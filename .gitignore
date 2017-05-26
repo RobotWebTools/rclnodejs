@@ -1,0 +1,14 @@
+*~
+.DS_Store
+.*.sw?
+*.gypcmd
+*.mk
+*.pyc
+*.tar.gz
+*.log
+build
+cscope.*
+gen
+node_modules
+npm-debug.log
+tags
