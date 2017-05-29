@@ -1,0 +1,30 @@
+{
+  "name": "rclnodejs",
+  "version": "0.0.1",
+  "description": "ROS2.0 JavaScript client with Node.js",
+  "main": "index.js",
+  "keywords": [
+    "rclnodejs",
+    "ros2"
+  ],
+  "scripts": {
+    "install": "node-gyp rebuild",
+    "lint": "eslint index.js cpplint.js lib example && node cpplint.js"
+  },
+  "author": [
+    "Minggang Wang <minggang.wang@intel.com>",
+    "Kenny Yuan <kaining.yuan@intel.com>"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RobotWebTools/rclnodejs.git"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0"
+  },
+  "dependencies": {
+    "bindings": "^1.2.1",
+    "nan": "^2.6.2"
+  }
+}

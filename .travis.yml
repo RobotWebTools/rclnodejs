@@ -1,0 +1,16 @@
+services:
+  - docker
+
+sudo: required
+
+branches:
+  only:
+  - develop
+  - master
+
+before_install:
+  - sudo docker pull ubuntu:xenial
+  - sudo docker build -t rcldocker .
+
+script:
+  - sudo docker run -v $(pwd):/root/rclnodejs --rm rcldocker bash -i -c '/root/rclnodejs/build.sh'
