@@ -34,13 +34,8 @@ let Rclnodejs  = {
     let handle = rclnodejs.createNode(nodeName, namespace);
 
     let node =  new rclnodejs.ShadowNode();
+    node.init();
     node._handle = handle;
-    node._publishers = [];
-    node._subscribers = [];
-    node._clients = [];
-    node._services = [];
-    node._timers = [];
-    node.spinning = false;
 
     this._nodes.push(node);
 
