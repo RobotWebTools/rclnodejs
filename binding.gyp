@@ -10,6 +10,7 @@
         "./src/executor.cpp",
         "./src/handle_manager.cpp",
         "./src/rcl_bindings.cpp",
+        "./src/rcl_bindings_publisher.cpp",
         "./src/rcl_handle.cpp",
         "./src/shadow_node.cpp",
       ],
@@ -34,6 +35,8 @@
       ],
       "libraries": [
         "-lrcl",
+        "-lrcutils",
+        "-lstd_msgs__rosidl_typesupport_c",
         "-L<(ROS2_INSTALL_PATH)/lib"
       ],
       "xcode_settings": {

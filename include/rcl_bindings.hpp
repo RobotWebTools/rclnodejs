@@ -17,6 +17,16 @@
 
 #include <nan.h>
 
+// This macro will check the return code of the func_call
+//  It will throw an exception to JavaScript if there is any thing went wrong
+#define RCLN_CHECK_AND_THROW(func_call) \
+  { \
+    auto rclnodejs_ret_code = (func_call); \
+    if (rclnodejs_ret_code != RCL_RET_OK) { \
+      Nan::ThrowError(rcl_get_error_string_safe()); \
+    } \
+  }
+
 namespace rclnodejs {
 
 typedef void (*JsCFuntcion)(const Nan::FunctionCallbackInfo<v8::Value>&);
@@ -29,6 +39,11 @@ typedef struct {
 uint32_t GetBindingMethodsCount(BindingMethod* methods);
 
 extern BindingMethod binding_methods[];
+
+// Publisher methods
+NAN_METHOD(CreatePublisher);
+NAN_METHOD(rcl_publish_std_string_message); // Temp method
+NAN_METHOD(PublishMessage);
 
 }  // namespace rclnodejs
 

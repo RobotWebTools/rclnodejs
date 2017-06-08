@@ -122,6 +122,16 @@ void DestroyEntity(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     ret = rcl_timer_fini(timer);
   }
 
+  if (0 == strcmp(type, "publisher")) {
+    rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
+        rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
+        info[1]->ToObject())->GetPtr());
+    rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
+        rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
+        info[2]->ToObject())->GetPtr());
+    ret = rcl_publisher_fini(publisher, node);
+  }
+
   if (ret != RCL_RET_OK) {
     Nan::ThrowError(rcl_get_error_string_safe());
   }
@@ -299,6 +309,11 @@ BindingMethod binding_methods[] = {
   {"resetTimer", ResetTimer},
   {"timerGetTimeSinceLastCall", TimerGetTimeSinceLastCall},
   {"timerGetTimeUntilNextCall", TimerGetTimeUntilNextCall},
+
+  {"createPublisher", CreatePublisher},
+  {"rcl_publish_std_string_message", rcl_publish_std_string_message},
+  {"publishMessage", PublishMessage},
+
   {"spin", Spin},
   {"shutdown", Shutdown},
   {"", nullptr}
