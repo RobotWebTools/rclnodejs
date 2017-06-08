@@ -12,3 +12,4 @@ gen
 node_modules
 npm-debug.log
 tags
+cpplint.py

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 #include "rcl_bindings.hpp"
 
 #include <rcl/error_handling.h>
@@ -19,14 +20,17 @@
 #include <rcl/publisher.h>
 #include <rcl/rcl.h>
 
+#include <string>
+
+// TODO(Kenny): remove these 3 temp header
+#include <rosidl_generator_c/message_type_support_struct.h>  // NOLINT
+#include <rosidl_generator_c/string_functions.h>  // NOLINT
+#include <std_msgs/msg/string.h>  // NOLINT
+
 #include "handle_manager.hpp"
 #include "shadow_node.hpp"
 #include "rcl_handle.hpp"
 
-// TODO: remove these 3 temp header
-#include <std_msgs/msg/string.h>
-#include <rosidl_generator_c/message_type_support_struct.h>
-#include <rosidl_generator_c/string_functions.h>
 
 namespace rclnodejs {
 
@@ -43,7 +47,8 @@ NAN_METHOD(CreatePublisher) {
   *publisher = rcl_get_zero_initialized_publisher();
 
   // TODO(Kenny): remove this and use the generic ts from args
-  const rosidl_message_type_support_t * ts = ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String);
+  const rosidl_message_type_support_t * ts =
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, String);
   rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
 
   RCLN_CHECK_AND_THROW(rcl_publisher_init(publisher,
@@ -61,7 +66,8 @@ NAN_METHOD(rcl_publish_std_string_message) {
 
   std_msgs__msg__String msg;
   std_msgs__msg__String__init(&msg);
-  rosidl_generator_c__String__assign(&msg.data, *Nan::Utf8String(info[1]->ToString()));
+  rosidl_generator_c__String__assign(&msg.data,
+      *Nan::Utf8String(info[1]->ToString()));
 
   RCLN_CHECK_AND_THROW(rcl_publish(publisher, &msg));
 
@@ -81,4 +87,4 @@ NAN_METHOD(PublishMessage) {
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
-}
+}  // namespace rclnodejs
