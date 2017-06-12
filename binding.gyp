@@ -36,7 +36,6 @@
       "libraries": [
         "-lrcl",
         "-lrcutils",
-        "-lstd_msgs__rosidl_typesupport_c",
         "-L<(ROS2_INSTALL_PATH)/lib"
       ],
       "xcode_settings": {

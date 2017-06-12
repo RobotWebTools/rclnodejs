@@ -20,7 +20,12 @@ rclnodejs.init();
 
 let node = rclnodejs.createNode('publisher_example_node');
 
-let messageType = undefined;
+const messageType = {
+  pkgName: 'std_msgs',
+  msgSubfolder: 'msg',
+  msgName: 'String',
+};
+
 let publisher = node.createPublisher(messageType, 'topic');
 
 let counter = 0;
