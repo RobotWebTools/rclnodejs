@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Usage: lanuch ./install/bin/examples_rclcpp_minimal_subscriber_lambda to display the message published by this program
+
 'use strict';
 
 const rclnodejs = require('../index.js');
+const Message = rclnodejs.Message;
 
 rclnodejs.init();
 
@@ -30,9 +33,51 @@ let publisher = node.createPublisher(messageType, 'topic');
 
 let counter = 0;
 setInterval(function() {
-  const message = 'hello rclnodejs ' + counter++;
-  console.log('Publishing message:', message);
-  publisher.publishStringMessage(message);
+  const testMessage = 'hello rclnodejs ' + counter++;
+
+  Message.createMessage(messageType).then(([message, spec]) => {
+    // console.log(message, spec);
+    message.data = testMessage;
+
+    const ffi = require('ffi');
+    const StructType = require('ref-struct');
+    const ref = require('ref');
+    let size_t = ref.types.size_t;
+    // const charPtr = ref.refType('char');
+
+    const ROSStringType = StructType({
+      data: ref.types.CString,
+      size: size_t,
+      capacity: size_t,
+    });
+
+    const ROSStringPtr = ref.refType(ROSStringType);
+
+    const ROSStringMessage = StructType({
+      data: ROSStringType,
+    });
+
+    let jsMsg = new ROSStringMessage();
+    console.log(jsMsg);
+
+    const libstd_msgs__rosidl_generator_c = ffi.Library('libstd_msgs__rosidl_generator_c', {
+      'rosidl_generator_c__String__Array__create': [ROSStringPtr, [size_t]],
+      'rosidl_generator_c__String__assign': [ref.types.bool, [ref.refType(ROSStringType), ref.types.CString]]
+    });
+
+    let ptr = libstd_msgs__rosidl_generator_c.rosidl_generator_c__String__Array__create(1);
+    let buf = new Buffer(testMessage);
+    buf.type = ref.types.CString;
+    libstd_msgs__rosidl_generator_c.rosidl_generator_c__String__assign(ptr, buf);
+    // console.log('JS Object:', ref.deref(ptr));
+    // console.log('Original pointer:', ptr);
+
+    console.log('Publishing message:', testMessage);
+    publisher.publish(ptr);
+  });
+
+  // console.log('Publishing message:', testMessage);
+  // publisher.publishStringMessage(testMessage);
 }, 100);
 
 rclnodejs.spin(node);

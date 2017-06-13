@@ -16,6 +16,7 @@
 
 const rclnodejs = require('bindings')('rclnodejs');
 const Node = require('./lib/node.js');
+const Message = require('./lib/message.js');
 
 function inherits(target, source) {
   // eslint-disable-next-line
@@ -61,6 +62,8 @@ let Rclnodejs  = {
     });
     this._nodes = [];
   },
+
+  Message: Message,
 };
 
 module.exports = Rclnodejs;
