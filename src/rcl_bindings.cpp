@@ -19,18 +19,18 @@
 #include <rcl/rcl.h>
 
 #include "handle_manager.hpp"
-#include "shadow_node.hpp"
 #include "rcl_handle.hpp"
+#include "shadow_node.hpp"
 
 namespace rclnodejs {
 
-void Init(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(Init) {
   rcl_ret_t ret = rcl_init(0, nullptr, rcl_get_default_allocator());
   if (ret != RCL_RET_OK)
     Nan::ThrowError(rcl_get_error_string_safe());
 }
 
-void CreateNode(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(CreateNode) {
   if (info.Length() < 2) {
     Nan::ThrowError("Wrong number of argments");
     return;
@@ -41,21 +41,21 @@ void CreateNode(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     return;
   }
 
-  const char* nodeName = *Nan::Utf8String(info[0]->ToString());
-  const char* nameSpace = *Nan::Utf8String(info[1]->ToString());
+  const char* node_name = *Nan::Utf8String(info[0]->ToString());
+  const char* name_space = *Nan::Utf8String(info[1]->ToString());
 
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(malloc(sizeof(rcl_node_t)));
 
   *node = rcl_get_zero_initialized_node();
   rcl_node_options_t options = rcl_node_get_default_options();
-  if (rcl_node_init(node, nodeName, nameSpace, &options) != RCL_RET_OK) {
+  if (rcl_node_init(node, node_name, name_space, &options) != RCL_RET_OK) {
     Nan::ThrowError(rcl_get_error_string_safe());
     return;
   }
   info.GetReturnValue().Set(rclnodejs::RclHandle::NewInstance(node));
 }
 
-void CreateTimer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(CreateTimer) {
   if (info.Length() < 1) {
     Nan::ThrowError("Wrong number of argments");
     return;
@@ -83,7 +83,7 @@ void CreateTimer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(rclnodejs::RclHandle::NewInstance(timer));
 }
 
-void IsTimerReady(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(IsTimerReady) {
   rclnodejs::RclHandle* timerHandler =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
@@ -100,7 +100,7 @@ void IsTimerReady(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(Nan::New(is_ready));
 }
 
-void DestroyEntity(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(DestroyEntity) {
   if (info.Length() < 2) {
     Nan::ThrowError("Wrong number of argments");
     return;
@@ -118,7 +118,7 @@ void DestroyEntity(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   if (0 == strcmp(type, "timer")) {
     rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(
         rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
-        info[0]->ToObject())->GetPtr());
+        info[1]->ToObject())->GetPtr());
     ret = rcl_timer_fini(timer);
   }
 
@@ -137,17 +137,17 @@ void DestroyEntity(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   }
 }
 
-void CallTimer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(CallTimer) {
   if (info.Length() < 1 && !info[0]->IsObject()) {
     Nan::ThrowError("Wrong argments");
     return;
   }
 
-  rclnodejs::RclHandle* timerHandler =
+  rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
   rcl_timer_t* timer =
-      reinterpret_cast<rcl_timer_t*>(timerHandler->GetPtr());
+      reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   rcl_ret_t ret = rcl_timer_call(timer);
 
@@ -157,17 +157,17 @@ void CallTimer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   }
 }
 
-void CancelTimer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(CancelTimer) {
   if (info.Length() < 1 && !info[0]->IsObject()) {
     Nan::ThrowError("Wrong argments");
     return;
   }
 
-  rclnodejs::RclHandle* timerHandler =
+  rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
   rcl_timer_t* timer =
-      reinterpret_cast<rcl_timer_t*>(timerHandler->GetPtr());
+      reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   rcl_ret_t ret = rcl_timer_cancel(timer);
 
@@ -177,17 +177,17 @@ void CancelTimer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   }
 }
 
-void IsTimerCanceled(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(IsTimerCanceled) {
   if (info.Length() < 1 && !info[0]->IsObject()) {
     Nan::ThrowError("Wrong argments");
     return;
   }
 
-  rclnodejs::RclHandle* timerHandler =
+  rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
   rcl_timer_t* timer =
-      reinterpret_cast<rcl_timer_t*>(timerHandler->GetPtr());
+      reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   bool is_canceled = false;
 
@@ -201,17 +201,17 @@ void IsTimerCanceled(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   info.GetReturnValue().Set(Nan::New(is_canceled));
 }
 
-void ResetTimer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(ResetTimer) {
   if (info.Length() < 1 && !info[0]->IsObject()) {
     Nan::ThrowError("Wrong argments");
     return;
   }
 
-  rclnodejs::RclHandle* timerHandler =
+  rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
   rcl_timer_t* timer =
-      reinterpret_cast<rcl_timer_t*>(timerHandler->GetPtr());
+      reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   rcl_ret_t ret = rcl_timer_reset(timer);
 
@@ -221,18 +221,17 @@ void ResetTimer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   }
 }
 
-void TimerGetTimeUntilNextCall(
-    const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(TimerGetTimeUntilNextCall) {
   if (info.Length() < 1 && !info[0]->IsObject()) {
     Nan::ThrowError("Wrong argments");
     return;
   }
 
-  rclnodejs::RclHandle* timerHandler =
+  rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
   rcl_timer_t* timer =
-      reinterpret_cast<rcl_timer_t*>(timerHandler->GetPtr());
+      reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   int64_t remaining_time = 0;
 
@@ -246,18 +245,17 @@ void TimerGetTimeUntilNextCall(
   info.GetReturnValue().Set(Nan::New((uint32_t)remaining_time));
 }
 
-void TimerGetTimeSinceLastCall(
-    const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(TimerGetTimeSinceLastCall) {
   if (info.Length() < 1 && !info[0]->IsObject()) {
     Nan::ThrowError("Wrong argments");
     return;
   }
 
-  rclnodejs::RclHandle* timerHandler =
+  rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
   rcl_timer_t* timer =
-      reinterpret_cast<rcl_timer_t*>(timerHandler->GetPtr());
+      reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   uint64_t elapsed_time = 0;
 
@@ -271,7 +269,7 @@ void TimerGetTimeSinceLastCall(
   info.GetReturnValue().Set(Nan::New((uint32_t)elapsed_time));
 }
 
-void Spin(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(Spin) {
   if (info.Length() == 1 && info[0]->IsObject()) {
     rclnodejs::ShadowNode* node =
         rclnodejs::ShadowNode::Unwrap<rclnodejs::ShadowNode>(
@@ -280,7 +278,7 @@ void Spin(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   }
 }
 
-void Shutdown(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+NAN_METHOD(Shutdown) {
   if (info.Length() == 1 && info[0]->IsObject()) {
     rclnodejs::ShadowNode* node =
         rclnodejs::ShadowNode::Unwrap<rclnodejs::ShadowNode>(

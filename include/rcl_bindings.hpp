@@ -19,7 +19,7 @@
 #include <string>
 
 // This macro will check the return code of the func_call
-//  It will throw an exception to JavaScript if there is any thing went wrong
+// It will throw an exception to JavaScript if there is any thing went wrong
 #define RCLN_CHECK_AND_THROW(func_call, expected) \
   { \
     if (func_call != (expected)) { \
