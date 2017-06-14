@@ -16,6 +16,9 @@
 
 'use strict';
 
+const StructType = require('ref-struct');
+const ref = require('ref');
+const ffi = require('ffi');
 const rclnodejs = require('../index.js');
 const Message = rclnodejs.Message;
 
@@ -31,69 +34,18 @@ const messageType = {
 
 let publisher = node.createPublisher(messageType, 'topic');
 
-let counter = 0;
-setInterval(function() {
-  const testMessage = 'hello rclnodejs ' + counter++;
+Message.createMessage(messageType).then((Message) => {
+  var msg = new Message();
 
-  Message.createMessage(messageType).then(([message, spec]) => {
-    // console.log(message, spec);
-    message.data = testMessage;
+  let counter = 0;
+  setInterval(function() {
+    const str = 'This string is published via generated JavaScript Message object' + new Date() + ' - ' + counter ++;
+    console.log('Publishing message', str);
 
-    // const ffi = require('ffi');
-    const StructType = require('ref-struct');
-    const ref = require('ref');
-    let size_t = ref.types.size_t;
-    // const charPtr = ref.refType('char');
-
-    const rosidl_generator_c__String = StructType({
-      data: ref.types.CString,
-      size: size_t,
-      capacity: size_t,
-    });
-
-    const std_msgs__msg__String = StructType({
-      data: rosidl_generator_c__String,
-    });
-
-    function rosidl_generator_c__String__assign(str, text) {
-      let strBuf = new Buffer(text);
-      strBuf.type = ref.types.CString;
-      str.data = strBuf;
-      str.size = text.length;
-      str.capacity = text.length + 1;
-    }
-
-    function getBuffer(obj) {
-      return obj['ref.buffer'];
-    }
-
-    let msg = new std_msgs__msg__String();
-    rosidl_generator_c__String__assign(msg.data, testMessage);
-    // console.log(msg);
-
-    // const libstd_msgs__rosidl_generator_c = ffi.Library('libstd_msgs__rosidl_generator_c', {
-    //   'rosidl_generator_c__String__Array__create': [ref.refType(rosidl_generator_c__String), [size_t]],
-    //   'rosidl_generator_c__String__assign': [ref.types.bool, [ref.refType(rosidl_generator_c__String), ref.types.CString]]
-    // });
-
-    // let ptr = libstd_msgs__rosidl_generator_c.rosidl_generator_c__String__Array__create(1);
-    // let buf = new Buffer(testMessage);
-    // buf.type = ref.types.CString;
-    // libstd_msgs__rosidl_generator_c.rosidl_generator_c__String__assign(ptr, buf);
-    // // console.log('JS Object:', ref.deref(ptr));
-    // // console.log('Original pointer:', ptr);
-
-    console.log('Publishing message:', testMessage);
-
-    publisher.publish(getBuffer(msg));
-    // publisher.publish(msg['ref.buffer']);
-    // publisher.publish(ptr);
-  });
-
-  // console.log('Publishing message:', testMessage);
-  // publisher.publishStringMessage(testMessage);
-}, 100);
+    msg.data = str;
+    publisher.publish(msg.refBuffer);
+  }, 10);
+});
 
 rclnodejs.spin(node);
-
 // rclnodejs.shutdown();
