@@ -51,9 +51,10 @@ class {{=className}} {
   }
 {{~}}
 
-  get refBuffer() {
-  	return this.__ref_message.ref();
-  }
 }
+
+{{=className}}.getRefBuffer = function(msg) {
+  return msg.__ref_message.ref();
+};
 
 module.exports = {{=className}};

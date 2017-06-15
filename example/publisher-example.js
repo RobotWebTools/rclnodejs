@@ -44,7 +44,7 @@ Message.createMessage(messageType).then((Message) => {
     console.log('Publishing message:', str);
 
     msg.data = str;
-    publisher.publish(msg.refBuffer);
+    publisher.publish(Message.getRefBuffer(msg));
   }, 10);
 });
 

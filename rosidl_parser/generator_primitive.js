@@ -17,6 +17,8 @@
 const StructType = require('ref-struct');
 const ref = require('ref');
 
+/* eslint-disable camelcase */
+
 const rosidl_generator_c__String = StructType({
   data: ref.types.CString,
   size: ref.types.size_t,
@@ -35,3 +37,5 @@ module.exports = {
   rosidl_generator_c__String: rosidl_generator_c__String,
   rosidl_generator_c__String__assign: rosidl_generator_c__String__assign,
 };
+
+/* eslint-enable camelcase */

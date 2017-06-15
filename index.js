@@ -19,7 +19,6 @@ const Node = require('./lib/node.js');
 const Message = require('./lib/message.js');
 
 function inherits(target, source) {
-  // eslint-disable-next-line
   let properties = Object.getOwnPropertyNames(source.prototype);
   properties.forEach((property) => {
     target.prototype[property] = source.prototype[property];
@@ -28,7 +27,7 @@ function inherits(target, source) {
 
 inherits(rclnodejs.ShadowNode, Node);
 
-let Rclnodejs  = {
+let rcl = {
   _nodes: [],
 
   createNode(nodeName, namespace = '') {
@@ -66,4 +65,4 @@ let Rclnodejs  = {
   Message: Message,
 };
 
-module.exports = Rclnodejs;
+module.exports = rcl;
