@@ -16,7 +16,7 @@
 
 const rclnodejs = require('bindings')('rclnodejs');
 const Node = require('./lib/node.js');
-const message = require('./rosidl_gen/message.js');
+const generator = require('./rosidl_gen/generator.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -44,6 +44,15 @@ let rcl = {
 
   init(...args) {
     rclnodejs.init(args);
+
+    // TODO(Kenny): introduce other policy to save the amout of time of doing message generation
+    return new Promise(function(resolve, reject) {
+      this.message.generateAll().then(() => {
+        resolve();
+      }).catch((e) => {
+        reject(e);
+      });
+    }.bind(this));
   },
 
   spin(node) {
@@ -62,7 +71,7 @@ let rcl = {
     this._nodes = [];
   },
 
-  message: message,
+  message: generator,
 };
 
 module.exports = rcl;

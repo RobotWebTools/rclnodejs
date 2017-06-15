@@ -14,7 +14,7 @@
 
 'use strict';
 
-const fs = require('fs.promised');
+const fs = require('mz/fs');
 const mkdirp = require('mkdirp');
 const path = require('path');
 const dot = require('dot');
@@ -28,20 +28,33 @@ dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
 const dots = dot.process({path: path.join(__dirname, '../rosidl_gen/templates')});
 
 const removeExtraSpaceLines = function(str) {
-  /* eslint-disable indent */
-  return str.replace(/([ \t]*\n){2,}/g, '\n\n') // multiple blank lines into one
-            .replace(/\n\n};/g, '\n};')         // remove blank line before };
-            .replace(/{\n\n/g, '{\n');          // remove blank line after {
-  /* eslint-enable indent */
+  return str.replace(/([ \t]*\n){2,}/g, '\n');
 };
 
-function generateMessageStructure(messageType, spec) {
-  const className = spec.baseType.pkgName + '__' + messageType.msgSubfolder + '__' + spec.msgName;
+function generateMessageSourceCode(messageType, spec) {
+  const className = getClassName(messageType, spec);
   const generated = removeExtraSpaceLines(dots.message({
     className: className,
     msgType: messageType,
     spec: spec,
     types: primitiveTypes,
+    json: JSON.stringify(spec, null, '  '),
+  }));
+  return generated;
+}
+
+function getClassName(msgType, spec) {
+  return spec.baseType.pkgName + '__' + msgType.msgSubfolder + '__' + spec.msgName;
+}
+
+function __discardGenerateMessageStructure(messageType, spec) {
+  const className = getClassName(messageType, spec);
+  const generated = removeExtraSpaceLines(dots.message({
+    className: className,
+    msgType: messageType,
+    spec: spec,
+    types: primitiveTypes,
+    json: JSON.stringify(spec, null, '  '),
   }));
   const fileFolder = path.join(__dirname, '../generated/');
   mkdirp.sync(fileFolder);
@@ -51,15 +64,54 @@ function generateMessageStructure(messageType, spec) {
 }
 
 function createMessageObjectFromSpec(messageType, spec) {
-  const code = generateMessageStructure(messageType, spec);
+  const code = __discardGenerateMessageStructure(messageType, spec);
   return requireFromString(code);
 }
 
+function getMessageFileName(msgType) {
+  return msgType.pkgName + '/' + msgType.msgSubfolder + '/' + msgType.msgName + '.msg';
+}
+
+function getMessagePath(basePath, msgType) {
+  return basePath +
+    msgType.pkgName + '/' + msgType.msgSubfolder + '/' + msgType.msgName + '.msg';
+}
+
+const generatedFilesDir = path.join(__dirname, '../generated/');
+mkdirp.sync(generatedFilesDir);
+
 const message = {
-  createMessage: function(messageType) {
-    const rosInstallPath = process.env.AMENT_PREFIX_PATH;
-    const packagePath = rosInstallPath + '/share/' +
-      messageType.pkgName + '/' + messageType.msgSubfolder + '/' + messageType.msgName + '.msg';
+  calcMessageFileName: function(messageType) {
+    return getMessageFileName(messageType);
+  },
+
+  getMessageType: function(pkgName, msgSubfolder, msgName) {
+    return {
+      pkgName: pkgName,
+      msgSubfolder: msgSubfolder,
+      msgName: msgName.replace(/\.msg$/g, '')
+    };
+  },
+
+  generateMessage: function(basePath, messageType) {
+    const packagePath = getMessagePath(basePath, messageType);
+
+    return new Promise(function(resolve, reject) {
+      parser.parseMessageFile(messageType.pkgName, packagePath).then((spec) => {
+        const code = generateMessageSourceCode(messageType, spec);
+        const className = getClassName(messageType, spec);
+        const fileName = generatedFilesDir + className + '.js';
+        return fs.writeFile(fileName, code);
+      }).then(() => {
+        resolve();
+      }).catch((e) => {
+        reject(e);
+      });
+    });  // new Promise
+  },
+
+  getMessage: function(basePath, messageType) {
+    const packagePath = getMessagePath(basePath, messageType);
 
     return new Promise(function(resolve, reject) {
       parser.parseMessageFile(messageType.pkgName, packagePath).then((spec) => {

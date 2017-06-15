@@ -11,20 +11,30 @@ const primitiveTypes = require('../rosidl_gen/generator_primitive.js');
 
 {{
 var className = it.className;
-var generatorName = 'rosidl_generator_c__' + className;
-var isString = function(field) {
-  return field.type.type === 'string' && !field.type.isArray;
+var generatorName = 'rosidl_generator_nodejs__' + className;
+
+var isString = function(type) {
+  return type.type === 'string' && !type.isArray;
 };
+
+var calcFileNameFromType = function(type) {
+  return type.pkgName + '__msg__' + type.type + '.js';
+};
+
+var calcGeneratorTypeNameFromType = function(type) {
+  return "rosidl_generator_nodejs__" + type.pkgName + '__msg__' + type.type;
+};
+
 }}
 
 const {{=generatorName}} = StructType({
 {{~ it.spec.fields :field}}
   {{
     var type;
-    if (isString(field)) {
-      type = 'primitiveTypes.rosidl_generator_c__String';
+    if (field.type.isPrimitiveType) {
+      type = 'primitiveTypes.' + field.type.type;
     } else {
-      type = "ref.types('" + field.type + "')";
+      type = "require('../generated/" + calcFileNameFromType(field.type) + "').RefType";
     }
   }}
   {{=field.name}}: {{=type}},
@@ -43,8 +53,8 @@ class {{=className}} {
   }
 
   set {{=field.name}}(value) {
-  {{? isString(field)}}
-    primitiveTypes.rosidl_generator_c__String__assign(this.__ref_message.{{=field.name}}, value);
+  {{? isString(field.type)}}
+    primitiveTypes.string__assign(this.__ref_message.{{=field.name}}, value);
   {{?? true}}
     this.__ref_message.{{=field.name}} = value;
   {{?}}
@@ -53,8 +63,17 @@ class {{=className}} {
 
 }
 
+{{=className}}.RefType = {{=generatorName}};
+
 {{=className}}.getRefBuffer = function(msg) {
   return msg.__ref_message.ref();
 };
 
 module.exports = {{=className}};
+
+/*
+ * The following is the original spec object coming from parser:
+
+{{=it.json}}
+
+*/

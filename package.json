@@ -27,8 +27,8 @@
     "bindings": "^1.2.1",
     "dot": "^1.1.2",
     "ffi": "^2.2.0",
-    "fs.promised": "^3.0.0",
     "mkdirp": "^0.5.1",
+    "mz": "^2.6.0",
     "nan": "^2.6.2",
     "require-from-string": "^1.2.1"
   }
