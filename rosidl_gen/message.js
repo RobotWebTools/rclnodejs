@@ -21,7 +21,7 @@ const dot = require('dot');
 const requireFromString = require('require-from-string');
 
 const primitiveTypes = require('../rosidl_gen/generator_primitive.js');
-const Parser = require('../rosidl_parser/rosidl_parser.js');
+const parser = require('../rosidl_parser/rosidl_parser.js');
 
 dot.templateSettings.strip = false;
 dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
@@ -62,7 +62,7 @@ const message = {
       messageType.pkgName + '/' + messageType.msgSubfolder + '/' + messageType.msgName + '.msg';
 
     return new Promise(function(resolve, reject) {
-      Parser.parseMessageFile(messageType.pkgName, packagePath).then((spec) => {
+      parser.parseMessageFile(messageType.pkgName, packagePath).then((spec) => {
         resolve(createMessageObjectFromSpec(messageType, spec));
       }).catch((e) => {
         reject(e);

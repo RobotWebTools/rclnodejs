@@ -17,9 +17,6 @@
 
 'use strict';
 
-const StructType = require('ref-struct');
-const ref = require('ref');
-const ffi = require('ffi');
 const rclnodejs = require('../index.js');
 const message = rclnodejs.message;
 
