@@ -16,7 +16,7 @@
 
 const rclnodejs = require('bindings')('rclnodejs');
 const Node = require('./lib/node.js');
-const Message = require('./lib/message.js');
+const message = require('./lib/message.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -62,7 +62,7 @@ let rcl = {
     this._nodes = [];
   },
 
-  Message: Message,
+  message: message,
 };
 
 module.exports = rcl;

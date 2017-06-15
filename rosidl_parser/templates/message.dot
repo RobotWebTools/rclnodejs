@@ -34,19 +34,19 @@ const {{=generatorName}} = StructType({
 
 class {{=className}} {
   constructor() {
-  	this.__ref_message = new {{=generatorName}}();
+    this.__ref_message = new {{=generatorName}}();
   }
 
 {{~ it.spec.fields :field}}
   get {{=field.name}}() {
-  	return this.__ref_message.{{=field.name}};
+    return this.__ref_message.{{=field.name}};
   }
 
   set {{=field.name}}(value) {
   {{? isString(field)}}
-  	primitiveTypes.rosidl_generator_c__String__assign(this.__ref_message.{{=field.name}}, value);
+    primitiveTypes.rosidl_generator_c__String__assign(this.__ref_message.{{=field.name}}, value);
   {{?? true}}
-  	this.__ref_message.{{=field.name}} = value;
+    this.__ref_message.{{=field.name}} = value;
   {{?}}
   }
 {{~}}
