@@ -20,12 +20,12 @@ const path = require('path');
 const dot = require('dot');
 const requireFromString = require('require-from-string');
 
-const primitiveTypes = require('../rosidl_parser/generator_primitive.js');
+const primitiveTypes = require('../rosidl_gen/generator_primitive.js');
 const Parser = require('../rosidl_parser/rosidl_parser.js');
 
 dot.templateSettings.strip = false;
 dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
-const dots = dot.process({path: path.join(__dirname, '../rosidl_parser/templates')});
+const dots = dot.process({path: path.join(__dirname, '../rosidl_gen/templates')});
 
 const removeExtraSpaceLines = function(str) {
   /* eslint-disable indent */

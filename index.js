@@ -16,7 +16,7 @@
 
 const rclnodejs = require('bindings')('rclnodejs');
 const Node = require('./lib/node.js');
-const message = require('./lib/message.js');
+const message = require('./rosidl_gen/message.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);

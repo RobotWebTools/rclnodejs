@@ -7,7 +7,7 @@
 
 const StructType = require('ref-struct');
 const ref = require('ref');
-const primitiveTypes = require('../rosidl_parser/generator_primitive.js');
+const primitiveTypes = require('../rosidl_gen/generator_primitive.js');
 
 {{
 var className = it.className;
