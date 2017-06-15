@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "install": "node-gyp rebuild",
-    "lint": "eslint --max-warnings=0 index.js cpplint.js lib example rosidl_parser && node cpplint.js"
+    "lint": "eslint --max-warnings=0 index.js cpplint.js lib example rosidl_gen rosidl_parser && node cpplint.js"
   },
   "author": [
     "Minggang Wang <minggang.wang@intel.com>",
