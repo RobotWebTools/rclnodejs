@@ -12,13 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Usage: lanuch ./install/bin/examples_rclcpp_minimal_subscriber_lambda
+//  to display the message published by this program
+
 'use strict';
 
 const rclnodejs = require('../index.js');
+const message = rclnodejs.message;
 
 rclnodejs.init();
 
-let node = rclnodejs.createNode('publisher_example_node');
+const node = rclnodejs.createNode('publisher_example_node');
 
 const messageType = {
   pkgName: 'std_msgs',
@@ -26,15 +30,20 @@ const messageType = {
   msgName: 'String',
 };
 
-let publisher = node.createPublisher(messageType, 'topic');
+const publisher = node.createPublisher(messageType, 'topic');
 
-let counter = 0;
-setInterval(function() {
-  const message = 'hello rclnodejs ' + counter++;
-  console.log('Publishing message:', message);
-  publisher.publishStringMessage(message);
-}, 100);
+message.createMessage(messageType).then((Message) => {
+  var msg = new Message();
+
+  let counter = 0;
+  setInterval(function() {
+    const str = 'Hello ROS ' + counter++;
+    console.log('Publishing message:', str);
+
+    msg.data = str;
+    publisher.publish(Message.getRefBuffer(msg));
+  }, 10);
+});
 
 rclnodejs.spin(node);
-
 // rclnodejs.shutdown();

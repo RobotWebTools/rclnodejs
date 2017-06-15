@@ -32,6 +32,10 @@
 #include "shadow_node.hpp"
 #include "rcl_handle.hpp"
 
+extern "C" {
+  typedef const rosidl_message_type_support_t* (*MSG_TYPE_SUPPORT_CALLBACK)();
+}
+
 
 namespace rclnodejs {
 
@@ -63,11 +67,10 @@ NAN_METHOD(CreatePublisher) {
   lib_error_message += "'). Check spelling or run rosidl_generator_c.";
   RCLN_THROW_EQUAL(lib, nullptr, lib_error_message.c_str());
   // Second, the function name
-  typedef const rosidl_message_type_support_t* (*CALLBACK_TYPE)();
-  CALLBACK_TYPE function_ptr = nullptr;
+  MSG_TYPE_SUPPORT_CALLBACK function_ptr = nullptr;
   std::string function_name = RCLN_GET_MSG_TYPE_SUPPORT(packageName,
       messageSubFolder, messageName);
-  function_ptr = (CALLBACK_TYPE)dlsym(lib, function_name.c_str());
+  function_ptr = (MSG_TYPE_SUPPORT_CALLBACK)dlsym(lib, function_name.c_str());
   // User-friendly error message if wrong function name
   std::string function_error_message;
   function_error_message +=

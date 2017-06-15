@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "install": "node-gyp rebuild",
-    "lint": "eslint --max-warnings=0 index.js cpplint.js lib example rosidl_parser && node cpplint.js"
+    "lint": "eslint --max-warnings=0 index.js cpplint.js lib example rosidl_gen rosidl_parser && node cpplint.js"
   },
   "author": [
     "Minggang Wang <minggang.wang@intel.com>",
@@ -25,6 +25,11 @@
   },
   "dependencies": {
     "bindings": "^1.2.1",
-    "nan": "^2.6.2"
+    "dot": "^1.1.2",
+    "ffi": "^2.2.0",
+    "fs.promised": "^3.0.0",
+    "mkdirp": "^0.5.1",
+    "nan": "^2.6.2",
+    "require-from-string": "^1.2.1"
   }
 }

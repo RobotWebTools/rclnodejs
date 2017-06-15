@@ -16,6 +16,7 @@
 
 const rclnodejs = require('bindings')('rclnodejs');
 const Node = require('./lib/node.js');
+const message = require('./rosidl_gen/message.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -60,6 +61,8 @@ let rcl = {
     });
     this._nodes = [];
   },
+
+  message: message,
 };
 
 module.exports = rcl;
