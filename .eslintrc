@@ -16,7 +16,7 @@ rules:
   indent: [2, 2]
   key-spacing: [2, { beforeColon: false, afterColon: true }]
   max-depth: [1, 3]
-  max-len: [1, 80, 4]
+  max-len: [1, 120, 4]
   max-nested-callbacks: [1, 3]
   no-cond-assign: 2
   no-constant-condition: 2
