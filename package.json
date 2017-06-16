@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "install": "node-gyp rebuild",
+    "test": "mocha",
     "lint": "eslint --max-warnings=0 index.js cpplint.js lib example rosidl_gen rosidl_parser && node cpplint.js"
   },
   "author": [

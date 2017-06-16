@@ -14,23 +14,24 @@
 
 'use strict';
 
+const assert = require('assert');
 const {message} = require('../index.js');
 
-message.generateAll().then((msgTypeList) => {
-  console.log('Generated number of MessageClass:', msgTypeList.length);
+describe('ROSIDL Node.js message generator test suite', function(){
+  it('Try generate all messages', function() {
+    return new Promise(function(resolve, reject) {
+      message.generateAll().then((msgTypeList) => {
+        assert(msgTypeList.length > 0);
 
-  msgTypeList.forEach((msgType) => {
-    try {
-      const MessageClass = message.getMessageClass(msgType);
-      process.stdout.write('.');
-      // console.log(MessageClass);
-    } catch (e) {
-      process.stdout.write('X');
-      // console.log('');
-      // console.log('Cannot require:', msgType);
-      // console.log('');
-    }
+        msgTypeList.forEach((msgType) => {
+          try {
+            const MessageClass = message.getMessageClass(msgType);
+          } catch (e) {
+            reject(e);
+          }
+        });
+        resolve();
+      });
+    }); // new Promise
   });
-  console.log('');
-  console.log('Done');
 });
