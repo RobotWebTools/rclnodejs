@@ -49,7 +49,11 @@ class {{=className}} {
 
 {{~ it.spec.fields :field}}
   get {{=field.name}}() {
+  {{? isString(field.type)}}
+    return this.__ref_message.{{=field.name}}.data;
+  {{?? true}}
     return this.__ref_message.{{=field.name}};
+  {{?}}
   }
 
   set {{=field.name}}(value) {

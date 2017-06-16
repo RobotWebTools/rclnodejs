@@ -15,12 +15,10 @@
 'use strict';
 
 const fs = require('mz/fs');
+const fse = require('fs-extra');
 const mkdirp = require('mkdirp');
 const path = require('path');
 const message = require('../rosidl_gen/message.js');
-
-const generatedFilesDir = path.join(__dirname, '../generated/');
-mkdirp.sync(generatedFilesDir);
 
 function isMessageDir(dir) {
   return dir.substring(dir.length - 5) === '_msgs' || dir.substring(dir.length - 18) === 'builtin_interfaces';
@@ -28,6 +26,10 @@ function isMessageDir(dir) {
 
 function isMessageFile(file) {
   return file.substring(file.length - 4) === '.msg';
+}
+
+function removeAllIntermediateMessages(genPath) {
+  return fse.remove(genPath);
 }
 
 function generateAllMessages(basePath) {
@@ -68,22 +70,47 @@ function generateAllMessages(basePath) {
   });
 };
 
+function isString(value) {
+  if (Array.isArray(value)) {
+    let flag = true;
+    value.forEach((i) => {
+      flag = flag && isString(i);
+    });
+    return flag;
+  }
+  return typeof(value) === 'string';
+}
+
 const generator = {
   scanPath: undefined,
+  genPath: undefined,
 
   getMessageType: message.getMessageType,
 
   getMessageClass: function(msgType) {
-    const file = msgType.pkgName + '__' + msgType.msgSubfolder + '__' + msgType.msgName + '.js';
-    return require(generatedFilesDir + file);
+    let file = '[wrong or missing file name in getMessageClass]';
+    if (typeof msgType === 'object' && isString([msgType.pkgName, msgType.msgSubfolder, msgType.msgName])) {
+      file = msgType.pkgName + '__' + msgType.msgSubfolder + '__' + msgType.msgName + '.js';
+    } else if (isString([arguments[0], arguments[1], arguments[2]])) {
+      file = arguments[0] + '__' + arguments[1] + '__' + arguments[2] + '.js';
+    }
+    return require(this.genPath + file);
   },
 
   generateAll: function() {
     if (!this.scanPath) {
       const rosInstallPath = process.env.AMENT_PREFIX_PATH;
-      this.scanPath = rosInstallPath + '/share/';
+      this.scanPath = path.join(rosInstallPath, '/share/');
     }
-    return generateAllMessages(this.scanPath);
+
+    if (!this.genPath) {
+      this.genPath = path.join(__dirname, '../generated/');
+    }
+
+    return removeAllIntermediateMessages(this.genPath).then(() => {
+      mkdirp.sync(this.genPath);
+      return generateAllMessages(this.scanPath);
+    });
   },
 };
 
