@@ -55,4 +55,40 @@ describe('ROSIDL Node.js message generator test suite', function(){
     assert.equal(msg.data, '123570');
   });
 
+  it('Testing message with all-primitive members - ColorRGBA', function() {
+    let MessageClass = message.getMessageClass('std_msgs', 'msg', 'ColorRGBA');
+    assert.equal(MessageClass.name, 'std_msgs__msg__ColorRGBA');
+    let msg = new MessageClass();
+    msg.r = 0.5;
+    msg.g = 0.25;
+    msg.b = 0.125;
+    msg.a = 0.75;
+    assert.equal(msg.r, 0.5);
+    assert.equal(msg.g, 0.25);
+    assert.equal(msg.b, 0.125);
+    assert.equal(msg.a, 0.75);
+  });
+
+  it('Testing assignment of an all-primitive message - Time', function() {
+    let MessageClass = message.getMessageClass('builtin_interfaces', 'msg', 'Time');
+    assert.equal(MessageClass.name, 'builtin_interfaces__msg__Time');
+    let msg = new MessageClass();
+    msg.sec = 120;
+    msg.nanosec = 777;
+
+    assert.equal(msg.sec, 120);
+    assert.equal(msg.nanosec, 777);
+
+    let msg2 = new MessageClass();
+    msg2.copy(msg);
+
+    msg2.sec = 240;
+    msg2.nanosec = 888;
+    assert.equal(msg2.sec, 240);
+    assert.equal(msg2.nanosec, 888);
+
+    assert.equal(msg.sec, 120);
+    assert.equal(msg.nanosec, 777);
+  });
+
 });
