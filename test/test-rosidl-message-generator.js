@@ -69,6 +69,27 @@ describe('ROSIDL Node.js message generator test suite', function(){
     assert.equal(msg.a, 0.75);
   });
 
+  it('Testing copy-constructor - Duration', function() {
+    let MessageClass = message.getMessageClass('builtin_interfaces', 'msg', 'Duration');
+    assert.equal(MessageClass.name, 'builtin_interfaces__msg__Duration');
+    let msg = new MessageClass();
+    msg.sec = 1024;
+    msg.nanosec = 0xAAAA5555;
+    assert.equal(msg.sec, 1024);
+    assert.equal(msg.nanosec, 0xAAAA5555);
+
+    let msg2 = new MessageClass(msg);
+    assert.equal(msg2.sec, 1024);
+    assert.equal(msg2.nanosec, 0xAAAA5555);
+
+    msg.sec = 2048;
+    msg.nanosec = 0x5555AAAA;
+    assert.equal(msg.sec, 2048);
+    assert.equal(msg.nanosec, 0x5555AAAA);
+    assert.equal(msg2.sec, 1024);
+    assert.equal(msg2.nanosec, 0xAAAA5555);
+  });
+
   it('Testing assignment of an all-primitive message - Time', function() {
     let MessageClass = message.getMessageClass('builtin_interfaces', 'msg', 'Time');
     assert.equal(MessageClass.name, 'builtin_interfaces__msg__Time');
