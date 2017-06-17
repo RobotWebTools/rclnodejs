@@ -43,8 +43,12 @@ const {{=generatorName}} = StructType({
 
 
 class {{=className}} {
-  constructor() {
-    this.__ref_message = new {{=generatorName}}();
+  constructor(other) {
+    let otherObj = undefined;
+    if (typeof other === 'object' && other.__ref_message) {
+      otherObj = other.__ref_message.toObject();
+    }
+    this.__ref_message = new {{=generatorName}}(otherObj);
   }
 
 {{~ it.spec.fields :field}}
@@ -64,6 +68,10 @@ class {{=className}} {
   {{?}}
   }
 {{~}}
+
+  copy(other) {
+    this.__ref_message = new {{=generatorName}}(other.__ref_message.toObject());
+  }
 
 }
 
