@@ -13,12 +13,36 @@ const primitiveTypes = require('../rosidl_gen/generator_primitive.js');
 var className = it.className;
 var generatorName = 'rosidl_generator_nodejs__' + className;
 
+var isStruct = function(type) {
+  return !type.isPrimitiveType && !type.isArray;
+};
+
+var isStructArray = function(type) {
+  return !type.isPrimitiveType && type.isArray;
+};
+
+var isPrimitiveArray = function(type) {
+  return type.isPrimitiveType && type.isArray;
+};
+
+var shouldRequireType = function(type) {
+  return !type.isPrimitiveType;
+};
+
+var isPrimitive = function(type) {
+  return type.isPrimitiveType && !type.isArray;
+};
+
 var isString = function(type) {
   return type.type === 'string' && !type.isArray;
 };
 
+var calcStructTypeName = function(type) {
+  return type.pkgName + '__msg__' + type.type;
+};
+
 var calcFileNameFromType = function(type) {
-  return type.pkgName + '__msg__' + type.type + '.js';
+  return calcStructTypeName(type) + '.js';
 };
 
 var calcGeneratorTypeNameFromType = function(type) {
@@ -26,22 +50,36 @@ var calcGeneratorTypeNameFromType = function(type) {
 };
 
 }}
+// TODO: remove duplicated (if any)
+{{~ it.spec.fields :field}}
+{{? shouldRequireType(field.type)}}
+var {{=calcStructTypeName(field.type)}} = require('../generated/{{=calcFileNameFromType(field.type)}}');
+{{?}}
+{{~}}
 
+//
+// Define the struct type
+//
 const {{=generatorName}} = StructType({
 {{~ it.spec.fields :field}}
-  {{
-    var type;
-    if (field.type.isPrimitiveType) {
-      type = 'primitiveTypes.' + field.type.type;
-    } else {
-      type = "require('../generated/" + calcFileNameFromType(field.type) + "').RefType";
-    }
-  }}
-  {{=field.name}}: {{=type}},
+
+{{? isPrimitive(field.type)}}
+  {{=field.name}}: primitiveTypes.{{=field.type.type}},
+{{?? isPrimitiveArray(field.type)}}
+  {{=field.name}}: primitiveTypes.{{=field.type.type}}, // TODO(Kenny): it's actually an array, need to generate a primitive type array
+{{?? isStructArray(field.type)}}
+  {{=field.name}}: {{=calcStructTypeName(field.type)}}.RawStructType, // TODO(Kenny): it's actually an array, need to generate a struct type array
+{{?? true}}
+  {{=field.name}}: {{=calcStructTypeName(field.type)}}.RawStructType,
+{{?}}
+
 {{~}}
 });
 
 
+//
+// Define the wrapper class
+//
 class {{=className}} {
   constructor(other) {
     let otherObj = undefined;
@@ -49,12 +87,19 @@ class {{=className}} {
       otherObj = other.__ref_message.toObject();
     }
     this.__ref_message = new {{=generatorName}}(otherObj);
+    this.__ref_object = {};
   }
 
 {{~ it.spec.fields :field}}
   get {{=field.name}}() {
   {{? isString(field.type)}}
     return this.__ref_message.{{=field.name}}.data;
+  {{?? isStruct(field.type)}}
+    if (!this.__ref_object['{{=field.name}}']) {
+      this.__ref_object['{{=field.name}}'] = new {{=calcStructTypeName(field.type)}}();
+      this.__ref_object['{{=field.name}}'].__ref_message = this.__ref_message.{{=field.name}};
+    }
+    return this.__ref_object.{{=field.name}};
   {{?? true}}
     return this.__ref_message.{{=field.name}};
   {{?}}
@@ -63,6 +108,15 @@ class {{=className}} {
   set {{=field.name}}(value) {
   {{? isString(field.type)}}
     primitiveTypes.string__assign(this.__ref_message.{{=field.name}}, value);
+  {{?? isStruct(field.type)}}
+    if (!this.__ref_object['{{=field.name}}']) {
+      this.__ref_object['{{=field.name}}'] = new {{=calcStructTypeName(field.type)}}();
+      this.__ref_object['{{=field.name}}'].__ref_message = this.__ref_message.{{=field.name}};
+    }
+    if (! value instanceof {{=calcStructTypeName(field.type)}}) {
+      throw new TypeError('Invalid argument: should provide "{{=calcStructTypeName(field.type)}}" to ".{{=field.name}}"()');
+    }
+    this.__ref_object.{{=field.name}}.copy(value);
   {{?? true}}
     this.__ref_message.{{=field.name}} = value;
   {{?}}
@@ -75,12 +129,26 @@ class {{=className}} {
 
 }
 
-{{=className}}.RefType = {{=generatorName}};
+{{? it.spec.constants != undefined && it.spec.constants.length}}
+//
+// Define constants ({{=it.spec.constants.length}} in total)
+//
+{{~ it.spec.constants :c}}
+// TODO(Kenny): define constants
+{{~}}
+{{?}}
+
+{{=className}}.RawStructType = {{=generatorName}};
+{{=generatorName}}.WrapperType = {{=className}};
 
 {{=className}}.getRefBuffer = function(msg) {
   return msg.__ref_message.ref();
 };
 
+//
+// Array Type for type: {{=className}}
+//
+{{=className}}.ArrayType = {}; // TODO(Kenny): define class {{=className}}Array type
 module.exports = {{=className}};
 
 /*
