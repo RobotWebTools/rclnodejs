@@ -14,6 +14,7 @@
 
 #include "rcl_bindings.hpp"
 
+#include <dlfcn.h>
 #include <rcl/error_handling.h>
 #include <rcl/node.h>
 #include <rcl/rcl.h>
@@ -23,7 +24,31 @@
 #include "rcl_handle.hpp"
 #include "shadow_node.hpp"
 
+extern "C" {
+  typedef const rosidl_message_type_support_t* (*GET_MSG_TYPE_SUPPORT)();
+}
+
 namespace rclnodejs {
+
+const rosidl_message_type_support_t* GetMessageTypeSupportType(
+    const std::string& package_name, const std::string& message_sub_folder,
+    const std::string& message_name) {
+  std::string lib_name = "lib";
+  lib_name += package_name;
+  lib_name += "__rosidl_typesupport_c.so";
+  void* lib = dlopen(lib_name.c_str(), RTLD_NOW|RTLD_GLOBAL);
+
+  GET_MSG_TYPE_SUPPORT function_ptr = nullptr;
+  std::string function_name = RCLN_GET_MSG_TYPE_SUPPORT(package_name,
+      message_sub_folder, message_name);
+  function_ptr = (GET_MSG_TYPE_SUPPORT)dlsym(lib, function_name.c_str());
+
+  if (function_ptr) {
+    return function_ptr();
+  }
+
+  return nullptr;
+}
 
 NAN_METHOD(Init) {
   rcl_ret_t ret = rcl_init(0, nullptr, rcl_get_default_allocator());
@@ -211,6 +236,59 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
   info.GetReturnValue().Set(Nan::New((uint32_t)elapsed_time));
 }
 
+NAN_METHOD(RclTake) {
+  rclnodejs::RclHandle* subscription_handle =
+      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->GetPtr());
+  void* msg_taken = node::Buffer::Data(info[1]->ToObject());
+
+  rcl_ret_t ret = rcl_take(subscription, msg_taken, nullptr);
+
+  if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    Nan::ThrowError(rcl_get_error_string_safe());
+    rcl_reset_error();
+    info.GetReturnValue().Set(Nan::False());
+    return;
+  }
+
+  if (ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    info.GetReturnValue().Set(Nan::True());
+    return;
+  }
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_METHOD(CreateSubscription) {
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
+      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
+          info[0]->ToObject())->GetPtr());
+  std::string package_name(*Nan::Utf8String(info[1]->ToString()));
+  std::string message_sub_folder(*Nan::Utf8String(info[2]->ToString()));
+  std::string message_name(*Nan::Utf8String(info[3]->ToString()));
+  std::string topic(*Nan::Utf8String(info[4]->ToString()));
+
+  rcl_subscription_t * subscription =
+    (rcl_subscription_t*)malloc(sizeof(rcl_subscription_t));
+  *subscription = rcl_get_zero_initialized_subscription();
+
+  rcl_subscription_options_t subscription_ops =
+      rcl_subscription_get_default_options();
+  const rosidl_message_type_support_t * ts =
+      GetMessageTypeSupportType(package_name, message_sub_folder, message_name);
+
+  rcl_ret_t ret =
+      rcl_subscription_init(subscription, node, ts, topic.c_str(),
+                            &subscription_ops);
+
+  if (ret != RCL_RET_OK) {
+    Nan::ThrowError("Create subscription failed");
+    return;
+  }
+
+  info.GetReturnValue().Set(rclnodejs::RclHandle::NewInstance(subscription));
+}
+
 NAN_METHOD(Spin) {
   if (info.Length() == 1 && info[0]->IsObject()) {
     rclnodejs::ShadowNode* node =
@@ -249,6 +327,8 @@ BindingMethod binding_methods[] = {
   {"resetTimer", ResetTimer},
   {"timerGetTimeSinceLastCall", TimerGetTimeSinceLastCall},
   {"timerGetTimeUntilNextCall", TimerGetTimeUntilNextCall},
+  {"rclTake", RclTake},
+  {"createSubscription", CreateSubscription},
 
   {"createPublisher", CreatePublisher},
   {"rcl_publish_std_string_message", rcl_publish_std_string_message},

@@ -42,8 +42,12 @@ void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
   Nan::HandleScope scope;
   Nan::MaybeLocal<v8::Value> timers =
       Nan::Get(node, Nan::New("_timers").ToLocalChecked());
+  Nan::MaybeLocal<v8::Value> subscriptions =
+      Nan::Get(node, Nan::New("_subscriptions").ToLocalChecked());
 
   CollectHandlesByType(timers.ToLocalChecked()->ToObject(), &timers_);
+  CollectHandlesByType(subscriptions.ToLocalChecked()->ToObject(),
+                       &subscriptions_);
 }
 
 uint32_t HandleManager::SubscriptionsCount() {
