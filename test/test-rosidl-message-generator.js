@@ -56,7 +56,7 @@ describe('ROSIDL Node.js message generator test suite', function(){
   });
 
   it('Testing message with all-primitive members - ColorRGBA', function() {
-    let MessageClass = message.getMessageClass('std_msgs', 'msg', 'ColorRGBA');
+    const MessageClass = message.getMessageClass('std_msgs', 'msg', 'ColorRGBA');
     assert.equal(MessageClass.name, 'std_msgs__msg__ColorRGBA');
     let msg = new MessageClass();
     msg.r = 0.5;
@@ -70,7 +70,7 @@ describe('ROSIDL Node.js message generator test suite', function(){
   });
 
   it('Testing copy-constructor - Duration', function() {
-    let MessageClass = message.getMessageClass('builtin_interfaces', 'msg', 'Duration');
+    const MessageClass = message.getMessageClass('builtin_interfaces', 'msg', 'Duration');
     assert.equal(MessageClass.name, 'builtin_interfaces__msg__Duration');
     let msg = new MessageClass();
     msg.sec = 1024;
@@ -91,7 +91,7 @@ describe('ROSIDL Node.js message generator test suite', function(){
   });
 
   it('Testing assignment of an all-primitive message - Time', function() {
-    let MessageClass = message.getMessageClass('builtin_interfaces', 'msg', 'Time');
+    const MessageClass = message.getMessageClass('builtin_interfaces', 'msg', 'Time');
     assert.equal(MessageClass.name, 'builtin_interfaces__msg__Time');
     let msg = new MessageClass();
     msg.sec = 120;
@@ -110,6 +110,69 @@ describe('ROSIDL Node.js message generator test suite', function(){
 
     assert.equal(msg.sec, 120);
     assert.equal(msg.nanosec, 777);
+  });
+
+  it('Testing a compound message - Pose', function() {
+    const MessageClass = message.getMessageClass('geometry_msgs', 'msg', 'Pose');
+    const geometry_msgs__msg__Point = message.getMessageClass('geometry_msgs', 'msg', 'Point');
+    const geometry_msgs__msg__Quaternion = message.getMessageClass('geometry_msgs', 'msg', 'Quaternion');
+
+    assert.equal(MessageClass.name, 'geometry_msgs__msg__Pose');
+    let msg = new MessageClass();
+    assert(msg.position instanceof geometry_msgs__msg__Point);
+    assert(msg.orientation instanceof geometry_msgs__msg__Quaternion);
+
+    // Setter + getter
+    msg.position.x = 123.5;
+    msg.position.y = 456.25;
+    msg.position.z = 789.125;
+    msg.orientation.x = 1234.125;
+    msg.orientation.y = 4567.25;
+    msg.orientation.z = 7890.5;
+    assert.equal(msg.position.x, 123.5);
+    assert.equal(msg.position.y, 456.25);
+    assert.equal(msg.position.z, 789.125);
+    assert.equal(msg.orientation.x, 1234.125);
+    assert.equal(msg.orientation.y, 4567.25);
+    assert.equal(msg.orientation.z, 7890.5);
+
+
+    // Copy ctor
+    let copy = new MessageClass(msg);
+    assert.equal(copy.position.x, 123.5);
+    assert.equal(copy.position.y, 456.25);
+    assert.equal(copy.position.z, 789.125);
+    assert.equal(copy.orientation.x, 1234.125);
+    assert.equal(copy.orientation.y, 4567.25);
+    assert.equal(copy.orientation.z, 7890.5);
+
+    // Does not interfere -- 1
+    msg.position.x = 1230.5;
+    msg.position.y = 4560.25;
+    msg.position.z = 7890.125;
+    assert.equal(copy.position.x, 123.5);
+    assert.equal(copy.position.y, 456.25);
+    assert.equal(copy.position.z, 789.125);
+    assert.equal(msg.position.x, 1230.5);
+    assert.equal(msg.position.y, 4560.25);
+    assert.equal(msg.position.z, 7890.125);
+    assert.equal(msg.orientation.x, 1234.125);
+    assert.equal(msg.orientation.y, 4567.25);
+    assert.equal(msg.orientation.z, 7890.5);
+
+    // Does not interfere -- 2
+    copy.position.x = 12301.5;
+    copy.position.y = 45601.25;
+    copy.position.z = 78901.125;
+    assert.equal(msg.position.x, 1230.5);
+    assert.equal(msg.position.y, 4560.25);
+    assert.equal(msg.position.z, 7890.125);
+    assert.equal(msg.orientation.x, 1234.125);
+    assert.equal(msg.orientation.y, 4567.25);
+    assert.equal(msg.orientation.z, 7890.5);
+    assert.equal(copy.position.x, 12301.5);
+    assert.equal(copy.position.y, 45601.25);
+    assert.equal(copy.position.z, 78901.125);
   });
 
 });
