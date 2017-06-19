@@ -26,7 +26,7 @@ rclnodejs.init().then(() => {
   let messageType = message.getMessageType('std_msgs', 'msg', 'String');
   let StringMessage = message.getMessageClass(messageType);
 
-  console.log('messageType');
+  console.log(messageType);
 
   node.createSubscription(messageType, StringMessage, 'topic', (msg) => {
     console.log(`Receive message: ${msg.data}`);

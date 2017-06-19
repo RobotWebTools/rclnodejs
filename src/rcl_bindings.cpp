@@ -64,6 +64,7 @@ NAN_METHOD(CreateNode) {
 
   *node = rcl_get_zero_initialized_node();
   rcl_node_options_t options = rcl_node_get_default_options();
+
   if (rcl_node_init(node, node_name.c_str(), name_space.c_str(), &options) !=
       RCL_RET_OK) {
     Nan::ThrowError(rcl_get_error_string_safe());
@@ -269,7 +270,7 @@ NAN_METHOD(CreateSubscription) {
   std::string topic(*Nan::Utf8String(info[4]->ToString()));
 
   rcl_subscription_t * subscription =
-    (rcl_subscription_t*)malloc(sizeof(rcl_subscription_t));
+    reinterpret_cast<rcl_subscription_t*>(malloc(sizeof(rcl_subscription_t)));
   *subscription = rcl_get_zero_initialized_subscription();
 
   rcl_subscription_options_t subscription_ops =
