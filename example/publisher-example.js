@@ -39,5 +39,4 @@ rclnodejs.init().then(() => {
   }, 10);
 
   rclnodejs.spin(node);
-  // rclnodejs.shutdown();
 });

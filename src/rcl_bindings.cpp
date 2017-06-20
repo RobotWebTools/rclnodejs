@@ -17,6 +17,7 @@
 #include <rcl/error_handling.h>
 #include <rcl/node.h>
 #include <rcl/rcl.h>
+#include <string>
 
 #include "handle_manager.hpp"
 #include "rcl_handle.hpp"
@@ -31,24 +32,15 @@ NAN_METHOD(Init) {
 }
 
 NAN_METHOD(CreateNode) {
-  if (info.Length() < 2) {
-    Nan::ThrowError("Wrong number of argments");
-    return;
-  }
-
-  if (!info[0]->IsString() || !info[1]->IsString()) {
-    Nan::ThrowError("Wrong argments");
-    return;
-  }
-
-  const char* node_name = *Nan::Utf8String(info[0]->ToString());
-  const char* name_space = *Nan::Utf8String(info[1]->ToString());
+  std::string node_name(*v8::String::Utf8Value(info[0]));
+  std::string name_space(*v8::String::Utf8Value(info[1]));
 
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(malloc(sizeof(rcl_node_t)));
 
   *node = rcl_get_zero_initialized_node();
   rcl_node_options_t options = rcl_node_get_default_options();
-  if (rcl_node_init(node, node_name, name_space, &options) != RCL_RET_OK) {
+  if (rcl_node_init(node, node_name.c_str(), name_space.c_str(), &options) !=
+      RCL_RET_OK) {
     Nan::ThrowError(rcl_get_error_string_safe());
     return;
   }
@@ -56,16 +48,6 @@ NAN_METHOD(CreateNode) {
 }
 
 NAN_METHOD(CreateTimer) {
-  if (info.Length() < 1) {
-    Nan::ThrowError("Wrong number of argments");
-    return;
-  }
-
-  if (!info[0]->IsNumber()) {
-    Nan::ThrowError("Wrong argments");
-    return;
-  }
-
   // TODO(minggang): Add support for uint64_t.
   int64_t period = info[0]->IntegerValue();
 
@@ -84,10 +66,10 @@ NAN_METHOD(CreateTimer) {
 }
 
 NAN_METHOD(IsTimerReady) {
-  rclnodejs::RclHandle* timerHandler =
+  rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
-  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timerHandler->GetPtr());
+  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   bool is_ready = false;
   rcl_ret_t ret = rcl_timer_is_ready(timer, &is_ready);
@@ -101,28 +83,18 @@ NAN_METHOD(IsTimerReady) {
 }
 
 NAN_METHOD(DestroyEntity) {
-  if (info.Length() < 2) {
-    Nan::ThrowError("Wrong number of argments");
-    return;
-  }
-
-  if (!info[0]->IsString()) {
-    Nan::ThrowError("Wrong argments");
-    return;
-  }
-
-  const char* type = *Nan::Utf8String(info[0]->ToString());
+  std::string type(*v8::String::Utf8Value(info[0]));
 
   rcl_ret_t ret = 0;
 
-  if (0 == strcmp(type, "timer")) {
+  if ("timer" == type) {
     rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(
         rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
         info[1]->ToObject())->GetPtr());
     ret = rcl_timer_fini(timer);
   }
 
-  if (0 == strcmp(type, "publisher")) {
+  if ("publisher" == type) {
     rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
         rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
         info[1]->ToObject())->GetPtr());
@@ -138,11 +110,6 @@ NAN_METHOD(DestroyEntity) {
 }
 
 NAN_METHOD(CallTimer) {
-  if (info.Length() < 1 && !info[0]->IsObject()) {
-    Nan::ThrowError("Wrong argments");
-    return;
-  }
-
   rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
@@ -158,11 +125,6 @@ NAN_METHOD(CallTimer) {
 }
 
 NAN_METHOD(CancelTimer) {
-  if (info.Length() < 1 && !info[0]->IsObject()) {
-    Nan::ThrowError("Wrong argments");
-    return;
-  }
-
   rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
@@ -178,11 +140,6 @@ NAN_METHOD(CancelTimer) {
 }
 
 NAN_METHOD(IsTimerCanceled) {
-  if (info.Length() < 1 && !info[0]->IsObject()) {
-    Nan::ThrowError("Wrong argments");
-    return;
-  }
-
   rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
@@ -202,11 +159,6 @@ NAN_METHOD(IsTimerCanceled) {
 }
 
 NAN_METHOD(ResetTimer) {
-  if (info.Length() < 1 && !info[0]->IsObject()) {
-    Nan::ThrowError("Wrong argments");
-    return;
-  }
-
   rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
@@ -222,11 +174,6 @@ NAN_METHOD(ResetTimer) {
 }
 
 NAN_METHOD(TimerGetTimeUntilNextCall) {
-  if (info.Length() < 1 && !info[0]->IsObject()) {
-    Nan::ThrowError("Wrong argments");
-    return;
-  }
-
   rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 
@@ -246,11 +193,6 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
 }
 
 NAN_METHOD(TimerGetTimeSinceLastCall) {
-  if (info.Length() < 1 && !info[0]->IsObject()) {
-    Nan::ThrowError("Wrong argments");
-    return;
-  }
-
   rclnodejs::RclHandle* timer_handle =
       rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
 

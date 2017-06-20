@@ -31,14 +31,16 @@ let rcl = {
   _nodes: [],
 
   createNode(nodeName, namespace = '') {
-    let handle = rclnodejs.createNode(nodeName, namespace);
+    if (typeof (nodeName) !== 'string' || typeof (namespace) !== 'string') {
+      throw new TypeError('Invalid argument.');
+    }
 
+    let handle = rclnodejs.createNode(nodeName, namespace);
     let node =  new rclnodejs.ShadowNode();
+
     node.init();
     node._handle = handle;
-
     this._nodes.push(node);
-
     return node;
   },
 
@@ -56,6 +58,9 @@ let rcl = {
   },
 
   spin(node) {
+    if (!(node instanceof rclnodejs.ShadowNode)) {
+      throw new TypeError('Invalid argument.');
+    }
     if (node.spinning) {
       throw new Error('The node is already spinning.');
     }
