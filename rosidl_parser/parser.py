@@ -37,7 +37,7 @@ def get_json_object_from_msg_spec_object(msg_spec_object):
 
     constants = []
     for constant in msg_spec_object.constants:
-        constants.append({'type': constant.type, 'name': constant.type, 'value': constant.value})
+        constants.append({'type': constant.type, 'name': constant.name, 'value': constant.value})
 
     msg_name = {'msgName': msg_spec_object.msg_name}
     json_obj = {'constants': constants, 'fields': fields, 'baseType': get_json_object_from_base_type_object(msg_spec_object.base_type),
