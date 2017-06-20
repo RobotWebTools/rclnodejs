@@ -18,14 +18,14 @@ const assert = require('assert');
 const {message} = require('../index.js');
 
 describe('ROSIDL Node.js message generator test suite', function(){
-  it('Try generate all messages', function() {
+  it('Try require all message classes', function() {
     this.timeout(100 * 1000);
     return new Promise(function(resolve, reject) {
       message.generateAll().then((msgTypeList) => {
         const DEFAULT_NUMBER_OF_MESSAGES = 127; // # of a new standard ROS 2.0 build
         assert(msgTypeList.length >= DEFAULT_NUMBER_OF_MESSAGES);
 
-        // Try require all message class
+        // Try require all message classes
         msgTypeList.forEach((msgType) => {
           try {
             const MessageClass = message.getMessageClass(msgType);
@@ -39,7 +39,7 @@ describe('ROSIDL Node.js message generator test suite', function(){
     }); // new Promise
   });
 
-  it('Try use stdmsgs/msg/String.msg', function() {
+  it('Try use stdmsgs/msg/String.msg, using getMessageClass() function overrides', function() {
     const MessageClass1 = message.getMessageClass(message.getMessageType('std_msgs', 'msg', 'String'));
     assert.equal(MessageClass1.name, 'std_msgs__msg__String');
     let msg = new MessageClass1();
@@ -175,4 +175,41 @@ describe('ROSIDL Node.js message generator test suite', function(){
     assert.equal(copy.position.z, 78901.125);
   });
 
+  it('Testing constants - GoalStatus', function(){
+    const MessageClass = message.getMessageClass('actionlib_msgs', 'msg', 'GoalStatus');
+    assert.equal(MessageClass.name, 'actionlib_msgs__msg__GoalStatus');
+    let msg = new MessageClass();
+    assert.equal(typeof msg.PENDING, 'undefined');
+    assert.equal(typeof MessageClass.PENDING, 'number');
+    assert.equal(MessageClass.PENDING, 0);
+
+    /*
+    uint8 PENDING         = 0   # The goal has yet to be processed by the action server.
+    uint8 ACTIVE          = 1   # The goal is currently being processed by the action server.
+    uint8 PREEMPTED       = 2   # The goal received a cancel request after it started executing
+                                #   and has since completed its execution (Terminal State).
+    uint8 SUCCEEDED       = 3   # The goal was achieved successfully by the action server
+                                #   (Terminal State).
+    uint8 ABORTED         = 4   # The goal was aborted during execution by the action server due
+                                #    to some failure (Terminal State).
+    uint8 REJECTED        = 5   # The goal was rejected by the action server without being processed,
+                                #    because the goal was unattainable or invalid (Terminal State).
+    uint8 PREEMPTING      = 6   # The goal received a cancel request after it started executing
+                                #    and has not yet completed execution.
+    uint8 RECALLING       = 7   # The goal received a cancel request before it started executing, but
+                                #    the action server has not yet confirmed that the goal is canceled.
+    uint8 RECALLED        = 8   # The goal received a cancel request before it started executing
+                                #    and was successfully cancelled (Terminal State).
+    uint8 LOST            = 9   # An action client can determine that a goal is LOST. This should not
+    */
+
+    const constants_name  = ["PENDING", "ACTIVE", "PREEMPTED", "SUCCEEDED", "ABORTED",
+                             "REJECTED", "PREEMPTING", "RECALLING", "RECALLED", "LOST"];
+    const constants_value = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    for (let i = 0 ; i < constants_name.length ; ++ i) {
+      assert.equal(typeof msg[constants_name[i]], 'undefined');
+      assert.equal(typeof MessageClass[constants_name[i]], 'number');
+      assert.equal(MessageClass[constants_name[i]], constants_value[i]);
+    }
+  });
 });

@@ -134,13 +134,13 @@ class {{=className}} {
 // Define constants ({{=it.spec.constants.length}} in total)
 //
 {{~ it.spec.constants :c}}
-// TODO(Kenny): define constants
+Object.defineProperty({{=className}}, "{{=c.name}}", {value: {{=c.value}}, writable: false, enumerable: true, configurable: true});
 {{~}}
 {{?}}
-
+// Raw type and wrapper type
 {{=className}}.RawStructType = {{=generatorName}};
 {{=generatorName}}.WrapperType = {{=className}};
-
+// Expose internal buffer
 {{=className}}.getRefBuffer = function(msg) {
   return msg.__ref_message.ref();
 };
