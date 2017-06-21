@@ -28,7 +28,10 @@ function inherits(target, source) {
 inherits(rclnodejs.ShadowNode, Node);
 
 let rcl = {
+  _initialized: false,
+  _messageGenerated: false,
   _nodes: [],
+  _allMessageType: [],
 
   createNode(nodeName, namespace = '') {
     let handle = rclnodejs.createNode(nodeName, namespace);
@@ -42,12 +45,28 @@ let rcl = {
     return node;
   },
 
+  getAllMessageTypes: function() {
+    return this._allMessageType;
+  },
+
   init(...args) {
-    rclnodejs.init(args);
+    if (this._initialized) {
+      console.log('Warning - rclnodejs is already initialized. These arguments will be ignored:', args);
+    } else {
+      rclnodejs.init(args);
+      this._initialized = true;
+    }
 
     // TODO(Kenny): introduce other policy to save the amout of time of doing message generation
     return new Promise(function(resolve, reject) {
-      this.message.generateAll().then(() => {
+      if (this._messageGenerated) {
+        resolve();
+        return;
+      }
+
+      this.message.generateAll().then((all) => {
+        this._allMessageType = all;
+        this._messageGenerated = true;
         resolve();
       }).catch((e) => {
         reject(e);

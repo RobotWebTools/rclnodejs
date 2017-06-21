@@ -15,28 +15,27 @@
 'use strict';
 
 const assert = require('assert');
-const {message} = require('../index.js');
+const rclnodejs = require('../index.js');
+const {message} = rclnodejs;
 
 describe('ROSIDL Node.js message generator test suite', function(){
+  before(function() {
+    this.timeout(10 * 1000);
+    return rclnodejs.init();
+  });
+
+  after(function() {
+    rclnodejs.shutdown();
+  });
+
   it('Try require all message classes', function() {
-    this.timeout(100 * 1000);
-    return new Promise(function(resolve, reject) {
-      message.generateAll().then((msgTypeList) => {
-        const DEFAULT_NUMBER_OF_MESSAGES = 127; // # of a new standard ROS 2.0 build
-        assert(msgTypeList.length >= DEFAULT_NUMBER_OF_MESSAGES);
-
-        // Try require all message classes
-        msgTypeList.forEach((msgType) => {
-          try {
-            const MessageClass = message.getMessageClass(msgType);
-          } catch (e) {
-            reject(e);
-          }
-        });
-
-        resolve();
-      });
-    }); // new Promise
+    this.timeout(10 * 1000);
+    const msgTypeList = rclnodejs.getAllMessageTypes();
+    const DEFAULT_NUMBER_OF_MESSAGES = 127; // # of a new standard ROS 2.0 build
+    assert(msgTypeList.length >= DEFAULT_NUMBER_OF_MESSAGES);
+    msgTypeList.forEach((msgType) => {
+      const MessageClass = message.getMessageClass(msgType);
+    });
   });
 
   it('Try use stdmsgs/msg/String.msg, using getMessageClass() function overrides', function() {
