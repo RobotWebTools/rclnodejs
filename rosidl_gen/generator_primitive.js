@@ -16,7 +16,7 @@
 
 const StructType = require('ref-struct');
 const ref = require('ref');
-const ffi = require('ffi');
+const rclnodejs = require('bindings')('rclnodejs');
 
 /* eslint-disable camelcase */
 
@@ -26,23 +26,11 @@ const rosidl_generator_nodejs__String = StructType({
   capacity: ref.types.size_t,
 });
 
-const libstd_msgs__rosidl_generator_c = ffi.Library('libstd_msgs__rosidl_generator_c', {
-  rosidl_generator_c__String__assign:
-      [ref.types.bool, [ref.refType(rosidl_generator_nodejs__String), ref.types.CString]],
-});
 
-function ffi_rosidl_generator_nodejs__String__assign(buf, text) {
+function bindingsStringAssign(buf, text) {
   let strPtr = new Buffer(text + '\0');
   strPtr.type = ref.types.CString;
-  libstd_msgs__rosidl_generator_c.rosidl_generator_c__String__assign(buf, strPtr);
-}
-
-function rosidl_generator_nodejs__String__assign(str, text) {
-  let strBuf = new Buffer(text + '\0');
-  strBuf.type = ref.types.CString;
-  str.data = strBuf;
-  str.size = text.length;
-  str.capacity = text.length + 1;
+  return rclnodejs.rosIDLStringAssign(buf, strPtr);
 }
 
 module.exports = {
@@ -61,7 +49,7 @@ module.exports = {
   byte: ref.types.byte,
 
   string: rosidl_generator_nodejs__String,
-  string__assign: ffi_rosidl_generator_nodejs__String__assign,
+  stringAssignFunc: bindingsStringAssign,
 };
 
 /* eslint-enable camelcase */

@@ -19,21 +19,48 @@
 
 namespace rclnodejs {
 
+enum RclHandleType {
+  RclHandleType_None,
+
+  RclHandleType_ROSNode,
+  RclHandleType_ROSPublisher,
+  RclHandleType_ROSSubscription,
+  RclHandleType_ROSService,
+  RclHandleType_ROSClient,
+  RclHandleType_ROSIDLString,
+  RclHandleType_Malloc,
+
+  RclHandleType_Count
+};
+
 class RclHandle : public Nan::ObjectWrap {
  public:
   static void Init(v8::Local<v8::Object> exports);
-  static v8::Local<v8::Object> NewInstance(void* handle);
+  static v8::Local<v8::Object> NewInstance(void* handle,
+    RclHandleType type = RclHandleType_Malloc);
 
-  void* GetPtr() { return handle_; }
-  void SetPtr(void* handle) { handle_ = handle; }
+  void* GetPtr() { return pointer_; }
+  void SetPtr(void* ptr) { pointer_ = ptr; }
+  RclHandleType GetType() { return type_; }
+  void SetType(RclHandleType type) { type_ = type; }
 
  private:
   RclHandle();
   ~RclHandle();
 
+  void DestroyMe();
+
   static Nan::Persistent<v8::Function> constructor;
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  void* handle_;
+  static NAN_METHOD(Destroy);
+  static NAN_METHOD(Dismiss);
+
+  static NAN_GETTER(HandleGetter);
+  static NAN_GETTER(TypeGetter);
+
+ private:
+  void* pointer_;
+  RclHandleType type_;
 };
 
 }  // namespace rclnodejs

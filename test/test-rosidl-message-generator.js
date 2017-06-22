@@ -47,6 +47,10 @@ describe('ROSIDL Node.js message generator test suite', function(){
     assert.equal(typeof msg.data, 'string');
     assert.equal(msg.data, '123570');
 
+    for (let i = 0; i < 100; ++ i) {
+      msg.data = 'message + ' + i;  // Testing string assignment multiple times (string de-allocation)
+    }
+
     const MessageClass2 = message.getMessageClass('std_msgs', 'msg', 'String'); // override func
     assert.equal(MessageClass2.name, 'std_msgs__msg__String');
     msg = new MessageClass2();

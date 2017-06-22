@@ -107,7 +107,12 @@ class {{=className}} {
 
   set {{=field.name}}(value) {
   {{? isString(field.type)}}
-    primitiveTypes.string__assign(this.__ref_message.{{=field.name}}.ref(), value);
+    {{var handleName = '__handle_' + field.name;}}
+    if (this.__ref_message.{{=handleName}}) {
+      // console.log('    Dismiss the previoud handle:', this.__ref_message.{{=handleName}});
+      this.__ref_message.{{=handleName}}.dismiss();
+    }
+    this.__ref_message.{{=handleName}} = primitiveTypes.stringAssignFunc(this.__ref_message.{{=field.name}}.ref(), value);
   {{?? true}}
     this.__ref_message.{{=field.name}} = value;
   {{?}}
