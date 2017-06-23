@@ -14,14 +14,17 @@
 
 #include "rcl_handle.hpp"
 
-#include <string>
+#include <rcl/rcl.h>
+
 #include <sstream>
+#include <string>
 
 namespace rclnodejs {
 
 Nan::Persistent<v8::Function> RclHandle::constructor;
 
-RclHandle::RclHandle() : pointer_(nullptr), type_(RclHandleType_None) {
+RclHandle::RclHandle()
+  : pointer_(nullptr), type_(RclHandleType_None), other_(nullptr) {
 }
 
 RclHandle::~RclHandle() {
@@ -30,33 +33,62 @@ RclHandle::~RclHandle() {
 
 void RclHandle::DestroyMe() {
   if (pointer_) {
+    rcl_ret_t ret = RCL_RET_OK;
+
     switch (type_) {
-    case RclHandleType_None:
-      break;
-    case RclHandleType_ROSNode:
-      break;
-    case RclHandleType_ROSPublisher:
-      break;
-    case RclHandleType_ROSSubscription:
-      break;
-    case RclHandleType_ROSService:
-      break;
-    case RclHandleType_ROSClient:
-      break;
-    case RclHandleType_ROSIDLString:
-      if (pointer_) {
+      case RclHandleType_None:
+        break;
+      case RclHandleType_ROSNode:
+        ret = rcl_node_fini(reinterpret_cast<rcl_node_t*>(pointer_));
+        break;
+      case RclHandleType_ROSPublisher:
+        if (other_) {
+          auto publisher = reinterpret_cast<rcl_publisher_t*>(pointer_);
+          auto node = reinterpret_cast<rcl_node_t*>(other_);
+          ret = rcl_publisher_fini(publisher, node);
+        }
+        break;
+      case RclHandleType_ROSSubscription:
+        if (other_) {
+          auto subscription = reinterpret_cast<rcl_subscription_t*>(pointer_);
+          auto node = reinterpret_cast<rcl_node_t*>(other_);
+          ret = rcl_subscription_fini(subscription, node);
+        }
+        break;
+      case RclHandleType_ROSService:
+        if (other_) {
+          auto service = reinterpret_cast<rcl_service_t*>(pointer_);
+          auto node = reinterpret_cast<rcl_node_t*>(other_);
+          ret = rcl_service_fini(service, node);
+        }
+        break;
+      case RclHandleType_ROSClient:
+        if (other_) {
+          auto client = reinterpret_cast<rcl_client_t*>(pointer_);
+          auto node = reinterpret_cast<rcl_node_t*>(other_);
+          ret = rcl_client_fini(client, node);
+        }
+        break;
+      case RclHandleType_Timer:
+        ret = rcl_timer_fini(reinterpret_cast<rcl_timer_t*>(pointer_));
         free(pointer_);
-      }
-      break;
-    case RclHandleType_Malloc:
-      free(pointer_);
-      break;
-    case RclHandleType_Count:  // No need to do anything
-      break;
+        break;
+      case RclHandleType_ROSIDLString:
+        if (pointer_) {
+          free(pointer_);
+        }
+        break;
+      case RclHandleType_Malloc:
+        free(pointer_);
+        break;
+      case RclHandleType_Count:  // No need to do anything
+        break;
     }
   }
+  // TODO(Kenny): log pointer_, other_, type_ and ret
   pointer_ = nullptr;
   type_ = RclHandleType_None;
+  other_ = nullptr;
 }
 
 void RclHandle::Init(v8::Local<v8::Object> exports) {
@@ -141,6 +173,9 @@ NAN_GETTER(RclHandle::TypeGetter) {
     break;
   case RclHandleType_ROSClient:
     str = "ROS Client";
+    break;
+  case RclHandleType_Timer:
+    str = "ROS Timer";
     break;
   case RclHandleType_ROSIDLString:
     str = "ROS String";

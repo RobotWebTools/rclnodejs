@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Usage: lanuch ./install/bin/examples_rclcpp_minimal_subscriber_lambda
-//  to display the message published by this program
+// to display the message published by this program
 
 'use strict';
 
@@ -23,12 +23,10 @@ const {message} = rclnodejs;
 rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('subscription_example_node');
 
-  let messageType = message.getMessageType('std_msgs', 'msg', 'String');
-  let StringMessage = message.getMessageClass(messageType);
+  let messageType = message.getMessageType('std_msgs', 'msg', 'Int32');
+  let Message = message.getMessageClass(messageType);
 
-  console.log(messageType);
-
-  node.createSubscription(messageType, StringMessage, 'topic', (msg) => {
+  node.createSubscription(messageType, Message, 'topic', (msg) => {
     console.log(`Receive message: ${msg.data}`);
   });
 

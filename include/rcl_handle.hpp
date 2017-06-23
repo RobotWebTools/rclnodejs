@@ -27,6 +27,7 @@ enum RclHandleType {
   RclHandleType_ROSSubscription,
   RclHandleType_ROSService,
   RclHandleType_ROSClient,
+  RclHandleType_Timer,
   RclHandleType_ROSIDLString,
   RclHandleType_Malloc,
 
@@ -41,6 +42,8 @@ class RclHandle : public Nan::ObjectWrap {
 
   void* GetPtr() { return pointer_; }
   void SetPtr(void* ptr) { pointer_ = ptr; }
+  void* GetOther() { return other_; }
+  void SetOther(void* ptr) { other_ = ptr; }
   RclHandleType GetType() { return type_; }
   void SetType(RclHandleType type) { type_ = type; }
 
@@ -61,6 +64,7 @@ class RclHandle : public Nan::ObjectWrap {
  private:
   void* pointer_;
   RclHandleType type_;
+  void* other_;
 };
 
 }  // namespace rclnodejs
