@@ -107,16 +107,12 @@ class {{=className}} {
 
   set {{=field.name}}(value) {
   {{? isString(field.type)}}
-    primitiveTypes.string__assign(this.__ref_message.{{=field.name}}, value);
-  {{?? isStruct(field.type)}}
-    if (!this.__ref_object['{{=field.name}}']) {
-      this.__ref_object['{{=field.name}}'] = new {{=calcStructTypeName(field.type)}}();
-      this.__ref_object['{{=field.name}}'].__ref_message = this.__ref_message.{{=field.name}};
+    {{var handleName = '__handle_' + field.name;}}
+    if (this.__ref_message.{{=handleName}}) {
+      // console.log('    Dismiss the previoud handle:', this.__ref_message.{{=handleName}});
+      this.__ref_message.{{=handleName}}.dismiss();
     }
-    if (! value instanceof {{=calcStructTypeName(field.type)}}) {
-      throw new TypeError('Invalid argument: should provide "{{=calcStructTypeName(field.type)}}" to ".{{=field.name}}"()');
-    }
-    this.__ref_object.{{=field.name}}.copy(value);
+    this.__ref_message.{{=handleName}} = primitiveTypes.stringAssignFunc(this.__ref_message.{{=field.name}}.ref(), value);
   {{?? true}}
     this.__ref_message.{{=field.name}} = value;
   {{?}}

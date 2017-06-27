@@ -16,6 +16,7 @@
 
 const StructType = require('ref-struct');
 const ref = require('ref');
+const rclnodejs = require('bindings')('rclnodejs');
 
 /* eslint-disable camelcase */
 
@@ -25,12 +26,11 @@ const rosidl_generator_nodejs__String = StructType({
   capacity: ref.types.size_t,
 });
 
-function rosidl_generator_nodejs__String__assign(str, text) {
-  let strBuf = new Buffer(text + '\0');
-  strBuf.type = ref.types.CString;
-  str.data = strBuf;
-  str.size = text.length;
-  str.capacity = text.length + 1;
+
+function bindingsStringAssign(buf, text) {
+  let strPtr = new Buffer(text + '\0');
+  strPtr.type = ref.types.CString;
+  return rclnodejs.rosIDLStringAssign(buf, strPtr);
 }
 
 module.exports = {
@@ -49,7 +49,7 @@ module.exports = {
   byte: ref.types.byte,
 
   string: rosidl_generator_nodejs__String,
-  string__assign: rosidl_generator_nodejs__String__assign,
+  stringAssignFunc: bindingsStringAssign,
 };
 
 /* eslint-enable camelcase */
