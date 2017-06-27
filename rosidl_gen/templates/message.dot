@@ -7,11 +7,33 @@
 
 const StructType = require('ref-struct');
 const ref = require('ref');
+const ArrayType = require('ref-array');
 const primitiveTypes = require('../rosidl_gen/generator_primitive.js');
 
 {{
 var className = it.className;
+var arrayClassName = className + '__Array';
 var generatorName = 'rosidl_generator_nodejs__' + className;
+var generatorArrayTypeName = generatorName + '__ArrayType';
+var generatorArrayName = generatorName + '__Array';
+
+if (it.spec.fields.length === 0) {
+  /* Following rosidl_generator_c style, put a bool member named '_dummy' */
+  it.spec.fields.push({
+    "type": {
+      "isArray": false,
+      "pkgName": null,
+      "type": "bool",
+      "isDynamicArray": false,
+      "stringUpperBound": null,
+      "isUpperBound": false,
+      "isPrimitiveType": true,
+      "isFixedSizeArray": false,
+      "arraySize": null
+    },
+    "name": "_dummy"
+  });
+} /* if */
 
 var isStruct = function(type) {
   return !type.isPrimitiveType && !type.isArray;
@@ -76,6 +98,20 @@ const {{=generatorName}} = StructType({
 {{~}}
 });
 
+//
+// Define the ref-array type
+//
+
+const {{=generatorArrayTypeName}} = ArrayType({{=generatorName}});
+
+//
+// Define the array type structure
+//
+const {{=generatorArrayName}} = StructType({
+  data: ref.refType({{=generatorName}}),
+  size: ref.types.size_t,
+  capacity: ref.types.size_t,
+});
 
 //
 // Define the wrapper class
@@ -114,7 +150,7 @@ class {{=className}} {
       this.__ref_object['{{=field.name}}'].__ref_message = this.__ref_message.{{=field.name}};
     }
     if (! value instanceof {{=calcStructTypeName(field.type)}}) {
-      throw new TypeError('Invalid argument: should provide "{{=calcStructTypeName(field.type)}}" to ".{{=field.name}}"()');
+      throw new TypeError('Invalid argument: should provide "{{=calcStructTypeName(field.type)}}" to ".{{=field.name}}" setter');
     }
     this.__ref_object.{{=field.name}}.copy(value);
   {{?? true}}
@@ -129,6 +165,76 @@ class {{=className}} {
 
 }
 
+//
+// Define the wrapper array class
+//
+class {{=arrayClassName}} {
+  constructor(sz = 1) {
+    this.__resize(sz);
+  }
+
+  get data() {
+    return this.__ref_array;
+  }
+
+  get size() {
+    return this.__ref_array.length;
+  }
+
+  set size(v) {
+    if (typeof v != 'number') {
+      throw new TypeError('Invalid argument: should provide a number to {{=arrayClassName}}.size setter');
+      return;
+    }
+
+    return this.__resize(v);
+  }
+
+  get capacity() {
+    return this.__ref_array.length;
+  }
+
+  set capacity(v) {
+    if (typeof v != 'number') {
+      throw new TypeError('Invalid argument: should provide a number to {{=arrayClassName}}.capacity setter');
+      return;
+    }
+
+    return this.__resize(v);
+  }
+
+  __resize(sz) {
+    if (sz <= 0) {
+      throw new RangeError('Invalid argument: should provide a positive number to {{=arrayClassName}}.size/capacity setter');
+      return;
+    }
+
+    // TODO: data detain policy
+    // TODO: use binding functions instead of ref-array type
+    this.__ref_message = new {{=generatorArrayName}}();
+    this.__ref_message.size = sz;
+    this.__ref_message.capacity = sz;
+    this.__ref_message.arrayTypeData = new {{=generatorArrayTypeName}}(sz);
+    this.__ref_message.data = this.__ref_message.arrayTypeData.ref();
+
+    // Now update __ref_array objects
+    this.__ref_array = new Array(sz);
+    for (let i = 0; i < this.__ref_array.length; ++i) {
+      this.__ref_array[i] = new {{=className}}();
+      this.__ref_array[i].__ref_message = this.__ref_message.arrayTypeData[i]; // TODO: fill it using data
+    }
+  }
+
+  copy(other) {
+    this.__resize(other.size);
+
+    // Array deep copy
+    for (let i = 0; i < this.__ref_array.length; ++ i) {
+      this.__ref_array[i].copy(other.__ref_array[i]);
+    }
+  }
+}
+
 {{? it.spec.constants != undefined && it.spec.constants.length}}
 //
 // Define constants ({{=it.spec.constants.length}} in total)
@@ -140,15 +246,19 @@ Object.defineProperty({{=className}}, "{{=c.name}}", {value: {{=c.value}}, writa
 // Raw type and wrapper type
 {{=className}}.RawStructType = {{=generatorName}};
 {{=generatorName}}.WrapperType = {{=className}};
+//
+// Array Type for type: {{=className}}
+//
+{{=className}}.RawArrayType = {{=generatorArrayName}};
+{{=className}}.ArrayType = {{=arrayClassName}};
+{{=className}}.ArrayType.RawArrayType = {{=generatorArrayName}};
+//
 // Expose internal buffer
+//
 {{=className}}.getRefBuffer = function(msg) {
   return msg.__ref_message.ref();
 };
 
-//
-// Array Type for type: {{=className}}
-//
-{{=className}}.ArrayType = {}; // TODO(Kenny): define class {{=className}}Array type
 module.exports = {{=className}};
 
 /*

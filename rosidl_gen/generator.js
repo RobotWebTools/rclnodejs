@@ -87,6 +87,10 @@ const generator = {
 
   getMessageType: message.getMessageType,
 
+  getMessageArrayClass: function() {
+    return this.getMessageClass.apply(this, arguments).ArrayType;
+  },
+
   getMessageClass: function(msgType) {
     let file = '[wrong or missing file name in getMessageClass]';
     if (typeof msgType === 'object' && isString([msgType.pkgName, msgType.msgSubfolder, msgType.msgName])) {
@@ -107,10 +111,12 @@ const generator = {
       this.genPath = path.join(__dirname, '../generated/');
     }
 
-    return removeAllIntermediateMessages(this.genPath).then(() => {
-      mkdirp.sync(this.genPath);
-      return generateAllMessages(this.scanPath);
-    });
+    // return removeAllIntermediateMessages(this.genPath).then(() => {
+    //   mkdirp.sync(this.genPath);
+    //   return generateAllMessages(this.scanPath);
+    // });
+    mkdirp.sync(this.genPath);
+    return generateAllMessages(this.scanPath);
   },
 };
 
