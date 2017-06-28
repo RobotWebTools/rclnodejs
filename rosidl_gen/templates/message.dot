@@ -124,6 +124,12 @@ class {{=className}} {
     }
     this.__ref_message = new {{=generatorName}}(otherObj);
     this.__ref_object = {};
+
+{{~ it.spec.fields :field}}
+  {{? isString(field.type)}}
+    primitiveTypes.stringInit(this.__ref_message.{{=field.name}}.ref());
+  {{?}}
+{{~}}
   }
 
 {{~ it.spec.fields :field}}

@@ -26,8 +26,19 @@ const rosidl_generator_nodejs__String = StructType({
   capacity: ref.types.size_t,
 });
 
+function bindingsStringInit(buf) {
+  if (! buf instanceof Buffer) {
+    throw new TypeError('Invalid argument: should provide a Node Buffer to bindingsStringInit()');
+  }
+
+  return rclnodejs.rosIDLStringInit(buf);
+}
 
 function bindingsStringAssign(buf, text) {
+  if (! buf instanceof Buffer) {
+    throw new TypeError('Invalid argument: should provide a Node Buffer to bindingsStringInit()');
+  }
+
   let strPtr = new Buffer(text + '\0');
   strPtr.type = ref.types.CString;
   return rclnodejs.rosIDLStringAssign(buf, strPtr);
@@ -49,6 +60,7 @@ module.exports = {
   byte: ref.types.byte,
 
   string: rosidl_generator_nodejs__String,
+  stringInit: bindingsStringInit,
   stringAssignFunc: bindingsStringAssign,
 };
 
