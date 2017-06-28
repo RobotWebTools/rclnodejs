@@ -291,6 +291,15 @@ NAN_METHOD(CreateSubscription) {
   info.GetReturnValue().Set(rclnodejs::RclHandle::NewInstance(subscription));
 }
 
+NAN_METHOD(ROSIDLStringInit) {
+  void* buffer = node::Buffer::Data(info[0]->ToObject());
+  rosidl_generator_c__String* ptr =
+    reinterpret_cast<rosidl_generator_c__String*>(buffer);
+
+  rosidl_generator_c__String__init(ptr);
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
 NAN_METHOD(ROSIDLStringAssign) {
   void* buffer = node::Buffer::Data(info[0]->ToObject());
   std::string value(*v8::String::Utf8Value(info[1]));
@@ -351,6 +360,7 @@ BindingMethod binding_methods[] = {
   {"rclTake", RclTake},
   {"createSubscription", CreateSubscription},
   {"rosIDLStringAssign", ROSIDLStringAssign},
+  {"rosIDLStringInit", ROSIDLStringInit},
 
   {"createPublisher", CreatePublisher},
   {"rcl_publish_std_string_message", rcl_publish_std_string_message},
