@@ -215,4 +215,48 @@ describe('ROSIDL Node.js message generator test suite', function(){
       assert.equal(MessageClass[constants_name[i]], constants_value[i]);
     }
   });
+
+  it('Testing array - Int32', function() {
+    const MessageClass = message.getMessageClass('std_msgs', 'msg', 'Int32');
+    const MessageArrayClass = message.getMessageArrayClass('std_msgs', 'msg', 'Int32');
+
+    let array = new MessageArrayClass(5);
+    assert((array.data[0]) instanceof MessageClass);  // Ensures element type is good
+    assert((array.data[1]) instanceof MessageClass);  // Ensures element type is good
+    assert((array.data[2]) instanceof MessageClass);  // Ensures element type is good
+    assert((array.data[3]) instanceof MessageClass);  // Ensures element type is good
+    assert((array.data[4]) instanceof MessageClass);  // Ensures element type is good
+    assert(typeof array.data[5] === 'undefined');  // No such index
+    assert.equal(array.size, 5);
+    assert.equal(array.capacity, 5);
+
+    // Assignment of message.data
+    const int32Data = [153, 26, 777, 666, 999];
+    for (let i = 0; i < int32Data.length; ++ i) {
+      array.data[i].data = int32Data[i];
+      assert.equal(array.data[i].data, int32Data[i]);  // Verifying
+    }
+
+    // Array deep copy
+    let array2 = new MessageArrayClass();
+    array2.copy(array);
+    for (let i = 0; i < int32Data.length; ++ i) {
+      assert.equal(array2.data[i].data, int32Data[i]);
+    }
+
+    // Change array2
+    for (let i = 0; i < array2.length; ++ i) {
+      array2.data[i] = 0;
+    }
+
+    // Values in array1 are NOT changed
+    for (let i = 0; i < array.length; ++ i) {
+      assert.equal(array.data[i].data, int32Data[i]);  // Verifying
+    }
+
+    // Resize
+    array.size = 6;
+    assert.equal(array.size, 6);
+    assert.equal(array.capacity, 6);
+  });
 });

@@ -32,6 +32,7 @@
     "mkdirp": "^0.5.1",
     "mz": "^2.6.0",
     "nan": "^2.6.2",
+    "ref-array": "^1.2.0",
     "require-from-string": "^1.2.1"
   }
 }
