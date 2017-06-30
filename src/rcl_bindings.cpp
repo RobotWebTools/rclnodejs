@@ -136,9 +136,7 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
 
 NAN_METHOD(TimerGetTimeSinceLastCall) {
   RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-
-  rcl_timer_t* timer =
-      reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
+  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   uint64_t elapsed_time = 0;
 
