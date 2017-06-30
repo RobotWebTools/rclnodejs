@@ -98,9 +98,7 @@ NAN_METHOD(CancelTimer) {
 
 NAN_METHOD(IsTimerCanceled) {
   RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-
-  rcl_timer_t* timer =
-      reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
+  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   bool is_canceled = false;
 
