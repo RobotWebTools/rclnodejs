@@ -38,7 +38,7 @@ class RclHandle : public Nan::ObjectWrap {
  public:
   static void Init(v8::Local<v8::Object> exports);
   static v8::Local<v8::Object> NewInstance(void* handle,
-    RclHandleType type = RclHandleType_Malloc);
+    RclHandleType type = RclHandleType_Malloc, void* other = nullptr);
 
   void* GetPtr() { return pointer_; }
   void SetPtr(void* ptr) { pointer_ = ptr; }

@@ -10,7 +10,6 @@
         "./src/executor.cpp",
         "./src/handle_manager.cpp",
         "./src/rcl_bindings.cpp",
-        "./src/rcl_bindings_publisher.cpp",
         "./src/rcl_handle.cpp",
         "./src/rcl_utilities.cpp",
         "./src/shadow_node.cpp",

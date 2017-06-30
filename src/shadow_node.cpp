@@ -31,9 +31,9 @@ ShadowNode::ShadowNode() {
 ShadowNode::~ShadowNode() {
   executor_->Stop();
 
-  Nan::HandleScope scope;
-  v8::Local<v8::Value> argv[0];
-  Nan::MakeCallback(Nan::New(this->persistent()), "destoryNode", 0, argv);
+  // Nan::HandleScope scope;
+  // v8::Local<v8::Value> argv[0];
+  // Nan::MakeCallback(Nan::New(this->persistent()), "destoryNode", 0, argv);
 }
 
 void ShadowNode::Init(v8::Local<v8::Object> exports) {
@@ -44,6 +44,7 @@ void ShadowNode::Init(v8::Local<v8::Object> exports) {
   tpl->SetClassName(Nan::New("ShadowNode").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
+  Nan::SetPrototypeMethod(tpl, "stopSpin", StopSpin);
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("ShadowNode").ToLocalChecked(), tpl->GetFunction());
@@ -56,6 +57,14 @@ void ShadowNode::Spin() {
 
 void ShadowNode::Shutdown() {
   executor_->Stop();
+}
+
+NAN_METHOD(ShadowNode::StopSpin) {
+  auto me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
+  if (me) {
+    me->Shutdown();
+  }
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 void ShadowNode::Execute() {

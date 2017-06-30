@@ -29,5 +29,6 @@ describe('rclnodejs node test suite', function() {
 
   it('Try creating a node', function() {
     const node = rclnodejs.createNode('example_node');
+    rclnodejs.spin(node);
   });
 });

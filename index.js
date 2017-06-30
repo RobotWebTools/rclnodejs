@@ -90,9 +90,12 @@ let rcl = {
 
   shutdown() {
     this._nodes.forEach((node) => {
-      rclnodejs.shutdown(node);
+      node.destory();
     });
+
+    rclnodejs.shutdown();
     this._nodes = [];
+    this._initialized = false;
   },
 
   message: generator,

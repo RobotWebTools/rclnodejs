@@ -42,7 +42,6 @@ class Executor {
   static void Run(void* arg);
 
  private:
-  uv_loop_t* mainthread_loop_;
   uv_async_t* async_;
   uv_thread_t thread_;
 

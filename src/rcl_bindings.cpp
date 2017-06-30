@@ -48,7 +48,8 @@ NAN_METHOD(CreateNode) {
       rcl_node_init(node, node_name.c_str(), name_space.c_str(), &options),
       rcl_get_error_string_safe());
 
-  info.GetReturnValue().Set(rclnodejs::RclHandle::NewInstance(node));
+  auto handle = RclHandle::NewInstance(node, RclHandleType_ROSNode);
+  info.GetReturnValue().Set(handle);
 }
 
 NAN_METHOD(CreateTimer) {
@@ -64,13 +65,12 @@ NAN_METHOD(CreateTimer) {
       rcl_timer_init(timer, period, nullptr, rcl_get_default_allocator()),
       rcl_get_error_string_safe());
 
-  info.GetReturnValue().Set(rclnodejs::RclHandle::NewInstance(timer));
+  auto jsObj = RclHandle::NewInstance(timer, RclHandleType_Timer);
+  info.GetReturnValue().Set(jsObj);
 }
 
 NAN_METHOD(IsTimerReady) {
-  rclnodejs::RclHandle* timer_handle =
-      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
-
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
   bool is_ready = false;
 
@@ -80,35 +80,8 @@ NAN_METHOD(IsTimerReady) {
   info.GetReturnValue().Set(Nan::New(is_ready));
 }
 
-NAN_METHOD(DestroyEntity) {
-  std::string type(*v8::String::Utf8Value(info[0]));
-
-  rcl_ret_t ret = 0;
-
-  if ("timer" == type) {
-    rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(
-        rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[1]->ToObject())
-            ->GetPtr());
-    ret = rcl_timer_fini(timer);
-  }
-
-  if ("publisher" == type) {
-    rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
-        rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[1]->ToObject())
-            ->GetPtr());
-    rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
-        rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[2]->ToObject())
-            ->GetPtr());
-    ret = rcl_publisher_fini(publisher, node);
-  }
-
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string_safe());
-}
-
 NAN_METHOD(CallTimer) {
-  rclnodejs::RclHandle* timer_handle =
-      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
-
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_call(timer),
@@ -116,8 +89,7 @@ NAN_METHOD(CallTimer) {
 }
 
 NAN_METHOD(CancelTimer) {
-  rclnodejs::RclHandle* timer_handle =
-      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_cancel(timer),
@@ -125,8 +97,7 @@ NAN_METHOD(CancelTimer) {
 }
 
 NAN_METHOD(IsTimerCanceled) {
-  rclnodejs::RclHandle* timer_handle =
-      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
   bool is_canceled = false;
 
@@ -138,8 +109,7 @@ NAN_METHOD(IsTimerCanceled) {
 }
 
 NAN_METHOD(ResetTimer) {
-  rclnodejs::RclHandle* timer_handle =
-      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_reset(timer),
@@ -147,8 +117,7 @@ NAN_METHOD(ResetTimer) {
 }
 
 NAN_METHOD(TimerGetTimeUntilNextCall) {
-  rclnodejs::RclHandle* timer_handle =
-      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
   int64_t remaining_time = 0;
 
@@ -160,8 +129,7 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
 }
 
 NAN_METHOD(TimerGetTimeSinceLastCall) {
-  rclnodejs::RclHandle* timer_handle =
-      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
   uint64_t elapsed_time = 0;
 
@@ -173,8 +141,8 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
 }
 
 NAN_METHOD(RclTake) {
-  rclnodejs::RclHandle* subscription_handle =
-      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject());
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->GetPtr());
   void* msg_taken = node::Buffer::Data(info[1]->ToObject());
@@ -197,8 +165,7 @@ NAN_METHOD(RclTake) {
 
 NAN_METHOD(CreateSubscription) {
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
-      rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(info[0]->ToObject())
-          ->GetPtr());
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
   std::string package_name(*Nan::Utf8String(info[1]->ToString()));
   std::string message_sub_folder(*Nan::Utf8String(info[2]->ToString()));
   std::string message_name(*Nan::Utf8String(info[3]->ToString()));
@@ -219,7 +186,9 @@ NAN_METHOD(CreateSubscription) {
                             &subscription_ops),
       rcl_get_error_string_safe());
 
-  info.GetReturnValue().Set(rclnodejs::RclHandle::NewInstance(subscription));
+  auto jsObj = RclHandle::NewInstance(subscription,
+      RclHandleType_ROSSubscription, node);
+  info.GetReturnValue().Set(jsObj);
 }
 
 NAN_METHOD(ROSIDLStringInit) {
@@ -250,22 +219,62 @@ NAN_METHOD(ROSIDLStringAssign) {
   }
 }
 
+NAN_METHOD(CreatePublisher) {
+  // Extract arguments
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
+      RclHandle::Unwrap<RclHandle>(
+      info[0]->ToObject())->GetPtr());
+  std::string package_name(*Nan::Utf8String(info[1]->ToString()));
+  std::string message_sub_folder(*Nan::Utf8String(info[2]->ToString()));
+  std::string message_name(*Nan::Utf8String(info[3]->ToString()));
+  std::string topic(*Nan::Utf8String(info[4]->ToString()));
+
+  // Prepare publisher object
+  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
+      malloc(sizeof(rcl_publisher_t)));
+  *publisher = rcl_get_zero_initialized_publisher();
+
+  // Get type support object dynamically
+  const rosidl_message_type_support_t* ts = GetMessageTypeSupportByMessageType(
+      package_name, message_sub_folder, message_name);
+
+  // Using default options
+  rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
+
+  // Initialize the publisher
+  RCLN_CHECK_AND_THROW(rcl_publisher_init(publisher,
+      node, ts, topic.c_str(), &publisher_ops), RCL_RET_OK);
+
+  // Wrap the handle into JS object
+  auto newObj = RclHandle::NewInstance(publisher,
+      RclHandleType_ROSPublisher, node);
+
+  // Everything is done
+  info.GetReturnValue().Set(newObj);
+}
+
+NAN_METHOD(PublishMessage) {
+  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
+
+  void* buffer = node::Buffer::Data(info[1]->ToObject());
+  // auto size = node::Buffer::Length(info[1]->ToObject());
+
+  RCLN_CHECK_AND_THROW(rcl_publish(publisher, buffer), RCL_RET_OK);
+
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
 NAN_METHOD(Spin) {
   if (info.Length() == 1 && info[0]->IsObject()) {
-    rclnodejs::ShadowNode* node =
-        rclnodejs::ShadowNode::Unwrap<rclnodejs::ShadowNode>(
-            info[0]->ToObject());
+    ShadowNode* node = ShadowNode::Unwrap<ShadowNode>(info[0]->ToObject());
     node->Spin();
   }
 }
 
 NAN_METHOD(Shutdown) {
-  if (info.Length() == 1 && info[0]->IsObject()) {
-    rclnodejs::ShadowNode* node =
-        rclnodejs::ShadowNode::Unwrap<rclnodejs::ShadowNode>(
-            info[0]->ToObject());
-    node->Shutdown();
-  }
+  rcl_shutdown();
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 uint32_t GetBindingMethodsCount(BindingMethod* methods) {
@@ -281,7 +290,6 @@ BindingMethod binding_methods[] = {
     {"createNode", CreateNode},
     {"createTimer", CreateTimer},
     {"isTimerReady", IsTimerReady},
-    {"destroyEntity", DestroyEntity},
     {"callTimer", CallTimer},
     {"cancelTimer", CancelTimer},
     {"isTimerCanceled", IsTimerCanceled},
@@ -294,11 +302,11 @@ BindingMethod binding_methods[] = {
     {"rosIDLStringInit", ROSIDLStringInit},
 
     {"createPublisher", CreatePublisher},
-    {"rcl_publish_std_string_message", rcl_publish_std_string_message},
     {"publishMessage", PublishMessage},
 
     {"spin", Spin},
     {"shutdown", Shutdown},
-    {"", nullptr}};
+    {"", nullptr}
+};
 
 }  // namespace rclnodejs

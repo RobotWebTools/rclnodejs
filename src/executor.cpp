@@ -26,35 +26,51 @@ namespace rclnodejs {
 static std::exception_ptr g_exception_ptr = nullptr;
 
 Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
-    : mainthread_loop_(uv_default_loop()),
+    : async_(nullptr),
       handle_manager_(handle_manager),
       delegate_(delegate) {
-  async_ = reinterpret_cast<uv_async_t*>(malloc(sizeof(uv_async_t)));
-  async_->data = this;
+  running_.store(false);
 }
 
 Executor::~Executor() {
-  free(async_);
+  // Note: don't free this->async_ in ctor
 }
 
 void Executor::Start() {
   if (!running_.load()) {
-    uv_async_init(mainthread_loop_, async_, DoWork);
-    uv_thread_create(&thread_, Executor::Run, this);
+    async_ = new uv_async_t();
+    uv_async_init(uv_default_loop(), async_, DoWork);
+    async_->data = this;
+
+    // Mark flag before creating thread
+    //  Make sure thread can run
     running_.store(true);
+    uv_thread_create(&thread_, Executor::Run, this);
   }
 }
 
 void Executor::Stop() {
   if (running_.load()) {
+    // Stop thread first, and then uv_close
+    //   Make sure async_ is not used anymore
     running_.store(false);
-    uv_close(reinterpret_cast<uv_handle_t*>(async_), nullptr);
     uv_thread_join(&thread_);
+
+    if (uv_is_active(reinterpret_cast<uv_handle_t*>(async_))) {
+      uv_close(reinterpret_cast<uv_handle_t*>(async_),
+        [](uv_handle_t* async) -> void {
+        // Important Notice:
+        //  This might be called after Executor::~Executor()
+        //  Don't free Executor::async_ in Executor's dtor
+        //
+        free(async);
+      });
+    }
   }
 }
 
 void Executor::DoWork(uv_async_t* handle) {
-  Executor*  executor = reinterpret_cast<Executor*>(handle->data);
+  Executor* executor = reinterpret_cast<Executor*>(handle->data);
   if (executor->delegate_) {
     if (g_exception_ptr) {
       executor->delegate_->CatchException(g_exception_ptr);
@@ -99,8 +115,8 @@ void Executor::Run(void* arg) {
             rcl_get_error_string_safe());
       }
 
-        if (rcl_wait_set_resize_timers(
-            &wait_set, handle_manager->TimersCount()) != RCL_RET_OK) {
+      if (rcl_wait_set_resize_timers(
+          &wait_set, handle_manager->TimersCount()) != RCL_RET_OK) {
         throw std::runtime_error(std::string(
             "Couldn't resize the number of timers in waitset : ") +
             rcl_get_error_string_safe());
@@ -117,7 +133,9 @@ void Executor::Run(void* arg) {
         throw std::runtime_error(std::string("rcl_wait() failed: ") +
             rcl_get_error_string_safe());
       } else {
-        uv_async_send(executor->async_);
+        if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(executor->async_))) {
+          uv_async_send(executor->async_);
+        }
       }
 
       if (rcl_wait_set_clear_subscriptions(&wait_set) != RCL_RET_OK) {
