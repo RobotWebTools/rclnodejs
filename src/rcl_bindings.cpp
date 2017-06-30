@@ -20,8 +20,6 @@
 #include <rosidl_generator_c/string_functions.h>
 #include <string>
 
-#include <dlfcn.h>
-
 #include "handle_manager.hpp"
 #include "macros.hpp"
 #include "rcl_handle.hpp"
@@ -183,8 +181,7 @@ NAN_METHOD(RclTake) {
 
 NAN_METHOD(CreateSubscription) {
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          info[0]->ToObject())->GetPtr());
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
   std::string package_name(*Nan::Utf8String(info[1]->ToString()));
   std::string message_sub_folder(*Nan::Utf8String(info[2]->ToString()));
   std::string message_name(*Nan::Utf8String(info[3]->ToString()));
@@ -286,9 +283,7 @@ NAN_METHOD(PublishMessage) {
 
 NAN_METHOD(Spin) {
   if (info.Length() == 1 && info[0]->IsObject()) {
-    ShadowNode* node =
-        ShadowNode::Unwrap<ShadowNode>(
-            info[0]->ToObject());
+    ShadowNode* node = ShadowNode::Unwrap<ShadowNode>(info[0]->ToObject());
     node->Spin();
   }
 }
@@ -307,27 +302,27 @@ uint32_t GetBindingMethodsCount(BindingMethod* methods) {
 }
 
 BindingMethod binding_methods[] = {
-  {"init", Init},
-  {"createNode", CreateNode},
-  {"createTimer", CreateTimer},
-  {"isTimerReady", IsTimerReady},
-  {"callTimer", CallTimer},
-  {"cancelTimer", CancelTimer},
-  {"isTimerCanceled", IsTimerCanceled},
-  {"resetTimer", ResetTimer},
-  {"timerGetTimeSinceLastCall", TimerGetTimeSinceLastCall},
-  {"timerGetTimeUntilNextCall", TimerGetTimeUntilNextCall},
-  {"rclTake", RclTake},
-  {"createSubscription", CreateSubscription},
-  {"rosIDLStringAssign", ROSIDLStringAssign},
-  {"rosIDLStringInit", ROSIDLStringInit},
+    {"init", Init},
+    {"createNode", CreateNode},
+    {"createTimer", CreateTimer},
+    {"isTimerReady", IsTimerReady},
+    {"callTimer", CallTimer},
+    {"cancelTimer", CancelTimer},
+    {"isTimerCanceled", IsTimerCanceled},
+    {"resetTimer", ResetTimer},
+    {"timerGetTimeSinceLastCall", TimerGetTimeSinceLastCall},
+    {"timerGetTimeUntilNextCall", TimerGetTimeUntilNextCall},
+    {"rclTake", RclTake},
+    {"createSubscription", CreateSubscription},
+    {"rosIDLStringAssign", ROSIDLStringAssign},
+    {"rosIDLStringInit", ROSIDLStringInit},
 
-  {"createPublisher", CreatePublisher},
-  {"publishMessage", PublishMessage},
+    {"createPublisher", CreatePublisher},
+    {"publishMessage", PublishMessage},
 
-  {"spin", Spin},
-  {"shutdown", Shutdown},
-  {"", nullptr}
+    {"spin", Spin},
+    {"shutdown", Shutdown},
+    {"", nullptr}
 };
 
 }  // namespace rclnodejs
