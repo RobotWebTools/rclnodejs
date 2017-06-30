@@ -26,8 +26,8 @@ namespace rclnodejs {
 static std::exception_ptr g_exception_ptr = nullptr;
 
 Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
-    : handle_manager_(handle_manager),
-      async_(nullptr),
+    : async_(nullptr),
+      handle_manager_(handle_manager),
       delegate_(delegate) {
   running_.store(false);
 }

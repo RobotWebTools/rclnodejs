@@ -29,8 +29,6 @@ ShadowNode::ShadowNode() {
 }
 
 ShadowNode::~ShadowNode() {
-  printf("                            ShadowNode::~ShadowNode() - node: 0x%08X, executor_: 0x%08X\n", this, executor_.get());
-
   executor_->Stop();
 
   // Nan::HandleScope scope;

@@ -23,10 +23,11 @@ const {message} = rclnodejs;
 rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('subscription_example_node');
 
-  let messageType = message.getMessageType('std_msgs', 'msg', 'Int32');
+  let messageType = message.getMessageType('std_msgs', 'msg', 'String');
   let Message = message.getMessageClass(messageType);
+  messageType.Message = Message;
 
-  node.createSubscription(messageType, Message, 'topic', (msg) => {
+  node.createSubscription(messageType, 'topic', (msg) => {
     console.log(`Receive message: ${msg.data}`);
   });
 
