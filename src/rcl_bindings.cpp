@@ -83,8 +83,7 @@ NAN_METHOD(IsTimerReady) {
 }
 
 NAN_METHOD(CallTimer) {
-  RclHandle* timer_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
 
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
@@ -93,8 +92,7 @@ NAN_METHOD(CallTimer) {
 }
 
 NAN_METHOD(CancelTimer) {
-  RclHandle* timer_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_cancel(timer),
@@ -102,8 +100,7 @@ NAN_METHOD(CancelTimer) {
 }
 
 NAN_METHOD(IsTimerCanceled) {
-  RclHandle* timer_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
 
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
@@ -118,8 +115,7 @@ NAN_METHOD(IsTimerCanceled) {
 }
 
 NAN_METHOD(ResetTimer) {
-  RclHandle* timer_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_reset(timer),
@@ -127,9 +123,7 @@ NAN_METHOD(ResetTimer) {
 }
 
 NAN_METHOD(TimerGetTimeUntilNextCall) {
-  RclHandle* timer_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
   int64_t remaining_time = 0;
 
@@ -141,8 +135,7 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
 }
 
 NAN_METHOD(TimerGetTimeSinceLastCall) {
-  RclHandle* timer_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
 
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
