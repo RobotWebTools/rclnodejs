@@ -73,6 +73,10 @@ bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
     if (rcl_wait_set_add_timer(wait_set, timer) != RCL_RET_OK)
       return false;
   }
+  for (auto& subscription : subscriptions_) {
+    if (rcl_wait_set_add_subscription(wait_set, subscription) != RCL_RET_OK)
+      return false;
+  }
   return true;
 }
 
