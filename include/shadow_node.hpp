@@ -44,6 +44,7 @@ class ShadowNode : public Nan::ObjectWrap,
 
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static Nan::Persistent<v8::Function> constructor;
+  static NAN_METHOD(StopSpin);
 
   std::unique_ptr<HandleManager> handle_manager_;
   std::unique_ptr<Executor> executor_;

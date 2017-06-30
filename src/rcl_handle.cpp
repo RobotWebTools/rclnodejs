@@ -23,6 +23,10 @@ namespace rclnodejs {
 
 Nan::Persistent<v8::Function> RclHandle::constructor;
 
+//
+// TODO(Kenny): attach publisher/subscription/service/client to node handle
+//  When node handle is destroyed, make sure the attached ones are destroyed
+//
 RclHandle::RclHandle()
   : pointer_(nullptr), type_(RclHandleType_None), other_(nullptr) {
 }
@@ -40,6 +44,7 @@ void RclHandle::DestroyMe() {
         break;
       case RclHandleType_ROSNode:
         ret = rcl_node_fini(reinterpret_cast<rcl_node_t*>(pointer_));
+        free(pointer_);
         break;
       case RclHandleType_ROSPublisher:
         if (other_) {
@@ -47,6 +52,7 @@ void RclHandle::DestroyMe() {
           auto node = reinterpret_cast<rcl_node_t*>(other_);
           ret = rcl_publisher_fini(publisher, node);
         }
+        free(pointer_);
         break;
       case RclHandleType_ROSSubscription:
         if (other_) {
@@ -54,6 +60,7 @@ void RclHandle::DestroyMe() {
           auto node = reinterpret_cast<rcl_node_t*>(other_);
           ret = rcl_subscription_fini(subscription, node);
         }
+        free(pointer_);
         break;
       case RclHandleType_ROSService:
         if (other_) {
@@ -61,6 +68,7 @@ void RclHandle::DestroyMe() {
           auto node = reinterpret_cast<rcl_node_t*>(other_);
           ret = rcl_service_fini(service, node);
         }
+        free(pointer_);
         break;
       case RclHandleType_ROSClient:
         if (other_) {
@@ -68,6 +76,7 @@ void RclHandle::DestroyMe() {
           auto node = reinterpret_cast<rcl_node_t*>(other_);
           ret = rcl_client_fini(client, node);
         }
+        free(pointer_);
         break;
       case RclHandleType_Timer:
         ret = rcl_timer_fini(reinterpret_cast<rcl_timer_t*>(pointer_));
@@ -79,7 +88,9 @@ void RclHandle::DestroyMe() {
         }
         break;
       case RclHandleType_Malloc:
-        free(pointer_);
+        if (pointer_) {
+          free(pointer_);
+        }
         break;
       case RclHandleType_Count:  // No need to do anything
         break;
@@ -188,7 +199,7 @@ NAN_GETTER(RclHandle::TypeGetter) {
 }
 
 v8::Local<v8::Object> RclHandle::NewInstance(void* handle,
-    RclHandleType type) {
+    RclHandleType type, void* other) {
   Nan::EscapableHandleScope scope;
 
   v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
@@ -201,6 +212,7 @@ v8::Local<v8::Object> RclHandle::NewInstance(void* handle,
   auto wrapper = Nan::ObjectWrap::Unwrap<RclHandle>(instance);
   wrapper->SetPtr(handle);
   wrapper->SetType(type);
+  wrapper->SetOther(other);
 
   return scope.Escape(instance);
 }

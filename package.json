@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "bindings": "^1.2.1",
+    "debug": "^2.6.8",
     "dot": "^1.1.2",
     "ffi": "^2.2.0",
     "fs-extra": "^3.0.1",

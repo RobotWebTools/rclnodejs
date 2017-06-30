@@ -32,6 +32,7 @@ describe('rclnodejs publisher test suite', function() {
     const node = rclnodejs.createNode('publisher_node');
     const messageType = message.getMessageType('std_msgs', 'msg', 'String');
     const publisher = node.createPublisher(messageType, 'topic');
+    rclnodejs.spin(node);
   });
 
   it('Try publish a message', function() {
@@ -42,5 +43,6 @@ describe('rclnodejs publisher test suite', function() {
     var msg = new StringMessage();
     msg.data = 'Hello ROS 2.0 Publisher!';
     publisher.publish(StringMessage.getRefBuffer(msg));
+    rclnodejs.spin(node);
   });
 });

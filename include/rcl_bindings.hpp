@@ -72,11 +72,6 @@ inline std::string RCLN_GET_MSG_TYPE_SUPPORT(const std::string& packageName,
   return name;
 }
 
-// Publisher methods
-NAN_METHOD(CreatePublisher);
-NAN_METHOD(rcl_publish_std_string_message);  // Temp method
-NAN_METHOD(PublishMessage);
-
 }  // namespace rclnodejs
 
 #endif
