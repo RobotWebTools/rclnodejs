@@ -70,9 +70,7 @@ NAN_METHOD(CreateTimer) {
 }
 
 NAN_METHOD(IsTimerReady) {
-  RclHandle* timer_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
   bool is_ready = false;
 
@@ -84,7 +82,6 @@ NAN_METHOD(IsTimerReady) {
 
 NAN_METHOD(CallTimer) {
   RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->GetPtr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_call(timer),
