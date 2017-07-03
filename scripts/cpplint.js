@@ -19,7 +19,8 @@ const exec = require('child_process').exec;
 const cmd = 'wget -nc ';
 const cpplintUrl = 'https://raw.githubusercontent.com/google/styleguide' +
     '/gh-pages/cpplint/cpplint.py';
-const args = '--extensions=cpp,h,hpp,cc addon.cpp src/* include/*';
+const root = `${__dirname}/../src/`;
+const args = `--extensions=cpp,h,hpp,cc ${root}/*`;
 
 console.log('Downloading the cpplint...');
 exec(cmd + cpplintUrl, (err, stdout, stderr) => {
