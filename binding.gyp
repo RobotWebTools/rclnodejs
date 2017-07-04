@@ -6,7 +6,7 @@
         "ROS2_INSTALL_PATH": "<!(echo $AMENT_PREFIX_PATH)",
       },
       "sources": [
-        "addon.cpp",
+        "./src/addon.cpp",
         "./src/executor.cpp",
         "./src/handle_manager.cpp",
         "./src/rcl_bindings.cpp",
@@ -16,9 +16,8 @@
       ],
       "include_dirs": [
         ".",
-        "./include",
-         "<!(node -e \"require('nan')\")",
-         "<(ROS2_INSTALL_PATH)/include/",
+        "<!(node -e \"require('nan')\")",
+        "<(ROS2_INSTALL_PATH)/include/",
       ],
       "cflags!": [
         "-fno-exceptions"
