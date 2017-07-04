@@ -24,9 +24,7 @@ struct ScopedMutex {
   explicit ScopedMutex(uv_mutex_t mutex) : mutex_(mutex) {
     uv_mutex_lock(&mutex_);
   }
-  ~ScopedMutex() {
-    uv_mutex_unlock(&mutex_);
-  }
+  ~ScopedMutex() { uv_mutex_unlock(&mutex_); }
   uv_mutex_t mutex_;
 };
 
@@ -89,23 +87,26 @@ void HandleManager::ClearHandles() {
   guard_conditions_.clear();
 }
 
-template<typename T>
+template <typename T>
 void HandleManager::CollectHandlesByType(
-      const v8::Local<v8::Object>& typeObject, std::vector<const T*>* vec) {
+    const v8::Local<v8::Object>& typeObject,
+    std::vector<const T*>* vec) {
   ScopedMutex scoped_mutex(mutex_);
   Nan::HandleScope scope;
 
   if (typeObject->IsArray()) {
-    uint32_t length = Nan::Get(typeObject, Nan::New("length").ToLocalChecked()).
-        ToLocalChecked()->Uint32Value();
+    uint32_t length = Nan::Get(typeObject, Nan::New("length").ToLocalChecked())
+                          .ToLocalChecked()
+                          ->Uint32Value();
 
     for (uint32_t index = 0; index < length; index++) {
-        v8::Local<v8::Object> obj = typeObject->Get(index)->ToObject();
-        Nan::MaybeLocal<v8::Value> handle =
-            Nan::Get(obj, Nan::New("_handle").ToLocalChecked());
-        rclnodejs::RclHandle* rcl_handle = rclnodejs::RclHandle::Unwrap<
-            rclnodejs::RclHandle>(handle.ToLocalChecked()->ToObject());
-        vec->push_back(reinterpret_cast<T*>(rcl_handle->GetPtr()));
+      v8::Local<v8::Object> obj = typeObject->Get(index)->ToObject();
+      Nan::MaybeLocal<v8::Value> handle =
+          Nan::Get(obj, Nan::New("_handle").ToLocalChecked());
+      rclnodejs::RclHandle* rcl_handle =
+          rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
+              handle.ToLocalChecked()->ToObject());
+      vec->push_back(reinterpret_cast<T*>(rcl_handle->GetPtr()));
     }
   }
 }

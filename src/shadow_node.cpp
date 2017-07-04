@@ -30,10 +30,6 @@ ShadowNode::ShadowNode() {
 
 ShadowNode::~ShadowNode() {
   executor_->Stop();
-
-  // Nan::HandleScope scope;
-  // v8::Local<v8::Value> argv[0];
-  // Nan::MakeCallback(Nan::New(this->persistent()), "destoryNode", 0, argv);
 }
 
 void ShadowNode::Init(v8::Local<v8::Object> exports) {

@@ -20,8 +20,8 @@
 
 namespace rclnodejs {
 
-typedef const rosidl_message_type_support_t* \
-    (*GetMsgTypeSupportHandleFunction)();
+typedef const rosidl_message_type_support_t* (
+    *GetMsgTypeSupportHandleFunction)();
 
 const rosidl_message_type_support_t* GetMessageTypeSupportByMessageType(
     const std::string& package_name,
@@ -33,7 +33,7 @@ const rosidl_message_type_support_t* GetMessageTypeSupportByMessageType(
   std::string lib_name = "lib" + package_name + "__rosidl_typesupport_c.so";
 
   // TODO(Kenny): support *.dll/etc. on other platforms.
-  void* lib = dlopen(lib_name.c_str(), RTLD_NOW|RTLD_GLOBAL);
+  void* lib = dlopen(lib_name.c_str(), RTLD_NOW | RTLD_GLOBAL);
   if (lib) {
     GetMsgTypeSupportHandleFunction function_ptr =
         reinterpret_cast<GetMsgTypeSupportHandleFunction>(

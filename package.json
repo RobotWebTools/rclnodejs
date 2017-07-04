@@ -12,7 +12,7 @@
     "test": "mocha",
     "lint": "eslint --max-warnings=0 index.js scripts lib example rosidl_gen rosidl_parser && node ./scripts/cpplint.js"
   },
-  "author": [
+  "authors": [
     "Minggang Wang <minggang.wang@intel.com>",
     "Kenny Yuan <kaining.yuan@intel.com>"
   ],

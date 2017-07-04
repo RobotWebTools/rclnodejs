@@ -18,35 +18,6 @@
 #include <nan.h>
 #include <string>
 
-// This macro will check the return code of the func_call
-// It will throw an exception to JavaScript if there is any thing went wrong
-#define RCLN_CHECK_AND_THROW(func_call, expected) \
-  { \
-    if (func_call != (expected)) { \
-      Nan::ThrowError(rcl_get_error_string_safe()); \
-      info.GetReturnValue().Set(Nan::Undefined()); \
-      return; \
-    } \
-  }
-
-#define RCLN_THROW_EQUAL(value, constant, message) \
-  { \
-    if ((value) == (constant)) { \
-      Nan::ThrowError((message)); \
-      info.GetReturnValue().Set(Nan::Undefined()); \
-      return; \
-    } \
-  }
-
-#define RCLN_THROW_NOT_EQUAL(value, constant, message) \
-  { \
-    if ((value) != (constant)) { \
-      Nan::ThrowError((message)); \
-      info.GetReturnValue().Set(Nan::Undefined()); \
-      return; \
-    } \
-  }
-
 namespace rclnodejs {
 
 typedef void (*JsCFuntcion)(const Nan::FunctionCallbackInfo<v8::Value>&);
@@ -59,18 +30,6 @@ typedef struct {
 uint32_t GetBindingMethodsCount(BindingMethod* methods);
 
 extern BindingMethod binding_methods[];
-
-inline std::string RCLN_GET_MSG_TYPE_SUPPORT(const std::string& packageName,
-    const std::string& messageSubFolder,
-    const std::string& messageName) {
-  std::string name("rosidl_typesupport_c__get_message_type_support_handle__");
-  name += packageName;
-  name += "__";
-  name += messageSubFolder;
-  name += "__";
-  name += messageName;
-  return name;
-}
 
 }  // namespace rclnodejs
 

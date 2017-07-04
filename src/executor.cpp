@@ -26,9 +26,7 @@ namespace rclnodejs {
 static std::exception_ptr g_exception_ptr = nullptr;
 
 Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
-    : async_(nullptr),
-      handle_manager_(handle_manager),
-      delegate_(delegate) {
+    : async_(nullptr), handle_manager_(handle_manager), delegate_(delegate) {
   running_.store(false);
 }
 
@@ -43,7 +41,7 @@ void Executor::Start() {
     async_->data = this;
 
     // Mark flag before creating thread
-    //  Make sure thread can run
+    // Make sure thread can run
     running_.store(true);
     uv_thread_create(&thread_, Executor::Run, this);
   }
@@ -52,19 +50,19 @@ void Executor::Start() {
 void Executor::Stop() {
   if (running_.load()) {
     // Stop thread first, and then uv_close
-    //   Make sure async_ is not used anymore
+    // Make sure async_ is not used anymore
     running_.store(false);
     uv_thread_join(&thread_);
 
     if (uv_is_active(reinterpret_cast<uv_handle_t*>(async_))) {
       uv_close(reinterpret_cast<uv_handle_t*>(async_),
-        [](uv_handle_t* async) -> void {
-        // Important Notice:
-        //  This might be called after Executor::~Executor()
-        //  Don't free Executor::async_ in Executor's dtor
-        //
-        free(async);
-      });
+               [](uv_handle_t* async) -> void {
+                 // Important Notice:
+                 //  This might be called after Executor::~Executor()
+                 //  Don't free Executor::async_ in Executor's dtor
+                 //
+                 free(async);
+               });
     }
   }
 }
@@ -85,40 +83,42 @@ void Executor::Run(void* arg) {
   HandleManager* handle_manager = executor->handle_manager_;
 
   rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
-  rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0,
-      rcl_get_default_allocator());
+  rcl_ret_t ret =
+      rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, rcl_get_default_allocator());
   if (ret != RCL_RET_OK) {
     throw std::runtime_error(std::string("Init waitset failed: ") +
-        rcl_get_error_string_safe());
+                             rcl_get_error_string_safe());
   }
 
   try {
     while (executor->running_.load()) {
       if (rcl_wait_set_resize_subscriptions(
-          &wait_set, handle_manager->SubscriptionsCount()) != RCL_RET_OK) {
-        throw std::runtime_error(std::string(
-            "Couldn't resize the number of subscriptions in waitset : ") +
+              &wait_set, handle_manager->SubscriptionsCount()) != RCL_RET_OK) {
+        throw std::runtime_error(
+            std::string(
+                "Couldn't resize the number of subscriptions in waitset : ") +
             rcl_get_error_string_safe());
       }
 
       if (rcl_wait_set_resize_services(
-          &wait_set, handle_manager->ServicesCount()) != RCL_RET_OK) {
-        throw std::runtime_error(std::string(
-            "Couldn't resize the number of services in waitset : ") +
+              &wait_set, handle_manager->ServicesCount()) != RCL_RET_OK) {
+        throw std::runtime_error(
+            std::string(
+                "Couldn't resize the number of services in waitset : ") +
             rcl_get_error_string_safe());
       }
 
       if (rcl_wait_set_resize_clients(
-          &wait_set, handle_manager->ClientsCount()) != RCL_RET_OK) {
-        throw std::runtime_error(std::string(
-            "Couldn't resize the number of clients in waitset : ") +
+              &wait_set, handle_manager->ClientsCount()) != RCL_RET_OK) {
+        throw std::runtime_error(
+            std::string("Couldn't resize the number of clients in waitset : ") +
             rcl_get_error_string_safe());
       }
 
       if (rcl_wait_set_resize_timers(
-          &wait_set, handle_manager->TimersCount()) != RCL_RET_OK) {
-        throw std::runtime_error(std::string(
-            "Couldn't resize the number of timers in waitset : ") +
+              &wait_set, handle_manager->TimersCount()) != RCL_RET_OK) {
+        throw std::runtime_error(
+            std::string("Couldn't resize the number of timers in waitset : ") +
             rcl_get_error_string_safe());
       }
 
@@ -126,12 +126,11 @@ void Executor::Run(void* arg) {
         throw std::runtime_error("Couldn't fill waitset");
       }
 
-      rcl_ret_t status =
-          rcl_wait(&wait_set, RCL_MS_TO_NS(10));
+      rcl_ret_t status = rcl_wait(&wait_set, RCL_MS_TO_NS(10));
       if (status == RCL_RET_WAIT_SET_EMPTY) {
       } else if (status != RCL_RET_OK && status != RCL_RET_TIMEOUT) {
         throw std::runtime_error(std::string("rcl_wait() failed: ") +
-            rcl_get_error_string_safe());
+                                 rcl_get_error_string_safe());
       } else {
         if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(executor->async_))) {
           uv_async_send(executor->async_);
@@ -161,10 +160,10 @@ void Executor::Run(void* arg) {
     }
 
     if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
-      throw std::runtime_error(std::string(
-          "Failed to destroy guard waitset:") + rcl_get_error_string_safe());
+      throw std::runtime_error(std::string("Failed to destroy guard waitset:") +
+                               rcl_get_error_string_safe());
     }
-  } catch(...) {
+  } catch (...) {
     g_exception_ptr = std::current_exception();
     uv_async_send(executor->async_);
   }

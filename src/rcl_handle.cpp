@@ -23,13 +23,11 @@ namespace rclnodejs {
 
 Nan::Persistent<v8::Function> RclHandle::constructor;
 
-//
 // TODO(Kenny): attach publisher/subscription/service/client to node handle
-//  When node handle is destroyed, make sure the attached ones are destroyed
-//
+// When node handle is destroyed, make sure the attached ones are destroyed
+
 RclHandle::RclHandle()
-  : pointer_(nullptr), type_(RclHandleType_None), other_(nullptr) {
-}
+    : pointer_(nullptr), type_(RclHandleType_None), other_(nullptr) {}
 
 RclHandle::~RclHandle() {
   DestroyMe();
@@ -110,21 +108,13 @@ void RclHandle::Init(v8::Local<v8::Object> exports) {
   Nan::SetPrototypeMethod(tpl, "destroy", Destroy);
   Nan::SetPrototypeMethod(tpl, "dismiss", Dismiss);
 
-  Nan::SetAccessor(tpl->InstanceTemplate(),
-      Nan::New("handle").ToLocalChecked(),
-      HandleGetter,
-      nullptr,
-      v8::Local<v8::Value>(),
-      v8::DEFAULT,
-      static_cast<v8::PropertyAttribute>(v8::ReadOnly));
+  Nan::SetAccessor(tpl->InstanceTemplate(), Nan::New("handle").ToLocalChecked(),
+                   HandleGetter, nullptr, v8::Local<v8::Value>(), v8::DEFAULT,
+                   static_cast<v8::PropertyAttribute>(v8::ReadOnly));
 
-  Nan::SetAccessor(tpl->InstanceTemplate(),
-      Nan::New("type").ToLocalChecked(),
-      TypeGetter,
-      nullptr,
-      v8::Local<v8::Value>(),
-      v8::DEFAULT,
-      static_cast<v8::PropertyAttribute>(v8::ReadOnly));
+  Nan::SetAccessor(tpl->InstanceTemplate(), Nan::New("type").ToLocalChecked(),
+                   TypeGetter, nullptr, v8::Local<v8::Value>(), v8::DEFAULT,
+                   static_cast<v8::PropertyAttribute>(v8::ReadOnly));
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("RclHandle").ToLocalChecked(), tpl->GetFunction());
@@ -166,40 +156,41 @@ NAN_GETTER(RclHandle::TypeGetter) {
   auto me = ObjectWrap::Unwrap<RclHandle>(info.Holder());
   std::string str;
   switch (me->GetType()) {
-  case RclHandleType_None:
-  case RclHandleType_Count:
-    str = "Unknown";
-    break;
-  case RclHandleType_ROSNode:
-    str = "ROS Node";
-    break;
-  case RclHandleType_ROSPublisher:
-    str = "ROS Publisher";
-    break;
-  case RclHandleType_ROSSubscription:
-    str = "ROS Subscription";
-    break;
-  case RclHandleType_ROSService:
-    str = "ROS Service";
-    break;
-  case RclHandleType_ROSClient:
-    str = "ROS Client";
-    break;
-  case RclHandleType_Timer:
-    str = "ROS Timer";
-    break;
-  case RclHandleType_ROSIDLString:
-    str = "ROS String";
-    break;
-  case RclHandleType_Malloc:
-    str = "Memory";
-    break;
+    case RclHandleType_None:
+    case RclHandleType_Count:
+      str = "Unknown";
+      break;
+    case RclHandleType_ROSNode:
+      str = "ROS Node";
+      break;
+    case RclHandleType_ROSPublisher:
+      str = "ROS Publisher";
+      break;
+    case RclHandleType_ROSSubscription:
+      str = "ROS Subscription";
+      break;
+    case RclHandleType_ROSService:
+      str = "ROS Service";
+      break;
+    case RclHandleType_ROSClient:
+      str = "ROS Client";
+      break;
+    case RclHandleType_Timer:
+      str = "ROS Timer";
+      break;
+    case RclHandleType_ROSIDLString:
+      str = "ROS String";
+      break;
+    case RclHandleType_Malloc:
+      str = "Memory";
+      break;
   }
   info.GetReturnValue().Set(Nan::New(str.c_str()).ToLocalChecked());
 }
 
 v8::Local<v8::Object> RclHandle::NewInstance(void* handle,
-    RclHandleType type, void* other) {
+                                             RclHandleType type,
+                                             void* other) {
   Nan::EscapableHandleScope scope;
 
   v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);

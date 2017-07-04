@@ -65,8 +65,8 @@ NAN_METHOD(CreateTimer) {
       rcl_timer_init(timer, period, nullptr, rcl_get_default_allocator()),
       rcl_get_error_string_safe());
 
-  auto jsObj = RclHandle::NewInstance(timer, RclHandleType_Timer);
-  info.GetReturnValue().Set(jsObj);
+  auto js_obj = RclHandle::NewInstance(timer, RclHandleType_Timer);
+  info.GetReturnValue().Set(js_obj);
 }
 
 NAN_METHOD(IsTimerReady) {
@@ -186,15 +186,15 @@ NAN_METHOD(CreateSubscription) {
                             &subscription_ops),
       rcl_get_error_string_safe());
 
-  auto jsObj = RclHandle::NewInstance(subscription,
-      RclHandleType_ROSSubscription, node);
-  info.GetReturnValue().Set(jsObj);
+  auto js_obj =
+      RclHandle::NewInstance(subscription, RclHandleType_ROSSubscription, node);
+  info.GetReturnValue().Set(js_obj);
 }
 
 NAN_METHOD(ROSIDLStringInit) {
   void* buffer = node::Buffer::Data(info[0]->ToObject());
   rosidl_generator_c__String* ptr =
-    reinterpret_cast<rosidl_generator_c__String*>(buffer);
+      reinterpret_cast<rosidl_generator_c__String*>(buffer);
 
   rosidl_generator_c__String__init(ptr);
   info.GetReturnValue().Set(Nan::Undefined());
@@ -211,7 +211,7 @@ NAN_METHOD(ROSIDLStringAssign) {
 
   if (ret) {
     // We only book the clean-up call, a.k.a. free(),
-    //  of the mallocated C-string itself
+    // of the mallocated C-string itself
     info.GetReturnValue().Set(
         RclHandle::NewInstance(ptr->data, RclHandleType_ROSIDLString));
   } else {
@@ -222,16 +222,15 @@ NAN_METHOD(ROSIDLStringAssign) {
 NAN_METHOD(CreatePublisher) {
   // Extract arguments
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
-      RclHandle::Unwrap<RclHandle>(
-      info[0]->ToObject())->GetPtr());
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
   std::string package_name(*Nan::Utf8String(info[1]->ToString()));
   std::string message_sub_folder(*Nan::Utf8String(info[2]->ToString()));
   std::string message_name(*Nan::Utf8String(info[3]->ToString()));
   std::string topic(*Nan::Utf8String(info[4]->ToString()));
 
   // Prepare publisher object
-  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
-      malloc(sizeof(rcl_publisher_t)));
+  rcl_publisher_t* publisher =
+      reinterpret_cast<rcl_publisher_t*>(malloc(sizeof(rcl_publisher_t)));
   *publisher = rcl_get_zero_initialized_publisher();
 
   // Get type support object dynamically
@@ -242,15 +241,16 @@ NAN_METHOD(CreatePublisher) {
   rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
 
   // Initialize the publisher
-  RCLN_CHECK_AND_THROW(rcl_publisher_init(publisher,
-      node, ts, topic.c_str(), &publisher_ops), RCL_RET_OK);
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_publisher_init(publisher, node, ts, topic.c_str(), &publisher_ops),
+      RCL_RET_OK, rcl_get_error_string_safe());
 
   // Wrap the handle into JS object
-  auto newObj = RclHandle::NewInstance(publisher,
-      RclHandleType_ROSPublisher, node);
+  auto js_obj =
+      RclHandle::NewInstance(publisher, RclHandleType_ROSPublisher, node);
 
   // Everything is done
-  info.GetReturnValue().Set(newObj);
+  info.GetReturnValue().Set(js_obj);
 }
 
 NAN_METHOD(PublishMessage) {
@@ -258,9 +258,8 @@ NAN_METHOD(PublishMessage) {
       RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
 
   void* buffer = node::Buffer::Data(info[1]->ToObject());
-  // auto size = node::Buffer::Length(info[1]->ToObject());
-
-  RCLN_CHECK_AND_THROW(rcl_publish(publisher, buffer), RCL_RET_OK);
+  THROW_ERROR_IF_NOT_EQUAL(rcl_publish(publisher, buffer), RCL_RET_OK,
+                           rcl_get_error_string_safe());
 
   info.GetReturnValue().Set(Nan::Undefined());
 }
@@ -273,7 +272,8 @@ NAN_METHOD(Spin) {
 }
 
 NAN_METHOD(Shutdown) {
-  rcl_shutdown();
+  THROW_ERROR_IF_NOT_EQUAL(rcl_shutdown(), RCL_RET_OK,
+                           rcl_get_error_string_safe());
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
@@ -306,7 +306,6 @@ BindingMethod binding_methods[] = {
 
     {"spin", Spin},
     {"shutdown", Shutdown},
-    {"", nullptr}
-};
+    {"", nullptr}};
 
 }  // namespace rclnodejs
