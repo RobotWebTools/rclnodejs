@@ -14,16 +14,17 @@
 
 #include <nan.h>
 
-#include "shadow_node.hpp"
 #include "rcl_bindings.hpp"
 #include "rcl_handle.hpp"
+#include "shadow_node.hpp"
 
 void InitModule(v8::Local<v8::Object> exports) {
-  for (uint32_t i = 0; i < rclnodejs::GetBindingMethodsCount(
-        rclnodejs::binding_methods); i++) {
-    exports->Set(Nan::New(rclnodejs::binding_methods[i].name).ToLocalChecked(),
-                 Nan::New<v8::FunctionTemplate>(
-                     rclnodejs::binding_methods[i].function)->GetFunction());
+  for (uint32_t i = 0;
+       i < rclnodejs::GetBindingMethodsCount(rclnodejs::binding_methods); i++) {
+    exports->Set(
+        Nan::New(rclnodejs::binding_methods[i].name).ToLocalChecked(),
+        Nan::New<v8::FunctionTemplate>(rclnodejs::binding_methods[i].function)
+            ->GetFunction());
   }
 
   rclnodejs::ShadowNode::Init(exports);
