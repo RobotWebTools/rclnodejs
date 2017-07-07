@@ -20,29 +20,46 @@
 
 namespace rclnodejs {
 
-typedef const rosidl_message_type_support_t* (
-    *GetMsgTypeSupportHandleFunction)();
+typedef const rosidl_message_type_support_t* (*GetMessageTypeSupportFunction)();
+typedef const rosidl_service_type_support_t* (*GetServiceTypeSupportFunction)();
 
-const rosidl_message_type_support_t* GetMessageTypeSupportByMessageType(
+void* GetTypeSupportFunctionByInterfaceSymbolName(
+    const std::string& symbol_name,
+    const std::string& lib_name) {
+  // TODO(Kenny): support *.dll/etc. on other platforms.
+  void* lib = dlopen(lib_name.c_str(), RTLD_NOW | RTLD_GLOBAL);
+
+  if (lib)
+    return dlsym(lib, symbol_name.c_str());
+  else
+    return nullptr;
+}
+
+const rosidl_message_type_support_t* GetMessageTypeSupport(
     const std::string& package_name,
     const std::string& sub_folder,
     const std::string& msg_name) {
-  std::string function_name(
-      "rosidl_typesupport_c__get_message_type_support_handle__");
-  function_name += package_name + "__" + sub_folder + "__" + msg_name;
-  std::string lib_name = "lib" + package_name + "__rosidl_typesupport_c.so";
+  void* function = GetTypeSupportFunctionByInterfaceSymbolName(
+      "rosidl_typesupport_c__get_message_type_support_handle__" + package_name +
+          "__" + sub_folder + "__" + msg_name,
+      "lib" + package_name + "__rosidl_typesupport_c.so");
+  if (function)
+    return reinterpret_cast<GetMessageTypeSupportFunction>(function)();
+  else
+    return nullptr;
+}
 
-  // TODO(Kenny): support *.dll/etc. on other platforms.
-  void* lib = dlopen(lib_name.c_str(), RTLD_NOW | RTLD_GLOBAL);
-  if (lib) {
-    GetMsgTypeSupportHandleFunction function_ptr =
-        reinterpret_cast<GetMsgTypeSupportHandleFunction>(
-            dlsym(lib, function_name.c_str()));
-    if (function_ptr) {
-      return function_ptr();
-    }
-  }
-  return nullptr;
+const rosidl_service_type_support_t* GetServiceTypeSupport(
+    const std::string& package_name,
+    const std::string& service_name) {
+  void* function = GetTypeSupportFunctionByInterfaceSymbolName(
+      "rosidl_typesupport_c__get_service_type_support_handle__" + package_name +
+          "__srv__" + service_name,
+      "lib" + package_name + "__rosidl_typesupport_c.so");
+  if (function)
+    return reinterpret_cast<GetServiceTypeSupportFunction>(function)();
+  else
+    return nullptr;
 }
 
 }  // namespace rclnodejs

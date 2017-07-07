@@ -18,13 +18,18 @@
 #define RCLNODEJS_RCL_UTILITIES_HPP_
 
 class rosidl_message_type_support_t;
+class rosidl_service_type_support_t;
 
 namespace rclnodejs {
 
-const rosidl_message_type_support_t* GetMessageTypeSupportByMessageType(
+const rosidl_message_type_support_t* GetMessageTypeSupport(
     const std::string& package_name,
     const std::string& sub_folder,
     const std::string& msg_name);
+
+const rosidl_service_type_support_t* GetServiceTypeSupport(
+    const std::string& package_name,
+    const std::string& service_name);
 
 }  // namespace rclnodejs
 
