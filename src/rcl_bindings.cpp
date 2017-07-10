@@ -177,8 +177,8 @@ NAN_METHOD(CreateSubscription) {
 
   rcl_subscription_options_t subscription_ops =
       rcl_subscription_get_default_options();
-  const rosidl_message_type_support_t* ts = GetMessageTypeSupportByMessageType(
-      package_name, message_sub_folder, message_name);
+  const rosidl_message_type_support_t* ts =
+      GetMessageTypeSupport(package_name, message_sub_folder, message_name);
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
@@ -234,8 +234,8 @@ NAN_METHOD(CreatePublisher) {
   *publisher = rcl_get_zero_initialized_publisher();
 
   // Get type support object dynamically
-  const rosidl_message_type_support_t* ts = GetMessageTypeSupportByMessageType(
-      package_name, message_sub_folder, message_name);
+  const rosidl_message_type_support_t* ts =
+      GetMessageTypeSupport(package_name, message_sub_folder, message_name);
 
   // Using default options
   rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
