@@ -56,7 +56,7 @@ function __discardGenerateMessageStructure(messageType, spec) {
     types: primitiveTypes,
     json: JSON.stringify(spec, null, '  '),
   }));
-  const fileFolder = path.join(__dirname, '../generated/');
+  const fileFolder = path.join(__dirname, `../generated/${spec.baseType.pkgName}`);
   mkdirp.sync(fileFolder);
   const fileName = fileFolder + className + '.js';
   fs.writeFile(fileName, generated);  // Write to file for reference
@@ -100,6 +100,8 @@ const message = {
       parser.parseMessageFile(messageType.pkgName, packagePath).then((spec) => {
         const code = generateMessageSourceCode(messageType, spec);
         const className = getClassName(messageType, spec);
+        let  generatedFilesDir = path.join(__dirname, `../generated/${spec.baseType.pkgName}/`);
+        mkdirp.sync(generatedFilesDir);
         const fileName = generatedFilesDir + className + '.js';
         return fs.writeFile(fileName, code);
       }).then(() => {

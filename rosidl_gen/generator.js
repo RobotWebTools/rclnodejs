@@ -98,7 +98,8 @@ const generator = {
     } else if (isString([arguments[0], arguments[1], arguments[2]])) {
       file = arguments[0] + '__' + arguments[1] + '__' + arguments[2] + '.js';
     }
-    return require(this.genPath + file);
+    this.genPath = path.join(this.genPath, msgType.pkgName);
+    return require(this.genPath + '/' + file);
   },
 
   generateAll: function() {
@@ -111,10 +112,6 @@ const generator = {
       this.genPath = path.join(__dirname, '../generated/');
     }
 
-    // return removeAllIntermediateMessages(this.genPath).then(() => {
-    //   mkdirp.sync(this.genPath);
-    //   return generateAllMessages(this.scanPath);
-    // });
     mkdirp.sync(this.genPath);
     return generateAllMessages(this.scanPath);
   },

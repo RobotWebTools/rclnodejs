@@ -8,7 +8,7 @@
 const StructType = require('ref-struct');
 const ref = require('ref');
 const ArrayType = require('ref-array');
-const primitiveTypes = require('../rosidl_gen/generator_primitive.js');
+const primitiveTypes = require('../../rosidl_gen/generator_primitive.js');
 
 {{
 var className = it.className;
@@ -75,7 +75,7 @@ var calcGeneratorTypeNameFromType = function(type) {
 // TODO: remove duplicated (if any)
 {{~ it.spec.fields :field}}
 {{? shouldRequireType(field.type)}}
-var {{=calcStructTypeName(field.type)}} = require('../generated/{{=calcFileNameFromType(field.type)}}');
+var {{=calcStructTypeName(field.type)}} = require('../../generated/{{=field.type.pkgName}}/{{=calcFileNameFromType(field.type)}}');
 {{?}}
 {{~}}
 
@@ -130,6 +130,10 @@ class {{=className}} {
     primitiveTypes.stringInit(this.__ref_message.{{=field.name}}.ref());
   {{?}}
 {{~}}
+  }
+
+  static type() {
+    return {pkgName: '{{=it.msgType.pkgName}}', msgSubfolder: '{{=it.msgType.msgSubfolder}}', msgName: '{{=it.msgType.msgName}}'};
   }
 
 {{~ it.spec.fields :field}}
