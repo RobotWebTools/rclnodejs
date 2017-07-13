@@ -18,18 +18,17 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-const {message} = rclnodejs;
 
 rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('subscription_example_node');
 
-  let messageType = message.getMessageType('std_msgs', 'msg', 'String');
-  let Message = message.getMessageClass(messageType);
-  messageType.Message = Message;
+  /* eslint-disable */
+  let std_msgs = rclnodejs.require('std_msgs');
 
-  node.createSubscription(messageType, 'topic', (msg) => {
+  node.createSubscription(std_msgs.String, 'topic', (msg) => {
     console.log(`Receive message: ${msg.data}`);
   });
+  /* eslint-enable */
 
   rclnodejs.spin(node);
 });

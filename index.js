@@ -17,6 +17,7 @@
 const rclnodejs = require('bindings')('rclnodejs');
 const Node = require('./lib/node.js');
 const generator = require('./rosidl_gen/generator.js');
+const packages = require('./rosidl_gen/packages.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -66,7 +67,7 @@ let rcl = {
         return;
       }
 
-      this.message.generateAll().then((all) => {
+      generator.generateAll().then((all) => {
         this._allMessageType = all;
         this._messageGenerated = true;
         resolve();
@@ -98,7 +99,17 @@ let rcl = {
     this._initialized = false;
   },
 
-  message: generator,
+  require(packageName, interfaceName) {
+    // TODO(minggang): Can require by a single interface name instead of the
+    // whole package.
+    let interfaceInfos = packages.loadInterfaceInfos(packageName);
+    let pkg = {};
+
+    interfaceInfos.forEach((info) => {
+      Object.defineProperty(pkg, info.name, {value: require(info.filePath)});
+    });
+    return pkg;
+  }
 };
 
 module.exports = rcl;

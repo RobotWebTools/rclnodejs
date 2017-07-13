@@ -18,16 +18,15 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-const {message} = rclnodejs;
 
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
 
-  const messageType = message.getMessageType('std_msgs', 'msg', 'String');
-  const publisher = node.createPublisher(messageType, 'topic');
-
-  const StringMessage = message.getMessageClass(messageType);
-  var msg = new StringMessage();
+  /* eslint-disable */
+  let std_msgs = rclnodejs.require('std_msgs');
+  const publisher = node.createPublisher(std_msgs.String, 'topic');
+  let msg = new std_msgs.String();
+  /* eslint-enable */
 
   let counter = 0;
   setInterval(function() {
@@ -35,7 +34,7 @@ rclnodejs.init().then(() => {
     console.log('Publishing message:', str);
 
     msg.data = str;
-    publisher.publish(StringMessage.getRefBuffer(msg));
+    publisher.publish(msg);
   }, 10);
 
   rclnodejs.spin(node);
