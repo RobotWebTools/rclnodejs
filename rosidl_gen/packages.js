@@ -15,26 +15,61 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs');
+const walk = require('walk');
 
 const generatedRoot = path.join(__dirname, '../generated/');
+let pkgMap = new Map();
+
+function getPackageName(filePath) {
+  return filePath.match(/\w+\/share\/(\w+)\//)[1];
+};
+
+function getSubFolder(filePath) {
+  return filePath.match(/\w+\/share\/\w+\/(\w+)\//)[1];
+}
+
+function grabInterfaceInfo(filePath) {
+  let pkgName = getPackageName(filePath);
+  let interfaceName = path.parse(filePath).name;
+  let subFolder = getSubFolder(filePath);
+  return {pkgName, interfaceName, subFolder, filePath};
+}
+
+function addInterfaceInfo(info, type) {
+  let pkgName = info.pkgName;
+  if (!pkgMap.has(pkgName)) {
+    pkgMap.set(pkgName, {messages: [], services: []});
+  }
+  let pkg = pkgMap.get(pkgName);
+  pkg[type].push(info);
+}
+
+function findPackagesInDirectory(dir) {
+  return new Promise((resolve, reject) => {
+    let walker = walk.walk(dir + '/share', {followLinks: true});
+    pkgMap.clear();
+
+    walker.on('file', (root, file, next) => {
+      if (path.extname(file.name) === '.msg') {
+        addInterfaceInfo(grabInterfaceInfo(root + '/' + file.name), 'messages');
+      } else if (path.extname(file.name) === '.srv') {
+        addInterfaceInfo(grabInterfaceInfo(root + '/' + file.name), 'services');
+      }
+      next();
+    });
+
+    walker.on('end', () => {
+      resolve(pkgMap);
+    });
+
+    walker.on('errors', (root, stats, next) => {
+      reject(stats);
+    });
+  });
+}
 
 let packages = {
-  loadInterfaceInfos(packageName) {
-    let packagePath = path.join(generatedRoot, packageName);
-    // The files under the package folder are limited, so it will not cost too
-    // much time and result in blocking the main thread.
-    // eslint-disable-next-line
-    let files = fs.readdirSync(packagePath);
-    let interfaceInfos = [];
-
-    files.forEach((file) => {
-      let name = file.match(/\w+__(\w+)?.js$/)[1];
-      let filePath = path.join(packagePath, file).normalize();
-      interfaceInfos.push({name, filePath});
-    });
-    return interfaceInfos;
-  }
+  findPackagesInDirectory: findPackagesInDirectory
 };
 
 module.exports = packages;

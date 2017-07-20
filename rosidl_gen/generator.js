@@ -18,103 +18,121 @@ const fs = require('mz/fs');
 const fse = require('fs-extra');
 const mkdirp = require('mkdirp');
 const path = require('path');
-const message = require('../rosidl_gen/message.js');
+const parser = require('../rosidl_parser/rosidl_parser.js');
+const packages = require('./packages.js');
+const dot = require('dot');
 
-function isMessageDir(dir) {
-  return dir.substring(dir.length - 5) === '_msgs' || dir.substring(dir.length - 18) === 'builtin_interfaces';
+dot.templateSettings.strip = false;
+dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
+const dots = dot.process({path: path.join(__dirname, '../rosidl_gen/templates')});
+
+const generatedRoot = path.join(__dirname, '../generated/');
+const installedPackagesRoot = process.env.AMENT_PREFIX_PATH.split(':');
+
+function removeExtraSpaceLines(str) {
+  return str.replace(/([ \t]*\n){2,}/g, '\n');
 }
 
-function isMessageFile(file) {
-  return file.substring(file.length - 4) === '.msg';
+function removeAllIntermediateFiles(path) {
+  return fse.remove(path);
 }
 
-function removeAllIntermediateMessages(genPath) {
-  return fse.remove(genPath);
+function writeGeneratedCode(dir, fileName, code) {
+  mkdirp.sync(dir);
+  return fs.writeFile(dir + fileName, code);
 }
 
-function generateAllMessages(basePath) {
+function generateServiceJSStruct(serviceInfo) {
+  const dir = path.join(generatedRoot, `${serviceInfo.pkgName}/`);
+  const fileName = serviceInfo.pkgName + '__' + serviceInfo.subFolder + '__' + serviceInfo.interfaceName + '.js';
+  const generatedCode = removeExtraSpaceLines(dots.service({serviceInfo: serviceInfo}));
+  return writeGeneratedCode(dir, fileName, generatedCode);
+}
+
+function generateMessageJSStruct(messageInfo) {
   return new Promise((resolve, reject) => {
-    fs.readdir(basePath).then((rawDirList) => {
-      let msgTypeList = [];
+    parser.parseMessageFile(messageInfo.pkgName, messageInfo.filePath).then((spec) => {
+      const dir = path.join(generatedRoot, `${spec.baseType.pkgName}/`);
+      const fileName = spec.baseType.pkgName + '__' + messageInfo.subFolder + '__' + spec.msgName + '.js';
 
-      let waitList = [];
-      rawDirList.filter(isMessageDir).forEach((item) => {
-        const dir = basePath + item + '/msg';
-        waitList.push(fs.exists(dir).then((present) => {
-          if (present) {
-            return fs.readdir(dir);
-          }
-          return [];
-        }).then((rawFileList) => {
-          /* eslint-disable max-nested-callbacks */
-          rawFileList.filter(isMessageFile).forEach((name) => {
-            const msgType = message.getMessageType(item, 'msg', name);
-            msgTypeList.push(msgType);
-          });
-        }));
-      });
-
-      Promise.all(waitList).then(() => {
-        let msgWaitList = [];
-        msgTypeList.forEach((msgType) => {
-          msgWaitList.push(message.generateMessage(basePath, msgType));
-        });
-
-        return Promise.all(msgWaitList);
-      }).then((e) => {
-        resolve(msgTypeList);
-      }).catch((e) => {
-        reject(e);
-      });
-    }); // fs.readdir
-  });
-};
-
-function isString(value) {
-  if (Array.isArray(value)) {
-    let flag = true;
-    value.forEach((i) => {
-      flag = flag && isString(i);
+      const generatedCode = removeExtraSpaceLines(dots.message({
+        messageInfo: messageInfo,
+        spec: spec,
+        json: JSON.stringify(spec, null, '  '),
+      }));
+      return writeGeneratedCode(dir, fileName, generatedCode);
+    }).then(() => {
+      resolve();
+    }).catch((e) => {
+      reject(e);
     });
-    return flag;
-  }
-  return typeof(value) === 'string';
+  });
+}
+
+function generateStructForPkg(pkg) {
+  return new Promise((resolve, reject) => {
+    let promises = [];
+    pkg.messages.forEach((messageInfo) => {
+      promises.push(generateMessageJSStruct(messageInfo));
+    });
+    pkg.services.forEach((serviceInfo) => {
+      promises.push(generateServiceJSStruct(serviceInfo));
+    });
+
+    Promise.all(promises).then(() => {
+      resolve();
+    }).catch((e) => {
+      reject(e);
+    });
+  });
+}
+
+function generateAll(forcedGenerating) {
+  return new Promise((resolve, reject) => {
+    if (forcedGenerating || !generator.isRootGererated()) {
+      installedPackagesRoot.forEach((packageRoot) => {
+        let promises = [];
+        packages.findPackagesInDirectory(packageRoot).then((pkgs) => {
+          pkgs.forEach((pkg) => {
+            promises.push(generateStructForPkg(pkg));
+          });
+
+          Promise.all(promises).then(() => {
+            resolve();
+          }).catch((e) => {
+            reject(e);
+          });
+        }).catch((e) => {
+          reject(e);
+        });
+      });
+    } else {
+      resolve();
+    }
+  });
 }
 
 const generator = {
-  scanPath: undefined,
-  genPath: undefined,
+  generateAll: generateAll,
 
-  getMessageType: message.getMessageType,
+  generatedRoot: generatedRoot,
 
-  getMessageArrayClass: function() {
-    return this.getMessageClass.apply(this, arguments).ArrayType;
+  generateForPackage(pkgName) {
+    installedPackagesRoot.forEach((packageRoot) => {
+      let packagePath = path.join(packageRoot, 'share', pkgName);
+
+      // eslint-disable-next-line
+      if (fs.existsSync(packagePath)) {
+        findPackagesInDirectory(packagePath).then((pkg) => {
+        });
+      }
+    });
   },
 
-  getMessageClass: function(msgType) {
-    let file = '[wrong or missing file name in getMessageClass]';
-    if (typeof msgType === 'object' && isString([msgType.pkgName, msgType.msgSubfolder, msgType.msgName])) {
-      file = msgType.pkgName + '__' + msgType.msgSubfolder + '__' + msgType.msgName + '.js';
-    } else if (isString([arguments[0], arguments[1], arguments[2]])) {
-      file = arguments[0] + '__' + arguments[1] + '__' + arguments[2] + '.js';
-    }
-    this.genPath = path.join(this.genPath, msgType.pkgName);
-    return require(this.genPath + '/' + file);
-  },
-
-  generateAll: function() {
-    if (!this.scanPath) {
-      const rosInstallPath = process.env.AMENT_PREFIX_PATH;
-      this.scanPath = path.join(rosInstallPath, '/share/');
-    }
-
-    if (!this.genPath) {
-      this.genPath = path.join(__dirname, '../generated/');
-    }
-
-    mkdirp.sync(this.genPath);
-    return generateAllMessages(this.scanPath);
-  },
+  isRootGererated() {
+    // eslint-disable-next-line
+    return fs.existsSync(generatedRoot);
+  }
 };
 
 module.exports = generator;
