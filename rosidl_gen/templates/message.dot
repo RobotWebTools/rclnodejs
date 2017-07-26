@@ -11,7 +11,7 @@ const ArrayType = require('ref-array');
 const primitiveTypes = require('../../rosidl_gen/generator_primitive.js');
 
 {{
-var className = it.className;
+var className = it.messageInfo.pkgName + '__' + it.messageInfo.subFolder + '__' + it.messageInfo.interfaceName;
 var arrayClassName = className + '__Array';
 var generatorName = 'rosidl_generator_nodejs__' + className;
 var generatorArrayTypeName = generatorName + '__ArrayType';
@@ -133,7 +133,7 @@ class {{=className}} {
   }
 
   static type() {
-    return {pkgName: '{{=it.msgType.pkgName}}', msgSubfolder: '{{=it.msgType.msgSubfolder}}', msgName: '{{=it.msgType.msgName}}'};
+    return {pkgName: '{{=it.messageInfo.pkgName}}', msgSubfolder: '{{=it.messageInfo.subFolder}}', msgName: '{{=it.messageInfo.interfaceName}}'};
   }
 
 {{~ it.spec.fields :field}}

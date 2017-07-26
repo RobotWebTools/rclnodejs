@@ -18,6 +18,7 @@ const rclnodejs = require('bindings')('rclnodejs');
 const Node = require('./lib/node.js');
 const generator = require('./rosidl_gen/generator.js');
 const packages = require('./rosidl_gen/packages.js');
+const loader = require('./lib/interface_loader.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -30,9 +31,7 @@ inherits(rclnodejs.ShadowNode, Node);
 
 let rcl = {
   _initialized: false,
-  _messageGenerated: false,
   _nodes: [],
-  _allMessageType: [],
 
   createNode(nodeName, namespace = '') {
     if (typeof (nodeName) !== 'string' || typeof (namespace) !== 'string') {
@@ -48,33 +47,22 @@ let rcl = {
     return node;
   },
 
-  getAllMessageTypes: function() {
-    return this._allMessageType;
-  },
-
   init(...args) {
-    if (this._initialized) {
-      console.log('Warning - rclnodejs is already initialized. These arguments will be ignored:', args);
-    } else {
-      rclnodejs.init(args);
-      this._initialized = true;
-    }
-
-    // TODO(Kenny): introduce other policy to save the amout of time of doing message generation
-    return new Promise(function(resolve, reject) {
-      if (this._messageGenerated) {
+    return new Promise((resolve, reject) => {
+      if (!this._initialized) {
+        // TODO(Kenny): introduce other policy to save the amout of time of doing message generation
+        generator.generateAll(false).then(() => {
+          rclnodejs.init(args);
+          this._initialized = true;
+          resolve();
+        }).catch((e) => {
+          reject(e);
+        });
+      } else {
+        console.log('Warning - rclnodejs is already initialized. These arguments will be ignored:', args);
         resolve();
-        return;
       }
-
-      generator.generateAll().then((all) => {
-        this._allMessageType = all;
-        this._messageGenerated = true;
-        resolve();
-      }).catch((e) => {
-        reject(e);
-      });
-    }.bind(this));
+    });
   },
 
   spin(node) {
@@ -102,13 +90,25 @@ let rcl = {
   require(packageName, interfaceName) {
     // TODO(minggang): Can require by a single interface name instead of the
     // whole package.
-    let interfaceInfos = packages.loadInterfaceInfos(packageName);
+    let interfaceInfos = loader.loadInterfaceInfos(packageName);
     let pkg = {};
 
     interfaceInfos.forEach((info) => {
       Object.defineProperty(pkg, info.name, {value: require(info.filePath)});
     });
     return pkg;
+  },
+
+  regenerateAll() {
+    // This will trigger to regererate all the JS structs used for messages and services,
+    // to overwrite the existing ones although they have been created.
+    return new Promise((resolve, reject) => {
+      generator.generateAll(true).then(() => {
+        resolve();
+      }).catch((e) => {
+        reject(e);
+      });
+    });
   }
 };
 
