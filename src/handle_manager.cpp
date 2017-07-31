@@ -42,10 +42,18 @@ void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
       Nan::Get(node, Nan::New("_timers").ToLocalChecked());
   Nan::MaybeLocal<v8::Value> subscriptions =
       Nan::Get(node, Nan::New("_subscriptions").ToLocalChecked());
+  Nan::MaybeLocal<v8::Value> clients =
+      Nan::Get(node, Nan::New("_clients").ToLocalChecked());
+  Nan::MaybeLocal<v8::Value> services =
+      Nan::Get(node, Nan::New("_services").ToLocalChecked());
 
   CollectHandlesByType(timers.ToLocalChecked()->ToObject(), &timers_);
   CollectHandlesByType(subscriptions.ToLocalChecked()->ToObject(),
                        &subscriptions_);
+  CollectHandlesByType(clients.ToLocalChecked()->ToObject(),
+                       &clients_);
+  CollectHandlesByType(services.ToLocalChecked()->ToObject(),
+                       &services_);
 }
 
 uint32_t HandleManager::SubscriptionsCount() {
@@ -73,6 +81,14 @@ bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
   }
   for (auto& subscription : subscriptions_) {
     if (rcl_wait_set_add_subscription(wait_set, subscription) != RCL_RET_OK)
+      return false;
+  }
+  for (auto& client : clients_) {
+    if (rcl_wait_set_add_client(wait_set, client) != RCL_RET_OK)
+      return false;
+  }
+  for (auto& service : services_) {
+    if (rcl_wait_set_add_service(wait_set, service) != RCL_RET_OK)
       return false;
   }
   return true;

@@ -264,6 +264,119 @@ NAN_METHOD(PublishMessage) {
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
+NAN_METHOD(CreateClient) {
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
+  std::string service_name(*Nan::Utf8String(info[1]->ToString()));
+  std::string interface_name(*Nan::Utf8String(info[2]->ToString()));
+  std::string package_name(*Nan::Utf8String(info[3]->ToString()));
+
+  const rosidl_service_type_support_t* ts =
+    GetServiceTypeSupport(package_name, interface_name);
+  rcl_client_t* client =
+      reinterpret_cast<rcl_client_t*>(malloc(sizeof(rcl_client_t)));
+  *client = rcl_get_zero_initialized_client();
+  rcl_client_options_t client_ops = rcl_client_get_default_options();
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_client_init(client, node, ts, service_name.c_str(), &client_ops),
+      RCL_RET_OK, rcl_get_error_string_safe());
+
+  auto js_obj =
+      RclHandle::NewInstance(client, RclHandleType_ROSClient, node);
+
+  info.GetReturnValue().Set(js_obj);
+}
+
+NAN_METHOD(SendRequest) {
+  rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
+  void* buffer = node::Buffer::Data(info[1]->ToObject());
+  int64_t sequence_number;
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_send_request(client, buffer, &sequence_number),
+      RCL_RET_OK, rcl_get_error_string_safe());
+
+  info.GetReturnValue().Set(Nan::New((uint32_t)sequence_number));
+}
+
+NAN_METHOD(RclTakeResponse) {
+  rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
+  int64_t sequence_number = info[1]->IntegerValue();
+
+  rmw_request_id_t * header =
+      reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
+  header->sequence_number = sequence_number;
+
+  void* taken_response = node::Buffer::Data(info[2]->ToObject());
+  rcl_ret_t ret = rcl_take_response(client, header, taken_response);
+
+  if (ret != RCL_RET_CLIENT_TAKE_FAILED) {
+    info.GetReturnValue().Set(Nan::True());
+    return;
+  }
+
+  info.GetReturnValue().Set(Nan::False());
+}
+
+NAN_METHOD(CreateService) {
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
+  std::string service_name(*Nan::Utf8String(info[1]->ToString()));
+  std::string interface_name(*Nan::Utf8String(info[2]->ToString()));
+  std::string package_name(*Nan::Utf8String(info[3]->ToString()));
+
+  const rosidl_service_type_support_t* ts =
+    GetServiceTypeSupport(package_name, interface_name);
+  rcl_service_t* service =
+      reinterpret_cast<rcl_service_t*>(malloc(sizeof(rcl_service_t)));
+  *service = rcl_get_zero_initialized_service();
+  rcl_service_options_t service_ops = rcl_service_get_default_options();
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
+      RCL_RET_OK, rcl_get_error_string_safe());
+  auto js_obj =
+      RclHandle::NewInstance(service, RclHandleType_ROSService, node);
+
+  info.GetReturnValue().Set(js_obj);
+}
+
+NAN_METHOD(RclTakeRequest) {
+  rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
+      RclHandle::Unwrap<RclHandle>(info[1]->ToObject())->GetPtr());
+  rmw_request_id_t* header =
+      reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
+
+  void* taken_request = node::Buffer::Data(info[2]->ToObject());
+  rcl_ret_t ret = rcl_take_request(service, header, taken_request);
+  if (ret != RCL_RET_SERVICE_TAKE_FAILED) {
+    auto js_obj =
+        RclHandle::NewInstance(header, RclHandleType_Malloc, node);
+    info.GetReturnValue().Set(js_obj);
+    return;
+  }
+
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_METHOD(SendResponse) {
+  rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->GetPtr());
+  void* buffer = node::Buffer::Data(info[1]->ToObject());
+
+  rmw_request_id_t* header = reinterpret_cast<rmw_request_id_t*>(
+      RclHandle::Unwrap<RclHandle>(info[2]->ToObject())->GetPtr());
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_send_response(service, header, buffer),
+      RCL_RET_OK, rcl_get_error_string_safe());
+}
+
 NAN_METHOD(Spin) {
   if (info.Length() == 1 && info[0]->IsObject()) {
     ShadowNode* node = ShadowNode::Unwrap<ShadowNode>(info[0]->ToObject());
@@ -303,7 +416,12 @@ BindingMethod binding_methods[] = {
 
     {"createPublisher", CreatePublisher},
     {"publishMessage", PublishMessage},
-
+    {"createClient", CreateClient},
+    {"rclTakeResponse", RclTakeResponse},
+    {"sendRequest", SendRequest},
+    {"createService", CreateService},
+    {"rclTakeRequest", RclTakeRequest},
+    {"sendResponse", SendResponse},
     {"spin", Spin},
     {"shutdown", Shutdown},
     {"", nullptr}};

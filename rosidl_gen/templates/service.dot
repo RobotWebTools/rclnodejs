@@ -21,7 +21,7 @@ class {{=className}} {
   }
 
   static type() {
-    return {pkgName: '{{=it.serviceInfo.pkgName}}', subFolder: '{{=it.serviceInfo.subFolder}}', srvName: '{{=it.serviceInfo.interfaceName}}'};
+    return {pkgName: '{{=it.serviceInfo.pkgName}}', subFolder: '{{=it.serviceInfo.subFolder}}', interfaceName: '{{=it.serviceInfo.interfaceName}}'};
   }
 }
 

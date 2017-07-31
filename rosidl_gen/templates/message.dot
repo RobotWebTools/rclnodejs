@@ -132,8 +132,12 @@ class {{=className}} {
 {{~}}
   }
 
+  toRawROS() {
+    return this.__ref_message.ref();
+  }
+
   static type() {
-    return {pkgName: '{{=it.messageInfo.pkgName}}', msgSubfolder: '{{=it.messageInfo.subFolder}}', msgName: '{{=it.messageInfo.interfaceName}}'};
+    return {pkgName: '{{=it.messageInfo.pkgName}}', subFolder: '{{=it.messageInfo.subFolder}}', interfaceName: '{{=it.messageInfo.interfaceName}}'};
   }
 
 {{~ it.spec.fields :field}}
@@ -266,12 +270,6 @@ Object.defineProperty({{=className}}, "{{=c.name}}", {value: {{=c.value}}, writa
 {{=className}}.RawArrayType = {{=generatorArrayName}};
 {{=className}}.ArrayType = {{=arrayClassName}};
 {{=className}}.ArrayType.RawArrayType = {{=generatorArrayName}};
-//
-// Expose internal buffer
-//
-{{=className}}.getRefBuffer = function(msg) {
-  return msg.__ref_message.ref();
-};
 
 module.exports = {{=className}};
 
