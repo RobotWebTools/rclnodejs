@@ -29,10 +29,20 @@ function inherits(target, source) {
 
 inherits(rclnodejs.ShadowNode, Node);
 
+/**
+ * A module that exposes the rclnodejs interfaces.
+ * @exports rclnodejs
+ */
 let rcl = {
   _initialized: false,
   _nodes: [],
 
+  /**
+   * Create a node.
+   * @param {string} nodeName - The name used to register in ROS.
+   * @param {string} namespace - The namespace used in ROS, default is an empty string.
+   * @return {Node} The instance of Node.
+   */
   createNode(nodeName, namespace = '') {
     if (typeof (nodeName) !== 'string' || typeof (namespace) !== 'string') {
       throw new TypeError('Invalid argument.');
@@ -47,6 +57,11 @@ let rcl = {
     return node;
   },
 
+  /**
+  * Init the module.
+  * @param {array} args - The command line arguments to pass to rcl.
+  * @return {Promise<undefined>} A Promise.
+  */
   init(...args) {
     return new Promise((resolve, reject) => {
       if (!this._initialized) {
@@ -65,6 +80,11 @@ let rcl = {
     });
   },
 
+  /**
+   * Start to spin the node, which triggers the event loop to start to check the incoming events.
+   * @param {Node} node - The node to be spun.
+   * @return {undefined}
+   */
   spin(node) {
     if (!(node instanceof rclnodejs.ShadowNode)) {
       throw new TypeError('Invalid argument.');
@@ -77,6 +97,10 @@ let rcl = {
     node.spinning = true;
   },
 
+  /**
+   * Terminate the node, this will destory all the allocated resources and quit.
+   * @return {undefined}
+   */
   shutdown() {
     this._nodes.forEach((node) => {
       node.destory();
@@ -87,6 +111,12 @@ let rcl = {
     this._initialized = false;
   },
 
+  /**
+   * Get the interface package, which is used by publisher/subscription or client/service.
+   * @param {string} packageName - The package wanted to get.
+   * @param {string} interfaceName - The interface in the package, if it's not assigned, then the whole package will be got.
+   * @return {object} - the object of the designated package/interface.
+   */
   require(packageName, interfaceName) {
     // TODO(minggang): Can require by a single interface name instead of the
     // whole package.
@@ -99,6 +129,12 @@ let rcl = {
     return pkg;
   },
 
+  /**
+   * Search packgaes which locate under path $AMENT_PREFIX_PATH, regenerate all JavaScript structs files from the IDL of
+   * messages(.msg) and services(.srv) and put these files under folder 'generated'. Any existing files under
+   * this folder will be overwritten after the execution.
+   * @return {Promise<undefined>} A Promise.
+   */
   regenerateAll() {
     // This will trigger to regererate all the JS structs used for messages and services,
     // to overwrite the existing ones although they have been created.
