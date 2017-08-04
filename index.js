@@ -121,10 +121,10 @@ let rcl = {
     // TODO(minggang): Can require by a single interface name instead of the
     // whole package.
     let interfaceInfos = loader.loadInterfaceInfos(packageName);
-    let pkg = {};
+    let pkg = {srv: {}, msg: {}};
 
     interfaceInfos.forEach((info) => {
-      Object.defineProperty(pkg, info.name, {value: require(info.filePath)});
+      Object.defineProperty(pkg[info.type], info.name, {value: require(info.filePath)});
     });
     return pkg;
   },
