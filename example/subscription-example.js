@@ -23,9 +23,9 @@ rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('subscription_example_node');
 
   /* eslint-disable */
-  let std_msgs = rclnodejs.require('std_msgs');
+  let String = rclnodejs.require('std_msgs').msg.String;
 
-  node.createSubscription(std_msgs.String, 'topic', (msg) => {
+  node.createSubscription(String, 'topic', (msg) => {
     console.log(`Receive message: ${msg.data}`);
   });
   /* eslint-enable */

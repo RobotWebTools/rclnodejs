@@ -23,9 +23,9 @@ rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
 
   /* eslint-disable */
-  let std_msgs = rclnodejs.require('std_msgs');
-  const publisher = node.createPublisher(std_msgs.String, 'topic');
-  let msg = new std_msgs.String();
+  let String = rclnodejs.require('std_msgs').msg.String;
+  const publisher = node.createPublisher(String, 'topic');
+  let msg = new String();
   /* eslint-enable */
 
   let counter = 0;

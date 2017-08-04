@@ -20,8 +20,8 @@ rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('service_example_node');
 
   /* eslint-disable */
-  let example_interfaces = rclnodejs.require('example_interfaces');
-  let service = node.createService(example_interfaces.AddTwoInts, 'add_two_ints', (request, response) => {
+  let AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+  let service = node.createService(AddTwoInts, 'add_two_ints', (request, response) => {
     console.log(`Incoming request: requst.a = ${request.a}; request.b = ${request.b}`);
     response.sum = request.a + request.b;
     return response;

@@ -20,9 +20,9 @@ rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('client_example_node');
 
   /* eslint-disable */
-  let example_interfaces = rclnodejs.require('example_interfaces');
-  let client = node.createClient(example_interfaces.AddTwoInts, 'add_two_ints');
-  let request = new example_interfaces.AddTwoInts.Request();
+  let AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+  let client = node.createClient(AddTwoInts, 'add_two_ints');
+  let request = new AddTwoInts.Request();
   /* eslint-enable */
 
   request.a = 1;
