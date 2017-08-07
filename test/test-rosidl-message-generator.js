@@ -18,7 +18,7 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const {message} = rclnodejs;
 
-describe('ROSIDL Node.js message generator test suite', function(){
+describe('ROSIDL Node.js message generator test suite', function() {
   before(function() {
     this.timeout(10 * 1000);
     return rclnodejs.init();
@@ -28,20 +28,27 @@ describe('ROSIDL Node.js message generator test suite', function(){
     rclnodejs.shutdown();
   });
 
-  it('Try require all message classes', function() {
-    this.timeout(10 * 1000);
-    const msgTypeList = rclnodejs.getAllMessageTypes();
-    const DEFAULT_NUMBER_OF_MESSAGES = 127; // # of a new standard ROS 2.0 build
-    assert(msgTypeList.length >= DEFAULT_NUMBER_OF_MESSAGES);
-    msgTypeList.forEach((msgType) => {
-      const MessageClass = message.getMessageClass(msgType);
+  it('Try require all message classes', function(done) {
+    this.timeout(10000);
+    const packages = require('../rosidl_gen/packages.js');
+    const installedPackagesRoot = process.env.AMENT_PREFIX_PATH.split(':');
+    installedPackagesRoot.forEach((path) => {
+      packages.findPackagesInDirectory(path).then((pkgs) => {
+        pkgs.forEach((pkg) => {
+          pkg.messages.forEach((info) => {
+            if (info.subFolder === 'msg') {
+              assert(rclnodejs.require(info.pkgName).msg[info.interfaceName]);
+            }
+          });
+        });
+        done();
+      });
     });
   });
 
-  it('Try use stdmsgs/msg/String.msg, using getMessageClass() function overrides', function() {
-    const MessageClass1 = message.getMessageClass(message.getMessageType('std_msgs', 'msg', 'String'));
-    assert.equal(MessageClass1.name, 'std_msgs__msg__String');
-    let msg = new MessageClass1();
+  it('Try use std_msgs/msg/String.msg', function() {
+    let String = rclnodejs.require('std_msgs').msg.String;
+    let msg = new String();
     assert(!msg.data);
     msg.data = '123570'; // The only member of this message is .data (string)
     assert.equal(typeof msg.data, 'string');
@@ -51,17 +58,14 @@ describe('ROSIDL Node.js message generator test suite', function(){
       msg.data = 'message + ' + i;  // Testing string assignment multiple times (string de-allocation)
     }
 
-    const MessageClass2 = message.getMessageClass('std_msgs', 'msg', 'String'); // override func
-    assert.equal(MessageClass2.name, 'std_msgs__msg__String');
-    msg = new MessageClass2();
+    msg = new String();
     msg.data = '123570';
     assert.equal(msg.data, '123570');
   });
 
   it('Testing message with all-primitive members - ColorRGBA', function() {
-    const MessageClass = message.getMessageClass('std_msgs', 'msg', 'ColorRGBA');
-    assert.equal(MessageClass.name, 'std_msgs__msg__ColorRGBA');
-    let msg = new MessageClass();
+    let ColorRGBA = rclnodejs.require('std_msgs').msg.ColorRGBA;
+    let msg = new ColorRGBA();
     msg.r = 0.5;
     msg.g = 0.25;
     msg.b = 0.125;
@@ -73,15 +77,14 @@ describe('ROSIDL Node.js message generator test suite', function(){
   });
 
   it('Testing copy-constructor - Duration', function() {
-    const MessageClass = message.getMessageClass('builtin_interfaces', 'msg', 'Duration');
-    assert.equal(MessageClass.name, 'builtin_interfaces__msg__Duration');
-    let msg = new MessageClass();
+    let Duration = rclnodejs.require('builtin_interfaces').msg.Duration;
+    let msg = new Duration();
     msg.sec = 1024;
     msg.nanosec = 0xAAAA5555;
     assert.equal(msg.sec, 1024);
     assert.equal(msg.nanosec, 0xAAAA5555);
 
-    let msg2 = new MessageClass(msg);
+    let msg2 = new Duration(msg);
     assert.equal(msg2.sec, 1024);
     assert.equal(msg2.nanosec, 0xAAAA5555);
 
@@ -94,16 +97,15 @@ describe('ROSIDL Node.js message generator test suite', function(){
   });
 
   it('Testing assignment of an all-primitive message - Time', function() {
-    const MessageClass = message.getMessageClass('builtin_interfaces', 'msg', 'Time');
-    assert.equal(MessageClass.name, 'builtin_interfaces__msg__Time');
-    let msg = new MessageClass();
+    let Time = rclnodejs.require('builtin_interfaces').msg.Time;
+    let msg = new Time();
     msg.sec = 120;
     msg.nanosec = 777;
 
     assert.equal(msg.sec, 120);
     assert.equal(msg.nanosec, 777);
 
-    let msg2 = new MessageClass();
+    let msg2 = new Time();
     msg2.copy(msg);
 
     msg2.sec = 240;
@@ -116,14 +118,12 @@ describe('ROSIDL Node.js message generator test suite', function(){
   });
 
   it('Testing a compound message - Pose', function() {
-    const MessageClass = message.getMessageClass('geometry_msgs', 'msg', 'Pose');
-    const geometry_msgs__msg__Point = message.getMessageClass('geometry_msgs', 'msg', 'Point');
-    const geometry_msgs__msg__Quaternion = message.getMessageClass('geometry_msgs', 'msg', 'Quaternion');
-
-    assert.equal(MessageClass.name, 'geometry_msgs__msg__Pose');
-    let msg = new MessageClass();
-    assert(msg.position instanceof geometry_msgs__msg__Point);
-    assert(msg.orientation instanceof geometry_msgs__msg__Quaternion);
+    let Pose = rclnodejs.require('geometry_msgs').msg.Pose;
+    let Point = rclnodejs.require('geometry_msgs').msg.Point;
+    let Quaternion = rclnodejs.require('geometry_msgs').msg.Quaternion;
+    let msg = new Pose();
+    assert(msg.position instanceof Point);
+    assert(msg.orientation instanceof Quaternion);
 
     // Setter + getter
     msg.position.x = 123.5;
@@ -141,7 +141,7 @@ describe('ROSIDL Node.js message generator test suite', function(){
 
 
     // Copy ctor
-    let copy = new MessageClass(msg);
+    let copy = new Pose(msg);
     assert.equal(copy.position.x, 123.5);
     assert.equal(copy.position.y, 456.25);
     assert.equal(copy.position.z, 789.125);
@@ -178,13 +178,12 @@ describe('ROSIDL Node.js message generator test suite', function(){
     assert.equal(copy.position.z, 78901.125);
   });
 
-  it('Testing constants - GoalStatus', function(){
-    const MessageClass = message.getMessageClass('actionlib_msgs', 'msg', 'GoalStatus');
-    assert.equal(MessageClass.name, 'actionlib_msgs__msg__GoalStatus');
-    let msg = new MessageClass();
+  it('Testing constants - GoalStatus', function() {
+    let GoalStatus = rclnodejs.require('actionlib_msgs').msg.GoalStatus;
+    let msg = new GoalStatus();
     assert.equal(typeof msg.PENDING, 'undefined');
-    assert.equal(typeof MessageClass.PENDING, 'number');
-    assert.equal(MessageClass.PENDING, 0);
+    assert.equal(typeof GoalStatus.PENDING, 'number');
+    assert.equal(GoalStatus.PENDING, 0);
 
     /*
     uint8 PENDING         = 0   # The goal has yet to be processed by the action server.
@@ -206,26 +205,25 @@ describe('ROSIDL Node.js message generator test suite', function(){
     uint8 LOST            = 9   # An action client can determine that a goal is LOST. This should not
     */
 
-    const constants_name  = ["PENDING", "ACTIVE", "PREEMPTED", "SUCCEEDED", "ABORTED",
-                             "REJECTED", "PREEMPTING", "RECALLING", "RECALLED", "LOST"];
+    const constants_name  = ['PENDING', 'ACTIVE', 'PREEMPTED', 'SUCCEEDED', 'ABORTED',
+                             'REJECTED', 'PREEMPTING', 'RECALLING', 'RECALLED', 'LOST'];
     const constants_value = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    for (let i = 0 ; i < constants_name.length ; ++ i) {
+    for (let i = 0; i < constants_name.length; ++ i) {
       assert.equal(typeof msg[constants_name[i]], 'undefined');
-      assert.equal(typeof MessageClass[constants_name[i]], 'number');
-      assert.equal(MessageClass[constants_name[i]], constants_value[i]);
+      assert.equal(typeof GoalStatus[constants_name[i]], 'number');
+      assert.equal(GoalStatus[constants_name[i]], constants_value[i]);
     }
   });
 
   it('Testing array - Int32', function() {
-    const MessageClass = message.getMessageClass('std_msgs', 'msg', 'Int32');
-    const MessageArrayClass = message.getMessageArrayClass('std_msgs', 'msg', 'Int32');
+    let Int32 = rclnodejs.require('std_msgs').msg.Int32;
+    let array = new Int32.ArrayType(5);
 
-    let array = new MessageArrayClass(5);
-    assert((array.data[0]) instanceof MessageClass);  // Ensures element type is good
-    assert((array.data[1]) instanceof MessageClass);  // Ensures element type is good
-    assert((array.data[2]) instanceof MessageClass);  // Ensures element type is good
-    assert((array.data[3]) instanceof MessageClass);  // Ensures element type is good
-    assert((array.data[4]) instanceof MessageClass);  // Ensures element type is good
+    assert(array.data[0] instanceof Int32);  // Ensures element type is good
+    assert(array.data[1] instanceof Int32);  // Ensures element type is good
+    assert(array.data[2] instanceof Int32);  // Ensures element type is good
+    assert(array.data[3] instanceof Int32);  // Ensures element type is good
+    assert(array.data[4] instanceof Int32);  // Ensures element type is good
     assert(typeof array.data[5] === 'undefined');  // No such index
     assert.equal(array.size, 5);
     assert.equal(array.capacity, 5);
@@ -238,7 +236,7 @@ describe('ROSIDL Node.js message generator test suite', function(){
     }
 
     // Array deep copy
-    let array2 = new MessageArrayClass();
+    let array2 = new Int32.ArrayType();
     array2.copy(array);
     for (let i = 0; i < int32Data.length; ++ i) {
       assert.equal(array2.data[i].data, int32Data[i]);

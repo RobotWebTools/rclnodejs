@@ -30,19 +30,18 @@ describe('rclnodejs publisher test suite', function() {
 
   it('Try creating a publisher', function() {
     const node = rclnodejs.createNode('publisher_node');
-    const messageType = message.getMessageType('std_msgs', 'msg', 'String');
-    const publisher = node.createPublisher(messageType, 'topic');
+    let String = rclnodejs.require('std_msgs').msg.String;
+    const publisher = node.createPublisher(String, 'topic');
     rclnodejs.spin(node);
   });
 
   it('Try publish a message', function() {
     const node = rclnodejs.createNode('publisher_node');
-    const messageType = message.getMessageType('std_msgs', 'msg', 'String');
-    const publisher = node.createPublisher(messageType, 'topic');
-    const StringMessage = message.getMessageClass(messageType);
-    var msg = new StringMessage();
+    let String = rclnodejs.require('std_msgs').msg.String;
+    const publisher = node.createPublisher(String, 'topic');
+    let msg = new String();
     msg.data = 'Hello ROS 2.0 Publisher!';
-    publisher.publish(StringMessage.getRefBuffer(msg));
+    publisher.publish(msg);
     rclnodejs.spin(node);
   });
 });
