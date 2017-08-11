@@ -14,90 +14,18 @@
 
 #include "rcl_handle.hpp"
 
+#include <rcl/error_handling.h>
 #include <rcl/rcl.h>
-
-#include <sstream>
-#include <string>
 
 namespace rclnodejs {
 
 Nan::Persistent<v8::Function> RclHandle::constructor;
 
-// TODO(Kenny): attach publisher/subscription/service/client to node handle
-// When node handle is destroyed, make sure the attached ones are destroyed
-
-RclHandle::RclHandle()
-    : pointer_(nullptr), type_(RclHandleType_None), other_(nullptr) {}
+RclHandle::RclHandle() : pointer_(nullptr), parent_(nullptr) {}
 
 RclHandle::~RclHandle() {
-  DestroyMe();
-}
-
-void RclHandle::DestroyMe() {
-  if (pointer_) {
-    rcl_ret_t ret = RCL_RET_OK;
-
-    switch (type_) {
-      case RclHandleType_None:
-        break;
-      case RclHandleType_ROSNode:
-        ret = rcl_node_fini(reinterpret_cast<rcl_node_t*>(pointer_));
-        free(pointer_);
-        break;
-      case RclHandleType_ROSPublisher:
-        if (other_) {
-          auto publisher = reinterpret_cast<rcl_publisher_t*>(pointer_);
-          auto node = reinterpret_cast<rcl_node_t*>(other_);
-          ret = rcl_publisher_fini(publisher, node);
-        }
-        free(pointer_);
-        break;
-      case RclHandleType_ROSSubscription:
-        if (other_) {
-          auto subscription = reinterpret_cast<rcl_subscription_t*>(pointer_);
-          auto node = reinterpret_cast<rcl_node_t*>(other_);
-          ret = rcl_subscription_fini(subscription, node);
-        }
-        free(pointer_);
-        break;
-      case RclHandleType_ROSService:
-        if (other_) {
-          auto service = reinterpret_cast<rcl_service_t*>(pointer_);
-          auto node = reinterpret_cast<rcl_node_t*>(other_);
-          ret = rcl_service_fini(service, node);
-        }
-        free(pointer_);
-        break;
-      case RclHandleType_ROSClient:
-        if (other_) {
-          auto client = reinterpret_cast<rcl_client_t*>(pointer_);
-          auto node = reinterpret_cast<rcl_node_t*>(other_);
-          ret = rcl_client_fini(client, node);
-        }
-        free(pointer_);
-        break;
-      case RclHandleType_Timer:
-        ret = rcl_timer_fini(reinterpret_cast<rcl_timer_t*>(pointer_));
-        free(pointer_);
-        break;
-      case RclHandleType_ROSIDLString:
-        if (pointer_) {
-          free(pointer_);
-        }
-        break;
-      case RclHandleType_Malloc:
-        if (pointer_) {
-          free(pointer_);
-        }
-        break;
-      case RclHandleType_Count:  // No need to do anything
-        break;
-    }
-  }
-  // TODO(Kenny): log pointer_, other_, type_ and ret
-  pointer_ = nullptr;
-  type_ = RclHandleType_None;
-  other_ = nullptr;
+  if (pointer_)
+    Reset();
 }
 
 void RclHandle::Init(v8::Local<v8::Object> exports) {
@@ -105,16 +33,8 @@ void RclHandle::Init(v8::Local<v8::Object> exports) {
   tpl->SetClassName(Nan::New("RclHandle").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  Nan::SetPrototypeMethod(tpl, "destroy", Destroy);
+  Nan::SetPrototypeMethod(tpl, "release", Release);
   Nan::SetPrototypeMethod(tpl, "dismiss", Dismiss);
-
-  Nan::SetAccessor(tpl->InstanceTemplate(), Nan::New("handle").ToLocalChecked(),
-                   HandleGetter, nullptr, v8::Local<v8::Value>(), v8::DEFAULT,
-                   static_cast<v8::PropertyAttribute>(v8::ReadOnly));
-
-  Nan::SetAccessor(tpl->InstanceTemplate(), Nan::New("type").ToLocalChecked(),
-                   TypeGetter, nullptr, v8::Local<v8::Value>(), v8::DEFAULT,
-                   static_cast<v8::PropertyAttribute>(v8::ReadOnly));
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("RclHandle").ToLocalChecked(), tpl->GetFunction());
@@ -128,69 +48,24 @@ void RclHandle::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   }
 }
 
-NAN_METHOD(RclHandle::Destroy) {
-  auto me = Nan::ObjectWrap::Unwrap<RclHandle>(info.Holder());
-  if (me) {
-    me->DestroyMe();
-  }
+NAN_METHOD(RclHandle::Release) {
+  auto* me = Nan::ObjectWrap::Unwrap<RclHandle>(info.Holder());
+  if (me->ptr())
+    me->Reset();
+
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(RclHandle::Dismiss) {
-  auto me = Nan::ObjectWrap::Unwrap<RclHandle>(info.Holder());
-  if (me) {
-    me->SetPtr(nullptr);
-    me->SetType(RclHandleType_None);
-  }
+  auto* me = Nan::ObjectWrap::Unwrap<RclHandle>(info.Holder());
+  if (me)
+    me->set_ptr(nullptr);
+
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
-NAN_GETTER(RclHandle::HandleGetter) {
-  auto me = ObjectWrap::Unwrap<RclHandle>(info.Holder());
-  std::stringstream ss;
-  ss << std::hex << "0x" << me->GetPtr();
-  info.GetReturnValue().Set(Nan::New(ss.str().c_str()).ToLocalChecked());
-}
-
-NAN_GETTER(RclHandle::TypeGetter) {
-  auto me = ObjectWrap::Unwrap<RclHandle>(info.Holder());
-  std::string str;
-  switch (me->GetType()) {
-    case RclHandleType_None:
-    case RclHandleType_Count:
-      str = "Unknown";
-      break;
-    case RclHandleType_ROSNode:
-      str = "ROS Node";
-      break;
-    case RclHandleType_ROSPublisher:
-      str = "ROS Publisher";
-      break;
-    case RclHandleType_ROSSubscription:
-      str = "ROS Subscription";
-      break;
-    case RclHandleType_ROSService:
-      str = "ROS Service";
-      break;
-    case RclHandleType_ROSClient:
-      str = "ROS Client";
-      break;
-    case RclHandleType_Timer:
-      str = "ROS Timer";
-      break;
-    case RclHandleType_ROSIDLString:
-      str = "ROS String";
-      break;
-    case RclHandleType_Malloc:
-      str = "Memory";
-      break;
-  }
-  info.GetReturnValue().Set(Nan::New(str.c_str()).ToLocalChecked());
-}
-
-v8::Local<v8::Object> RclHandle::NewInstance(void* handle,
-                                             RclHandleType type,
-                                             void* other) {
+v8::Local<v8::Object> RclHandle::NewInstance(
+    void* handle, RclHandle* parent, std::function<int()> deleter) {
   Nan::EscapableHandleScope scope;
 
   v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
@@ -200,12 +75,39 @@ v8::Local<v8::Object> RclHandle::NewInstance(void* handle,
   v8::Local<v8::Object> instance =
       cons->NewInstance(context, 0, nullptr).ToLocalChecked();
 
-  auto wrapper = Nan::ObjectWrap::Unwrap<RclHandle>(instance);
-  wrapper->SetPtr(handle);
-  wrapper->SetType(type);
-  wrapper->SetOther(other);
+  auto* rcl_handle = Nan::ObjectWrap::Unwrap<RclHandle>(instance);
+  rcl_handle->set_ptr(handle);
+  rcl_handle->set_deleter(deleter);
+  if (parent) {
+    rcl_handle->set_parent(parent);
+    parent->AddChild(rcl_handle);
+  }
 
   return scope.Escape(instance);
 }
+
+void RclHandle::Reset() {
+  if (!pointer_) return;
+
+  if (parent_) {
+    parent_->RemoveChild(this);
+    parent_ = nullptr;
+  }
+
+  for (auto* child : children_) {
+    // Because the parent is going to reset the child, and don't want be
+    // notified back from the child again, set the |parent_| of child to
+    // nullptr.
+    child->set_parent(nullptr);
+    child->Reset();
+  }
+
+  if (deleter_() != RCL_RET_OK)
+    Nan::ThrowError(rcl_get_error_string_safe());
+
+  free(pointer_);
+  pointer_ = nullptr;
+  children_.clear();
+  }
 
 }  // namespace rclnodejs

@@ -45,13 +45,13 @@ describe('Node destroy testing', function() {
     var node = rclnodejs.createNode('my_node3');
     node.destroy();
 
-    var org_handle = node._handle;
-    node._handle = 'garbage'; 
-    try {               
+    var org_handle = node.handle;
+    node.handle = 'garbage';
+    try {
       node.destroy();
     } catch (TypeError) {
       assert.ok(true);
-      node._handle = org_handle;
+      node.handle = org_handle;
       node.destroy();
     }
   });
@@ -104,7 +104,7 @@ describe('Node destroy testing', function() {
       node.handle = 'gargage';
     } catch (Error) {
       assert.ok(true);
-      node.destroy();            
+      node.destroy();
     }
   });
 });

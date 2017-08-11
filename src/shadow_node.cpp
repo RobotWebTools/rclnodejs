@@ -18,18 +18,24 @@
 
 #include "executor.hpp"
 #include "handle_manager.hpp"
+#include "rcl_handle.hpp"
 
 namespace rclnodejs {
 
 Nan::Persistent<v8::Function> ShadowNode::constructor;
 
-ShadowNode::ShadowNode() {
+ShadowNode::ShadowNode() : rcl_handle_(nullptr) {
   handle_manager_ = std::make_unique<HandleManager>();
   executor_ = std::make_unique<Executor>(handle_manager_.get(), this);
+  rcl_handle_.reset(new Nan::Persistent<v8::Object>());
 }
 
 ShadowNode::~ShadowNode() {
-  executor_->Stop();
+  StopRunning();
+  if (!rcl_handle_->IsEmpty()) {
+    RclHandle* handle = RclHandle::Unwrap<RclHandle>(Nan::New(*rcl_handle_));
+    handle->Reset();
+  }
 }
 
 void ShadowNode::Init(v8::Local<v8::Object> exports) {
@@ -40,26 +46,55 @@ void ShadowNode::Init(v8::Local<v8::Object> exports) {
   tpl->SetClassName(Nan::New("ShadowNode").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  Nan::SetPrototypeMethod(tpl, "stopSpin", StopSpin);
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+                   Nan::New("handle").ToLocalChecked(),
+                   HandleGetter,
+                   HandleSetter);
+  Nan::SetPrototypeMethod(tpl, "start", Start);
+  Nan::SetPrototypeMethod(tpl, "stop", Stop);
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("ShadowNode").ToLocalChecked(), tpl->GetFunction());
 }
 
-void ShadowNode::Spin() {
+NAN_GETTER(ShadowNode::HandleGetter) {
+  auto* me = ShadowNode::Unwrap<ShadowNode>(info.Holder());
+
+  if (!me->rcl_handle()->IsEmpty())
+    info.GetReturnValue().Set(Nan::New(*(me->rcl_handle())));
+  else
+    info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_SETTER(ShadowNode::HandleSetter) {
+  auto* me = ShadowNode::Unwrap<ShadowNode>(info.Holder());
+  if (value->ToObject()->InternalFieldCount() > 0)
+    me->rcl_handle()->Reset(value->ToObject());
+}
+
+void ShadowNode::StopRunning() {
+  executor_->Stop();
+  handle_manager_->ClearHandles();
+}
+
+void ShadowNode::StartRunning() {
   handle_manager_->CollectHandles(this->handle());
   executor_->Start();
 }
 
-void ShadowNode::Shutdown() {
-  executor_->Stop();
+NAN_METHOD(ShadowNode::Start) {
+  auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
+  if (me)
+    me->StartRunning();
+
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
-NAN_METHOD(ShadowNode::StopSpin) {
-  auto me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
-  if (me) {
-    me->Shutdown();
-  }
+NAN_METHOD(ShadowNode::Stop) {
+  auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
+  if (me)
+    me->StopRunning();
+
   info.GetReturnValue().Set(Nan::Undefined());
 }
 

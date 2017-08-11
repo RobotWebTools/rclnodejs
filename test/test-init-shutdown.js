@@ -30,7 +30,7 @@ describe('Node destroy testing', function() {
     }).catch(function(err) {
       assert.ok(false);
       done(err);
-    });        
+    });
   });
 
   it('rclnodejs.init() & rclnodejs.shutdown()', function(done) {
@@ -48,7 +48,7 @@ describe('Node destroy testing', function() {
     rclnodejs.init().then(function() {
       rclnodejs.shutdown();
       assert.ok(true);
-    }).then(function() {     
+    }).then(function() {
       assert.ok(true);
       return rclnodejs.init();
     }).then(function() {
@@ -60,12 +60,12 @@ describe('Node destroy testing', function() {
     }).catch(function(err) {
       assert.ok(false);
       done(err);
-    });        
+    });
   });
 
   it('rclnodejs double init', function(done) {
     rclnodejs.init().then(function() {
-      assert.ok(true);    
+      assert.ok(true);
     }).then(function() {
       return rclnodejs.init();
     }).catch(function(err) {

@@ -31,8 +31,10 @@ class ShadowNode : public Nan::ObjectWrap,
                    public Executor::Delegate {
  public:
   static void Init(v8::Local<v8::Object> exports);
-  void Spin();
-  void Shutdown();
+  void StartRunning();
+  void StopRunning();
+
+  Nan::Persistent<v8::Object>* rcl_handle() { return rcl_handle_.get(); }
 
   // Executor::Delegate overrides:
   void Execute() override;
@@ -44,10 +46,14 @@ class ShadowNode : public Nan::ObjectWrap,
 
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static Nan::Persistent<v8::Function> constructor;
-  static NAN_METHOD(StopSpin);
+  static NAN_METHOD(Stop);
+  static NAN_METHOD(Start);
+  static NAN_GETTER(HandleGetter);
+  static NAN_SETTER(HandleSetter);
 
   std::unique_ptr<HandleManager> handle_manager_;
   std::unique_ptr<Executor> executor_;
+  std::unique_ptr<Nan::Persistent<v8::Object>> rcl_handle_;
 };
 
 }  // namespace rclnodejs

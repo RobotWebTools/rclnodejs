@@ -16,7 +16,6 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const {message} = rclnodejs;
 
 describe('ROSIDL Node.js message generator test suite', function() {
   before(function() {
