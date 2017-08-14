@@ -1,0 +1,101 @@
+// Copyright (c) 2017 Intel Corporation. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+'use strict';
+
+const assert = require('assert');
+const rclnodejs = require('../index.js');
+
+describe('Node destroy testing', function() {
+    before(function() {
+        this.timeout(10 * 1000);
+    });
+
+    it('rclnodejs.init()', function(done) {
+        rclnodejs.init().then(function() {
+            assert.ok(true);
+            rclnodejs.shutdown();
+            done();
+        }).catch(function(err) {
+            assert.ok(false);
+            done(err);
+        });        
+    });
+
+    it('rclnodejs.init() & rclnodejs.shutdown()', function(done) {
+        rclnodejs.init().then(function() {
+            rclnodejs.shutdown();
+            assert.ok(true);
+            done();
+        }).catch(function(err) {
+            assert.ok(false);
+            done(err);
+        });
+    });
+
+    it('rclnodejs init shutdown sequence', function(done) {
+        rclnodejs.init().then(function() {
+            rclnodejs.shutdown();
+            assert.ok(true);
+        }).then(function() {     
+            assert.ok(true);
+            return rclnodejs.init();
+        }).then(function() {
+            assert.doesNotThrow(function() {
+                rclnodejs.shutdown();
+                assert.ok(true);
+                done();
+            });
+        }).catch(function(err) {
+            assert.ok(false);
+            done(err);
+        });        
+    });
+
+    it('rclnodejs double init', function(done) {
+        rclnodejs.init().then(function() {
+            assert.ok(true);    
+        }).then(function() {
+            rclnodejs.init();
+            assert.ok(false);
+            done();
+        }).catch(function(err) {
+            assert.ok(true);
+            rclnodejs.shutdown();
+            done(err);
+        });
+    });
+
+    it('rclnodejs double shutdown', function(done) {
+        rclnodejs.init().then(function() {
+            rclnodejs.shutdown();
+            assert.ok(true);
+        }).then(function() {
+            assert.throws(function() {
+                rclnodejs.shutdown();
+            });
+            assert.ok(true);
+            done();
+        }).catch(function(err) {
+            assert.ok(true);
+            done(err);
+        });
+    });
+
+    it('rclnodejs create node without init', function() {
+        assert.throws(function() {
+            rclnodejs.createNode('my_node');
+        }, /has not been called/, 'Failed to createNode');
+    });
+});
