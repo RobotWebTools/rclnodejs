@@ -20,3 +20,4 @@ pushd $(dirname $0) > /dev/null
 
 npm install
 npm run lint
+npm test
