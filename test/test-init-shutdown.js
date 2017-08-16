@@ -18,84 +18,84 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 
 describe('Node destroy testing', function() {
-    before(function() {
-        this.timeout(10 * 1000);
-    });
+  before(function() {
+    this.timeout(10 * 1000);
+  });
 
-    it('rclnodejs.init()', function(done) {
-        rclnodejs.init().then(function() {
-            assert.ok(true);
-            rclnodejs.shutdown();
-            done();
-        }).catch(function(err) {
-            assert.ok(false);
-            done(err);
-        });        
-    });
+  it('rclnodejs.init()', function(done) {
+    rclnodejs.init().then(function() {
+      assert.ok(true);
+      rclnodejs.shutdown();
+      done();
+    }).catch(function(err) {
+      assert.ok(false);
+      done(err);
+    });        
+  });
 
-    it('rclnodejs.init() & rclnodejs.shutdown()', function(done) {
-        rclnodejs.init().then(function() {
-            rclnodejs.shutdown();
-            assert.ok(true);
-            done();
-        }).catch(function(err) {
-            assert.ok(false);
-            done(err);
-        });
+  it('rclnodejs.init() & rclnodejs.shutdown()', function(done) {
+    rclnodejs.init().then(function() {
+      rclnodejs.shutdown();
+      assert.ok(true);
+      done();
+    }).catch(function(err) {
+      assert.ok(false);
+      done(err);
     });
+  });
 
-    it('rclnodejs init shutdown sequence', function(done) {
-        rclnodejs.init().then(function() {
-            rclnodejs.shutdown();
-            assert.ok(true);
-        }).then(function() {     
-            assert.ok(true);
-            return rclnodejs.init();
-        }).then(function() {
-            assert.doesNotThrow(function() {
-                rclnodejs.shutdown();
-                assert.ok(true);
-                done();
-            });
-        }).catch(function(err) {
-            assert.ok(false);
-            done(err);
-        });        
-    });
+  it('rclnodejs init shutdown sequence', function(done) {
+    rclnodejs.init().then(function() {
+      rclnodejs.shutdown();
+      assert.ok(true);
+    }).then(function() {     
+      assert.ok(true);
+      return rclnodejs.init();
+    }).then(function() {
+      assert.doesNotThrow(function() {
+        rclnodejs.shutdown();
+        assert.ok(true);
+        done();
+      });
+    }).catch(function(err) {
+      assert.ok(false);
+      done(err);
+    });        
+  });
 
-    it('rclnodejs double init', function(done) {
-        rclnodejs.init().then(function() {
-            assert.ok(true);    
-        }).then(function() {
-            rclnodejs.init();
-            assert.ok(false);
-            done();
-        }).catch(function(err) {
-            assert.ok(true);
-            rclnodejs.shutdown();
-            done(err);
-        });
+  it('rclnodejs double init', function(done) {
+    rclnodejs.init().then(function() {
+      assert.ok(true);    
+    }).then(function() {
+      rclnodejs.init();
+      assert.ok(false);
+      done();
+    }).catch(function(err) {
+      assert.ok(true);
+      rclnodejs.shutdown();
+      done(err);
     });
+  });
 
-    it('rclnodejs double shutdown', function(done) {
-        rclnodejs.init().then(function() {
-            rclnodejs.shutdown();
-            assert.ok(true);
-        }).then(function() {
-            assert.throws(function() {
-                rclnodejs.shutdown();
-            });
-            assert.ok(true);
-            done();
-        }).catch(function(err) {
-            assert.ok(true);
-            done(err);
-        });
+  it('rclnodejs double shutdown', function(done) {
+    rclnodejs.init().then(function() {
+      rclnodejs.shutdown();
+      assert.ok(true);
+    }).then(function() {
+      assert.throws(function() {
+        rclnodejs.shutdown();
     });
+      assert.ok(true);
+      done();
+    }).catch(function(err) {
+      assert.ok(true);
+      done(err);
+    });
+  });
 
-    it('rclnodejs create node without init', function() {
-        assert.throws(function() {
-            rclnodejs.createNode('my_node');
-        }, /has not been called/, 'Failed to createNode');
-    });
+  it('rclnodejs create node without init', function() {
+    assert.throws(function() {
+      rclnodejs.createNode('my_node');
+    }, /has not been called/, 'Failed to createNode');
+  });
 });

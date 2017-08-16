@@ -31,51 +31,47 @@ describe('rclnodejs node test suite', function() {
     it('Try creating a node', function() {
       const node = rclnodejs.createNode('example_node');
       rclnodejs.spin(node);
-      node.destory();
+      node.destroy();
     });
 
-    // it('Try creating a node with a namespace', function() {
-    //   let nodeName = 'example_node_with_ns',
-    //       nodeNamespace = '/ns';
+/* Todo: 
+**     need the get_name() and get_namespace() interface.
+    it('Try creating a node with a namespace', function() {
+      let nodeName = 'example_node_with_ns',
+          nodeNamespace = '/ns';
 
-    //   const node = rclnodejs.createNode(nodeName, nodeNamespace);
-    //   rclnodejs.spin(node);
+      const node = rclnodejs.createNode(nodeName, nodeNamespace);
+      rclnodejs.spin(node);
+      assert.deepStrictEqual(node.getNamespace(), '/ns');
+    });
 
-    //   // Add statements to test node namespace
-    //   // namespace === '/ns'
-    // });
+    it('Try creating a node with the empty namespace', function() {
+      let nodeName = 'example_node_with_empty_ns',
+          nodeNamespace = '';
 
-    // it('Try creating a node with the empty namespace', function() {
-    //   let nodeName = 'example_node_with_empty_ns',
-    //       nodeNamespace = '';
+      const node = rclnodejs.createNode(nodeName, nodeNamespace);
+      rclnodejs.spin(node);
+      assert.deepStrictEqual(node.getNamespace(), '/');
+    });
 
-    //   const node = rclnodejs.createNode(nodeName, nodeNamespace);
-    //   rclnodejs.spin(node);
+    it('Try creating a node with a relative namespace', function() {
+      let nodeName = 'example_node_with_rel_ns',
+          nodeNamespace = 'ns';
 
-    //   // Add statements to test node namespace
-    //   // namespace === '/'
-    // });
-
-    // it('Try creating a node with a relative namespace', function() {
-    //   let nodeName = 'example_node_with_rel_ns',
-    //       nodeNamespace = 'ns';
-
-    //   const node = rclnodejs.createNode(nodeName, nodeNamespace);
-    //   rclnodejs.spin(node);
-
-    //   // Add statements to test node namespace
-    //   // namespace === '/ns'
-    // });
-
+      const node = rclnodejs.createNode(nodeName, nodeNamespace);
+      rclnodejs.spin(node);
+      assert.deepStrictEqual(node.getNamespace(), '/ns');
+    });
+*/
     it('Try creating a node with an invalid name', function() {
       var nodeName = 'example_node_invalid_name?',
           nodeNamespace = 'ns';
 
       assert.throws(() => {
-          const node = rclnodejs.createNode(nodeName, nodeNamespace);
-          rclnodejs.spin(node);
-          node.destory();
-        }, /must not contain characters other than/, 'Invalid node name!');
+        const node = rclnodejs.createNode(nodeName, nodeNamespace);
+        rclnodejs.spin(node);
+        node.destroy();
+      }, /must not contain characters other than/, 'Invalid node name!');
     });
 
     it('Try creating a node with an invliad relative nampespace', function() {
@@ -85,7 +81,7 @@ describe('rclnodejs node test suite', function() {
       assert.throws(() => {
         const node = rclnodejs.createNode(nodeName, nodeNamespace);
         rclnodejs.spin(node);
-        node.destory();
+        node.destroy();
       }, /must not contain characters other than/, 'Invalid relative namespace name!');
     });
 
@@ -96,7 +92,7 @@ describe('rclnodejs node test suite', function() {
       assert.throws(() => {
         const node = rclnodejs.createNode(nodeName, nodeNamespace);
         rclnodejs.spin(node);
-        node.destory();
+        node.destroy();
       }, /must not contain characters other than/, 'Invalid absolute namespace name!');
     });
   });
@@ -121,30 +117,31 @@ describe('rcl node methods testing', function() {
   });
 
   afterEach(function() {
-    node.destory();
+    node.destroy();
   });
 
   it('node setter/getter', function() {
     assert.notDeepStrictEqual(null, node);
 
-    // assert.deepStrictEqual(node.get_name(), 'my_node');
-    // assert.deepStrictEqual(node.get_namespace(), '/my_ns');
+    // Todo
+    // assert.deepStrictEqual(node.getName(), 'my_node');
+    // assert.deepStrictEqual(node.getNamespace(), '/my_ns');
   });
 
   it('node.createPublisher', function() {
     node.createPublisher(rclString, 'chatter');
 
-    assert.throws(function() {
-      node.createPublisher(rclString, 'chatter?');
-    }, /topic name is invalid/, 'Failed to createPublisher');
+    var invalidParams = [
+      ['chatter?', /topic name is invalid/],
+      ['/chatter/42_is_the_answer', /topic name is invalid/],
+      ['/chatter/{bad_sub}', /unknown substitution/]
+    ];
 
-    assert.throws(function() {
-      node.createPublisher(rclString, '/chatter/42_is_the_answer');
-    }, /topic name is invalid/, 'Failed to createPublisher');
-
-    assert.throws(function() {
-      node.createPublisher(rclString, '/chatter/{bad_sub}');
-    }, /unknown substitution/, 'Failed to createPublisher');
+    invalidParams.forEach(function(invalidParam) {
+      assert.throws(function() {
+        node.createPublisher(rclString, invalidParam[0]);
+      }, invalidParam[1], 'Failed to createPublisher');
+    });
   });
 
   it('node.createSubscription', function() {
@@ -152,34 +149,34 @@ describe('rcl node methods testing', function() {
       assert.ok(true);
     });
 
-    assert.throws(function() {
-      node.createSubscription(rclString, 'chatter?', () =>{});
-    }, /topic name is invalid/, 'Failed to createSubscription');
+    var invalidParams = [
+      ['chatter?', /topic name is invalid/],
+      ['/chatter/42_is_the_answer', /topic name is invalid/],
+      ['/chatter/{bad_sub}', /unknown substitution/]
+    ];
 
-    assert.throws(function() {
-      node.createSubscription(rclString, '/chatter/42_is_the_answer', () =>{});
-    }, /topic name is invalid/, 'Failed to createSubscription');
-
-    assert.throws(function() {
-      node.createSubscription(rclString, '/chatter/{bad_sub}', () =>{});
-    }, /unknown substitution/, 'Failed to createSubscription');
+    invalidParams.forEach(function(invalidParam) {
+      assert.throws(function() {
+        node.createPublisher(rclString, invalidParam[0], () => {});
+      }, invalidParam[1], 'Failed to createSubscription');
+    });
   });
 
   it('node.createClient', function() {
     var GetParameters = rclnodejs.require('rcl_interfaces').srv.GetParameters;
     node.createClient(GetParameters, 'get/parameters');
 
-    assert.throws(function() {
-      node.createClient(GetParameters, 'get/parameters?');
-    }, /topic name is invalid/, 'Failed to createClient');
+    var invalidParams = [
+      ['get/parameters?', /topic name is invalid/],
+      ['get/42parameters', /topic name is invalid/],
+      ['foo/{bad_sub}', /unknown substitution/]
+    ];
 
-    assert.throws(function() {
-      node.createClient(GetParameters, 'get/42parameters');
-    }, /topic name is invalid/, 'Failed to createClient');
-
-    assert.throws(function() {
-      node.createClient(GetParameters, 'foo/{bad_sub}');
-    }, /unknown substitution/, 'Failed to createClient');
+    invalidParams.forEach(function(invalidParam) {
+      assert.throws(function() {
+        node.createClient(GetParameters, invalidParam[0]);
+      }, invalidParam[1], 'Failed to createClient');
+    });
   });
 
   it('node.createService', function() {
@@ -188,16 +185,16 @@ describe('rcl node methods testing', function() {
       assert.ok(true);
     });
 
-    assert.throws(function() {
-      node.createService(GetParameters, 'get/parameters?', () => {});
-    }, /topic name is invalid/, 'Failed to createService');
+    var invalidParams = [
+      ['get/parameters?', /topic name is invalid/],
+      ['get/42parameters', /topic name is invalid/],
+      ['foo/{bad_sub}', /unknown substitution/]
+    ];
 
-    assert.throws(function() {
-      node.createService(GetParameters, 'get/42parameters', () => {});
-    }, /topic name is invalid/, 'Failed to createService');
-
-    assert.throws(function() {
-      node.createService(GetParameters, 'foo/{bad_sub}', () => {});
-    }, /unknown substitution/, 'Failed to createService');
+    invalidParams.forEach(function(invalidParam) {
+      assert.throws(function() {
+        node.createService(GetParameters, invalidParam[0], () => {});
+      }, invalidParam[1], 'Failed to createService');
+    });
   });
 });
