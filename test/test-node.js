@@ -19,7 +19,7 @@ const rclnodejs = require('../index.js');
 
 describe('rclnodejs node test suite', function() {
   before(function() {
-    this.timeout(10 * 1000);
+    this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 
