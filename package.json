@@ -23,7 +23,8 @@
     "url": "git+https://github.com/RobotWebTools/rclnodejs.git"
   },
   "devDependencies": {
-    "eslint": "^3.19.0"
+    "eslint": "^3.19.0",
+    "mocha": "^3.5.0"
   },
   "dependencies": {
     "bindings": "^1.2.1",
