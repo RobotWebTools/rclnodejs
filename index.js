@@ -103,7 +103,7 @@ let rcl = {
    */
   shutdown() {
     this._nodes.forEach((node) => {
-      node.destory();
+      node.destroy();
     });
 
     rclnodejs.shutdown();
