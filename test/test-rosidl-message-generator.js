@@ -20,7 +20,7 @@ const {message} = rclnodejs;
 
 describe('ROSIDL Node.js message generator test suite', function() {
   before(function() {
-    this.timeout(10 * 1000);
+    this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 
@@ -29,7 +29,7 @@ describe('ROSIDL Node.js message generator test suite', function() {
   });
 
   it('Try require all message classes', function(done) {
-    this.timeout(10000);
+    this.timeout(60 * 1000);
     const packages = require('../rosidl_gen/packages.js');
     const installedPackagesRoot = process.env.AMENT_PREFIX_PATH.split(':');
     installedPackagesRoot.forEach((path) => {

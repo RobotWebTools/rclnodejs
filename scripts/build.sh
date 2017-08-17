@@ -18,5 +18,6 @@ set -e
 
 pushd $(dirname $0) > /dev/null
 
-npm install
+npm install --unsafe-perm
 npm run lint
+npm test

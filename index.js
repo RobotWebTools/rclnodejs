@@ -74,8 +74,7 @@ let rcl = {
           reject(e);
         });
       } else {
-        console.log('Warning - rclnodejs is already initialized. These arguments will be ignored:', args);
-        resolve();
+        throw new Error('The module rclnodejs has been initialized.');
       }
     });
   },
@@ -102,8 +101,12 @@ let rcl = {
    * @return {undefined}
    */
   shutdown() {
+    if (!this._initialized) {
+      throw new Error('The module rclnodejs has been shut.');
+    }
+
     this._nodes.forEach((node) => {
-      node.destory();
+      node.destroy();
     });
 
     rclnodejs.shutdown();
