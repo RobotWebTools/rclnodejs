@@ -19,7 +19,7 @@ const rclnodejs = require('../index.js');
 
 describe('Node destroy testing', function() {
   before(function() {
-    this.timeout(10 * 1000);
+    this.timeout(60 * 1000);
   });
 
   it('rclnodejs.init()', function(done) {
@@ -54,9 +54,9 @@ describe('Node destroy testing', function() {
     }).then(function() {
       assert.doesNotThrow(function() {
         rclnodejs.shutdown();
-        assert.ok(true);
-        done();
       });
+      assert.ok(true);
+      done();
     }).catch(function(err) {
       assert.ok(false);
       done(err);
@@ -67,13 +67,10 @@ describe('Node destroy testing', function() {
     rclnodejs.init().then(function() {
       assert.ok(true);    
     }).then(function() {
-      rclnodejs.init();
-      assert.ok(false);
-      done();
+      return rclnodejs.init();
     }).catch(function(err) {
-      assert.ok(true);
       rclnodejs.shutdown();
-      done(err);
+      done();
     });
   });
 
@@ -84,7 +81,7 @@ describe('Node destroy testing', function() {
     }).then(function() {
       assert.throws(function() {
         rclnodejs.shutdown();
-    });
+      });
       assert.ok(true);
       done();
     }).catch(function(err) {
