@@ -34,7 +34,7 @@ describe('rclnodejs node test suite', function() {
       node.destroy();
     });
 
-/* Todo: 
+/* Todo:
 **     need the get_name() and get_namespace() interface.
     it('Try creating a node with a namespace', function() {
       let nodeName = 'example_node_with_ns',

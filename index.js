@@ -52,7 +52,7 @@ let rcl = {
     let node =  new rclnodejs.ShadowNode();
 
     node.init();
-    node._handle = handle;
+    node.handle = handle;
     this._nodes.push(node);
     return node;
   },
@@ -91,9 +91,7 @@ let rcl = {
     if (node.spinning) {
       throw new Error('The node is already spinning.');
     }
-
-    rclnodejs.spin(node);
-    node.spinning = true;
+    node.startSpinning();
   },
 
   /**
@@ -106,6 +104,7 @@ let rcl = {
     }
 
     this._nodes.forEach((node) => {
+      node.stopSpinning();
       node.destroy();
     });
 

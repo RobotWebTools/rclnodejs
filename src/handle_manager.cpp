@@ -122,7 +122,7 @@ void HandleManager::CollectHandlesByType(
       rclnodejs::RclHandle* rcl_handle =
           rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
               handle.ToLocalChecked()->ToObject());
-      vec->push_back(reinterpret_cast<T*>(rcl_handle->GetPtr()));
+      vec->push_back(reinterpret_cast<T*>(rcl_handle->ptr()));
     }
   }
 }

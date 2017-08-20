@@ -17,54 +17,47 @@
 
 #include <nan.h>
 
+#include <functional>
+#include <set>
+
 namespace rclnodejs {
-
-enum RclHandleType {
-  RclHandleType_None,
-
-  RclHandleType_ROSNode,
-  RclHandleType_ROSPublisher,
-  RclHandleType_ROSSubscription,
-  RclHandleType_ROSService,
-  RclHandleType_ROSClient,
-  RclHandleType_Timer,
-  RclHandleType_ROSIDLString,
-  RclHandleType_Malloc,
-
-  RclHandleType_Count
-};
 
 class RclHandle : public Nan::ObjectWrap {
  public:
   static void Init(v8::Local<v8::Object> exports);
   static v8::Local<v8::Object> NewInstance(void* handle,
-    RclHandleType type = RclHandleType_Malloc, void* other = nullptr);
+                                           RclHandle* parent = nullptr,
+                                           std::function<int()> deleter = [] {
+                                             return 0;
+                                           });
 
-  void* GetPtr() { return pointer_; }
-  void SetPtr(void* ptr) { pointer_ = ptr; }
-  void* GetOther() { return other_; }
-  void SetOther(void* ptr) { other_ = ptr; }
-  RclHandleType GetType() { return type_; }
-  void SetType(RclHandleType type) { type_ = type; }
+  void set_deleter(std::function<int()> deleter) { deleter_ = deleter; }
+
+  RclHandle* parent() { return parent_; }
+  void set_parent(RclHandle* parent) { parent_ = parent; }
+
+  void* ptr() { return pointer_; }
+  void set_ptr(void* ptr) { pointer_ = ptr; }
+
+  void Reset();
+  void AddChild(RclHandle* child) { children_.insert(child); }
+  void RemoveChild(RclHandle* child) { children_.erase(child); }
 
  private:
   RclHandle();
   ~RclHandle();
 
-  void DestroyMe();
-
   static Nan::Persistent<v8::Function> constructor;
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static NAN_METHOD(Destroy);
+  static NAN_METHOD(Release);
   static NAN_METHOD(Dismiss);
-
-  static NAN_GETTER(HandleGetter);
-  static NAN_GETTER(TypeGetter);
 
  private:
   void* pointer_;
-  RclHandleType type_;
-  void* other_;
+  RclHandle* parent_;
+
+  std::function<int()> deleter_;
+  std::set<RclHandle*> children_;
 };
 
 }  // namespace rclnodejs
