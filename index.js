@@ -19,6 +19,7 @@ const Node = require('./lib/node.js');
 const generator = require('./rosidl_gen/generator.js');
 const packages = require('./rosidl_gen/packages.js');
 const loader = require('./lib/interface_loader.js');
+const QoS = require('./lib/qos.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -36,6 +37,7 @@ inherits(rclnodejs.ShadowNode, Node);
 let rcl = {
   _initialized: false,
   _nodes: [],
+  QoS: QoS,
 
   /**
    * Create a node.
