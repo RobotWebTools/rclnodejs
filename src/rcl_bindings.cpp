@@ -28,6 +28,8 @@
 
 namespace rclnodejs {
 
+const rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos);
+
 NAN_METHOD(Init) {
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_init(0, nullptr, rcl_get_default_allocator()),
@@ -181,6 +183,11 @@ NAN_METHOD(CreateSubscription) {
 
   rcl_subscription_options_t subscription_ops =
       rcl_subscription_get_default_options();
+  const rmw_qos_profile_t* qos_profile = GetQoSProfile(info[5]);
+  if (qos_profile) {
+    subscription_ops.qos = *qos_profile;
+  }
+
   const rosidl_message_type_support_t* ts =
       GetMessageTypeSupport(package_name, message_sub_folder, message_name);
 
@@ -244,6 +251,10 @@ NAN_METHOD(CreatePublisher) {
 
   // Using default options
   rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
+  const rmw_qos_profile_t* qos_profile = GetQoSProfile(info[5]);
+  if (qos_profile) {
+    publisher_ops.qos = *qos_profile;
+  }
 
   // Initialize the publisher
   THROW_ERROR_IF_NOT_EQUAL(
@@ -286,6 +297,10 @@ NAN_METHOD(CreateClient) {
       reinterpret_cast<rcl_client_t*>(malloc(sizeof(rcl_client_t)));
   *client = rcl_get_zero_initialized_client();
   rcl_client_options_t client_ops = rcl_client_get_default_options();
+  const rmw_qos_profile_t* qos_profile = GetQoSProfile(info[4]);
+  if (qos_profile) {
+    client_ops.qos = *qos_profile;
+  }
 
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_client_init(client, node, ts, service_name.c_str(), &client_ops),
@@ -345,6 +360,10 @@ NAN_METHOD(CreateService) {
       reinterpret_cast<rcl_service_t*>(malloc(sizeof(rcl_service_t)));
   *service = rcl_get_zero_initialized_service();
   rcl_service_options_t service_ops = rcl_service_get_default_options();
+  const rmw_qos_profile_t* qos_profile = GetQoSProfile(info[4]);
+  if (qos_profile) {
+    service_ops.qos = *qos_profile;
+  }
 
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
@@ -385,6 +404,57 @@ NAN_METHOD(SendResponse) {
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_send_response(service, header, buffer),
       RCL_RET_OK, rcl_get_error_string_safe());
+}
+
+const rmw_qos_profile_t* GetQoSProfileFromString(
+    const std::string& profile) {
+  const rmw_qos_profile_t* qos_profile = nullptr;
+  if (profile == "qos_profile_sensor_data") {
+    qos_profile = &rmw_qos_profile_sensor_data;
+  } else if (profile == "qos_profile_default") {
+    qos_profile = &rmw_qos_profile_default;
+  } else if (profile == "qos_profile_system_default") {
+    qos_profile = &rmw_qos_profile_system_default;
+  } else if (profile == "qos_profile_services_default") {
+    qos_profile = &rmw_qos_profile_services_default;
+  } else if (profile == "qos_profile_parameters") {
+    qos_profile = &rmw_qos_profile_parameters;
+  } else if (profile == "qos_profile_parameter_events") {
+    qos_profile = &rmw_qos_profile_parameter_events;
+  } else {
+    return nullptr;
+  }
+
+  return qos_profile;
+}
+
+const rmw_qos_profile_t* GetQosProfileFromObject(v8::Local<v8::Object> object) {
+  rmw_qos_profile_t * qos_profile = reinterpret_cast<rmw_qos_profile_t*>(
+      malloc(sizeof(rmw_qos_profile_t)));
+  qos_profile->history = static_cast<rmw_qos_history_policy_t>(
+      object->Get(Nan::New("history").ToLocalChecked())->Uint32Value());
+  qos_profile->depth =
+      object->Get(Nan::New("depth").ToLocalChecked())->Uint32Value();
+  qos_profile->reliability = static_cast<rmw_qos_reliability_policy_t>(
+      object->Get(Nan::New("reliability").ToLocalChecked())->Uint32Value());
+  qos_profile->durability = static_cast<rmw_qos_durability_policy_t>(
+      object->Get(Nan::New("durability").ToLocalChecked())->Uint32Value());
+  qos_profile->avoid_ros_namespace_conventions =
+      object->Get(Nan::New("avoidRosNameSpaceConventions").ToLocalChecked())
+          ->BooleanValue();
+
+  return qos_profile;
+}
+
+const rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos) {
+  if (qos->IsString()) {
+    return GetQoSProfileFromString(
+        std::string(*Nan::Utf8String(qos->ToString())));
+  } else if (qos->IsObject()) {
+    return GetQosProfileFromObject(qos->ToObject());
+  } else {
+    return nullptr;
+  }
 }
 
 NAN_METHOD(Shutdown) {
