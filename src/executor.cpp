@@ -72,6 +72,7 @@ void Executor::DoWork(uv_async_t* handle) {
   if (executor->delegate_) {
     if (g_exception_ptr) {
       executor->delegate_->CatchException(g_exception_ptr);
+      rcl_reset_error();
       g_exception_ptr = nullptr;
     }
     executor->delegate_->Execute();
@@ -82,15 +83,15 @@ void Executor::Run(void* arg) {
   Executor* executor = reinterpret_cast<Executor*>(arg);
   HandleManager* handle_manager = executor->handle_manager_;
 
-  rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
-  rcl_ret_t ret =
-      rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, rcl_get_default_allocator());
-  if (ret != RCL_RET_OK) {
-    throw std::runtime_error(std::string("Init waitset failed: ") +
-                             rcl_get_error_string_safe());
-  }
-
   try {
+    rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
+    rcl_ret_t ret = rcl_wait_set_init(
+        &wait_set, 0, 2, 0, 0, 0, rcl_get_default_allocator());
+    if (ret != RCL_RET_OK) {
+      throw std::runtime_error(std::string("Init waitset failed: ") +
+                              rcl_get_error_string_safe());
+    }
+
     while (executor->running_.load()) {
       if (rcl_wait_set_resize_subscriptions(
               &wait_set, handle_manager->SubscriptionsCount()) != RCL_RET_OK) {

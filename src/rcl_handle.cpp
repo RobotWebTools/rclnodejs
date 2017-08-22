@@ -102,9 +102,10 @@ void RclHandle::Reset() {
     child->Reset();
   }
 
-  if (deleter_() != RCL_RET_OK)
+  if (deleter_() != RCL_RET_OK) {
     Nan::ThrowError(rcl_get_error_string_safe());
-
+    rcl_reset_error();
+  }
   free(pointer_);
   pointer_ = nullptr;
   children_.clear();
