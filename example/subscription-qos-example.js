@@ -18,6 +18,7 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
+const {QoS} = rclnodejs;
 
 rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('subscription_example_node');
@@ -27,7 +28,7 @@ rclnodejs.init().then(() => {
 
   node.createSubscription(String, 'topic', (msg) => {
     console.log(`Receive message: ${msg.data}`);
-  });
+  }, QoS.profileSystemDefault);
   /* eslint-enable */
 
   rclnodejs.spin(node);
