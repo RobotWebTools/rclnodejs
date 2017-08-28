@@ -48,11 +48,11 @@ const Publisher = require('./publisher.js');
 const Subscription = require('./subscription.js');
 const Client = require('./client.js');
 const Service = require('./service.js');
+const QoS = require('./qos.js');
 
 /** Class representing a Node in ROS */
 class Node {
   init() {
-    this._handle = {};
     this._publishers = [];
     this._subscriptions = [];
     this._clients = [];
@@ -84,23 +84,25 @@ class Node {
     });
 
     this._services.forEach((service) => {
-      let header = rclnodejs.rclTakeRequest(service.handle, this._handle, service.takenRequest);
+      let header = rclnodejs.rclTakeRequest(service.handle, this.handle, service.takenRequest);
       if (header) {
         service.processRequest(header);
       }
     });
   }
 
-  handle() {
-    return this._handle;
+  startSpinning() {
+    this.start();
+    this.spinning = true;
   }
 
-  setHandle(handle) {
-    this._handle = handle;
+  stopSpinning() {
+    this.stop();
+    this.spinning = false;
   }
 
   /**
-   * Create a timer.
+   * Create a Timer.
    * @param {number} period - The number representing period.
    * @param {function} callback - The callback to be called when timeout.
    * @return {Timer} - An instance of Timer.
@@ -118,17 +120,19 @@ class Node {
   }
 
   /**
-   * Create a publisher.
+   * Create a Publisher.
    * @param {function} typeClass - The class representing the message.
    * @param {string} topic - The name of the topic.
+   * @param {QoS} qos - Middleware quality of service settings for the publisher.
    * @return {Publisher} - An instance of Publisher.
    */
-  createPublisher(typeClass, topic) {
-    if (typeof (typeClass) !== 'function' || typeof (topic) !== 'string') {
+  createPublisher(typeClass, topic, qos = QoS.profileDefault) {
+    if (typeof (typeClass) !== 'function' || typeof (topic) !== 'string' ||
+        (typeof (qos) !== 'string' &amp;&amp; !qos instanceof QoS)) {
       throw new TypeError('Invalid argument');
     }
 
-    let publisher = Publisher.createPublisher(this._handle, typeClass, topic);
+    let publisher = Publisher.createPublisher(this.handle, typeClass, topic, qos);
     this._publishers.push(publisher);
     return publisher;
   }
@@ -144,19 +148,21 @@ class Node {
    */
 
   /**
-   * Create a subscription.
+   * Create a Subscription.
    * @param {function} typeClass - The class representing the message.
    * @param {string} topic - The name of the topic.
    * @param {SubscriptionCallback} callback - The callback to be call when receiving the topic subscribed.
+   * @param {QoS} qos - Middleware quality of service settings for the subscription.
    * @return {Subscription} - An instance of Subscription.
    * @see {@link SubscriptionCallback}
    */
-  createSubscription(typeClass, topic, callback) {
-    if (typeof (typeClass) !== 'function' || typeof (topic) !== 'string' || typeof (callback) !== 'function') {
+  createSubscription(typeClass, topic, callback, qos = QoS.profileDefault) {
+    if (typeof (typeClass) !== 'function' || typeof (topic) !== 'string' || typeof (callback) !== 'function' ||
+        (typeof (qos) !== 'string' &amp;&amp; !qos instanceof QoS)) {
       throw new TypeError('Invalid argument');
     }
 
-    let subscription = Subscription.createSubscription(this._handle, typeClass, topic, callback);
+    let subscription = Subscription.createSubscription(this.handle, typeClass, topic, callback, qos);
     this._subscriptions.push(subscription);
     return subscription;
   }
@@ -165,14 +171,16 @@ class Node {
    * Create a Client.
    * @param {function} typeClass - The Class representing the service.
    * @param {string} serviceName - The service name to request.
+   * @param {QoS} qos - Middleware quality of service settings for the client.
    * @return {Client} - An instance of Client.
    */
-  createClient(typeClass, serviceName) {
-    if (typeof (typeClass) !== 'function' || typeof (serviceName) !== 'string') {
+  createClient(typeClass, serviceName, qos = QoS.profileDefault) {
+    if (typeof (typeClass) !== 'function' || typeof (serviceName) !== 'string' ||
+        (typeof (qos) !== 'string' &amp;&amp; !qos instanceof QoS)) {
       throw new TypeError('Invalid argument');
     }
 
-    let client = Client.createClient(this._handle, serviceName, typeClass);
+    let client = Client.createClient(this.handle, serviceName, typeClass, qos);
     this._clients.push(client);
     return client;
   }
@@ -192,73 +200,57 @@ class Node {
    * @param {function} typeClass - The class representing the service.
    * @param {string} serviceName - The service name to offer.
    * @param {RequestCallback} callback - The callback to be called when receiving request.
+   * @param {QoS} qos - Middleware quality of service settings for the service.
    * @return {Service} - An instance of Service.
    * @see {@link RequestCallback}
    */
-  createService(typeClass, serviceName, callback) {
-    if (typeof (typeClass) !== 'function' || typeof (serviceName) !== 'string' || typeof (callback) !== 'function') {
+  createService(typeClass, serviceName, callback, qos = QoS.profileDefault) {
+    if (typeof (typeClass) !== 'function' || typeof (serviceName) !== 'string' || typeof (callback) !== 'function' ||
+        (typeof (qos) !== 'string' &amp;&amp; !qos instanceof QoS)) {
       throw new TypeError('Invalid argument');
     }
 
-    let service = Service.createService(this._handle, serviceName, typeClass, callback);
+    let service = Service.createService(this.handle, serviceName, typeClass, callback, qos);
     this._services.push(service);
     return service;
   }
 
   /**
-   * Destory all resource allocated by this node, including
+   * Destroy all resource allocated by this node, including
    * &lt;code>Timer&lt;/code>s/&lt;code>Publisher&lt;/code>s/&lt;code>Subscription&lt;/code>s
    * /&lt;code>Client&lt;/code>s/&lt;code>Service&lt;/code>s
    * @return {undefined}
    */
-  destory() {
-    this.stopSpin();
+  destroy() {
+    if (this.spinning) {
+      this.stopSpinning();
+    }
 
-    this._timers.forEach(function(timer) {
-      timer._handle.destroy();
-    });
+    this.handle.release();
     this._timers = [];
-
-    this._publishers.forEach(function(publisher) {
-      publisher._handle.destroy();
-    });
     this._publishers = [];
-
-    this._subscriptions.forEach(function(subscription) {
-      subscription._handle.destroy();
-    });
     this._subscriptions = [];
-
-    this._clients.forEach(function(client) {
-      client._handle.destroy();
-    });
     this._clients = [];
-
-    this._services.forEach(function(service) {
-      service._handle.destroy();
-    });
     this._services = [];
-
-    this._handle.destroy();
   }
 
-  destoryPublisher(publisher) {
-
-  }
-
-  destorySubscription(subscription) {
+  destroyPublisher(publisher) {
 
   }
 
-  destoryClient(client) {
+  destroySubscription(subscription) {
 
   }
 
-  destoryService(service) {
+  destroyClient(client) {
 
   }
 
-  destoryTimer(timer) {
+  destroyService(service) {
+
+  }
+
+  destroyTimer(timer) {
 
   }
 }
@@ -274,13 +266,13 @@ module.exports = Node;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Timer.html">Timer</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Entity.html">Entity</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Timer.html">Timer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.2</a> on Tue Aug 01 2017 10:29:10 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.4</a> on Mon Aug 28 2017 15:18:24 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>
