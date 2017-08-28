@@ -18,13 +18,21 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
+const {QoS} = rclnodejs;
 
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
 
   /* eslint-disable */
+  let qos = new QoS();
+  qos.hitory = QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT;
+  qos.reliability = QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT;
+  qos.durability = QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT;
+  qos.depth = 1;
+  qos.avoidRosNameSpaceConventions = false;
+
   let String = rclnodejs.require('std_msgs').msg.String;
-  const publisher = node.createPublisher(String, 'topic');
+  const publisher = node.createPublisher(String, 'topic', qos);
   let msg = new String();
   /* eslint-enable */
 
