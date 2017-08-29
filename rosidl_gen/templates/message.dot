@@ -127,7 +127,7 @@ class {{=className}} {
 
 {{~ it.spec.fields :field}}
   {{? isString(field.type)}}
-    primitiveTypes.stringInit(this.__ref_message.{{=field.name}}.ref());
+    primitiveTypes.initString(this.__ref_message.{{=field.name}});
   {{?}}
 {{~}}
   }
@@ -157,11 +157,9 @@ class {{=className}} {
 
   set {{=field.name}}(value) {
   {{? isString(field.type)}}
-    {{var handleName = '__handle_' + field.name;}}
-    if (this.__ref_message.{{=handleName}}) {
-      this.__ref_message.{{=handleName}}.dismiss();
-    }
-    this.__ref_message.{{=handleName}} = primitiveTypes.stringAssignFunc(this.__ref_message.{{=field.name}}.ref(), value);
+    this.__ref_message.data.size = value.length;
+    this.__ref_message.data.capacity = value.length + 1;
+    this.__ref_message.data.data = value;
   {{?? isStruct(field.type)}}
     if (!this.__ref_object['{{=field.name}}']) {
       this.__ref_object['{{=field.name}}'] = new {{=calcStructTypeName(field.type)}}();
