@@ -204,33 +204,6 @@ NAN_METHOD(CreateSubscription) {
   info.GetReturnValue().Set(js_obj);
 }
 
-NAN_METHOD(ROSIDLStringInit) {
-  void* buffer = node::Buffer::Data(info[0]->ToObject());
-  rosidl_generator_c__String* ptr =
-      reinterpret_cast<rosidl_generator_c__String*>(buffer);
-
-  rosidl_generator_c__String__init(ptr);
-  info.GetReturnValue().Set(Nan::Undefined());
-}
-
-NAN_METHOD(ROSIDLStringAssign) {
-  void* buffer = node::Buffer::Data(info[0]->ToObject());
-  std::string value(*v8::String::Utf8Value(info[1]));
-  rosidl_generator_c__String* ptr =
-      reinterpret_cast<rosidl_generator_c__String*>(buffer);
-
-  // This call will free the previous allocated C-string
-  bool ret = rosidl_generator_c__String__assign(ptr, value.c_str());
-
-  if (ret) {
-    // We only book the clean-up call, a.k.a. free(),
-    // of the mallocated C-string itself
-    info.GetReturnValue().Set(RclHandle::NewInstance(ptr->data));
-  } else {
-    info.GetReturnValue().Set(Nan::Undefined());
-  }
-}
-
 NAN_METHOD(CreatePublisher) {
   // Extract arguments
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
@@ -273,7 +246,7 @@ NAN_METHOD(CreatePublisher) {
   info.GetReturnValue().Set(js_obj);
 }
 
-NAN_METHOD(PublishMessage) {
+NAN_METHOD(Publish) {
   rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
       RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
 
@@ -484,11 +457,8 @@ BindingMethod binding_methods[] = {
     {"timerGetTimeUntilNextCall", TimerGetTimeUntilNextCall},
     {"rclTake", RclTake},
     {"createSubscription", CreateSubscription},
-    {"rosIDLStringAssign", ROSIDLStringAssign},
-    {"rosIDLStringInit", ROSIDLStringInit},
-
     {"createPublisher", CreatePublisher},
-    {"publishMessage", PublishMessage},
+    {"publish", Publish},
     {"createClient", CreateClient},
     {"rclTakeResponse", RclTakeResponse},
     {"sendRequest", SendRequest},
