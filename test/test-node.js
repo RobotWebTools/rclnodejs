@@ -74,7 +74,7 @@ describe('rclnodejs node test suite', function() {
 */
     it('Try creating a node with an invalid name', function() {
       var nodeName = 'example_node_invalid_name?',
-          nodeNamespace = 'ns';
+        nodeNamespace = 'ns';
 
       assertThrowsError(() => {
         var node = rclnodejs.createNode(nodeName, nodeNamespace);
@@ -83,7 +83,7 @@ describe('rclnodejs node test suite', function() {
 
     it('Try creating a node with an invliad relative nampespace', function() {
       var nodeName = 'example_node_with_invalid_rel_ns',
-          nodeNamespace = 'ns?';
+        nodeNamespace = 'ns?';
 
       assertThrowsError(() => {
         var node = rclnodejs.createNode(nodeName, nodeNamespace);
@@ -92,7 +92,7 @@ describe('rclnodejs node test suite', function() {
 
     it('Try creating a node with an invalid absolute namespace', function() {
       var nodeName = 'example_node_with_abs_ns',
-          nodeNamespace = '/ns?';
+        nodeNamespace = '/ns?';
 
       assertThrowsError(() => {
         var node = rclnodejs.createNode(nodeName, nodeNamespace);
@@ -177,7 +177,7 @@ describe('rcl node methods testing', function() {
       [undefined, 'validServiceName'],
       [null, 'validServiceName'],
       [true, 'validServiceName'],
-      [{f:'abc'}, 'validServiceName'],
+      [{f: 'abc'}, 'validServiceName'],
       [['a', 'b', 'c'], 'validSerivceName'],
       [rclString, 2],
       [rclString, undefined],
@@ -209,7 +209,7 @@ describe('rcl node methods testing', function() {
     invalidParams.forEach(function(invalidParam) {
       assertThrowsError(() => {
         node.createSubscription(rclString, invalidParam[0], () => {});
-      }, Error, invalidParam[1], 'Failed to createSubscription')
+      }, Error, invalidParam[1], 'Failed to createSubscription');
     });
   });
 
@@ -220,7 +220,7 @@ describe('rcl node methods testing', function() {
       [undefined, 'validTopicName', undefined],
       [null, 'validTopicName', null],
       [true, 'validTopicName', undefined],
-      [{f:'abc'}, 'validTopicName', null],
+      [{f: 'abc'}, 'validTopicName', null],
       [['a', 'b', 'c'], 'validTopicName', undefined],
       [rclString, 2, null],
       [rclString, undefined, undefined],
@@ -261,7 +261,7 @@ describe('rcl node methods testing', function() {
       [undefined, 'validServiceName'],
       [null, 'validServiceName'],
       [true, 'validServiceName'],
-      [{f:'abc'}, 'validServiceName'],
+      [{f: 'abc'}, 'validServiceName'],
       [['a', 'b', 'c'], 'validServiceName'],
       [GetParameters, 2],
       [GetParameters, undefined],
@@ -304,7 +304,7 @@ describe('rcl node methods testing', function() {
       [undefined, 'validTopicName', undefined],
       [null, 'validTopicName', null],
       [true, 'validTopicName', undefined],
-      [{f:'abc'}, 'validTopicName', null],
+      [{f: 'abc'}, 'validTopicName', null],
       [['a', 'b', 'c'], 'validTopicName', undefined],
       [GetParameters, 2, null],
       [GetParameters, undefined, undefined],

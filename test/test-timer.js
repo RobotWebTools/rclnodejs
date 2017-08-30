@@ -53,7 +53,7 @@ describe('rclnodejs Timer class testing', function() {
       node.destroy();
     });
 
-    it('timer.period should be readonly', function(done){
+    it('timer.period should be readonly', function(done) {
       var timer = node.createTimer(TIMER_INTERVAL, function() {
         assert.deepEqual(timer.period, TIMER_INTERVAL);
         assert.throws(() => {
@@ -118,7 +118,7 @@ describe('rclnodejs Timer class testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('timer.timeUntilNextCall', function(done){
+    it('timer.timeUntilNextCall', function(done) {
       var timer = node.createTimer(TIMER_INTERVAL, function() {
         var nextCallInterval = timer.timeUntilNextCall();
         assert.deepStrictEqual(typeof nextCallInterval, 'number');

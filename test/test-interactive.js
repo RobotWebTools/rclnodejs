@@ -34,7 +34,7 @@ describe('rclnodejs interactive testing', function() {
       var RclString = rclnodejs.require('std_msgs').msg.String;
       var msg = new RclString();
       var subscription = node.createSubscription(RclString, 'topic', function(msg) {
-      assert.deepStrictEqual(typeof msg, 'object');
+        assert.deepStrictEqual(typeof msg, 'object');
         assert.ok('data' in msg);
         assert.deepStrictEqual(msg.data, 'Greeting from publisher');
 
@@ -64,7 +64,7 @@ describe('rclnodejs interactive testing', function() {
       var clientProcess = childProcess.spawn('node', ['client_setup.js'], {cwd: __dirname});
       clientProcess.stdout.on('data', function(data) {
         node.destroy();
-        assert.deepEqual(parseInt(data), 3);
+        assert.deepEqual(parseInt(data, 10), 3);
         done();
       });
     });

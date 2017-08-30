@@ -204,13 +204,13 @@ describe('ROSIDL Node.js message generator test suite', function() {
     uint8 LOST            = 9   # An action client can determine that a goal is LOST. This should not
     */
 
-    const constants_name  = ['PENDING', 'ACTIVE', 'PREEMPTED', 'SUCCEEDED', 'ABORTED',
-                             'REJECTED', 'PREEMPTING', 'RECALLING', 'RECALLED', 'LOST'];
-    const constants_value = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    for (let i = 0; i < constants_name.length; ++ i) {
-      assert.equal(typeof msg[constants_name[i]], 'undefined');
-      assert.equal(typeof GoalStatus[constants_name[i]], 'number');
-      assert.equal(GoalStatus[constants_name[i]], constants_value[i]);
+    const constantsName  = ['PENDING', 'ACTIVE', 'PREEMPTED', 'SUCCEEDED', 'ABORTED',
+      'REJECTED', 'PREEMPTING', 'RECALLING', 'RECALLED', 'LOST'];
+    const cconstantsValue = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    for (let i = 0; i < constantsName.length; ++ i) {
+      assert.equal(typeof msg[constantsName[i]], 'undefined');
+      assert.equal(typeof GoalStatus[constantsName[i]], 'number');
+      assert.equal(GoalStatus[constantsName[i]], cconstantsValue[i]);
     }
   });
 

@@ -52,7 +52,7 @@ describe('rclnodejs module existance testing', function() {
 });
 
 describe('rclnodejs class existance testing', function() {
-  before(function(){
+  before(function() {
     this.timeout(60 * 1000);
     return rclnodejs.init();
   });
@@ -137,7 +137,7 @@ describe('rclnodejs class existance testing', function() {
     });
 
     it('publish method should exist', function() {
-      assertMember('publish', publisher, publisher.publish, 'function')
+      assertMember('publish', publisher, publisher.publish, 'function');
     });
   });
 
