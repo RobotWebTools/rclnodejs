@@ -45,13 +45,13 @@ describe('Node destroy testing', function() {
     var node = rclnodejs.createNode('my_node3');
     node.destroy();
 
-    var org_handle = node.handle;
+    var orgHandle = node.handle;
     node.handle = 'garbage';
     try {
       node.destroy();
     } catch (TypeError) {
       assert.ok(true);
-      node.handle = org_handle;
+      node.handle = orgHandle;
       node.destroy();
     }
   });
@@ -59,7 +59,7 @@ describe('Node destroy testing', function() {
   it('node.destory timers', function() {
     var node = rclnodejs.createNode('my_node4');
     var timer1 = node.createTimer(0.1, () => {}),
-        timer2 = node.createTimer(1, () => {});
+      timer2 = node.createTimer(1, () => {});
 
     assert.deepStrictEqual(2, node._timers.length);
     node.destroy();
@@ -68,9 +68,9 @@ describe('Node destroy testing', function() {
 
   it('node destory entities', function() {
     var node = rclnodejs.createNode('my_node5');
-        
+
     var timer = node.createTimer(0.1, () => {});
-        assert.deepStrictEqual(1, node._timers.length);
+    assert.deepStrictEqual(1, node._timers.length);
         
     var int16 = rclnodejs.require('std_msgs').msg.Int16;
     var pub1 = node.createPublisher(int16, 'pub1_topic');

@@ -69,6 +69,7 @@ describe('Node destroy testing', function() {
     }).then(function() {
       return rclnodejs.init();
     }).catch(function(err) {
+      assert.notDeepStrictEqual(err, null);
       rclnodejs.shutdown();
       done();
     });
