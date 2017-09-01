@@ -16,15 +16,8 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-
-function assertThrowsError(operation, errorType, errMsg, message) {
-  assert.throws(operation, function(err) {
-    var containedMsg = new RegExp(errMsg);
-    if ((err instanceof errorType) && containedMsg.test(err)) {
-      return true;
-    }
-  }, message);
-}
+const assertUtils = require('./utils.js');
+const assertThrowsError = assertUtils.assertThrowsError;
 
 describe('rclnodejs node test suite', function() {
   describe('createNode method testing', function() {
