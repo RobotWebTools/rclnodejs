@@ -16,12 +16,9 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-
-
-function assertMember(name, obj, member, typeName) {
-  assert.ok(name in obj);
-  assert.deepStrictEqual(typeof member, typeName);
-}
+const assertUtils = require('./utils.js');
+const assertMember = assertUtils.assertMember;
+const assertThrowsError = assertUtils.assertThrowsError;
 
 describe('rclnodejs module existance testing', function() {
   describe('rclnodejs module members', function() {
@@ -181,6 +178,116 @@ describe('rclnodejs class existance testing', function() {
 
     it('timeUntilNextCall method should exist', function() {
       assertMember('timeUntilNextCall', timer, timer.timeUntilNextCall, 'function');
+    });
+  });
+
+  describe('QoS class', function() {
+    var qos;
+
+    before(function() {
+      qos = new rclnodejs.QoS();
+    });
+
+    it('should have getter avoidRosNameSpaceConventions', function() {
+      assertMember('avoidRosNameSpaceConventions', qos, qos.avoidRosNameSpaceConventions, 'boolean');
+    });
+
+    it('should have getter depth', function() {
+      assertMember('depth', qos, qos.depth, 'number');
+    });
+
+    it('should have getter durability', function() {
+      assertMember('durability', qos, qos.durability, 'number');
+    });
+
+    it('should have static getter DurabilityPolicy', function() {
+      assertMember('DurabilityPolicy', rclnodejs.QoS,
+        rclnodejs.QoS.DurabilityPolicy, 'object');
+    });
+
+    it('should have getter history', function() {
+      assertMember('history', qos, qos.history, 'number');
+    });
+
+    it('should have static getter HistoryPolicy', function() {
+      assertMember('HistoryPolicy', rclnodejs.QoS, rclnodejs.QoS.HistoryPolicy, 'object');
+    });
+
+    it('should have static getter profileDefault', function() {
+      assertMember('profileDefault', rclnodejs.QoS, rclnodejs.QoS.profileDefault, 'string');
+    });
+
+    it('should have static getter profileParameterEvents', function() {
+      assertMember('profileParameterEvents', rclnodejs.QoS, rclnodejs.QoS.profileParameterEvents, 'string');
+    });
+
+    it('should have static getter profileParameters', function() {
+      assertMember('profileParameters', rclnodejs.QoS, rclnodejs.QoS.profileParameters, 'string');
+    });
+
+    it('should have static getter profileSensorData', function() {
+      assertMember('profileSensorData', rclnodejs.QoS, rclnodejs.QoS.profileSensorData, 'string');
+    });
+
+    it('should have static getter profileServicesDefault', function() {
+      assertMember('profileServicesDefault', rclnodejs.QoS, rclnodejs.QoS.profileServicesDefault, 'string');
+    });
+
+    it('should have static getter profileSystemDefault', function() {
+      assertMember('profileSystemDefault', rclnodejs.QoS, rclnodejs.QoS.profileSystemDefault, 'string');
+    });
+
+    it('should have getter reliability', function() {
+      assertMember('reliability', qos, qos.reliability, 'number');
+    });
+
+    it('should have static getter ReliabilityPolicy', function() {
+      assertMember('ReliabilityPolicy', rclnodejs.QoS, rclnodejs.QoS.ReliabilityPolicy, 'object');
+    });
+
+    it('should have setter avoidRosNameSpaceConventions', function() {
+      qos.avoidRosNameSpaceConventions = true;
+      assert.ok(qos.avoidRosNameSpaceConventions);
+
+      assertThrowsError(() => {
+        qos.avoidRosNameSpaceConventions = 1;
+      }, TypeError, 'Invalid argument', 'Failed to call setter');
+    });
+
+    it('should have setter depth', function() {
+      qos.depth = 0;
+      assert.deepStrictEqual(qos.depth, 0);
+
+      assertThrowsError(() => {
+        qos.depth = 'abc';
+      }, TypeError, 'Invalid argument', 'Failed to call setter');
+    });
+
+    it('should have setter durability', function() {
+      qos.durability = 0;
+      assert.deepStrictEqual(qos.durability, 0);
+
+      assertThrowsError(() => {
+        qos.durability = 'abc';
+      }, TypeError, 'Invalid argument', 'Failed to call setter');
+    });
+
+    it('should have setter history', function() {
+      qos.history = 0;
+      assert.deepStrictEqual(qos.history, 0);
+
+      assertThrowsError(() => {
+        qos.history = 'abc';
+      }, TypeError, 'Invalid argument', 'Failed to call setter');
+    });
+
+    it('should have setter reliability', function() {
+      qos.reliability = 0;
+      assert.deepStrictEqual(qos.reliability, 0);
+
+      assertThrowsError(() => {
+        qos.reliability = 'abc';
+      }, TypeError, 'Invalid argument', 'Failed to call setter');
     });
   });
 });
