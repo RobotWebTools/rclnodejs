@@ -11,11 +11,12 @@ const ArrayType = require('ref-array');
 const primitiveTypes = require('../../rosidl_gen/generator_primitive.js');
 
 {{
-var className = it.messageInfo.pkgName + '__' + it.messageInfo.subFolder + '__' + it.messageInfo.interfaceName;
-var arrayClassName = className + '__Array';
-var generatorName = 'rosidl_generator_nodejs__' + className;
-var generatorArrayTypeName = generatorName + '__ArrayType';
-var generatorArrayName = generatorName + '__Array';
+let objectWrapper = it.spec.msgName + 'Wrapper';
+let arrayWrapper = it.spec.msgName + 'ArrayWrapper';
+
+let refObjectType = it.spec.msgName + 'RefStruct';
+let refObjectArrayType = it.spec.msgName + 'RefStructArray';
+let refArrayType = it.spec.msgName + 'RefArray';
 
 if (it.spec.fields.length === 0) {
   /* Following rosidl_generator_c style, put a bool member named '_dummy' */
@@ -35,245 +36,349 @@ if (it.spec.fields.length === 0) {
   });
 } /* if */
 
-var isStruct = function(type) {
-  return !type.isPrimitiveType && !type.isArray;
-};
+function getPrimitiveNameByType(type) {
+  if (type.type === 'bool') {
+    return 'Bool';
+  } else if (type.type === 'int8') {
+    return 'Int8';
+  } else if (type.type === 'uint8') {
+    return 'UInt8';
+  } else if (type.type === 'int16') {
+    return 'Int16';
+  } else if (type.type === 'uint16') {
+    return 'UInt16';
+  } else if (type.type === 'int32') {
+    return 'Int32';
+  } else if (type.type === 'uint32') {
+    return 'UInt32';
+  } else if (type.type === 'int64') {
+    return 'Int64';
+  } else if (type.type === 'uint64') {
+    return 'UInt64';
+  } else if (type.type === 'float64') {
+    return 'Float64';
+  } else if (type.type === 'float32') {
+    return 'Float32';
+  } else if (type.type === 'char') {
+    return 'Char';
+  } else if (type.type === 'byte') {
+    return 'Byte';
+  } else if (type.type === 'string') {
+    return 'String';
+  } else {
+    return '';
+  }
+}
 
-var isStructArray = function(type) {
-  return !type.isPrimitiveType && type.isArray;
-};
+let primitiveBaseType = ['Bool', 'Int8', 'UInt8', 'Int16', 'UInt16', 'Int32', 'UInt32',
+                         'Int64', 'UInt64', 'Float64', 'Float32', 'Char', 'Byte', 'String'];
 
-var isPrimitiveArray = function(type) {
-  return type.isPrimitiveType && type.isArray;
-};
+let existedModules = [];
 
-var shouldRequireType = function(type) {
-  return !type.isPrimitiveType;
-};
+function isExisted(requiredModule) {
+  return existedModules.indexOf(requiredModule) !== -1;
+}
 
-var isPrimitive = function(type) {
-  return type.isPrimitiveType && !type.isArray;
-};
+function isPrimitivePackage(baseType) {
+  return primitiveBaseType.indexOf(baseType.type) !== -1;
+}
 
-var isString = function(type) {
-  return type.type === 'string' && !type.isArray;
-};
+function shouldRequire(baseType, fieldType) {
+  let requiredModule = '{{=getPackageNameByType(fieldType)}}/{{=getJSFileNameByType(fieldType)}}';
+  let shouldRequire = !isPrimitivePackage(baseType) && (fieldType.isArray || !fieldType.isPrimitiveType || fieldType.type === 'string');
 
-var calcStructTypeName = function(type) {
-  return type.pkgName + '__msg__' + type.type;
-};
+  if (shouldRequire && !isExisted(requiredModule)) {
+    existedModules.push(requiredModule);
+    return true;
+  } else {
+    return false;
+  }
+}
 
-var calcFileNameFromType = function(type) {
-  return calcStructTypeName(type) + '.js';
-};
+function getWrapperNameByType(type) {
+  if (type.isPrimitiveType) {
+    return getPrimitiveNameByType(type) + 'Wrapper';
+  } else {
+    return type.type + 'Wrapper';
+  }
+}
 
-var calcGeneratorTypeNameFromType = function(type) {
-  return "rosidl_generator_nodejs__" + type.pkgName + '__msg__' + type.type;
-};
+function getJSFileNameByType(type) {
+    if (type.isPrimitiveType) {
+    return 'std_msgs__msg__' + getPrimitiveNameByType(type) + '.js';
+  } else {
+    return type.pkgName + '__msg__' + type.type + '.js';
+  }
+}
 
+function getPackageNameByType(type) {
+  if (type.isPrimitiveType) {
+    return 'std_msgs';
+  } else {
+    return type.pkgName;
+  }
+}
 }}
-// TODO: remove duplicated (if any)
+
 {{~ it.spec.fields :field}}
-{{? shouldRequireType(field.type)}}
-var {{=calcStructTypeName(field.type)}} = require('../../generated/{{=field.type.pkgName}}/{{=calcFileNameFromType(field.type)}}');
+{{? shouldRequire(it.spec.baseType, field.type)}}
+let {{=getWrapperNameByType(field.type)}} = require('../../generated/{{=getPackageNameByType(field.type)}}/{{=getJSFileNameByType(field.type)}}');
 {{?}}
 {{~}}
 
-//
-// Define the struct type
-//
-const {{=generatorName}} = StructType({
-{{~ it.spec.fields :field}}
-
-{{? isPrimitive(field.type)}}
+{{? it.spec.msgName === 'String'}}
+const {{=refObjectType}} = primitiveTypes.string;
+{{??}}
+const {{=refObjectType}} = StructType({
+  {{~ it.spec.fields :field}}
+  {{? field.type.isPrimitiveType && !field.type.isArray}}
   {{=field.name}}: primitiveTypes.{{=field.type.type}},
-{{?? isPrimitiveArray(field.type)}}
-  {{=field.name}}: primitiveTypes.{{=field.type.type}}, // TODO(Kenny): it's actually an array, need to generate a primitive type array
-{{?? isStructArray(field.type)}}
-  {{=field.name}}: {{=calcStructTypeName(field.type)}}.RawStructType, // TODO(Kenny): it's actually an array, need to generate a struct type array
-{{?? true}}
-  {{=field.name}}: {{=calcStructTypeName(field.type)}}.RawStructType,
+  {{?? field.type.isArray}}
+  {{=field.name}}: {{=getWrapperNameByType(field.type)}}.refObjectArrayType,
+  {{?? true}}
+  {{=field.name}}: {{=getWrapperNameByType(field.type)}}.refObjectType,
+  {{?}}
+  {{~}}
+});
 {{?}}
 
-{{~}}
-});
-
-//
-// Define the ref-array type
-//
-
-const {{=generatorArrayTypeName}} = ArrayType({{=generatorName}});
-
-//
-// Define the array type structure
-//
-const {{=generatorArrayName}} = StructType({
-  data: ref.refType({{=generatorName}}),
+const {{=refArrayType}} = ArrayType({{=refObjectType}});
+const {{=refObjectArrayType}} = StructType({
+  data: ArrayType({{=refObjectType}}),
   size: ref.types.size_t,
   capacity: ref.types.size_t,
 });
 
-//
-// Define the wrapper class
-//
-class {{=className}} {
+// Define the wrapper class.
+class {{=objectWrapper}} {
   constructor(other) {
-    let otherObj = undefined;
-    if (typeof other === 'object' && other.__ref_message) {
-      otherObj = other.__ref_message.toObject();
+    this._wrapperFields = {};
+    if (typeof other === 'object' && other._refObject) {
+      this._refObject = new {{=refObjectType}}(other._refObject.toObject());
+      {{~ it.spec.fields :field}}
+      {{? field.type.isArray || !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
+      this._wrapperFields.{{=field.name}} =  new {{=getWrapperNameByType(field.type)}}(other._wrapperFields.{{=field.name}});
+      {{?}}
+      {{~}}
+    } else {
+      this._refObject = new {{=refObjectType}}();
+      {{~ it.spec.fields :field}}
+      {{? field.type.isArray}}
+      this._wrapperFields.{{=field.name}} = {{=getWrapperNameByType(field.type)}}.createArray();
+      {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
+      this._wrapperFields.{{=field.name}} = new {{=getWrapperNameByType(field.type)}}();
+      {{?? it.spec.msgName === 'String'}}
+      primitiveTypes.initString(this._refObject);
+      {{?}}
+      {{~}}
     }
-    this.__ref_message = new {{=generatorName}}(otherObj);
-    this.__ref_object = {};
+    this.serialize();
+  }
 
-{{~ it.spec.fields :field}}
-  {{? isString(field.type)}}
-    primitiveTypes.initString(this.__ref_message.{{=field.name}});
-  {{?}}
-{{~}}
+  static createArray() {
+    return new {{=arrayWrapper}};
+  }
+
+  static get ArrayType() {
+    return {{=arrayWrapper}};
+  }
+
+  static get refObjectArrayType() {
+    return {{=refObjectArrayType}}
+  }
+
+  static get refObjectType() {
+    return {{=refObjectType}};
   }
 
   toRawROS() {
-    return this.__ref_message.ref();
+    return this._refObject.ref();
+  }
+
+  serialize() {
+    {{~ it.spec.fields :field}}
+    {{? !field.type.isPrimitiveType || field.type.isArray || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
+    this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+    {{?}}
+    {{~}}
+  }
+
+  deserialize() {
+    {{~ it.spec.fields :field}}
+    {{? !field.type.isPrimitiveType && !field.type.isArray}}
+    this._wrapperFields.{{=field.name}}._refObject = this._refObject.{{=field.name}};
+    this._wrapperFields.{{=field.name}}.deserialize();
+    {{?? !field.type.isPrimitiveType && field.type.isArray}}
+    this._wrapperFields.{{=field.name}}._refObject = this._refObject.{{=field.name}};
+    this._wrapperFields.{{=field.name}}.data.forEach((wrapper, index) => {
+      wrapper._refObject = this._wrapperFields.{{=field.name}}._refArray[index];
+      wrapper.deserialize();
+    });
+    {{?}}
+    {{~}}
   }
 
   static type() {
     return {pkgName: '{{=it.messageInfo.pkgName}}', subFolder: '{{=it.messageInfo.subFolder}}', interfaceName: '{{=it.messageInfo.interfaceName}}'};
   }
 
-{{~ it.spec.fields :field}}
+  get refObject() {
+    this.serialize();
+    return this._refObject;
+  }
+
+  {{~ it.spec.fields :field}}
   get {{=field.name}}() {
-  {{? isString(field.type)}}
-    return this.__ref_message.{{=field.name}}.data;
-  {{?? isStruct(field.type)}}
-    if (!this.__ref_object['{{=field.name}}']) {
-      this.__ref_object['{{=field.name}}'] = new {{=calcStructTypeName(field.type)}}();
-      this.__ref_object['{{=field.name}}'].__ref_message = this.__ref_message.{{=field.name}};
-    }
-    return this.__ref_object.{{=field.name}};
-  {{?? true}}
-    return this.__ref_message.{{=field.name}};
-  {{?}}
+    {{? field.type.isArray && field.type.isPrimitiveType}}
+    let primitives = this._refObject.{{=field.name}}.data;
+    primitives.length = this._refObject.{{=field.name}}.size;
+    let values = [];
+    primitives.toArray().forEach(value =>{
+      values.push(value.data);
+    });
+    return values;
+    {{?? !field.type.isPrimitiveType && !field.type.isArray}}
+    return this._wrapperFields.{{=field.name}};
+    {{?? !field.type.isArray && field.type.type === 'string' && it.spec.msgName !== 'String'}}
+    return this._wrapperFields.{{=field.name}}.data;
+    {{?? true}}
+    return this._refObject.{{=field.name}};
+    {{?}}
   }
 
   set {{=field.name}}(value) {
-  {{? isString(field.type)}}
-    this.__ref_message.data.size = value.length;
-    this.__ref_message.data.capacity = value.length + 1;
-    this.__ref_message.data.data = value;
-  {{?? isStruct(field.type)}}
-    if (!this.__ref_object['{{=field.name}}']) {
-      this.__ref_object['{{=field.name}}'] = new {{=calcStructTypeName(field.type)}}();
-      this.__ref_object['{{=field.name}}'].__ref_message = this.__ref_message.{{=field.name}};
+    {{? field.type.isArray && field.type.isPrimitiveType}}
+    this._wrapperFields['{{=field.name}}'].setWrappers(value);;
+    {{?? !field.type.isArray && field.type.isPrimitiveType && field.type.type !== 'string'}}
+    this._refObject.{{=field.name}} = value;
+    {{?? it.spec.msgName === 'String'}}
+    this._refObject.size = value.length;
+    this._refObject.capacity = value.length + 1;
+    this._refObject.data = value;
+    {{?? !field.type.isArray && field.type.type === 'string' && it.spec.msgName !== 'String'}}
+    this._wrapperFields.{{=field.name}}.data = value;
+    {{?? true}}
+    if (! value instanceof {{=getWrapperNameByType(field.type)}}) {
+      throw new TypeError('Invalid argument: should provide "{{=getWrapperNameByType(field.type)}}" to ".{{=field.name}}" setter');
     }
-    if (! value instanceof {{=calcStructTypeName(field.type)}}) {
-      throw new TypeError('Invalid argument: should provide "{{=calcStructTypeName(field.type)}}" to ".{{=field.name}}" setter');
-    }
-    this.__ref_object.{{=field.name}}.copy(value);
-  {{?? true}}
-    this.__ref_message.{{=field.name}} = value;
-  {{?}}
+    this._wrapperFields.{{=field.name}}.copy(value);
+    {{?}}
   }
-{{~}}
+  {{~}}
 
   copy(other) {
-    this.__ref_message = new {{=generatorName}}(other.__ref_message.toObject());
-  }
+    this._refObject = new {{=refObjectType}}(other._refObject.toObject());
 
+    {{~ it.spec.fields :field}}
+    {{? !field.type.isPrimitiveType || field.type.isArray || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
+    this._wrapperFields.{{=field.name}}.copy(other._wrapperFields.{{=field.name}});
+    {{?}}
+    {{~}}
+  }
 }
 
-//
-// Define the wrapper array class
-//
-class {{=arrayClassName}} {
-  constructor(sz = 1) {
-    this.__resize(sz);
+// Define the wrapper of array class.
+class {{=arrayWrapper}} {
+  constructor(size = 0) {
+    this._resize(size);
+    this._refObject = new {{=refObjectArrayType}};
+  }
+
+  toRawROS() {
+    return this._refObject.ref();
+  }
+
+  setWrappers(wrappers) {
+    this._refArray = new {{=refArrayType}}(wrappers.length);
+    this._wrappers = [];
+
+    wrappers.forEach((value, index) => {
+      {{? primitiveBaseType.indexOf(it.spec.baseType.type) !== -1}}
+      let wrapper = new {{=objectWrapper}}();
+      wrapper.data = value;
+      {{??}}
+      let wrapper = new {{=objectWrapper}}(value);
+      {{?}}
+      this._wrappers.push(wrapper);
+      this._refArray[index] = wrapper.refObject;
+    });
+    this._refObject.size = wrappers.length;
+    this._refObject.capacity = wrappers.length;
+    this._refObject.data = this._refArray.buffer;
   }
 
   get data() {
-    return this.__ref_array;
+    return this._wrappers;
   }
 
   get size() {
-    return this.__ref_array.length;
+    return this._wrappers.length;
   }
 
-  set size(v) {
-    if (typeof v != 'number') {
-      throw new TypeError('Invalid argument: should provide a number to {{=arrayClassName}}.size setter');
+  set size(value) {
+    if (typeof value != 'number') {
+      throw new TypeError('Invalid argument: should provide a number to {{=arrayWrapper}}.size setter');
       return;
     }
-
-    return this.__resize(v);
+    return this._resize(value);
   }
 
   get capacity() {
-    return this.__ref_array.length;
+    return this._wrappers.length;
   }
 
-  set capacity(v) {
-    if (typeof v != 'number') {
-      throw new TypeError('Invalid argument: should provide a number to {{=arrayClassName}}.capacity setter');
+  set capacity(value) {
+    if (typeof value != 'number') {
+      throw new TypeError('Invalid argument: should provide a number to {{=arrayWrapper}}.capacity setter');
+    }
+    return this._resize(value);
+  }
+
+  get refObject() {
+    this._wrappers.forEach((wrapper, index) => {
+      this._refArray[index] = wrapper.refObject;
+    });
+    return this._refObject;
+  }
+
+  _resize(size) {
+    if (size < 0) {
+      throw new RangeError('Invalid argument: should provide a positive number');
       return;
     }
 
-    return this.__resize(v);
-  }
-
-  __resize(sz) {
-    if (sz <= 0) {
-      throw new RangeError('Invalid argument: should provide a positive number to {{=arrayClassName}}.size/capacity setter');
-      return;
-    }
-
-    // TODO: data detain policy
-    // TODO: use binding functions instead of ref-array type
-    this.__ref_message = new {{=generatorArrayName}}();
-    this.__ref_message.size = sz;
-    this.__ref_message.capacity = sz;
-    this.__ref_message.arrayTypeData = new {{=generatorArrayTypeName}}(sz);
-    this.__ref_message.data = this.__ref_message.arrayTypeData.ref();
-
-    // Now update __ref_array objects
-    this.__ref_array = new Array(sz);
-    for (let i = 0; i < this.__ref_array.length; ++i) {
-      this.__ref_array[i] = new {{=className}}();
-      this.__ref_array[i].__ref_message = this.__ref_message.arrayTypeData[i]; // TODO: fill it using data
+    this._refArray = new ArrayType({{=refObjectType}});
+    this._refArray.size = size;
+    this._refArray.capacity = size;
+    this._wrappers = new Array();
+    for (let i = 0; i < size; i++) {
+      this._wrappers.push(new {{=objectWrapper}}());
     }
   }
 
   copy(other) {
-    this.__resize(other.size);
-
-    // Array deep copy
-    for (let i = 0; i < this.__ref_array.length; ++ i) {
-      this.__ref_array[i].copy(other.__ref_array[i]);
+    if (! other instanceof {{=arrayWrapper}}) {
+      throw new TypeError('Invalid argument: should provide "{{=arrayWrapper}}".');
     }
+
+    this._resize(other.size);
+    // Array deep copy
+    other._wrappers.forEach((wrapper, index) => {
+      this._wrappers[index].copy(wrapper);
+    });
   }
 }
 
 {{? it.spec.constants != undefined && it.spec.constants.length}}
-//
 // Define constants ({{=it.spec.constants.length}} in total)
-//
 {{~ it.spec.constants :c}}
-Object.defineProperty({{=className}}, "{{=c.name}}", {value: {{=c.value}}, writable: false, enumerable: true, configurable: true});
+Object.defineProperty({{=objectWrapper}}, "{{=c.name}}", {value: {{=c.value}}, writable: false, enumerable: true, configurable: true});
 {{~}}
 {{?}}
-// Raw type and wrapper type
-{{=className}}.RawStructType = {{=generatorName}};
-{{=generatorName}}.WrapperType = {{=className}};
-//
-// Array Type for type: {{=className}}
-//
-{{=className}}.RawArrayType = {{=generatorArrayName}};
-{{=className}}.ArrayType = {{=arrayClassName}};
-{{=className}}.ArrayType.RawArrayType = {{=generatorArrayName}};
 
-module.exports = {{=className}};
+module.exports = {{=objectWrapper}};
 
 /*
  * The following is the original spec object coming from parser:
-
 {{=it.json}}
-
 */

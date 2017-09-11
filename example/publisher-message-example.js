@@ -15,32 +15,36 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-const {QoS} = rclnodejs;
+let Header = rclnodejs.require('std_msgs').msg.Header;
+let Time = rclnodejs.require('builtin_interfaces').msg.Time;
+let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
 
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
+  const publisher = node.createPublisher(JointState, 'JointState');
+  let count = 0;
 
-  /* eslint-disable */
-  let qos = new QoS();
-  qos.hitory = QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT;
-  qos.reliability = QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT;
-  qos.durability = QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT;
-  qos.depth = 1;
-  qos.avoidRosNameSpaceConventions = false;
-
-  let String = rclnodejs.require('std_msgs').msg.String;
-  const publisher = node.createPublisher(String, 'topic', qos);
-  let msg = new String();
-  /* eslint-enable */
-
-  let counter = 0;
   setInterval(function() {
-    const str = 'Hello ROS ' + counter++;
-    console.log('Publishing message:', str);
+    let time = new Time();
+    time.sec = 123456;
+    time.nanosec = 789;
 
-    msg.data = str;
-    publisher.publish(msg);
-  }, 10);
+    let header = new Header();
+    header.stamp = time;
+    // eslint-disable-next-line
+    header.frame_id = 'main frame';
 
+    let state = new JointState();
+    state.header = header;
+    state.name = ['Tom', 'Jerry'];
+    state.position = [1, 2];
+    state.velocity = [2, 3];
+    state.effort = [4, 5, 6];
+
+    publisher.publish(state);
+    console.log(`Publish ${++count} messages.`);
+  }, 1000);
   rclnodejs.spin(node);
+}).catch(e => {
+  console.log(e);
 });

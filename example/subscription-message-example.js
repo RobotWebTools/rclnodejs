@@ -15,18 +15,24 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-const {QoS} = rclnodejs;
+let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
 
 rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('subscription_example_node');
+  let count = 0;
 
-  /* eslint-disable */
-  let String = rclnodejs.require('std_msgs').msg.String;
-
-  node.createSubscription(String, 'topic', (msg) => {
-    console.log(`Receive message: ${msg.data}`);
-  }, QoS.profileSystemDefault);
-  /* eslint-enable */
+  node.createSubscription(JointState, 'JointState', (state) => {
+    console.log(`Received ${++count} messages:`);
+    console.log('state.header.stamp.sec = ' + state.header.stamp.sec);
+    console.log('state.header.stamp.nanosec = ' + state.header.stamp.nanosec);
+    console.log('state.header.frame_id = ' + state.header.frame_id);
+    console.log('state.name = ' + state.name.toString());
+    console.log('state.position = ' + state.position.toString());
+    console.log('state.velocity = ' + state.velocity.toString());
+    console.log('state.effort = ' + state.effort.toString() + '\n');
+  });
 
   rclnodejs.spin(node);
+}).catch(e => {
+  console.log(e);
 });
