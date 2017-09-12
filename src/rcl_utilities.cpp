@@ -23,6 +23,12 @@ namespace rclnodejs {
 typedef const rosidl_message_type_support_t* (*GetMessageTypeSupportFunction)();
 typedef const rosidl_service_type_support_t* (*GetServiceTypeSupportFunction)();
 
+#if defined(OS_MACOS)
+const char* lib_ext = ".dylib";
+#elif defined(OS_LINUX)
+const char* lib_ext = ".so";
+#endif
+
 void* GetTypeSupportFunctionByInterfaceSymbolName(
     const std::string& symbol_name,
     const std::string& lib_name) {
@@ -42,7 +48,7 @@ const rosidl_message_type_support_t* GetMessageTypeSupport(
   void* function = GetTypeSupportFunctionByInterfaceSymbolName(
       "rosidl_typesupport_c__get_message_type_support_handle__" + package_name +
           "__" + sub_folder + "__" + msg_name,
-      "lib" + package_name + "__rosidl_typesupport_c.so");
+      "lib" + package_name + "__rosidl_typesupport_c" + lib_ext);
   if (function)
     return reinterpret_cast<GetMessageTypeSupportFunction>(function)();
   else
@@ -55,7 +61,7 @@ const rosidl_service_type_support_t* GetServiceTypeSupport(
   void* function = GetTypeSupportFunctionByInterfaceSymbolName(
       "rosidl_typesupport_c__get_service_type_support_handle__" + package_name +
           "__srv__" + service_name,
-      "lib" + package_name + "__rosidl_typesupport_c.so");
+      "lib" + package_name + "__rosidl_typesupport_c" + lib_ext);
   if (function)
     return reinterpret_cast<GetServiceTypeSupportFunction>(function)();
   else
