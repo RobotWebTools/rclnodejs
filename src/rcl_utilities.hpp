@@ -17,8 +17,8 @@
 #ifndef RCLNODEJS_RCL_UTILITIES_HPP_
 #define RCLNODEJS_RCL_UTILITIES_HPP_
 
-class rosidl_message_type_support_t;
-class rosidl_service_type_support_t;
+struct rosidl_message_type_support_t;
+struct rosidl_service_type_support_t;
 
 namespace rclnodejs {
 

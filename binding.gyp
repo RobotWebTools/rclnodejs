@@ -1,75 +1,69 @@
 {
-  "targets": [
+  'targets': [
     {
-      "target_name": "rclnodejs",
-      "variables": {
-        "ROS2_INSTALL_PATH": "<!(echo $AMENT_PREFIX_PATH)",
+      'target_name': 'rclnodejs',
+      'variables': {
+        'ROS2_INSTALL_PATH': '<!(echo $AMENT_PREFIX_PATH)',
       },
-      "sources": [
-        "./src/addon.cpp",
-        "./src/executor.cpp",
-        "./src/handle_manager.cpp",
-        "./src/rcl_bindings.cpp",
-        "./src/rcl_handle.cpp",
-        "./src/rcl_utilities.cpp",
-        "./src/shadow_node.cpp",
+      'sources': [
+        './src/addon.cpp',
+        './src/executor.cpp',
+        './src/handle_manager.cpp',
+        './src/rcl_bindings.cpp',
+        './src/rcl_handle.cpp',
+        './src/rcl_utilities.cpp',
+        './src/shadow_node.cpp',
       ],
-      "include_dirs": [
-        ".",
-        "<!(node -e \"require('nan')\")",
-        "<(ROS2_INSTALL_PATH)/include/",
+      'include_dirs': [
+        '.',
+        '<!(node -e \'require("nan")\')',
+        '<(ROS2_INSTALL_PATH)/include/',
       ],
-      "cflags!": [
-        "-fno-exceptions"
+      'cflags!': [
+        '-fno-exceptions'
       ],
-      "cflags": [
-        "-std=c++11",
-        "-fstack-protector-strong",
-        "-fPIE -fPIC",
-        "-O2 -D_FORTIFY_SOURCE=2",
-        "-Wformat -Wformat-security"
+      'cflags': [
+        '-fstack-protector-strong',
+        '-fPIE -fPIC',
+        '-O2 -D_FORTIFY_SOURCE=2',
+        '-Wformat -Wformat-security'
       ],
-      "cflags_cc!": [
-        "-fno-exceptions"
+      'cflags_cc!': [
+        '-fno-exceptions'
       ],
-      "libraries": [
-        "-lrcl",
-        "-lrcutils",
-        "-L<(ROS2_INSTALL_PATH)/lib"
+      'libraries': [
+        '-lrcl',
+        '-lrcutils',
+        '-L<(ROS2_INSTALL_PATH)/lib'
       ],
-      "xcode_settings": {
-        "OTHER_CFLAGS": [
-          "-std=c++11"
-        ]
-      },
-      "conditions": [
+      'conditions': [
         [
-          "OS!=\"win\"",
-          {
-            "cflags+": [
-              "-std=c++14"
+          'OS=="linux"', {
+            'defines': [
+              'OS_LINUX'
             ],
-            "cflags_c+": [
-              "-std=c++14"
-            ],
-            "cflags_cc+": [
-              "-std=c++14"
+            'cflags_cc': [
+              '-std=c++14'
             ]
           }
         ],
         [
-          "OS==\"mac\"",
+          'OS=="win"',
           {
-            "xcode_settings": {
-              "OTHER_CPLUSPLUSFLAGS": [
-                "-std=c++14",
-                "-stdlib=libc++"
+          }
+        ],
+        [
+          'OS=="mac"',
+          {
+            'defines': [
+              'OS_MACOS'
+            ],
+            'xcode_settings': {
+              'OTHER_CPLUSPLUSFLAGS': [
+                '-std=c++14',
+                '-stdlib=libc++'
               ],
-              "OTHER_LDFLAGS": [
-                "-stdlib=libc++"
-              ],
-              "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
-              "MACOSX_DEPLOYMENT_TARGET": "10.8"
+              'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
             }
           }
         ]
