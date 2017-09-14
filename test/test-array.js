@@ -17,7 +17,6 @@
 const assert = require('assert');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
-let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
 
 describe('rclnodejs message communication', function() {
   before(function() {
@@ -32,6 +31,7 @@ describe('rclnodejs message communication', function() {
   it('should support array type', function(done) {
     this.timeout(10 * 1000);
     var node = rclnodejs.createNode('array_message_subscription');
+    let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
     var subscription = node.createSubscription(JointState, 'JointState', (state) => {
       assert.deepStrictEqual(state.header.stamp.sec, 123456);
       assert.deepStrictEqual(state.header.stamp.nanosec, 789);
