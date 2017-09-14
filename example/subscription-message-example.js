@@ -15,9 +15,9 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
 
 rclnodejs.init().then(() => {
+  let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
   let node = rclnodejs.createNode('subscription_example_node');
   let count = 0;
 
