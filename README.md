@@ -2,8 +2,8 @@
 
 Branch | Linux Build | MacOS Build | Windows Build |
 ------------ | :-------------: |  :-------------: |  :-------------: |
-develop | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/tree/develop) | N/A | N/A
-master | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=master)](https://github.com/RobotWebTools/rclnodejs/tree/master) | N/A | N/A
+develop | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/tree/develop) | [![macOS Build Status](https://circleci.com/gh/RobotWebTools/rclnodejs/tree/develop.svg?style=shield)](https://circleci.com/gh/RobotWebTools/rclnodejs) | N/A
+master | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=master)](https://github.com/RobotWebTools/rclnodejs/tree/master) | [![macOS Build Status](https://circleci.com/gh/RobotWebTools/rclnodejs/tree/master.svg?style=shield)](https://circleci.com/gh/RobotWebTools/rclnodejs) | N/A
 
 ## Build Environment
 
