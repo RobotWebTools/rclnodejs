@@ -15,11 +15,12 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-let Header = rclnodejs.require('std_msgs').msg.Header;
-let Time = rclnodejs.require('builtin_interfaces').msg.Time;
-let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
 
 rclnodejs.init().then(() => {
+  let Header = rclnodejs.require('std_msgs').msg.Header;
+  let Time = rclnodejs.require('builtin_interfaces').msg.Time;
+  let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+
   const node = rclnodejs.createNode('publisher_example_node');
   const publisher = node.createPublisher(JointState, 'JointState');
   let count = 0;
