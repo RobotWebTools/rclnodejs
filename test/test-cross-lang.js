@@ -91,7 +91,6 @@ describe('Cross-language interaction', function() {
       cppListener.stdout.on('data', (data) => {
         if (!destroy) {
           clearInterval(timer);
-          // console.log(data.toString());
           assert.ok(new RegExp(text).test(data.toString()));
           done();
           node.destroy();
@@ -102,34 +101,31 @@ describe('Cross-language interaction', function() {
       rclnodejs.spin(node);
     });
 
-    // it('Python subscription should receive msg from Node.js publisher', function(done) {
-    //   this.timeout(60 * 1000);
-    //   var node = rclnodejs.createNode('py_pub_cpp_sub');
-    //   var rclString = rclnodejs.require('std_msgs').msg.String;
-    //   var destroy = false;
+    it('Python subscription should receive msg from Node.js publisher', function(done) {
+      var node = rclnodejs.createNode('js_pub_py_sub');
+      var rclString = rclnodejs.require('std_msgs').msg.String;
+      var destroy = false;
 
-    //   let text = 'Greeting from Node.js publisher';
-    //   var pyListener = childProcess.spawn('ros2', ['run', 'demo_nodes_py', 'listener']);
-    //   console.log('subprocess created');
-    //   var publisher = node.createPublisher(rclString, 'chatter');
-    //   var msg = new rclString();
-    //   msg.data = text;
+      let text = 'Greeting from Node.js publisher';
+      var pyListener = childProcess.spawn('python3', [`${__dirname}/py/listener.py`]);
+      var publisher = node.createPublisher(rclString, 'chatter');
+      var msg = new rclString();
+      msg.data = text;
 
-    //   pyListener.stdout.on('data', (data) => {
-    //     console.log(data.toString());
-    //     if (!destroy) {
-    //       clearInterval(timer);
-    //       assert.ok(new RegExp(text).test(data.toString()));
-    //       done();
-    //       node.destroy();
-    //       pyListener.kill('SIGINT');
-    //       destroy = true;
-    //     }
-    //   });
-    //   var timer = setInterval(() => {
-    //     publisher.publish(msg);
-    //   }, 500);      
-    //   rclnodejs.spin(node);
-    // });
+      pyListener.stdout.on('data', (data) => {
+        if (!destroy) {
+          clearInterval(timer);
+          assert.ok(new RegExp(text).test(data.toString()));
+          done();
+          node.destroy();
+          pyListener.kill('SIGINT');
+          destroy = true;
+        }
+      });
+      var timer = setInterval(() => {
+        publisher.publish(msg);
+      }, 100);
+      rclnodejs.spin(node);
+    });
   });
 });
