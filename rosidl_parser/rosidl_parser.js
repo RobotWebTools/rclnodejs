@@ -14,7 +14,10 @@
 
 'use strict';
 
+const os = require('os');
 const exec = require('child_process').exec;
+
+const pythonExe = (os.type() === 'Windows_NT') ? 'python' : 'python3';
 
 let rosidlParser = {
   parseMessageFile(packageName, filePath) {
@@ -38,7 +41,7 @@ let rosidlParser = {
   },
 
   _assembleCommand(args) {
-    let command = `python3 ${__dirname}/parser.py`;
+    let command = `${pythonExe} ${__dirname}/parser.py`;
     args.forEach((arg) => {
       command += ' ' + arg;
     });
