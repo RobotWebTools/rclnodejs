@@ -214,6 +214,8 @@ class {{=objectWrapper}} {
       wrapper._refObject = this._wrapperFields.{{=field.name}}._refArray[index];
       wrapper.deserialize();
     });
+    {{?? !field.type.isArray && field.type.type === 'string' && it.spec.msgName !== 'String'}}
+    this._wrapperFields.{{=field.name}}.data = this._refObject.{{=field.name}}.data;
     {{?}}
     {{~}}
   }
