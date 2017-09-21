@@ -21,16 +21,19 @@ const path = require('path');
 const parser = require('../rosidl_parser/rosidl_parser.js');
 const packages = require('./packages.js');
 const dot = require('dot');
+const os = require('os');
 
 dot.templateSettings.strip = false;
 dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
 const dots = dot.process({path: path.join(__dirname, '../rosidl_gen/templates')});
 
 const generatedRoot = path.join(__dirname, '../generated/');
-const installedPackagesRoot = process.env.AMENT_PREFIX_PATH.split(':');
+const installedPackagesRoot = (os.type() === 'Windows_NT')
+                              ? process.env.AMENT_PREFIX_PATH.split(';')
+                              : process.env.AMENT_PREFIX_PATH.split(':');
 
 function removeExtraSpaceLines(str) {
-  return str.replace(/([ \t]*\n){2,}/g, '\n');
+  return str.replace(/^\s*\n/gm, '');
 }
 
 function removeAllIntermediateFiles(path) {

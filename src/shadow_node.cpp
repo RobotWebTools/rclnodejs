@@ -100,7 +100,7 @@ NAN_METHOD(ShadowNode::Stop) {
 
 void ShadowNode::Execute() {
   Nan::HandleScope scope;
-  v8::Local<v8::Value> argv[0];
+  v8::Local<v8::Value> argv[1];
   Nan::MakeCallback(Nan::New(this->persistent()), "execute", 0, argv);
 }
 

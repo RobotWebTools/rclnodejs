@@ -1,3 +1,6 @@
 [submodule "spdlog"]
 	path = src/third_party/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "src/third_party/dlfcn-win32"]
+	path = src/third_party/dlfcn-win32
+	url = https://github.com/dlfcn-win32/dlfcn-win32.git

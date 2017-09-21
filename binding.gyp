@@ -16,8 +16,7 @@
       ],
       'include_dirs': [
         '.',
-        '<!(node -e \'require("nan")\')',
-        '<(ROS2_INSTALL_PATH)/include/',
+        "<!(node -e \"require('nan')\")",
       ],
       'cflags!': [
         '-fno-exceptions'
@@ -34,7 +33,6 @@
       'libraries': [
         '-lrcl',
         '-lrcutils',
-        '-L<(ROS2_INSTALL_PATH)/lib'
       ],
       'conditions': [
         [
@@ -42,14 +40,45 @@
             'defines': [
               'OS_LINUX'
             ],
+            'include_dirs': [
+              "<(ROS2_INSTALL_PATH)/include/",
+            ],
             'cflags_cc': [
               '-std=c++14'
-            ]
+            ],
+            'libraries': [
+              '-L<(ROS2_INSTALL_PATH)/lib'
+            ],
           }
         ],
         [
           'OS=="win"',
           {
+            'defines': [
+              'OS_WINDOWS'
+            ],
+            'variables': {
+              "ROS2_INSTALL_PATH_WINDOWS": "<!(echo %AMENT_PREFIX_PATH%)",
+            },
+            'cflags_cc': [
+              '-std=c++14'
+            ],
+            'include_dirs': [
+              './src/third_party/dlfcn-win32/',
+              '<(ROS2_INSTALL_PATH_WINDOWS)/include/',
+            ],
+            'sources': [
+              './src/third_party/dlfcn-win32/dlfcn.c',
+            ],
+            'msvs_settings': {
+              'VCCLCompilerTool': {
+                'ExceptionHandling': '2', # /EHsc
+              },
+              'VCLinkerTool': {
+                'AdditionalDependencies': ['psapi.lib'],
+                'AdditionalLibraryDirectories': ['<(ROS2_INSTALL_PATH_WINDOWS)/lib/'],
+              }
+            }
           }
         ],
         [
@@ -57,6 +86,12 @@
           {
             'defines': [
               'OS_MACOS'
+            ],
+            'include_dirs': [
+              "<(ROS2_INSTALL_PATH)/include/",
+            ],
+            'libraries': [
+              '-L<(ROS2_INSTALL_PATH)/lib'
             ],
             'xcode_settings': {
               'OTHER_CPLUSPLUSFLAGS': [

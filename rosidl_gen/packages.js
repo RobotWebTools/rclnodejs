@@ -16,15 +16,22 @@
 
 const path = require('path');
 const walk = require('walk');
+const os = require('os');
 
 const generatedRoot = path.join(__dirname, '../generated/');
 let pkgMap = new Map();
 
 function getPackageName(filePath) {
+  if (os.type() === 'Windows_NT') {
+    filePath = filePath.replace(/\\/g, '/');
+  }
   return filePath.match(/\w+\/share\/(\w+)\//)[1];
 };
 
 function getSubFolder(filePath) {
+  if (os.type() === 'Windows_NT') {
+    filePath = filePath.replace(/\\/g, '/');
+  }
   return filePath.match(/\w+\/share\/\w+\/(\w+)\//)[1];
 }
 
