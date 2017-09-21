@@ -1,0 +1,44 @@
+version: '{branch}-{build}'
+
+branches:
+  only:
+    - master
+    - develop
+
+image: Visual Studio 2017
+
+environment:
+  nodejs_version: "6"
+  PYTHON: "c:\\Python36-x64"
+
+clone_folder: c:\proj\rclnodejs
+
+before_build:
+  - cd c:\
+  - md download
+  - cd download
+  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/asio.1.10.6.nupkg
+  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/eigen.3.3.3.nupkg
+  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/tinyxml-usestl.2.6.2.nupkg
+  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/tinyxml2.4.0.1.nupkg
+  - choco install -y -s c:\download\ asio eigen tinyxml-usestl tinyxml2
+  - appveyor DownloadFile http://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip
+  - 7z x -y "c:\download\ros2-package-windows-AMD64.zip" -o"c:\" > nul
+  - "SET PATH=%PYTHON%;%PYTHON%\\bin;%PYTHON%\\Scripts;%PATH%"
+  - python --version
+  - pip install -U setuptools pip
+
+build_script:
+  - cd  c:\proj\rclnodejs
+  - git submodule init
+  - git submodule update
+  - ps: Install-Product node $env:nodejs_version x64
+  - call c:\ros2-windows\local_setup.bat
+  - node --version
+  - npm --version
+  - set PYTHON=C:\Python27-x64
+  - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+  - python --version
+  - npm install
+
+test: off
