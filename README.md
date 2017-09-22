@@ -2,8 +2,8 @@
 
 Branch | Linux/MacOS Build | Windows Build |
 ------------ |  :-------------: |  :-------------: |
-develop | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/tree/develop) | [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/develop?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/develop)
-master | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=master)](https://github.com/RobotWebTools/rclnodejs/tree/master) | [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/master?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/master)
+develop | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://travis-ci.org/RobotWebTools/rclnodejs) | [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/develop?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/develop)
+master | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=master)](https://travis-ci.org/RobotWebTools/rclnodejs) | [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/master?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/master)
 
 ## Build Environment
 
@@ -22,9 +22,23 @@ The `Node.js` version we selected is the latest LTS (6.x) `Boron`. You can insta
 * Download from Node.js offical [website](https://nodejs.org/en/), and install it.
 * Use the Node Version Manager ([nvm](https://github.com/creationix/nvm)) to install it.
 
+## Get Code
+
+Open a terminal, and input:
+
+```bash
+git clone https://github.com/RobotWebTools/rclnodejs.git
+```
+
+then enter the folder `rclnodejs`, and get the submodule:
+
+```bash
+git submodule update --init --recursive
+```
+
 ## Build Module
 
-This `Node.js` module is built by [node-gyp](https://www.npmjs.com/package/node-gyp), all you have to do is just to run the following command (**We only support the Linux platform in the current phase**):
+This `Node.js` module is built by [node-gyp](https://www.npmjs.com/package/node-gyp), all you have to do is just to run the following command:
 
 ```javascript
 npm install
