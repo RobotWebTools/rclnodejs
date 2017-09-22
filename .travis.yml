@@ -1,3 +1,8 @@
+os:
+  - linux
+  - osx
+osx_image: xcode9
+
 services:
   - docker
 
@@ -9,8 +14,26 @@ branches:
   - master
 
 before_install:
-  - sudo docker pull ubuntu:xenial
-  - sudo docker build -t rcldocker .
+  # LINUX
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo docker pull ubuntu:xenial; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo docker build -t rcldocker .; fi
+
+  # MACOS
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew tap osrf/ros2; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew tap ros/deps; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install python3 asio tinyxml2 tinyxml eigen pcre openssl; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then python3 -m pip install pyyaml setuptools argcomplete; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then cd ~/Downloads && wget http://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then mkdir -p ~/ros2_install && cd ~/ros2_install && tar xf ~/Downloads/ros2-package-osx-x86_64.tar.bz2; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then source $HOME/.nvm/nvm.sh; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then nvm install v6.11.3; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then nvm alias default v6.11.3; fi
 
 script:
-  - sudo docker run -v $(pwd):/root/rclnodejs --rm rcldocker bash -i -c '/root/rclnodejs/scripts/build.sh'
+  - echo $TRAVIS_OS_NAME
+  - node --version
+  - npm  --version
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo docker run -v $(pwd):/root/rclnodejs --rm rcldocker bash -i -c '/root/rclnodejs/scripts/build.sh'; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then source $HOME/ros2_install/ros2-osx/local_setup.bash && cd $TRAVIS_BUILD_DIR && npm install; fi
