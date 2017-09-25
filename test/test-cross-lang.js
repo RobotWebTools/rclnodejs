@@ -108,7 +108,7 @@ describe('Cross-language interaction', function() {
 
       let text = 'Greeting from Node.js publisher';
       var pyListener = childProcess.spawn('python3', [`${__dirname}/py/listener.py`]);
-      var publisher = node.createPublisher(rclString, 'chatter');
+      var publisher = node.createPublisher(rclString, 'chatter_py');
       var msg = new rclString();
       msg.data = text;
 
