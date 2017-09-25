@@ -30,17 +30,13 @@ rclnodejs.init().then(() => {
 
   let String = rclnodejs.require('std_msgs').msg.String;
   const publisher = node.createPublisher(String, 'topic', qos);
-  let msg = new String();
   /* eslint-enable */
 
   let counter = 0;
   setInterval(function() {
-    const str = 'Hello ROS ' + counter++;
-    console.log('Publishing message:', str);
-
-    msg.data = str;
-    publisher.publish(msg);
-  }, 10);
+    console.log(`Publishing message: Hello ROS ${counter}`);
+    publisher.publish(`Hello ROS ${counter++}`);
+  }, 1000);
 
   rclnodejs.spin(node);
 });
