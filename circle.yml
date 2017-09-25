@@ -1,0 +1,31 @@
+machine:
+  xcode:
+    version: 9.0
+
+general:
+  branches:
+    only:
+    - master
+    - develop
+
+dependencies:
+  pre:
+    - brew update
+    - brew tap homebrew/science
+    - brew tap ros/deps
+    - brew install python3 cmake wget cppcheck tinyxml eigen pcre
+    - brew install asio tinyxml2
+    - brew install opencv
+    - python3 -m pip install argcomplete coverage empy flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes mock nose pep8 pydocstyle pyflakes pyyaml setuptools vcstool
+    - brew install opencv
+    - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
+    - nvm install v6.11.3
+    - nvm use v6.11.3
+    - export PATH=/usr/local/Cellar/numpy/1.13.1_1/libexec/nose/bin:$PATH && mkdir -p ~/ros2_ws/src && cd ~/ros2_ws && wget https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos && vcs import src < ros2.repos && src/ament/ament_tools/scripts/ament.py build --symlink-install
+
+  override:
+    - source ~/ros2_ws/install/local_setup.bash && npm install
+
+test:
+  override:
+    - echo "disable tests"
