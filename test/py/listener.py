@@ -27,7 +27,7 @@ def main():
   global node
   rclpy.init()
   node = rclpy.create_node('py_listener')
-  publisher = node.create_subscription(String, 'chatter', callback)
+  publisher = node.create_subscription(String, 'chatter_py', callback)
   while rclpy.ok():
     rclpy.spin_once(node)
 

@@ -35,13 +35,9 @@ const rclnodejs = require('../index.js');
 // }
 
 describe('Rclnodejs message type testing', function() {
-  before(function() {
+  beforeEach(function() {
     this.timeout(60 * 1000);
     return rclnodejs.init();
-  });
-
-  after(function() {
-    rclnodejs.shutdown();
   });
 
   describe('Primitive types', function() {
@@ -54,6 +50,7 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'boolean');
         assert.ok(msg.data);
+        rclnodejs.shutdown();
         done();
       });
       rclnodejs.spin(node);
@@ -68,6 +65,7 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.deepStrictEqual(msg.data, 65);
+        rclnodejs.shutdown();
         done();
       });
       rclnodejs.spin(node);
@@ -81,6 +79,7 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.deepStrictEqual(msg.data, 10);
+        rclnodejs.shutdown();
         done();
       });
       rclnodejs.spin(node);
@@ -94,9 +93,10 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'string');
         assert.deepStrictEqual(msg.data, 'RCL String');
+        rclnodejs.shutdown();
         done();
       });
-      rclnodejs.spin(node);      
+      rclnodejs.spin(node);
     });
 
     // it('InitString', function(done) {
@@ -120,9 +120,10 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.deepStrictEqual(msg.data, 127);
+        rclnodejs.shutdown();
         done();
       });
-      rclnodejs.spin(node);          
+      rclnodejs.spin(node);
     });
 
     it('UInt8', function(done) {
@@ -133,9 +134,10 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.deepStrictEqual(msg.data, 255);
+        rclnodejs.shutdown();
         done();
       });
-      rclnodejs.spin(node);          
+      rclnodejs.spin(node);
     });
 
     it('Int16', function(done) {
@@ -146,9 +148,10 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.deepStrictEqual(msg.data, 0x7fff);
+        rclnodejs.shutdown();
         done();
       });
-      rclnodejs.spin(node);          
+      rclnodejs.spin(node);
     });
 
     it('UInt16', function(done) {
@@ -159,9 +162,10 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.deepStrictEqual(msg.data, 0xffff);
+        rclnodejs.shutdown();
         done();
       });
-      rclnodejs.spin(node);          
+      rclnodejs.spin(node);
     });
 
     it('Int32', function(done) {
@@ -172,9 +176,10 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.deepStrictEqual(msg.data, 0x7fffffff);
+        rclnodejs.shutdown();
         done();
       });
-      rclnodejs.spin(node);          
+      rclnodejs.spin(node);
     });
 
     it('UInt32', function(done) {
@@ -185,9 +190,10 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.deepStrictEqual(msg.data, 0xffffffff);
+        rclnodejs.shutdown();
         done();
       });
-      rclnodejs.spin(node);          
+      rclnodejs.spin(node);
     });
 
     it('Int64', function(done) {
@@ -198,6 +204,7 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         // assert.deepStrictEqual(typeof msg.data, 'string');
         assert.deepStrictEqual(parseInt(msg.data, 10), Number.MAX_SAFE_INTEGER);
+        rclnodejs.shutdown();
         done();
       });
       rclnodejs.spin(node);
@@ -211,9 +218,10 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         // assert.deepStrictEqual(typeof msg.data, 'string');
         assert.deepStrictEqual(parseInt(msg.data, 10), Number.MAX_SAFE_INTEGER);
+        rclnodejs.shutdown();
         done();
       });
-      rclnodejs.spin(node);          
+      rclnodejs.spin(node);
     });
 
     it('Float32', function(done) {
@@ -224,6 +232,7 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.ok(Math.abs(msg.data - 3.14) < 0.000001);
+        rclnodejs.shutdown();
         done();
       });
       rclnodejs.spin(node);
@@ -237,9 +246,10 @@ describe('Rclnodejs message type testing', function() {
         publisher.send('quit');
         assert.deepStrictEqual(typeof msg.data, 'number');
         assert.ok(Math.abs(msg.data - 3.14) < 0.000001);
+        rclnodejs.shutdown();
         done();
       });
       rclnodejs.spin(node);
-    });    
+    });
   });
 });
