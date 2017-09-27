@@ -57,17 +57,14 @@ NAN_METHOD(CreateNode) {
 }
 
 NAN_METHOD(CreateTimer) {
-  // TODO(minggang): Add support for uint64_t.
-  int64_t period = info[0]->IntegerValue();
-
+  int64_t period_ms = info[0]->IntegerValue();
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
-
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
-      rcl_timer_init(timer, period, nullptr, rcl_get_default_allocator()),
-      rcl_get_error_string_safe());
+      rcl_timer_init(timer, RCL_MS_TO_NS((uint64_t)period_ms), nullptr,
+          rcl_get_default_allocator()), rcl_get_error_string_safe());
 
   auto js_obj = RclHandle::NewInstance(timer, nullptr, [timer] {
       return rcl_timer_fini(timer);
@@ -131,7 +128,8 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
       RCL_RET_OK, rcl_timer_get_time_until_next_call(timer, &remaining_time),
       rcl_get_error_string_safe());
 
-  info.GetReturnValue().Set(Nan::New((uint32_t)remaining_time));
+  info.GetReturnValue().Set(Nan::New<v8::String>(
+      std::to_string(RCL_NS_TO_MS(remaining_time))).ToLocalChecked());
 }
 
 NAN_METHOD(TimerGetTimeSinceLastCall) {
@@ -143,7 +141,8 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
       RCL_RET_OK, rcl_timer_get_time_since_last_call(timer, &elapsed_time),
       rcl_get_error_string_safe());
 
-  info.GetReturnValue().Set(Nan::New((uint32_t)elapsed_time));
+  info.GetReturnValue().Set(Nan::New<v8::String>(
+    std::to_string(RCL_NS_TO_MS(elapsed_time))).ToLocalChecked());
 }
 
 NAN_METHOD(RclTake) {
