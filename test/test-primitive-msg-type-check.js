@@ -74,11 +74,11 @@ describe('Rclnodejs message type data testing', function() {
     assert.deepStrictEqual(msg.data, 10);
 
     assertThrowsError(() => {
-      msg.data = -129;
-    }, TypeError, 'out of bounds', 'Byte should be in [-128, 255]');
+      msg.data = -1;
+    }, TypeError, 'out of bounds', 'Byte should be in [0, 255]');
     assertThrowsError(() => {
       msg.data = 256;
-    }, TypeError, 'out of bounds', 'Byte should be in [-128, 255]');
+    }, TypeError, 'out of bounds', 'Byte should be in [0, 255]');
   });
 
   it('String data checking', function() {

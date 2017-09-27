@@ -242,4 +242,79 @@ describe('Rclnodejs message type testing', function() {
       rclnodejs.spin(node);
     });    
   });
+
+  describe('Compound types', function() {
+    this.timeout(60 * 1000);
+    it('ColorRGBA', function(done) {
+      var node = rclnodejs.createNode('colorrgba_subscription');
+      var msgColorRGBA = rclnodejs.require('std_msgs').msg.ColorRGBA;
+      var publisher = childProcess.fork(`${__dirname}/publisher_msg_colorrgba.js`);
+      var subscription = node.createSubscription(msgColorRGBA, 'ColorRGBA_channel', (msg) => {
+        publisher.send('quit');
+        assert.ok('r' in msg);
+        // assert.deepStrictEqual(typeof msg.r, 'number');
+        assert.deepStrictEqual(msg.r, 127);
+        assert.ok('g' in msg);
+        // assert.deepStrictEqual(typeof msg.g, 'number');
+        assert.deepStrictEqual(msg.g, 255);
+        assert.ok('b' in msg);
+        // assert.deepStrictEqual(typeof msg.b, 'number');
+        assert.deepStrictEqual(msg.b, 255);
+        assert.ok('a' in msg);
+        // assert.deepStrictEqual(typeof msg.a, 'number');
+        assert.ok(Math.abs(msg.a - 0.5) < 0.000001);
+        done();
+      });
+      rclnodejs.spin(node);
+    });
+
+    // it('Array', function(done) {
+
+    // });
+
+    it('Object with Header', function(done) {
+      var node = rclnodejs.createNode('header_subscription');
+      var Header = rclnodejs.require('std_msgs').msg.Header;
+      var Time = rclnodejs.require('builtin_interfaces').msg.Time;
+      var publisher = childProcess.fork(`${__dirname}/publisher_msg_header.js`);
+      var subscription = node.createSubscription(Header, 'Header_channel', (header) => {
+        publisher.send('quit');
+        assert.ok(header instanceof Header);
+
+        assert.ok('stamp' in header);
+        assert.ok(header.stamp instanceof Time);
+        assert.ok('sec' in header.stamp);
+        assert.deepStrictEqual(header.stamp.sec, 123456);
+        assert.ok('nanosec' in header.stamp);
+        assert.deepStrictEqual(header.stamp.nanosec, 789);
+
+        assert.ok('frame_id' in header);
+        assert.deepStrictEqual(header.frame_id, 'main frame');
+
+        done();
+      });
+      rclnodejs.spin(node);
+    });
+
+    it('Complex object', function(done) {
+      var node = rclnodejs.createNode('jointstate_subscription');
+      var Header = rclnodejs.require('std_msgs').msg.Header;
+      var Time = rclnodejs.require('builtin_interfaces').msg.Time;
+      var JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+      var publisher = childProcess.fork(`${__dirname}/publisher_msg_jointstate.js`);
+      var subscription = node.createSubscription(JointState, 'JointState_channel', (state) => {
+        publisher.send('quit');
+        assert.ok(state instanceof JointState);
+
+        assert.ok(state.header instanceof Header);
+        assert.deepStrictEqual(state.name, ['Tom', 'Jerry']);
+        assert.deepStrictEqual(state.position, [1, 2]);
+        assert.deepStrictEqual(state.velocity, [2, 3]);
+        assert.deepStrictEqual(state.effort, [4, 5, 6]);
+
+        done();
+      });
+      rclnodejs.spin(node);
+    });
+  });
 });
