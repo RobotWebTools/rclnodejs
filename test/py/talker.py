@@ -14,10 +14,11 @@
 # limitations under the License.
 
 import sys
-import rclpy
+import signal
 from time import sleep
 from std_msgs.msg import String
-import signal
+
+import rclpy
 
 node = None
 
@@ -30,19 +31,21 @@ def handler(signum, frame):
   cleanup()
   sys.exit(0)
 
-signal.signal(signal.SIGINT, handler)
-
-def callback(msg):
-  sys.stdout.write(msg.data)
-  sys.stdout.flush()
-
 def main():
   global node
+  signal.signal(signal.SIGINT, handler)
+
   rclpy.init()
-  node = rclpy.create_node('py_listener')
-  publisher = node.create_subscription(String, 'js_py_chatter', callback)
-  while rclpy.ok():
-    rclpy.spin_once(node)
+  node = rclpy.create_node('py_talker')
+  publisher = node.create_publisher(String, 'py_js_chatter')
+
+  msg = String()
+  msg.data = 'Hello World'
+  
+  while True:
+    print(msg.data)
+    publisher.publish(msg)
+    sleep(0.1)
 
   cleanup()
 

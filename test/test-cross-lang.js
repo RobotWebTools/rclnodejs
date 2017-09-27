@@ -15,13 +15,15 @@
 'use strict';
 
 const assert = require('assert');
+const path = require('path');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 
 describe('Cross-language interaction', function() {
   describe('Node.js Subcription', function() {
-    before(function() {
-      this.timeout(60 * 1000);
+    this.timeout(60 * 1000);
+
+    before(function() {      
       return rclnodejs.init();
     });
 
@@ -33,9 +35,10 @@ describe('Cross-language interaction', function() {
       var node = rclnodejs.createNode('cpp_pub_js_sub');
       var rclString = rclnodejs.require('std_msgs').msg.String;
       var destroy = false;
-      var cppTalker = childProcess.spawn('ros2', ['run', 'demo_nodes_cpp', 'talker']);
+      var cppTalkPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'talker');
+      var cppTalker = childProcess.spawn(cppTalkPath);
       var subscription = node.createSubscription(rclString, 'chatter', (msg) => {
-        assert.ok(/Hello World:/.test(msg.data));             
+        assert.ok(/Hello World:/.test(msg.data));
         if (!destroy) {
           node.destroy();
           cppTalker.kill('SIGINT');
@@ -50,9 +53,9 @@ describe('Cross-language interaction', function() {
       var node = rclnodejs.createNode('cpp_pub_py_sub');
       var rclString = rclnodejs.require('std_msgs').msg.String;
       var destroy = false;
-      var pyTalker = childProcess.spawn('ros2', ['run', 'demo_nodes_py', 'talker']);
-      var subscription = node.createSubscription(rclString, 'chatter', (msg) => {
-        assert.ok(/Hello World:/.test(msg.data));             
+      var pyTalker = childProcess.spawn('python3', [`${__dirname}/py/talker.py`]);
+      var subscription = node.createSubscription(rclString, 'py_js_chatter', (msg) => {
+        assert.ok(/Hello World/.test(msg.data));
         if (!destroy) {
           node.destroy();
           pyTalker.kill('SIGINT');
@@ -65,8 +68,9 @@ describe('Cross-language interaction', function() {
   });
     
   describe('Node.js publisher', function() {
+    this.timeout(60 * 1000);
+
     before(function() {
-      this.timeout(60 * 1000);
       return rclnodejs.init();
     });
 
@@ -80,7 +84,8 @@ describe('Cross-language interaction', function() {
       var destroy = false;
 
       let text = 'Greeting from Node.js publisher';
-      var cppListener = childProcess.spawn('ros2', ['run', 'demo_nodes_cpp', 'listener']);
+      let cppListenerPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
+      var cppListener = childProcess.spawn(cppListenerPath);
       var publisher = node.createPublisher(rclString, 'chatter');
       var msg = new rclString();
       msg.data = text;
@@ -108,7 +113,7 @@ describe('Cross-language interaction', function() {
 
       let text = 'Greeting from Node.js publisher';
       var pyListener = childProcess.spawn('python3', [`${__dirname}/py/listener.py`]);
-      var publisher = node.createPublisher(rclString, 'chatter');
+      var publisher = node.createPublisher(rclString, 'js_py_chatter');
       var msg = new rclString();
       msg.data = text;
 
