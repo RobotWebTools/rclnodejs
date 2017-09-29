@@ -17,7 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-const TIMER_INTERVAL = Math.pow(10, 8);
+const TIMER_INTERVAL = Math.pow(10, 2);
 describe('rclnodejs Timer class testing', function() {
   before(function() {
     this.timeout(60 * 1000);

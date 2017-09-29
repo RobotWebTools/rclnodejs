@@ -19,7 +19,7 @@ const rclnodejs = require('../index.js');
 rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('timer');
 
-  let timer = node.createTimer(1000000000, () => {
+  let timer = node.createTimer(1000, () => {
     console.log('One second escaped!');
 
     console.log('Cancel this timer.');
@@ -33,7 +33,7 @@ rclnodejs.init().then(() => {
     timer.reset();
     console.log('The next call will be ' +
                 timer.timeUntilNextCall() +
-                'ns later.');
+                'ms later.');
 
     console.log('Shuting down...');
     rclnodejs.shutdown();
