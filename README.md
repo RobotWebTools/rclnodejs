@@ -58,9 +58,9 @@ After building this module, you just need to follow the normal way to use it as 
 
 ```javascript
 const rclnodejs = require('../index.js');
-let String = rclnodejs.require('std_msgs').msg.String;
 
 rclnodejs.init().then(() => {
+  let String = rclnodejs.require('std_msgs').msg.String;
   const node = rclnodejs.createNode('publisher_example_node');
   const publisher = node.createPublisher(String, 'topic');
   let msg = new String();

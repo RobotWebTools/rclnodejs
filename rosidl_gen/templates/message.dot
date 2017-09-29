@@ -224,6 +224,10 @@ class {{=objectWrapper}} {
     return {pkgName: '{{=it.messageInfo.pkgName}}', subFolder: '{{=it.messageInfo.subFolder}}', interfaceName: '{{=it.messageInfo.interfaceName}}'};
   }
 
+  isPrimitive() {
+    return {{=isPrimitivePackage(it.spec.baseType)}};
+  }
+
   get refObject() {
     this.serialize();
     return this._refObject;
