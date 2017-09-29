@@ -9,7 +9,8 @@ image: Visual Studio 2017
 
 environment:
   nodejs_version: "6"
-  PYTHON: "c:\\Python36-x64"
+  PYTHON3: "c:\\Python36-x64"
+  PYTHON2: "c:\\Python27-x64"
 
 clone_folder: c:\proj\rclnodejs
 
@@ -22,10 +23,14 @@ before_build:
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/tinyxml-usestl.2.6.2.nupkg
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/tinyxml2.4.0.1.nupkg
   - choco install -y -s c:\download\ asio eigen tinyxml-usestl tinyxml2
+  - choco install -y wget
   - appveyor DownloadFile http://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip
   - 7z x -y "c:\download\ros2-package-windows-AMD64.zip" -o"c:\" > nul
-  - "SET PATH=%PYTHON%;%PYTHON%\\bin;%PYTHON%\\Scripts;%PATH%"
-  - python --version
+  - setx -m OPENSSL_CONF C:\OpenSSL-Win64\bin\openssl.cfg
+  - set PATH=C:\OpenSSL-Win64\bin;%PATH%
+  - setx AMENT_PYTHON_EXECUTABLE "c:\Python36-x64"
+  - refreshenv
+  - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
   - pip install -U setuptools pip
 
 build_script:
@@ -34,11 +39,13 @@ build_script:
   - git submodule update
   - ps: Install-Product node $env:nodejs_version x64
   - call c:\ros2-windows\local_setup.bat
+  - "SET PATH=%PYTHON2%;%PYTHON2%\\bin;%PYTHON2%\\Scripts;%PATH%"
   - node --version
   - npm --version
-  - set PYTHON=C:\Python27-x64
-  - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - python --version
   - npm install
+  - npm run lint
 
-test: off
+test_script:
+  - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
+  - npm test
