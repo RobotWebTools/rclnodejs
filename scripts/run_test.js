@@ -27,7 +27,7 @@ const tests = fs.readdirSync(testDir).filter(file => {
 
 const blacklistWindows = ['test-array.js', 'test-cross-lang.js', 'test-msg-type-py-node.js',
   'test-message-type.js', 'test-interactive.js'];
-const blacklistMac = [];
+const blacklistMac = ['test-interactive.js'];
 const blacklistLinux = [];
 let blacklist = [];
 
