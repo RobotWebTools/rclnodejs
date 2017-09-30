@@ -27,12 +27,13 @@ describe('ROSIDL Node.js message generator test suite', function() {
     rclnodejs.shutdown();
   });
 
-  it('Try require all message classes', function(done) {
+  it('Try require all message classes', function() {
     this.timeout(60 * 1000);
     const packages = require('../rosidl_gen/packages.js');
     const installedPackagesRoot = process.env.AMENT_PREFIX_PATH.split(':');
+    let promises = [];
     installedPackagesRoot.forEach((path) => {
-      packages.findPackagesInDirectory(path).then((pkgs) => {
+      let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
         pkgs.forEach((pkg) => {
           pkg.messages.forEach((info) => {
             if (info.subFolder === 'msg') {
@@ -40,9 +41,10 @@ describe('ROSIDL Node.js message generator test suite', function() {
             }
           });
         });
-        done();
       });
+      promises.push(promise);
     });
+    return Promise.all(promises);
   });
 
   it('Try use std_msgs/msg/String.msg', function() {
