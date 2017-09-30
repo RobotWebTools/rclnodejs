@@ -18,8 +18,8 @@ dependencies:
     - export PATH=/usr/local/Cellar/numpy/1.13.1_1/libexec/nose/bin:$PATH && mkdir -p ~/ros2_ws/src && cd ~/ros2_ws && wget https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos && vcs import src < ros2.repos && src/ament/ament_tools/scripts/ament.py build --symlink-install
 
   override:
-    - source ~/ros2_ws/install/local_setup.bash && npm install
+    - source ~/ros2_ws/install/local_setup.bash && npm install && npm run lint
 
 test:
   override:
-    - echo "disable tests"
+    - source ~/ros2_ws/install/local_setup.bash && node scripts/run_test.js
