@@ -24,6 +24,7 @@
 namespace rclnodejs {
 
 static std::exception_ptr g_exception_ptr = nullptr;
+static bool g_handle_closed = false;
 
 Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
     : async_(nullptr), handle_manager_(handle_manager), delegate_(delegate) {
@@ -38,6 +39,7 @@ void Executor::Start() {
   if (!running_.load()) {
     async_ = new uv_async_t();
     uv_async_init(uv_default_loop(), async_, DoWork);
+    g_handle_closed = false;
     async_->data = this;
 
     // Mark flag before creating thread
@@ -62,7 +64,10 @@ void Executor::Stop() {
                  //  Don't free Executor::async_ in Executor's dtor
                  //
                  free(async);
+                 g_handle_closed = true;
                });
+      while (!g_handle_closed)
+        uv_run(uv_default_loop(), UV_RUN_ONCE);
     }
   }
 }
