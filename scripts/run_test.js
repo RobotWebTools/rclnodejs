@@ -25,22 +25,12 @@ const testDir = path.join(__dirname, '../test/');
 const tests = fs.readdirSync(testDir).filter(file => {
   return file.substr(0, 5) === 'test-';});
 
-const blacklistWindows = ['test-array.js', 'test-cross-lang.js', 'test-msg-type-py-node.js',
-  'test-message-type.js', 'test-interactive.js'];
-const blacklistMac = ['test-interactive.js'];
-const blacklistLinux = [];
-let blacklist = [];
-
-if (os.type() === 'Windows_NT') {
-  blacklist = blacklistWindows;
-} else if (os.type() === 'Darwin') {
-  blacklist = blacklistMac;
-} else {
-  blacklist = blacklistLinux;
-}
+// eslint-disable-next-line
+let blacklist = JSON.parse(fs.readFileSync(path.join(__dirname, '../test/blacklist.json'), 'utf8'));
+let ignoredCases = blacklist[os.type()];
 
 tests.forEach(test => {
-  if (blacklist.indexOf(test) === -1) {
+  if (ignoredCases.indexOf(test) === -1) {
     mocha.addFile(path.join(testDir, test));
   }
 });
