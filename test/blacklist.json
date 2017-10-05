@@ -1,0 +1,6 @@
+{
+  "Linux": [],
+  "Darwin": ["test-interactive.js"],
+  "Windows_NT": ["test-array.js", "test-cross-lang.js", "test-msg-type-py-node.js",
+    "test-message-type.js", "test-interactive.js"]
+}
