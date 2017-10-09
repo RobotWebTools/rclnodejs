@@ -35,12 +35,12 @@ const rclnodejs = require('../index.js');
 // }
 
 describe('Rclnodejs message type testing', function() {
-  before(function() {
+  beforeEach(function() {
     this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 
-  after(function() {
+  afterEach(function() {
     rclnodejs.shutdown();
   });
 

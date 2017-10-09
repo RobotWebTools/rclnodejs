@@ -27,7 +27,7 @@ describe('Rclnodejs - Python message type testing', function() {
     rclnodejs.shutdown();
   });
 
-  describe('Python publisher - rclnodejs subscription', function() {
+  describe('Python publisher - rclnodejs subscription: primitive msg type', function() {
     this.timeout(60 * 1000);
 
     it('Bool', function(done) {
@@ -269,7 +269,85 @@ describe('Rclnodejs - Python message type testing', function() {
     });
   });
 
-  describe('Rclnodejs publisher - Python subscription', function(done) {
+  describe('Python publisher - rlcnodejs subscription: compound msg type', function() {
+    this.timeout(60 * 1000);
+
+    it('ColorRGBA', function(done) {
+      var node = rclnodejs.createNode('colorrgba_js_subscription');
+      const ColorRGBA = rclnodejs.require('std_msgs').msg.ColorRGBA;
+      var destroy = false;
+      var publisher = childProcess.spawn('python3', [`${__dirname}/py/publisher_msg.py`, 'ColorRGBA']);
+      var subscription = node.createSubscription(ColorRGBA, 'ColorRGBA_py_js_channel', (msg) => {
+        assert.ok(Math.abs(msg.a - 0.5) < 0.000001);
+        assert.ok(Math.abs(msg.r - 127) < 0.000001);
+        assert.ok(Math.abs(msg.g - 255) < 0.000001);
+        assert.ok(Math.abs(msg.b - 255) < 0.000001);
+
+        if (!destroy) {
+          node.destroy();
+          publisher.kill('SIGINT');
+          destroy = true;
+        }
+        done();
+      });
+      rclnodejs.spin(node);
+    });
+
+    // it('Array', function(done) {
+    // });
+
+    it('Header', function(done) {
+      var node = rclnodejs.createNode('header_js_publisher');
+      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
+      const Header = rclnodejs.require('std_msgs').msg.Header;
+      var destroy = false;
+      var publisher = childProcess.spawn('python3', [`${__dirname}/py/publisher_msg.py`, 'Header']);
+      var subscription = node.createSubscription(Header, 'Header_py_js_channel', (msg) => {
+        assert.ok(msg.stamp instanceof Time);
+        assert.deepStrictEqual(msg.stamp.sec, 123456);
+        assert.deepStrictEqual(msg.stamp.nanosec, 789);
+        assert.deepStrictEqual(msg.frame_id, 'main frame');
+
+        if (!destroy) {
+          node.destroy();
+          publisher.kill('SIGINT');
+          destroy = true;
+        }
+        done();
+      });
+      rclnodejs.spin(node);
+    });
+
+    it('Complex object', function(done) {
+      var node = rclnodejs.createNode('jointstate_js_publisher');
+      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
+      const Header = rclnodejs.require('std_msgs').msg.Header;
+      const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+      var destroy = false;
+      var publisher = childProcess.spawn('python3', [`${__dirname}/py/publisher_msg.py`, 'JointState']);
+      var subscription = node.createSubscription(JointState, 'JointState_py_js_channel', (msg) => {
+        assert.ok(msg.header instanceof Header);
+        assert.ok(msg.header.stamp instanceof Time);
+        assert.deepStrictEqual(msg.header.stamp.sec, 123456);
+        assert.deepStrictEqual(msg.header.stamp.nanosec, 789);
+        assert.deepStrictEqual(msg.header.frame_id, 'main frame');
+        assert.deepStrictEqual(msg.name, ['Tom', 'Jerry']);
+        assert.deepStrictEqual(msg.position, [1, 2]);
+        assert.deepStrictEqual(msg.velocity, [2, 3]);
+        assert.deepStrictEqual(msg.effort, [4, 5, 6]);
+
+        if (!destroy) {
+          node.destroy();
+          publisher.kill('SIGINT');
+          destroy = true;
+        }
+        done();
+      });
+      rclnodejs.spin(node);
+    });
+  });
+
+  describe('Rclnodejs publisher - Python subscription: primitive', function(done) {
     this.timeout(60 * 1000);
 
     it('Bool', function(done) {
@@ -648,6 +726,108 @@ describe('Rclnodejs - Python message type testing', function() {
         publisher.publish(msg);
       }, 100);
       rclnodejs.spin(node);
-    });    
+    });
+  });
+
+  describe('Rclnodejs publisher - Python subscription: compound msg type', function() {
+    this.timeout(60 * 1000);
+
+    it('ColorRGBA', function(done) {
+      var node = rclnodejs.createNode('colorrgba_js_publisher');
+      const ColorRGBA = rclnodejs.require('std_msgs').msg.ColorRGBA;
+      var msg = new ColorRGBA();
+      msg.a = 0.5;
+      msg.r = 127;
+      msg.g = 255;
+      msg.b = 255;
+
+      var destroy = false;
+      var subscription = childProcess.spawn('python3', [`${__dirname}/py/subscription_msg.py`, 'ColorRGBA']);
+      var publisher = node.createPublisher(ColorRGBA, 'ColorRGBA_js_py_channel');
+      const expected = '(127.0,255.0,255.0,0.5)';
+      subscription.stdout.on('data', (data) => {
+        if (!destroy) {
+          clearInterval(timer);
+          assert.deepStrictEqual(data.toString(), expected);
+          done();
+          node.destroy();
+          subscription.kill('SIGINT');
+          destroy = true;
+        }
+      });
+      var timer = setInterval(() => {
+        publisher.publish(msg);
+      }, 100);
+      rclnodejs.spin(node);      
+    });
+
+    it('Header', function(done) {
+      var node = rclnodejs.createNode('header_js_publisher');
+      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
+      const Header = rclnodejs.require('std_msgs').msg.Header;
+      var time = new Time();
+      time.sec = 123456;
+      time.nanosec = 789;
+      var msg = new Header();
+      msg.stamp = time;
+      msg.frame_id = 'main frame';
+
+      var destroy = false;
+      var subscription = childProcess.spawn('python3', [`${__dirname}/py/subscription_msg.py`, 'Header']);
+      var publisher = node.createPublisher(Header, 'Header_js_py_channel');
+      const expected = '(123456,789,main frame)';
+      subscription.stdout.on('data', (data) => {
+        if (!destroy) {
+          clearInterval(timer);
+          assert.deepStrictEqual(data.toString(), expected);
+          done();
+          node.destroy();
+          subscription.kill('SIGINT');
+          destroy = true;
+        }
+      });
+      var timer = setInterval(() => {
+        publisher.publish(msg);
+      }, 100);
+      rclnodejs.spin(node);      
+    });
+
+    it('Complex object', function(done) {
+      var node = rclnodejs.createNode('jointstate_js_publisher');
+      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
+      const Header = rclnodejs.require('std_msgs').msg.Header;
+      const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+      var time = new Time();
+      time.sec = 123456;
+      time.nanosec = 789;
+      var header = new Header();
+      header.stamp = time;
+      header.frame_id = 'main frame';
+      var msg = new JointState();
+      msg.header = header;
+      msg.name = ['Tom', 'Jerry'];
+      msg.position = [1, 2];
+      msg.velocity = [2, 3];
+      msg.effort = [4, 5, 6];
+
+      var destroy = false;
+      var subscription = childProcess.spawn('python3', [`${__dirname}/py/subscription_msg.py`, 'JointState']);
+      var publisher = node.createPublisher(JointState, 'JointState_js_py_channel');
+      const expected = "(123456,789,main frame,['Tom', 'Jerry'],[1.0, 2.0],[2.0, 3.0],[4.0, 5.0, 6.0])";
+      subscription.stdout.on('data', (data) => {
+        if (!destroy) {
+          clearInterval(timer);
+          assert.deepStrictEqual(data.toString(), expected);
+          done();
+          node.destroy();
+          subscription.kill('SIGINT');
+          destroy = true;
+        }       
+      });
+      var timer = setInterval(() => {
+        publisher.publish(msg);
+      }, 100);
+      rclnodejs.spin(node);      
+    });
   });
 });

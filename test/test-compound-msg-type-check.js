@@ -38,13 +38,6 @@ describe('Compound types', function() {
     assert.deepStrictEqual(typeof msg.g, 'number');
     assert.deepStrictEqual(typeof msg.b, 'number');
     assert.deepStrictEqual(typeof msg.a, 'number');
-    // assert.ok('r' in msg);
-    // assert.ok('g' in msg);
-    // assert.ok('b' in msg);
-    // assert.ok('a' in msg);
-
-    // msg.a = 1.1;
-    // msg.r = 256;
 
     // assertThrowsError(() => {
     //   msg.r = -1;
