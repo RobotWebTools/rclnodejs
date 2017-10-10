@@ -770,6 +770,7 @@ describe('Rclnodejs - Python message type testing', function() {
       time.nanosec = 789;
       var msg = new Header();
       msg.stamp = time;
+      // eslint-disable-next-line
       msg.frame_id = 'main frame';
 
       var destroy = false;
@@ -802,6 +803,7 @@ describe('Rclnodejs - Python message type testing', function() {
       time.nanosec = 789;
       var header = new Header();
       header.stamp = time;
+      // eslint-disable-next-line
       header.frame_id = 'main frame';
       var msg = new JointState();
       msg.header = header;
