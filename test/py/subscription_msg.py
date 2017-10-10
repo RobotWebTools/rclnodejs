@@ -17,6 +17,8 @@ import sys
 import rclpy
 from time import sleep
 from std_msgs.msg import *
+from builtin_interfaces.msg import *
+from sensor_msgs.msg import *
 import signal
 
 node = None
@@ -32,6 +34,30 @@ def handler(signum, frame):
 
 def callback(msg):
   sys.stdout.write(str(msg.data))
+  sys.stdout.flush()
+
+def callback_colorrgba(msg):
+  sys.stdout.write('(' + str(msg.r) + ',' 
+                    + str(msg.g) + ',' 
+                    + str(msg.b) + ','
+                    + str(msg.a) + ')')
+  sys.stdout.flush()
+
+def callback_header(msg):
+  sys.stdout.write('(' + str(msg.stamp.sec) + ','
+                    + str(msg.stamp.nanosec) + ','
+                    + str(msg.frame_id) + ')')
+  sys.stdout.flush()
+
+def callback_jointstate(msg):
+  sys.stdout.write('(' + str(msg.header.stamp.sec) + ','
+                    + str(msg.header.stamp.nanosec) + ','
+                    + str(msg.header.frame_id) + ','
+                    + str(msg.name) + ','
+                    + str(msg.position) + ','
+                    + str(msg.velocity) + ','
+                    + str(msg.effort)
+                    + ')')
   sys.stdout.flush()
 
 def main():
@@ -82,7 +108,16 @@ def main():
     subscription = node.create_subscription(Float32, 'Float32_js_py_channel', callback)
   elif rclType == 'Float64':
     node = rclpy.create_node('py_float64_subscription')
-    subscription = node.create_subscription(Float64, 'Float64_js_py_channel', callback)                               
+    subscription = node.create_subscription(Float64, 'Float64_js_py_channel', callback)
+  elif rclType == 'ColorRGBA':
+    node = rclpy.create_node('py_colorrgba_subscription')
+    subscription = node.create_subscription(ColorRGBA, 'ColorRGBA_js_py_channel', callback_colorrgba)
+  elif rclType == 'Header':
+    node = rclpy.create_node('py_header_subscription')
+    subscription = node.create_subscription(Header, 'Header_js_py_channel', callback_header)         
+  elif rclType == 'JointState':
+    node = rclpy.create_node('py_jointstate_subscrption')
+    subscription = node.create_subscription(JointState, 'JointState_js_py_channel', callback_jointstate)
   while rclpy.ok():
     rclpy.spin_once(node)
 

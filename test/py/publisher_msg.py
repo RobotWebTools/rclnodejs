@@ -6,6 +6,8 @@ from time import sleep
 
 import rclpy
 from std_msgs.msg import *
+from builtin_interfaces.msg import *
+from sensor_msgs.msg import *
 
 node = None
 
@@ -95,11 +97,42 @@ def main():
     publisher = node.create_publisher(Float64, 'Float64_py_js_channel')
     msg = Float64()
     msg.data = 3.14
+  elif rclType == 'ColorRGBA':
+    node = rclpy.create_node('py_colorrgba_publisher')
+    publisher = node.create_publisher(ColorRGBA, 'ColorRGBA_py_js_channel')
+    msg = ColorRGBA()
+    msg.a = 0.5
+    msg.r = 127.0
+    msg.g = 255.0
+    msg.b = 255.0
+  elif rclType == 'Header':
+    node = rclpy.create_node('py_header_publisher')
+    publisher = node.create_publisher(Header, 'Header_py_js_channel')
+    time = Time()
+    time.sec = 123456
+    time.nanosec = 789
+    msg = Header()
+    msg.stamp = time
+    msg.frame_id = 'main frame'
+  elif rclType == 'JointState':
+    node = rclpy.create_node('py_jointstate_publisher')
+    publisher = node.create_publisher(JointState, 'JointState_py_js_channel')
+    time = Time()
+    time.sec = 123456
+    time.nanosec = 789
+    header = Header()
+    header.stamp = time
+    header.frame_id = 'main frame'
+    msg = JointState()
+    msg.header = header
+    msg.name = ['Tom', 'Jerry']
+    msg.position = [1.0, 2.0]
+    msg.velocity = [2.0, 3.0]
+    msg.effort = [4.0, 5.0, 6.0]
   else:
     sys.stderr.write('Unsupported type')
     sys.exit(0)
   while True:
-    print(msg.data)
     publisher.publish(msg)
     sleep(0.5)
 
