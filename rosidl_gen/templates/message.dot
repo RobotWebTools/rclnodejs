@@ -214,6 +214,14 @@ class {{=objectWrapper}} {
       wrapper._refObject = this._wrapperFields.{{=field.name}}._refArray[index];
       wrapper.deserialize();
     });
+    {{?? field.type.isPrimitiveType && field.type.isArray}}
+    let {{=field.name}}Primitives = this._refObject.{{=field.name}}.data;
+    {{=field.name}}Primitives.length = this._refObject.{{=field.name}}.size;
+    let {{=field.name}}Values = [];
+    {{=field.name}}Primitives.toArray().forEach(value =>{
+      {{=field.name}}Values.push(value.data);
+    });
+    this._wrapperFields.{{=field.name}}.setWrappers({{=field.name}}Values);
     {{?? !field.type.isArray && field.type.type === 'string' && it.spec.msgName !== 'String'}}
     this._wrapperFields.{{=field.name}}.data = this._refObject.{{=field.name}}.data;
     {{?}}
@@ -236,11 +244,9 @@ class {{=objectWrapper}} {
   {{~ it.spec.fields :field}}
   get {{=field.name}}() {
     {{? field.type.isArray && field.type.isPrimitiveType}}
-    let primitives = this._refObject.{{=field.name}}.data;
-    primitives.length = this._refObject.{{=field.name}}.size;
     let values = [];
-    primitives.toArray().forEach(value =>{
-      values.push(value.data);
+    this._wrapperFields['{{=field.name}}'].data.forEach((wrapper, index) => {
+      values.push(wrapper.data);
     });
     return values;
     {{?? !field.type.isPrimitiveType && !field.type.isArray}}
@@ -254,7 +260,7 @@ class {{=objectWrapper}} {
 
   set {{=field.name}}(value) {
     {{? field.type.isArray && field.type.isPrimitiveType}}
-    this._wrapperFields['{{=field.name}}'].setWrappers(value);;
+    this._wrapperFields['{{=field.name}}'].setWrappers(value);
     {{?? !field.type.isArray && field.type.isPrimitiveType && field.type.type !== 'string'}}
     this._refObject.{{=field.name}} = value;
     {{?? it.spec.msgName === 'String'}}
@@ -288,6 +294,8 @@ class {{=arrayWrapper}} {
   constructor(size = 0) {
     this._resize(size);
     this._refObject = new {{=refObjectArrayType}};
+    this._refObject.size = size;
+    this._refObject.capacity = size;
   }
 
   toRawROS() {
