@@ -16,8 +16,9 @@
 
 const os = require('os');
 const exec = require('child_process').exec;
+const pyUtils = require('./py_utils');
 
-const pythonExe = (os.type() === 'Windows_NT') ? 'python' : 'python3';
+const pythonExe = pyUtils.getPython('python3');
 
 let rosidlParser = {
   parseMessageFile(packageName, filePath) {
