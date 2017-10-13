@@ -61,7 +61,7 @@ describe('Compound types', function() {
     const Byte = rclnodejs.require('std_msgs').msg.Byte;
     const ByteArray = Byte.ArrayType;
     let msg = new ByteArray(3);
-    msg.setWrappers([1, 2, 3]);
+    msg.fill([1, 2, 3]);
 
     assert.deepStrictEqual(msg.data.length, 3);
     assert.deepStrictEqual(msg.data[0].data, 1);
