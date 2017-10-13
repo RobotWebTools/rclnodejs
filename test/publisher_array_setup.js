@@ -17,13 +17,13 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(function() {
-  const node = rclnodejs.createNode('array_message_publisher');
+  var node = rclnodejs.createNode('array_message_publisher');
 
-  let Header = rclnodejs.require('std_msgs').msg.Header;
-  let Time = rclnodejs.require('builtin_interfaces').msg.Time;
-  let JointState = rclnodejs.require('sensor_msgs').msg.JointState;  
+  const Header = rclnodejs.require('std_msgs').msg.Header;
+  const Time = rclnodejs.require('builtin_interfaces').msg.Time;
+  const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
 
-  const publisher = node.createPublisher(JointState, 'JointState');
+  var publisher = node.createPublisher(JointState, 'JointState');
 
   let time = new Time();
   time.sec = 123456;
@@ -44,10 +44,11 @@ rclnodejs.init().then(function() {
   publisher.publish(state);
   rclnodejs.spin(node);
 
-  setTimeout(() => {
+  process.on('SIGINT', function() {
     node.destroy();
     rclnodejs.shutdown();
-  }, 100);
+    process.exit(0);
+  });  
 }).catch(function(err) {
   console.log(err);
 });

@@ -19,8 +19,9 @@ const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 
 describe('rclnodejs interactive testing', function() {
+  this.timeout(60 * 1000);
+
   before(function() {
-    this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 
@@ -31,19 +32,22 @@ describe('rclnodejs interactive testing', function() {
   describe('Publisher/Subscription', function() {
     it('Publisher/Subscription', function(done) {
       var node = rclnodejs.createNode('publisher_subscription');
-      var RclString = rclnodejs.require('std_msgs').msg.String;
-      var msg = new RclString();
+      const RclString = rclnodejs.require('std_msgs').msg.String;
+      var publisher = childProcess.fork(`${__dirname}/publisher_setup.js`);
+      var destroy = false;
       var subscription = node.createSubscription(RclString, 'topic', function(msg) {
         assert.deepStrictEqual(typeof msg, 'object');
         assert.ok('data' in msg);
         assert.deepStrictEqual(msg.data, 'Greeting from publisher');
 
-        node.destroy();
-        done();
+        if (!destroy) {
+          publisher.kill('SIGINT');
+          node.destroy();
+          destroy = true;
+          done();
+        }
       });      
       rclnodejs.spin(node);
-
-      childProcess.spawn('node', ['publisher_setup.js'], {cwd: __dirname});
     });
   });
 
@@ -61,11 +65,16 @@ describe('rclnodejs interactive testing', function() {
       });
       rclnodejs.spin(node);
 
-      var clientProcess = childProcess.spawn('node', ['client_setup.js'], {cwd: __dirname});
-      clientProcess.stdout.on('data', function(data) {
-        node.destroy();
+      var destroy = false;
+      var client = childProcess.fork(`${__dirname}/client_setup.js`, {silent: true});
+      client.stdout.on('data', function(data) {
         assert.deepEqual(parseInt(data, 10), 3);
-        done();
+        if (!destroy) {
+          client.kill('SIGINT');
+          node.destroy();
+          destroy = true;
+          done();
+        }
       });
     });
   });

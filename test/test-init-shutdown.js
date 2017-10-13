@@ -18,9 +18,7 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 
 describe('Node destroy testing', function() {
-  before(function() {
-    this.timeout(60 * 1000);
-  });
+  this.timeout(60 * 1000);
 
   it('rclnodejs.init()', function(done) {
     rclnodejs.init().then(function() {

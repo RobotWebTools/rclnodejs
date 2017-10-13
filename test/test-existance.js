@@ -49,8 +49,9 @@ describe('rclnodejs module existance testing', function() {
 });
 
 describe('rclnodejs class existance testing', function() {
+  this.timeout(60 * 1000);
+
   before(function() {
-    this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 

@@ -27,10 +27,12 @@ rclnodejs.init().then(function() {
     process.stdout.write(response.sum.toString());
   });
   rclnodejs.spin(node);
-  setTimeout(function() {
+
+  process.on('SIGINT', function() {
     node.destroy();
     rclnodejs.shutdown();
-  }, 1 * 1000);
+    process.exit(0);
+  });
 }).catch(function(err) {
   console.log(err);
 });

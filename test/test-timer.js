@@ -19,8 +19,9 @@ const rclnodejs = require('../index.js');
 
 const TIMER_INTERVAL = Math.pow(10, 2);
 describe('rclnodejs Timer class testing', function() {
+  this.timeout(60 * 1000);
+
   before(function() {
-    this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 

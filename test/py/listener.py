@@ -30,17 +30,17 @@ def handler(signum, frame):
   cleanup()
   sys.exit(0)
 
-signal.signal(signal.SIGINT, handler)
-
 def callback(msg):
   sys.stdout.write(msg.data)
   sys.stdout.flush()
 
 def main():
   global node
+  signal.signal(signal.SIGINT, handler)
+
   rclpy.init()
   node = rclpy.create_node('py_listener')
-  publisher = node.create_subscription(String, 'js_py_chatter', callback)
+  subscription = node.create_subscription(String, 'js_py_chatter', callback)
   while rclpy.ok():
     rclpy.spin_once(node)
 

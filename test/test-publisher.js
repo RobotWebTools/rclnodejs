@@ -19,8 +19,9 @@ const rclnodejs = require('../index.js');
 const {message} = rclnodejs;
 
 describe('rclnodejs publisher test suite', function() {
+  this.timeout(60 * 1000);
+
   before(function() {
-    this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 
