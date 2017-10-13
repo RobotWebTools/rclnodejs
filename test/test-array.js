@@ -19,8 +19,9 @@ const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 
 describe('rclnodejs message communication', function() {
+  this.timeout(60 * 1000);
+
   before(function() {
-    this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 
@@ -29,9 +30,10 @@ describe('rclnodejs message communication', function() {
   });
 
   it('should support array type', function(done) {
-    this.timeout(10 * 1000);
     var node = rclnodejs.createNode('array_message_subscription');
-    let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+    const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+    var publisher = childProcess.fork(`${__dirname}/publisher_array_setup.js`);
+    var destroy = false;
     var subscription = node.createSubscription(JointState, 'JointState', (state) => {
       assert.deepStrictEqual(state.header.stamp.sec, 123456);
       assert.deepStrictEqual(state.header.stamp.nanosec, 789);
@@ -41,11 +43,13 @@ describe('rclnodejs message communication', function() {
       assert.deepStrictEqual(state.velocity, [2, 3]);
       assert.deepStrictEqual(state.effort, [4, 5, 6]);
 
-      node.destroy();
-      done();
+      if (!destroy) {
+        publisher.kill('SIGINT');
+        node.destroy();
+        destroy = true;
+        done();
+      }
     });
     rclnodejs.spin(node);
-
-    childProcess.spawn('node', ['publisher_array_setup.js'], {cwd: __dirname});
   });
 });

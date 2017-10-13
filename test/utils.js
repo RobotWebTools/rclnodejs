@@ -15,6 +15,8 @@
 'use strict';
 
 const assert = require('assert');
+const os = require('os');
+const childProcess = require('child_process');
 
 function assertMember(name, obj, member, typeName) {
   assert.ok(name in obj);
@@ -30,5 +32,16 @@ function assertThrowsError(operation, errorType, errMsg, message) {
   }, message);
 }
 
+function launchPythonProcess(cmdline) {
+  var pythonProcess = null;
+  if (os.platform() === 'win32') {
+    cmdline.unshift('-3');
+    pythonProcess = childProcess.spawn('py', cmdline);
+  } else {
+    pythonProcess = childProcess.spawn('python3', cmdline);
+  }
+  return pythonProcess;
+}
 module.exports.assertMember = assertMember;
 module.exports.assertThrowsError = assertThrowsError;
+module.exports.launchPythonProcess = launchPythonProcess;

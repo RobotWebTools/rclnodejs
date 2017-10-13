@@ -20,16 +20,17 @@ const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
 
 describe('rclnodejs node test suite', function() {
+  this.timeout(60 * 1000);
+
+  before(function() {
+    return rclnodejs.init();
+  });
+
+  after(function() {
+    rclnodejs.shutdown();
+  });
+
   describe('createNode method testing', function() {
-    before(function() {
-      this.timeout(60 * 1000);
-      return rclnodejs.init();
-    });
-
-    after(function() {
-      rclnodejs.shutdown();
-    });
-
     it('Try creating a node', function() {
       const node = rclnodejs.createNode('example_node');
       rclnodejs.spin(node);
@@ -119,9 +120,9 @@ describe('rclnodejs node test suite', function() {
 describe('rcl node methods testing', function() {
   var node;
   var rclString, GetParameters;
+  this.timeout(60 * 1000);
 
   before(function() {
-    this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 
