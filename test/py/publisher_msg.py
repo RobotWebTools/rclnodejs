@@ -97,6 +97,22 @@ def main():
     publisher = node.create_publisher(Float64, 'Float64_py_js_channel')
     msg = Float64()
     msg.data = 3.14
+  elif rclType == 'Array':
+    node = rclpy.create_node('py_array_publisher')
+    publisher = node.create_publisher(ByteMultiArray, 'Array_py_js_channel');
+
+    lengthDim = MultiArrayDimension()
+    lengthDim.label = 'length'
+    lengthDim.size = 1;
+    lengthDim.stride = 3;
+
+    layout = MultiArrayLayout()
+    layout.dim = [lengthDim]
+    layout.data_offset = 0;
+
+    msg = ByteMultiArray()
+    msg.layout = layout
+    msg.data = [b'\x41', b'\x42', b'\x43']
   elif rclType == 'ColorRGBA':
     node = rclpy.create_node('py_colorrgba_publisher')
     publisher = node.create_publisher(ColorRGBA, 'ColorRGBA_py_js_channel')
