@@ -33,6 +33,7 @@
       'libraries': [
         '-lrcl',
         '-lrcutils',
+        '-lrmw',
       ],
       'conditions': [
         [

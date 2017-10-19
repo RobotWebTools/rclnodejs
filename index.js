@@ -20,6 +20,7 @@ const generator = require('./rosidl_gen/generator.js');
 const packages = require('./rosidl_gen/packages.js');
 const loader = require('./lib/interface_loader.js');
 const QoS = require('./lib/qos.js');
+const validator = require('./lib/validator.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -38,7 +39,7 @@ let rcl = {
   _initialized: false,
   _nodes: [],
   QoS: QoS,
-
+  validator: validator,
   /**
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
@@ -53,7 +54,7 @@ let rcl = {
     let handle = rclnodejs.createNode(nodeName, namespace);
     let node =  new rclnodejs.ShadowNode();
 
-    node.init();
+    node.init(nodeName, namespace);
     node.handle = handle;
     this._nodes.push(node);
     return node;
@@ -149,6 +150,23 @@ let rcl = {
         reject(e);
       });
     });
+  },
+
+  /**
+   * Judge if the topic/service is hidden, see http://design.ros2.org/articles/topic_and_service_names.html#hidden-topic-or-service-names
+   * @param {string} name - Name of topic/service.
+   * @return {boolean} - True if a given topic or service name is hidden, otherwise False.
+   */
+  isTopicOrServiceHidden(name) {
+    if (typeof (name) !== 'string') {
+      throw new TypeError('Invalid argument');
+    }
+
+    let arr = name.split('/');
+    for (let i= 0; i < arr.length; i++) {
+      if (arr[i].startsWith('_')) return true;
+    }
+    return false;
   }
 };
 

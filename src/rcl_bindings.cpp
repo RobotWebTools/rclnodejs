@@ -17,6 +17,12 @@
 #include <rcl/error_handling.h>
 #include <rcl/node.h>
 #include <rcl/rcl.h>
+#include <rcl/validate_topic_name.h>
+#include <rmw/error_handling.h>
+#include <rmw/rmw.h>
+#include <rmw/validate_full_topic_name.h>
+#include <rmw/validate_namespace.h>
+#include <rmw/validate_node_name.h>
 #include <rosidl_generator_c/string_functions.h>
 #include <string>
 
@@ -378,6 +384,142 @@ NAN_METHOD(SendResponse) {
       RCL_RET_OK, rcl_get_error_string_safe());
 }
 
+NAN_METHOD(ValidateFullTopicName) {
+  int validation_result;
+  size_t invalid_index;
+  std::string topic_name(*Nan::Utf8String(info[0]->ToString()));
+  rmw_ret_t ret = rmw_validate_full_topic_name(
+      topic_name.c_str(),
+      &validation_result,
+      &invalid_index);
+
+  if (ret != RMW_RET_OK) {
+    if (ret == RMW_RET_BAD_ALLOC) {
+      Nan::ThrowError(rmw_get_error_string_safe());
+    }
+    rmw_reset_error();
+    return info.GetReturnValue().Set(Nan::Undefined());
+  }
+
+  if (validation_result == RMW_NAMESPACE_VALID) {
+    info.GetReturnValue().Set(Nan::Null());
+    return;
+  }
+  const char * validation_message =
+      rmw_full_topic_name_validation_result_string(validation_result);
+  THROW_ERROR_IF_EQUAL(nullptr, validation_message,
+      "Unable to get validation error message");
+
+  v8::Local<v8::Array> result_list =  Nan::New<v8::Array>(2);
+  Nan::Set(result_list, 0,
+      Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
+  Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(ValidateNodeName) {
+  int validation_result;
+  size_t invalid_index;
+  std::string node_name(*Nan::Utf8String(info[0]->ToString()));
+  rmw_ret_t ret = rmw_validate_node_name(
+      node_name.c_str(),
+      &validation_result,
+      &invalid_index);
+
+  if (ret != RMW_RET_OK) {
+    if (ret == RMW_RET_BAD_ALLOC) {
+      Nan::ThrowError(rmw_get_error_string_safe());
+    }
+    rmw_reset_error();
+    return info.GetReturnValue().Set(Nan::Undefined());
+  }
+
+  if (validation_result == RMW_NODE_NAME_VALID) {
+    info.GetReturnValue().Set(Nan::Null());
+    return;
+  }
+  const char * validation_message =
+      rmw_node_name_validation_result_string(validation_result);
+  THROW_ERROR_IF_EQUAL(nullptr, validation_message,
+      "Unable to get validation error message");
+
+  v8::Local<v8::Array> result_list =  Nan::New<v8::Array>(2);
+  Nan::Set(result_list, 0,
+      Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
+  Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(ValidateTopicName) {
+  int validation_result;
+  size_t invalid_index;
+  std::string topic_name(*Nan::Utf8String(info[0]->ToString()));
+  rmw_ret_t ret = rcl_validate_topic_name(
+      topic_name.c_str(),
+      &validation_result,
+      &invalid_index);
+
+  if (ret != RMW_RET_OK) {
+    if (ret == RMW_RET_BAD_ALLOC) {
+      Nan::ThrowError(rmw_get_error_string_safe());
+    }
+    rmw_reset_error();
+    return info.GetReturnValue().Set(Nan::Undefined());
+  }
+
+  if (validation_result == RMW_NODE_NAME_VALID) {
+    info.GetReturnValue().Set(Nan::Null());
+    return;
+  }
+  const char * validation_message =
+      rcl_topic_name_validation_result_string(validation_result);
+  THROW_ERROR_IF_EQUAL(nullptr, validation_message,
+      "Unable to get validation error message");
+
+  v8::Local<v8::Array> result_list =  Nan::New<v8::Array>(2);
+  Nan::Set(result_list, 0,
+      Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
+  Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(ValidateNamespace) {
+  int validation_result;
+  size_t invalid_index;
+  std::string namespace_name(*Nan::Utf8String(info[0]->ToString()));
+  rmw_ret_t ret = rmw_validate_namespace(
+      namespace_name.c_str(),
+      &validation_result,
+      &invalid_index);
+
+  if (ret != RMW_RET_OK) {
+    if (ret == RMW_RET_BAD_ALLOC) {
+      Nan::ThrowError(rmw_get_error_string_safe());
+    }
+    rmw_reset_error();
+    return info.GetReturnValue().Set(Nan::Undefined());
+  }
+
+  if (validation_result == RMW_NODE_NAME_VALID) {
+    info.GetReturnValue().Set(Nan::Null());
+    return;
+  }
+  const char * validation_message =
+      rmw_namespace_validation_result_string(validation_result);
+  THROW_ERROR_IF_EQUAL(nullptr, validation_message,
+      "Unable to get validation error message");
+
+  v8::Local<v8::Array> result_list =  Nan::New<v8::Array>(2);
+  Nan::Set(result_list, 0,
+      Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
+  Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
+
+  info.GetReturnValue().Set(result_list);
+}
+
 const rmw_qos_profile_t* GetQoSProfileFromString(
     const std::string& profile) {
   const rmw_qos_profile_t* qos_profile = nullptr;
@@ -465,6 +607,10 @@ BindingMethod binding_methods[] = {
     {"rclTakeRequest", RclTakeRequest},
     {"sendResponse", SendResponse},
     {"shutdown", Shutdown},
+    {"validateFullTopicName", ValidateFullTopicName},
+    {"validateNodeName", ValidateNodeName},
+    {"validateTopicName", ValidateTopicName},
+    {"validateNamespace", ValidateNamespace},
     {"", nullptr}};
 
 }  // namespace rclnodejs
