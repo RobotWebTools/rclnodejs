@@ -94,11 +94,10 @@
               '-L<(ROS2_INSTALL_PATH)/lib'
             ],
             'xcode_settings': {
-              'OTHER_CPLUSPLUSFLAGS': [
-                '-std=c++14',
-                '-stdlib=libc++'
-              ],
               'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
+              'CLANG_CXX_LIBRARY': 'libc++',
+              'MACOS_DEPLOYMENT_TARGET': '10.12',
+              'CLANG_CXX_LANGUAGE_STANDARD': 'c++14'
             }
           }
         ]
