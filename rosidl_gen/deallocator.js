@@ -14,29 +14,12 @@
 
 'use strict';
 
-/**
- * @class - Class representing a common object in RCL.
- * @ignore
- */
+const rclnodejs = require('bindings')('rclnodejs');
 
-class Entity {
-  constructor(handle, typeClass, qos) {
-    this._handle = handle;
-    this._typeClass = typeClass;
-    this._qos = qos;
+let deallocator = {
+  freeStructMember(refObj, type, name) {
+    rclnodejs.freeMemeoryAtOffset(refObj.ref(), type.fields[name].offset);
   }
+};
 
-  get handle() {
-    return this._handle;
-  }
-
-  get qos() {
-    return this._qos;
-  }
-
-  get typeClass() {
-    return this._typeClass;
-  }
-}
-
-module.exports = Entity;
+module.exports = deallocator;

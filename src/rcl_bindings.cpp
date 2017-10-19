@@ -158,7 +158,6 @@ NAN_METHOD(RclTake) {
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
   void* msg_taken = node::Buffer::Data(info[1]->ToObject());
-
   rcl_ret_t ret = rcl_take(subscription, msg_taken, nullptr);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
@@ -673,6 +672,34 @@ NAN_METHOD(Shutdown) {
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
+NAN_METHOD(InitString) {
+    void* buffer = node::Buffer::Data(info[0]->ToObject());
+    rosidl_generator_c__String* ptr =
+        reinterpret_cast<rosidl_generator_c__String*>(buffer);
+
+    rosidl_generator_c__String__init(ptr);
+    info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_METHOD(FreeMemeoryAtOffset) {
+  v8::Local<v8::Value> buf = info[0];
+  if (!node::Buffer::HasInstance(buf)) {
+    return Nan::ThrowTypeError("Buffer instance expected as first argument");
+  }
+
+  int64_t offset =
+      info[1]->IsNumber() ? Nan::To<int64_t>(info[1]).FromJust() : 0;
+  char* ptr = node::Buffer::Data(buf.As<v8::Object>()) + offset;
+
+  if (ptr == nullptr) {
+    return Nan::ThrowError("Cannot read from NULL pointer");
+  }
+
+  char* val = *reinterpret_cast<char**>(ptr);
+  free(val);
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
 uint32_t GetBindingMethodsCount(BindingMethod* methods) {
   uint32_t count = 0;
   while (methods[count].function) {
@@ -710,6 +737,8 @@ BindingMethod binding_methods[] = {
     {"expandTopicName", ExpandTopicName},
     {"getNodeName", GetNodeName},
     {"getNamespace", GetNamespace},
+    {"initString", InitString},
+    {"freeMemeoryAtOffset", FreeMemeoryAtOffset},
     {"", nullptr}};
 
 }  // namespace rclnodejs

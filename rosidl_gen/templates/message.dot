@@ -9,6 +9,7 @@ const StructType = require('ref-struct');
 const ref = require('ref');
 const ArrayType = require('ref-array');
 const primitiveTypes = require('../../rosidl_gen/generator_primitive.js');
+const deallocator = require('../../rosidl_gen/deallocator.js');
 
 {{
 let objectWrapper = it.spec.msgName + 'Wrapper';
@@ -172,7 +173,7 @@ class {{=objectWrapper}} {
       {{?}}
       {{~}}
     }
-    this.serialize();
+    this.freeze();
   }
 
   static createFromRefObject(refObject) {
@@ -198,28 +199,62 @@ class {{=objectWrapper}} {
   }
 
   toRawROS() {
+    this.freeze(true);
     return this._refObject.ref();
   }
 
-  serialize() {
+  freeze(own = false) {
     {{~ it.spec.fields :field}}
     {{? !field.type.isPrimitiveType || field.type.isArray}}
-    this._wrapperFields.{{=field.name}}.serialize();
+    this._wrapperFields.{{=field.name}}.freeze(own);
     this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
     {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
+    if (own) {
+      primitiveTypes.initString(this._wrapperFields.{{=field.name}}.refObject.ref(), own);
+    }
     this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+    {{?? it.spec.msgName === 'String'}}
+    if (own) {
+      primitiveTypes.initString(this._refObject.ref(), own);
+    }
     {{?}}
     {{~}}
   }
 
-  deserialize() {
+  serialize() {
+    this.freeze();
+    return this._refObject.ref();
+  }
+
+  deserialize(refObject) {
     {{~ it.spec.fields :field}}
     {{? !field.type.isPrimitiveType || field.type.isArray}}
-    this._wrapperFields.{{=field.name}}.copyRefObject(this._refObject.{{=field.name}});
+    this._wrapperFields.{{=field.name}}.copyRefObject(refObject.{{=field.name}});
     {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
-    this._wrapperFields.{{=field.name}}.data = this._refObject.{{=field.name}}.data;
+    this._wrapperFields.{{=field.name}}.data = refObject.{{=field.name}}.data;
+    {{?? field.type.isPrimitiveType}}
+    this._refObject.{{=field.name}} = refObject.{{=field.name}};
     {{?}}
     {{~}}
+  }
+
+  static freeStruct(refObject) {
+    {{~ it.spec.fields :field}}
+    {{? field.type.isArray}}
+    if (refObject.{{=field.name}}.size != 0) {
+      {{=getWrapperNameByType(field.type)}}.ArrayType.freeArray(refObject.{{=field.name}});
+      deallocator.freeStructMember(refObject.{{=field.name}}, {{=getWrapperNameByType(field.type)}}.refObjectArrayType, 'data');
+    }
+    {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
+    {{=getWrapperNameByType(field.type)}}.freeStruct(refObject.{{=field.name}});
+    {{?? it.spec.msgName === 'String'}}
+    deallocator.freeStructMember(refObject, {{=getWrapperNameByType(field.type)}}.refObjectType, '{{=field.name}}');
+    {{?}}
+    {{~}}
+  }
+
+  static destoryRawROS(msg) {
+    {{=objectWrapper}}.freeStruct(msg.refObject);
   }
 
   static type() {
@@ -319,18 +354,14 @@ class {{=arrayWrapper}} {
     {{?}}
   }
 
-  serialize() {
+  freeze(own) {
     this._wrappers.forEach((wrapper, index) => {
-      wrapper.serialize();
+      wrapper.freeze(own);
       this._refArray[index] = wrapper.refObject;
     });
     this._refObject.size = this._wrappers.length;
     this._refObject.capacity = this._wrappers.length;
     this._refObject.data = this._refArray.buffer;
-  }
-
-  deserialize(refObject) {
-    copyRefObject(refObject)
   }
 
   get refObject() {
@@ -405,6 +436,14 @@ class {{=arrayWrapper}} {
     other._wrappers.forEach((wrapper, index) => {
       this._wrappers[index].copy(wrapper);
     });
+  }
+
+  static freeArray(refObject) {
+    let refObjectArray = refObject.data;
+    refObjectArray.length = refObject.size;
+    for (let index = 0; index < refObject.size; index++) {
+      {{=objectWrapper}}.freeStruct(refObjectArray[index]);
+    }
   }
 }
 
