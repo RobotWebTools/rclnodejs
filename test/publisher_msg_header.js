@@ -34,7 +34,7 @@ rclnodejs.init().then(() => {
   }, 100);
 
   rclnodejs.spin(node);
-  process.on('message', (m) => {
+  process.on('SIGINT', (m) => {
     clearInterval(timer);
     node.destroy();
     rclnodejs.shutdown();

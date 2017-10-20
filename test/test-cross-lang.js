@@ -124,4 +124,59 @@ describe('Cross-language interaction', function() {
       rclnodejs.spin(node);
     });
   });
+
+  describe('Node.js client', function() {
+    it('Node.js client should work with Python service', function(done) {
+      var node = rclnodejs.createNode('js_add_client');
+      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      var destroy = false;
+
+      var pyService = utils.launchPythonProcess([`${__dirname}/py/service.py`]);
+      var client = node.createClient(AddTwoInts, 'py_js_add_service');
+      let request = new AddTwoInts.Request();
+      request.a = 1;
+      request.b = 2;
+
+      var timer = setInterval(() => {
+        client.sendRequest(request, (response) => {
+          if (!destroy) {
+            assert.deepStrictEqual(response.sum, 3);
+            clearInterval(timer);
+            node.destroy();
+            pyService.kill('SIGINT');
+            destroy = true;
+            done();
+          }      
+        });
+      }, 100);
+
+      rclnodejs.spin(node);
+    });
+  });
+  
+  describe('Node.js service', function() {
+    it('Node.js service should work with Python client', function(done) {
+      var node = rclnodejs.createNode('js_add_service');
+      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      var destroy = false;
+
+      var service = node.createService(AddTwoInts, 'js_py_add_service', (request, response) => {
+        assert.deepStrictEqual(typeof request.a, 'number');
+        assert.deepStrictEqual(typeof request.b, 'number');
+        response.sum = request.a + request.b;
+        return response;
+      });
+      rclnodejs.spin(node);
+
+      var pyClient = utils.launchPythonProcess([`${__dirname}/py/client.py`]);
+      pyClient.stdout.on('data', function(data) {
+        assert.deepEqual(parseInt(data, 10), 3);
+        if (!destroy) {
+          node.destroy();
+          destroy = true;
+          done();
+        }
+      });
+    });
+  });
 });
