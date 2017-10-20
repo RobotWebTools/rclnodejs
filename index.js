@@ -167,6 +167,17 @@ let rcl = {
       if (arr[i].startsWith('_')) return true;
     }
     return false;
+  },
+
+  /**
+   * Expand a given topic name using given node name and namespace as well.
+   * @param {string} topicName - Topic name to be expanded.
+   * @param {string} nodeName - Name of the node that this topic is associated with.
+   * @param {string} nodeNamespace - Namespace that the topic is within.
+   * @return {string} Expanded topic name which is fully qualified.
+   */
+  expandTopicName(topicName, nodeName, nodeNamespace) {
+    return rclnodejs.expandTopicName(topicName, nodeName, nodeNamespace);
   }
 };
 
