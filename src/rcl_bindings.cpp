@@ -317,11 +317,12 @@ NAN_METHOD(RclTakeResponse) {
   void* taken_response = node::Buffer::Data(info[2]->ToObject());
   rcl_ret_t ret = rcl_take_response(client, header, taken_response);
 
-  if (ret != RCL_RET_CLIENT_TAKE_FAILED) {
+  if (ret == RCL_RET_OK) {
     info.GetReturnValue().Set(Nan::True());
     return;
   }
 
+  rcl_reset_error();
   info.GetReturnValue().Set(Nan::False());
 }
 
