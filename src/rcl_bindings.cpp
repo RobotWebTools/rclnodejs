@@ -593,6 +593,29 @@ NAN_METHOD(ExpandTopicName) {
   info.GetReturnValue().Set(Nan::New<v8::String>(topic).ToLocalChecked());
 }
 
+NAN_METHOD(GetNodeName) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  const char * node_name = rcl_node_get_name(node);
+  if (!node_name) {
+    info.GetReturnValue().Set(Nan::Undefined());
+  } else {
+    info.GetReturnValue().Set(Nan::New<v8::String>(node_name).ToLocalChecked());
+  }
+}
+
+NAN_METHOD(GetNamespace) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  const char * node_namespace = rcl_node_get_namespace(node);
+  if (!node_namespace) {
+    info.GetReturnValue().Set(Nan::Undefined());
+  } else {
+    info.GetReturnValue().Set(
+        Nan::New<v8::String>(node_namespace).ToLocalChecked());
+  }
+}
+
 const rmw_qos_profile_t* GetQoSProfileFromString(
     const std::string& profile) {
   const rmw_qos_profile_t* qos_profile = nullptr;
@@ -685,6 +708,8 @@ BindingMethod binding_methods[] = {
     {"validateTopicName", ValidateTopicName},
     {"validateNamespace", ValidateNamespace},
     {"expandTopicName", ExpandTopicName},
+    {"getNodeName", GetNodeName},
+    {"getNamespace", GetNamespace},
     {"", nullptr}};
 
 }  // namespace rclnodejs
