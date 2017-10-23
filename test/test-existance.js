@@ -36,15 +36,23 @@ describe('rclnodejs module existance testing', function() {
 
     it('require method should exist', function() {
       assertMember('require', rclnodejs, rclnodejs.require, 'function');
-    });    
+    });
 
     it('shutdown method should exist', function() {
       assertMember('shutdown', rclnodejs, rclnodejs.shutdown, 'function');
-    });    
+    });
 
     it('spin method should exist', function() {
       assertMember('shutdown', rclnodejs, rclnodejs.shutdown, 'function');
-    });    
+    });
+
+    it('expandTopicName method should exist', function() {
+      assertMember('expandTopicName', rclnodejs, rclnodejs.expandTopicName, 'function');
+    });
+
+    it('isTopicOrServiceHidden method should exist', function() {
+      assertMember('isTopicOrServiceHidden', rclnodejs, rclnodejs.isTopicOrServiceHidden, 'function');
+    });
   });
 });
 
@@ -289,6 +297,28 @@ describe('rclnodejs class existance testing', function() {
       assertThrowsError(() => {
         qos.reliability = 'abc';
       }, TypeError, 'Invalid argument', 'Failed to call setter');
+    });
+  });
+
+  describe('Validator class', function() {
+    it('should have validateFullTopicName method', function() {
+      assertMember('validateFullTopicName', rclnodejs.validator,
+        rclnodejs.validator.validateFullTopicName, 'function');
+    });
+
+    it('should have validateNodeName method', function() {
+      assertMember('validateNodeName', rclnodejs.validator,
+        rclnodejs.validator.validateNodeName, 'function');
+    });
+
+    it('should have validateTopicName method', function() {
+      assertMember('validateTopicName', rclnodejs.validator,
+        rclnodejs.validator.validateTopicName, 'function');
+    });
+
+    it('should have validateNamespace method', function() {
+      assertMember('validateNamespace', rclnodejs.validator,
+        rclnodejs.validator.validateNamespace, 'function');
     });
   });
 });

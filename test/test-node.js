@@ -32,40 +32,34 @@ describe('rclnodejs node test suite', function() {
 
   describe('createNode method testing', function() {
     it('Try creating a node', function() {
-      const node = rclnodejs.createNode('example_node');
-      rclnodejs.spin(node);
+      var node = rclnodejs.createNode('example_node');
       node.destroy();
     });
 
-/* Todo:
-**     need the get_name() and get_namespace() interface.
     it('Try creating a node with a namespace', function() {
       let nodeName = 'example_node_with_ns',
-          nodeNamespace = '/ns';
+        nodeNamespace = '/ns';
 
-      const node = rclnodejs.createNode(nodeName, nodeNamespace);
-      rclnodejs.spin(node);
-      assert.deepStrictEqual(node.getNamespace(), '/ns');
+      var node = rclnodejs.createNode(nodeName, nodeNamespace);
+      assert.deepStrictEqual(node.namespace(), '/ns');
     });
 
     it('Try creating a node with the empty namespace', function() {
       let nodeName = 'example_node_with_empty_ns',
-          nodeNamespace = '';
+        nodeNamespace = '';
 
-      const node = rclnodejs.createNode(nodeName, nodeNamespace);
-      rclnodejs.spin(node);
-      assert.deepStrictEqual(node.getNamespace(), '/');
+      var node = rclnodejs.createNode(nodeName, nodeNamespace);
+      assert.deepStrictEqual(node.namespace(), '/');
     });
 
     it('Try creating a node with a relative namespace', function() {
       let nodeName = 'example_node_with_rel_ns',
-          nodeNamespace = 'ns';
+        nodeNamespace = 'ns';
 
-      const node = rclnodejs.createNode(nodeName, nodeNamespace);
-      rclnodejs.spin(node);
-      assert.deepStrictEqual(node.getNamespace(), '/ns');
+      var node = rclnodejs.createNode(nodeName, nodeNamespace);
+      assert.deepStrictEqual(node.namespace(), '/ns');
     });
-*/
+
     it('Try creating a node with an invalid name', function() {
       var nodeName = 'example_node_invalid_name?',
         nodeNamespace = 'ns';
@@ -143,9 +137,8 @@ describe('rcl node methods testing', function() {
   it('node setter/getter', function() {
     assert.notDeepStrictEqual(null, node);
 
-    // Todo
-    // assert.deepStrictEqual(node.getName(), 'my_node');
-    // assert.deepStrictEqual(node.getNamespace(), '/my_ns');
+    assert.deepStrictEqual(node.name(), 'my_node');
+    assert.deepStrictEqual(node.namespace(), '/my_ns');
   });
 
   it('node.createPublisher', function() {
