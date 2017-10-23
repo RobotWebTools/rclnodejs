@@ -38,7 +38,11 @@ inherits(rclnodejs.ShadowNode, Node);
 let rcl = {
   _initialized: false,
   _nodes: [],
+
+  /** {@link QoS} class */
   QoS: QoS,
+
+  /** {@link module:validator|validator} object */
   validator: validator,
   /**
    * Create a node.
