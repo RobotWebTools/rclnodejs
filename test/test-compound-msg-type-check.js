@@ -38,23 +38,6 @@ describe('Compound types', function() {
     assert.deepStrictEqual(typeof msg.g, 'number');
     assert.deepStrictEqual(typeof msg.b, 'number');
     assert.deepStrictEqual(typeof msg.a, 'number');
-
-    // assertThrowsError(() => {
-    //   msg.r = -1;
-    //   msg.r = 256;
-    // }, TypeError, 'out of bounds', 'Invalid RGBA value');
-    // assertThrowsError(() => {
-    //   msg.g = -1;
-    //   msg.g = 256;
-    // }, TypeError, 'out of bounds', 'Invalid RGBA value');
-    // assertThrowsError(() => {
-    //   msg.b = -1;
-    //   msg.b = 256;
-    // }, TypeError, 'out of bounds', 'Invalid RGBA value');
-    // assertThrowsError(() => {
-    //   msg.a = -0.1;
-    //   msg.a = 1.1;
-    // }, TypeError, 'out of bounds', 'Invalid RGBA value');
   });
 
   it('Array', function() {

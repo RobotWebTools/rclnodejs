@@ -15,6 +15,7 @@
 #include "rcl_bindings.hpp"
 
 #include <rcl/error_handling.h>
+#include <rcl/expand_topic_name.h>
 #include <rcl/node.h>
 #include <rcl/rcl.h>
 #include <rcl/validate_topic_name.h>
@@ -317,11 +318,12 @@ NAN_METHOD(RclTakeResponse) {
   void* taken_response = node::Buffer::Data(info[2]->ToObject());
   rcl_ret_t ret = rcl_take_response(client, header, taken_response);
 
-  if (ret != RCL_RET_CLIENT_TAKE_FAILED) {
+  if (ret == RCL_RET_OK) {
     info.GetReturnValue().Set(Nan::True());
     return;
   }
 
+  rcl_reset_error();
   info.GetReturnValue().Set(Nan::False());
 }
 
@@ -520,6 +522,77 @@ NAN_METHOD(ValidateNamespace) {
   info.GetReturnValue().Set(result_list);
 }
 
+NAN_METHOD(ExpandTopicName) {
+  std::string topic_name(*Nan::Utf8String(info[0]->ToString()));
+  std::string node_name(*Nan::Utf8String(info[1]->ToString()));
+  std::string node_namespace(*Nan::Utf8String(info[2]->ToString()));
+
+  char* expanded_topic = nullptr;
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  rcutils_allocator_t rcutils_allocator = rcutils_get_default_allocator();
+  rcutils_string_map_t substitutions_map =
+      rcutils_get_zero_initialized_string_map();
+
+  rcutils_ret_t rcutils_ret =
+      rcutils_string_map_init(&substitutions_map, 0, rcutils_allocator);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    if (rcutils_ret == RCUTILS_RET_BAD_ALLOC) {
+      Nan::ThrowError(rcutils_get_error_string_safe());
+    }
+    rcutils_reset_error();
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+  rcl_ret_t ret = rcl_get_default_topic_name_substitutions(&substitutions_map);
+  if (ret != RCL_RET_OK) {
+    if (ret == RCL_RET_BAD_ALLOC) {
+      Nan::ThrowError(rcl_get_error_string_safe());
+    }
+    rcl_reset_error();
+
+    rcutils_ret = rcutils_string_map_fini(&substitutions_map);
+    if (rcutils_ret != RCUTILS_RET_OK) {
+      Nan::ThrowError(rcutils_get_error_string_safe());
+      rcutils_reset_error();
+    }
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+
+  ret = rcl_expand_topic_name(
+      topic_name.c_str(),
+      node_name.c_str(),
+      node_namespace.c_str(),
+      &substitutions_map,
+      allocator,
+      &expanded_topic);
+
+  rcutils_ret = rcutils_string_map_fini(&substitutions_map);
+  if (rcutils_ret != RCUTILS_RET_OK) {
+    Nan::ThrowError(rcutils_get_error_string_safe());
+    rcutils_reset_error();
+    allocator.deallocate(expanded_topic, allocator.state);
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+  if (ret != RCL_RET_OK) {
+    Nan::ThrowError(rcl_get_error_string_safe());
+    rcl_reset_error();
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+
+  if (!expanded_topic) {
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+
+  rcl_allocator_t topic_allocator = rcl_get_default_allocator();
+  std::string topic(expanded_topic);
+  allocator.deallocate(expanded_topic, topic_allocator.state);
+  info.GetReturnValue().Set(Nan::New<v8::String>(topic).ToLocalChecked());
+}
+
 const rmw_qos_profile_t* GetQoSProfileFromString(
     const std::string& profile) {
   const rmw_qos_profile_t* qos_profile = nullptr;
@@ -611,6 +684,7 @@ BindingMethod binding_methods[] = {
     {"validateNodeName", ValidateNodeName},
     {"validateTopicName", ValidateTopicName},
     {"validateNamespace", ValidateNamespace},
+    {"expandTopicName", ExpandTopicName},
     {"", nullptr}};
 
 }  // namespace rclnodejs

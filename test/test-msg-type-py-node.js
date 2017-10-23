@@ -294,8 +294,23 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    // it('Array', function(done) {
-    // });
+    it('Array', function(done) {
+      var node = rclnodejs.createNode('array_js_subscription');
+      const ByteMultiArray = rclnodejs.require('std_msgs').msg.ByteMultiArray;
+      var destroy = false;
+      var publisher = utils.launchPythonProcess([`${__dirname}/py/publisher_msg.py`, 'Array']);
+      var subscription = node.createSubscription(ByteMultiArray, 'Array_py_js_channel', (msg) => {
+        assert.deepStrictEqual(msg.data, [65, 66, 67]);
+
+        if (!destroy) {
+          node.destroy();
+          publisher.kill('SIGINT');
+          destroy = true;
+        }
+        done();
+      });
+      rclnodejs.spin(node);
+    });
 
     it('Header', function(done) {
       var node = rclnodejs.createNode('header_js_publisher');
@@ -732,6 +747,47 @@ describe('Rclnodejs - Python message type testing', function() {
 
   describe('Rclnodejs publisher - Python subscription: compound msg types', function() {
     this.timeout(60 * 1000);
+
+    it('Array', function(done) {
+      var node = rclnodejs.createNode('multiarray_js_publisher');
+      const Byte = rclnodejs.require('std_msgs').msg.Byte;
+      const MultiArrayDimension = rclnodejs.require('std_msgs').msg.MultiArrayDimension;
+      const MultiArrayLayout = rclnodejs.require('std_msgs').msg.MultiArrayLayout;
+      const ByteMultiArray = rclnodejs.require('std_msgs').msg.ByteMultiArray;
+
+      let lengthDim = new MultiArrayDimension();
+      lengthDim.label = 'length';
+      lengthDim.size = 1;
+      lengthDim.stride = 3;
+
+      let layout = new MultiArrayLayout();
+      layout.dim.fill([lengthDim]);
+      // eslint-disable-next-line
+      layout.data_offset = 0;
+
+      let byteArray = new ByteMultiArray();
+      byteArray.layout = layout;
+      byteArray.data = [65, 66, 67];
+
+      var destroy = false;
+      var subscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Array']);
+      var publisher = node.createPublisher(ByteMultiArray, 'Array_js_py_channel');
+      const expected = 'ABC';
+      subscription.stdout.on('data', (data) => {
+        if (!destroy) {
+          clearInterval(timer);
+          assert.deepStrictEqual(data.toString(), expected);
+          done();
+          node.destroy();
+          subscription.kill('SIGINT');
+          destroy = true;
+        }
+      });
+      var timer = setInterval(() => {
+        publisher.publish(byteArray);
+      }, 100);
+      rclnodejs.spin(node);
+    });
 
     it('ColorRGBA', function(done) {
       var node = rclnodejs.createNode('colorrgba_js_publisher');

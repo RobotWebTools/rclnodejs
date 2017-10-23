@@ -36,6 +36,10 @@ def callback(msg):
   sys.stdout.write(str(msg.data))
   sys.stdout.flush()
 
+def callback_array(msg):
+  sys.stdout.write(''.join([r.decode('utf-8') for r in msg.data]))
+  sys.stdout.flush()
+
 def callback_colorrgba(msg):
   sys.stdout.write('(' + str(msg.r) + ',' 
                     + str(msg.g) + ',' 
@@ -109,6 +113,9 @@ def main():
   elif rclType == 'Float64':
     node = rclpy.create_node('py_float64_subscription')
     subscription = node.create_subscription(Float64, 'Float64_js_py_channel', callback)
+  elif rclType == 'Array':
+    node = rclpy.create_node('py_array_subscription')
+    subscription = node.create_subscription(ByteMultiArray, 'Array_js_py_channel', callback_array)
   elif rclType == 'ColorRGBA':
     node = rclpy.create_node('py_colorrgba_subscription')
     subscription = node.create_subscription(ColorRGBA, 'ColorRGBA_js_py_channel', callback_colorrgba)
