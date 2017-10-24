@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: lib/timer.js</title>
+    <title>JSDoc: Source: lib/validator.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: lib/timer.js</h1>
+    <h1 class="page-title">Source: lib/validator.js</h1>
 
     
 
@@ -45,78 +45,86 @@
 const rclnodejs = require('bindings')('rclnodejs');
 
 /**
-  * @class - Class representing a Timer in ROS
-  * @hideconstructor
-  */
-
-class Timer {
-  constructor(handle, period, callback) {
-    this._handle = handle;
-    this._period = period;
-    this.callback = callback;
-  }
-
-  /**
-   * @type {number}
-   */
-  get period() {
-    return this._period;
-  }
-
-  get handle() {
-    return this._handle;
-  }
+ * An object - Representing a validator in ROS.
+ * @exports validator
+ */
+let validator = {
+  _createErrorFromValidation: function(result) {
+    let err = new Error(result[0]);
+    err.invalidIndex = result[1];
+    return err;
+  },
 
   /**
-   * Check if the timer is ready.
-   * @return {boolean} Return true if timer is ready, otherwise return false.
+   * Validate a given topic or service name, and throw an error if invalid.
+   * @param {string} topic - The name of topic/service. and it must be fully-qualified and already expanded.
+   * @return {boolean} - True if it is valid.
    */
-  isReady() {
-    return rclnodejs.isTimerReady(this._handle);
-  }
+  validateFullTopicName(topic) {
+    if (typeof (topic) !== 'string') {
+      throw new TypeError('Invalid argument');
+    }
+
+    let result = rclnodejs.validateFullTopicName(topic);
+    if (result === null) {
+      return true;
+    }
+    throw this._createErrorFromValidation(result);
+  },
 
   /**
-   * Check if the timer is canceled.
-   * @return {boolean} Return true if timer is canceled, otherwise return false.
+   * Validate a given node name, and throw an error if invalid.
+   * @param {string} name - The name of node.
+   * @return {boolean} - True if it is valid.
    */
-  isCanceled() {
-    return rclnodejs.isTimerCanceled(this._handle);
-  }
+  validateNodeName(name) {
+    if (typeof (name) !== 'string') {
+      throw new TypeError('Invalid argument');
+    }
+
+    let result = rclnodejs.validateNodeName(name);
+    if (result === null) {
+      return true;
+    }
+    throw this._createErrorFromValidation(result);
+  },
 
   /**
-   * Cancel the timer.
-   * @return {undefined}
+   * Validate a given topic or service name, and throw an error if invalid.
+   * @param {string} topic - The name of topic/service and does not have to be fully-qualified and is not expanded.
+   * @return {boolean} - True if it is valid.
    */
-  cancel() {
-    rclnodejs.cancelTimer(this._handle);
-  }
+  validateTopicName(topic) {
+    if (typeof (topic) !== 'string') {
+      throw new TypeError('Invalid argument');
+    }
+
+    let result = rclnodejs.validateTopicName(topic);
+    if (result === null) {
+      return true;
+    }
+    throw this._createErrorFromValidation(result);
+  },
 
   /**
-   * Reset the timer.
-   * @return {undefined}
+   * Validate a given namespace, and throw an error if invalid.
+   * @param {string} namespace - The namespace to be validated
+   * @return {boolean} - True if it is valid.
    */
-  reset() {
-    rclnodejs.resetTimer(this._handle);
-  }
+  validateNamespace(namespace) {
+    if (typeof (namespace) !== 'string') {
+      throw new TypeError('Invalid argument');
+    }
 
-  /**
-   * Get the interval since the last call of this timer.
-   * @return {number} - the interval value - ms.
-   */
-  timeSinceLastCall() {
-    return parseInt(rclnodejs.timerGetTimeSinceLastCall(this._handle), 10);
-  }
-
-  /**
-   * Get the interval until the next call will happen.
-   * @return {number} - the interval value - ms.
-   */
-  timeUntilNextCall() {
-    return parseInt(rclnodejs.timerGetTimeUntilNextCall(this._handle), 10);
+    let result = rclnodejs.validateNamespace(namespace);
+    if (result === null) {
+      return true;
+    }
+    throw this._createErrorFromValidation(result);
   }
 };
 
-module.exports = Timer;
+module.exports = validator;
 </code></pre>
         </article>
     </section>
