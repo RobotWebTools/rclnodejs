@@ -21,6 +21,7 @@ const packages = require('./rosidl_gen/packages.js');
 const loader = require('./lib/interface_loader.js');
 const QoS = require('./lib/qos.js');
 const validator = require('./lib/validator.js');
+const debug = require('debug')('rclnodejs');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -59,6 +60,7 @@ let rcl = {
     let node =  new rclnodejs.ShadowNode();
 
     node.init(nodeName, namespace);
+    debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
     node.handle = handle;
     this._nodes.push(node);
     return node;
@@ -72,9 +74,12 @@ let rcl = {
   init(...args) {
     return new Promise((resolve, reject) => {
       if (!this._initialized) {
+        debug('Begin to generate JavaScript code from ROS IDL files.');
         // TODO(Kenny): introduce other policy to save the amout of time of doing message generation
         generator.generateAll(false).then(() => {
+          debug('Finish generating.');
           rclnodejs.init(args);
+          debug('Finish initializing rcl with args = %o.', args);
           this._initialized = true;
           resolve();
         }).catch((e) => {
@@ -147,8 +152,10 @@ let rcl = {
   regenerateAll() {
     // This will trigger to regererate all the JS structs used for messages and services,
     // to overwrite the existing ones although they have been created.
+    debug('Begin to regenerate JavaScript code from ROS IDL files.');
     return new Promise((resolve, reject) => {
       generator.generateAll(true).then(() => {
+        debug('Finish regenerating.');
         resolve();
       }).catch((e) => {
         reject(e);
