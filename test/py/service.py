@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http:#www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,9 +39,13 @@ def main():
   global node
   signal.signal(signal.SIGINT, handler)
 
+  service = 'js_py_add_two_ints'
+  if len(sys.argv) > 1:
+    service = sys.argv[1]
+
   rclpy.init()
   node = rclpy.create_node('add_service')
-  service = node.create_service(AddTwoInts, 'py_js_add_service', callback)
+  service = node.create_service(AddTwoInts, service, callback)
   while rclpy.ok():
     rclpy.spin_once(node)
 

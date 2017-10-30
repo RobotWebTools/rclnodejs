@@ -37,8 +37,8 @@ describe('Cross-language interaction', function() {
       const rclString = rclnodejs.require('std_msgs').msg.String;
       var destroy = false;
       var cppTalkPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'talker');
-      var cppTalker = childProcess.spawn(cppTalkPath);
-      var subscription = node.createSubscription(rclString, 'chatter', (msg) => {
+      var cppTalker = childProcess.spawn(cppTalkPath, ['-t', 'cpp_js_chatter']);
+      var subscription = node.createSubscription(rclString, 'cpp_js_chatter', (msg) => {
         assert.ok(/Hello World:/.test(msg.data));
         if (!destroy) {
           node.destroy();
@@ -76,8 +76,8 @@ describe('Cross-language interaction', function() {
 
       let text = 'Greeting from Node.js publisher';
       let cppListenerPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
-      var cppListener = childProcess.spawn(cppListenerPath);
-      var publisher = node.createPublisher(rclString, 'chatter');
+      var cppListener = childProcess.spawn(cppListenerPath, ['-t', 'js_cpp_chatter']);
+      var publisher = node.createPublisher(rclString, 'js_cpp_chatter');
       var msg = new rclString();
       msg.data = text;
       var timer = setInterval(() => {
@@ -127,12 +127,12 @@ describe('Cross-language interaction', function() {
 
   describe('Node.js client', function() {
     it('Node.js client should work with Python service', function(done) {
-      var node = rclnodejs.createNode('js_add_client');
+      var node = rclnodejs.createNode('js_py_add_client');
       const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
       var destroy = false;
 
       var pyService = utils.launchPythonProcess([`${__dirname}/py/service.py`]);
-      var client = node.createClient(AddTwoInts, 'py_js_add_service');
+      var client = node.createClient(AddTwoInts, 'js_py_add_two_ints');
       let request = new AddTwoInts.Request();
       request.a = 1;
       request.b = 2;
@@ -152,15 +152,44 @@ describe('Cross-language interaction', function() {
 
       rclnodejs.spin(node);
     });
+
+    it('Node.js client should work with C++ service', function(done) {
+      var node = rclnodejs.createNode('js_cpp_add_client');
+      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      var client = node.createClient(AddTwoInts, 'js_cpp_add_two_ints');
+      let request = new AddTwoInts.Request();
+      request.a = 1;
+      request.b = 2;
+
+      var destroy = false;
+      var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],
+                                    'lib',
+                                    'demo_nodes_cpp',
+                                    'add_two_ints_server');
+      var cppService = childProcess.spawn(cppServicePath, ['-s', 'js_cpp_add_two_ints']);
+      var timer = node.createTimer(100, () => {
+        client.sendRequest(request, (response) => {
+          if (!destroy) {
+            timer.cancel();
+            assert.deepStrictEqual(response.sum, 3);
+            node.destroy();
+            cppService.kill('SIGINT');
+            destroy = true;
+            done();
+          }
+        });
+      });
+      rclnodejs.spin(node);
+    });
   });
-  
+
   describe('Node.js service', function() {
     it('Node.js service should work with Python client', function(done) {
-      var node = rclnodejs.createNode('js_add_service');
+      var node = rclnodejs.createNode('py_js_add_service');
       const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
       var destroy = false;
 
-      var service = node.createService(AddTwoInts, 'js_py_add_service', (request, response) => {
+      var service = node.createService(AddTwoInts, 'py_js_add_two_ints', (request, response) => {
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.deepStrictEqual(typeof request.b, 'number');
         response.sum = request.a + request.b;
@@ -176,6 +205,31 @@ describe('Cross-language interaction', function() {
           destroy = true;
           done();
         }
+      });
+    });
+
+    it('Node.js service should work with C++ client', function(done) {
+      var node = rclnodejs.createNode('cpp_js_add_service');
+      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      var destroy = false;
+
+      var service = node.createService(AddTwoInts, 'cpp_js_add_two_ints', (request, response) => {
+        assert.deepStrictEqual(typeof request.a, 'number');
+        assert.deepStrictEqual(typeof request.b, 'number');
+        response.sum = request.a + request.b;
+        return response;
+      });
+      rclnodejs.spin(node);
+
+      var cppClientPath = path.join(process.env['AMENT_PREFIX_PATH'],
+                                    'lib',
+                                    'demo_nodes_cpp',
+                                    'add_two_ints_client');
+      var cppClient = childProcess.spawn(cppClientPath, ['-s', 'cpp_js_add_two_ints']);
+      cppClient.stdout.on('data', function(data) {
+        assert.deepStrictEqual(data.toString().trim(), 'Result of add_two_ints: 5');
+        node.destroy();
+        done();
       });
     });
   });
