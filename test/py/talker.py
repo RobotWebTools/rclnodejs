@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http:#www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,9 +35,13 @@ def main():
   global node
   signal.signal(signal.SIGINT, handler)
 
+  topic = 'py_js_chatter'
+  if len(sys.argv) > 1:
+    topic = sys.argv[1]
+
   rclpy.init()
   node = rclpy.create_node('py_talker')
-  publisher = node.create_publisher(String, 'py_js_chatter')
+  publisher = node.create_publisher(String, topic)
 
   msg = String()
   msg.data = 'Hello World'

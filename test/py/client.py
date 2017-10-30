@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http:#www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,9 +38,13 @@ def main():
   global node
   signal.signal(signal.SIGINT, handler)
 
+  service = 'py_js_add_two_ints'
+  if len(sys.argv) > 1:
+    service = sys.argv[1]
+
   rclpy.init()
   node = rclpy.create_node('add_client')
-  client = node.create_client(AddTwoInts, 'js_py_add_service')
+  client = node.create_client(AddTwoInts, service)
   request = AddTwoInts.Request()
   request.a = 1
   request.b = 2
