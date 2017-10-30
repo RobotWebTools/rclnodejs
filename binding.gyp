@@ -34,6 +34,7 @@
         '-lrcl',
         '-lrcutils',
         '-lrmw',
+        '-lrosidl_generator_c',
       ],
       'conditions': [
         [

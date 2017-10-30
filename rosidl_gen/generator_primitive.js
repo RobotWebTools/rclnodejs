@@ -26,14 +26,21 @@ const StringRefStruct = StructType({
   capacity: ref.types.size_t,
 });
 
-function initString(str) {
-  if (! str instanceof StringRefStruct) {
-    throw new TypeError('Invalid argument: should provide a type of StringRefStruct');
-  }
+function initString(str, own = false) {
+  if (own) {
+    if (! str instanceof Buffer) {
+      throw new TypeError('Invalid argument: should provide a Node Buffer to bindingsStringInit()');
+    }
+    rclnodejs.initString(str);
+  } else {
+    if (! str instanceof StringRefStruct) {
+      throw new TypeError('Invalid argument: should provide a type of StringRefStruct');
+    }
 
-  str.data = Buffer.alloc(1).fill('\u0000');
-  str.size = 0;
-  str.capacity = 1;
+    str.data = Buffer.alloc(1).fill('\u0000');
+    str.size = 0;
+    str.capacity = 1;
+  }
 }
 
 module.exports = {
