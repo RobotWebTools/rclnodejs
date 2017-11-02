@@ -186,23 +186,15 @@ describe('Multiple nodes interation testing', function() {
                                     'add_two_ints_client');
       var cppClient = childProcess.spawn(cppClientPath, ['-s', 'pycpp_js_add_two_ints']);
       var pyClientPath = path.join(__dirname, 'py', 'client.py');
-      var pyClient = utils.launchPythonProcess([pyClientPath, 'pycpp_js_add_two_ints']);
-      var cppClientExited = false, pyClientExited = false;
 
       cppClient.stdout.on('data', (data) => {
         assert.deepStrictEqual(data.toString().trim(), 'Result of add_two_ints: 5');
-        cppClientExited = true;
-        if (pyClientExited) {
-          done();
-        }
-      });
+        var pyClient = utils.launchPythonProcess([pyClientPath, 'pycpp_js_add_two_ints']);
 
-      pyClient.stdout.on('data', (data) => {
-        assert.deepStrictEqual(data.toString().trim(), '3');
-        pyClientExited = true;
-        if (cppClientExited) {
+        pyClient.stdout.on('data', (data) => {
+          assert.deepStrictEqual(data.toString().trim(), '3');
           done();
-        }          
+        });
       });
     });
   });
