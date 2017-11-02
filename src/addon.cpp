@@ -17,6 +17,7 @@
 #include "rcl_bindings.hpp"
 #include "rcl_handle.hpp"
 #include "shadow_node.hpp"
+#include "spdlog/spdlog.h"
 
 void InitModule(v8::Local<v8::Object> exports) {
   for (uint32_t i = 0;
@@ -29,6 +30,11 @@ void InitModule(v8::Local<v8::Object> exports) {
 
   rclnodejs::ShadowNode::Init(exports);
   rclnodejs::RclHandle::Init(exports);
+
+#ifdef SPDLOG_DEBUG_ON
+  auto console = spdlog::stdout_color_mt("rclnodejs");
+  console->set_level(spdlog::level::debug);
+#endif
 }
 
 NODE_MODULE(rclnodejs, InitModule);
