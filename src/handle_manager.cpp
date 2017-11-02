@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "rcl_handle.hpp"
+#include "spdlog/spdlog.h"
 
 namespace rclnodejs {
 
@@ -54,6 +55,9 @@ void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
                        &clients_);
   CollectHandlesByType(services.ToLocalChecked()->ToObject(),
                        &services_);
+  SPDLOG_DEBUG(spdlog::get("rclnodejs"),
+      "Add {0:d} timers, {1:d} subscriptions, {2:d} clients, {3:d} services.",
+      timers_.size(), subscriptions_.size(), clients_.size(), services_.size());
 }
 
 uint32_t HandleManager::SubscriptionsCount() {
@@ -91,6 +95,7 @@ bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
     if (rcl_wait_set_add_service(wait_set, service) != RCL_RET_OK)
       return false;
   }
+
   return true;
 }
 
