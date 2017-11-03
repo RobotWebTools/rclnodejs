@@ -22,4 +22,4 @@ dependencies:
 
 test:
   override:
-    - source ~/ros2_ws/install/local_setup.bash && node scripts/run_test.js
+    - source ~/ros2_ws/install/local_setup.bash && node scripts/compile_cpp.js && node scripts/run_test.js
