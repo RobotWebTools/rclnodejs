@@ -1,11 +1,13 @@
 {
   "name": "rclnodejs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ROS2.0 JavaScript client with Node.js",
   "main": "index.js",
   "keywords": [
     "rclnodejs",
-    "ros2"
+    "ros2",
+    "ros",
+    "rcl"
   ],
   "scripts": {
     "install": "node-gyp rebuild",
