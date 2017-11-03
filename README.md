@@ -1,21 +1,31 @@
 # rclnodejs - ROS Client Library for JavaScript language
 
-Branch | Linux Build | MacOS Build | Windows Build |
+Branch | Linux Build | macOS Build | Windows Build |
 ------------ |  :-------------: | :-------------: | :-------------: |
 develop | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://travis-ci.org/RobotWebTools/rclnodejs) | [![macOS Build Status](https://circleci.com/gh/RobotWebTools/rclnodejs/tree/develop.svg?style=shield)](https://circleci.com/gh/RobotWebTools/rclnodejs) | [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/develop?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/develop)
 master | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=master)](https://travis-ci.org/RobotWebTools/rclnodejs) | [![macOS Build Status](https://circleci.com/gh/RobotWebTools/rclnodejs/tree/master.svg?style=shield)](https://circleci.com/gh/RobotWebTools/rclnodejs) | [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/master?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/master)
 
 ## Build Environment
 
-1.Building ROS 2.
+### Get ready for ROS 2
 
-Currently, the ROS is a cross-platform system, which covers Linux, MacOS and Windows, and the `rclnodejs` module is developed on the [`master`](https://github.com/ros2/ros2/blob/master/ros2.repos) branch of ROS, so you have to build ROS from scratch at the present stage. Please select the platform you want to work on, then reference the instruction to build ROS.
+1.Build from scratch.
+
+ROS is a cross-platform system, which covers Linux, macOS and Windows, and the `rclnodejs` module is developed on the [`master`](https://github.com/ros2/ros2/blob/master/ros2.repos) branch of ROS, so you have to build ROS from scratch at the present stage. Please select the platform you want to work on, then reference the instruction to build ROS.
 
 * [Linux](https://github.com/ros2/ros2/wiki/Linux-Development-Setup)
-* [MacOS](https://github.com/ros2/ros2/wiki/OSX-Development-Setup)
+* [macOS](https://github.com/ros2/ros2/wiki/OSX-Development-Setup)
 * [Windows](https://github.com/ros2/ros2/wiki/Windows-Development-Setup)
 
-2.Install `Node.js`.
+2.Get the binary package.
+
+Alternatively, you can download the latest binary package of ROS2 from [here](http://ci.ros2.org/view/packaging/) and follow the instructions to setup the environment.
+
+* [Linux](https://github.com/ros2/ros2/wiki/Linux-Install-Binary)
+* [macOS](https://github.com/ros2/ros2/wiki/OSX-Install-Binary)
+* [Windows](https://github.com/ros2/ros2/wiki/Windows-Install-Binary)
+
+### Install `Node.js`
 
 The `Node.js` version we selected is the latest LTS (6.x) `Boron`. You can install it:
 
