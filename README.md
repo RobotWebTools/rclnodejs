@@ -47,12 +47,37 @@ git submodule update --init --recursive
 ```
 
 ## Build Module
+Before you build the module, you should make sure the ROS2 environments were loaded. You can check if the `AMENT_PREFIX_PATH` environment variable was set:
+
+* For Windows: `echo %AMENT_PREFIX_PATH%` in the command prompt.
+
+* For Linux and macOS: `echo $AMENT_PREFIX_PATH` in the terminal.
+
+If the `AMENT_PREFIX_PATH` is unset, you should load the ROS2 environments:
+
+* For Windows, open the command prompt and run
+
+  ```
+  call <path\to\ros2>\install\local_setup.bat
+  ```
+
+* For Linux and macOS, open the terminal and run:
+
+  ```
+  source <path/to/ros2>/install/local_setup.bash
+  ```
 
 This `Node.js` module is built by [node-gyp](https://www.npmjs.com/package/node-gyp), all you have to do is just to run the following command:
 
 ```javascript
 npm install
 ```
+
+**Windows-specific**: make sure Python 2.x interpreter is first searched in your `PATH` before running the command. You can change it temporarily by:
+
+  ```
+  set PATH=<path\to\python 2.x>;%PATH%
+  ```
 
 ## Run Unit Test
 
@@ -61,6 +86,11 @@ npm install
 ```javascript
 npm run test
 ```
+
+**Windows-specific**: the tests requires in a `Microsoft Visual Studio Native Tools command prompt`,  and also make sure Python 3.x interpreter is first searched in your `PATH` before running te test. You can change it temporarily by:
+  ```
+  set PATH=<path\to\python 3.x>;%PATH%
+  ```
 
 ## How To Use
 
