@@ -12,7 +12,7 @@
   "scripts": {
     "install": "node-gyp rebuild",
     "docs": "cd docs && make",
-    "test": "node ./scripts/run_test.js",
+    "test": "node ./scripts/compile_cpp.js && node ./scripts/run_test.js",
     "lint": "eslint --max-warnings=0 index.js scripts lib example rosidl_gen rosidl_parser test && node ./scripts/cpplint.js"
   },
   "authors": [
