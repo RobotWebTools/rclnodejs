@@ -93,20 +93,23 @@ function generateStructForPkg(pkg) {
 function generateAll(forcedGenerating) {
   return new Promise((resolve, reject) => {
     if (forcedGenerating || !generator.isRootGererated()) {
-      installedPackagesRoot.forEach((packageRoot) => {
-        let promises = [];
-        packages.findPackagesInDirectory(packageRoot).then((pkgs) => {
-          pkgs.forEach((pkg) => {
-            promises.push(generateStructForPkg(pkg));
-          });
+      fse.copy(path.join(__dirname, 'generator.json'), path.join(generatedRoot, 'generator.json'), err => {
+        if (err) reject(err);
+        installedPackagesRoot.forEach((packageRoot) => {
+          let promises = [];
+          packages.findPackagesInDirectory(packageRoot).then((pkgs) => {
+            pkgs.forEach((pkg) => {
+              promises.push(generateStructForPkg(pkg));
+            });
 
-          Promise.all(promises).then(() => {
-            resolve();
+            Promise.all(promises).then(() => {
+              resolve();
+            }).catch((e) => {
+              reject(e);
+            });
           }).catch((e) => {
             reject(e);
           });
-        }).catch((e) => {
-          reject(e);
         });
       });
     } else {
@@ -135,6 +138,11 @@ const generator = {
   isRootGererated() {
     // eslint-disable-next-line
     return fs.existsSync(generatedRoot);
+  },
+
+  version() {
+    // eslint-disable-next-line
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'generator.json'), 'utf8')).version;
   }
 };
 
