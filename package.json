@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "bindings": "^1.2.1",
+    "compare-versions": "^3.1.0",
     "debug": "^2.6.8",
     "dot": "^1.1.2",
     "fs-extra": "^3.0.1",

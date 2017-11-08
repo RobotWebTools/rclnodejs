@@ -1,0 +1,10 @@
+{
+  "name": "rosidl-generator",
+  "version": "0.0.1",
+  "description": "Generate JavaScript object from ROS IDL(.msg) files",
+  "authors": [
+    "Minggang Wang <minggang.wang@intel.com>",
+    "Kenny Yuan <kaining.yuan@intel.com>"
+  ],
+  "license": "Apache-2.0"
+}

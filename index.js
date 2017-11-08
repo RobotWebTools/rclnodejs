@@ -14,14 +14,17 @@
 
 'use strict';
 
-const rclnodejs = require('bindings')('rclnodejs');
-const Node = require('./lib/node.js');
-const generator = require('./rosidl_gen/generator.js');
-const packages = require('./rosidl_gen/packages.js');
-const loader = require('./lib/interface_loader.js');
-const QoS = require('./lib/qos.js');
-const validator = require('./lib/validator.js');
+const compareVersions = require('compare-versions');
 const debug = require('debug')('rclnodejs');
+const fs = require('mz/fs');
+const generator = require('./rosidl_gen/generator.js');
+const loader = require('./lib/interface_loader.js');
+const Node = require('./lib/node.js');
+const packages = require('./rosidl_gen/packages.js');
+const path = require('path');
+const QoS = require('./lib/qos.js');
+const rclnodejs = require('bindings')('rclnodejs');
+const validator = require('./lib/validator.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -31,6 +34,16 @@ function inherits(target, source) {
 }
 
 inherits(rclnodejs.ShadowNode, Node);
+
+/* eslint-disable */
+function getCurrentGeneratorVersion() {
+  let jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
+  if (fs.existsSync(jsonFilePath)) {
+    return JSON.parse(fs.readFileSync(jsonFilePath, 'utf8')).version;
+  }
+  return null;
+}
+/* eslint-enable */
 
 /**
  * A module that exposes the rclnodejs interfaces.
@@ -74,10 +87,14 @@ let rcl = {
   init(...args) {
     return new Promise((resolve, reject) => {
       if (!this._initialized) {
-        debug('Begin to generate JavaScript code from ROS IDL files.');
-        // TODO(Kenny): introduce other policy to save the amout of time of doing message generation
-        generator.generateAll(false).then(() => {
-          debug('Finish generating.');
+        let version = getCurrentGeneratorVersion();
+        let forced = version === null || compareVersions(version, generator.version()) === -1
+                     ? true
+                     : false;
+        if (forced) {
+          debug('The generator will begin to create JavaScript code from ROS IDL files...');
+        }
+        generator.generateAll(forced).then(() => {
           rclnodejs.init(args);
           debug('Finish initializing rcl with args = %o.', args);
           this._initialized = true;
