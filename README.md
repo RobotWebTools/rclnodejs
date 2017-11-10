@@ -1,4 +1,4 @@
-# rclnodejs - ROS Client Library for JavaScript language
+# rclnodejs - ROS Client Library for JavaScript language[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=update-readme-security)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=update-readme-security)
 
 Branch | Linux Build | macOS Build | Windows Build |
 ------------ |  :-------------: | :-------------: | :-------------: |

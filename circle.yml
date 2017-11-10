@@ -22,4 +22,5 @@ dependencies:
 
 test:
   override:
+    - npm install -g istanbul
     - source ~/ros2_ws/install/local_setup.bash && node scripts/compile_cpp.js && node scripts/run_test.js
