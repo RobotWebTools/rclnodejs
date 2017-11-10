@@ -21,4 +21,3 @@ pushd $(dirname $0) > /dev/null
 git submodule update --init --recursive
 npm install --unsafe-perm
 npm run lint
-npm test

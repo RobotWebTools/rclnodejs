@@ -43,8 +43,6 @@ RUN echo "source $ROS2_WS/install/local_setup.bash" >> $HOME/.bashrc
 ENV NODE_VERSION v6.12.0
 RUN wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash \
     && . $HOME/.nvm/nvm.sh \
-    && nvm install $NODE_VERSION && nvm alias default $NODE_VERSION \
-    && npm install -g istanbul
-
+    && nvm install $NODE_VERSION && nvm alias default $NODE_VERSION
 
 ENV PATH /bin/versions/node/$NODE_VERSION/bin:$PATH
