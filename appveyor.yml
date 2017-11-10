@@ -44,7 +44,6 @@ build_script:
   - npm --version
   - python --version
   - npm install
-  - npm install -g istanbul
   - npm run lint
 
 test_script:
