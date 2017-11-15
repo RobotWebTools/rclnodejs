@@ -13,11 +13,11 @@ RUN /bin/bash -c 'echo "deb http://packages.ros.org/ros/ubuntu xenial main" > /e
     && apt-key adv  --keyserver ha.pool.sks-keyservers.net --recv-keys 421C365BD9FF1F717815A3895523BAEEB01FA116
 
 RUN apt-get update && apt-get install -y build-essential cppcheck cmake libopencv-dev libpoco-dev libpocofoundation9v5 \
-    libpocofoundation9v5-dbg python-empy python3-dev python3-empy python3-nose python3-pip python3-setuptools python3-vcstool libtinyxml-dev libeigen3-dev
+    libpocofoundation9v5-dbg python-empy python3-dev python3-empy python3-nose python3-pip python3-pyparsing python3-setuptools python3-vcstool libtinyxml-dev libeigen3-dev
 
 # Dependencies for testing
 RUN apt-get install -y clang-format pydocstyle pyflakes python3-coverage python3-mock python3-pep8 uncrustify \
-    && pip3 install argcomplete flake8 flake8-import-order
+    && pip3 install argcomplete flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes pytest pytest-cov pytest-runner
 
 # Dependencies for FastRTPS
 RUN apt-get install -y libasio-dev libtinyxml2-dev
