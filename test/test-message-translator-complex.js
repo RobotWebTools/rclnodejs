@@ -33,18 +33,56 @@ describe('Rclnodejs message translation: complex types', function() {
 
   [
     {
-      pkg: 'std_msgs',
-      type: 'MultiArrayDimension',
+      pkg: 'std_msgs', type: 'MultiArrayDimension',
+      values: [
+        {label:  'label name 0', size:   256, stride: 4, },
+        {label:  'label name 1', size:   48,  stride: 8, },
+      ]
+    },
+    {
+      pkg: 'geometry_msgs', type: 'Point',
+      values: [
+        {x: 1.5,  y: 2.75, z: 3.0,  },
+        {x: -1.5, y: 2.75, z: -6.0, },
+      ]
+    },
+    {
+      pkg: 'geometry_msgs', type: 'Point32',
+      values: [
+        {x: 1.5,  y: 2.75, z: 3.0,  },
+        {x: -1.5, y: 2.75, z: -6.0, },
+      ]
+    },
+    {
+      pkg: 'geometry_msgs', type: 'Quaternion',
+      values: [
+        {x: 1.5,  y: 2.75, z: 3.0,  w: 1.0, },
+        {x: -1.5, y: 2.75, z: -6.0, w: -1.0,},
+      ]
+    },
+    {
+      pkg: 'geometry_msgs', type: 'Pose',
       values: [
         {
-          label:  'label name 0',
-          size:   256,
-          stride: 4,
+          position:    {x: 1.5,  y: 2.75,   z: 3.0, },
+          orientation: {x: 1.5,  y: 2.75,   z: 3.0, w: 1.0, },
         },
         {
-          label:  'label name 1',
-          size:   48,
-          stride: 8,
+          position:    {x: 11.5, y: 112.75, z: 9.0, },
+          orientation: {x: 31.5, y: 21.5,   z: 7.5, w: 1.5, },
+        },
+      ]
+    },
+    {
+      pkg: 'geometry_msgs', type: 'Transform',
+      values: [
+        {
+          translation: {x: 1.5,  y: 2.75,   z: 3.0, },
+          rotation:    {x: 1.5,  y: 2.75,   z: 3.0, w: 1.0, },
+        },
+        {
+          translation: {x: 11.5, y: 112.75, z: 9.0, },
+          rotation:    {x: 31.5, y: 21.5,   z: 7.5, w: 1.5, },
         },
       ]
     },
