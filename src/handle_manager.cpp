@@ -38,6 +38,8 @@ HandleManager::~HandleManager() {
 }
 
 void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
+  ScopedMutex scoped_mutex(mutex_);
+
   Nan::HandleScope scope;
   Nan::MaybeLocal<v8::Value> timers =
       Nan::Get(node, Nan::New("_timers").ToLocalChecked());

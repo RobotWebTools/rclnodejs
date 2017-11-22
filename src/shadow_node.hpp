@@ -35,6 +35,7 @@ class ShadowNode : public Nan::ObjectWrap,
   void StopRunning();
 
   Nan::Persistent<v8::Object>* rcl_handle() { return rcl_handle_.get(); }
+  HandleManager* handle_manager() { return handle_manager_.get(); }
 
   // Executor::Delegate overrides:
   void Execute() override;
@@ -48,6 +49,7 @@ class ShadowNode : public Nan::ObjectWrap,
   static Nan::Persistent<v8::Function> constructor;
   static NAN_METHOD(Stop);
   static NAN_METHOD(Start);
+  static NAN_METHOD(SyncHandles);
   static NAN_GETTER(HandleGetter);
   static NAN_SETTER(HandleSetter);
 
