@@ -48,7 +48,7 @@ rclnodejs.init().then(function() {
     node.destroy();
     rclnodejs.shutdown();
     process.exit(0);
-  });  
+  });
 }).catch(function(err) {
   console.log(err);
 });
