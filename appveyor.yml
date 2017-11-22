@@ -9,8 +9,8 @@ image: Visual Studio 2017
 
 environment:
   nodejs_version: "6"
-  PYTHON3: "c:\\Python36-x64"
-  PYTHON2: "c:\\Python27-x64"
+  PYTHON3: "c:\\Python36"
+  PYTHON2: "c:\\Python27"
 
 clone_folder: c:\proj\rclnodejs
 
@@ -28,10 +28,11 @@ before_build:
   - 7z x -y "c:\download\ros2-package-windows-AMD64.zip" -o"c:\" > nul
   - setx -m OPENSSL_CONF C:\OpenSSL-Win64\bin\openssl.cfg
   - set PATH=C:\OpenSSL-Win64\bin;%PATH%
-  - setx AMENT_PYTHON_EXECUTABLE "c:\Python36-x64"
+  - setx AMENT_PYTHON_EXECUTABLE "c:\Python36"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
   - pip install -U setuptools pip
+  - pip install EmPy pyparsing pyyaml
 
 build_script:
   - cd  c:\proj\rclnodejs

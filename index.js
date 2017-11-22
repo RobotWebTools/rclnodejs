@@ -36,15 +36,29 @@ function inherits(target, source) {
 
 inherits(rclnodejs.ShadowNode, Node);
 
-/* eslint-disable */
 function getCurrentGeneratorVersion() {
   let jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
-  if (fs.existsSync(jsonFilePath)) {
-    return JSON.parse(fs.readFileSync(jsonFilePath, 'utf8')).version;
-  }
-  return null;
+
+  return new Promise((resolve, reject) => {
+    fs.open(jsonFilePath, 'r', (err, fd) => {
+      if (err) {
+        if (err.code === 'ENOENT') {
+          resolve(null);
+          return;
+        }
+        reject(err);
+      } else {
+        fs.readFile(jsonFilePath, 'utf8', (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(JSON.parse(data).version);
+          }
+        });
+      }
+    });
+  });
 }
-/* eslint-enable */
 
 /**
  * A module that exposes the rclnodejs interfaces.
@@ -88,19 +102,23 @@ let rcl = {
   init(...args) {
     return new Promise((resolve, reject) => {
       if (!this._initialized) {
-        let version = getCurrentGeneratorVersion();
-        let forced = version === null || compareVersions(version, generator.version()) === -1
-                     ? true
-                     : false;
-        if (forced) {
-          debug('The generator will begin to create JavaScript code from ROS IDL files...');
-        }
-        generator.generateAll(forced).then(() => {
-          rclnodejs.init(args);
-          debug('Finish initializing rcl with args = %o.', args);
-          this._initialized = true;
-          resolve();
-        }).catch((e) => {
+        getCurrentGeneratorVersion().then(version => {
+          let forced = version === null || compareVersions(version, generator.version()) === -1
+                       ? true
+                       : false;
+          if (forced) {
+            debug('The generator will begin to create JavaScript code from ROS IDL files...');
+          }
+
+          generator.generateAll(forced).then(() => {
+            rclnodejs.init(args);
+            debug('Finish initializing rcl with args = %o.', args);
+            this._initialized = true;
+            resolve();
+          }).catch(e => {
+            reject(e);
+          });
+        }).catch(e => {
           reject(e);
         });
       } else {

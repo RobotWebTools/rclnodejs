@@ -25,6 +25,8 @@
 #include <rmw/validate_namespace.h>
 #include <rmw/validate_node_name.h>
 #include <rosidl_generator_c/string_functions.h>
+
+#include <memory>
 #include <string>
 
 #include "handle_manager.hpp"
@@ -35,7 +37,7 @@
 
 namespace rclnodejs {
 
-const rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos);
+rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos);
 
 NAN_METHOD(Init) {
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
@@ -188,7 +190,9 @@ NAN_METHOD(CreateSubscription) {
 
   rcl_subscription_options_t subscription_ops =
       rcl_subscription_get_default_options();
-  const rmw_qos_profile_t* qos_profile = GetQoSProfile(info[5]);
+  auto qos_profile = std::make_unique<rmw_qos_profile_t>();
+  qos_profile.reset(GetQoSProfile(info[5]));
+
   if (qos_profile) {
     subscription_ops.qos = *qos_profile;
   }
@@ -229,7 +233,9 @@ NAN_METHOD(CreatePublisher) {
 
   // Using default options
   rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
-  const rmw_qos_profile_t* qos_profile = GetQoSProfile(info[5]);
+  auto qos_profile = std::make_unique<rmw_qos_profile_t>();
+  qos_profile.reset(GetQoSProfile(info[5]));
+
   if (qos_profile) {
     publisher_ops.qos = *qos_profile;
   }
@@ -275,7 +281,9 @@ NAN_METHOD(CreateClient) {
       reinterpret_cast<rcl_client_t*>(malloc(sizeof(rcl_client_t)));
   *client = rcl_get_zero_initialized_client();
   rcl_client_options_t client_ops = rcl_client_get_default_options();
-  const rmw_qos_profile_t* qos_profile = GetQoSProfile(info[4]);
+  auto qos_profile = std::make_unique<rmw_qos_profile_t>();
+  qos_profile.reset(GetQoSProfile(info[4]));
+
   if (qos_profile) {
     client_ops.qos = *qos_profile;
   }
@@ -310,12 +318,13 @@ NAN_METHOD(RclTakeResponse) {
       RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
   int64_t sequence_number = info[1]->IntegerValue();
 
-  rmw_request_id_t * header =
+  rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
   header->sequence_number = sequence_number;
 
   void* taken_response = node::Buffer::Data(info[2]->ToObject());
   rcl_ret_t ret = rcl_take_response(client, header, taken_response);
+  free(header);
 
   if (ret == RCL_RET_OK) {
     info.GetReturnValue().Set(Nan::True());
@@ -339,7 +348,9 @@ NAN_METHOD(CreateService) {
       reinterpret_cast<rcl_service_t*>(malloc(sizeof(rcl_service_t)));
   *service = rcl_get_zero_initialized_service();
   rcl_service_options_t service_ops = rcl_service_get_default_options();
-  const rmw_qos_profile_t* qos_profile = GetQoSProfile(info[4]);
+  auto qos_profile = std::make_unique<rmw_qos_profile_t>();
+  qos_profile.reset(GetQoSProfile(info[4]));
+
   if (qos_profile) {
     service_ops.qos = *qos_profile;
   }
@@ -406,7 +417,7 @@ NAN_METHOD(ValidateFullTopicName) {
     info.GetReturnValue().Set(Nan::Null());
     return;
   }
-  const char * validation_message =
+  const char* validation_message =
       rmw_full_topic_name_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
       "Unable to get validation error message");
@@ -440,7 +451,7 @@ NAN_METHOD(ValidateNodeName) {
     info.GetReturnValue().Set(Nan::Null());
     return;
   }
-  const char * validation_message =
+  const char* validation_message =
       rmw_node_name_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
       "Unable to get validation error message");
@@ -474,7 +485,7 @@ NAN_METHOD(ValidateTopicName) {
     info.GetReturnValue().Set(Nan::Null());
     return;
   }
-  const char * validation_message =
+  const char* validation_message =
       rcl_topic_name_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
       "Unable to get validation error message");
@@ -508,7 +519,7 @@ NAN_METHOD(ValidateNamespace) {
     info.GetReturnValue().Set(Nan::Null());
     return;
   }
-  const char * validation_message =
+  const char* validation_message =
       rmw_namespace_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
       "Unable to get validation error message");
@@ -595,7 +606,7 @@ NAN_METHOD(ExpandTopicName) {
 NAN_METHOD(GetNodeName) {
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  const char * node_name = rcl_node_get_name(node);
+  const char* node_name = rcl_node_get_name(node);
   if (!node_name) {
     info.GetReturnValue().Set(Nan::Undefined());
   } else {
@@ -606,7 +617,7 @@ NAN_METHOD(GetNodeName) {
 NAN_METHOD(GetNamespace) {
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  const char * node_namespace = rcl_node_get_namespace(node);
+  const char* node_namespace = rcl_node_get_namespace(node);
   if (!node_namespace) {
     info.GetReturnValue().Set(Nan::Undefined());
   } else {
@@ -638,7 +649,7 @@ const rmw_qos_profile_t* GetQoSProfileFromString(
 }
 
 const rmw_qos_profile_t* GetQosProfileFromObject(v8::Local<v8::Object> object) {
-  rmw_qos_profile_t * qos_profile = reinterpret_cast<rmw_qos_profile_t*>(
+  rmw_qos_profile_t* qos_profile = reinterpret_cast<rmw_qos_profile_t*>(
       malloc(sizeof(rmw_qos_profile_t)));
   qos_profile->history = static_cast<rmw_qos_history_policy_t>(
       object->Get(Nan::New("history").ToLocalChecked())->Uint32Value());
@@ -655,15 +666,19 @@ const rmw_qos_profile_t* GetQosProfileFromObject(v8::Local<v8::Object> object) {
   return qos_profile;
 }
 
-const rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos) {
+rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos) {
+  rmw_qos_profile_t* qos_profile = reinterpret_cast<rmw_qos_profile_t*>(
+      malloc(sizeof(rmw_qos_profile_t)));
+
   if (qos->IsString()) {
-    return GetQoSProfileFromString(
+    *qos_profile = *GetQoSProfileFromString(
         std::string(*Nan::Utf8String(qos->ToString())));
   } else if (qos->IsObject()) {
-    return GetQosProfileFromObject(qos->ToObject());
+    *qos_profile = *GetQosProfileFromObject(qos->ToObject());
   } else {
     return nullptr;
   }
+  return qos_profile;
 }
 
 NAN_METHOD(Shutdown) {

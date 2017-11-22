@@ -2,5 +2,5 @@ instrumentation:
     root: .
     extensions:
         - .js
-    default-excludes: true
-    excludes: ['**/rosidl_parser/**', '**/src/**', '**/generated/**', '**/docs/**', '**/build/**', '**/scripts/**', '**/rosidl_gen/**']
+    default-excludes: false
+    excludes: ['**/rosidl_parser/**', '**/src/**', '**/generated/**', '**/docs/**', '**/build/**', '**/scripts/**', '**/rosidl_gen/**', '**/node_modules/**']
