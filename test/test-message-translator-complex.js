@@ -175,10 +175,10 @@ describe('Rclnodejs message translation: complex types', function() {
   /* eslint-enable key-spacing */
   /* eslint-enable comma-spacing */
   ].forEach((testData) => {
-    let MessageType = rclnodejs.require(testData.pkg).msg[testData.type];
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {
       it('Test translation of ' + testData.type + ' msg, case ' + i, function() {
+        let MessageType = rclnodejs.require(testData.pkg).msg[testData.type];
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {

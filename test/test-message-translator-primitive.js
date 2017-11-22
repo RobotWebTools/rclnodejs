@@ -46,10 +46,10 @@ describe('Rclnodejs message translation: primitive types', function() {
     {type: 'UInt64',  values: [0, 1, 2, 3, 32767, 65535]},
     {type: 'UInt8',   values: [0, 1, 2, 3, 127, 255]},
   ].forEach((testData) => {
-    let MessageType = rclnodejs.require('std_msgs').msg[testData.type];
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {
       it('Test translation of ' + testData.type + ' msg, value ' + v, function() {
+        let MessageType = rclnodejs.require('std_msgs').msg[testData.type];
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {
