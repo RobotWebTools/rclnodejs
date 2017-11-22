@@ -21,7 +21,7 @@ describe('Rclnodejs message translation: complex types', function() {
 
   let node;
   before(function() {
-    return rclnodejs.init().then(function(){
+    return rclnodejs.init().then(function() {
       node = rclnodejs.createNode('test_message_translation_node');
       rclnodejs.spin(node);
     });
@@ -31,12 +31,16 @@ describe('Rclnodejs message translation: complex types', function() {
     rclnodejs.shutdown();
   });
 
+  /* eslint-disable camelcase */
+  /* eslint-disable key-spacing */
+  /* eslint-disable comma-spacing */
+
   [
     {
       pkg: 'std_msgs', type: 'MultiArrayDimension',
       values: [
-        {label:  'label name 0', size:   256, stride: 4, },
-        {label:  'label name 1', size:   48,  stride: 8, },
+        {label: 'label name 0', size: 256, stride: 4, },
+        {label: 'label name 1', size: 48,  stride: 8, },
       ]
     },
     {
@@ -56,8 +60,8 @@ describe('Rclnodejs message translation: complex types', function() {
     {
       pkg: 'geometry_msgs', type: 'Quaternion',
       values: [
-        {x: 1.5,  y: 2.75, z: 3.0,  w: 1.0, },
-        {x: -1.5, y: 2.75, z: -6.0, w: -1.0,},
+        {x: 1.5,  y: 2.75, z: 3.0,  w: 1.0,  },
+        {x: -1.5, y: 2.75, z: -6.0, w: -1.0, },
       ]
     },
     {
@@ -152,7 +156,7 @@ describe('Rclnodejs message translation: complex types', function() {
             frame_id: 'f001',
           },
           points: [
-            {x:0,y:1,z:3}, {x:0,y:1,z:3}, {x:0,y:1,z:3}, {x:0,y:1,z:3},
+            {x:0, y:1, z:3}, {x:0, y:1, z:3}, {x:0, y:1, z:3}, {x:0, y:1, z:3},
           ],
           channels: [
             {
@@ -167,6 +171,9 @@ describe('Rclnodejs message translation: complex types', function() {
         },
       ]
     },
+  /* eslint-enable camelcase */
+  /* eslint-enable key-spacing */
+  /* eslint-enable comma-spacing */
   ].forEach((testData) => {
     let MessageType = rclnodejs.require(testData.pkg).msg[testData.type];
     const topic = testData.topic || 'topic' + testData.type;

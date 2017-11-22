@@ -20,7 +20,7 @@ describe('Rclnodejs message translation: primitive types', function() {
 
   let node;
   before(function() {
-    return rclnodejs.init().then(function(){
+    return rclnodejs.init().then(function() {
       node = rclnodejs.createNode('test_message_translation_node');
       rclnodejs.spin(node);
     });
