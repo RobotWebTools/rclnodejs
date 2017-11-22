@@ -52,6 +52,7 @@ void ShadowNode::Init(v8::Local<v8::Object> exports) {
                    HandleSetter);
   Nan::SetPrototypeMethod(tpl, "start", Start);
   Nan::SetPrototypeMethod(tpl, "stop", Stop);
+  Nan::SetPrototypeMethod(tpl, "syncHandles", SyncHandles);
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("ShadowNode").ToLocalChecked(), tpl->GetFunction());
@@ -96,6 +97,14 @@ NAN_METHOD(ShadowNode::Stop) {
     me->StopRunning();
 
   info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_METHOD(ShadowNode::SyncHandles) {
+  auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
+  if (me) {
+    me->handle_manager()->ClearHandles();
+    me->handle_manager()->CollectHandles(me->handle());
+  }
 }
 
 void ShadowNode::Execute() {

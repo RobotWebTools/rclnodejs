@@ -49,6 +49,7 @@ const Subscription = require('./subscription.js');
 const Client = require('./client.js');
 const Service = require('./service.js');
 const QoS = require('./qos.js');
+const debug = require('debug')('rclnodejs:node');
 
 /**
  * @class - Class representing a Node in ROS
@@ -82,24 +83,33 @@ class Node {
     });
 
     this._subscriptions.forEach((subscription) => {
-      let success = rclnodejs.rclTake(subscription.handle, subscription.takenMsg);
+      let Message = subscription.typeClass;
+      let msg = new Message();
+      let success = rclnodejs.rclTake(subscription.handle, msg.toRawROS());
       if (success) {
-        subscription.processResponse();
+        subscription.processResponse(msg.refObject);
       }
+      Message.destoryRawROS(msg);
     });
 
     this._clients.forEach((client) => {
-      let success = rclnodejs.rclTakeResponse(client.handle, client.sequenceNumber, client.takenResponse);
+      let Response = client.typeClass.Response;
+      let response = new Response();
+      let success = rclnodejs.rclTakeResponse(client.handle, client.sequenceNumber, response.toRawROS());
       if (success) {
-        client.processResponse();
+        client.processResponse(response.refObject);
       }
+      Response.destoryRawROS(response);
     });
 
     this._services.forEach((service) => {
-      let header = rclnodejs.rclTakeRequest(service.handle, this.handle, service.takenRequest);
+      let Request = service.typeClass.Request;
+      let request = new Request();
+      let header = rclnodejs.rclTakeRequest(service.handle, this.handle, request.toRawROS());
       if (header) {
-        service.processRequest(header);
+        service.processRequest(header, request.refObject);
       }
+      Request.destoryRawROS(request);
     });
   }
 
@@ -111,6 +121,21 @@ class Node {
   stopSpinning() {
     this.stop();
     this.spinning = false;
+  }
+
+  _removeEntityFromArray(entity, array) {
+    let index = array.indexOf(entity);
+    if (index > -1) {
+      array.splice(index, 1);
+    }
+  }
+
+  _destroyEntity(entity, array, syncHandles = true) {
+    this._removeEntityFromArray(entity, array);
+    if (syncHandles) {
+      this.syncHandles();
+    }
+    entity.handle.release();
   }
 
   /**
@@ -134,8 +159,8 @@ class Node {
 
     let timerHandle = rclnodejs.createTimer(period);
     let timer = new Timer(timerHandle, period, callback);
+    debug('Finish creating timer, period = %d.', period);
     this._timers.push(timer);
-
     return timer;
   }
 
@@ -153,6 +178,7 @@ class Node {
     }
 
     let publisher = Publisher.createPublisher(this.handle, typeClass, topic, qos);
+    debug('Finish creating publisher, topic = %s.', topic);
     this._publishers.push(publisher);
     return publisher;
   }
@@ -183,6 +209,7 @@ class Node {
     }
 
     let subscription = Subscription.createSubscription(this.handle, typeClass, topic, callback, qos);
+    debug('Finish creating subscription, topic = %s.', topic);
     this._subscriptions.push(subscription);
     return subscription;
   }
@@ -201,6 +228,7 @@ class Node {
     }
 
     let client = Client.createClient(this.handle, serviceName, typeClass, qos);
+    debug('Finish creating client, service = %s.', serviceName);
     this._clients.push(client);
     return client;
   }
@@ -231,6 +259,7 @@ class Node {
     }
 
     let service = Service.createService(this.handle, serviceName, typeClass, callback, qos);
+    debug('Finish creating service, service = %s.', serviceName);
     this._services.push(service);
     return service;
   }
@@ -254,24 +283,64 @@ class Node {
     this._services = [];
   }
 
+  /**
+   * Destroy a Publisher.
+   * @param {Publisher} publisher - The Publisher to be destroyed.
+   * @return {undefined}
+   */
   destroyPublisher(publisher) {
-
+    if (!(publisher instanceof Publisher)) {
+      throw new TypeError('Invalid argument');
+    }
+    this._destroyEntity(publisher, this._publishers, false);
   }
 
+  /**
+   * Destroy a Subscription.
+   * @param {Subscription} subscription - The Subscription to be destroyed.
+   * @return {undefined}
+   */
   destroySubscription(subscription) {
-
+    if (!(subscription instanceof Subscription)) {
+      throw new TypeError('Invalid argument');
+    }
+    this._destroyEntity(subscription, this._subscriptions);
   }
 
+  /**
+   * Destroy a Client.
+   * @param {Client} client - The Client to be destroyed.
+   * @return {undefined}
+   */
   destroyClient(client) {
-
+    if (!(client instanceof Client)) {
+      throw new TypeError('Invalid argument');
+    }
+    this._destroyEntity(client, this._clients);
   }
 
+  /**
+   * Destroy a Service.
+   * @param {Service} service - The Service to be destroyed.
+   * @return {undefined}
+   */
   destroyService(service) {
-
+    if (!(service instanceof Service)) {
+      throw new TypeError('Invalid argument');
+    }
+    this._destroyEntity(service, this._services);
   }
 
+  /**
+   * Destroy a Timer.
+   * @param {Timer} timer - The Timer to be destroyed.
+   * @return {undefined}
+   */
   destroyTimer(timer) {
-
+    if (!(timer instanceof Timer)) {
+      throw new TypeError('Invalid argument');
+    }
+    this._destroyEntity(timer, this._timers);
   }
 
   /* Get the name of the node.
@@ -306,7 +375,7 @@ module.exports = Node;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 23 2017 16:56:25 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Nov 22 2017 11:16:22 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>
