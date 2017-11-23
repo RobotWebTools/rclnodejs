@@ -162,20 +162,19 @@ let rcl = {
 
   /**
    * Get the interface package, which is used by publisher/subscription or client/service.
-   * @param {string} packageName - The package wanted to get.
-   * @param {string} interfaceName - The interface in the package, if it's not assigned, then the whole package will be got.
-   * @return {object} - the object of the designated package/interface.
+   * @param {string} name - The name of interface to be required.
+   * @return {object} - the object of the required package/interface.
    */
-  require(packageName, interfaceName) {
-    // TODO(minggang): Can require by a single interface name instead of the
-    // whole package.
-    let interfaceInfos = loader.loadInterfaceInfos(packageName);
-    let pkg = {srv: {}, msg: {}};
+  require(name) {
+    if (typeof (name) !== 'string') {
+      throw new TypeError('Invalid argument');
+    }
 
-    interfaceInfos.forEach((info) => {
-      Object.defineProperty(pkg[info.type], info.name, {value: require(info.filePath)});
-    });
-    return pkg;
+    if (name.indexOf('/') !== -1) {
+      let [packageName, type, messageName] = name.split('/');
+      return loader.loadInterface(packageName, type, messageName);
+    }
+    return loader.loadInterfaceInPackage(name);
   },
 
   /**
