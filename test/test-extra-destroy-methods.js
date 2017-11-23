@@ -100,4 +100,4 @@ describe('Node extra destroy methods testing', function() {
     node.destroyTimer(timer);
     assert.deepStrictEqual(node._timers.length, 0);
   });
-})
+});
