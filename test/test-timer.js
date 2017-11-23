@@ -63,6 +63,7 @@ describe('rclnodejs Timer class testing', function() {
           if ((err instanceof TypeError) && /Cannot set property period/.test(err)) {
             return true;
           }
+          return false;
         }, 'timer.period is readonly!');
         timer.cancel();
         done();
