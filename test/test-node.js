@@ -183,9 +183,7 @@ describe('rcl node methods testing', function() {
   });
 
   it('node.createSubscription', function() {
-    node.createSubscription(rclString, 'chatter', () => {
-      assert.ok(true);
-    });
+    node.createSubscription(rclString, 'chatter', () => {});
 
     var invalidParams = [
       ['chatter?', /topic name is invalid/],
@@ -265,11 +263,9 @@ describe('rcl node methods testing', function() {
       }, TypeError, errorRegExp, 'Failed to createClient');
     });
   });
-  
+
   it('node.createService', function() {
-    node.createService(GetParameters, 'get/parameters', () => {
-      assert.ok(true);
-    });
+    node.createService(GetParameters, 'get/parameters', () => {});
 
     var invalidParams = [
       ['get/parameters?', /topic name is invalid/],

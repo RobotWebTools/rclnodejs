@@ -29,6 +29,7 @@ function assertThrowsError(operation, errorType, errMsg, message) {
     if ((err instanceof errorType) && containedMsg.test(err)) {
       return true;
     }
+    return false;
   }, message);
 }
 

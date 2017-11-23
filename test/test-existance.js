@@ -99,7 +99,7 @@ describe('rclnodejs class existance testing', function() {
     after(function() {
       node.destroy();
     });
-    
+
     it('createClient method should exist', function() {
       assertMember('createClient', node, node.createClient, 'function');
     });
@@ -122,6 +122,26 @@ describe('rclnodejs class existance testing', function() {
 
     it('destroy method should exist', function() {
       assertMember('destroy', node, node.destroy, 'function');
+    });
+
+    it('destroyPublisher method should exist', function() {
+      assertMember('destroyPublisher', node, node.destroyPublisher, 'function');
+    });
+
+    it('destroySubscription method should exist', function() {
+      assertMember('destroySubscription', node, node.destroySubscription, 'function');
+    });
+
+    it('destroyClient method should exist', function() {
+      assertMember('destroyClient', node, node.destroyClient, 'function');
+    });
+
+    it('destroyService method should exist', function() {
+      assertMember('destroyService', node, node.destroyService, 'function');
+    });
+
+    it('destroyTimer method should exist', function() {
+      assertMember('destroyTimer', node, node.destroyTimer, 'function');
     });    
   });
 
