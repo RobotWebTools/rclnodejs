@@ -17,6 +17,7 @@
 const rclnodejs = require('../index.js');
 
 describe('Rclnodejs message translation: primitive types', function() {
+  this.timeout(60 * 1000);
 
   let node;
   before(function() {
