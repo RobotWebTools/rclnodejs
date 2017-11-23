@@ -19,12 +19,8 @@ const rclnodejs = require('../index.js');
 describe('Rclnodejs message translation: primitive types', function() {
   this.timeout(60 * 1000);
 
-  let node;
   before(function() {
-    return rclnodejs.init().then(function() {
-      node = rclnodejs.createNode('test_message_translation_node');
-      rclnodejs.spin(node);
-    });
+    return rclnodejs.init();
   });
 
   after(function() {
@@ -50,20 +46,21 @@ describe('Rclnodejs message translation: primitive types', function() {
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {
       it('Test translation of ' + testData.type + ' msg, value ' + v, function() {
-        let MessageType = rclnodejs.require('std_msgs').msg[testData.type];
+        const node = rclnodejs.createNode('test_message_translation_node');
+        const MessageType = rclnodejs.require('std_msgs').msg[testData.type];
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {
             // For primitive types, msgs are defined as a single `.data` field
             if (value.data === v) {
-              node.destroySubscription(sub);
+              node.destroy();
               resolve();
             } else {
               reject('case ' + i + '. Expected: ' + v + ', Got: ' + value.data);
             }
           });
           publisher.publish(v);
-          node.destroyPublisher(publisher);
+          rclnodejs.spin(node);
         });
       });
     });

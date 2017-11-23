@@ -20,12 +20,8 @@ const rclnodejs = require('../index.js');
 describe('Rclnodejs message translation: complex types', function() {
   this.timeout(60 * 1000);
 
-  let node;
   before(function() {
-    return rclnodejs.init().then(function() {
-      node = rclnodejs.createNode('test_message_translation_node');
-      rclnodejs.spin(node);
-    });
+    return rclnodejs.init();
   });
 
   after(function() {
@@ -179,22 +175,20 @@ describe('Rclnodejs message translation: complex types', function() {
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {
       it('Test translation of ' + testData.type + ' msg, case ' + i, function() {
-        let MessageType = rclnodejs.require(testData.pkg).msg[testData.type];
+        const node = rclnodejs.createNode('test_message_translation_node');
+        const MessageType = rclnodejs.require(testData.pkg).msg[testData.type];
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {
             if (rclnodejs.util.deepEqual(value, v)) {
-              // Note: waiting for Issue 184 (https://github.com/RobotWebTools/rclnodejs/issues/184)
-              node.destroySubscription(sub);
+              node.destroy();
               resolve();
             } else {
-              // Note: this routine will be invoked multiple times unless
-              //       Issue 184 is resolved (https://github.com/RobotWebTools/rclnodejs/issues/184)
               reject('case ' + i + '. Expected: ' + v + ', Got: ' + value);
             }
           });
           publisher.publish(v);
-          node.destroyPublisher(publisher);
+          rclnodejs.spin(node);
         });
       });
     });
