@@ -49,6 +49,26 @@ describe('Test rclnodejs nodes in a single process', function() {
     rclnodejs.spin(publisherNode);
   });
 
+  it('New style requiring for messages', function(done) {
+    var node = rclnodejs.createNode('new_style_require_message');
+    const RclString = rclnodejs.require('std_msgs/msg/String');
+    let msg = new RclString();
+    msg.data = 'Hello World';
+
+    var subscription = node.createSubscription(RclString, 'new_style_require1', (msg) => {
+      timer.cancel();
+      assert.deepStrictEqual(msg.data, 'Hello World');
+      done();
+    }); 
+
+    var publisher = node.createPublisher(RclString, 'new_style_require1');
+    var timer = node.createTimer(100, () => {
+      publisher.publish(msg);
+    });
+
+    rclnodejs.spin(node);
+  });
+
   it('Client/Service is a one process', function(done) {
     var clientNode = rclnodejs.createNode('single_ps_client');
     var serviceNode = rclnodejs.createNode('single_ps_service');
@@ -74,5 +94,31 @@ describe('Test rclnodejs nodes in a single process', function() {
     });
     rclnodejs.spin(serviceNode);
     rclnodejs.spin(clientNode);
+  });
+
+  it('New style requiring for services', function(done) {
+    var node = rclnodejs.createNode('new_style_require_services');
+    const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
+
+    var service = node.createService(AddTwoInts, 'new_style_require2', (request, response) => {
+      assert.deepStrictEqual(request.a, 1);
+      assert.deepStrictEqual(request.b, 2);
+      response.sum = request.a + request.b;
+      return response;
+    });
+    var client = node.createClient(AddTwoInts, 'new_style_require2');
+    let request = new AddTwoInts.Request();
+    request.a = 1;
+    request.b = 2;
+
+    var timer = node.createTimer(100, () => {
+      client.sendRequest(request, (response) => {
+        timer.cancel();
+        assert.deepStrictEqual(response.sum, 3);
+        done();
+      });
+    });
+
+    rclnodejs.spin(node);
   });
 });
