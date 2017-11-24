@@ -18,6 +18,7 @@ let arrayWrapper = it.spec.msgName + 'ArrayWrapper';
 let refObjectType = it.spec.msgName + 'RefStruct';
 let refObjectArrayType = it.spec.msgName + 'RefStructArray';
 let refArrayType = it.spec.msgName + 'RefArray';
+const compactMsgDefJSON = JSON.stringify(JSON.parse(it.json));
 
 if (it.spec.fields.length === 0) {
   /* Following rosidl_generator_c style, put a bool member named '_dummy' */
@@ -326,6 +327,14 @@ class {{=objectWrapper}} {
     {{?}}
     {{~}}
   }
+
+  get classType() {
+    return {{=objectWrapper}};
+  }
+
+  static get ROSMessageDef() {
+    return {{=compactMsgDefJSON}};
+  }
 }
 
 // Define the wrapper of array class.
@@ -444,6 +453,18 @@ class {{=arrayWrapper}} {
     for (let index = 0; index < refObject.size; index++) {
       {{=objectWrapper}}.freeStruct(refObjectArray[index]);
     }
+  }
+
+  static get elementType() {
+    return {{=objectWrapper}};
+  }
+
+  get isROSArray() {
+    return true;
+  }
+
+  get classType() {
+    return {{=arrayWrapper}};
   }
 }
 
