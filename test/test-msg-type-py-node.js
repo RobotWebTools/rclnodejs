@@ -18,6 +18,7 @@ const assert = require('assert');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
+const {verifyMessageStruct} = require('../lib/message_translator.js');
 
 describe('Rclnodejs - Python message type testing', function() {
   this.timeout(60 * 1000);
@@ -319,7 +320,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var destroy = false;
       var publisher = utils.launchPythonProcess([`${__dirname}/py/publisher_msg.py`, 'Header']);
       var subscription = node.createSubscription(Header, 'Header_py_js_channel', (msg) => {
-        assert.ok(msg.stamp instanceof Time);
+        assert(verifyMessageStruct(Header, msg));
         assert.deepStrictEqual(msg.stamp.sec, 123456);
         assert.deepStrictEqual(msg.stamp.nanosec, 789);
         assert.deepStrictEqual(msg.frame_id, 'main frame');
@@ -342,8 +343,8 @@ describe('Rclnodejs - Python message type testing', function() {
       var destroy = false;
       var publisher = utils.launchPythonProcess([`${__dirname}/py/publisher_msg.py`, 'JointState']);
       var subscription = node.createSubscription(JointState, 'JointState_py_js_channel', (msg) => {
-        assert.ok(msg.header instanceof Header);
-        assert.ok(msg.header.stamp instanceof Time);
+        assert(verifyMessageStruct(JointState, msg));
+
         assert.deepStrictEqual(msg.header.stamp.sec, 123456);
         assert.deepStrictEqual(msg.header.stamp.nanosec, 789);
         assert.deepStrictEqual(msg.header.frame_id, 'main frame');

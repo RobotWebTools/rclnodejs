@@ -17,22 +17,7 @@
 const assert = require('assert');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
-
-// function checkType(m, rclType, jsType, value, callback) {
-//                   // rclnodejs, 'Bool', 'boolean', '"true"', callback
-//   if ((typeof rclType !== 'string') || (typeof value !== 'string')) {
-//     throw TypeError('Invalid type of parameters!');
-//   }
-
-//   var node = m.createNode(rclType + '_subscription');
-//   var msgType = m.require('std_msgs').msg[rclType];
-//   var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, [rclType, value]);
-//   var subscription = node.createSubscription(msgType, rclType + '_type_channel', (msg) => {
-//     publisher.send('quit');
-//     callback(msg, jsType, value);    
-//   });
-//   m.spin(node);
-// }
+const {verifyMessageStruct} = require('../lib/message_translator.js');
 
 describe('Rclnodejs message type testing', function() {
   this.timeout(60 * 1000);
@@ -278,16 +263,11 @@ describe('Rclnodejs message type testing', function() {
       var publisher = childProcess.fork(`${__dirname}/publisher_msg_header.js`);
       var subscription = node.createSubscription(Header, 'Header_channel', (header) => {
         publisher.kill('SIGINT');
-        assert.ok(header instanceof Header);
 
-        assert.ok('stamp' in header);
-        assert.ok(header.stamp instanceof Time);
-        assert.ok('sec' in header.stamp);
+        assert(verifyMessageStruct(Header, header));
+
         assert.deepStrictEqual(header.stamp.sec, 123456);
-        assert.ok('nanosec' in header.stamp);
         assert.deepStrictEqual(header.stamp.nanosec, 789);
-
-        assert.ok('frame_id' in header);
         assert.deepStrictEqual(header.frame_id, 'main frame');
 
         done();
@@ -303,9 +283,9 @@ describe('Rclnodejs message type testing', function() {
       var publisher = childProcess.fork(`${__dirname}/publisher_msg_jointstate.js`);
       var subscription = node.createSubscription(JointState, 'JointState_channel', (state) => {
         publisher.kill('SIGINT');
-        assert.ok(state instanceof JointState);
 
-        assert.ok(state.header instanceof Header);
+        assert(verifyMessageStruct(JointState, state));
+
         assert.deepStrictEqual(state.name, ['Tom', 'Jerry']);
         assert.deepStrictEqual(state.position, [1, 2]);
         assert.deepStrictEqual(state.velocity, [2, 3]);
