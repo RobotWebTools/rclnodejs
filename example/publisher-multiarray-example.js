@@ -14,12 +14,14 @@
 
 'use strict';
 
+/* eslint-disable camelcase */
+
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  let MultiArrayDimension = rclnodejs.require('std_msgs').msg.MultiArrayDimension;
-  let MultiArrayLayout = rclnodejs.require('std_msgs').msg.MultiArrayLayout;
-  let Int32MultiArray = rclnodejs.require('std_msgs').msg.Int32MultiArray;
+  const MultiArrayDimension = rclnodejs.require('std_msgs').msg.MultiArrayDimension;
+  const MultiArrayLayout = rclnodejs.require('std_msgs').msg.MultiArrayLayout;
+  const Int32MultiArray = rclnodejs.require('std_msgs').msg.Int32MultiArray;
 
   const node = rclnodejs.createNode('publisher_multiarray_node');
   const publisher = node.createPublisher(Int32MultiArray, 'Int32MultiArray');
@@ -28,30 +30,29 @@ rclnodejs.init().then(() => {
   setInterval(function() {
     // Please reference the usage of multi-array at
     // https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/MultiArrayLayout.msg
-    let heightDimension = new MultiArrayDimension();
-    heightDimension.label = 'height';
-    heightDimension.size = 2;
-    heightDimension.stride = 2 * 3 * 3;
-
-    let weightDimension = new MultiArrayDimension();
-    weightDimension.label = 'weight';
-    weightDimension.size = 3;
-    weightDimension.stride = 3 * 3;
-
-    let channelDimension = new MultiArrayDimension();
-    channelDimension.label = 'channel';
-    channelDimension.size = 3;
-    channelDimension.stride = 3;
-
-    let layout = new MultiArrayLayout();
-    layout.dim.fill([heightDimension, weightDimension, channelDimension]);
-    // eslint-disable-next-line
-    layout.data_offset = 0;
-    let multiArray = new Int32MultiArray();
-    multiArray.layout = layout;
-    multiArray.data = [1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6];
-
-    publisher.publish(multiArray);
+    publisher.publish({
+      layout: {
+        dim: [
+          {
+            label: 'height',
+            size: 2,
+            stride: 2 * 3 * 3,
+          },
+          {
+            label: 'weight',
+            size: 3,
+            stride: 3 * 3,
+          },
+          {
+            label: 'channel',
+            size: 3,
+            stride: 3,
+          },
+        ],
+        data_offset: 0,
+      },
+      data: [1, 2, 3, 4, 5, 6, 10, 20, 30, 40, 50, 60, 101, 102, 103, 104, 105, 106],
+    });
     console.log(`Publish ${++count} messages.`);
   }, 1000);
   rclnodejs.spin(node);

@@ -17,19 +17,12 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
-  let node = rclnodejs.createNode('subscription_example_node');
+  const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+  const node = rclnodejs.createNode('subscription_example_node');
   let count = 0;
 
   node.createSubscription(JointState, 'JointState', (state) => {
-    console.log(`Received ${++count} messages:`);
-    console.log('state.header.stamp.sec = ' + state.header.stamp.sec);
-    console.log('state.header.stamp.nanosec = ' + state.header.stamp.nanosec);
-    console.log('state.header.frame_id = ' + state.header.frame_id);
-    console.log('state.name = ' + state.name.toString());
-    console.log('state.position = ' + state.position.toString());
-    console.log('state.velocity = ' + state.velocity.toString());
-    console.log('state.effort = ' + state.effort.toString() + '\n');
+    console.log(`Received message No. ${++count}: `, state);
   });
 
   rclnodejs.spin(node);

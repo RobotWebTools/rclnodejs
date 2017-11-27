@@ -28,7 +28,7 @@ rclnodejs.init().then(() => {
   qos.depth = 1;
   qos.avoidRosNameSpaceConventions = false;
 
-  let String = rclnodejs.require('std_msgs').msg.String;
+  const String = rclnodejs.require('std_msgs').msg.String;
   const publisher = node.createPublisher(String, 'topic', qos);
   /* eslint-enable */
 
