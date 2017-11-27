@@ -29,7 +29,7 @@ Alternatively, you can download the latest binary package of ROS2 from [here](ht
 
 ### Install `Node.js`
 
-The `Node.js` version we selected is the latest LTS (6.x) `Boron`. You can install it:
+The `Node.js` version we selected is the latest LTS [`Carbon`](https://nodejs.org/download/release/latest-carbon/) (8.x). You can install it:
 
 * Download from Node.js offical [website](https://nodejs.org/en/), and install it.
 * Use the Node Version Manager ([nvm](https://github.com/creationix/nvm)) to install it.
