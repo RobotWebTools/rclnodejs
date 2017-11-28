@@ -72,7 +72,7 @@ describe('Test rclnodejs nodes in a single process', function() {
   it('Client/Service is a one process', function(done) {
     var clientNode = rclnodejs.createNode('single_ps_client');
     var serviceNode = rclnodejs.createNode('single_ps_service');
-    const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
     var service = serviceNode.createService(AddTwoInts, 'single_ps_channel2', (request, response) => {
       assert.deepStrictEqual(request.a, 1);

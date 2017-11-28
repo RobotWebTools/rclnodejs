@@ -122,7 +122,7 @@ describe('Multiple nodes interation testing', function() {
   describe('Client/Service', function() {
     it('Node.js client - Cpp service and Python service', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_client');
-      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       let request1 = {a: 1, b: 2};
       let request2 = {a: 3, b: 4};
 
@@ -168,7 +168,7 @@ describe('Multiple nodes interation testing', function() {
 
     it('Node.js service - Cpp client and Python client', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_service');
-      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var service = node.createService(AddTwoInts, 'pycpp_js_add_two_ints', (request, response) => {
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.deepStrictEqual(typeof request.b, 'number');

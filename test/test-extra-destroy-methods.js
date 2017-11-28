@@ -60,7 +60,7 @@ describe('Node extra destroy methods testing', function() {
 
   it('destroyClient()', function() {
     var node = rclnodejs.createNode('node3');
-    const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     // const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
     var client = node.createClient(AddTwoInts, 'add_two_ints');
     assert.deepStrictEqual(node._clients.length, 1);
@@ -75,7 +75,7 @@ describe('Node extra destroy methods testing', function() {
 
   it('destroyService()', function() {
     var node = rclnodejs.createNode('node4');
-    const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     // const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
     var service = node.createService(AddTwoInts, 'add_two_ints', () => {});
     assert.deepStrictEqual(node._services.length, 1);

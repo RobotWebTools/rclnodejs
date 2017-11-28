@@ -128,7 +128,7 @@ describe('Cross-language interaction', function() {
   describe('Node.js client', function() {
     it('Node.js client should work with Python service', function(done) {
       var node = rclnodejs.createNode('js_py_add_client');
-      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var destroy = false;
 
       var pyService = utils.launchPythonProcess([`${__dirname}/py/service.py`]);
@@ -153,7 +153,7 @@ describe('Cross-language interaction', function() {
 
     it('Node.js client should work with C++ service', function(done) {
       var node = rclnodejs.createNode('js_cpp_add_client');
-      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var client = node.createClient(AddTwoInts, 'js_cpp_add_two_ints');
       let request = {a: 1, b: 2};
 
@@ -182,7 +182,7 @@ describe('Cross-language interaction', function() {
   describe('Node.js service', function() {
     it('Node.js service should work with Python client', function(done) {
       var node = rclnodejs.createNode('py_js_add_service');
-      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var destroy = false;
 
       var service = node.createService(AddTwoInts, 'py_js_add_two_ints', (request, response) => {
@@ -206,7 +206,7 @@ describe('Cross-language interaction', function() {
 
     it('Node.js service should work with C++ client', function(done) {
       var node = rclnodejs.createNode('cpp_js_add_service');
-      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var destroy = false;
 
       var service = node.createService(AddTwoInts, 'cpp_js_add_two_ints', (request, response) => {

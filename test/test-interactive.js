@@ -54,7 +54,7 @@ describe('rclnodejs interactive testing', function() {
   describe('Client/Service', function() {
     it('Client/Service', function(done) {
       var node = rclnodejs.createNode('client_service');
-      var AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      var AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var service = node.createService(AddTwoInts, 'add_two_ints', function(request, response) {
         assert.ok('a' in request);
         assert.deepStrictEqual(typeof request.a, 'number');
