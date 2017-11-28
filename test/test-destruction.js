@@ -73,11 +73,11 @@ describe('Node destroy testing', function() {
     var timer = node.createTimer(0.1, () => {});
     assert.deepStrictEqual(1, node._timers.length);
         
-    var int16 = rclnodejs.require('std_msgs').msg.Int16;
+    const int16 = 'std_msgs/msg/Int16';
     var pub1 = node.createPublisher(int16, 'pub1_topic');
     assert.deepStrictEqual(1, node._publishers.length);
 
-    var float32 = rclnodejs.require('std_msgs').msg.Float32;
+    const float32 = 'std_msgs/msg/Float32';
     var pub2 = node.createPublisher(float32, 'pub2_topic');
     assert.deepStrictEqual(2, node._publishers.length);
 
@@ -87,7 +87,7 @@ describe('Node destroy testing', function() {
     });
     assert.deepStrictEqual(1, node._subscriptions.length);
 
-    var uint8 = rclnodejs.require('std_msgs').msg.UInt8;
+    const uint8 = 'std_msgs/msg/UInt8';
     var sub2 = node.createSubscription(uint8, 'sub2_topic', function(msg) {
       console.log(`Received ${msg}`);
     });
