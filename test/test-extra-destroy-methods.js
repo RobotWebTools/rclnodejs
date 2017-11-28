@@ -30,7 +30,7 @@ describe('Node extra destroy methods testing', function() {
 
   it('destroyPublisher()', function() {
     var node = rclnodejs.createNode('node1');
-    const RclString = rclnodejs.require('std_msgs').msg.String;
+    const RclString = 'std_msgs/msg/String';
     // const RclString = rclnodejs.require('std_msgs/msg/String');
     var publisher = node.createPublisher(RclString, 'chatter');
     assert.deepStrictEqual(node._publishers.length, 1);
@@ -45,7 +45,7 @@ describe('Node extra destroy methods testing', function() {
 
   it('destroySubscription()', function() {
     var node = rclnodejs.createNode('node2');
-    const RclString = rclnodejs.require('std_msgs').msg.String;
+    const RclString = 'std_msgs/msg/String';
     // const RclString = rclnodejs.require('std_msgs/msg/String');
     var subscription = node.createSubscription(RclString, 'chatter', () => {});
     assert.deepStrictEqual(node._subscriptions.length, 1);

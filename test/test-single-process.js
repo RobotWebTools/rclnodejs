@@ -31,9 +31,8 @@ describe('Test rclnodejs nodes in a single process', function() {
   it('Publisher/Subscription in one process', function(done) {
     var publisherNode = rclnodejs.createNode('single_ps_publisher');
     var subscriptionNode = rclnodejs.createNode('single_ps_subscription');
-    const RclString = rclnodejs.require('std_msgs').msg.String;
-    let msg = new RclString();
-    msg.data = 'Hello World';
+    const RclString = 'std_msgs/msg/String';
+    const msg = 'Hello World';
 
     var subscription = subscriptionNode.createSubscription(RclString, 'single_ps_channel1', (msg) => {
       timer.cancel();

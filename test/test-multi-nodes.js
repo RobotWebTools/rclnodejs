@@ -34,7 +34,7 @@ describe('Multiple nodes interation testing', function() {
   describe('Publisher/Subscription', function() {
     it('Node.js publisher - Python and Cpp subscription', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_publisher');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
+      const RclString = 'std_msgs/msg/String';
 
       var cppReceived = false, pyReceived = false;
       var cppSubPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
@@ -42,8 +42,7 @@ describe('Multiple nodes interation testing', function() {
       var pySubPath = path.join(__dirname, 'py', 'listener.py');
       var pySubscription = utils.launchPythonProcess([pySubPath, 'js_pycpp_chatter']);
 
-      let msg = new RclString();
-      msg.data = 'hello world';
+      const msg = 'hello world';
       var jsPublisher = node.createPublisher(RclString, 'js_pycpp_chatter');
       var timer = node.createTimer(100, () => {
         jsPublisher.publish(msg);
@@ -81,7 +80,7 @@ describe('Multiple nodes interation testing', function() {
 
     it('Node.js subscription - Python publisher and Cpp publisher', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_subscription');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
+      const RclString = 'std_msgs/msg/String';
 
       var receivedFromPy = false, receivedFromCpp = false;
       var subscription = node.createSubscription(RclString, 'pycpp_js_chatter', (msg) => {

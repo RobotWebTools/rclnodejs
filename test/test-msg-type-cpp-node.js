@@ -93,7 +93,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('String', function(done) {
       var node = rclnodejs.createNode('string_js_subscription');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
+      const RclString = 'std_msgs/msg/String';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'String_cpp_js_channel', '-m', 'String']);
@@ -472,9 +472,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('String', function(done) {
       var node = rclnodejs.createNode('string_js_publisher');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
-      var msg = new RclString();
-      msg.data = 'Hello World';
+      const RclString = 'std_msgs/msg/String';
+      const msg = 'Hello World';
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);

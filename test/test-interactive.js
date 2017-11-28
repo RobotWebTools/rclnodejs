@@ -32,7 +32,7 @@ describe('rclnodejs interactive testing', function() {
   describe('Publisher/Subscription', function() {
     it('Publisher/Subscription', function(done) {
       var node = rclnodejs.createNode('publisher_subscription');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
+      const RclString = 'std_msgs/msg/String';
       var publisher = childProcess.fork(`${__dirname}/publisher_setup.js`);
       var destroy = false;
       var subscription = node.createSubscription(RclString, 'topic', function(msg) {

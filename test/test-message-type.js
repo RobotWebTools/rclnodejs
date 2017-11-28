@@ -72,7 +72,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('String', function(done) {
       var node = rclnodejs.createNode('string_subscription');
-      var msgString = rclnodejs.require('std_msgs').msg.String;
+      var msgString = 'std_msgs/msg/String';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['String', '"RCL String"']);
       var subscription = node.createSubscription(msgString, 'String_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -85,7 +85,7 @@ describe('Rclnodejs message type testing', function() {
 
     // it('InitString', function(done) {
     //   var node = rclnodejs.createNode('init_string_subscription');
-    //   var msgString = rclnodejs.require('std_msgs').msg.String;
+    //   var msgString = 'std_msgs/msg/String';
     //   var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['InitString', '"RCL String"']);
     //   var subscription = node.createSubscription(msgString, 'InitString_channel', (msg) => {
     //     publisher.send('quit');

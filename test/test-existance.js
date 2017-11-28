@@ -150,7 +150,7 @@ describe('rclnodejs class existance testing', function() {
 
     before(function() {
       node = rclnodejs.createNode('Publisher');
-      rclString = rclnodejs.require('std_msgs').msg.String;
+      rclString = 'std_msgs/msg/String';
       publisher = node.createPublisher(rclString, 'chatter');
     });
 

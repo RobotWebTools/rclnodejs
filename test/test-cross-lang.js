@@ -33,12 +33,12 @@ describe('Cross-language interaction', function() {
 
   describe('Node.js Subcription', function() {
     it('Node.js subscription should receive msg from C++ publisher', (done) => {
-      var node = rclnodejs.createNode('cpp_pub_js_sub');
-      const rclString = rclnodejs.require('std_msgs').msg.String;
-      var destroy = false;
-      var cppTalkPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'talker');
-      var cppTalker = childProcess.spawn(cppTalkPath, ['-t', 'cpp_js_chatter']);
-      var subscription = node.createSubscription(rclString, 'cpp_js_chatter', (msg) => {
+      const node = rclnodejs.createNode('cpp_pub_js_sub');
+      const rclString = 'std_msgs/msg/String';
+      let destroy = false;
+      const cppTalkPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'talker');
+      const cppTalker = childProcess.spawn(cppTalkPath, ['-t', 'cpp_js_chatter']);
+      const subscription = node.createSubscription(rclString, 'cpp_js_chatter', (msg) => {
         assert.ok(/Hello World:/.test(msg.data));
         if (!destroy) {
           node.destroy();
@@ -52,7 +52,7 @@ describe('Cross-language interaction', function() {
 
     it('Node.js subscription should receive msg from Python publisher', (done) => {
       var node = rclnodejs.createNode('cpp_pub_py_sub');
-      const rclString = rclnodejs.require('std_msgs').msg.String;
+      const rclString = 'std_msgs/msg/String';
       var destroy = false;
       var pyTalker = utils.launchPythonProcess([`${__dirname}/py/talker.py`]);
       var subscription = node.createSubscription(rclString, 'py_js_chatter', (msg) => {
@@ -70,17 +70,16 @@ describe('Cross-language interaction', function() {
     
   describe('Node.js publisher', function() {
     it('Cpp subscription should receive msg from Node.js publisher', (done) => {
-      var node = rclnodejs.createNode('js_pub_cpp_sub');
-      const rclString = rclnodejs.require('std_msgs').msg.String;
-      var destroy = false;
+      const node = rclnodejs.createNode('js_pub_cpp_sub');
+      const rclString = 'std_msgs/msg/String';
+      let destroy = false;
 
-      let text = 'Greeting from Node.js publisher';
-      let cppListenerPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
-      var cppListener = childProcess.spawn(cppListenerPath, ['-t', 'js_cpp_chatter']);
-      var publisher = node.createPublisher(rclString, 'js_cpp_chatter');
-      var msg = new rclString();
-      msg.data = text;
-      var timer = setInterval(() => {
+      const text = 'Greeting from Node.js publisher';
+      const cppListenerPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
+      const cppListener = childProcess.spawn(cppListenerPath, ['-t', 'js_cpp_chatter']);
+      const publisher = node.createPublisher(rclString, 'js_cpp_chatter');
+      const msg = text;
+      const timer = setInterval(() => {
         publisher.publish(msg);
       }, 100);
 
@@ -98,17 +97,16 @@ describe('Cross-language interaction', function() {
     });
 
     it('Python subscription should receive msg from Node.js publisher', function(done) {
-      var node = rclnodejs.createNode('js_pub_py_sub');
-      const rclString = rclnodejs.require('std_msgs').msg.String;
-      var destroy = false;
+      const node = rclnodejs.createNode('js_pub_py_sub');
+      const rclString = 'std_msgs/msg/String';
+      let destroy = false;
 
-      let text = 'Greeting from Node.js publisher to Python subscription';
-      var pyListener = utils.launchPythonProcess([`${__dirname}/py/listener.py`]);
-      var publisher = node.createPublisher(rclString, 'js_py_chatter');
-      var msg = new rclString();
-      msg.data = text;
+      const text = 'Greeting from Node.js publisher to Python subscription';
+      const pyListener = utils.launchPythonProcess([`${__dirname}/py/listener.py`]);
+      const publisher = node.createPublisher(rclString, 'js_py_chatter');
+      const msg = text;
 
-      var timer = setInterval(() => {
+      const timer = setInterval(() => {
         publisher.publish(msg);
       }, 100);
       pyListener.stdout.on('data', (data) => {

@@ -85,7 +85,7 @@ describe('Rclnodejs - Python message type testing', function() {
 
     it('String', function(done) {
       var node = rclnodejs.createNode('string_js_subscription');
-      const String = rclnodejs.require('std_msgs').msg.String;
+      const String = 'std_msgs/msg/String';
       var destroy = false;
       var publisher = utils.launchPythonProcess([`${__dirname}/py/publisher_msg.py`, 'String']);
       var subscription = node.createSubscription(String, 'String_py_js_channel', (msg) => {
@@ -448,9 +448,8 @@ describe('Rclnodejs - Python message type testing', function() {
 
     it('String', function(done) {
       var node = rclnodejs.createNode('string_js_publisher');
-      const String = rclnodejs.require('std_msgs').msg.String;
-      var msg = new String();
-      msg.data = 'Hello World';
+      const String = 'std_msgs/msg/String';
+      const msg = 'Hello World';
       var destroy = false;
 
       var subscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'String']);
