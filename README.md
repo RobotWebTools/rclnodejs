@@ -1,4 +1,4 @@
-# rclnodejs - ROS Client Library for JavaScript language[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg)](https://coveralls.io/github/RobotWebTools/rclnodejs)[![npm](https://img.shields.io/npm/dt/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs)[![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE)
+# rclnodejs - ROS Client Library for JavaScript language[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=develop)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=develop)[![npm](https://img.shields.io/npm/dt/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs)[![GitHub license](https://img.shields.io/github/license/RobotWebTools/rclnodejs.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE)
 
 Branch | Linux Build | macOS Build | Windows Build |
 ------------ |  :-------------: | :-------------: | :-------------: |
@@ -29,7 +29,7 @@ Alternatively, you can download the latest binary package of ROS2 from [here](ht
 
 ### Install `Node.js`
 
-The `Node.js` version we selected is the latest LTS (6.x) `Boron`. You can install it:
+The `Node.js` version we selected is the latest LTS [`Carbon`](https://nodejs.org/download/release/latest-carbon/) (8.x). You can install it:
 
 * Download from Node.js offical [website](https://nodejs.org/en/), and install it.
 * Use the Node Version Manager ([nvm](https://github.com/creationix/nvm)) to install it.

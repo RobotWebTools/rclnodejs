@@ -43,7 +43,6 @@ const char* lib_ext = ".dll";
 void* GetTypeSupportFunctionByInterfaceSymbolName(
     const std::string& symbol_name,
     const std::string& lib_name) {
-  // TODO(Kenny): support *.dll/etc. on other platforms.
   void* lib = dlopen(lib_name.c_str(), RTLD_NOW | RTLD_GLOBAL);
 
   if (lib)
