@@ -133,9 +133,7 @@ describe('Cross-language interaction', function() {
 
       var pyService = utils.launchPythonProcess([`${__dirname}/py/service.py`]);
       var client = node.createClient(AddTwoInts, 'js_py_add_two_ints');
-      let request = new AddTwoInts.Request();
-      request.a = 1;
-      request.b = 2;
+      let request = {a: 1, b: 2};
 
       var timer = setInterval(() => {
         client.sendRequest(request, (response) => {
@@ -157,9 +155,7 @@ describe('Cross-language interaction', function() {
       var node = rclnodejs.createNode('js_cpp_add_client');
       const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
       var client = node.createClient(AddTwoInts, 'js_cpp_add_two_ints');
-      let request = new AddTwoInts.Request();
-      request.a = 1;
-      request.b = 2;
+      let request = {a: 1, b: 2};
 
       var destroy = false;
       var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],

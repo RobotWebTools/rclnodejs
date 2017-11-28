@@ -20,9 +20,10 @@ rclnodejs.init().then(function() {
   var node = rclnodejs.createNode('service');
   var AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
   var client = node.createClient(AddTwoInts, 'add_two_ints');
-  var request = new AddTwoInts.Request();
-  request.a = 1;
-  request.b = 2;
+  var request = {
+    a: 1,
+    b: 2,
+  };
   client.sendRequest(request, function(response) {
     process.stdout.write(response.sum.toString());
   });

@@ -123,12 +123,8 @@ describe('Multiple nodes interation testing', function() {
     it('Node.js client - Cpp service and Python service', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_client');
       const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
-      let request1 = new AddTwoInts.Request();
-      request1.a = 1;
-      request1.b = 2;
-      let request2 = new AddTwoInts.Request();
-      request2.a = 3;
-      request2.b = 4;
+      let request1 = {a: 1, b: 2};
+      let request2 = {a: 3, b: 4};
 
       var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],
                                     'lib',
