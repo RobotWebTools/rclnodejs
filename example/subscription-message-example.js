@@ -17,11 +17,10 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
   const node = rclnodejs.createNode('subscription_example_node');
   let count = 0;
 
-  node.createSubscription(JointState, 'JointState', (state) => {
+  node.createSubscription('sensor_msgs/msg/JointState', 'JointState', (state) => {
     console.log(`Received message No. ${++count}: `, state);
   });
 

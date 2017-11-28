@@ -17,12 +17,13 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  const Int32MultiArray = rclnodejs.require('std_msgs').msg.Int32MultiArray;
   const node = rclnodejs.createNode('subscription_multiarray_node');
 
-  node.createSubscription(Int32MultiArray, 'Int32MultiArray', (multiArray) => {
+  let counter = 0;
+  node.createSubscription('std_msgs/msg/Int32MultiArray', 'Int32MultiArray', (multiArray) => {
     // Please reference the usage of multi-array at
     // https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/MultiArrayLayout.msg
+    console.log('Message: ', counter++, multiArray);
     console.log('Iterate the multi array:');
     const dim = multiArray.layout.dim;
     const height = dim[0].size;
@@ -36,11 +37,13 @@ rclnodejs.init().then(() => {
     for (let i = 0; i < height; i++) {
       for (let j = 0; j < weight; j++) {
         for (let k = 0; k < channel; k++) {
-          console.log(`multiarray(${i},${j},${k}) = ${multiArray.data[offset + weightStride*i + channelStride*j + k]}`);
+          console.log(`multiArray(${i},${j},${k}) = ${multiArray.data[offset + weightStride*i + channelStride*j + k]}`);
         }
       }
     }
+    console.log('');
   });
+
   rclnodejs.spin(node);
 }).catch(e => {
   console.log(e);

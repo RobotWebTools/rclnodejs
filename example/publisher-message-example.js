@@ -19,12 +19,8 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  const Header = rclnodejs.require('std_msgs').msg.Header;
-  const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-  const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
-
   const node = rclnodejs.createNode('publisher_example_node');
-  const publisher = node.createPublisher(JointState, 'JointState');
+  const publisher = node.createPublisher('sensor_msgs/msg/JointState', 'JointState');
   let count = 0;
 
   setInterval(function() {
@@ -43,6 +39,7 @@ rclnodejs.init().then(() => {
     });
     console.log(`Publish ${++count} messages.`);
   }, 1000);
+
   rclnodejs.spin(node);
 }).catch(e => {
   console.log(e);

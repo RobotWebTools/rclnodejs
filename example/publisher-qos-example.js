@@ -20,7 +20,6 @@ const {QoS} = rclnodejs;
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
 
-  /* eslint-disable */
   let qos = new QoS();
   qos.hitory = QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT;
   qos.reliability = QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT;
@@ -28,9 +27,7 @@ rclnodejs.init().then(() => {
   qos.depth = 1;
   qos.avoidRosNameSpaceConventions = false;
 
-  const String = rclnodejs.require('std_msgs').msg.String;
-  const publisher = node.createPublisher(String, 'topic', qos);
-  /* eslint-enable */
+  const publisher = node.createPublisher('std_msgs/msg/String', 'topic', qos);
 
   let counter = 0;
   setInterval(function() {

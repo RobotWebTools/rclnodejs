@@ -19,14 +19,10 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  const MultiArrayDimension = rclnodejs.require('std_msgs').msg.MultiArrayDimension;
-  const MultiArrayLayout = rclnodejs.require('std_msgs').msg.MultiArrayLayout;
-  const Int32MultiArray = rclnodejs.require('std_msgs').msg.Int32MultiArray;
-
   const node = rclnodejs.createNode('publisher_multiarray_node');
-  const publisher = node.createPublisher(Int32MultiArray, 'Int32MultiArray');
-  let count = 0;
+  const publisher = node.createPublisher('std_msgs/msg/Int32MultiArray', 'Int32MultiArray');
 
+  let count = 0;
   setInterval(function() {
     // Please reference the usage of multi-array at
     // https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/MultiArrayLayout.msg
@@ -55,6 +51,7 @@ rclnodejs.init().then(() => {
     });
     console.log(`Publish ${++count} messages.`);
   }, 1000);
+
   rclnodejs.spin(node);
 }).catch(e => {
   console.log(e);

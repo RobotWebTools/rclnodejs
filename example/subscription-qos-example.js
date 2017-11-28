@@ -20,13 +20,9 @@ const {QoS} = rclnodejs;
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('subscription_example_node');
 
-  /* eslint-disable */
-  const String = rclnodejs.require('std_msgs').msg.String;
-
-  node.createSubscription(String, 'topic', (msg) => {
+  node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
     console.log(`Receive message: ${typeof msg}`, msg);
   }, QoS.profileSystemDefault);
-  /* eslint-enable */
 
   rclnodejs.spin(node);
 });
