@@ -335,7 +335,6 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Header', function(done) {
       var node = rclnodejs.createNode('header_js_publisher');
-      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
       const Header = rclnodejs.require('std_msgs').msg.Header;
       var destroy = false;
 
@@ -359,8 +358,6 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Complex object', function(done) {
       var node = rclnodejs.createNode('jointstate_js_publisher');
-      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-      const Header = rclnodejs.require('std_msgs').msg.Header;
       const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
       var destroy = false;
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'JointState_cpp_js_channel', '-m', 'JointState']);
@@ -892,22 +889,21 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Complex object', function(done) {
       var node = rclnodejs.createNode('jointstate_js_publisher');
-      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-      const Header = rclnodejs.require('std_msgs').msg.Header;
-      const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
-      var time = new Time();
-      time.sec = 123456;
-      time.nanosec = 789;
-      var header = new Header();
-      header.stamp = time;
-      // eslint-disable-next-line
-      header.frame_id = 'main frame';
-      var msg = new JointState();
-      msg.header = header;
-      msg.name = ['Tom', 'Jerry'];
-      msg.position = [1, 2];
-      msg.velocity = [2, 3];
-      msg.effort = [4, 5, 6];
+      const JointState = 'sensor_msgs/msg/JointState';
+
+      const msg = {
+        header: {
+          stamp: {
+            sec: 123456,
+            nanosec: 789,
+          },
+          frame_id: 'main frame',
+        },
+        name: ['Tom', 'Jerry'],
+        position: [1, 2],
+        velocity: [2, 3],
+        effort: [4, 5, 6],
+      };
 
       var destroy = false;
       var subscription = childProcess.spawn(cppSubscriptionPath);

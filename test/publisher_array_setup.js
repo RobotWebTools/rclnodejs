@@ -17,29 +17,23 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(function() {
-  var node = rclnodejs.createNode('array_message_publisher');
+  const node = rclnodejs.createNode('array_message_publisher');
+  const JointState = 'sensor_msgs/msg/JointState';
+  const publisher = node.createPublisher(JointState, 'JointState');
 
-  const Header = rclnodejs.require('std_msgs').msg.Header;
-  const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-  const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
-
-  var publisher = node.createPublisher(JointState, 'JointState');
-
-  let time = new Time();
-  time.sec = 123456;
-  time.nanosec = 789;
-
-  let header = new Header();
-  header.stamp = time;
-  // eslint-disable-next-line
-  header.frame_id = 'main frame';
-
-  let state = new JointState();
-  state.header = header;
-  state.name = ['Tom', 'Jerry'];
-  state.position = [1, 2];
-  state.velocity = [2, 3];
-  state.effort = [4, 5, 6];
+  const state = {
+    header: {
+      stamp: {
+        sec: 123456,
+        nanosec: 789,
+      },
+      frame_id: 'main frame',
+    },
+    name: ['Tom', 'Jerry'],
+    position: [1, 2],
+    velocity: [2, 3],
+    effort: [4, 5, 6],
+  };
 
   publisher.publish(state);
   rclnodejs.spin(node);

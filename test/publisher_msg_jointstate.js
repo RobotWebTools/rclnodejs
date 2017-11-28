@@ -18,25 +18,21 @@ const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
   var node = rclnodejs.createNode('Header_publisher');
-  const Header = rclnodejs.require('std_msgs').msg.Header;
-  const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-  const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+  const JointState = 'sensor_msgs/msg/JointState';
 
-  var time = new Time();
-  time.sec = 123456;
-  time.nanosec = 789;
-  
-  var header = new Header();
-  header.stamp = time;
-  // eslint-disable-next-line
-  header.frame_id = 'main frame';
-
-  var state = new JointState();
-  state.header = header;
-  state.name = ['Tom', 'Jerry'];
-  state.position = [1, 2];
-  state.velocity = [2, 3];
-  state.effort = [4, 5, 6];
+  const state = {
+    header: {
+      stamp: {
+        sec: 123456,
+        nanosec: 789,
+      },
+      frame_id: 'main frame',
+    },
+    name: ['Tom', 'Jerry'],
+    position: [1, 2],
+    velocity: [2, 3],
+    effort: [4, 5, 6],
+  };
 
   var publisher = node.createPublisher(JointState, 'JointState_channel');
   var timer = setInterval(() => {

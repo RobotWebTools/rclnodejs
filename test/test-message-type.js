@@ -277,8 +277,6 @@ describe('Rclnodejs message type testing', function() {
 
     it('Complex object', function(done) {
       var node = rclnodejs.createNode('jointstate_subscription');
-      var Header = rclnodejs.require('std_msgs').msg.Header;
-      var Time = rclnodejs.require('builtin_interfaces').msg.Time;
       var JointState = rclnodejs.require('sensor_msgs').msg.JointState;
       var publisher = childProcess.fork(`${__dirname}/publisher_msg_jointstate.js`);
       var subscription = node.createSubscription(JointState, 'JointState_channel', (state) => {
