@@ -177,7 +177,7 @@ describe('Rclnodejs message translation: complex types', function() {
     testData.values.forEach((v, i) => {
       it('Test translation of ' + testData.type + ' msg, case ' + i, function() {
         const node = rclnodejs.createNode('test_message_translation_node');
-        const MessageType = rclnodejs.require(testData.pkg).msg[testData.type];
+        const MessageType = testData.pkg + '/msg/' + testData.type;
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {

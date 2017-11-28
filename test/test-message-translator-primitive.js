@@ -47,7 +47,7 @@ describe('Rclnodejs message translation: primitive types', function() {
     testData.values.forEach((v, i) => {
       it('Test translation of ' + testData.type + ' msg, value ' + v, function() {
         const node = rclnodejs.createNode('test_message_translation_node');
-        const MessageType = rclnodejs.require('std_msgs').msg[testData.type];
+        const MessageType = 'std_msgs/msg/' + testData.type;
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {
@@ -98,7 +98,7 @@ describe('Rclnodejs message translation: primitive types 2', function() {
     testData.values.forEach((v, i) => {
       it('Test translation of ' + testData.type + ' msg, value ' + v, function() {
         const node = rclnodejs.createNode('test_message_translation_node');
-        const MessageType = rclnodejs.require('std_msgs').msg[testData.type];
+        const MessageType = 'std_msgs/msg/' + testData.type;
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {
