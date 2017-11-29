@@ -18,7 +18,7 @@ const rclnodejs = require('../index.js');
 const {QoS} = rclnodejs;
 
 rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('publisher_example_node');
+  const node = rclnodejs.createNode('publisher_qos_example_node');
 
   let qos = new QoS();
   qos.hitory = QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT;

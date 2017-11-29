@@ -15,16 +15,14 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
+const {QoS} = rclnodejs;
 
 rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('subscription_message_example_node');
-  let count = 0;
+  const node = rclnodejs.createNode('subscription_example_node');
 
-  node.createSubscription('sensor_msgs/msg/JointState', 'JointState', (state) => {
-    console.log(`Received message No. ${++count}: `, state);
+  node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
+    console.log(`Received message: ${typeof msg}`, msg);
   });
 
   rclnodejs.spin(node);
-}).catch(e => {
-  console.log(e);
 });

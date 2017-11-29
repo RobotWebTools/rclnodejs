@@ -18,10 +18,10 @@ const rclnodejs = require('../index.js');
 const {QoS} = rclnodejs;
 
 rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('subscription_example_node');
+  const node = rclnodejs.createNode('subscription_qos_example_node');
 
   node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-    console.log(`Receive message: ${typeof msg}`, msg);
+    console.log(`Received message: ${typeof msg}`, msg);
   }, QoS.profileSystemDefault);
 
   rclnodejs.spin(node);

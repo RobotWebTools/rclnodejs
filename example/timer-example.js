@@ -17,7 +17,7 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  let node = rclnodejs.createNode('timer');
+  let node = rclnodejs.createNode('timer_example_node');
 
   let timer = node.createTimer(1000, () => {
     console.log('One second escaped!');

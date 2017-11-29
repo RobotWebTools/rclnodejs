@@ -19,7 +19,7 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('publisher_multiarray_node');
+  const node = rclnodejs.createNode('publisher_multiarray_example_node');
   const publisher = node.createPublisher('std_msgs/msg/Int32MultiArray', 'Int32MultiArray');
 
   let count = 0;

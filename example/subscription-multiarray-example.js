@@ -17,7 +17,7 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('subscription_multiarray_node');
+  const node = rclnodejs.createNode('subscription_multiarray_example_node');
 
   let counter = 0;
   node.createSubscription('std_msgs/msg/Int32MultiArray', 'Int32MultiArray', (multiArray) => {

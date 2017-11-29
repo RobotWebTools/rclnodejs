@@ -19,7 +19,7 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('publisher_example_node');
+  const node = rclnodejs.createNode('publisher_message_example_node');
   const publisher = node.createPublisher('sensor_msgs/msg/JointState', 'JointState');
   let count = 0;
 
