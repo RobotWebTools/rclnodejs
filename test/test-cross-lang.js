@@ -99,7 +99,7 @@ describe('Cross-language interaction', function() {
     it('Python subscription should receive msg from Node.js publisher', function(done) {
       var node = rclnodejs.createNode('js_pub_py_sub');
       const rclString = 'std_msgs/msg/String';
-      let destroy = false;
+      var destroy = false;
 
       let text = 'Greeting from Node.js publisher to Python subscription';
       var pyListener = utils.launchPythonProcess([`${__dirname}/py/listener.py`]);
