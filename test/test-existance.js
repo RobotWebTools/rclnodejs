@@ -72,7 +72,7 @@ describe('rclnodejs class existance testing', function() {
 
     before(function() {
       node = rclnodejs.createNode('Client');
-      GetParameters = rclnodejs.require('rcl_interfaces').srv.GetParameters;
+      GetParameters = 'rcl_interfaces/srv/GetParameters';
       client = node.createClient(GetParameters, 'get/parameters');
     });
 

@@ -127,7 +127,7 @@ describe('rcl node methods testing', function() {
   beforeEach(function() {
     node = rclnodejs.createNode('my_node', '/my_ns');
     rclString = 'std_msgs/msg/String';
-    GetParameters = rclnodejs.require('rcl_interfaces').srv.GetParameters;
+    GetParameters = 'rcl_interfaces/srv/GetParameters';
   });
 
   afterEach(function() {

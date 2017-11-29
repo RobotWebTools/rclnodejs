@@ -259,7 +259,6 @@ describe('Rclnodejs message type testing', function() {
     it('Object with Header', function(done) {
       var node = rclnodejs.createNode('header_subscription');
       const Header = 'std_msgs/msg/Header';
-      var Time = rclnodejs.require('builtin_interfaces').msg.Time;
       var publisher = childProcess.fork(`${__dirname}/publisher_msg_header.js`);
       var subscription = node.createSubscription(Header, 'Header_channel', (header) => {
         publisher.kill('SIGINT');
@@ -274,13 +273,11 @@ describe('Rclnodejs message type testing', function() {
     });
 
     it('Complex object', function(done) {
-      var node = rclnodejs.createNode('jointstate_subscription');
-      var JointState = rclnodejs.require('sensor_msgs').msg.JointState;
-      var publisher = childProcess.fork(`${__dirname}/publisher_msg_jointstate.js`);
-      var subscription = node.createSubscription(JointState, 'JointState_channel', (state) => {
+      const node = rclnodejs.createNode('jointstate_subscription');
+      const JointState = 'sensor_msgs/msg/JointState';
+      const publisher = childProcess.fork(`${__dirname}/publisher_msg_jointstate.js`);
+      const subscription = node.createSubscription(JointState, 'JointState_channel', (state) => {
         publisher.kill('SIGINT');
-
-        assert(verifyMessageStruct(JointState, state));
 
         assert.deepStrictEqual(state.name, ['Tom', 'Jerry']);
         assert.deepStrictEqual(state.position, [1, 2]);

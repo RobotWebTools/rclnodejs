@@ -315,7 +315,6 @@ describe('Rclnodejs - Python message type testing', function() {
 
     it('Header', function(done) {
       var node = rclnodejs.createNode('header_js_publisher');
-      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
       const Header = 'std_msgs/msg/Header';
       var destroy = false;
       var publisher = utils.launchPythonProcess([`${__dirname}/py/publisher_msg.py`, 'Header']);
@@ -336,7 +335,7 @@ describe('Rclnodejs - Python message type testing', function() {
 
     it('Complex object', function(done) {
       var node = rclnodejs.createNode('jointstate_js_publisher');
-      const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+      const JointState = 'sensor_msgs/msg/JointState';
       var destroy = false;
       var publisher = utils.launchPythonProcess([`${__dirname}/py/publisher_msg.py`, 'JointState']);
       var subscription = node.createSubscription(JointState, 'JointState_py_js_channel', (msg) => {

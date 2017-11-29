@@ -356,13 +356,11 @@ describe('Rclnodejs - Cpp message type testing', function() {
     });
 
     it('Complex object', function(done) {
-      var node = rclnodejs.createNode('jointstate_js_publisher');
-      const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
-      var destroy = false;
-      var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'JointState_cpp_js_channel', '-m', 'JointState']);
-      var subscription = node.createSubscription(JointState, 'JointState_cpp_js_channel', (msg) => {
-        assert(verifyMessageStruct(JointState, msg));
-
+      const node = rclnodejs.createNode('jointstate_js_publisher');
+      const JointState = 'sensor_msgs/msg/JointState';
+      let destroy = false;
+      const publisher = childProcess.spawn(cppPublisherPath, ['-t', 'JointState_cpp_js_channel', '-m', 'JointState']);
+      const subscription = node.createSubscription(JointState, 'JointState_cpp_js_channel', (msg) => {
         assert.deepStrictEqual(msg.header.stamp.sec, 123456);
         assert.deepStrictEqual(msg.header.stamp.nanosec, 789);
         assert.deepStrictEqual(msg.header.frame_id, 'main frame');
