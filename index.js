@@ -167,14 +167,15 @@ let rcl = {
    * @return {object} - the object of the required package/interface.
    */
   require(name) {
-    if (typeof (name) !== 'string') {
-      throw new TypeError('Invalid argument');
+    if (typeof (name.package) === 'string' && typeof (name.type) === 'string' && typeof (name.message) === 'string') {
+      return loader.loadInterface(name.package, name.type, name.message);
     }
 
     if (name.indexOf('/') !== -1) {
       let [packageName, type, messageName] = name.split('/');
       return loader.loadInterface(packageName, type, messageName);
     }
+
     return loader.loadInterfaceInPackage(name);
   },
 
