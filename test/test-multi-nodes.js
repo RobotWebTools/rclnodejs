@@ -122,8 +122,8 @@ describe('Multiple nodes interation testing', function() {
     it('Node.js client - Cpp service and Python service', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_client');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
-      let request1 = {a: 1, b: 2};
-      let request2 = {a: 3, b: 4};
+      const request1 = {a: 1, b: 2};
+      const request2 = {a: 3, b: 4};
 
       var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],
                                     'lib',

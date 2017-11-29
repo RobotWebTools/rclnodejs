@@ -17,9 +17,9 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(function() {
-  const node = rclnodejs.createNode('service');
+  var node = rclnodejs.createNode('service');
   const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
-  const client = node.createClient(AddTwoInts, 'add_two_ints');
+  var client = node.createClient(AddTwoInts, 'add_two_ints');
   const request = {
     a: 1,
     b: 2,

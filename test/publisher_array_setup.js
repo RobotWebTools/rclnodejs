@@ -19,9 +19,9 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(function() {
-  const node = rclnodejs.createNode('array_message_publisher');
+  var node = rclnodejs.createNode('array_message_publisher');
   const JointState = 'sensor_msgs/msg/JointState';
-  const publisher = node.createPublisher(JointState, 'JointState');
+  var publisher = node.createPublisher(JointState, 'JointState');
 
   const state = {
     header: {

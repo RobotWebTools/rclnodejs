@@ -21,7 +21,6 @@ const path = require('path');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
-const {verifyMessageStruct} = require('../lib/message_translator.js');
 
 describe('Rclnodejs - Cpp message type testing', function() {
   var cppPublisherPath = path.join(__dirname, 'cpp', 'publisher_msg');
@@ -358,11 +357,11 @@ describe('Rclnodejs - Cpp message type testing', function() {
     });
 
     it('Complex object', function(done) {
-      const node = rclnodejs.createNode('jointstate_js_publisher');
+      var node = rclnodejs.createNode('jointstate_js_publisher');
       const JointState = 'sensor_msgs/msg/JointState';
       let destroy = false;
-      const publisher = childProcess.spawn(cppPublisherPath, ['-t', 'JointState_cpp_js_channel', '-m', 'JointState']);
-      const subscription = node.createSubscription(JointState, 'JointState_cpp_js_channel', (msg) => {
+      var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'JointState_cpp_js_channel', '-m', 'JointState']);
+      var subscription = node.createSubscription(JointState, 'JointState_cpp_js_channel', (msg) => {
         assert.deepStrictEqual(msg.header.stamp.sec, 123456);
         assert.deepStrictEqual(msg.header.stamp.nanosec, 789);
         assert.deepStrictEqual(msg.header.frame_id, 'main frame');

@@ -20,7 +20,6 @@ const assert = require('assert');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
-const {verifyMessageStruct} = require('../lib/message_translator.js');
 
 describe('Rclnodejs - Python message type testing', function() {
   this.timeout(60 * 1000);

@@ -80,7 +80,7 @@ describe('Test rclnodejs nodes in a single process', function() {
       return response;
     });
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
-    let request = {a: 1, b: 2};
+    const request = {a: 1, b: 2};
 
     var timer = clientNode.createTimer(100, () => {
       client.sendRequest(request, (response) => {
