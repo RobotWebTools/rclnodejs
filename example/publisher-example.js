@@ -17,16 +17,14 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  let node = rclnodejs.createNode('service_example_node');
+  const node = rclnodejs.createNode('publisher_example_node');
+  const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
 
-  node.createService('example_interfaces/srv/AddTwoInts', 'add_two_ints', (request, response) => {
-    console.log(`Incoming request: ${typeof request}`, request);
-    response.sum = request.a + request.b;
-    console.log(`Sending response: ${typeof response}`, response, '\n--');
-    return response;
-  });
+  let counter = 0;
+  setInterval(() => {
+    console.log(`Publishing message: Hello ROS ${counter}`);
+    publisher.publish(`Hello ROS ${counter++}`);
+  }, 1000);
 
   rclnodejs.spin(node);
-}).catch((e) => {
-  console.log(`Error: ${e}`);
 });

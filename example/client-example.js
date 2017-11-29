@@ -21,10 +21,11 @@ rclnodejs.init().then(() => {
 
   const client = node.createClient('example_interfaces/srv/AddTwoInts', 'add_two_ints');
   const request = {
-    a: 1,
-    b: 2,
+    a: Math.floor(Math.random() * 100),
+    b: Math.floor(Math.random() * 100),
   };
 
+  console.log(`Sending: ${typeof request}`, request);
   client.sendRequest(request, (response) => {
     console.log(`Result: ${typeof response}`, response);
     rclnodejs.shutdown();
