@@ -17,9 +17,9 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  var node = rclnodejs.createNode('colorrgba_publisher');
-  var ColorRGBA = 'std_msgs/msg/ColorRGBA';
-  var msg = {
+  const node = rclnodejs.createNode('colorrgba_publisher');
+  const ColorRGBA = 'std_msgs/msg/ColorRGBA';
+  const msg = {
     r: 127,
     g: 255,
     b: 255,

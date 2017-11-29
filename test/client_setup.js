@@ -17,10 +17,10 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(function() {
-  var node = rclnodejs.createNode('service');
-  var AddTwoInts = 'example_interfaces/srv/AddTwoInts';
-  var client = node.createClient(AddTwoInts, 'add_two_ints');
-  var request = {
+  const node = rclnodejs.createNode('service');
+  const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+  const client = node.createClient(AddTwoInts, 'add_two_ints');
+  const request = {
     a: 1,
     b: 2,
   };

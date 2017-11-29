@@ -33,12 +33,12 @@ describe('Cross-language interaction', function() {
 
   describe('Node.js Subcription', function() {
     it('Node.js subscription should receive msg from C++ publisher', (done) => {
-      const node = rclnodejs.createNode('cpp_pub_js_sub');
+      var node = rclnodejs.createNode('cpp_pub_js_sub');
       const rclString = 'std_msgs/msg/String';
-      let destroy = false;
-      const cppTalkPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'talker');
-      const cppTalker = childProcess.spawn(cppTalkPath, ['-t', 'cpp_js_chatter']);
-      const subscription = node.createSubscription(rclString, 'cpp_js_chatter', (msg) => {
+      var destroy = false;
+      var cppTalkPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'talker');
+      var cppTalker = childProcess.spawn(cppTalkPath, ['-t', 'cpp_js_chatter']);
+      var subscription = node.createSubscription(rclString, 'cpp_js_chatter', (msg) => {
         assert.ok(/Hello World:/.test(msg.data));
         if (!destroy) {
           node.destroy();
@@ -70,16 +70,16 @@ describe('Cross-language interaction', function() {
     
   describe('Node.js publisher', function() {
     it('Cpp subscription should receive msg from Node.js publisher', (done) => {
-      const node = rclnodejs.createNode('js_pub_cpp_sub');
+      var node = rclnodejs.createNode('js_pub_cpp_sub');
       const rclString = 'std_msgs/msg/String';
-      let destroy = false;
+      var destroy = false;
 
-      const text = 'Greeting from Node.js publisher';
-      const cppListenerPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
-      const cppListener = childProcess.spawn(cppListenerPath, ['-t', 'js_cpp_chatter']);
-      const publisher = node.createPublisher(rclString, 'js_cpp_chatter');
+      let text = 'Greeting from Node.js publisher';
+      let cppListenerPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
+      var cppListener = childProcess.spawn(cppListenerPath, ['-t', 'js_cpp_chatter']);
+      var publisher = node.createPublisher(rclString, 'js_cpp_chatter');
       const msg = text;
-      const timer = setInterval(() => {
+      var timer = setInterval(() => {
         publisher.publish(msg);
       }, 100);
 
@@ -97,16 +97,16 @@ describe('Cross-language interaction', function() {
     });
 
     it('Python subscription should receive msg from Node.js publisher', function(done) {
-      const node = rclnodejs.createNode('js_pub_py_sub');
+      var node = rclnodejs.createNode('js_pub_py_sub');
       const rclString = 'std_msgs/msg/String';
       let destroy = false;
 
-      const text = 'Greeting from Node.js publisher to Python subscription';
-      const pyListener = utils.launchPythonProcess([`${__dirname}/py/listener.py`]);
-      const publisher = node.createPublisher(rclString, 'js_py_chatter');
-      const msg = text;
+      let text = 'Greeting from Node.js publisher to Python subscription';
+      var pyListener = utils.launchPythonProcess([`${__dirname}/py/listener.py`]);
+      var publisher = node.createPublisher(rclString, 'js_py_chatter');
+      var msg = text;
 
-      const timer = setInterval(() => {
+      var timer = setInterval(() => {
         publisher.publish(msg);
       }, 100);
       pyListener.stdout.on('data', (data) => {
@@ -131,7 +131,7 @@ describe('Cross-language interaction', function() {
 
       var pyService = utils.launchPythonProcess([`${__dirname}/py/service.py`]);
       var client = node.createClient(AddTwoInts, 'js_py_add_two_ints');
-      let request = {a: 1, b: 2};
+      const request = {a: 1, b: 2};
 
       var timer = setInterval(() => {
         client.sendRequest(request, (response) => {
@@ -153,7 +153,7 @@ describe('Cross-language interaction', function() {
       var node = rclnodejs.createNode('js_cpp_add_client');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var client = node.createClient(AddTwoInts, 'js_cpp_add_two_ints');
-      let request = {a: 1, b: 2};
+      const request = {a: 1, b: 2};
 
       var destroy = false;
       var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],

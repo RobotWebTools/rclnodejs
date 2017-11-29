@@ -110,7 +110,7 @@ describe('Rclnodejs message translation: primitive types 2', function() {
               reject('case ' + i + '. Expected: ' + v + ', Got: ' + value.data);
             }
           });
-          publisher.publish({data: v});  // Ensure the original form for the message can be used
+          publisher.publish({data: v});  // Ensure the original form of the message can be used
           rclnodejs.spin(node);
         });
       });
