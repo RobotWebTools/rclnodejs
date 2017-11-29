@@ -224,6 +224,16 @@ let rcl = {
   expandTopicName(topicName, nodeName, nodeNamespace) {
     return rclnodejs.expandTopicName(topicName, nodeName, nodeNamespace);
   },
+
+  createMessageObject(type) {
+    let typeClass = loader.loadInterface(type);
+
+    if (typeClass) {
+      return new typeClass();
+    }
+
+    return undefined;
+  },
 };
 
 module.exports = rcl;

@@ -176,9 +176,9 @@ describe('rcl node methods testing', function() {
     ];
 
     invalidParams.forEach(function(invalidParam) {
-      assertThrowsError(() => {
+      assert.throws(() => {
         node.createPublisher(invalidParam[0], invalidParam[1]);
-      }, TypeError, errorRegExp, 'Failed to createPublisher');
+      });
     });
   });
 
@@ -217,9 +217,9 @@ describe('rcl node methods testing', function() {
     ];
 
     invalidParams.forEach(function(invalidParam) {
-      assertThrowsError(() => {
+      assert.throws(() => {
         node.createSubscription(invalidParam[0], invalidParam[1], invalidParam[2]);
-      }, TypeError, errorRegExp, 'Failed to createSubscription');
+      });
     });
   });
 
@@ -258,9 +258,9 @@ describe('rcl node methods testing', function() {
     ];
 
     invalidParams.forEach(function(invalidParam) {
-      assertThrowsError(() => {
+      assert.throws(() => {
         node.createClient(invalidParam[0], invalidParam[1]);
-      }, TypeError, errorRegExp, 'Failed to createClient');
+      });
     });
   });
 
@@ -299,9 +299,9 @@ describe('rcl node methods testing', function() {
     ];
 
     invalidParams.forEach(function(invalidParam) {
-      assertThrowsError(() => {
+      assert.throws(() => {
         node.createService(invalidParam[0], invalidParam[1], invalidParam[2]);
-      }, TypeError, errorRegExp, 'Failed to createService');
+      });
     });
   });
 });
