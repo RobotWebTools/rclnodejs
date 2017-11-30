@@ -31,13 +31,13 @@ rclnodejs.init().then(() => {
   };
 
   var publisher = node.createPublisher(Header, 'Header_channel');
-  var timer = setInterval(() => {
+  var timer = node.createTimer(100, () => {
     publisher.publish(header);
-  }, 100);
+  });
 
   rclnodejs.spin(node);
   process.on('SIGINT', (m) => {
-    clearInterval(timer);
+    timer.cancel();
     node.destroy();
     rclnodejs.shutdown();
     process.exit(0);

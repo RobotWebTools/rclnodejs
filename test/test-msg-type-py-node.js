@@ -374,7 +374,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = 'True';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -382,9 +382,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -400,7 +400,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = "b'A'";
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -408,9 +408,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -426,7 +426,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = 'a';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -434,9 +434,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -452,7 +452,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = 'Hello World';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -460,9 +460,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
     
@@ -478,7 +478,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '127';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -486,9 +486,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -504,7 +504,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '255';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -512,9 +512,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -530,7 +530,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '32767';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -538,9 +538,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -556,7 +556,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '65535';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -564,9 +564,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -582,7 +582,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '2147483647';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -590,9 +590,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
     
@@ -608,7 +608,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '4294967295';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -616,9 +616,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -634,7 +634,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '9007199254740991';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -642,9 +642,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -660,7 +660,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '9007199254740991';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -668,9 +668,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -686,7 +686,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '3.14';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.ok(Math.abs(parseFloat(data.toString()) - expected) < 0.000001);
           done();
           node.destroy();
@@ -694,9 +694,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -712,7 +712,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '3.14';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.ok(Math.abs(parseFloat(data.toString()) - expected) < 0.000001);
           done();
           node.destroy();
@@ -720,9 +720,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
   });
@@ -754,7 +754,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = 'ABC';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -762,9 +762,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(byteArray);
-      }, 100);
+      });
       rclnodejs.spin(node);
     });
 
@@ -784,7 +784,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '(127.0,255.0,255.0,0.5)';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -792,9 +792,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);      
     });
 
@@ -816,7 +816,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '(123456,789,main frame)';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -824,9 +824,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);      
     });
 
@@ -854,7 +854,7 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = "(123456,789,main frame,['Tom', 'Jerry'],[1.0, 2.0],[2.0, 3.0],[4.0, 5.0, 6.0])";
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          clearInterval(timer);
+          timer.cancel();
           assert.deepStrictEqual(data.toString(), expected);
           done();
           node.destroy();
@@ -862,9 +862,9 @@ describe('Rclnodejs - Python message type testing', function() {
           destroy = true;
         }       
       });
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       rclnodejs.spin(node);      
     });
   });

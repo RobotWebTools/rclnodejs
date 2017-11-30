@@ -146,12 +146,12 @@ describe('rclnodejs class existance testing', function() {
   });
 
   describe('Publisher class', function() {
-    var node, rclString, publisher;
+    var node, RclString, publisher;
 
     before(function() {
       node = rclnodejs.createNode('Publisher');
-      rclString = 'std_msgs/msg/String';
-      publisher = node.createPublisher(rclString, 'chatter');
+      RclString = 'std_msgs/msg/String';
+      publisher = node.createPublisher(RclString, 'chatter');
     });
 
     after(function() {

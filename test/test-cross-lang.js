@@ -34,11 +34,11 @@ describe('Cross-language interaction', function() {
   describe('Node.js Subcription', function() {
     it('Node.js subscription should receive msg from C++ publisher', (done) => {
       var node = rclnodejs.createNode('cpp_pub_js_sub');
-      const rclString = 'std_msgs/msg/String';
+      const RclString = 'std_msgs/msg/String';
       var destroy = false;
       var cppTalkPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'talker');
       var cppTalker = childProcess.spawn(cppTalkPath, ['-t', 'cpp_js_chatter']);
-      var subscription = node.createSubscription(rclString, 'cpp_js_chatter', (msg) => {
+      var subscription = node.createSubscription(RclString, 'cpp_js_chatter', (msg) => {
         assert.ok(/Hello World:/.test(msg.data));
         if (!destroy) {
           node.destroy();
@@ -52,10 +52,10 @@ describe('Cross-language interaction', function() {
 
     it('Node.js subscription should receive msg from Python publisher', (done) => {
       var node = rclnodejs.createNode('cpp_pub_py_sub');
-      const rclString = 'std_msgs/msg/String';
+      const RclString = 'std_msgs/msg/String';
       var destroy = false;
       var pyTalker = utils.launchPythonProcess([`${__dirname}/py/talker.py`]);
-      var subscription = node.createSubscription(rclString, 'py_js_chatter', (msg) => {
+      var subscription = node.createSubscription(RclString, 'py_js_chatter', (msg) => {
         assert.ok(/Hello World/.test(msg.data));
         if (!destroy) {
           node.destroy();
@@ -71,22 +71,22 @@ describe('Cross-language interaction', function() {
   describe('Node.js publisher', function() {
     it('Cpp subscription should receive msg from Node.js publisher', (done) => {
       var node = rclnodejs.createNode('js_pub_cpp_sub');
-      const rclString = 'std_msgs/msg/String';
+      const RclString = 'std_msgs/msg/String';
       var destroy = false;
 
       let text = 'Greeting from Node.js publisher';
       let cppListenerPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
       var cppListener = childProcess.spawn(cppListenerPath, ['-t', 'js_cpp_chatter']);
-      var publisher = node.createPublisher(rclString, 'js_cpp_chatter');
+      var publisher = node.createPublisher(RclString, 'js_cpp_chatter');
       const msg = text;
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
 
       cppListener.stdout.on('data', (data) => {
         if (!destroy) {
           assert.ok(new RegExp(text).test(data.toString()));
-          clearInterval(timer);
+          timer.cancel();
           node.destroy();
           cppListener.kill('SIGINT');
           destroy = true;
@@ -98,21 +98,21 @@ describe('Cross-language interaction', function() {
 
     it('Python subscription should receive msg from Node.js publisher', function(done) {
       var node = rclnodejs.createNode('js_pub_py_sub');
-      const rclString = 'std_msgs/msg/String';
+      const RclString = 'std_msgs/msg/String';
       var destroy = false;
 
       let text = 'Greeting from Node.js publisher to Python subscription';
       var pyListener = utils.launchPythonProcess([`${__dirname}/py/listener.py`]);
-      var publisher = node.createPublisher(rclString, 'js_py_chatter');
+      var publisher = node.createPublisher(RclString, 'js_py_chatter');
       var msg = text;
 
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       pyListener.stdout.on('data', (data) => {
         if (!destroy) {
           assert.ok(new RegExp(text).test(data.toString()));
-          clearInterval(timer);
+          timer.cancel();
           node.destroy();
           pyListener.kill('SIGINT');
           destroy = true;
@@ -133,18 +133,18 @@ describe('Cross-language interaction', function() {
       var client = node.createClient(AddTwoInts, 'js_py_add_two_ints');
       const request = {a: 1, b: 2};
 
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         client.sendRequest(request, (response) => {
           if (!destroy) {
             assert.deepStrictEqual(response.sum, 3);
-            clearInterval(timer);
+            timer.cancel();
             node.destroy();
             pyService.kill('SIGINT');
             destroy = true;
             done();
           }      
         });
-      }, 100);
+      });
 
       rclnodejs.spin(node);
     });
