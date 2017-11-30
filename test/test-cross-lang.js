@@ -79,14 +79,14 @@ describe('Cross-language interaction', function() {
       var cppListener = childProcess.spawn(cppListenerPath, ['-t', 'js_cpp_chatter']);
       var publisher = node.createPublisher(RclString, 'js_cpp_chatter');
       const msg = text;
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
 
       cppListener.stdout.on('data', (data) => {
         if (!destroy) {
           assert.ok(new RegExp(text).test(data.toString()));
-          clearInterval(timer);
+          timer.cancel();
           node.destroy();
           cppListener.kill('SIGINT');
           destroy = true;
@@ -106,13 +106,13 @@ describe('Cross-language interaction', function() {
       var publisher = node.createPublisher(RclString, 'js_py_chatter');
       var msg = text;
 
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         publisher.publish(msg);
-      }, 100);
+      });
       pyListener.stdout.on('data', (data) => {
         if (!destroy) {
           assert.ok(new RegExp(text).test(data.toString()));
-          clearInterval(timer);
+          timer.cancel();
           node.destroy();
           pyListener.kill('SIGINT');
           destroy = true;
@@ -133,18 +133,18 @@ describe('Cross-language interaction', function() {
       var client = node.createClient(AddTwoInts, 'js_py_add_two_ints');
       const request = {a: 1, b: 2};
 
-      var timer = setInterval(() => {
+      var timer = node.createTimer(100, () => {
         client.sendRequest(request, (response) => {
           if (!destroy) {
             assert.deepStrictEqual(response.sum, 3);
-            clearInterval(timer);
+            timer.cancel();
             node.destroy();
             pyService.kill('SIGINT');
             destroy = true;
             done();
           }      
         });
-      }, 100);
+      });
 
       rclnodejs.spin(node);
     });

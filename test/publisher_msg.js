@@ -26,13 +26,13 @@ rclnodejs.init().then(() => {
   msg.data = rclValue;
 
   var publisher = node.createPublisher(msgType, rclType + '_channel');
-  var timer = setInterval(() => {
+  var timer = node.createTimer(100, () => {
     publisher.publish(msg);
-  }, 100);
+  });
 
   rclnodejs.spin(node);
   process.on('SIGINT', (m) => {
-    clearInterval(timer);
+    timer.cancel();
     node.destroy();
     rclnodejs.shutdown();
     process.exit(0);
