@@ -87,6 +87,62 @@ describe('Test rclnodejs nodes in a single process', function() {
       client.sendRequest(request, (response) => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
+        serviceNode.destroy();
+        clientNode.destroy();
+        done();
+      });
+    });
+    rclnodejs.spin(serviceNode);
+    rclnodejs.spin(clientNode);
+  });
+
+  it('Client/Service is a one process - service callback syntax #2', function(done) {
+    var clientNode = rclnodejs.createNode('single_ps_client_2');
+    var serviceNode = rclnodejs.createNode('single_ps_service_2');
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+
+    var service = serviceNode.createService(AddTwoInts, 'single_ps_channel2_2', (request, response) => {
+      assert.deepStrictEqual(request.a, 1);
+      assert.deepStrictEqual(request.b, 2);
+      let result = response.template;
+      result.sum = request.a + request.b;
+      response.send(result);
+    });
+    var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2_2');
+    const request = {a: 1, b: 2};
+
+    var timer = clientNode.createTimer(100, () => {
+      client.sendRequest(request, (response) => {
+        timer.cancel();
+        assert.deepStrictEqual(response.sum, 3);
+        serviceNode.destroy();
+        clientNode.destroy();
+        done();
+      });
+    });
+    rclnodejs.spin(serviceNode);
+    rclnodejs.spin(clientNode);
+  });
+
+  it('Client/Service is a one process - service callback syntax #3', function(done) {
+    var clientNode = rclnodejs.createNode('single_ps_client_3');
+    var serviceNode = rclnodejs.createNode('single_ps_service_3');
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+
+    var service = serviceNode.createService(AddTwoInts, 'single_ps_channel2_3', (request, response) => {
+      assert.deepStrictEqual(request.a, 1);
+      assert.deepStrictEqual(request.b, 2);
+      response.send({sum: request.a + request.b});
+    });
+    var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2_3');
+    const request = {a: 1, b: 2};
+
+    var timer = clientNode.createTimer(100, () => {
+      client.sendRequest(request, (response) => {
+        timer.cancel();
+        assert.deepStrictEqual(response.sum, 3);
+        serviceNode.destroy();
+        clientNode.destroy();
         done();
       });
     });
