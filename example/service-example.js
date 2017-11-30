@@ -19,14 +19,13 @@ const rclnodejs = require('../index.js');
 rclnodejs.init().then(() => {
   let node = rclnodejs.createNode('service_example_node');
 
-  /* eslint-disable */
-  let AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
-  let service = node.createService(AddTwoInts, 'add_two_ints', (request, response) => {
-    console.log(`Incoming request: requst.a = ${request.a}; request.b = ${request.b}`);
-    response.sum = request.a + request.b;
-    return response;
+  node.createService('example_interfaces/srv/AddTwoInts', 'add_two_ints', (request, response) => {
+    console.log(`Incoming request: ${typeof request}`, request);
+    let result = response.template;
+    result.sum = request.a + request.b;
+    console.log(`Sending response: ${typeof result}`, result, '\n--');
+    response.send(result);
   });
-  /* eslint-enable */
 
   rclnodejs.spin(node);
 }).catch((e) => {

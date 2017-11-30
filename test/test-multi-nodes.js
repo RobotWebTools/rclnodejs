@@ -34,7 +34,7 @@ describe('Multiple nodes interation testing', function() {
   describe('Publisher/Subscription', function() {
     it('Node.js publisher - Python and Cpp subscription', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_publisher');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
+      const RclString = 'std_msgs/msg/String';
 
       var cppReceived = false, pyReceived = false;
       var cppSubPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
@@ -42,8 +42,7 @@ describe('Multiple nodes interation testing', function() {
       var pySubPath = path.join(__dirname, 'py', 'listener.py');
       var pySubscription = utils.launchPythonProcess([pySubPath, 'js_pycpp_chatter']);
 
-      let msg = new RclString();
-      msg.data = 'hello world';
+      const msg = 'hello world';
       var jsPublisher = node.createPublisher(RclString, 'js_pycpp_chatter');
       var timer = node.createTimer(100, () => {
         jsPublisher.publish(msg);
@@ -81,7 +80,7 @@ describe('Multiple nodes interation testing', function() {
 
     it('Node.js subscription - Python publisher and Cpp publisher', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_subscription');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
+      const RclString = 'std_msgs/msg/String';
 
       var receivedFromPy = false, receivedFromCpp = false;
       var subscription = node.createSubscription(RclString, 'pycpp_js_chatter', (msg) => {
@@ -122,13 +121,9 @@ describe('Multiple nodes interation testing', function() {
   describe('Client/Service', function() {
     it('Node.js client - Cpp service and Python service', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_client');
-      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
-      let request1 = new AddTwoInts.Request();
-      request1.a = 1;
-      request1.b = 2;
-      let request2 = new AddTwoInts.Request();
-      request2.a = 3;
-      request2.b = 4;
+      const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+      const request1 = {a: 1, b: 2};
+      const request2 = {a: 3, b: 4};
 
       var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],
                                     'lib',
@@ -172,12 +167,13 @@ describe('Multiple nodes interation testing', function() {
 
     it('Node.js service - Cpp client and Python client', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_service');
-      const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var service = node.createService(AddTwoInts, 'pycpp_js_add_two_ints', (request, response) => {
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.deepStrictEqual(typeof request.b, 'number');
-        response.sum = request.a + request.b;
-        return response;
+        let result = response.template;
+        result.sum = request.a + request.b;
+        return result;
       });
       rclnodejs.spin(node);
       var cppClientPath = path.join(process.env['AMENT_PREFIX_PATH'],

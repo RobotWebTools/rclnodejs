@@ -25,7 +25,6 @@ const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
 const validator = require('./lib/validator.js');
-const util = require('./lib/utility.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -226,7 +225,15 @@ let rcl = {
     return rclnodejs.expandTopicName(topicName, nodeName, nodeNamespace);
   },
 
-  util: util,
+  createMessageObject(type) {
+    let typeClass = loader.loadInterface(type);
+
+    if (typeClass) {
+      return new typeClass();
+    }
+
+    return undefined;
+  },
 };
 
 module.exports = rcl;

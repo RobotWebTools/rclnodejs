@@ -14,19 +14,21 @@
 
 'use strict';
 
+/* eslint-disable camelcase */
+
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
   var node = rclnodejs.createNode('Header_publisher');
-  const Header = rclnodejs.require('std_msgs').msg.Header;
-  const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-  var time = new Time();
-  time.sec = 123456;
-  time.nanosec = 789;
-  var header = new Header();
-  header.stamp = time;
-  // eslint-disable-next-line
-  header.frame_id = 'main frame';
+  const Header = 'std_msgs/msg/Header';
+
+  const header = {
+    stamp: {
+      sec: 123456,
+      nanosec: 789,
+    },
+    frame_id: 'main frame',
+  };
 
   var publisher = node.createPublisher(Header, 'Header_channel');
   var timer = setInterval(() => {

@@ -32,6 +32,7 @@
     "bindings": "^1.2.1",
     "compare-versions": "^3.1.0",
     "debug": "^2.6.8",
+    "deep-equal": "^1.0.1",
     "dot": "^1.1.2",
     "fs-extra": "^3.0.1",
     "mz": "^2.6.0",
