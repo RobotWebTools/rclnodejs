@@ -32,7 +32,7 @@ describe('rclnodejs interactive testing', function() {
   describe('Publisher/Subscription', function() {
     it('Publisher/Subscription', function(done) {
       var node = rclnodejs.createNode('publisher_subscription');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
+      const RclString = 'std_msgs/msg/String';
       var publisher = childProcess.fork(`${__dirname}/publisher_setup.js`);
       var destroy = false;
       var subscription = node.createSubscription(RclString, 'topic', function(msg) {
@@ -54,14 +54,15 @@ describe('rclnodejs interactive testing', function() {
   describe('Client/Service', function() {
     it('Client/Service', function(done) {
       var node = rclnodejs.createNode('client_service');
-      var AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+      var AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var service = node.createService(AddTwoInts, 'add_two_ints', function(request, response) {
         assert.ok('a' in request);
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.ok('b' in request);
         assert.deepStrictEqual(typeof request.b, 'number');
-        response.sum = request.a + request.b;
-        return response;
+        let result = response.template;
+        result.sum = request.a + request.b;
+        return result;
       });
       rclnodejs.spin(node);
 

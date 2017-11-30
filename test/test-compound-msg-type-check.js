@@ -64,8 +64,6 @@ describe('Compound types', function() {
   });
 
   it('Complex object', function() {
-    const Header = rclnodejs.require('std_msgs').msg.Header;
-    const Time = rclnodejs.require('builtin_interfaces').msg.Time;
     const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
     let state = new JointState();
 

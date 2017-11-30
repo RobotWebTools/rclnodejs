@@ -14,37 +14,32 @@
 
 'use strict';
 
+/* eslint-disable camelcase */
+
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  let Header = rclnodejs.require('std_msgs').msg.Header;
-  let Time = rclnodejs.require('builtin_interfaces').msg.Time;
-  let JointState = rclnodejs.require('sensor_msgs').msg.JointState;
-
-  const node = rclnodejs.createNode('publisher_example_node');
-  const publisher = node.createPublisher(JointState, 'JointState');
+  const node = rclnodejs.createNode('publisher_message_example_node');
+  const publisher = node.createPublisher('sensor_msgs/msg/JointState', 'JointState');
   let count = 0;
 
   setInterval(function() {
-    let time = new Time();
-    time.sec = 123456;
-    time.nanosec = 789;
-
-    let header = new Header();
-    header.stamp = time;
-    // eslint-disable-next-line
-    header.frame_id = 'main frame';
-
-    let state = new JointState();
-    state.header = header;
-    state.name = ['Tom', 'Jerry'];
-    state.position = [1, 2];
-    state.velocity = [2, 3];
-    state.effort = [4, 5, 6];
-
-    publisher.publish(state);
+    publisher.publish({
+      header: {
+        stamp: {
+          sec: 123456,
+          nanosec: 789,
+        },
+        frame_id: 'main frame',
+      },
+      name: ['Tom', 'Jerry'],
+      position: [1, 2],
+      velocity: [2, 3],
+      effort: [4, 5, 6],
+    });
     console.log(`Publish ${++count} messages.`);
   }, 1000);
+
   rclnodejs.spin(node);
 }).catch(e => {
   console.log(e);

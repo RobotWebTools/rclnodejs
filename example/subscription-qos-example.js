@@ -18,15 +18,11 @@ const rclnodejs = require('../index.js');
 const {QoS} = rclnodejs;
 
 rclnodejs.init().then(() => {
-  let node = rclnodejs.createNode('subscription_example_node');
+  const node = rclnodejs.createNode('subscription_qos_example_node');
 
-  /* eslint-disable */
-  let String = rclnodejs.require('std_msgs').msg.String;
-
-  node.createSubscription(String, 'topic', (msg) => {
-    console.log(`Receive message: ${msg.data}`);
+  node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
+    console.log(`Received message: ${typeof msg}`, msg);
   }, QoS.profileSystemDefault);
-  /* eslint-enable */
 
   rclnodejs.spin(node);
 });

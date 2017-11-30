@@ -18,10 +18,9 @@ const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(function() {
   var node = rclnodejs.createNode('publisher');
-  const RclString = rclnodejs.require('std_msgs').msg.String;
+  const RclString = 'std_msgs/msg/String';
 
-  let msg = new RclString();
-  msg.data = 'Greeting from publisher';
+  const msg = 'Greeting from publisher';
 
   var publisher = node.createPublisher(RclString, 'topic');
   publisher.publish(msg);

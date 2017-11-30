@@ -16,6 +16,7 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
+const deepEqual = require('deep-equal');
 
 describe('Rclnodejs message translation: complex types', function() {
   this.timeout(60 * 1000);
@@ -176,11 +177,11 @@ describe('Rclnodejs message translation: complex types', function() {
     testData.values.forEach((v, i) => {
       it('Test translation of ' + testData.type + ' msg, case ' + i, function() {
         const node = rclnodejs.createNode('test_message_translation_node');
-        const MessageType = rclnodejs.require(testData.pkg).msg[testData.type];
+        const MessageType = testData.pkg + '/msg/' + testData.type;
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {
-            if (rclnodejs.util.deepEqual(value, v)) {
+            if (deepEqual(value, v)) {
               node.destroy();
               resolve();
             } else {

@@ -14,37 +14,15 @@
 
 'use strict';
 
-/* eslint-disable camelcase */
-
 const rclnodejs = require('../index.js');
+const {QoS} = rclnodejs;
 
-rclnodejs.init().then(function() {
-  var node = rclnodejs.createNode('array_message_publisher');
-  const JointState = 'sensor_msgs/msg/JointState';
-  var publisher = node.createPublisher(JointState, 'JointState');
+rclnodejs.init().then(() => {
+  const node = rclnodejs.createNode('subscription_example_node');
 
-  const state = {
-    header: {
-      stamp: {
-        sec: 123456,
-        nanosec: 789,
-      },
-      frame_id: 'main frame',
-    },
-    name: ['Tom', 'Jerry'],
-    position: [1, 2],
-    velocity: [2, 3],
-    effort: [4, 5, 6],
-  };
-
-  publisher.publish(state);
-  rclnodejs.spin(node);
-
-  process.on('SIGINT', function() {
-    node.destroy();
-    rclnodejs.shutdown();
-    process.exit(0);
+  node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
+    console.log(`Received message: ${typeof msg}`, msg);
   });
-}).catch(function(err) {
-  console.log(err);
+
+  rclnodejs.spin(node);
 });
