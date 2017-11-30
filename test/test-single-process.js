@@ -76,8 +76,9 @@ describe('Test rclnodejs nodes in a single process', function() {
     var service = serviceNode.createService(AddTwoInts, 'single_ps_channel2', (request, response) => {
       assert.deepStrictEqual(request.a, 1);
       assert.deepStrictEqual(request.b, 2);
-      response.sum = request.a + request.b;
-      return response;
+      let result = response.template;
+      result.sum = request.a + request.b;
+      return result;
     });
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
     const request = {a: 1, b: 2};
@@ -100,8 +101,9 @@ describe('Test rclnodejs nodes in a single process', function() {
     var service = node.createService(AddTwoInts, 'new_style_require2', (request, response) => {
       assert.deepStrictEqual(request.a, 1);
       assert.deepStrictEqual(request.b, 2);
-      response.sum = request.a + request.b;
-      return response;
+      let result = response.template;
+      result.sum = request.a + request.b;
+      return result;
     });
     var client = node.createClient(AddTwoInts, 'new_style_require2');
     let request = new AddTwoInts.Request();

@@ -60,8 +60,9 @@ describe('rclnodejs interactive testing', function() {
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.ok('b' in request);
         assert.deepStrictEqual(typeof request.b, 'number');
-        response.sum = request.a + request.b;
-        return response;
+        let result = response.template;
+        result.sum = request.a + request.b;
+        return result;
       });
       rclnodejs.spin(node);
 

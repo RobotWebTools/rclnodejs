@@ -171,8 +171,9 @@ describe('Multiple nodes interation testing', function() {
       var service = node.createService(AddTwoInts, 'pycpp_js_add_two_ints', (request, response) => {
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.deepStrictEqual(typeof request.b, 'number');
-        response.sum = request.a + request.b;
-        return response;
+        let result = response.template;
+        result.sum = request.a + request.b;
+        return result;
       });
       rclnodejs.spin(node);
       var cppClientPath = path.join(process.env['AMENT_PREFIX_PATH'],

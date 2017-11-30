@@ -21,9 +21,10 @@ rclnodejs.init().then(() => {
 
   node.createService('example_interfaces/srv/AddTwoInts', 'add_two_ints', (request, response) => {
     console.log(`Incoming request: ${typeof request}`, request);
-    response.sum = request.a + request.b;
-    console.log(`Sending response: ${typeof response}`, response, '\n--');
-    return response;
+    let result = response.template;
+    result.sum = request.a + request.b;
+    console.log(`Sending response: ${typeof result}`, result, '\n--');
+    response.send(result);
   });
 
   rclnodejs.spin(node);

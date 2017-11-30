@@ -186,8 +186,9 @@ describe('Cross-language interaction', function() {
       var service = node.createService(AddTwoInts, 'py_js_add_two_ints', (request, response) => {
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.deepStrictEqual(typeof request.b, 'number');
-        response.sum = request.a + request.b;
-        return response;
+        let result = response.template;
+        result.sum = request.a + request.b;
+        return result;
       });
       rclnodejs.spin(node);
 
@@ -210,8 +211,9 @@ describe('Cross-language interaction', function() {
       var service = node.createService(AddTwoInts, 'cpp_js_add_two_ints', (request, response) => {
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.deepStrictEqual(typeof request.b, 'number');
-        response.sum = request.a + request.b;
-        return response;
+        let result = response.template;
+        result.sum = request.a + request.b;
+        return result;
       });
       rclnodejs.spin(node);
 
