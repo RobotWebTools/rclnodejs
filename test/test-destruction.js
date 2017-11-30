@@ -81,8 +81,8 @@ describe('Node destroy testing', function() {
     var pub2 = node.createPublisher(float32, 'pub2_topic');
     assert.deepStrictEqual(2, node._publishers.length);
 
-    var rclString = 'std_msgs/msg/String';
-    var sub1 = node.createSubscription(rclString, 'sub1_topic', function(msg) {
+    var RclString = 'std_msgs/msg/String';
+    var sub1 = node.createSubscription(RclString, 'sub1_topic', function(msg) {
       console.log(`Received ${msg}`);
     });
     assert.deepStrictEqual(1, node._subscriptions.length);

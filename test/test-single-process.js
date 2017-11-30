@@ -37,6 +37,8 @@ describe('Test rclnodejs nodes in a single process', function() {
     var subscription = subscriptionNode.createSubscription(RclString, 'single_ps_channel1', (msg) => {
       timer.cancel();
       assert.deepStrictEqual(msg.data, 'Hello World');
+      publisherNode.destroy();
+      subscriptionNode.destroy();
       done();
     });
 
@@ -57,6 +59,7 @@ describe('Test rclnodejs nodes in a single process', function() {
     var subscription = node.createSubscription(RclString, 'new_style_require1', (msg) => {
       timer.cancel();
       assert.deepStrictEqual(msg.data, 'Hello World');
+      node.destroy();
       done();
     }); 
 
@@ -68,7 +71,7 @@ describe('Test rclnodejs nodes in a single process', function() {
     rclnodejs.spin(node);
   });
 
-  it('Client/Service is a one process', function(done) {
+  it('Client/Service in one process', function(done) {
     var clientNode = rclnodejs.createNode('single_ps_client');
     var serviceNode = rclnodejs.createNode('single_ps_service');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
@@ -96,7 +99,7 @@ describe('Test rclnodejs nodes in a single process', function() {
     rclnodejs.spin(clientNode);
   });
 
-  it('Client/Service is a one process - service callback syntax #2', function(done) {
+  it('Client/Service in one process - service callback syntax #2', function(done) {
     var clientNode = rclnodejs.createNode('single_ps_client_2');
     var serviceNode = rclnodejs.createNode('single_ps_service_2');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
@@ -124,7 +127,7 @@ describe('Test rclnodejs nodes in a single process', function() {
     rclnodejs.spin(clientNode);
   });
 
-  it('Client/Service is a one process - service callback syntax #3', function(done) {
+  it('Client/Service in one process - service callback syntax #3', function(done) {
     var clientNode = rclnodejs.createNode('single_ps_client_3');
     var serviceNode = rclnodejs.createNode('single_ps_service_3');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
@@ -170,6 +173,7 @@ describe('Test rclnodejs nodes in a single process', function() {
       client.sendRequest(request, (response) => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
+        node.destroy();
         done();
       });
     });

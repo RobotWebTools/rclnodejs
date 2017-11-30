@@ -113,7 +113,7 @@ describe('rclnodejs node test suite', function() {
 
 describe('rcl node methods testing', function() {
   var node;
-  var rclString, GetParameters;
+  var RclString, GetParameters;
   this.timeout(60 * 1000);
 
   before(function() {
@@ -126,7 +126,7 @@ describe('rcl node methods testing', function() {
 
   beforeEach(function() {
     node = rclnodejs.createNode('my_node', '/my_ns');
-    rclString = 'std_msgs/msg/String';
+    RclString = 'std_msgs/msg/String';
     GetParameters = 'rcl_interfaces/srv/GetParameters';
   });
 
@@ -142,7 +142,7 @@ describe('rcl node methods testing', function() {
   });
 
   it('node.createPublisher', function() {
-    node.createPublisher(rclString, 'chatter');
+    node.createPublisher(RclString, 'chatter');
 
     var invalidParams = [
       ['chatter?', Error, /topic name is invalid/],
@@ -152,7 +152,7 @@ describe('rcl node methods testing', function() {
 
     invalidParams.forEach(function(invalidParam) {
       assertThrowsError(() => {
-        node.createPublisher(rclString, invalidParam[0]);
+        node.createPublisher(RclString, invalidParam[0]);
       }, invalidParam[1], invalidParam[2], 'Failed to createPublisher');
     });
   });
@@ -166,12 +166,12 @@ describe('rcl node methods testing', function() {
       [true, 'validServiceName'],
       [{f: 'abc'}, 'validServiceName'],
       [['a', 'b', 'c'], 'validSerivceName'],
-      [rclString, 2],
-      [rclString, undefined],
-      [rclString, null],
-      [rclString, false],
-      [rclString, {n: 'invalidServiceName'}],
-      [rclString, [1, 2, 3]],
+      [RclString, 2],
+      [RclString, undefined],
+      [RclString, null],
+      [RclString, false],
+      [RclString, {n: 'invalidServiceName'}],
+      [RclString, [1, 2, 3]],
       [undefined, null]
     ];
 
@@ -183,7 +183,7 @@ describe('rcl node methods testing', function() {
   });
 
   it('node.createSubscription', function() {
-    node.createSubscription(rclString, 'chatter', () => {});
+    node.createSubscription(RclString, 'chatter', () => {});
 
     var invalidParams = [
       ['chatter?', /topic name is invalid/],
@@ -193,7 +193,7 @@ describe('rcl node methods testing', function() {
 
     invalidParams.forEach(function(invalidParam) {
       assertThrowsError(() => {
-        node.createSubscription(rclString, invalidParam[0], () => {});
+        node.createSubscription(RclString, invalidParam[0], () => {});
       }, Error, invalidParam[1], 'Failed to createSubscription');
     });
   });
@@ -207,12 +207,12 @@ describe('rcl node methods testing', function() {
       [true, 'validTopicName', undefined],
       [{f: 'abc'}, 'validTopicName', null],
       [['a', 'b', 'c'], 'validTopicName', undefined],
-      [rclString, 2, null],
-      [rclString, undefined, undefined],
-      [rclString, null, null],
-      [rclString, false, undefined],
-      [rclString, {n: 'invalidServiceName'}, null],
-      [rclString, [1, 2, 3], undefined],
+      [RclString, 2, null],
+      [RclString, undefined, undefined],
+      [RclString, null, null],
+      [RclString, false, undefined],
+      [RclString, {n: 'invalidServiceName'}, null],
+      [RclString, [1, 2, 3], undefined],
       [undefined, null, null]
     ];
 
