@@ -31,17 +31,16 @@ describe('rclnodejs publisher test suite', function() {
 
   it('Try creating a publisher', function() {
     const node = rclnodejs.createNode('publisher_node');
-    let String = rclnodejs.require('std_msgs').msg.String;
+    const String = 'std_msgs/msg/String';
     const publisher = node.createPublisher(String, 'topic');
     rclnodejs.spin(node);
   });
 
   it('Try publish a message', function() {
     const node = rclnodejs.createNode('publisher_node');
-    let String = rclnodejs.require('std_msgs').msg.String;
+    const String = 'std_msgs/msg/String';
     const publisher = node.createPublisher(String, 'topic');
-    let msg = new String();
-    msg.data = 'Hello ROS 2.0 Publisher!';
+    const msg = 'Hello ROS 2.0 Publisher!';
     publisher.publish(msg);
     rclnodejs.spin(node);
   });

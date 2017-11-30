@@ -31,7 +31,7 @@ describe('rclnodejs message communication', function() {
 
   it('should support array type', function(done) {
     var node = rclnodejs.createNode('array_message_subscription');
-    const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+    const JointState = 'sensor_msgs/msg/JointState';
     var publisher = childProcess.fork(`${__dirname}/publisher_array_setup.js`);
     var destroy = false;
     var subscription = node.createSubscription(JointState, 'JointState', (state) => {

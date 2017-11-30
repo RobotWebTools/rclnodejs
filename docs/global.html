@@ -96,6 +96,68 @@
 
         
             
+<h4 class="name" id="debug"><span class="type-signature">(constant) </span>debug<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    /* eslint-disable max-depth
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_message_translator.js.html">lib/message_translator.js</a>, <a href="lib_message_translator.js.html#line19">line 19</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
 <h4 class="name" id="DurabilityPolicy"><span class="type-signature">(readonly) </span>DurabilityPolicy<span class="type-signature"> :number</span></h4>
 
 
@@ -618,7 +680,7 @@
     
 
     
-    <h4 class="name" id="RequestCallback"><span class="type-signature"></span>RequestCallback<span class="signature">(request)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="RequestCallback"><span class="type-signature"></span>RequestCallback<span class="signature">(request, response)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -682,6 +744,30 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>response</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Response.html">Response</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The response to client.
+        Use <a href="Response.html#send">response.send()</a> to send response object to client</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -719,7 +805,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line208">line 208</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line227">line 227</a>
     </li></ul></dd>
     
 
@@ -736,6 +822,8 @@
             <li><a href="Client.html">Client</a></li>
         
             <li><a href="Service.html">Service</a></li>
+        
+            <li><a href="Response.html#send">Response#send</a></li>
         </ul>
     </dd>
     
@@ -755,6 +843,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -867,7 +973,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line34">line 34</a>
+        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line36">line 36</a>
     </li></ul></dd>
     
 
@@ -1015,7 +1121,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line158">line 158</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line165">line 165</a>
     </li></ul></dd>
     
 
@@ -1070,13 +1176,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Timer.html">Timer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Response.html">Response</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Timer.html">Timer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#debug">debug</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Nov 23 2017 11:22:53 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.2</a> on Thu Nov 30 2017 08:36:54 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>

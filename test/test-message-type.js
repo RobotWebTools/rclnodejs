@@ -48,7 +48,7 @@ describe('Rclnodejs message type testing', function() {
   describe('Primitive types', function() {
     it('Bool', function(done) {
       var node = rclnodejs.createNode('bool_subscription');
-      var msgBool = rclnodejs.require('std_msgs').msg.Bool;
+      const msgBool = 'std_msgs/msg/Bool';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['Bool', '"true"']);
       var subscription = node.createSubscription(msgBool, 'Bool_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -61,7 +61,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('Char', function(done) {
       var node = rclnodejs.createNode('char_subscription');
-      var msgChar = rclnodejs.require('std_msgs').msg.Char;
+      const msgChar = 'std_msgs/msg/Char';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['Char', '"A"']);
       var subscription = node.createSubscription(msgChar, 'Char_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -74,7 +74,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('Byte', function(done) {
       var node = rclnodejs.createNode('byte_subscription');
-      var msgByte = rclnodejs.require('std_msgs').msg.Byte;
+      const msgByte = 'std_msgs/msg/Byte';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['Byte', '0xa']);
       var subscription = node.createSubscription(msgByte, 'Byte_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -87,7 +87,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('String', function(done) {
       var node = rclnodejs.createNode('string_subscription');
-      var msgString = rclnodejs.require('std_msgs').msg.String;
+      var msgString = 'std_msgs/msg/String';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['String', '"RCL String"']);
       var subscription = node.createSubscription(msgString, 'String_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -100,7 +100,7 @@ describe('Rclnodejs message type testing', function() {
 
     // it('InitString', function(done) {
     //   var node = rclnodejs.createNode('init_string_subscription');
-    //   var msgString = rclnodejs.require('std_msgs').msg.String;
+    //   var msgString = 'std_msgs/msg/String';
     //   var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['InitString', '"RCL String"']);
     //   var subscription = node.createSubscription(msgString, 'InitString_channel', (msg) => {
     //     publisher.send('quit');
@@ -113,7 +113,7 @@ describe('Rclnodejs message type testing', function() {
     
     it('Int8', function(done) {
       var node = rclnodejs.createNode('int8_subscription');
-      var msgInt8 = rclnodejs.require('std_msgs').msg.Int8;
+      const msgInt8 = 'std_msgs/msg/Int8';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['Int8', '0x7f']);
       var subscription = node.createSubscription(msgInt8, 'Int8_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -126,7 +126,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('UInt8', function(done) {
       var node = rclnodejs.createNode('uint8_subscription');
-      var msgUInt8 = rclnodejs.require('std_msgs').msg.UInt8;
+      const msgUInt8 = 'std_msgs/msg/UInt8';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['UInt8', '0xff']);
       var subscription = node.createSubscription(msgUInt8, 'UInt8_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -139,7 +139,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('Int16', function(done) {
       var node = rclnodejs.createNode('int16_subscription');
-      var msgInt16 = rclnodejs.require('std_msgs').msg.Int16;
+      const msgInt16 = 'std_msgs/msg/Int16';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['Int16', '0x7fff']);
       var subscription = node.createSubscription(msgInt16, 'Int16_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -152,7 +152,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('UInt16', function(done) {
       var node = rclnodejs.createNode('uint16_subscription');
-      var msgUInt16 = rclnodejs.require('std_msgs').msg.UInt16;
+      const msgUInt16 = 'std_msgs/msg/UInt16';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['UInt16', '0xffff']);
       var subscription = node.createSubscription(msgUInt16, 'UInt16_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -165,7 +165,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('Int32', function(done) {
       var node = rclnodejs.createNode('int32_subscription');
-      var msgInt32 = rclnodejs.require('std_msgs').msg.Int32;
+      const msgInt32 = 'std_msgs/msg/Int32';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['Int32', '0x7fffffff']);
       var subscription = node.createSubscription(msgInt32, 'Int32_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -178,7 +178,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('UInt32', function(done) {
       var node = rclnodejs.createNode('uint32_subscription');
-      var msgUInt32 = rclnodejs.require('std_msgs').msg.UInt32;
+      const msgUInt32 = 'std_msgs/msg/UInt32';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['UInt32', '0xffffffff']);
       var subscription = node.createSubscription(msgUInt32, 'UInt32_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -191,7 +191,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('Int64', function(done) {
       var node = rclnodejs.createNode('int64_subscription');
-      var msgInt64 = rclnodejs.require('std_msgs').msg.Int64;
+      const msgInt64 = 'std_msgs/msg/Int64';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['Int64', '0x1fffffffffffff']);
       var subscription = node.createSubscription(msgInt64, 'Int64_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -204,7 +204,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('UInt64', function(done) {
       var node = rclnodejs.createNode('uint64_subscription');
-      var msgUInt64 = rclnodejs.require('std_msgs').msg.UInt64;
+      const msgUInt64 = 'std_msgs/msg/UInt64';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['UInt64', '0x1fffffffffffff']);
       var subscription = node.createSubscription(msgUInt64, 'UInt64_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -217,7 +217,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('Float32', function(done) {
       var node = rclnodejs.createNode('float32_subscription');
-      var msgFloat32 = rclnodejs.require('std_msgs').msg.Float32;
+      const msgFloat32 = 'std_msgs/msg/Float32';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['Float32', '3.14']);
       var subscription = node.createSubscription(msgFloat32, 'Float32_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -230,7 +230,7 @@ describe('Rclnodejs message type testing', function() {
 
     it('Float64', function(done) {
       var node = rclnodejs.createNode('float64_subscription');
-      var msgFloat64 = rclnodejs.require('std_msgs').msg.Float64;
+      const msgFloat64 = 'std_msgs/msg/Float64';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['Float64', '3.14']);
       var subscription = node.createSubscription(msgFloat64, 'Float64_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -246,7 +246,7 @@ describe('Rclnodejs message type testing', function() {
     this.timeout(60 * 1000);
     it('ColorRGBA', function(done) {
       var node = rclnodejs.createNode('colorrgba_subscription');
-      var msgColorRGBA = rclnodejs.require('std_msgs').msg.ColorRGBA;
+      const msgColorRGBA = 'std_msgs/msg/ColorRGBA';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg_colorrgba.js`);
       var subscription = node.createSubscription(msgColorRGBA, 'ColorRGBA_channel', (msg) => {
         publisher.kill('SIGINT');
@@ -273,20 +273,16 @@ describe('Rclnodejs message type testing', function() {
 
     it('Object with Header', function(done) {
       var node = rclnodejs.createNode('header_subscription');
-      var Header = rclnodejs.require('std_msgs').msg.Header;
-      var Time = rclnodejs.require('builtin_interfaces').msg.Time;
+      const Header = 'std_msgs/msg/Header';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg_header.js`);
       var subscription = node.createSubscription(Header, 'Header_channel', (header) => {
         publisher.kill('SIGINT');
-        assert.ok(header instanceof Header);
 
         assert.ok('stamp' in header);
-        assert.ok(header.stamp instanceof Time);
         assert.ok('sec' in header.stamp);
         assert.deepStrictEqual(header.stamp.sec, 123456);
         assert.ok('nanosec' in header.stamp);
         assert.deepStrictEqual(header.stamp.nanosec, 789);
-
         assert.ok('frame_id' in header);
         assert.deepStrictEqual(header.frame_id, 'main frame');
 
@@ -297,15 +293,11 @@ describe('Rclnodejs message type testing', function() {
 
     it('Complex object', function(done) {
       var node = rclnodejs.createNode('jointstate_subscription');
-      var Header = rclnodejs.require('std_msgs').msg.Header;
-      var Time = rclnodejs.require('builtin_interfaces').msg.Time;
-      var JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+      const JointState = 'sensor_msgs/msg/JointState';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg_jointstate.js`);
       var subscription = node.createSubscription(JointState, 'JointState_channel', (state) => {
         publisher.kill('SIGINT');
-        assert.ok(state instanceof JointState);
 
-        assert.ok(state.header instanceof Header);
         assert.deepStrictEqual(state.name, ['Tom', 'Jerry']);
         assert.deepStrictEqual(state.position, [1, 2]);
         assert.deepStrictEqual(state.velocity, [2, 3]);

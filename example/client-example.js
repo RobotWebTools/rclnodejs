@@ -17,19 +17,18 @@
 const rclnodejs = require('../index.js');
 
 rclnodejs.init().then(() => {
-  let node = rclnodejs.createNode('client_example_node');
+  const node = rclnodejs.createNode('client_example_node');
 
-  /* eslint-disable */
-  let AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
-  let client = node.createClient(AddTwoInts, 'add_two_ints');
-  let request = new AddTwoInts.Request();
-  /* eslint-enable */
+  const client = node.createClient('example_interfaces/srv/AddTwoInts', 'add_two_ints');
+  const request = {
+    a: Math.floor(Math.random() * 100),
+    b: Math.floor(Math.random() * 100),
+  };
 
-  request.a = 1;
-  request.b = 2;
-
+  console.log(`Sending: ${typeof request}`, request);
   client.sendRequest(request, (response) => {
-    console.log(`Result: sum = ${response.sum}`);
+    console.log(`Result: ${typeof response}`, response);
+    rclnodejs.shutdown();
   });
 
   rclnodejs.spin(node);

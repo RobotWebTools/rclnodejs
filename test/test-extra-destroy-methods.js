@@ -30,7 +30,7 @@ describe('Node extra destroy methods testing', function() {
 
   it('destroyPublisher()', function() {
     var node = rclnodejs.createNode('node1');
-    const RclString = rclnodejs.require('std_msgs').msg.String;
+    const RclString = 'std_msgs/msg/String';
     // const RclString = rclnodejs.require('std_msgs/msg/String');
     var publisher = node.createPublisher(RclString, 'chatter');
     assert.deepStrictEqual(node._publishers.length, 1);
@@ -45,7 +45,7 @@ describe('Node extra destroy methods testing', function() {
 
   it('destroySubscription()', function() {
     var node = rclnodejs.createNode('node2');
-    const RclString = rclnodejs.require('std_msgs').msg.String;
+    const RclString = 'std_msgs/msg/String';
     // const RclString = rclnodejs.require('std_msgs/msg/String');
     var subscription = node.createSubscription(RclString, 'chatter', () => {});
     assert.deepStrictEqual(node._subscriptions.length, 1);
@@ -60,7 +60,7 @@ describe('Node extra destroy methods testing', function() {
 
   it('destroyClient()', function() {
     var node = rclnodejs.createNode('node3');
-    const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     // const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
     var client = node.createClient(AddTwoInts, 'add_two_ints');
     assert.deepStrictEqual(node._clients.length, 1);
@@ -75,7 +75,7 @@ describe('Node extra destroy methods testing', function() {
 
   it('destroyService()', function() {
     var node = rclnodejs.createNode('node4');
-    const AddTwoInts = rclnodejs.require('example_interfaces').srv.AddTwoInts;
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     // const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
     var service = node.createService(AddTwoInts, 'add_two_ints', () => {});
     assert.deepStrictEqual(node._services.length, 1);

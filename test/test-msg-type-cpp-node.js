@@ -14,6 +14,8 @@
 
 'use strict';
 
+/* eslint-disable camelcase */
+
 const assert = require('assert');
 const path = require('path');
 const childProcess = require('child_process');
@@ -38,7 +40,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Bool', function(done) {
       var node = rclnodejs.createNode('bool_js_subscription');
-      const Bool = rclnodejs.require('std_msgs').msg.Bool;
+      const Bool = 'std_msgs/msg/Bool';
       var destroy = false;
       
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Bool_cpp_js_channel', '-m', 'Bool']);
@@ -56,7 +58,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Byte', function(done) {
       var node = rclnodejs.createNode('byte_js_subscription');
-      const Byte = rclnodejs.require('std_msgs').msg.Byte;
+      const Byte = 'std_msgs/msg/Byte';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Byte_cpp_js_channel', '-m', 'Byte']);
@@ -74,7 +76,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Char', function(done) {
       var node = rclnodejs.createNode('char_js_subscription');
-      const Char = rclnodejs.require('std_msgs').msg.Char;
+      const Char = 'std_msgs/msg/Char';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Char_cpp_js_channel', '-m', 'Char']);
@@ -92,7 +94,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('String', function(done) {
       var node = rclnodejs.createNode('string_js_subscription');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
+      const RclString = 'std_msgs/msg/String';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'String_cpp_js_channel', '-m', 'String']);
@@ -110,7 +112,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Int8', function(done) {
       var node = rclnodejs.createNode('int8_js_subscription');
-      const Int8 = rclnodejs.require('std_msgs').msg.Int8;
+      const Int8 = 'std_msgs/msg/Int8';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Int8_cpp_js_channel', '-m', 'Int8']);
@@ -128,7 +130,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('UInt8', function(done) {
       var node = rclnodejs.createNode('uint8_js_subscription');
-      const UInt8 = rclnodejs.require('std_msgs').msg.UInt8;
+      const UInt8 = 'std_msgs/msg/UInt8';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'UInt8_cpp_js_channel', '-m', 'UInt8']);
@@ -146,7 +148,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Int16', function(done) {
       var node = rclnodejs.createNode('int16_js_subscription');
-      const Int16 = rclnodejs.require('std_msgs').msg.Int16;
+      const Int16 = 'std_msgs/msg/Int16';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Int16_cpp_js_channel', '-m', 'Int16']);
@@ -164,7 +166,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('UInt16', function(done) {
       var node = rclnodejs.createNode('uint16_js_subscription');
-      const UInt16 = rclnodejs.require('std_msgs').msg.UInt16;
+      const UInt16 = 'std_msgs/msg/UInt16';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'UInt16_cpp_js_channel', '-m', 'UInt16']);
@@ -182,7 +184,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Int32', function(done) {
       var node = rclnodejs.createNode('int32_js_subscription');
-      const Int32 = rclnodejs.require('std_msgs').msg.Int32;
+      const Int32 = 'std_msgs/msg/Int32';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Int32_cpp_js_channel', '-m', 'Int32']);
@@ -200,7 +202,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('UInt32', function(done) {
       var node = rclnodejs.createNode('uint32_js_subscription');
-      const UInt32 = rclnodejs.require('std_msgs').msg.UInt32;
+      const UInt32 = 'std_msgs/msg/UInt32';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'UInt32_cpp_js_channel', '-m', 'UInt32']);
@@ -218,7 +220,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Int64', function(done) {
       var node = rclnodejs.createNode('int64_js_subscription');
-      const Int64 = rclnodejs.require('std_msgs').msg.Int64;
+      const Int64 = 'std_msgs/msg/Int64';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Int64_cpp_js_channel', '-m', 'Int64']);
@@ -236,7 +238,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('UInt64', function(done) {
       var node = rclnodejs.createNode('uint64_js_subscription');
-      const UInt64 = rclnodejs.require('std_msgs').msg.UInt64;
+      const UInt64 = 'std_msgs/msg/UInt64';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'UInt64_cpp_js_channel', '-m', 'UInt64']);
@@ -254,7 +256,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Float32', function(done) {
       var node = rclnodejs.createNode('float32_js_subscription');
-      const Float32 = rclnodejs.require('std_msgs').msg.Float32;
+      const Float32 = 'std_msgs/msg/Float32';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Float32_cpp_js_channel', '-m', 'Float32']);
@@ -272,7 +274,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Float64', function(done) {
       var node = rclnodejs.createNode('float64_js_subscription');
-      const Float64 = rclnodejs.require('std_msgs').msg.Float64;
+      const Float64 = 'std_msgs/msg/Float64';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Float64_cpp_js_channel', '-m', 'Float64']);
@@ -293,7 +295,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('ColorRGBA', function(done) {
       var node = rclnodejs.createNode('colorrgba_js_subscription');
-      const ColorRGBA = rclnodejs.require('std_msgs').msg.ColorRGBA;
+      const ColorRGBA = 'std_msgs/msg/ColorRGBA';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'ColorRGBA_cpp_js_channel', '-m', 'ColorRGBA']);
@@ -315,7 +317,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Array', function(done) {
       var node = rclnodejs.createNode('array_js_subscription');
-      var ByteMultiArray = rclnodejs.require('std_msgs').msg.ByteMultiArray;
+      var ByteMultiArray = 'std_msgs/msg/ByteMultiArray';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Array_cpp_js_channel', '-m', 'Array']);
@@ -334,13 +336,11 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Header', function(done) {
       var node = rclnodejs.createNode('header_js_publisher');
-      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-      const Header = rclnodejs.require('std_msgs').msg.Header;
+      const Header = 'std_msgs/msg/Header';
       var destroy = false;
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Header_cpp_js_channel', '-m', 'Header']);
       var subscription = node.createSubscription(Header, 'Header_cpp_js_channel', (msg) => {
-        assert.ok(msg.stamp instanceof Time);
         assert.deepStrictEqual(msg.stamp.sec, 123456);
         assert.deepStrictEqual(msg.stamp.nanosec, 789);
         assert.deepStrictEqual(msg.frame_id, 'main frame');
@@ -358,14 +358,10 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Complex object', function(done) {
       var node = rclnodejs.createNode('jointstate_js_publisher');
-      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-      const Header = rclnodejs.require('std_msgs').msg.Header;
-      const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
+      const JointState = 'sensor_msgs/msg/JointState';
       var destroy = false;
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'JointState_cpp_js_channel', '-m', 'JointState']);
       var subscription = node.createSubscription(JointState, 'JointState_cpp_js_channel', (msg) => {
-        assert.ok(msg.header instanceof Header);
-        assert.ok(msg.header.stamp instanceof Time);
         assert.deepStrictEqual(msg.header.stamp.sec, 123456);
         assert.deepStrictEqual(msg.header.stamp.nanosec, 789);
         assert.deepStrictEqual(msg.header.frame_id, 'main frame');
@@ -389,9 +385,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Bool', function(done) {
       var node = rclnodejs.createNode('bool_js_publisher');
-      const Bool = rclnodejs.require('std_msgs').msg.Bool;
-      var msg = new Bool();
-      msg.data = true;
+      const Bool = 'std_msgs/msg/Bool';
+      const msg = true;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath, ['-t', 'Bool_js_cpp_channel']);
@@ -417,9 +412,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Byte', function(done) {
       var node = rclnodejs.createNode('byte_js_publisher');
-      const Byte = rclnodejs.require('std_msgs').msg.Byte;
-      var msg = new Byte();
-      msg.data = 0x41;
+      const Byte = 'std_msgs/msg/Byte';
+      const msg = 0x41;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -446,9 +440,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Char', function(done) {
       var node = rclnodejs.createNode('char_js_publisher');
-      const Char = rclnodejs.require('std_msgs').msg.Char;
-      var msg = new Char();
-      msg.data = 0x61;
+      const Char = 'std_msgs/msg/Char';
+      const msg = 0x61;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -474,9 +467,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('String', function(done) {
       var node = rclnodejs.createNode('string_js_publisher');
-      const RclString = rclnodejs.require('std_msgs').msg.String;
-      var msg = new RclString();
-      msg.data = 'Hello World';
+      const RclString = 'std_msgs/msg/String';
+      const msg = 'Hello World';
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -502,9 +494,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Int8', function(done) {
       var node = rclnodejs.createNode('int8_js_publisher');
-      const Int8 = rclnodejs.require('std_msgs').msg.Int8;
-      var msg = new Int8();
-      msg.data = 0x7f;
+      const Int8 = 'std_msgs/msg/Int8';
+      const msg = 0x7f;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -530,9 +521,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('UInt8', function(done) {
       var node = rclnodejs.createNode('uint8_js_publisher');
-      const UInt8 = rclnodejs.require('std_msgs').msg.UInt8;
-      var msg = new UInt8();
-      msg.data = 0xff;
+      const UInt8 = 'std_msgs/msg/UInt8';
+      const msg = 0xff;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -558,9 +548,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Int16', function(done) {
       var node = rclnodejs.createNode('int16_js_publisher');
-      const Int16 = rclnodejs.require('std_msgs').msg.Int16;
-      var msg = new Int16();
-      msg.data = 0x7fff;
+      const Int16 = 'std_msgs/msg/Int16';
+      const msg = 0x7fff;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -586,9 +575,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('UInt16', function(done) {
       var node = rclnodejs.createNode('uint16_js_publisher');
-      const UInt16 = rclnodejs.require('std_msgs').msg.UInt16;
-      var msg = new UInt16();
-      msg.data = 0xffff;
+      const UInt16 = 'std_msgs/msg/UInt16';
+      const msg = 0xffff;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -614,9 +602,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Int32', function(done) {
       var node = rclnodejs.createNode('int32_js_publisher');
-      const Int32 = rclnodejs.require('std_msgs').msg.Int32;
-      var msg = new Int32();
-      msg.data = 0x7fffffff;
+      const Int32 = 'std_msgs/msg/Int32';
+      const msg = 0x7fffffff;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -642,9 +629,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('UInt32', function(done) {
       var node = rclnodejs.createNode('uint32_js_publisher');
-      const UInt32 = rclnodejs.require('std_msgs').msg.UInt32;
-      var msg = new UInt32();
-      msg.data = 0xffffffff;
+      const UInt32 = 'std_msgs/msg/UInt32';
+      const msg = 0xffffffff;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -670,9 +656,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Int64', function(done) {
       var node = rclnodejs.createNode('int64_js_publisher');
-      const Int64 = rclnodejs.require('std_msgs').msg.Int64;
-      var msg = new Int64();
-      msg.data = Number.MAX_SAFE_INTEGER;
+      const Int64 = 'std_msgs/msg/Int64';
+      const msg = Number.MAX_SAFE_INTEGER;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -698,9 +683,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('UInt64', function(done) {
       var node = rclnodejs.createNode('uint64_js_publisher');
-      const UInt64 = rclnodejs.require('std_msgs').msg.UInt64;
-      var msg = new UInt64();
-      msg.data = Number.MAX_SAFE_INTEGER;
+      const UInt64 = 'std_msgs/msg/UInt64';
+      const msg = Number.MAX_SAFE_INTEGER;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -726,9 +710,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Float32', function(done) {
       var node = rclnodejs.createNode('float32_js_publisher');
-      const Float32 = rclnodejs.require('std_msgs').msg.Float32;
-      var msg = new Float32();
-      msg.data = 3.14;
+      const Float32 = 'std_msgs/msg/Float32';
+      const msg = 3.14;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -754,9 +737,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Float64', function(done) {
       var node = rclnodejs.createNode('float64_js_publisher');
-      const Float64 = rclnodejs.require('std_msgs').msg.Float64;
-      var msg = new Float64();
-      msg.data = 3.1415926;
+      const Float64 = 'std_msgs/msg/Float64';
+      const msg = 3.1415926;
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -784,12 +766,13 @@ describe('Rclnodejs - Cpp message type testing', function() {
   describe('Node.js publisher - Cpp subscription: compound message types', function() {
     it('ColorRGBA', function(done) {
       var node = rclnodejs.createNode('colorrgba_js_publisher');
-      const ColorRGBA = rclnodejs.require('std_msgs').msg.ColorRGBA;
-      var msg = new ColorRGBA();
-      msg.a = 0.5;
-      msg.r = 127;
-      msg.g = 255;
-      msg.b = 255;
+      const ColorRGBA = 'std_msgs/msg/ColorRGBA';
+      const msg = {
+        a: 0.5,
+        r: 127,
+        g: 255,
+        b: 255,
+      };
       var destroy = false;
 
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -815,23 +798,21 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
     it('Array', function(done) {
       var node = rclnodejs.createNode('multiarray_js_publisher');
-      const Byte = rclnodejs.require('std_msgs').msg.Byte;
-      const MultiArrayDimension = rclnodejs.require('std_msgs').msg.MultiArrayDimension;
-      const MultiArrayLayout = rclnodejs.require('std_msgs').msg.MultiArrayLayout;
-      const ByteMultiArray = rclnodejs.require('std_msgs').msg.ByteMultiArray;
-      let lengthDim = new MultiArrayDimension();
-      lengthDim.label = 'length';
-      lengthDim.size = 1;
-      lengthDim.stride = 3;
+      const ByteMultiArray = 'std_msgs/msg/ByteMultiArray';
 
-      let layout = new MultiArrayLayout();
-      layout.dim.fill([lengthDim]);
-      // eslint-disable-next-line
-      layout.data_offset = 0;
-
-      let msg = new ByteMultiArray();
-      msg.layout = layout;
-      msg.data = [65, 66, 67];
+      const msg = {
+        layout: {
+          dim: [
+            {
+              label: 'length',
+              size: 1,
+              stride: 3,
+            },
+          ],
+          data_offset: 0,
+        },
+        data: [65, 66, 67],
+      };
 
       var destroy = false;
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -857,15 +838,15 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Header', function(done) {
       var node = rclnodejs.createNode('header_js_publisher');
-      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-      const Header = rclnodejs.require('std_msgs').msg.Header;
-      var time = new Time();
-      time.sec = 123456;
-      time.nanosec = 789;
-      var msg = new Header();
-      msg.stamp = time;
-      // eslint-disable-next-line
-      msg.frame_id = 'main frame';
+      const Header = 'std_msgs/msg/Header';
+
+      const msg = {
+        stamp: {
+          sec: 123456,
+          nanosec: 789,
+        },
+        frame_id: 'main frame',
+      };
 
       var destroy = false;
       var subscription = childProcess.spawn(cppSubscriptionPath);
@@ -891,22 +872,21 @@ describe('Rclnodejs - Cpp message type testing', function() {
     
     it('Complex object', function(done) {
       var node = rclnodejs.createNode('jointstate_js_publisher');
-      const Time = rclnodejs.require('builtin_interfaces').msg.Time;
-      const Header = rclnodejs.require('std_msgs').msg.Header;
-      const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
-      var time = new Time();
-      time.sec = 123456;
-      time.nanosec = 789;
-      var header = new Header();
-      header.stamp = time;
-      // eslint-disable-next-line
-      header.frame_id = 'main frame';
-      var msg = new JointState();
-      msg.header = header;
-      msg.name = ['Tom', 'Jerry'];
-      msg.position = [1, 2];
-      msg.velocity = [2, 3];
-      msg.effort = [4, 5, 6];
+      const JointState = 'sensor_msgs/msg/JointState';
+
+      const msg = {
+        header: {
+          stamp: {
+            sec: 123456,
+            nanosec: 789,
+          },
+          frame_id: 'main frame',
+        },
+        name: ['Tom', 'Jerry'],
+        position: [1, 2],
+        velocity: [2, 3],
+        effort: [4, 5, 6],
+      };
 
       var destroy = false;
       var subscription = childProcess.spawn(cppSubscriptionPath);

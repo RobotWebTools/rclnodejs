@@ -43,11 +43,11 @@ describe('Rclnodejs message translation: primitive types', function() {
     {type: 'UInt64',  values: [0, 1, 2, 3, 32767, 65535]},
     {type: 'UInt8',   values: [0, 1, 2, 3, 127, 255]},
   ].forEach((testData) => {
-    const topic = testData.topic || 'topic' + testData.type;
+    const topic = testData.topic || 'topic' + testData.type + 'Shortcut';
     testData.values.forEach((v, i) => {
       it('Test translation of ' + testData.type + ' msg, value ' + v, function() {
         const node = rclnodejs.createNode('test_message_translation_node');
-        const MessageType = rclnodejs.require('std_msgs').msg[testData.type];
+        const MessageType = 'std_msgs/msg/' + testData.type;
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {
@@ -59,7 +59,58 @@ describe('Rclnodejs message translation: primitive types', function() {
               reject('case ' + i + '. Expected: ' + v + ', Got: ' + value.data);
             }
           });
-          publisher.publish(v);
+          publisher.publish(v);  // Short-cut form of publishing primitive types
+          rclnodejs.spin(node);
+        });
+      });
+    });
+  });
+});
+
+describe('Rclnodejs message translation: primitive types 2', function() {
+  this.timeout(60 * 1000);
+
+  before(function() {
+    return rclnodejs.init();
+  });
+
+  after(function() {
+    rclnodejs.shutdown();
+  });
+
+  [
+    {type: 'Bool',    values: [true, false]},
+    {type: 'Byte',    values: [0, 1, 2, 3, 255]},
+    {type: 'Char',    values: [-128, -127, -2, -1, 0, 1, 2, 3, 127]},
+    {type: 'Float32', values: [-5, 0, 1.25, 89.75, 72.50, 3.141592e8]},
+    {type: 'Float64', values: [-5, 0, 1.25, 89.75, 72.50, 3.141592e8]},
+    {type: 'Int16',   values: [-32768, -2, -1, 0, 1, 2, 3, 32767]},
+    {type: 'Int32',   values: [-32768, -2, -1, 0, 1, 2, 3, 32767]},
+    {type: 'Int64',   values: [-32768, -2, -1, 0, 1, 2, 3, 32767]},
+    {type: 'Int8',    values: [-128, -127, -2, -1, 0, 1, 2, 3, 127]},
+    {type: 'String',  values: ['', 'A String', ' ', '<>']},
+    {type: 'UInt16',  values: [0, 1, 2, 3, 32767, 65535]},
+    {type: 'UInt32',  values: [0, 1, 2, 3, 32767, 65535]},
+    {type: 'UInt64',  values: [0, 1, 2, 3, 32767, 65535]},
+    {type: 'UInt8',   values: [0, 1, 2, 3, 127, 255]},
+  ].forEach((testData) => {
+    const topic = testData.topic || 'topic' + testData.type;
+    testData.values.forEach((v, i) => {
+      it('Test translation of ' + testData.type + ' msg, value ' + v, function() {
+        const node = rclnodejs.createNode('test_message_translation_node');
+        const MessageType = 'std_msgs/msg/' + testData.type;
+        const publisher = node.createPublisher(MessageType, topic);
+        return new Promise((resolve, reject) => {
+          const sub = node.createSubscription(MessageType, topic, (value) => {
+            // For primitive types, msgs are defined as a single `.data` field
+            if (value.data === v) {
+              node.destroy();
+              resolve();
+            } else {
+              reject('case ' + i + '. Expected: ' + v + ', Got: ' + value.data);
+            }
+          });
+          publisher.publish({data: v});  // Ensure the original form of the message can be used
           rclnodejs.spin(node);
         });
       });
