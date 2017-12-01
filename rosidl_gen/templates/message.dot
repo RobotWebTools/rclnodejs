@@ -72,8 +72,40 @@ function getPrimitiveNameByType(type) {
   }
 }
 
-let primitiveBaseType = ['Bool', 'Int8', 'UInt8', 'Int16', 'UInt16', 'Int32', 'UInt32',
-                         'Int64', 'UInt64', 'Float64', 'Float32', 'Char', 'Byte', 'String'];
+function getTypedArrayName(type) {
+  if (type.type === 'int8') {
+    return 'Int8Array';
+  } else if (type.type === 'uint8') {
+    return 'Uint8Array';
+  } else if (type.type === 'int16') {
+    return 'Int16Array';
+  } else if (type.type === 'uint16') {
+    return 'Uint16Array';
+  } else if (type.type === 'int32') {
+    return 'Int32Array';
+  } else if (type.type === 'uint32') {
+    return 'Uint32Array';
+  } else if (type.type === 'int64') {
+    return 'Int64Array';
+  } else if (type.type === 'uint64') {
+    return 'Uint64Array';
+  } else if (type.type === 'float64') {
+    return 'Float64Array';
+  } else if (type.type === 'float32') {
+    return 'Float32Array';
+  } else if (type.type === 'char') {
+    return 'Int8Array';
+  } else if (type.type === 'byte') {
+    return 'Uint8Array';
+  } else {
+    return '';
+  }
+}
+
+const primitiveBaseType = ['Bool', 'Int8', 'UInt8', 'Int16', 'UInt16', 'Int32', 'UInt32',
+                           'Int64', 'UInt64', 'Float64', 'Float32', 'Char', 'Byte', 'String'];
+const typedArrayType = ['int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32',
+                        'int64', 'uint64', 'float64', 'float32', 'char', 'byte'];
 
 let existedModules = [];
 
@@ -83,6 +115,10 @@ function isExisted(requiredModule) {
 
 function isPrimitivePackage(baseType) {
   return primitiveBaseType.indexOf(baseType.type) !== -1;
+}
+
+function isTypedArrayType(type) {
+  return typedArrayType.indexOf(type.type) !== -1;
 }
 
 function shouldRequire(baseType, fieldType) {
@@ -272,7 +308,14 @@ class {{=objectWrapper}} {
 
   {{~ it.spec.fields :field}}
   get {{=field.name}}() {
-    {{? field.type.isArray && field.type.isPrimitiveType}}
+    {{? field.type.isArray && isTypedArrayType(field.type)}}
+    const src = this._wrapperFields['{{=field.name}}'].data;
+    let values = new {{=getTypedArrayName(field.type)}}(src.length);
+    for (let i = 0; i < src.length; ++i) {
+      values[i] = src[i].data;
+    }
+    return values;
+    {{?? field.type.isArray && field.type.isPrimitiveType}}
     let values = [];
     this._wrapperFields['{{=field.name}}'].data.forEach((wrapper, index) => {
       values.push(wrapper.data);
@@ -348,14 +391,15 @@ class {{=arrayWrapper}} {
   }
 
   fill(values) {
-    let length = values.length;
+    const length = values.length;
     this._resize(length);
     {{? isPrimitivePackage(it.spec.baseType)}}
-    values.forEach((value, index) => {
+    // Use for loop to make it also work for TypedArray
+    for (let i = 0; i < length; ++i) {
       let wrapper = new {{=objectWrapper}}();
-      wrapper.data = value;
-      this._wrappers[index] = wrapper;
-    });
+      wrapper.data = values[i];
+      this._wrappers[i] = wrapper;
+    }
     {{?? !isPrimitivePackage(it.spec.baseType)}}
     values.forEach((value, index) => {
       this._wrappers[index].copy(value);

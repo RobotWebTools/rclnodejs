@@ -39,9 +39,9 @@ describe('rclnodejs message communication', function() {
       assert.deepStrictEqual(state.header.stamp.nanosec, 789);
       assert.deepStrictEqual(state.header.frame_id, 'main frame');
       assert.deepStrictEqual(state.name, ['Tom', 'Jerry']);
-      assert.deepStrictEqual(state.position, [1, 2]);
-      assert.deepStrictEqual(state.velocity, [2, 3]);
-      assert.deepStrictEqual(state.effort, [4, 5, 6]);
+      assert.deepStrictEqual(state.position, Float64Array.from([1, 2]));
+      assert.deepStrictEqual(state.velocity, Float64Array.from([2, 3]));
+      assert.deepStrictEqual(state.effort, Float64Array.from([4, 5, 6]));
 
       if (!destroy) {
         publisher.kill('SIGINT');

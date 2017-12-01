@@ -127,6 +127,17 @@ describe('Rclnodejs message translation: complex types', function() {
           },
           data: [1.0, 2.0, 3.0, 8.5, 6.75, 0.5, -0.25],
         },
+        {
+          layout: {
+            dim: [
+              {label: 'height',  size: 480, stride: 921600},
+              {label: 'width',   size: 640, stride: 1920},
+              {label: 'channel', size: 3,   stride: 8},
+            ],
+            data_offset: 1024,
+          },
+          data: Float32Array.from([1.0, 2.0, 3.0, 8.5, 6.75, 0.5, -0.25]),
+        },
       ]
     },
     {
@@ -141,7 +152,72 @@ describe('Rclnodejs message translation: complex types', function() {
             ],
             data_offset: 0,
           },
-          data: [-10, 1, 2, 3, 8, 6, 0, -25],
+          data: [-10, 1, 2, 3, 8, 6, 0, -25], // Provide data via Array
+        },
+        {
+          layout: {
+            dim: [
+              {label: 'height',  size: 10, stride: 600},
+              {label: 'width',   size: 20, stride: 60},
+              {label: 'channel', size: 3,   stride: 4},
+            ],
+            data_offset: 0,
+          },
+          data: Int32Array.from([-10, 1, 2, 3, 8, 6, 0, -25]), // Provide data via TypedArray
+        },
+      ]
+    },
+    {
+      pkg: 'std_msgs', type: 'Int16MultiArray',
+      values: [
+        {
+          layout: {
+            dim: [
+              {label: 'height',  size: 10, stride: 600},
+              {label: 'width',   size: 20, stride: 60},
+              {label: 'channel', size: 3,   stride: 4},
+            ],
+            data_offset: 0,
+          },
+          data: [-10, 1, 2, 3, 8, 6, 0, -25], // Provide data via Array
+        },
+        {
+          layout: {
+            dim: [
+              {label: 'height',  size: 10, stride: 600},
+              {label: 'width',   size: 20, stride: 60},
+              {label: 'channel', size: 3,   stride: 4},
+            ],
+            data_offset: 0,
+          },
+          data: Int16Array.from([-10, 1, 2, 3, 8, 6, 0, -25]), // Provide data via TypedArray
+        },
+      ]
+    },
+    {
+      pkg: 'std_msgs', type: 'Int8MultiArray',
+      values: [
+        {
+          layout: {
+            dim: [
+              {label: 'height',  size: 10, stride: 600},
+              {label: 'width',   size: 20, stride: 60},
+              {label: 'channel', size: 3,   stride: 4},
+            ],
+            data_offset: 0,
+          },
+          data: [-10, 1, 2, 3, 8, 6, 0, -25], // Provide data via Array
+        },
+        {
+          layout: {
+            dim: [
+              {label: 'height',  size: 10, stride: 600},
+              {label: 'width',   size: 20, stride: 60},
+              {label: 'channel', size: 3,   stride: 4},
+            ],
+            data_offset: 0,
+          },
+          data: Int8Array.from([-10, 1, 2, 3, 8, 6, 0, -25]), // Provide data via TypedArray
         },
       ]
     },
@@ -185,6 +261,8 @@ describe('Rclnodejs message translation: complex types', function() {
               node.destroy();
               resolve();
             } else {
+              console.log('got', value);
+              console.log('expected', v);
               reject('case ' + i + '. Expected: ' + v + ', Got: ' + value);
             }
           });

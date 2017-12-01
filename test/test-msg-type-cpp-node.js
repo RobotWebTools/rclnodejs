@@ -322,7 +322,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       var publisher = childProcess.spawn(cppPublisherPath, ['-t', 'Array_cpp_js_channel', '-m', 'Array']);
       var subscription = node.createSubscription(ByteMultiArray, 'Array_cpp_js_channel', (msg) => {
-        assert.deepStrictEqual(msg.data, [65, 66, 67]);
+        assert.deepStrictEqual(msg.data, Uint8Array.from([65, 66, 67]));
 
         if (!destroy) {
           node.destroy();
@@ -366,9 +366,9 @@ describe('Rclnodejs - Cpp message type testing', function() {
         assert.deepStrictEqual(msg.header.stamp.nanosec, 789);
         assert.deepStrictEqual(msg.header.frame_id, 'main frame');
         assert.deepStrictEqual(msg.name, ['Tom', 'Jerry']);
-        assert.deepStrictEqual(msg.position, [1, 2]);
-        assert.deepStrictEqual(msg.velocity, [2, 3]);
-        assert.deepStrictEqual(msg.effort, [4, 5, 6]);
+        assert.deepStrictEqual(msg.position, Float64Array.from([1, 2]));
+        assert.deepStrictEqual(msg.velocity, Float64Array.from([2, 3]));
+        assert.deepStrictEqual(msg.effort, Float64Array.from([4, 5, 6]));
 
         if (!destroy) {
           node.destroy();
