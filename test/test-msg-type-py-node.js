@@ -374,12 +374,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = 'True';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -400,12 +400,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = "b'A'";
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -426,12 +426,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = 'a';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -452,12 +452,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = 'Hello World';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -478,12 +478,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '127';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -504,12 +504,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '255';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -530,12 +530,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '32767';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -556,12 +556,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '65535';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -582,12 +582,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '2147483647';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -608,12 +608,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '4294967295';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -634,12 +634,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '9007199254740991';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -660,12 +660,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '9007199254740991';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -686,12 +686,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '3.14';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          timer.cancel();
           assert.ok(Math.abs(parseFloat(data.toString()) - expected) < 0.000001);
-          done();
+          timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -703,21 +703,21 @@ describe('Rclnodejs - Python message type testing', function() {
     it('Float64', function(done) {
       var node = rclnodejs.createNode('float64_js_publisher');
       const Float64 = 'std_msgs/msg/Float64';
-      const msg = 3.14;
+      const msg = 3.1415926;
       var destroy = false;
 
       var subscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Float64']);
       var publisher = node.createPublisher(Float64, 'Float64_js_py_channel');
 
-      const expected = '3.14';
+      const expected = '3.1415926';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.ok(Math.abs(parseFloat(data.toString()) - expected) < 0.000001);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -754,12 +754,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = 'ABC';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -784,12 +784,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '(127.0,255.0,255.0,0.5)';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -816,12 +816,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = '(123456,789,main frame)';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }
       });
       var timer = node.createTimer(100, () => {
@@ -854,12 +854,12 @@ describe('Rclnodejs - Python message type testing', function() {
       const expected = "(123456,789,main frame,['Tom', 'Jerry'],[1.0, 2.0],[2.0, 3.0],[4.0, 5.0, 6.0])";
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
+          assert.notDeepStrictEqual(data.toString().indexOf(expected), -1);
           timer.cancel();
-          assert.deepStrictEqual(data.toString(), expected);
-          done();
           node.destroy();
           subscription.kill('SIGINT');
           destroy = true;
+          done();
         }       
       });
       var timer = node.createTimer(100, () => {

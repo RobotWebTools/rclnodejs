@@ -395,7 +395,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       subscription.stdout.on('data', (data) => {
         if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -422,7 +422,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       subscription.stdout.on('data', (data) => {
         if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -450,7 +450,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       subscription.stdout.on('data', (data) => {
         if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -477,7 +477,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       subscription.stdout.on('data', (data) => {
         if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -504,7 +504,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       subscription.stdout.on('data', (data) => {
         if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -531,7 +531,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       subscription.stdout.on('data', (data) => {
         if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -558,7 +558,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       subscription.stdout.on('data', (data) => {
         if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim().toLowerCase(), expected);
+          assert.ok(new RegExp(expected).test(data.toString().toLowerCase()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -585,7 +585,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       subscription.stdout.on('data', (data) => {
         if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim().toLowerCase(), expected);
+          assert.ok(new RegExp(expected).test(data.toString().toLowerCase()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -611,8 +611,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = '7fffffff';
 
       subscription.stdout.on('data', (data) => {
-        if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim().toLowerCase(), expected);
+        if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString().toLowerCase()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -638,8 +638,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = 'ffffffff';
 
       subscription.stdout.on('data', (data) => {
-        if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim().toLowerCase(), expected);
+        if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString().toLowerCase()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -665,8 +665,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = '1fffffffffffff';
 
       subscription.stdout.on('data', (data) => {
-        if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim().toLowerCase(), expected);
+        if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString().toLowerCase()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -692,8 +692,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = '1fffffffffffff';
 
       subscription.stdout.on('data', (data) => {
-        if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim().toLowerCase(), expected);
+        if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString().toLowerCase()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -719,8 +719,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = '3.14';
 
       subscription.stdout.on('data', (data) => {
-        if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+        if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -746,8 +746,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = '3.1415926';
 
       subscription.stdout.on('data', (data) => {
-        if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+        if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -780,8 +780,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = '(0.5, 127, 255, 255)';
 
       subscription.stdout.on('data', (data) => {
-        if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+        if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -820,8 +820,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = 'ABC';
 
       subscription.stdout.on('data', (data) => {
-        if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+        if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -854,8 +854,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = '(123456,789,main frame)';
 
       subscription.stdout.on('data', (data) => {
-        if (!destroy) {          
-          assert.deepStrictEqual(data.toString().trim(), expected);
+        if (!destroy) {
+          assert.ok(new RegExp(expected).test(data.toString()));
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
@@ -894,7 +894,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const expected = '(123456,789,main frame,[Tom,Jerry,],[1,2,],[2,3,],[4,5,6,])';
       subscription.stdout.on('data', (data) => {
         if (!destroy) {
-          assert.deepStrictEqual(data.toString().trim(), expected);
+          assert.notDeepStrictEqual(data.toString().indexOf(expected), -1);
           timer.cancel();
           node.destroy();
           subscription.kill('SIGINT');
