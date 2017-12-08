@@ -1,5 +1,5 @@
 {
-  "Linux": [],
-  "Darwin": [],
-  "Windows_NT": []
+  "Linux": ["test-cross-lang.js", "test-interactive.js", "test-multi-nodes.js"],
+  "Darwin": ["test-cross-lang.js", "test-interactive.js", "test-multi-nodes.js"],
+  "Windows_NT": ["test-cross-lang.js", "test-interactive.js", "test-multi-nodes.js"]
 }
