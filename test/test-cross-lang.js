@@ -194,7 +194,7 @@ describe('Cross-language interaction', function() {
 
       var pyClient = utils.launchPythonProcess([`${__dirname}/py/client.py`]);
       pyClient.stdout.on('data', function(data) {
-        assert.deepEqual(parseInt(data, 10), 3);
+        assert.ok(new RegExp('3').test(data.toString()));
         if (!destroy) {
           node.destroy();
           destroy = true;
@@ -223,7 +223,7 @@ describe('Cross-language interaction', function() {
                                     'add_two_ints_client');
       var cppClient = childProcess.spawn(cppClientPath, ['-s', 'cpp_js_add_two_ints']);
       cppClient.stdout.on('data', function(data) {
-        assert.deepStrictEqual(data.toString().trim(), 'Result of add_two_ints: 5');
+        assert.ok(new RegExp('Result of add_two_ints: 5').test(data.toString()));
         node.destroy();
         done();
       });

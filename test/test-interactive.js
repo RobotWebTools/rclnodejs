@@ -69,7 +69,7 @@ describe('rclnodejs interactive testing', function() {
       var destroy = false;
       var client = childProcess.fork(`${__dirname}/client_setup.js`, {silent: true});
       client.stdout.on('data', function(data) {
-        assert.deepEqual(parseInt(data, 10), 3);
+        assert.ok(new RegExp('3').test(data.toString()));
         if (!destroy) {
           client.kill('SIGINT');
           node.destroy();
