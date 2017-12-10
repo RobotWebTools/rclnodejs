@@ -194,7 +194,10 @@ class {{=objectWrapper}} {
     if (typeof other === 'object' && other._refObject) {
       this._refObject = new {{=refObjectType}}(other._refObject.toObject());
       {{~ it.spec.fields :field}}
-      {{? field.type.isArray || !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
+      {{? field.type.isArray}}
+      this._wrapperFields.{{=field.name}} = {{=getWrapperNameByType(field.type)}}.createArray();
+      this._wrapperFields.{{=field.name}}.copy(other._wrapperFields.{{=field.name}});
+      {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
       this._wrapperFields.{{=field.name}} =  new {{=getWrapperNameByType(field.type)}}(other._wrapperFields.{{=field.name}});
       {{?}}
       {{~}}
