@@ -14,8 +14,8 @@ dependencies:
     - brew install opencv
     - brew install qt freetype assimp
     - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
-    - nvm install v8.9.1
-    - nvm alias default v8.9.1
+    - nvm install v8.9.2
+    - nvm alias default v8.9.2
     - export CMAKE_PREFIX_PATH=/usr/local/opt/qt:$CMAKE_PREFIX_PATH && export PATH=/usr/local/Cellar/numpy/1.13.1_1/libexec/nose/bin:$PATH && mkdir -p ~/ros2_ws/src && cd ~/ros2_ws && wget https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos && vcs import src < ros2.repos && src/ament/ament_tools/scripts/ament.py build --symlink-install
 
   override:
