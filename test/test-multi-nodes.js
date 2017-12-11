@@ -50,6 +50,7 @@ describe('Multiple nodes interation testing', function() {
 
       cppSubscription.stdout.on('data', (data) => {
         if (!cppReceived) {
+          console.log('data = ' + data);          
           assert.ok(new RegExp('hello world').test(data.toString()));
           cppReceived = true;
           cppSubscription.kill('SIGINT');
@@ -184,7 +185,8 @@ describe('Multiple nodes interation testing', function() {
       var pyClientPath = path.join(__dirname, 'py', 'client.py');
 
       cppClient.stdout.on('data', (data) => {
-        assert.deepStrictEqual(data.toString().trim(), 'Result of add_two_ints: 5');
+        console.log('data = ' + data);        
+        assert.ok(new RegExp('Result of add_two_ints: 5').test(data.toString()));
         var pyClient = utils.launchPythonProcess([pyClientPath, 'pycpp_js_add_two_ints']);
 
         pyClient.stdout.on('data', (data) => {
