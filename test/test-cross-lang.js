@@ -69,7 +69,7 @@ describe('Cross-language interaction', function() {
   });
     
   describe('Node.js publisher', function() {
-    it('Cpp subscription should receive msg from Node.js publisher', (done) => {
+    it('Cpp subscription should receive msg from Node.js publisher', () => {
       var node = rclnodejs.createNode('js_pub_cpp_sub');
       const RclString = 'std_msgs/msg/String';
       var destroy = false;
@@ -83,17 +83,28 @@ describe('Cross-language interaction', function() {
         publisher.publish(msg);
       });
 
-      cppListener.stdout.on('data', (data) => {
-        if (!destroy) {
-          assert.ok(new RegExp(text).test(data.toString()));
-          timer.cancel();
-          node.destroy();
-          cppListener.kill('SIGINT');
-          destroy = true;
-          done();
-        }
+      let promise = new Promise((resolve, reject) => {
+        let received = '';
+        cppListener.stdout.on('data', (data) => {
+          received += data;
+          if (!destroy) {
+            console.log('data = ' + received);
+            if (new RegExp(text).test(received.toString())) {
+              console.log('string was found!');
+              cppListener.kill('SIGINT');
+              timer.cancel();
+              node.destroy();
+              destroy = true;
+              resolve();
+              console.log('resolved!');
+            }
+          }
+        });
       });
+
       rclnodejs.spin(node);
+      console.log('return promise');      
+      return promise;
     });
 
     it('Python subscription should receive msg from Node.js publisher', function(done) {
@@ -223,6 +234,7 @@ describe('Cross-language interaction', function() {
                                     'add_two_ints_client');
       var cppClient = childProcess.spawn(cppClientPath, ['-s', 'cpp_js_add_two_ints']);
       cppClient.stdout.on('data', function(data) {
+        console.log('data = ' + data);        
         assert.ok(new RegExp('Result of add_two_ints: 5').test(data.toString()));
         node.destroy();
         done();
