@@ -696,6 +696,10 @@ NAN_METHOD(InitString) {
     info.GetReturnValue().Set(Nan::Undefined());
 }
 
+inline char* GetBufAddr(v8::Local<v8::Value> buf) {
+  return node::Buffer::Data(buf.As<v8::Object>());
+}
+
 NAN_METHOD(FreeMemeoryAtOffset) {
   v8::Local<v8::Value> buf = info[0];
   if (!node::Buffer::HasInstance(buf)) {
@@ -704,7 +708,7 @@ NAN_METHOD(FreeMemeoryAtOffset) {
 
   int64_t offset =
       info[1]->IsNumber() ? Nan::To<int64_t>(info[1]).FromJust() : 0;
-  char* ptr = node::Buffer::Data(buf.As<v8::Object>()) + offset;
+  auto ptr = GetBufAddr(buf) + offset;
 
   if (ptr == nullptr) {
     return Nan::ThrowError("Cannot read from NULL pointer");
@@ -713,6 +717,30 @@ NAN_METHOD(FreeMemeoryAtOffset) {
   char* val = *reinterpret_cast<char**>(ptr);
   free(val);
   info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_METHOD(CreateArrayBufferFromAddress) {
+  auto address = GetBufAddr(info[0]);
+  int32_t length = Nan::To<int32_t>(info[1]).FromJust();
+
+  auto array_buffer = v8::ArrayBuffer::New(
+      v8::Isolate::GetCurrent(), address, length,
+      v8::ArrayBufferCreationMode::kExternalized);
+
+  info.GetReturnValue().Set(array_buffer);
+}
+
+NAN_METHOD(CreateArrayBufferCleaner) {
+  auto address = GetBufAddr(info[0]);
+  int32_t offset = Nan::To<int32_t>(info[1]).FromJust();
+
+  char* target = *reinterpret_cast<char**>(address + offset);
+  info.GetReturnValue().Set(RclHandle::NewInstance(
+      target,
+      nullptr,
+      [] {
+        return RCL_RET_OK;
+      }));
 }
 
 uint32_t GetBindingMethodsCount(BindingMethod* methods) {
@@ -754,6 +782,8 @@ BindingMethod binding_methods[] = {
     {"getNamespace", GetNamespace},
     {"initString", InitString},
     {"freeMemeoryAtOffset", FreeMemeoryAtOffset},
+    {"createArrayBufferFromAddress", CreateArrayBufferFromAddress},
+    {"createArrayBufferCleaner", CreateArrayBufferCleaner},
     {"", nullptr}};
 
 }  // namespace rclnodejs

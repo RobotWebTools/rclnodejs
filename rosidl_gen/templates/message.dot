@@ -5,12 +5,6 @@
 
 'use strict';
 
-const StructType = require('ref-struct');
-const ref = require('ref');
-const ArrayType = require('ref-array');
-const primitiveTypes = require('../../rosidl_gen/generator_primitive.js');
-const deallocator = require('../../rosidl_gen/deallocator.js');
-
 {{
 let objectWrapper = it.spec.msgName + 'Wrapper';
 let arrayWrapper = it.spec.msgName + 'ArrayWrapper';
@@ -73,30 +67,54 @@ function getPrimitiveNameByType(type) {
 }
 
 function getTypedArrayName(type) {
-  if (type.type === 'int8') {
+  const t = type.type.toLowerCase();
+  if (t === 'int8') {
     return 'Int8Array';
-  } else if (type.type === 'uint8') {
+  } else if (t === 'uint8') {
     return 'Uint8Array';
-  } else if (type.type === 'int16') {
+  } else if (t === 'int16') {
     return 'Int16Array';
-  } else if (type.type === 'uint16') {
+  } else if (t === 'uint16') {
     return 'Uint16Array';
-  } else if (type.type === 'int32') {
+  } else if (t === 'int32') {
     return 'Int32Array';
-  } else if (type.type === 'uint32') {
+  } else if (t === 'uint32') {
     return 'Uint32Array';
-  } else if (type.type === 'int64') {
-    return 'Int64Array';
-  } else if (type.type === 'uint64') {
-    return 'Uint64Array';
-  } else if (type.type === 'float64') {
+  } else if (t === 'float64') {
     return 'Float64Array';
-  } else if (type.type === 'float32') {
+  } else if (t === 'float32') {
     return 'Float32Array';
-  } else if (type.type === 'char') {
+  } else if (t === 'char') {
     return 'Int8Array';
-  } else if (type.type === 'byte') {
+  } else if (t === 'byte') {
     return 'Uint8Array';
+  } else {
+    return '';
+  }
+}
+
+function getTypedArrayElementName(type) {
+  const t = type.type.toLowerCase();
+  if (t === 'int8') {
+    return 'int8';
+  } else if (t === 'uint8') {
+    return 'uint8';
+  } else if (t === 'int16') {
+    return 'int16';
+  } else if (t === 'uint16') {
+    return 'uint16';
+  } else if (t === 'int32') {
+    return 'int32';
+  } else if (t === 'uint32') {
+    return 'uint32';
+  } else if (t === 'float64') {
+    return 'double';
+  } else if (t === 'float32') {
+    return 'float';
+  } else if (t === 'char') {
+    return 'int8';
+  } else if (t === 'byte') {
+    return 'uint8';
   } else {
     return '';
   }
@@ -105,7 +123,7 @@ function getTypedArrayName(type) {
 const primitiveBaseType = ['Bool', 'Int8', 'UInt8', 'Int16', 'UInt16', 'Int32', 'UInt32',
                            'Int64', 'UInt64', 'Float64', 'Float32', 'Char', 'Byte', 'String'];
 const typedArrayType = ['int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32',
-                        'int64', 'uint64', 'float64', 'float32', 'char', 'byte'];
+                        'float64', 'float32', 'char', 'byte'];
 
 let existedModules = [];
 
@@ -118,8 +136,12 @@ function isPrimitivePackage(baseType) {
 }
 
 function isTypedArrayType(type) {
-  return typedArrayType.indexOf(type.type) !== -1;
+  return typedArrayType.indexOf(type.type.toLowerCase()) !== -1;
 }
+
+const usePlainTypedArray = isTypedArrayType(it.spec.baseType);
+const currentTypedArray = getTypedArrayName(it.spec.baseType);
+const currentTypedArrayElementType = getTypedArrayElementName(it.spec.baseType);
 
 function shouldRequire(baseType, fieldType) {
   let requiredModule = '{{=getPackageNameByType(fieldType)}}/{{=getJSFileNameByType(fieldType)}}';
@@ -158,6 +180,15 @@ function getPackageNameByType(type) {
 }
 }}
 
+{{? usePlainTypedArray}}
+const rclnodejs = require('bindings')('rclnodejs');
+{{?}}
+const StructType = require('ref-struct');
+const ref = require('ref');
+const ArrayType = require('ref-array');
+const primitiveTypes = require('../../rosidl_gen/generator_primitive.js');
+const deallocator = require('../../rosidl_gen/deallocator.js');
+
 {{~ it.spec.fields :field}}
 {{? shouldRequire(it.spec.baseType, field.type)}}
 let {{=getWrapperNameByType(field.type)}} = require('../../generated/{{=getPackageNameByType(field.type)}}/{{=getJSFileNameByType(field.type)}}');
@@ -182,7 +213,11 @@ const {{=refObjectType}} = StructType({
 
 const {{=refArrayType}} = ArrayType({{=refObjectType}});
 const {{=refObjectArrayType}} = StructType({
-  data: ArrayType({{=refObjectType}}),
+{{? usePlainTypedArray }}
+  data: ref.refType(ref.types.{{=currentTypedArrayElementType}}),
+{{?? true}}
+  data: {{=refArrayType}},
+{{?}}
   size: ref.types.size_t,
   capacity: ref.types.size_t,
 });
@@ -283,7 +318,11 @@ class {{=objectWrapper}} {
     {{? field.type.isArray}}
     if (refObject.{{=field.name}}.size != 0) {
       {{=getWrapperNameByType(field.type)}}.ArrayType.freeArray(refObject.{{=field.name}});
-      deallocator.freeStructMember(refObject.{{=field.name}}, {{=getWrapperNameByType(field.type)}}.refObjectArrayType, 'data');
+      if ({{=getWrapperNameByType(field.type)}}.ArrayType.useTypedArray) {
+        deallocator.delayFreeStructMember(refObject.{{=field.name}}, {{=getWrapperNameByType(field.type)}}.refObjectArrayType, 'data');
+      } else {
+        deallocator.freeStructMember(refObject.{{=field.name}}, {{=getWrapperNameByType(field.type)}}.refObjectArrayType, 'data');
+      }
     }
     {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
     {{=getWrapperNameByType(field.type)}}.freeStruct(refObject.{{=field.name}});
@@ -312,12 +351,7 @@ class {{=objectWrapper}} {
   {{~ it.spec.fields :field}}
   get {{=field.name}}() {
     {{? field.type.isArray && isTypedArrayType(field.type)}}
-    const src = this._wrapperFields['{{=field.name}}'].data;
-    let values = new {{=getTypedArrayName(field.type)}}(src.length);
-    for (let i = 0; i < src.length; ++i) {
-      values[i] = src[i].data;
-    }
-    return values;
+    return this._wrapperFields['{{=field.name}}'].data;
     {{?? field.type.isArray && field.type.isPrimitiveType}}
     let values = [];
     this._wrapperFields['{{=field.name}}'].data.forEach((wrapper, index) => {
@@ -394,30 +428,49 @@ class {{=arrayWrapper}} {
   }
 
   fill(values) {
+    {{? usePlainTypedArray }}
+    if (Array.isArray(values)) {
+      // Convert JavaScript array
+      this._wrappers = new {{=currentTypedArray}}(values);
+    } else {
+      this._wrappers = values;
+    }
+    {{?? isPrimitivePackage(it.spec.baseType) }}
+    // Now only for string/bool array
     const length = values.length;
     this._resize(length);
-    {{? isPrimitivePackage(it.spec.baseType)}}
-    // Use for loop to make it also work for TypedArray
     for (let i = 0; i < length; ++i) {
       let wrapper = new {{=objectWrapper}}();
       wrapper.data = values[i];
       this._wrappers[i] = wrapper;
     }
-    {{?? !isPrimitivePackage(it.spec.baseType)}}
+    {{?? true}}
+    const length = values.length;
+    this._resize(length);
     values.forEach((value, index) => {
       this._wrappers[index].copy(value);
     });
     {{?}}
   }
 
+  // Put all data currently stored in `this._wrappers` into `this._refObject`
   freeze(own) {
+    {{? usePlainTypedArray }}
+    // When it's a TypedArray: no need to copy to `this._refArray`
+    {{?? true}}
     this._wrappers.forEach((wrapper, index) => {
       wrapper.freeze(own);
       this._refArray[index] = wrapper.refObject;
     });
+    {{?}}
     this._refObject.size = this._wrappers.length;
     this._refObject.capacity = this._wrappers.length;
+    {{? usePlainTypedArray }}
+    const buffer = Buffer.from(new Uint8Array(this._wrappers.buffer));
+    this._refObject.data = buffer;
+    {{?? true}}
     this._refObject.data = this._refArray.buffer;
+    {{?}}
   }
 
   get refObject() {
@@ -460,19 +513,35 @@ class {{=arrayWrapper}} {
       throw new RangeError('Invalid argument: should provide a positive number');
       return;
     }
+    {{? usePlainTypedArray }}
+    this._refArray = undefined;
+    {{?? true }}
     this._refArray = new {{=refArrayType}}(size);
+    {{?}}
     this._refObject = new {{=refObjectArrayType}}();
     this._refObject.size = size;
     this._refObject.capacity = size;
 
+    {{? usePlainTypedArray }}
+    this._wrappers = new {{=currentTypedArray}}(size);
+    {{?? true }}
     this._wrappers = new Array();
     for (let i = 0; i < size; i++) {
       this._wrappers.push(new {{=objectWrapper}}());
     }
+    {{?}}
   }
 
+  // Copy all data from `this._refObject` into `this._wrappers`
   copyRefObject(refObject) {
     this._refObject = refObject;
+
+    {{? usePlainTypedArray }}
+    const byteLen = refObject.size * ref.types.{{=currentTypedArrayElementType}}.size;
+    // An ArrayBuffer object that doesn't hold the ownership of the address
+    const arrayBuffer = rclnodejs.createArrayBufferFromAddress(refObject.data, byteLen);
+    this._wrappers = new {{=currentTypedArray}}(arrayBuffer);
+    {{?? true }}
     let refObjectArray = this._refObject.data;
     refObjectArray.length = this._refObject.size;
     this._resize(this._refObject.size);
@@ -480,6 +549,7 @@ class {{=arrayWrapper}} {
     for (let index = 0; index < this._refObject.size; index++) {
       this._wrappers[index].copyRefObject(refObjectArray[index]);
     }
+    {{?}}
   }
 
   copy(other) {
@@ -488,18 +558,26 @@ class {{=arrayWrapper}} {
     }
 
     this._resize(other.size);
+    {{? usePlainTypedArray }}
+    this._wrappers = other._wrappers.slice();
+    {{?? true }}
     // Array deep copy
     other._wrappers.forEach((wrapper, index) => {
       this._wrappers[index].copy(wrapper);
     });
+    {{?}}
   }
 
   static freeArray(refObject) {
+    {{? usePlainTypedArray }}
+    // For TypedArray: .data will be 'free()'-ed in parent struct
+    {{?? true }}
     let refObjectArray = refObject.data;
     refObjectArray.length = refObject.size;
     for (let index = 0; index < refObject.size; index++) {
       {{=objectWrapper}}.freeStruct(refObjectArray[index]);
     }
+    {{?}}
   }
 
   static get elementType() {
@@ -508,6 +586,14 @@ class {{=arrayWrapper}} {
 
   get isROSArray() {
     return true;
+  }
+
+  static get isROSArray() {
+    return true;
+  }
+
+  static get useTypedArray() {
+    return {{=usePlainTypedArray}};
   }
 
   get classType() {

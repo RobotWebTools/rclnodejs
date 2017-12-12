@@ -220,11 +220,7 @@ describe('ROSIDL Node.js message generator test suite', function() {
     let Int32 = rclnodejs.require('std_msgs').msg.Int32;
     let array = new Int32.ArrayType(5);
 
-    assert(array.data[0] instanceof Int32);  // Ensures element type is good
-    assert(array.data[1] instanceof Int32);  // Ensures element type is good
-    assert(array.data[2] instanceof Int32);  // Ensures element type is good
-    assert(array.data[3] instanceof Int32);  // Ensures element type is good
-    assert(array.data[4] instanceof Int32);  // Ensures element type is good
+    assert(array.data instanceof Int32Array);
     assert(typeof array.data[5] === 'undefined');  // No such index
     assert.equal(array.size, 5);
     assert.equal(array.capacity, 5);
@@ -232,15 +228,15 @@ describe('ROSIDL Node.js message generator test suite', function() {
     // Assignment of message.data
     const int32Data = [153, 26, 777, 666, 999];
     for (let i = 0; i < int32Data.length; ++ i) {
-      array.data[i].data = int32Data[i];
-      assert.equal(array.data[i].data, int32Data[i]);  // Verifying
+      array.data[i] = int32Data[i];
+      assert.equal(array.data[i], int32Data[i]);  // Verifying
     }
 
     // Array deep copy
     let array2 = new Int32.ArrayType();
     array2.copy(array);
     for (let i = 0; i < int32Data.length; ++ i) {
-      assert.equal(array2.data[i].data, int32Data[i]);
+      assert.equal(array2.data[i], int32Data[i]);
     }
 
     // Change array2
@@ -250,7 +246,7 @@ describe('ROSIDL Node.js message generator test suite', function() {
 
     // Values in array1 are NOT changed
     for (let i = 0; i < array.length; ++ i) {
-      assert.equal(array.data[i].data, int32Data[i]);  // Verifying
+      assert.equal(array.data[i], int32Data[i]);  // Verifying
     }
 
     // Resize
