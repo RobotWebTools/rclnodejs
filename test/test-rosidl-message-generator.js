@@ -36,9 +36,8 @@ describe('ROSIDL Node.js message generator test suite', function() {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
         pkgs.forEach((pkg) => {
           pkg.messages.forEach((info) => {
-            if (info.subFolder === 'msg') {
-              assert(rclnodejs.require(info.pkgName).msg[info.interfaceName]);
-            }
+            const s = info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
+            assert(rclnodejs.require(s));
           });
         });
       });

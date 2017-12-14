@@ -25,6 +25,7 @@ const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
 const validator = require('./lib/validator.js');
+const translator = require('./lib/message_translator.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -217,7 +218,7 @@ let rcl = {
     return rclnodejs.expandTopicName(topicName, nodeName, nodeNamespace);
   },
 
-  createMessageObject(type) {
+  createMessage(type) {
     let typeClass = loader.loadInterface(type);
 
     if (typeClass) {
@@ -225,6 +226,16 @@ let rcl = {
     }
 
     return undefined;
+  },
+
+  /**
+   * Create a plain JavaScript by specified type identifier
+   * @param {string|Object} type -- the type identifier, acceptable formats could be 'std_msgs/std/String'
+   *                                or {package: 'std_msgs', type: 'msg', name: 'String'}
+   * @return {Object|undefined} A plain JavaScript of that type
+   */
+  createMessageObject(type) {
+    return translator.toPlainObject(this.createMessage(type));
   },
 };
 
