@@ -15,7 +15,6 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-const {QoS} = rclnodejs;
 
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('subscription_example_node');
