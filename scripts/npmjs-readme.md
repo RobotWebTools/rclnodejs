@@ -1,4 +1,4 @@
-`rclnodejs` is a Node.js client for Robot Operating System (ROS) v2.0. It provides extremely simple & easy API for ROS 2.0 programming, the following examples shows how to create a ROS 2.0 node and then publish a string message in only 6 lines of code.
+`rclnodejs` is a Node.js client for Robot Operating System (ROS) v2.0. It provides extremely simple & easy API for ROS 2.0 programming, the following example shows how to create a ROS 2.0 node and then publish a string message in only 6 lines of code.
 
 ``` JavaScript
 const rclnodejs = require('rclnodejs');
