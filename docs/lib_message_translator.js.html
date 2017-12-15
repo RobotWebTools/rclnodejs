@@ -46,6 +46,10 @@
 
 const debug = require('debug')('rclnodejs:message_translator');
 
+function isTypedArray(value) {
+  return ArrayBuffer.isView(value) &amp;&amp; !(value instanceof DataView);
+}
+
 function copyMsgObject(msg, obj) {
   if (typeof obj === 'object') {
     for (let i in obj) {
@@ -54,17 +58,16 @@ function copyMsgObject(msg, obj) {
         if (type === 'string' || type === 'number' || type === 'boolean') {
           // A primitive-type value
           msg[i] = obj[i];
-        } else if (Array.isArray(obj[i])) {  // TODO(Kenny): deal with TypedArray
+        } else if (Array.isArray(obj[i]) || isTypedArray(obj[i])) {
           // It's an array
           if (typeof obj[i][0] === 'object') {
             // It's an array of objects: converting to ROS message objects
 
             // 1. Extract the element-type first
-            const t = new MessageTranslator(msg[i].classType.elementType);
             // 2. Build the array by translate every elements
             let msgArray = [];
             obj[i].forEach((o) => {
-              msgArray.push(t.toROSMessage(o));
+              msgArray.push(toROSMessage(msg[i].classType.elementType, o));
             });
             // 3. Assign
             msg[i].fill(msgArray);
@@ -74,7 +77,7 @@ function copyMsgObject(msg, obj) {
           }
         } else {
           // Proceed further of this object
-          copyMsgObject(msg[i], obj[i]);  // TODO(Kenny): deal with TypedArray
+          copyMsgObject(msg[i], obj[i]);
         }
       } else {
         // Extra fields in obj (but not in msg)
@@ -141,81 +144,55 @@ function verifyMessageStruct(MessageType, obj) {
   return verifyMessage(msg, obj);
 }
 
-class MessageTranslator {
-  constructor(typeClass) {
-    this._typeClass = typeClass;
-  }
+function toPlainObject(message) {
+  if (!message) return undefined;
 
-  static toPlainObject(message) {
-    if (!message) return undefined;
+  // TODO(Kenny): make sure `message` is a ROS message
 
-    // TODO(Kenny): make sure `message` is a ROS message
-    // TODO(Kenny): deal with primitive-type array (convert to TypedArray)
-
-    if (message.isROSArray) {
-      // It's a ROS message array
-      //  Note: there won't be any JavaScript array in message
-      let array = [];
-      message.data.forEach((e) => {
-        array.push(MessageTranslator.toPlainObject(e));  // Translate every elements
-      });
-      return array;
-      // eslint-disable-next-line no-else-return
-    } else {
-      // It's a ROS message
-      const def = message.classType.ROSMessageDef;
-      let obj = {};
-      for (let i in def.fields) {
-        const name = def.fields[i].name;
-        if (def.fields[i].type.isPrimitiveType) {
-          // Direct assignment
-          obj[name] = message[name];
-        } else {
-          // Proceed further
-          obj[name] = MessageTranslator.toPlainObject(message[name]);
-        }
+  if (message.isROSArray) {
+    // It's a ROS message array
+    //  Note: there won't be any JavaScript array in message
+    let array = [];
+    message.data.forEach((e) => {
+      array.push(toPlainObject(e));  // Translate every elements
+    });
+    return array;
+    // eslint-disable-next-line no-else-return
+  } else {
+    // It's a ROS message
+    const def = message.classType.ROSMessageDef;
+    let obj = {};
+    for (let i in def.fields) {
+      const name = def.fields[i].name;
+      if (def.fields[i].type.isPrimitiveType) {
+        // Direct assignment
+        //  Note: TypedArray also falls into this branch
+        // TODO(Kenny): make sure Int64 &amp; Uint64 type can be copied here
+        obj[name] = message[name];
+      } else {
+        // Proceed further
+        obj[name] = toPlainObject(message[name]);
       }
-      return obj;
     }
+    return obj;
   }
+}
 
-  toROSMessage(obj) {
-    let msg = new this._typeClass();
-    const type = typeof obj;
-    if (type === 'string' || type === 'number' || type === 'boolean') {
-      msg.data = obj;
-    } else if (type === 'object') {
-      copyMsgObject(msg, obj);
-    }
-    return msg;
+function toROSMessage(TypeClass, obj) {
+  let msg = new TypeClass();
+  const type = typeof obj;
+  if (type === 'string' || type === 'number' || type === 'boolean') {
+    msg.data = obj;
+  } else if (type === 'object') {
+    copyMsgObject(msg, obj);
   }
-
-  toROSRequest(obj) {
-    let msg = new this._typeClass.Request();
-    const type = typeof obj;
-    if (type === 'string' || type === 'number' || type === 'boolean') {
-      msg.data = obj;
-    } else if (type === 'object') {
-      copyMsgObject(msg, obj);
-    }
-    return msg;
-  }
-
-  toROSResponse(obj) {
-    let msg = new this._typeClass.Response();
-    const type = typeof obj;
-    if (type === 'string' || type === 'number' || type === 'boolean') {
-      msg.data = obj;
-    } else if (type === 'object') {
-      copyMsgObject(msg, obj);
-    }
-    return msg;
-  }
+  return msg;
 }
 
 module.exports = {
   verifyMessageStruct: verifyMessageStruct,
-  MessageTranslator: MessageTranslator
+  toROSMessage: toROSMessage,
+  toPlainObject: toPlainObject
 };
 </code></pre>
         </article>
@@ -233,7 +210,7 @@ module.exports = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.2</a> on Thu Nov 30 2017 08:36:54 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.2</a> on Thu Dec 14 2017 14:35:39 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>
