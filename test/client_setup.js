@@ -19,13 +19,15 @@ const rclnodejs = require('../index.js');
 rclnodejs.init().then(function() {
   var node = rclnodejs.createNode('client');
   const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+  const Int8 = 'std_msgs/msg/Int8';
   var client = node.createClient(AddTwoInts, 'add_two_ints');
   const request = {
     a: 1,
     b: 2,
   };
-  client.sendRequest(request, function(response) {
-    process.stdout.write(response.sum.toString());
+  var publisher = node.createPublisher(Int8, 'back_add_two_ints');
+  client.sendRequest(request, (response) => {
+    publisher.publish(response.sum);
   });
   rclnodejs.spin(node);
 

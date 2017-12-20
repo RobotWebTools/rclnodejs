@@ -15,10 +15,9 @@
 
 import sys
 import rclpy
-from time import sleep
 from std_msgs.msg import String
+from std_msgs.msg import Int8
 from example_interfaces.srv import AddTwoInts
-import signal
 
 node = None
 
@@ -27,16 +26,8 @@ def cleanup():
   node.destroy_node()
   rclpy.shutdown()
 
-def handler(signum, frame):
-  cleanup()
-  sys.exit(0)
-
-def callback(response):
-  print(response.sum)
-
 def main():
   global node
-  signal.signal(signal.SIGINT, handler)
 
   service = 'py_js_add_two_ints'
   if len(sys.argv) > 1:
@@ -45,15 +36,21 @@ def main():
   rclpy.init()
   node = rclpy.create_node('add_client')
   client = node.create_client(AddTwoInts, service)
+  publisher = node.create_publisher(Int8, 'back_' + service)
   request = AddTwoInts.Request()
   request.a = 1
   request.b = 2
 
+  msg = Int8()
   client.call(request)
-  client.wait_for_future()
-  print(client.response.sum)
+  while rclpy.ok():
+    rclpy.spin_once(node)
+    if client.response is not None:
+      msg.data = client.response.sum
+      publisher.publish(msg)
 
   cleanup()
+
 
 if __name__ == '__main__':
   main()
