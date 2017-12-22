@@ -340,8 +340,12 @@ class {{=objectWrapper}} {
     return {pkgName: '{{=it.messageInfo.pkgName}}', subFolder: '{{=it.messageInfo.subFolder}}', interfaceName: '{{=it.messageInfo.interfaceName}}'};
   }
 
-  isPrimitive() {
+  static isPrimitive() {
     return {{=isPrimitivePackage(it.spec.baseType)}};
+  }
+
+  static get isROSArray() {
+    return false;
   }
 
   get refObject() {
@@ -408,7 +412,7 @@ class {{=objectWrapper}} {
     {{~}}
   }
 
-  get classType() {
+  static get classType() {
     return {{=objectWrapper}};
   }
 
@@ -582,10 +586,6 @@ class {{=arrayWrapper}} {
 
   static get elementType() {
     return {{=objectWrapper}};
-  }
-
-  get isROSArray() {
-    return true;
   }
 
   static get isROSArray() {
