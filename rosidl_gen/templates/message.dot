@@ -226,12 +226,20 @@ const {{=refObjectArrayType}} = StructType({
 class {{=objectWrapper}} {
   constructor(other) {
     this._wrapperFields = {};
+    {{~ it.spec.fields :field}}
+    {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
+    this._{{=field.name}}Array = [];
+    {{?}}
+    {{~}}
     if (typeof other === 'object' && other._refObject) {
       this._refObject = new {{=refObjectType}}(other._refObject.toObject());
       {{~ it.spec.fields :field}}
       {{? field.type.isArray}}
       this._wrapperFields.{{=field.name}} = {{=getWrapperNameByType(field.type)}}.createArray();
       this._wrapperFields.{{=field.name}}.copy(other._wrapperFields.{{=field.name}});
+      {{? field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
+      this.{{=field.name}} = other.{{=field.name}};
+      {{?}}
       {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
       this._wrapperFields.{{=field.name}} =  new {{=getWrapperNameByType(field.type)}}(other._wrapperFields.{{=field.name}});
       {{?}}
@@ -248,6 +256,7 @@ class {{=objectWrapper}} {
       {{?}}
       {{~}}
     }
+
     this.freeze();
   }
 
@@ -280,7 +289,11 @@ class {{=objectWrapper}} {
 
   freeze(own = false) {
     {{~ it.spec.fields :field}}
-    {{? !field.type.isPrimitiveType || field.type.isArray}}
+    {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
+    this._wrapperFields.{{=field.name}}.fill(this._{{=field.name}}Array);
+    this._wrapperFields.{{=field.name}}.freeze(own);
+    this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+    {{?? !field.type.isPrimitiveType || field.type.isArray}}
     this._wrapperFields.{{=field.name}}.freeze(own);
     this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
     {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
@@ -303,7 +316,12 @@ class {{=objectWrapper}} {
 
   deserialize(refObject) {
     {{~ it.spec.fields :field}}
-    {{? !field.type.isPrimitiveType || field.type.isArray}}
+    {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
+    refObject.{{=field.name}}.data.length = refObject.{{=field.name}}.size;
+    for (let index = 0; index < refObject.{{=field.name}}.size; index++) {
+      this._{{=field.name}}Array[index] = refObject.{{=field.name}}.data[index].data;
+    }
+    {{?? !field.type.isPrimitiveType || field.type.isArray}}
     this._wrapperFields.{{=field.name}}.copyRefObject(refObject.{{=field.name}});
     {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
     this._wrapperFields.{{=field.name}}.data = refObject.{{=field.name}}.data;
@@ -357,11 +375,7 @@ class {{=objectWrapper}} {
     {{? field.type.isArray && isTypedArrayType(field.type)}}
     return this._wrapperFields['{{=field.name}}'].data;
     {{?? field.type.isArray && field.type.isPrimitiveType}}
-    let values = [];
-    this._wrapperFields['{{=field.name}}'].data.forEach((wrapper, index) => {
-      values.push(wrapper.data);
-    });
-    return values;
+    return this._{{=field.name}}Array;
     {{?? field.type.isArray && !field.type.isPrimitiveType}}
     return this._wrapperFields.{{=field.name}};
     {{?? !field.type.isPrimitiveType && !field.type.isArray}}
@@ -374,8 +388,10 @@ class {{=objectWrapper}} {
   }
 
   set {{=field.name}}(value) {
-    {{? field.type.isArray && field.type.isPrimitiveType}}
+    {{? field.type.isArray && isTypedArrayType(field.type)}}
     this._wrapperFields['{{=field.name}}'].fill(value);
+    {{?? field.type.isArray && field.type.isPrimitiveType}}
+    this._{{=field.name}}Array = value;
     {{?? field.type.isArray && !field.type.isPrimitiveType}}
     this._wrapperFields.{{=field.name}}.copy(value);
     {{?? !field.type.isPrimitiveType && !field.type.isArray}}
@@ -396,7 +412,12 @@ class {{=objectWrapper}} {
     this._refObject = new {{=refObjectType}}(refObject.toObject());
 
     {{~ it.spec.fields :field}}
-    {{? !field.type.isPrimitiveType || field.type.isArray || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
+    {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
+    refObject.{{=field.name}}.data.length = refObject.{{=field.name}}.size;
+    for (let index = 0; index < refObject.{{=field.name}}.size; index++) {
+      this._{{=field.name}}Array[index] = refObject.{{=field.name}}.data[index].data;
+    }
+    {{?? !field.type.isPrimitiveType || field.type.isArray || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
     this._wrapperFields.{{=field.name}}.copyRefObject(this._refObject.{{=field.name}});
     {{?}}
     {{~}}
@@ -406,7 +427,9 @@ class {{=objectWrapper}} {
     this._refObject = new {{=refObjectType}}(other._refObject.toObject());
 
     {{~ it.spec.fields :field}}
-    {{? !field.type.isPrimitiveType || field.type.isArray || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
+    {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
+    this._{{=field.name}}Array = other._{{=field.name}}Array.slice();
+    {{?? !field.type.isPrimitiveType || field.type.isArray || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
     this._wrapperFields.{{=field.name}}.copy(other._wrapperFields.{{=field.name}});
     {{?}}
     {{~}}
