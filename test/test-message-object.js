@@ -61,14 +61,14 @@ describe('Rclnodejs createMessage() testing', function() {
     assert.equal(typeof s.data, 'string');
     assert.equal(s.data, 'this is fun');
 
-    const t = s.classType.type();
+    const t = s.constructor.classType.type();
     assert(t.pkgName === 'std_msgs');
     assert(t.subFolder === 'msg');
     assert(t.interfaceName === 'String');
 
     const classType = rclnodejs.require('std_msgs/msg/String');
     assert(s instanceof classType);
-    assert(s.classType === classType);
+    assert(s.constructor.classType === classType);
   });
 
   it('create by object', function() {
@@ -84,14 +84,14 @@ describe('Rclnodejs createMessage() testing', function() {
     assert.equal(typeof s.data, 'string');
     assert.equal(s.data, 'this is fun');
 
-    const t = s.classType.type();
+    const t = s.constructor.classType.type();
     assert(t.pkgName === 'std_msgs');
     assert(t.subFolder === 'msg');
     assert(t.interfaceName === 'String');
 
     const classType = rclnodejs.require('std_msgs/msg/String');
     assert(s instanceof classType);
-    assert(s.classType === classType);
+    assert(s.constructor.classType === classType);
   });
 
   [
