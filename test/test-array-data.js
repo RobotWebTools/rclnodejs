@@ -192,13 +192,13 @@ describe('rclnodejs message communication', function() {
       values: [
         {
           header: {stamp: {sec: 11223, nanosec: 44556}, frame_id: 'f001', },
-          height: 240, width: 320, fields: [{}], is_bigendian: false, point_step: 16, row_step: 320*16,
+          height: 240, width: 320, fields: [], is_bigendian: false, point_step: 16, row_step: 320*16,
           data: uint8Data,
           is_dense: false,
         },
         {
           header: {stamp: {sec: 11223, nanosec: 44556}, frame_id: 'f001', },
-          height: 240, width: 320, fields: [{}], is_bigendian: false, point_step: 16, row_step: 320*16,
+          height: 240, width: 320, fields: [], is_bigendian: false, point_step: 16, row_step: 320*16,
           data: Uint8Array.from(uint8Data),
           is_dense: false,
         },

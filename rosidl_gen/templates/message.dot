@@ -393,7 +393,7 @@ class {{=objectWrapper}} {
     {{?? field.type.isArray && field.type.isPrimitiveType}}
     this._{{=field.name}}Array = value;
     {{?? field.type.isArray && !field.type.isPrimitiveType}}
-    this._wrapperFields.{{=field.name}}.copy(value);
+    this._wrapperFields.{{=field.name}}.fill(value);
     {{?? !field.type.isPrimitiveType && !field.type.isArray}}
     this._wrapperFields.{{=field.name}}.copy(value);
     {{?? !field.type.isArray && field.type.type === 'string' && it.spec.msgName !== 'String'}}
@@ -580,7 +580,7 @@ class {{=arrayWrapper}} {
   }
 
   copy(other) {
-    if (! other instanceof {{=arrayWrapper}}) {
+    if (! (other instanceof {{=arrayWrapper}})) {
       throw new TypeError('Invalid argument: should provide "{{=arrayWrapper}}".');
     }
 
