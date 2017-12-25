@@ -72,8 +72,7 @@ describe('rclnodejs message communication', function() {
     {
       pkg: 'std_msgs', type: 'Int64MultiArray',
       values: [
-        // Waiting for https://github.com/RobotWebTools/rclnodejs/issues/232 to enable this case
-        // {layout: layout, data: [-111, 1, 2, 3, 8, 6, 0, -25, Number.MAX_SAFE_INTEGER] }, // Provide data via Array
+        {layout: layout, data: [-111, 1, 2, 3, 8, 6, 0, -25, Number.MAX_SAFE_INTEGER] }, // Provide data via Array
       ]
     },
     {
@@ -107,8 +106,7 @@ describe('rclnodejs message communication', function() {
     {
       pkg: 'std_msgs', type: 'UInt64MultiArray',
       values: [
-        // Waiting for https://github.com/RobotWebTools/rclnodejs/issues/232 to enable this case
-        // {layout: layout, data: [0, 1, 2, 3, 8, 6, 0, 255, Number.MAX_SAFE_INTEGER] }, // Provide data via Array
+        {layout: layout, data: [0, 1, 2, 3, 8, 6, 0, 255, Number.MAX_SAFE_INTEGER] }, // Provide data via Array
       ]
     },
     {
@@ -146,6 +144,7 @@ describe('rclnodejs message communication', function() {
           assert(msg.layout.dim.data[0].label === v.layout.dim[0].label);
           assert(msg.layout.dim.data[0].size === v.layout.dim[0].size);
           assert(msg.layout.dim.data[0].stride === v.layout.dim[0].stride);
+
           // Second element
           assert(typeof msg.layout.dim.data[1] === 'object');
           assert(msg.layout.dim.data[1].label === v.layout.dim[1].label);
