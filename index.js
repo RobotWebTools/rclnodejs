@@ -246,3 +246,4 @@ process.on('SIGINT', () => {
 });
 
 module.exports = rcl;
+module.exports.rosClockGetNow = rclnodejs.rosClockGetNow;
