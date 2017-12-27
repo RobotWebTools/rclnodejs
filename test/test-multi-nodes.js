@@ -163,18 +163,16 @@ describe('Multiple nodes interation testing', function() {
 
       var pyReceived = false, cppReceived = false;
       var cppSubscription = node.createSubscription(Int8, 'back_pycpp_js_add_two_ints', (backMsg) => {
-        if (backMsg.data === 5) {
+        if (backMsg.data === 5)
           cppReceived = true;
-          cppClient.kill('SIGINT');
-        }
 
-        if (backMsg.data === 3) {
+        if (backMsg.data === 3)
           pyReceived = true;
-          pyClient.kill('SIGINT');
-        }
 
         if (cppReceived && pyReceived) {
           node.destroy();
+          cppClient.kill('SIGINT');
+          pyClient.kill('SIGINT');
           done();
         }
       });

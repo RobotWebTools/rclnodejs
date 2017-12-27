@@ -90,14 +90,19 @@ int main(int argc, char ** argv)
   publisher = node->create_publisher<std_msgs::msg::Int8>(
     std::string("back_") + topic, custom_qos_profile);
 
-  auto result = send_request(node, client, request);
-  if (result) {
-    // printf("Result of add_two_ints: %zd\n", result->sum);
-    msg->data = result->sum;
+
+  auto future_result = client->async_send_request(request);
+
+  // Wait for the result.
+  if (rclcpp::spin_until_future_complete(node, future_result) ==
+    rclcpp::executor::FutureReturnCode::SUCCESS)
+  {
+    // printf("Result of add_two_ints: %zd\n", future_result.get()->sum);
+    msg->data = future_result.get()->sum;
     publisher->publish(msg);
   } else {
-    printf("add_two_ints_client was interrupted. Exiting.\n");
-  }
+    printf("add_two_ints_client_async was interrupted. Exiting.\n");
+  }  
 
   rclcpp::shutdown();
   return 0;
