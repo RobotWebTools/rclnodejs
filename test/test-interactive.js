@@ -54,29 +54,27 @@ describe('rclnodejs interactive testing', function() {
   describe('Client/Service', function() {
     it('Client/Service', function(done) {
       var node = rclnodejs.createNode('client_service');
-      var AddTwoInts = 'example_interfaces/srv/AddTwoInts';
-      var service = node.createService(AddTwoInts, 'add_two_ints', function(request, response) {
+      const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+      const Int8 = 'std_msgs/msg/Int8';
+      var service = node.createService(AddTwoInts, 'add_two_ints', (request, response) => {
         assert.ok('a' in request);
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.ok('b' in request);
         assert.deepStrictEqual(typeof request.b, 'number');
         let result = response.template;
         result.sum = request.a + request.b;
-        return result;
+        response.send(result);
+      });
+      var subscription = node.createSubscription(Int8, 'back_add_two_ints', (backMsg) => {
+        assert.deepStrictEqual(backMsg.data, 3);
+
+        node.destroy();
+        pyClient.kill('SIGINT');
+        done();
       });
       rclnodejs.spin(node);
 
-      var destroy = false;
-      var client = childProcess.fork(`${__dirname}/client_setup.js`, {silent: true});
-      client.stdout.on('data', function(data) {
-        assert.ok(new RegExp('3').test(data.toString()));
-        if (!destroy) {
-          client.kill('SIGINT');
-          node.destroy();
-          destroy = true;
-          done();
-        }
-      });
+      var pyClient = childProcess.fork(`${__dirname}/client_setup.js`, {silent: true});
     });
   });
 });

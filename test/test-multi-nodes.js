@@ -37,44 +37,28 @@ describe('Multiple nodes interation testing', function() {
       const RclString = 'std_msgs/msg/String';
 
       var cppReceived = false, pyReceived = false;
-      var cppSubPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'listener');
+      var cppSubPath = path.join(__dirname, 'cpp', 'listener');
       var cppSubscription = childProcess.spawn(cppSubPath, ['-t', 'js_pycpp_chatter']);
       var pySubPath = path.join(__dirname, 'py', 'listener.py');
       var pySubscription = utils.launchPythonProcess([pySubPath, 'js_pycpp_chatter']);
 
       const msg = 'hello world';
-      var jsPublisher = node.createPublisher(RclString, 'js_pycpp_chatter');
-      var timer = node.createTimer(100, () => {
-        jsPublisher.publish(msg);
-      });
+      var count = 0;
+      var jsSubscription1 = node.createSubscription(RclString, 'back_js_pycpp_chatter', (backMsg) => {
+        count++;
+        assert.deepStrictEqual(backMsg.data, msg);
 
-      cppSubscription.stdout.on('data', (data) => {
-        if (!cppReceived) {
-          assert.ok(new RegExp('hello world').test(data.toString()));
-          cppReceived = true;
+        if (count === 2) {
+          node.destroy();
           cppSubscription.kill('SIGINT');
-
-          if (pyReceived) {
-            timer.cancel();
-            node.destroy();
-            done();
-          }
-        }
-      });
-
-      pySubscription.stdout.on('data', (data) => {
-        if (!pyReceived) {
-          assert.ok(new RegExp('hello world').test(data.toString()));
-          pyReceived = true;
           pySubscription.kill('SIGINT');
-
-          if (cppReceived) {
-            timer.cancel();
-            node.destroy();
-            done();
-          }
+          done();
         }
       });
+      var jsPublisher = node.createPublisher(RclString, 'js_pycpp_chatter');
+      setTimeout(() => {
+        jsPublisher.publish(msg);
+      }, 500);
       rclnodejs.spin(node);
     });
 
@@ -168,30 +152,36 @@ describe('Multiple nodes interation testing', function() {
     it('Node.js service - Cpp client and Python client', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_service');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+      const Int8 = 'std_msgs/msg/Int8';
       var service = node.createService(AddTwoInts, 'pycpp_js_add_two_ints', (request, response) => {
         assert.deepStrictEqual(typeof request.a, 'number');
         assert.deepStrictEqual(typeof request.b, 'number');
         let result = response.template;
         result.sum = request.a + request.b;
-        return result;
+        response.send(result);
+      });
+
+      var pyReceived = false, cppReceived = false;
+      var cppSubscription = node.createSubscription(Int8, 'back_pycpp_js_add_two_ints', (backMsg) => {
+        if (backMsg.data === 5)
+          cppReceived = true;
+
+        if (backMsg.data === 3)
+          pyReceived = true;
+
+        if (cppReceived && pyReceived) {
+          node.destroy();
+          cppClient.kill('SIGINT');
+          pyClient.kill('SIGINT');
+          done();
+        }
       });
       rclnodejs.spin(node);
-      var cppClientPath = path.join(process.env['AMENT_PREFIX_PATH'],
-                                    'lib',
-                                    'demo_nodes_cpp',
-                                    'add_two_ints_client');
-      var cppClient = childProcess.spawn(cppClientPath, ['-s', 'pycpp_js_add_two_ints']);
+
       var pyClientPath = path.join(__dirname, 'py', 'client.py');
-
-      cppClient.stdout.on('data', (data) => {
-        assert.deepStrictEqual(data.toString().trim(), 'Result of add_two_ints: 5');
-        var pyClient = utils.launchPythonProcess([pyClientPath, 'pycpp_js_add_two_ints']);
-
-        pyClient.stdout.on('data', (data) => {
-          assert.deepStrictEqual(data.toString().trim(), '3');
-          done();
-        });
-      });
+      var pyClient = utils.launchPythonProcess([pyClientPath, 'pycpp_js_add_two_ints']);
+      var cppClientPath = path.join(__dirname, 'cpp', 'add_two_ints_client');
+      var cppClient = childProcess.spawn(cppClientPath, ['-s', 'pycpp_js_add_two_ints']);
     });
   });
 });

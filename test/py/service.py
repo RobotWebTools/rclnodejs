@@ -18,7 +18,6 @@ import rclpy
 from time import sleep
 from std_msgs.msg import String
 from example_interfaces.srv import AddTwoInts
-import signal
 
 node = None
 
@@ -27,17 +26,12 @@ def cleanup():
   node.destroy_node()
   rclpy.shutdown()
 
-def handler(signum, frame):
-  cleanup()
-  sys.exit(0)
-
 def callback(request, response):
   response.sum = request.a + request.b
   return response
 
 def main():
   global node
-  signal.signal(signal.SIGINT, handler)
 
   service = 'js_py_add_two_ints'
   if len(sys.argv) > 1:

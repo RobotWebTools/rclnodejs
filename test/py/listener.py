@@ -15,34 +15,31 @@
 
 import sys
 import rclpy
-from time import sleep
 from std_msgs.msg import String
-import signal
 
 node = None
+publisher = None
 
 def cleanup():
   global node
   node.destroy_node()
   rclpy.shutdown()
 
-def handler(signum, frame):
-  cleanup()
-  sys.exit(0)
-
 def callback(msg):
-  sys.stdout.write(msg.data)
-  sys.stdout.flush()
+  global publisher
+  publisher.publish(msg)
 
 def main():
   global node
-  signal.signal(signal.SIGINT, handler)
+  global publisher
 
   topic = 'js_py_chatter'
   if len(sys.argv) > 1:
     topic = sys.argv[1]
+
   rclpy.init()
   node = rclpy.create_node('py_listener')
+  publisher = node.create_publisher(String, 'back_' + topic)
   subscription = node.create_subscription(String, topic, callback)
   while rclpy.ok():
     rclpy.spin_once(node)
