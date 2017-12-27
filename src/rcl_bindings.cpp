@@ -154,6 +154,37 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
     std::to_string(RCL_NS_TO_MS(elapsed_time))).ToLocalChecked());
 }
 
+NAN_METHOD(ROSClockGetNow) {
+  rcl_clock_t ros_clock;
+  rcl_time_point_t rcl_time;
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+
+  rcl_ret_t ret = rcl_ros_clock_init(&ros_clock, &allocator);
+
+  if (ret == RCL_RET_OK) {
+    ret = rcl_clock_get_now(&ros_clock, &rcl_time);
+  }
+
+  if (ret == RCL_RET_OK) {
+    ret = rcl_clock_fini(&ros_clock);
+  }
+
+  if (ret == RCL_RET_OK) {
+    auto obj = v8::Object::New(v8::Isolate::GetCurrent());
+    const auto sec = static_cast<std::int32_t>(
+        RCL_NS_TO_S(rcl_time.nanoseconds));
+    const auto nanosec = static_cast<std::uint32_t>(
+        rcl_time.nanoseconds % (1000 * 1000 * 1000));
+    obj->Set(Nan::New("sec").ToLocalChecked(), Nan::New(sec));
+    obj->Set(Nan::New("nanosec").ToLocalChecked(), Nan::New(nanosec));
+
+    info.GetReturnValue().Set(obj);
+    return;
+  }
+
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
 NAN_METHOD(RclTake) {
   RclHandle* subscription_handle =
       RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
@@ -762,6 +793,7 @@ BindingMethod binding_methods[] = {
     {"resetTimer", ResetTimer},
     {"timerGetTimeSinceLastCall", TimerGetTimeSinceLastCall},
     {"timerGetTimeUntilNextCall", TimerGetTimeUntilNextCall},
+    {"rosClockGetNow", ROSClockGetNow},
     {"rclTake", RclTake},
     {"createSubscription", CreateSubscription},
     {"createPublisher", CreatePublisher},
