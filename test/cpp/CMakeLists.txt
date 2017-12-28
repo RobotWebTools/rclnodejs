@@ -31,5 +31,3 @@ endfunction()
 
 custom_executable(publisher_msg)
 custom_executable(subscription_msg)
-custom_executable(listener)
-custom_executable(add_two_ints_client)

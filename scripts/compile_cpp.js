@@ -19,40 +19,22 @@ const os = require('os');
 const path = require('path');
 const child = require('child_process');
 
-// var platform = os.platform();
+var platform = os.platform();
 var rootDir = path.dirname(__dirname);
 var testCppDir = path.join(rootDir, 'test', 'cpp');
 
-function getExecutable(input) {
-  if (os.platform() === 'win32')
-    return input + '.exe';
+var publisher = (platform === 'win32') ? 'publisher_msg.exe' : 'publisher_msg';
+var subscription = (platform === 'win32') ? 'subscription_msg.exe' : 'subscription_msg';
 
-  return input;
-}
-
-var publisher = getExecutable('publisher_msg');
-var subscription = getExecutable('subscription_msg');
-var listener = getExecutable('listener');
-var client = getExecutable('add_two_ints_client');
-
-function getExecutablePath(input) {
-  var releaseDir = '';
-  if (os.platform() === 'win32')
-    releaseDir = 'Release';
-
-  return path.join(rootDir, 'build', 'cpp_nodes', releaseDir, input);
-}
-
-var publisherPath = getExecutablePath(publisher);
-var subscriptionPath = getExecutablePath(subscription);
-var listenerPath = getExecutablePath(listener);
-var clientPath = getExecutablePath(client);
-
+var publisherPath = path.join(rootDir, 'build', 'cpp_nodes',
+  (platform === 'win32') ? 'Release' : '', publisher);
+var subscriptionPath = path.join(rootDir, 'build', 'cpp_nodes',
+  (platform === 'win32') ? 'Release' : '', subscription);
 
 function copyFile(platform, srcFile, destFile) {
   // eslint-disable-next-line
   if (!fs.existsSync(destFile)) {
-    if (os.platform() === 'win32') {
+    if (platform === 'win32') {
       child.spawn('cmd.exe', ['/c', `copy ${srcFile} ${destFile}`]);
     } else {
       child.spawn('sh', ['-c', `cp ${srcFile} ${destFile}`]);
@@ -62,18 +44,16 @@ function copyFile(platform, srcFile, destFile) {
 
 function copyAll(fileList, dest) {
   fileList.forEach((file) => {
-    copyFile(os.platform(), file, path.join(dest, path.basename(file)));
+    copyFile(platform, file, path.join(dest, path.basename(file)));
   });
 }
 
 // eslint-disable-next-line
-if (!fs.existsSync(publisherPath) && !fs.existsSync(subscriptionPath) &&
-  // eslint-disable-next-line
-  !fs.existsSync(listenerPath) && !fs.existsSync(clientPath)) {
+if (!fs.existsSync(publisherPath) && !fs.existsSync(subscriptionPath)) {
   var compileProcess = child.spawn('ament', ['build', testCppDir, '--skip-install']);
   compileProcess.on('close', (code) => {
-    copyAll([publisherPath, subscriptionPath, listenerPath, clientPath], testCppDir);
+    copyAll([publisherPath, subscriptionPath], testCppDir);
   });
 } else {
-  copyAll([publisherPath, subscriptionPath, , listenerPath, clientPath], testCppDir);
+  copyAll([publisherPath, subscriptionPath], testCppDir);
 }
