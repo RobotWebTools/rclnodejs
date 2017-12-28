@@ -305,3 +305,46 @@ describe('rcl node methods testing', function() {
     });
   });
 });
+
+describe('topic & serviceName getter/setter', function() {
+  const RclString = 'std_msgs/msg/String';
+  const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+
+  this.timeout(60 * 1000);
+
+  before(function() {
+    return rclnodejs.init();
+  });
+
+  after(function() {
+    rclnodejs.shutdown();
+  });
+
+  it('publisher: topic property getter', function() {
+    var node = rclnodejs.createNode('publisher', '/topic_getter');
+    var publisher = node.createPublisher(RclString, 'chatter');
+    assert.deepStrictEqual(publisher.topic, 'chatter');
+    node.destroy();
+  });
+
+  it('subscription: topic property getter', function() {
+    var node = rclnodejs.createNode('subscription', '/topic_getter');
+    var subscription = node.createSubscription(RclString, 'chatter', (msg) => {});
+    assert.deepStrictEqual(subscription.topic, 'chatter');
+    node.destroy();
+  });
+
+  it('client: serviceName property getter', function() {
+    var node = rclnodejs.createNode('client', '/servicename_getter');
+    var client = node.createClient(AddTwoInts, 'add_two_ints', (req, res) => {});
+    assert.deepStrictEqual(client.serviceName, 'add_two_ints');
+    node.destroy();
+  });
+
+  it('service: topic property getter', function() {
+    var node = rclnodejs.createNode('service', '/servicename_getter');
+    var service = node.createService(AddTwoInts, 'add_two_ints', (req) => {});
+    assert.deepStrictEqual(service.serviceName, 'add_two_ints');
+    node.destroy();
+  });  
+});
