@@ -22,6 +22,18 @@ const assertThrowsError = assertUtils.assertThrowsError;
 
 describe('rclnodejs module existance testing', function() {
   describe('rclnodejs module members', function() {
+    it('QoS member should exist', function() {
+      assertMember('QoS', rclnodejs, rclnodejs.QoS, 'function');
+    });
+
+    it('validator member should exist', function() {
+      assertMember('validator', rclnodejs, rclnodejs.validator, 'object');
+    });
+
+    it('createMessageObject method should exist', function() {
+      assertMember('createMessageObject', rclnodejs, rclnodejs.createMessageObject, 'function');
+    });
+
     it('createNode method should exist', function() {
       assertMember('createNode', rclnodejs, rclnodejs.createNode, 'function');
     });
@@ -142,29 +154,65 @@ describe('rclnodejs class existance testing', function() {
 
     it('destroyTimer method should exist', function() {
       assertMember('destroyTimer', node, node.destroyTimer, 'function');
-    });    
+    });
+
+    it('name method should exist', function() {
+      assertMember('name', node, node.name, 'function');
+    });
+
+    it('namespace method should exist', function() {
+      assertMember('namespace', node, node.namespace, 'function');
+    });        
   });
 
-  describe('Publisher class', function() {
-    var node, RclString, publisher;
+  describe('Publisher & Subscription class', function() {
+    var node, RclString, publisher, subscription;
 
     before(function() {
       node = rclnodejs.createNode('Publisher');
       RclString = 'std_msgs/msg/String';
       publisher = node.createPublisher(RclString, 'chatter');
+      subscription = node.createSubscription(RclString, 'chatter', () => {});
     });
 
     after(function() {
       node.destroy();
     });
 
-    it('topic property should exist', function() {
+    it('topic property of a publisher should exist', function() {
       assertMember('topic', publisher, publisher.topic, 'string');
     });
 
-    it('publish method should exist', function() {
+    it('publish method of a publisher should exist', function() {
       assertMember('publish', publisher, publisher.publish, 'function');
     });
+
+    it('topic member of a subscription should exist', function() {
+      assertMember('topic', subscription, subscription.topic, 'string');
+    });    
+  });
+
+  describe('Client & Service class', function() {
+    var node, AddTwoInts, client, service;
+
+    before(function() {
+      node = rclnodejs.createNode('Client');
+      AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+      client = node.createClient(AddTwoInts, 'add_two_ints', (req, res) => {});
+      service = node.createService(AddTwoInts, 'add_two_ints', (req) => {});
+    });
+
+    after(function() {
+      node.destroy();
+    });
+
+    it('serviceName member of a client should exist', function() {
+      assertMember('serviceName', client, client.serviceName, 'string');
+    });
+
+    it('serviceName member of a service should exist', function() {
+      assertMember('serviceName', service, service.serviceName, 'string');
+    });    
   });
 
   describe('Timer class', function() {
@@ -200,7 +248,7 @@ describe('rclnodejs class existance testing', function() {
     it('reset method should exist', function() {
       assertMember('reset', timer, timer.reset, 'function');
     });
-    
+
     it('timeSinceLastCall method should exist', function() {
       assertMember('timeSinceLastCall', timer, timer.timeSinceLastCall, 'function');
     });    
