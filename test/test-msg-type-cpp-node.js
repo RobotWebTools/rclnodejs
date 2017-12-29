@@ -23,13 +23,13 @@ const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 
 describe('Rclnodejs - Cpp message type testing', function() {
-  var cppPublisherPath = path.join(__dirname, 'cpp', 'publisher_msg');
   var cppSubscriptionPath = path.join(__dirname, 'cpp', 'subscription_msg');
-  var cppSubscription = childProcess.spawn(cppSubscriptionPath);
+  var cppSubscription;
 
   this.timeout(60 * 1000);
 
   before(function() {
+    cppSubscription = childProcess.spawn(cppSubscriptionPath);
     return rclnodejs.init();
   });
 
