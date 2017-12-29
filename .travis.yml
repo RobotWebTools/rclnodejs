@@ -6,7 +6,7 @@ sudo: required
 branches:
   only:
   - develop
-  - master
+  - fix-issue-222
 
 before_install:
   - sudo docker pull ubuntu:xenial
