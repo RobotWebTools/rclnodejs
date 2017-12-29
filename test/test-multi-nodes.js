@@ -179,9 +179,12 @@ describe('Multiple nodes interation testing', function() {
       rclnodejs.spin(node);
 
       var pyClientPath = path.join(__dirname, 'py', 'client.py');
-      var pyClient = utils.launchPythonProcess([pyClientPath, 'pycpp_js_add_two_ints']);
       var cppClientPath = path.join(__dirname, 'cpp', 'add_two_ints_client');
-      var cppClient = childProcess.spawn(cppClientPath, ['-s', 'pycpp_js_add_two_ints']);
+      var pyClient, cppClient;
+      setTimeout(() => {
+        pyClient = utils.launchPythonProcess([pyClientPath, 'pycpp_js_add_two_ints']);
+        cppClient = childProcess.spawn(cppClientPath, ['-s', 'pycpp_js_add_two_ints']);
+      }, 500);
     });
   });
 });

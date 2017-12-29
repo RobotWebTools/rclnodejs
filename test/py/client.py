@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import sys
+import time
 import rclpy
 from std_msgs.msg import String
 from std_msgs.msg import Int8
@@ -42,12 +43,14 @@ def main():
   request.b = 2
 
   msg = Int8()
-  client.call(request)
   while rclpy.ok():
+    client.call(request)
     rclpy.spin_once(node)
     if client.response is not None:
       msg.data = client.response.sum
       publisher.publish(msg)
+
+    time.sleep(0.1)
 
   cleanup()
 
