@@ -19,7 +19,6 @@ const os = require('os');
 const path = require('path');
 const child = require('child_process');
 
-// var platform = os.platform();
 var rootDir = path.dirname(__dirname);
 var testCppDir = path.join(rootDir, 'test', 'cpp');
 
