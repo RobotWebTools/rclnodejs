@@ -14,11 +14,11 @@
 # limitations under the License.
 
 import sys
-import signal
+import rclpy
 from time import sleep
 from std_msgs.msg import String
 
-import rclpy
+
 
 node = None
 
@@ -27,13 +27,8 @@ def cleanup():
   node.destroy_node()
   rclpy.shutdown()
 
-def handler(signum, frame):
-  cleanup()
-  sys.exit(0)
-
 def main():
   global node
-  signal.signal(signal.SIGINT, handler)
 
   topic = 'py_js_chatter'
   if len(sys.argv) > 1:
