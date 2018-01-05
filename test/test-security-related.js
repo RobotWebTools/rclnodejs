@@ -17,6 +17,8 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertThrowsError = require('./utils.js').assertThrowsError;
+const translator = require('../lib/message_translator.js');
+const arrayGen = require('./array_generator.js');
 
 describe('Destroying non-existent objects testing', function() {
   this.timeout(60 * 1000);
@@ -207,5 +209,62 @@ describe('Fuzzing API calls testing', function() {
     });
 
     node.destroy();
+  });
+
+  it('Race condition 1', function(done) {
+    var node = rclnodejs.createNode('node4', '/race1');
+    const RclString = 'std_msgs/msg/String';
+
+    var publisher = node.createPublisher(RclString, 'race_channel');
+    var subscription = node.createSubscription(RclString, 'race_channel', (msg) => {
+      node.destroy();
+      done();
+    });
+
+    publisher.publish('hello world!');
+    rclnodejs.spin(node);
+  });
+
+  it('Race condition 2', function(done) {
+    var node = rclnodejs.createNode('node5', '/race2');
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+
+    var client = node.createClient(AddTwoInts, 'race_service');
+    var service = node.createService(AddTwoInts, 'race_service', (req, res) => {
+      node.destroy();
+      done();
+    });
+
+    let request = { a: 1, b: 2};
+    client.sendRequest(request, (response) => {
+      throw new Error('never reached');
+    });
+    rclnodejs.spin(node);
+  });
+
+  it('Performace with big array data', function(done) {
+    var node = rclnodejs.createNode('performance');
+    const Image = 'sensor_msgs/msg/Image';
+
+    const dataLength = 320 * 240 * 4 * 4;
+    let uint8Data = new Array(dataLength);
+    for (let i = 0; i < dataLength; i++) {
+      uint8Data[i] = i % 255;
+    }
+    /* eslint-disable camelcase */
+    const value = {
+      header: {stamp: {sec: 11223, nanosec: 44556}, frame_id: 'f001', },
+      height: 240, width: 320, encoding: 'rgba', is_bigendian: false, step: 320*16, is_dense: false,
+      data: Uint8Array.from(uint8Data),
+    };
+
+    var publisher = node.createPublisher(Image, 'performance');
+    var subscription = node.createSubscription(Image, 'performance', (message) => {
+      assert.deepStrictEqual(message.data.length, dataLength);
+      node.destroy();
+      done();
+    });
+    publisher.publish(value);
+    rclnodejs.spin(node);
   });
 });
