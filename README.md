@@ -28,6 +28,8 @@ Alternatively, you can download the latest binary package of ROS2 from [here](ht
 * [Windows](https://github.com/ros2/ros2/wiki/Windows-Install-Binary)
 
 ### Install `Node.js`
+**Notice:**
+`rclnodejs` use some new feature of ECMAScript 6, we recommend using the latest LTS Node.js. The lowest LTS Node.js we used to verify the unit tests is `6.10.0`. Your Node.js version should not be lower than this verion.
 
 The `Node.js` version we selected is the latest LTS [`Carbon`](https://nodejs.org/download/release/latest-carbon/) (8.x). You can install it:
 
