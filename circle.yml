@@ -5,7 +5,6 @@ machine:
 dependencies:
   pre:
     - brew update
-    - brew tap homebrew/science
     - brew tap ros/deps
     - brew install python3 cmake wget cppcheck tinyxml eigen pcre
     - brew install asio tinyxml2
