@@ -32,9 +32,11 @@ describe('Node destroy testing', function() {
   });
 
   it('rclnodejs.init() & rclnodejs.shutdown()', function(done) {
+    assert.deepStrictEqual(rclnodejs.isShutdown(), true);
     rclnodejs.init().then(function() {
+      assert.deepStrictEqual(rclnodejs.isShutdown(), false);
       rclnodejs.shutdown();
-      assert.ok(true);
+      assert.deepStrictEqual(rclnodejs.isShutdown(), true);
       done();
     }).catch(function(err) {
       assert.ok(false);

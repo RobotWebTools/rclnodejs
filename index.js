@@ -160,6 +160,13 @@ let rcl = {
     this._nodes = [];
     this._initialized = false;
   },
+  /**
+   * Return status that whether the module is shut down.
+   * @return {boolean} Return true if the module is shut down, otherwise return false.
+   */
+  isShutdown() {
+    return !this._initialized;
+  },
 
   /**
    * Get the interface package, which is used by publisher/subscription or client/service.
