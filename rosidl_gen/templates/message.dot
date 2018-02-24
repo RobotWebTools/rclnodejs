@@ -178,6 +178,14 @@ function getPackageNameByType(type) {
     return type.pkgName;
   }
 }
+
+function extractMemberNames(fields) {
+  let memberNames = [];
+  fields.forEach(field => {
+    memberNames.push(field.name);
+  });
+  return JSON.stringify(memberNames);
+}
 }}
 
 {{? usePlainTypedArray}}
@@ -231,9 +239,13 @@ class {{=objectWrapper}} {
     this._{{=field.name}}Array = [];
     {{?}}
     {{~}}
+
     if (typeof other === 'object' && other._refObject) {
       this._refObject = new {{=refObjectType}}(other._refObject.toObject());
       {{~ it.spec.fields :field}}
+      {{? field.type.isPrimitiveType && !field.type.isArray}}
+      this._{{=field.name}}Intialized = true;
+      {{?}}
       {{? field.type.isArray}}
       this._wrapperFields.{{=field.name}} = {{=getWrapperNameByType(field.type)}}.createArray();
       this._wrapperFields.{{=field.name}}.copy(other._wrapperFields.{{=field.name}});
@@ -247,6 +259,9 @@ class {{=objectWrapper}} {
     } else {
       this._refObject = new {{=refObjectType}}();
       {{~ it.spec.fields :field}}
+      {{? field.type.isPrimitiveType && !field.type.isArray}}
+      this._{{=field.name}}Intialized = false;
+      {{?}}
       {{? field.type.isArray}}
       this._wrapperFields.{{=field.name}} = {{=getWrapperNameByType(field.type)}}.createArray();
       {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
@@ -287,14 +302,23 @@ class {{=objectWrapper}} {
     return this._refObject.ref();
   }
 
-  freeze(own = false) {
+  freeze(own = false, checkConsistency = false) {
+    if (checkConsistency) {
+    {{~ it.spec.fields :field}}
+    {{? field.type.isPrimitiveType && !field.type.isArray}}
+      if (!this._{{=field.name}}Intialized) {
+        throw new TypeError('Invalid argument: {{=field.name}} in {{=it.spec.msgName}}');
+      }
+    {{?}}
+    {{~}}
+    }
     {{~ it.spec.fields :field}}
     {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
     this._wrapperFields.{{=field.name}}.fill(this._{{=field.name}}Array);
-    this._wrapperFields.{{=field.name}}.freeze(own);
+    this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
     this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
     {{?? !field.type.isPrimitiveType || field.type.isArray}}
-    this._wrapperFields.{{=field.name}}.freeze(own);
+    this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
     this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
     {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
     if (own) {
@@ -310,12 +334,15 @@ class {{=objectWrapper}} {
   }
 
   serialize() {
-    this.freeze();
+    this.freeze(false, true);
     return this._refObject.ref();
   }
 
   deserialize(refObject) {
     {{~ it.spec.fields :field}}
+    {{? field.type.isPrimitiveType && !field.type.isArray}}
+    this._{{=field.name}}Intialized = true;
+    {{?}}
     {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
     refObject.{{=field.name}}.data.length = refObject.{{=field.name}}.size;
     for (let index = 0; index < refObject.{{=field.name}}.size; index++) {
@@ -381,13 +408,23 @@ class {{=objectWrapper}} {
     {{?? !field.type.isPrimitiveType && !field.type.isArray}}
     return this._wrapperFields.{{=field.name}};
     {{?? !field.type.isArray && field.type.type === 'string' && it.spec.msgName !== 'String'}}
+    if (!this._{{=field.name}}Intialized) {
+      return undefined;
+    }
     return this._wrapperFields.{{=field.name}}.data;
     {{?? true}}
+    if (!this._{{=field.name}}Intialized) {
+      return undefined;
+    }
     return this._refObject.{{=field.name}};
     {{?}}
   }
 
   set {{=field.name}}(value) {
+    {{? field.type.isPrimitiveType && !field.type.isArray}}
+    this._{{=field.name}}Intialized = true;
+    {{?}}
+
     {{? field.type.isArray && isTypedArrayType(field.type)}}
     this._wrapperFields['{{=field.name}}'].fill(value);
     {{?? field.type.isArray && field.type.isPrimitiveType}}
@@ -412,6 +449,9 @@ class {{=objectWrapper}} {
     this._refObject = new {{=refObjectType}}(refObject.toObject());
 
     {{~ it.spec.fields :field}}
+    {{? field.type.isPrimitiveType && !field.type.isArray}}
+    this._{{=field.name}}Intialized = true;
+    {{?}}
     {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
     refObject.{{=field.name}}.data.length = refObject.{{=field.name}}.size;
     for (let index = 0; index < refObject.{{=field.name}}.size; index++) {
@@ -427,6 +467,9 @@ class {{=objectWrapper}} {
     this._refObject = new {{=refObjectType}}(other._refObject.toObject());
 
     {{~ it.spec.fields :field}}
+    {{? field.type.isPrimitiveType && !field.type.isArray}}
+    this._{{=field.name}}Intialized = true;
+    {{?}}
     {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
     this._{{=field.name}}Array = other._{{=field.name}}Array.slice();
     {{?? !field.type.isPrimitiveType || field.type.isArray || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
@@ -441,6 +484,11 @@ class {{=objectWrapper}} {
 
   static get ROSMessageDef() {
     return {{=compactMsgDefJSON}};
+  }
+
+  hasMember(name) {
+    let memberNames = {{=extractMemberNames(it.spec.fields)}};
+    return memberNames.indexOf(name) !== -1;
   }
 }
 

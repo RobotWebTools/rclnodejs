@@ -34,10 +34,10 @@ describe('Compound types', function() {
     let msg = new msgColorRGBA();
 
     assert.ok('r' in msg && 'g' in msg && 'b' in msg && 'a' in msg);
-    assert.deepStrictEqual(typeof msg.r, 'number');
-    assert.deepStrictEqual(typeof msg.g, 'number');
-    assert.deepStrictEqual(typeof msg.b, 'number');
-    assert.deepStrictEqual(typeof msg.a, 'number');
+    assert.deepStrictEqual(typeof msg.r, 'undefined');
+    assert.deepStrictEqual(typeof msg.g, 'undefined');
+    assert.deepStrictEqual(typeof msg.b, 'undefined');
+    assert.deepStrictEqual(typeof msg.a, 'undefined');
   });
 
   it('Array', function() {
@@ -60,7 +60,7 @@ describe('Compound types', function() {
     assert.ok('frame_id' in header);
 
     assert.deepStrictEqual(typeof header.stamp, 'object');
-    assert.deepStrictEqual(typeof header.frame_id, 'string');
+    assert.deepStrictEqual(typeof header.frame_id, 'undefined');
   });
 
   it('Complex object', function() {
