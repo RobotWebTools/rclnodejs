@@ -59,8 +59,8 @@ describe('Compound types', function() {
     assert.ok('stamp' in header);
     assert.ok('frame_id' in header);
 
-    assert.ok(typeof header.stamp, 'string');
-    assert.ok(typeof header.frame_id, 'string');
+    assert.deepStrictEqual(typeof header.stamp, 'object');
+    assert.deepStrictEqual(typeof header.frame_id, 'string');
   });
 
   it('Complex object', function() {
