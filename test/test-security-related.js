@@ -163,26 +163,30 @@ describe('Fuzzing API calls testing', function() {
     const RclString = 'std_msgs/msg/String';
 
     var publisher = node.createPublisher(RclString, 'chatter7');
-    // assertThrowsError(() => {
-    //   publisher.publish({a: 1});
-    // }, TypeError, 'Illegal', `Illegal data for ${RclString}`);
+    assertThrowsError(() => {
+      publisher.publish({a: 1});
+    }, TypeError, 'Invalid argument', `Type should be ${RclString}`);
 
     rclnodejs.spin(node);
     node.destroy();
   });
 
-  it('Inconsistent request data for service', function(done) {
+  it('Inconsistent request data for service', function() {
     var node = rclnodejs.createNode('node2', '/inconsistent');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
     var client = node.createClient(AddTwoInts, 'add_two_ints');
     var service = node.createService(AddTwoInts, 'add_two_ints', (request, response) => {
-      // assert.deepStrictEqual(request.b, undefined);
-      node.destroy();
-      done();
+      assert.throws(() => {
+        request.b;
+      }, Error, 'This should never be reached.');
     });
-    client.sendRequest({a: 1}, (response) => {});
+
+    assertThrowsError(() => {
+      client.sendRequest({a: 1}, (response) => {});
+    }, TypeError, 'Invalid argument', 'request.b does not exist');
     rclnodejs.spin(node);
+    node.destroy();
   });
 
   it('resources will be freed by shutdown', function() {
