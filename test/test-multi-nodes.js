@@ -58,7 +58,7 @@ describe('Multiple nodes interation testing', function() {
       var jsPublisher = node.createPublisher(RclString, 'js_pycpp_chatter');
       setTimeout(() => {
         jsPublisher.publish(msg);
-      }, 500);
+      }, 1000);
       rclnodejs.spin(node);
     });
 
@@ -184,7 +184,7 @@ describe('Multiple nodes interation testing', function() {
       setTimeout(() => {
         pyClient = utils.launchPythonProcess([pyClientPath, 'pycpp_js_add_two_ints']);
         cppClient = childProcess.spawn(cppClientPath, ['-s', 'pycpp_js_add_two_ints']);
-      }, 500);
+      }, 1000);
     });
   });
 });
