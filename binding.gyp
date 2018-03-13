@@ -10,9 +10,6 @@
   'targets': [
     {
       'target_name': 'rclnodejs',
-      'variables': {
-        'ROS2_INSTALL_PATH': '<!(echo $AMENT_PREFIX_PATH)',
-      },
       'sources': [
         './src/addon.cpp',
         './src/executor.cpp',
@@ -51,14 +48,14 @@
             'defines': [
               'OS_LINUX'
             ],
-            'include_dirs': [
-              "<(ROS2_INSTALL_PATH)/include/",
-            ],
             'cflags_cc': [
               '-std=c++14'
             ],
-            'libraries': [
-              '-L<(ROS2_INSTALL_PATH)/lib'
+            'include_dirs': [
+              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/, '/include/ ') + '/include/')\")",
+            ],
+            'library_dirs': [
+              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/, '/lib/ ') + '/lib/')\")",
             ],
           }
         ],
@@ -68,15 +65,12 @@
             'defines': [
               'OS_WINDOWS'
             ],
-            'variables': {
-              "ROS2_INSTALL_PATH_WINDOWS": "<!(echo %AMENT_PREFIX_PATH%)",
-            },
             'cflags_cc': [
               '-std=c++14'
             ],
             'include_dirs': [
               './src/third_party/dlfcn-win32/',
-              '<(ROS2_INSTALL_PATH_WINDOWS)/include/',
+              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/, '\\\include ').replace(/\\\/g, '/') + '/include')\")",
             ],
             'sources': [
               './src/third_party/dlfcn-win32/dlfcn.c',
@@ -87,7 +81,7 @@
               },
               'VCLinkerTool': {
                 'AdditionalDependencies': ['psapi.lib'],
-                'AdditionalLibraryDirectories': ['<(ROS2_INSTALL_PATH_WINDOWS)/lib/'],
+                'AdditionalLibraryDirectories': ["<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/, '\\\lib ').replace(/\\\/g, '/') + '/lib')\")",],
               }
             }
           }
@@ -99,10 +93,10 @@
               'OS_MACOS'
             ],
             'include_dirs': [
-              "<(ROS2_INSTALL_PATH)/include/",
+              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/, '/include/ ') + '/include/')\")",
             ],
-            'libraries': [
-              '-L<(ROS2_INSTALL_PATH)/lib'
+            'library_dirs': [
+                "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/, '/lib/ ') + '/lib/')\")",
             ],
             'xcode_settings': {
               'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
