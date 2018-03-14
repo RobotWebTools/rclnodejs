@@ -90,26 +90,40 @@ function generateStructForPkg(pkg) {
   });
 }
 
+function generateInPath(path) {
+  return new Promise((resolve, reject) => {
+    let promises = [];
+    packages.findPackagesInDirectory(path).then((pkgs) => {
+      pkgs.forEach((pkg) => {
+        promises.push(generateStructForPkg(pkg));
+      });
+
+      Promise.all(promises).then(() => {
+        resolve();
+      }).catch((e) => {
+        reject(e);
+      });
+    }).catch((e) => {
+      reject(e);
+    });
+  });
+}
+
 function generateAll(forcedGenerating) {
   return new Promise((resolve, reject) => {
     if (forcedGenerating || !generator.isRootGererated()) {
       fse.copy(path.join(__dirname, 'generator.json'), path.join(generatedRoot, 'generator.json'), err => {
         if (err) reject(err);
-        installedPackagesRoot.forEach((packageRoot) => {
-          let promises = [];
-          packages.findPackagesInDirectory(packageRoot).then((pkgs) => {
-            pkgs.forEach((pkg) => {
-              promises.push(generateStructForPkg(pkg));
-            });
 
-            Promise.all(promises).then(() => {
-              resolve();
-            }).catch((e) => {
-              reject(e);
-            });
-          }).catch((e) => {
-            reject(e);
-          });
+        let promises = [];
+        installedPackagesRoot.forEach((packageRoot) => {
+          promises.push(generateInPath(packageRoot));
+        });
+
+        Promise.all(promises).then(() => {
+          resolve();
+        }).catch((e) => {
+          reject(e);
         });
       });
     } else {
