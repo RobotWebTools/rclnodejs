@@ -31,8 +31,8 @@ before_build:
   - setx AMENT_PYTHON_EXECUTABLE "c:\Python36"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
-  - pip install -U setuptools pip
-  - pip install EmPy pyparsing pyyaml
+  - python -m pip install -U setuptools pip
+  - python -m pip install EmPy pyparsing pyyaml
 
 build_script:
   - cd  c:\proj\rclnodejs
