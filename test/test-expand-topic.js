@@ -67,3 +67,66 @@ describe('rclnodejs expand topic API testing', function() {
     }, Error, 'topic name is invalid', 'invalid topic name');
   });
 });
+
+describe('rclnodejs topic string type coverage testing', function() {
+  this.timeout(60 * 1000);
+
+  before(function() {
+    return rclnodejs.init();
+  });
+
+  after(function() {
+    rclnodejs.shutdown();
+  });
+
+  let testData = [
+    {
+      title: ' name cannot be empty',
+      nodeName: 'empty_',
+      topicName: '', serviceName: '',
+      matchMsg: 'topic name is invalid', msg: ' name should not be empty!'
+    },
+    {
+      title: ' name cannot contain single quote',
+      nodeName: 'single_quote_',
+      topicName: "'single_quote_topic'", serviceName: "'single_quote_service'",
+      matchMsg: 'topic name is invalid', msg: ' name should not be empty!'
+    },
+    {
+      title: ' name cannot contain double quotes',
+      nodeName: 'double_quotes_',
+      topicName: '"double_quotes_topic"', serviceName: '"double_quotes_service"',
+      matchMsg: 'topic name is invalid', msg: ' name should not contain double quotes!'
+    },
+    {
+      title: ' name cannot be unicode',
+      nodeName: 'unicode_',
+      topicName: '\u8bdd\u9898', serviceName: '\u8bdd\u9898',
+      matchMsg: 'topic name is invalid', msg: ' name cannot support unicode!'
+    }
+  ];
+
+  testData.forEach((data, index) => {
+    it('topic' + data.title, function() {
+      var node = rclnodejs.createNode(data.nodeName + 'topic_node');
+
+      utils.assertThrowsError(() => {
+        var publisher = node.createPublisher('std_msgs/msg/String', data.topicName);
+      }, Error, data.matchMsg, 'topic' + data.msg);
+      utils.assertThrowsError(() => {
+        var publisher = node.createSubscription('std_msgs/msg/String', data.topicName, (msg) =>{});
+      }, Error, data.matchMsg, 'topic' + data.msg);
+    });
+
+    it('service' + data.title, function() {
+      var node = rclnodejs.createNode(data.nodeName + 'service_node');
+
+      utils.assertThrowsError(() => {
+        var service = node.createService('example_interfaces/srv/AddTwoInts', data.serviceName, (res, req) => {});
+      }, Error, data.matchMsg, 'service' + data.msg);
+      utils.assertThrowsError(() => {
+        var client = node.createClient('example_interfaces/srv/AddTwoInts', data.serviceName);
+      }, Error, data.matchMsg, 'service' + data.msg);
+    });
+  });
+});
