@@ -59,9 +59,8 @@ NAN_METHOD(CreateNode) {
       rcl_node_init(node, node_name.c_str(), name_space.c_str(), &options),
       rcl_get_error_string_safe());
 
-  auto handle = RclHandle::NewInstance(node, nullptr, [node] {
-      return rcl_node_fini(node);
-  });
+  auto handle = RclHandle::NewInstance(node, nullptr,
+                                       [node] { return rcl_node_fini(node); });
   info.GetReturnValue().Set(handle);
 }
 
@@ -70,14 +69,13 @@ NAN_METHOD(CreateTimer) {
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_timer_init(timer, RCL_MS_TO_NS(period_ms), nullptr,
-          rcl_get_default_allocator()), rcl_get_error_string_safe());
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_timer_init(timer, RCL_MS_TO_NS(period_ms),
+                                          nullptr, rcl_get_default_allocator()),
+                           rcl_get_error_string_safe());
 
-  auto js_obj = RclHandle::NewInstance(timer, nullptr, [timer] {
-      return rcl_timer_fini(timer);
-  });
+  auto js_obj = RclHandle::NewInstance(
+      timer, nullptr, [timer] { return rcl_timer_fini(timer); });
   info.GetReturnValue().Set(js_obj);
 }
 
@@ -137,8 +135,9 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
       RCL_RET_OK, rcl_timer_get_time_until_next_call(timer, &remaining_time),
       rcl_get_error_string_safe());
 
-  info.GetReturnValue().Set(Nan::New<v8::String>(
-      std::to_string(RCL_NS_TO_MS(remaining_time))).ToLocalChecked());
+  info.GetReturnValue().Set(
+      Nan::New<v8::String>(std::to_string(RCL_NS_TO_MS(remaining_time)))
+          .ToLocalChecked());
 }
 
 NAN_METHOD(TimerGetTimeSinceLastCall) {
@@ -150,8 +149,9 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
       RCL_RET_OK, rcl_timer_get_time_since_last_call(timer, &elapsed_time),
       rcl_get_error_string_safe());
 
-  info.GetReturnValue().Set(Nan::New<v8::String>(
-    std::to_string(RCL_NS_TO_MS(elapsed_time))).ToLocalChecked());
+  info.GetReturnValue().Set(
+      Nan::New<v8::String>(std::to_string(RCL_NS_TO_MS(elapsed_time)))
+          .ToLocalChecked());
 }
 
 NAN_METHOD(RclTake) {
@@ -208,7 +208,7 @@ NAN_METHOD(CreateSubscription) {
 
   auto js_obj =
       RclHandle::NewInstance(subscription, node_handle, [subscription, node] {
-          return rcl_subscription_fini(subscription, node);
+        return rcl_subscription_fini(subscription, node);
       });
   info.GetReturnValue().Set(js_obj);
 }
@@ -246,12 +246,9 @@ NAN_METHOD(CreatePublisher) {
       RCL_RET_OK, rcl_get_error_string_safe());
 
   // Wrap the handle into JS object
-  auto js_obj =
-      RclHandle::NewInstance(publisher,
-                             node_handle,
-                             [publisher, node]() {
-          return rcl_publisher_fini(publisher, node);
-      });
+  auto js_obj = RclHandle::NewInstance(
+      publisher, node_handle,
+      [publisher, node]() { return rcl_publisher_fini(publisher, node); });
 
   // Everything is done
   info.GetReturnValue().Set(js_obj);
@@ -276,7 +273,7 @@ NAN_METHOD(CreateClient) {
   std::string package_name(*Nan::Utf8String(info[3]->ToString()));
 
   const rosidl_service_type_support_t* ts =
-    GetServiceTypeSupport(package_name, interface_name);
+      GetServiceTypeSupport(package_name, interface_name);
   rcl_client_t* client =
       reinterpret_cast<rcl_client_t*>(malloc(sizeof(rcl_client_t)));
   *client = rcl_get_zero_initialized_client();
@@ -292,10 +289,9 @@ NAN_METHOD(CreateClient) {
       rcl_client_init(client, node, ts, service_name.c_str(), &client_ops),
       RCL_RET_OK, rcl_get_error_string_safe());
 
-  auto js_obj =
-      RclHandle::NewInstance(client, node_handle, [client, node] {
-          return rcl_client_fini(client, node);
-      });
+  auto js_obj = RclHandle::NewInstance(client, node_handle, [client, node] {
+    return rcl_client_fini(client, node);
+  });
 
   info.GetReturnValue().Set(js_obj);
 }
@@ -306,9 +302,8 @@ NAN_METHOD(SendRequest) {
   void* buffer = node::Buffer::Data(info[1]->ToObject());
   int64_t sequence_number;
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      rcl_send_request(client, buffer, &sequence_number),
-      RCL_RET_OK, rcl_get_error_string_safe());
+  THROW_ERROR_IF_NOT_EQUAL(rcl_send_request(client, buffer, &sequence_number),
+                           RCL_RET_OK, rcl_get_error_string_safe());
 
   info.GetReturnValue().Set(Nan::New((uint32_t)sequence_number));
 }
@@ -343,7 +338,7 @@ NAN_METHOD(CreateService) {
   std::string package_name(*Nan::Utf8String(info[3]->ToString()));
 
   const rosidl_service_type_support_t* ts =
-    GetServiceTypeSupport(package_name, interface_name);
+      GetServiceTypeSupport(package_name, interface_name);
   rcl_service_t* service =
       reinterpret_cast<rcl_service_t*>(malloc(sizeof(rcl_service_t)));
   *service = rcl_get_zero_initialized_service();
@@ -358,10 +353,9 @@ NAN_METHOD(CreateService) {
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
       RCL_RET_OK, rcl_get_error_string_safe());
-  auto js_obj =
-      RclHandle::NewInstance(service, node_handle, [service, node] {
-          return rcl_service_fini(service, node);
-      });
+  auto js_obj = RclHandle::NewInstance(service, node_handle, [service, node] {
+    return rcl_service_fini(service, node);
+  });
 
   info.GetReturnValue().Set(js_obj);
 }
@@ -391,9 +385,8 @@ NAN_METHOD(SendResponse) {
   rmw_request_id_t* header = reinterpret_cast<rmw_request_id_t*>(
       RclHandle::Unwrap<RclHandle>(info[2]->ToObject())->ptr());
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      rcl_send_response(service, header, buffer),
-      RCL_RET_OK, rcl_get_error_string_safe());
+  THROW_ERROR_IF_NOT_EQUAL(rcl_send_response(service, header, buffer),
+                           RCL_RET_OK, rcl_get_error_string_safe());
 }
 
 NAN_METHOD(ValidateFullTopicName) {
@@ -401,9 +394,7 @@ NAN_METHOD(ValidateFullTopicName) {
   size_t invalid_index;
   std::string topic_name(*Nan::Utf8String(info[0]->ToString()));
   rmw_ret_t ret = rmw_validate_full_topic_name(
-      topic_name.c_str(),
-      &validation_result,
-      &invalid_index);
+      topic_name.c_str(), &validation_result, &invalid_index);
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
@@ -420,10 +411,11 @@ NAN_METHOD(ValidateFullTopicName) {
   const char* validation_message =
       rmw_full_topic_name_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
-      "Unable to get validation error message");
+                       "Unable to get validation error message");
 
-  v8::Local<v8::Array> result_list =  Nan::New<v8::Array>(2);
-  Nan::Set(result_list, 0,
+  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(2);
+  Nan::Set(
+      result_list, 0,
       Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
   Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
 
@@ -434,10 +426,8 @@ NAN_METHOD(ValidateNodeName) {
   int validation_result;
   size_t invalid_index;
   std::string node_name(*Nan::Utf8String(info[0]->ToString()));
-  rmw_ret_t ret = rmw_validate_node_name(
-      node_name.c_str(),
-      &validation_result,
-      &invalid_index);
+  rmw_ret_t ret = rmw_validate_node_name(node_name.c_str(), &validation_result,
+                                         &invalid_index);
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
@@ -454,10 +444,11 @@ NAN_METHOD(ValidateNodeName) {
   const char* validation_message =
       rmw_node_name_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
-      "Unable to get validation error message");
+                       "Unable to get validation error message");
 
-  v8::Local<v8::Array> result_list =  Nan::New<v8::Array>(2);
-  Nan::Set(result_list, 0,
+  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(2);
+  Nan::Set(
+      result_list, 0,
       Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
   Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
 
@@ -468,10 +459,8 @@ NAN_METHOD(ValidateTopicName) {
   int validation_result;
   size_t invalid_index;
   std::string topic_name(*Nan::Utf8String(info[0]->ToString()));
-  rmw_ret_t ret = rcl_validate_topic_name(
-      topic_name.c_str(),
-      &validation_result,
-      &invalid_index);
+  rmw_ret_t ret = rcl_validate_topic_name(topic_name.c_str(),
+                                          &validation_result, &invalid_index);
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
@@ -488,10 +477,11 @@ NAN_METHOD(ValidateTopicName) {
   const char* validation_message =
       rcl_topic_name_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
-      "Unable to get validation error message");
+                       "Unable to get validation error message");
 
-  v8::Local<v8::Array> result_list =  Nan::New<v8::Array>(2);
-  Nan::Set(result_list, 0,
+  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(2);
+  Nan::Set(
+      result_list, 0,
       Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
   Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
 
@@ -502,10 +492,8 @@ NAN_METHOD(ValidateNamespace) {
   int validation_result;
   size_t invalid_index;
   std::string namespace_name(*Nan::Utf8String(info[0]->ToString()));
-  rmw_ret_t ret = rmw_validate_namespace(
-      namespace_name.c_str(),
-      &validation_result,
-      &invalid_index);
+  rmw_ret_t ret = rmw_validate_namespace(namespace_name.c_str(),
+                                         &validation_result, &invalid_index);
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
@@ -522,10 +510,11 @@ NAN_METHOD(ValidateNamespace) {
   const char* validation_message =
       rmw_namespace_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
-      "Unable to get validation error message");
+                       "Unable to get validation error message");
 
-  v8::Local<v8::Array> result_list =  Nan::New<v8::Array>(2);
-  Nan::Set(result_list, 0,
+  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(2);
+  Nan::Set(
+      result_list, 0,
       Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
   Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
 
@@ -569,13 +558,9 @@ NAN_METHOD(ExpandTopicName) {
     return;
   }
 
-  ret = rcl_expand_topic_name(
-      topic_name.c_str(),
-      node_name.c_str(),
-      node_namespace.c_str(),
-      &substitutions_map,
-      allocator,
-      &expanded_topic);
+  ret = rcl_expand_topic_name(topic_name.c_str(), node_name.c_str(),
+                              node_namespace.c_str(), &substitutions_map,
+                              allocator, &expanded_topic);
 
   rcutils_ret = rcutils_string_map_fini(&substitutions_map);
   if (rcutils_ret != RCUTILS_RET_OK) {
@@ -626,8 +611,7 @@ NAN_METHOD(GetNamespace) {
   }
 }
 
-const rmw_qos_profile_t* GetQoSProfileFromString(
-    const std::string& profile) {
+const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
   const rmw_qos_profile_t* qos_profile = nullptr;
   if (profile == "qos_profile_sensor_data") {
     qos_profile = &rmw_qos_profile_sensor_data;
@@ -649,8 +633,8 @@ const rmw_qos_profile_t* GetQoSProfileFromString(
 }
 
 const rmw_qos_profile_t* GetQosProfileFromObject(v8::Local<v8::Object> object) {
-  rmw_qos_profile_t* qos_profile = reinterpret_cast<rmw_qos_profile_t*>(
-      malloc(sizeof(rmw_qos_profile_t)));
+  rmw_qos_profile_t* qos_profile =
+      reinterpret_cast<rmw_qos_profile_t*>(malloc(sizeof(rmw_qos_profile_t)));
   qos_profile->history = static_cast<rmw_qos_history_policy_t>(
       object->Get(Nan::New("history").ToLocalChecked())->Uint32Value());
   qos_profile->depth =
@@ -667,8 +651,8 @@ const rmw_qos_profile_t* GetQosProfileFromObject(v8::Local<v8::Object> object) {
 }
 
 rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos) {
-  rmw_qos_profile_t* qos_profile = reinterpret_cast<rmw_qos_profile_t*>(
-      malloc(sizeof(rmw_qos_profile_t)));
+  rmw_qos_profile_t* qos_profile =
+      reinterpret_cast<rmw_qos_profile_t*>(malloc(sizeof(rmw_qos_profile_t)));
 
   if (qos->IsString()) {
     *qos_profile = *GetQoSProfileFromString(
@@ -688,12 +672,12 @@ NAN_METHOD(Shutdown) {
 }
 
 NAN_METHOD(InitString) {
-    void* buffer = node::Buffer::Data(info[0]->ToObject());
-    rosidl_generator_c__String* ptr =
-        reinterpret_cast<rosidl_generator_c__String*>(buffer);
+  void* buffer = node::Buffer::Data(info[0]->ToObject());
+  rosidl_generator_c__String* ptr =
+      reinterpret_cast<rosidl_generator_c__String*>(buffer);
 
-    rosidl_generator_c__String__init(ptr);
-    info.GetReturnValue().Set(Nan::Undefined());
+  rosidl_generator_c__String__init(ptr);
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 inline char* GetBufAddr(v8::Local<v8::Value> buf) {
@@ -723,9 +707,9 @@ NAN_METHOD(CreateArrayBufferFromAddress) {
   auto address = GetBufAddr(info[0]);
   int32_t length = Nan::To<int32_t>(info[1]).FromJust();
 
-  auto array_buffer = v8::ArrayBuffer::New(
-      v8::Isolate::GetCurrent(), address, length,
-      v8::ArrayBufferCreationMode::kExternalized);
+  auto array_buffer =
+      v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), address, length,
+                           v8::ArrayBufferCreationMode::kExternalized);
 
   info.GetReturnValue().Set(array_buffer);
 }
@@ -735,12 +719,8 @@ NAN_METHOD(CreateArrayBufferCleaner) {
   int32_t offset = Nan::To<int32_t>(info[1]).FromJust();
 
   char* target = *reinterpret_cast<char**>(address + offset);
-  info.GetReturnValue().Set(RclHandle::NewInstance(
-      target,
-      nullptr,
-      [] {
-        return RCL_RET_OK;
-      }));
+  info.GetReturnValue().Set(
+      RclHandle::NewInstance(target, nullptr, [] { return RCL_RET_OK; }));
 }
 
 uint32_t GetBindingMethodsCount(BindingMethod* methods) {

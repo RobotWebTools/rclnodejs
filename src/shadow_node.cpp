@@ -46,10 +46,8 @@ void ShadowNode::Init(v8::Local<v8::Object> exports) {
   tpl->SetClassName(Nan::New("ShadowNode").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  Nan::SetAccessor(tpl->InstanceTemplate(),
-                   Nan::New("handle").ToLocalChecked(),
-                   HandleGetter,
-                   HandleSetter);
+  Nan::SetAccessor(tpl->InstanceTemplate(), Nan::New("handle").ToLocalChecked(),
+                   HandleGetter, HandleSetter);
   Nan::SetPrototypeMethod(tpl, "start", Start);
   Nan::SetPrototypeMethod(tpl, "stop", Stop);
   Nan::SetPrototypeMethod(tpl, "syncHandles", SyncHandles);
@@ -102,7 +100,6 @@ NAN_METHOD(ShadowNode::Stop) {
 NAN_METHOD(ShadowNode::SyncHandles) {
   auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
   if (me) {
-    me->handle_manager()->ClearHandles();
     me->handle_manager()->CollectHandles(me->handle());
   }
 }
