@@ -17,9 +17,20 @@
 
 #include <nan.h>
 #include <rcl/wait.h>
+
+#include <atomic>
 #include <vector>
 
 namespace rclnodejs {
+
+class ScopedMutex {
+ public:
+  explicit ScopedMutex(uv_mutex_t* mutex) : mutex_(mutex) {
+    uv_mutex_lock(mutex_);
+  }
+  ~ScopedMutex() { uv_mutex_unlock(mutex_); }
+  uv_mutex_t* mutex_;
+};
 
 class HandleManager {
  public:
@@ -27,14 +38,16 @@ class HandleManager {
   ~HandleManager();
 
   void CollectHandles(const v8::Local<v8::Object> node);
-
-  uint32_t SubscriptionsCount();
-  uint32_t ServicesCount();
-  uint32_t ClientsCount();
-  uint32_t TimersCount();
-
   bool AddHandlesToWaitSet(rcl_wait_set_t* wait_set);
   void ClearHandles();
+  void WaitForSynchronizing() { uv_sem_wait(&sem_); }
+
+  uint32_t subscription_count() const { return subscriptions_.size(); }
+  uint32_t service_count() const { return services_.size(); }
+  uint32_t client_count() const { return clients_.size(); }
+  uint32_t timer_count() const { return  timers_.size(); }
+  uv_mutex_t* mutex() { return &mutex_; }
+  bool is_synchronizing() const { return is_synchronizing_.load(); }
 
  protected:
   template<typename T> void CollectHandlesByType(
@@ -48,6 +61,8 @@ class HandleManager {
   std::vector<const rcl_guard_condition_t*> guard_conditions_;
 
   uv_mutex_t mutex_;
+  uv_sem_t sem_;
+  std::atomic_bool is_synchronizing_;
 };
 
 }  // namespace rclnodejs

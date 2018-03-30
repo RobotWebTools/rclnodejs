@@ -92,81 +92,90 @@ void Executor::Run(void* arg) {
 
   try {
     rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
-    rcl_ret_t ret = rcl_wait_set_init(
-        &wait_set, 0, 2, 0, 0, 0, rcl_get_default_allocator());
+    rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0,
+                                      rcl_get_default_allocator());
     if (ret != RCL_RET_OK) {
       throw std::runtime_error(std::string("Init waitset failed: ") +
-                              rcl_get_error_string_safe());
+                               rcl_get_error_string_safe());
     }
 
     while (executor->running_.load()) {
-      if (rcl_wait_set_resize_subscriptions(
-              &wait_set, handle_manager->SubscriptionsCount()) != RCL_RET_OK) {
-        throw std::runtime_error(
-            std::string(
-                "Couldn't resize the number of subscriptions in waitset : ") +
-            rcl_get_error_string_safe());
-      }
+      if (handle_manager->is_synchronizing())
+        handle_manager->WaitForSynchronizing();
 
-      if (rcl_wait_set_resize_services(
-              &wait_set, handle_manager->ServicesCount()) != RCL_RET_OK) {
-        throw std::runtime_error(
-            std::string(
-                "Couldn't resize the number of services in waitset : ") +
-            rcl_get_error_string_safe());
-      }
+      {
+        ScopedMutex mutex(handle_manager->mutex());
+        if (rcl_wait_set_resize_subscriptions(
+                &wait_set, handle_manager->subscription_count()) !=
+            RCL_RET_OK) {
+          throw std::runtime_error(
+              std::string(
+                  "Couldn't resize the number of subscriptions in waitset : ") +
+              rcl_get_error_string_safe());
+        }
 
-      if (rcl_wait_set_resize_clients(
-              &wait_set, handle_manager->ClientsCount()) != RCL_RET_OK) {
-        throw std::runtime_error(
-            std::string("Couldn't resize the number of clients in waitset : ") +
-            rcl_get_error_string_safe());
-      }
+        if (rcl_wait_set_resize_services(
+                &wait_set, handle_manager->service_count()) != RCL_RET_OK) {
+          throw std::runtime_error(
+              std::string(
+                  "Couldn't resize the number of services in waitset : ") +
+              rcl_get_error_string_safe());
+        }
 
-      if (rcl_wait_set_resize_timers(
-              &wait_set, handle_manager->TimersCount()) != RCL_RET_OK) {
-        throw std::runtime_error(
-            std::string("Couldn't resize the number of timers in waitset : ") +
-            rcl_get_error_string_safe());
-      }
+        if (rcl_wait_set_resize_clients(
+                &wait_set, handle_manager->client_count()) != RCL_RET_OK) {
+          throw std::runtime_error(
+              std::string(
+                  "Couldn't resize the number of clients in waitset : ") +
+              rcl_get_error_string_safe());
+        }
 
-      if (!handle_manager->AddHandlesToWaitSet(&wait_set)) {
-        throw std::runtime_error("Couldn't fill waitset");
-      }
+        if (rcl_wait_set_resize_timers(
+                &wait_set, handle_manager->timer_count()) != RCL_RET_OK) {
+          throw std::runtime_error(
+              std::string(
+                  "Couldn't resize the number of timers in waitset : ") +
+              rcl_get_error_string_safe());
+        }
 
-      rcl_ret_t status = rcl_wait(&wait_set, RCL_MS_TO_NS(10));
-      if (status == RCL_RET_WAIT_SET_EMPTY) {
-      } else if (status != RCL_RET_OK && status != RCL_RET_TIMEOUT) {
-        throw std::runtime_error(std::string("rcl_wait() failed: ") +
-                                 rcl_get_error_string_safe());
-      } else {
-        if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(executor->async_))) {
-          uv_async_send(executor->async_);
+        if (!handle_manager->AddHandlesToWaitSet(&wait_set)) {
+          throw std::runtime_error("Couldn't fill waitset");
+        }
+
+        rcl_ret_t status = rcl_wait(&wait_set, RCL_MS_TO_NS(10));
+        if (status == RCL_RET_WAIT_SET_EMPTY) {
+        } else if (status != RCL_RET_OK && status != RCL_RET_TIMEOUT) {
+          throw std::runtime_error(std::string("rcl_wait() failed: ") +
+                                   rcl_get_error_string_safe());
+        } else {
+          if (!uv_is_closing(
+                  reinterpret_cast<uv_handle_t*>(executor->async_))) {
+            uv_async_send(executor->async_);
+          }
+        }
+
+        if (rcl_wait_set_clear_subscriptions(&wait_set) != RCL_RET_OK) {
+          throw std::runtime_error("Couldn't clear subscriptions from waitset");
+        }
+
+        if (rcl_wait_set_clear_services(&wait_set) != RCL_RET_OK) {
+          throw std::runtime_error("Couldn't clear servicess from waitset");
+        }
+
+        if (rcl_wait_set_clear_clients(&wait_set) != RCL_RET_OK) {
+          throw std::runtime_error("Couldn't clear clients from waitset");
+        }
+
+        if (rcl_wait_set_clear_guard_conditions(&wait_set) != RCL_RET_OK) {
+          throw std::runtime_error(
+              "Couldn't clear guard conditions from waitset");
+        }
+
+        if (rcl_wait_set_clear_timers(&wait_set) != RCL_RET_OK) {
+          throw std::runtime_error("Couldn't clear timers from waitset");
         }
       }
-
-      if (rcl_wait_set_clear_subscriptions(&wait_set) != RCL_RET_OK) {
-        throw std::runtime_error("Couldn't clear subscriptions from waitset");
-      }
-
-      if (rcl_wait_set_clear_services(&wait_set) != RCL_RET_OK) {
-        throw std::runtime_error("Couldn't clear servicess from waitset");
-      }
-
-      if (rcl_wait_set_clear_clients(&wait_set) != RCL_RET_OK) {
-        throw std::runtime_error("Couldn't clear clients from waitset");
-      }
-
-      if (rcl_wait_set_clear_guard_conditions(&wait_set) != RCL_RET_OK) {
-        throw std::runtime_error(
-            "Couldn't clear guard conditions from waitset");
-      }
-
-      if (rcl_wait_set_clear_timers(&wait_set) != RCL_RET_OK) {
-        throw std::runtime_error("Couldn't clear timers from waitset");
-      }
     }
-
     if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
       throw std::runtime_error(std::string("Failed to destroy guard waitset:") +
                                rcl_get_error_string_safe());
