@@ -20,13 +20,14 @@ from nav_msgs.srv import *
 def main():
   rclpy.init()
 
+  times = input('How many times do you want to run? ')
   print(
-    'The client will send a GetMap request continuously(response contains a size of 10MB array) until receiving 36000 response times.')
+    'The client will send a GetMap request continuously(response contains a size of 10MB array) until receiving %s response times.' % times)
   print('Begin at ' + str(datetime.now()))
   node = rclpy.create_node('stress_client_rclpy')
   client = node.create_client(GetMap, 'get_map')
   request = GetMap.Request()
-  totalTimes = 36000
+  totalTimes = int(times)
   receivedTimes = 0
 
   while rclpy.ok():
@@ -35,9 +36,9 @@ def main():
       rclpy.shutdown()
       print('End at ' + str(datetime.now()))
     else:
-      client.call(request)
-      rclpy.spin_once(node)
-      if client.response is not None:
+      future = client.call_async(request)
+      rclpy.spin_until_future_complete(node, future)
+      if future.result() is not None:
         receivedTimes += 1
 
 if __name__ == '__main__':

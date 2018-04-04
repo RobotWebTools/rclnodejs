@@ -16,40 +16,50 @@
 
 /* eslint-disable camelcase */
 const rclnodejs = require('../../index.js');
+const readline = require('readline');
 
-rclnodejs.init().then(() => {
-  const JointState = 'sensor_msgs/msg/JointState';
-  const state = {
-    header: {
-      stamp: {
-        sec: 123456,
-        nanosec: 789,
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+rl.question('How many times do you want to run? ', (times) => {
+  rclnodejs.init().then(() => {
+    const JointState = 'sensor_msgs/msg/JointState';
+    const state = {
+      header: {
+        stamp: {
+          sec: 123456,
+          nanosec: 789,
+        },
+        frame_id: 'main_frame',
       },
-      frame_id: 'main_frame',
-    },
-    name: ['Tom', 'Jerry'],
-    position: [1, 2],
-    velocity: [2, 3],
-    effort: [4, 5, 6],
-  };
+      name: ['Tom', 'Jerry'],
+      position: [1, 2],
+      velocity: [2, 3],
+      effort: [4, 5, 6],
+    };
 
-  console.log('The publisher will publish a JointState topic every 100ms.');
-  console.log(`Begin at ${new Date().toString()} and end in about 24 hours.`);
+    console.log(`The publisher will publish a JointState topic ${times} times every 100ms.`);
+    console.log(`Begin at ${new Date().toString()}.`);
 
-  let node = rclnodejs.createNode('endurance_publisher_rclnodejs');
-  let publisher = node.createPublisher(JointState, 'endurance_topic');
-  let sentTimes = 0;
-  let totalTimes = 864000;
+    let node = rclnodejs.createNode('endurance_publisher_rclnodejs');
+    let publisher = node.createPublisher(JointState, 'endurance_topic');
+    let sentTimes = 0;
+    let totalTimes = parseInt(times, 10);
 
-  let timer = setInterval(() => {
-    if (sentTimes++ > totalTimes) {
-      clearInterval(timer);
-      rclnodejs.shutdown();
-      console.log(`End at ${new Date().toString()}`);
-    } else {
-      publisher.publish(state);
-    }}, 100);
-  rclnodejs.spin(node);
-}).catch((err) => {
-  console.log(err);
+    let timer = setInterval(() => {
+      if (sentTimes++ > totalTimes) {
+        clearInterval(timer);
+        rclnodejs.shutdown();
+        console.log(`End at ${new Date().toString()}`);
+      } else {
+        publisher.publish(state);
+      }}, 100);
+    rclnodejs.spin(node);
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  rl.close();
 });

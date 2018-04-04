@@ -47,15 +47,17 @@ int main(int argc, char* argv[]) {
   msg->layout = *layout;
   msg->data = std::vector<uint8_t>(1024 * 1024 * 10, 255);
 
+  auto totalTimes = 0;
+  printf("How many times do you want to run?\n");
+  scanf("%d", &totalTimes);
   printf(
       "The publisher will publish a UInt8MultiArray topic(contains a size of "
-      "10MB array) every 100ms.\n");
-  printf("Begin at %s and end in about 1 hour\n", GetCurrentTime());
+      "10MB array) %d times every 100ms.\n", totalTimes);
+  printf("Begin at %s\n", GetCurrentTime());
 
   auto node = rclcpp::Node::make_shared("stress_publisher_rclcpp");
   auto publisher =
       node->create_publisher<std_msgs::msg::UInt8MultiArray>("stress_topic");
-  auto totalTimes = 36000;
   auto sentTimes = 0;
 
   rclcpp::WallRate wall_rate(std::chrono::milliseconds(100));
