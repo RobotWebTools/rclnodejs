@@ -23,8 +23,9 @@ import threading
 def main():
   rclpy.init()
 
-  print('The publisher will publish a JointState topic every 100ms.')
-  print('Begin at ' + str(datetime.now()) + 'and end in about 24 hours')
+  times = input('How many times do you want to run? ')
+  print('The publisher will publish a JointState topic % times every 100ms.' % times)
+  print('Begin at ' + str(datetime.now())
   node = rclpy.create_node('endurance_publisher_rclpy')
   publisher = node.create_publisher(JointState, 'endurance_topic')
   time = Time()
@@ -39,7 +40,7 @@ def main():
   msg.position = [1.0, 2.0]
   msg.velocity = [2.0, 3.0]
   msg.effort = [4.0, 5.0, 6.0]
-  totalTimes = 864000
+  totalTimes = int(times)
   sentTimes = 0
 
   def publish_topic():

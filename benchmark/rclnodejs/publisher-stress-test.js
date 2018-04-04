@@ -16,38 +16,48 @@
 
 /* eslint-disable camelcase */
 const rclnodejs = require('../../index.js');
+const readline = require('readline');
 
-const message = {
-  layout: {
-    dim: [
-      {label: 'height',  size: 10, stride: 600},
-      {label: 'width',   size: 20, stride: 60},
-      {label: 'channel', size: 3,  stride: 4},
-    ],
-    data_offset: 0,
-  },
-  data: Uint8Array.from({length: 1024 * 1024 * 10}, (v, k) => k)
-};
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
-rclnodejs.init().then(() => {
-  console.log(
-    'The publisher will publish a UInt8MultiArray topic(contains a size of 10MB array) every 100ms.');
-  console.log(`Begin at ${new Date().toString()} and end in about 1 hour.`);
+rl.question('How many times do you want to run? ', (times) => {
+  const message = {
+    layout: {
+      dim: [
+        {label: 'height',  size: 10, stride: 600},
+        {label: 'width',   size: 20, stride: 60},
+        {label: 'channel', size: 3,  stride: 4},
+      ],
+      data_offset: 0,
+    },
+    data: Uint8Array.from({length: 1024 * 1024 * 10}, (v, k) => k)
+  };
 
-  let node = rclnodejs.createNode('stress_publisher_rclnodejs');
-  const publisher = node.createPublisher('std_msgs/msg/UInt8MultiArray', 'stress_topic');
-  let sentTimes = 0;
-  let totalTimes = 36000;
+  rclnodejs.init().then(() => {
+    console.log(
+      `The publisher will publish a UInt8MultiArray topic(contains a size of 10MB array) ${times} times every 100ms.`);
+    console.log(`Begin at ${new Date().toString()}.`);
 
-  let timer = setInterval(() => {
-    if (sentTimes++ > totalTimes) {
-      clearInterval(timer);
-      rclnodejs.shutdown();
-      console.log(`End at ${new Date().toString()}`);
-    } else {
-      publisher.publish(message);
-    }}, 100);
-  rclnodejs.spin(node);
-}).catch((err) => {
-  console.log(err);
+    let node = rclnodejs.createNode('stress_publisher_rclnodejs');
+    const publisher = node.createPublisher('std_msgs/msg/UInt8MultiArray', 'stress_topic');
+    let sentTimes = 0;
+    let totalTimes = parseInt(times, 10);
+
+    let timer = setInterval(() => {
+      if (sentTimes++ > totalTimes) {
+        clearInterval(timer);
+        rclnodejs.shutdown();
+        console.log(`End at ${new Date().toString()}`);
+      } else {
+        publisher.publish(message);
+      }}, 100);
+    rclnodejs.spin(node);
+  }).catch((err) => {
+    console.log(err);
+  });
+
+  rl.close();
 });

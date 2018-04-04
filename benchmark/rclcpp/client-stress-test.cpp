@@ -23,15 +23,17 @@
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
 
+  auto totalTimes = 0;
+  printf("How many times do you want to run?\n");
+  scanf("%d", &totalTimes);
   printf(
       "The client will send a GetMap request(response contains a size of 10MB "
-      "array) every 100ms until receiving response 36000 times.\n");
+      "array) every 100ms until receiving response %d times.\n", totalTimes);
   printf("Begin at %s\n", GetCurrentTime());
 
   auto node = rclcpp::Node::make_shared("stress_client_rclcpp");
   auto client = node->create_client<nav_msgs::srv::GetMap>("get_map");
   auto request = std::make_shared<nav_msgs::srv::GetMap::Request>();
-  auto totalTimes = 36000;
   auto receivedTimes = 0;
 
   while (rclcpp::ok()) {

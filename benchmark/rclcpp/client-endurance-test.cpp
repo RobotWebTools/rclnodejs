@@ -23,15 +23,17 @@
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
 
+  auto totalTimes = 0;
+  printf("How many times do you want to run?\n");
+  scanf("%d", &totalTimes);
   printf(
       "The client will send a SetBool request every 100ms until receiving"
-      " response 864000 times.\n");
+      " response %d times.\n", totalTimes);
   printf("Begin at %s\n", GetCurrentTime());
 
   auto node = rclcpp::Node::make_shared("endurance_client_rclcpp");
   auto client = node->create_client<std_srvs::srv::SetBool>("set_flag");
   auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
-  auto totalTimes = 864000;
   auto receivedTimes = 0;
 
   while (rclcpp::ok()) {

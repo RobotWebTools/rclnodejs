@@ -20,14 +20,15 @@ from std_srvs.srv import *
 def main():
   rclpy.init()
 
-  print('The client will send a SetBool request continuously until receiving response 864000 times.')
+  times = input('How many times do you want to run? ')
+  print('The client will send a SetBool request continuously until receiving response %s times.' % times)
   print('Begin at ' + str(datetime.now()))
 
   node = rclpy.create_node('endurance_client_rclpy')
   client = node.create_client(SetBool, 'set_flag')
   request = SetBool.Request()
   request.data = True
-  totalTimes = 864000
+  totalTimes = int(times)
   receivedTimes = 0
 
   while rclpy.ok():
@@ -36,9 +37,9 @@ def main():
       rclpy.shutdown()
       print('End at ' + str(datetime.now()))
     else:
-      client.call(request)
-      rclpy.spin_once(node)
-      if client.response is not None:
+      future = client.call_async(request)
+      rclpy.spin_until_future_complete(node, future)
+      if future.result() is not None:
         receivedTimes += 1
 
 if __name__ == '__main__':

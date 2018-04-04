@@ -15,30 +15,39 @@
 'use strict';
 
 const rclnodejs = require('../../index.js');
+const readline = require('readline');
 
-rclnodejs.init().then(() => {
-  console.log('The client will send a SetBool request continuously until receiving response 864000 times.');
-  console.log(`Begin at ${new Date().toString()}.`);
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
-  const node = rclnodejs.createNode('endurance_client_rclnodejs');
-  const client = node.createClient('std_srvs/srv/SetBool', 'set_flag');
-  let sentTimes = 0;
-  let receivedTimes = 0;
-  let totalTimes = 864000;
+rl.question('How many times do you want to run? ', (times) => {
+  rclnodejs.init().then(() => {
+    console.log(`The client will send a SetBool request continuously until receiving response ${times} times.`);
+    console.log(`Begin at ${new Date().toString()}.`);
 
-  let sendRequest = function(response) {
-    client.sendRequest(true, (response) => {
-      if (++receivedTimes > totalTimes) {
-        rclnodejs.shutdown();
-        console.log(`End at ${new Date().toString()}`);
-      } else {
-        setImmediate(sendRequest);
-      }
-    });
-  };
+    const node = rclnodejs.createNode('endurance_client_rclnodejs');
+    const client = node.createClient('std_srvs/srv/SetBool', 'set_flag');
+    let sentTimes = 0;
+    let receivedTimes = 0;
+    let totalTimes = parseInt(times, 10);
+    let sendRequest = function(response) {
+      client.sendRequest(true, (response) => {
+        if (++receivedTimes > totalTimes) {
+          rclnodejs.shutdown();
+          console.log(`End at ${new Date().toString()}`);
+        } else {
+          setImmediate(sendRequest);
+        }
+      });
+    };
 
-  sendRequest();
-  rclnodejs.spin(node);
-}).catch((e) => {
-  console.log(`Error: ${e}`);
+    sendRequest();
+    rclnodejs.spin(node);
+  }).catch((e) => {
+    console.log(`Error: ${e}`);
+  });
+
+  rl.close();
 });
