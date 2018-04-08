@@ -29,8 +29,8 @@ const dots = dot.process({path: path.join(__dirname, '../rosidl_gen/templates')}
 
 const generatedRoot = path.join(__dirname, '../generated/');
 const installedPackagesRoot = (os.type() === 'Windows_NT')
-                              ? process.env.AMENT_PREFIX_PATH.split(';')
-                              : process.env.AMENT_PREFIX_PATH.split(':');
+  ? process.env.AMENT_PREFIX_PATH.split(';')
+  : process.env.AMENT_PREFIX_PATH.split(':');
 
 function removeExtraSpaceLines(str) {
   return str.replace(/^\s*\n/gm, '');

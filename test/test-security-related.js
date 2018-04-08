@@ -95,7 +95,7 @@ describe('Destroying non-existent objects testing', function() {
 
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     var service = node.createService(AddTwoInts, 'add_two_ints',
-                                    (request, response) =>{});
+      (request, response) =>{});
     node.destroyService(service);
 
     // OK to destroy a service multiple times

@@ -110,9 +110,9 @@ describe('Multiple nodes interation testing', function() {
       const request2 = {a: 3, b: 4};
 
       var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],
-                                    'lib',
-                                    'demo_nodes_cpp',
-                                    'add_two_ints_server');
+        'lib',
+        'demo_nodes_cpp',
+        'add_two_ints_server');
       var cppService = childProcess.spawn(cppServicePath, ['-s', 'js_pycpp_add_two_ints']);
       var pyServicePath = path.join(__dirname, 'py', 'service.py');
       var pyService = utils.launchPythonProcess([pyServicePath, 'js_pycpp_add_two_ints']);
