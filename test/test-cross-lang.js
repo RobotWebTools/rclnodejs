@@ -151,9 +151,9 @@ describe('Cross-language interaction', function() {
 
       var destroy = false;
       var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],
-                                    'lib',
-                                    'demo_nodes_cpp',
-                                    'add_two_ints_server');
+        'lib',
+        'demo_nodes_cpp',
+        'add_two_ints_server');
       var cppService = childProcess.spawn(cppServicePath, ['-s', 'js_cpp_add_two_ints']);
       var timer = node.createTimer(100, () => {
         client.sendRequest(request, (response) => {

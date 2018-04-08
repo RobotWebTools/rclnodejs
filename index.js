@@ -104,8 +104,8 @@ let rcl = {
       if (!this._initialized) {
         getCurrentGeneratorVersion().then(version => {
           let forced = version === null || compareVersions(version, generator.version()) === -1
-                       ? true
-                       : false;
+            ? true
+            : false;
           if (forced) {
             debug('The generator will begin to create JavaScript code from ROS IDL files...');
           }
