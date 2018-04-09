@@ -24,8 +24,11 @@ def main():
   rclpy.init()
 
   times = input('How many times do you want to run? ')
-  print('The publisher will publish a JointState topic % times every 100ms.' % times)
-  print('Begin at ' + str(datetime.now())
+  ms = input('Please enter the period of publishing a topic in millisecond ')
+  period = int(ms) / 100
+  print('The publisher will publish a JointState topic %s times every %sms.' % (times, ms))
+  print('Begin at ' + str(datetime.now()))
+
   node = rclpy.create_node('endurance_publisher_rclpy')
   publisher = node.create_publisher(JointState, 'endurance_topic')
   time = Time()
@@ -56,10 +59,10 @@ def main():
     else:
       publisher.publish(msg)
       sentTimes += 1
-      timer = threading.Timer(0.1, publish_topic)
+      timer = threading.Timer(period, publish_topic)
       timer.start()
 
-  timer = threading.Timer(0.1, publish_topic)
+  timer = threading.Timer(period, publish_topic)
   timer.start()
 
 if __name__ == '__main__':
