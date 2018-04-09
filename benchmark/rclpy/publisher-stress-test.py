@@ -46,7 +46,9 @@ def main():
   multiArray.data = [x & 0xff for x in range(1024 * 1024 * 10)]
 
   times = input('How many times do you want to run? ')
-  print('The publisher will publish a UInt8MultiArray topic(contains a size of 10MB array) %s times every 100ms.' % times)
+  ms = input('Please enter the period of publishing a topic in millisecond ')
+  period = int(ms) / 100
+  print('The publisher will publish a UInt8MultiArray topic(contains a size of 10MB array) %s times every %sms.' % (times, ms))
   print('Begin at ' + str(datetime.now()))
   node = rclpy.create_node('stress_publisher_rclpy')
   publisher = node.create_publisher(UInt8MultiArray, 'stress_topic')
@@ -66,10 +68,10 @@ def main():
     else:
       publisher.publish(multiArray)
       sentTimes += 1
-      timer = threading.Timer(0.1, publish_topic)
+      timer = threading.Timer(period, publish_topic)
       timer.start()
 
-  timer = threading.Timer(0.1, publish_topic)
+  timer = threading.Timer(period, publish_topic)
   timer.start()
 
 if __name__ == '__main__':
