@@ -19,6 +19,7 @@ const debug = require('debug')('rclnodejs');
 const fs = require('mz/fs');
 const generator = require('./rosidl_gen/generator.js');
 const loader = require('./lib/interface_loader.js');
+const logging = require('./lib/logging.js');
 const Node = require('./lib/node.js');
 const packages = require('./rosidl_gen/packages.js');
 const path = require('path');
@@ -70,6 +71,9 @@ let rcl = {
 
   /** {@link QoS} class */
   QoS: QoS,
+
+  /** {@link Logging} class */
+  logging: logging,
 
   /** {@link module:validator|validator} object */
   validator: validator,
