@@ -723,6 +723,57 @@ NAN_METHOD(CreateArrayBufferCleaner) {
       RclHandle::NewInstance(target, nullptr, [] { return RCL_RET_OK; }));
 }
 
+NAN_METHOD(setLoggerLevel) {
+  std::string name(*Nan::Utf8String(info[0]->ToString()));
+  int level = info[1]->IntegerValue();
+
+  rcutils_ret_t ret = rcutils_logging_set_logger_level(name.c_str(), level);
+  if (ret != RCUTILS_RET_OK) {
+    Nan::ThrowError(rcutils_get_error_string_safe());
+    rcutils_reset_error();
+  }
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_METHOD(GetLoggerEffectiveLevel) {
+  std::string name(*Nan::Utf8String(info[0]->ToString()));
+  int logger_level = rcutils_logging_get_logger_effective_level(name.c_str());
+
+  if (logger_level < 0) {
+    Nan::ThrowError(rcutils_get_error_string_safe());
+    rcutils_reset_error();
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+  info.GetReturnValue().Set(Nan::New(logger_level));
+}
+
+NAN_METHOD(Log) {
+  std::string name(*Nan::Utf8String(info[0]->ToString()));
+  int severity = info[1]->IntegerValue();
+  std::string message(*Nan::Utf8String(info[2]->ToString()));
+  std::string function_name(*Nan::Utf8String(info[3]->ToString()));
+  size_t line_number = info[4]->IntegerValue();
+  std::string file_name(*Nan::Utf8String(info[5]->ToString()));
+  bool enabled = rcutils_logging_logger_is_enabled_for(name.c_str(), severity);
+
+  if (enabled) {
+    rcutils_log_location_t logging_location = {function_name.c_str(),
+                                               file_name.c_str(),
+                                               line_number};
+    rcutils_log(&logging_location, severity, name.c_str(), message.c_str());
+  }
+
+  info.GetReturnValue().Set(Nan::New(enabled));
+}
+
+NAN_METHOD(IsEnableFor) {
+  std::string name(*Nan::Utf8String(info[0]->ToString()));
+  int severity = info[1]->IntegerValue();
+  bool enabled = rcutils_logging_logger_is_enabled_for(name.c_str(), severity);
+  info.GetReturnValue().Set(Nan::New(enabled));
+}
+
 uint32_t GetBindingMethodsCount(BindingMethod* methods) {
   uint32_t count = 0;
   while (methods[count].function) {
@@ -764,6 +815,10 @@ BindingMethod binding_methods[] = {
     {"freeMemeoryAtOffset", FreeMemeoryAtOffset},
     {"createArrayBufferFromAddress", CreateArrayBufferFromAddress},
     {"createArrayBufferCleaner", CreateArrayBufferCleaner},
+    {"setLoggerLevel", setLoggerLevel},
+    {"getLoggerEffectiveLevel", GetLoggerEffectiveLevel},
+    {"log", Log},
+    {"isEnableFor", IsEnableFor},
     {"", nullptr}};
 
 }  // namespace rclnodejs
