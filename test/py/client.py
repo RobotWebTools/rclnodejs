@@ -44,10 +44,11 @@ def main():
 
   msg = Int8()
   while rclpy.ok():
-    client.call(request)
-    rclpy.spin_once(node)
-    if client.response is not None:
-      msg.data = client.response.sum
+    future = client.call_async(request)
+    rclpy.spin_until_future_complete(node, future)
+    response = future.result()
+    if response is not None:
+      msg.data = response.sum
       publisher.publish(msg)
 
     time.sleep(0.1)
