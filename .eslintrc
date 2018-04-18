@@ -44,3 +44,6 @@ rules:
   strict: [2, "global"]
   valid-jsdoc: 2
   yoda: [2, "never"]
+
+parserOptions:
+  ecmaVersion: 2017
