@@ -26,7 +26,6 @@ const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
 const validator = require('./lib/validator.js');
-const translator = require('./lib/message_translator.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -246,7 +245,7 @@ let rcl = {
    * @return {Object|undefined} A plain JavaScript of that type
    */
   createMessageObject(type) {
-    return translator.toPlainObject(this.createMessage(type));
+    return this.createMessage(type).toPlainObject();
   },
 };
 

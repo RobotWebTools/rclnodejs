@@ -152,6 +152,10 @@ function toPlainObject(message) {
 
 function toROSMessage(TypeClass, obj) {
   let msg = new TypeClass();
+  return constructFromPlanObject(msg, obj);
+}
+
+function constructFromPlanObject(msg, obj) {
   const type = typeof obj;
   if (type === 'string' || type === 'number' || type === 'boolean') {
     msg.data = obj;
@@ -164,5 +168,6 @@ function toROSMessage(TypeClass, obj) {
 module.exports = {
   verifyMessageStruct: verifyMessageStruct,
   toROSMessage: toROSMessage,
-  toPlainObject: toPlainObject
+  toPlainObject: toPlainObject,
+  constructFromPlanObject: constructFromPlanObject
 };

@@ -196,6 +196,7 @@ const ref = require('ref');
 const ArrayType = require('ref-array');
 const primitiveTypes = require('../../rosidl_gen/generator_primitive.js');
 const deallocator = require('../../rosidl_gen/deallocator.js');
+const translator = require('../../rosidl_gen/message_translator.js');
 
 {{~ it.spec.fields :field}}
 {{? shouldRequire(it.spec.baseType, field.type)}}
@@ -257,23 +258,30 @@ class {{=objectWrapper}} {
       this._wrapperFields.{{=field.name}} =  new {{=getWrapperNameByType(field.type)}}(other._wrapperFields.{{=field.name}});
       {{?}}
       {{~}}
+    } else if (typeof other !== 'undefined') {
+      this._initMembers();
+      translator.constructFromPlanObject(this, other);
     } else {
-      this._refObject = new {{=refObjectType}}();
-      {{~ it.spec.fields :field}}
-      {{? field.type.isPrimitiveType && !field.type.isArray}}
-      this._{{=field.name}}Intialized = false;
-      {{?}}
-
-      {{? field.type.isArray}}
-      this._wrapperFields.{{=field.name}} = {{=getWrapperNameByType(field.type)}}.createArray();
-      {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
-      this._wrapperFields.{{=field.name}} = new {{=getWrapperNameByType(field.type)}}();
-      {{?? it.spec.msgName === 'String'}}
-      primitiveTypes.initString(this._refObject);
-      {{?}}
-      {{~}}
+      this._initMembers();
     }
     this.freeze();
+  }
+
+  _initMembers() {
+    this._refObject = new {{=refObjectType}}();
+    {{~ it.spec.fields :field}}
+    {{? field.type.isPrimitiveType && !field.type.isArray}}
+    this._{{=field.name}}Intialized = false;
+    {{?}}
+
+    {{? field.type.isArray}}
+    this._wrapperFields.{{=field.name}} = {{=getWrapperNameByType(field.type)}}.createArray();
+    {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
+    this._wrapperFields.{{=field.name}} = new {{=getWrapperNameByType(field.type)}}();
+    {{?? it.spec.msgName === 'String'}}
+    primitiveTypes.initString(this._refObject);
+    {{?}}
+    {{~}}
   }
 
   static createFromRefObject(refObject) {
@@ -359,6 +367,10 @@ class {{=objectWrapper}} {
     this._refObject.{{=field.name}} = refObject.{{=field.name}};
     {{?}}
   {{~}}
+  }
+
+  toPlainObject() {
+    return translator.toPlainObject(this);
   }
 
   static freeStruct(refObject) {
