@@ -17,7 +17,7 @@
 const assert = require('assert');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
-const translator = require('../lib/message_translator.js');
+const translator = require('../rosidl_gen/message_translator.js');
 const arrayGen = require('./array_generator.js');
 
 function isTypedArray(v) {

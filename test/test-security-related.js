@@ -17,7 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertThrowsError = require('./utils.js').assertThrowsError;
-const translator = require('../lib/message_translator.js');
+const translator = require('../rosidl_gen/message_translator.js');
 const arrayGen = require('./array_generator.js');
 
 describe('Destroying non-existent objects testing', function() {
