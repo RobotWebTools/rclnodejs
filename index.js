@@ -27,6 +27,7 @@ const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
 const validator = require('./lib/validator.js');
 const translator = require('./lib/message_translator.js');
+const rosTime = require('./lib/time.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -65,7 +66,7 @@ function getCurrentGeneratorVersion() {
  * A module that exposes the rclnodejs interfaces.
  * @exports rclnodejs
  */
-let rcl = {
+const rcl = {
   _initialized: false,
   _nodes: [],
 
@@ -248,6 +249,20 @@ let rcl = {
   createMessageObject(type) {
     return translator.toPlainObject(this.createMessage(type));
   },
+
+  rosClockGetNow() {
+    return rclnodejs.staticClockGetNow(rosTime.RCL_ROS_TIME);
+  },
+
+  systemClockGetNow() {
+    return rclnodejs.staticClockGetNow(rosTime.RCL_SYSTEM_TIME);
+  },
+
+  steadyClockGetNow() {
+    return rclnodejs.staticClockGetNow(rosTime.RCL_STEADY_TIME);
+  },
+
+  Time: rosTime.Time,
 };
 
 process.on('SIGINT', () => {
