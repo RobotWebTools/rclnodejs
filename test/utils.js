@@ -23,12 +23,21 @@ function assertMember(name, obj, member, typeName) {
   assert.deepStrictEqual(typeof member, typeName);
 }
 
-function assertThrowsError(operation, errorType, errMsg, message) {
+function assertThrowsError(operation, errors, errMsg, message) {
   assert.throws(operation, function(err) {
     var containedMsg = new RegExp(errMsg);
-    if ((err instanceof errorType) && containedMsg.test(err)) {
+
+    if (errors instanceof Array) {
+      var foundError = false;
+      errors.forEach((e) => {
+        if (err instanceof e)
+          foundError = true;
+      });
+      return foundError;
+    } else if ((err instanceof errors) && containedMsg.test(err)) {
       return true;
     }
+
     return false;
   }, message);
 }

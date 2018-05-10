@@ -34,17 +34,23 @@ describe('Rclnodejs message type data testing', function() {
     var msgBool = rclnodejs.require('std_msgs').msg.Bool;
     var msg = new msgBool();
 
+    msg.data = true;
+    assert.ok(msg.data);
+
+    msg.data = false;
+    assert.ok(!msg.data);
+
     msg.data = 1;
     assert.ok(msg.data);
 
     msg.data = 0;
-    assert.ifError(msg.data);
+    assert.ok(!msg.data);
 
     msg.data = 'ABc';
     assert.ok(msg.data);
 
     msg.data = '';
-    assert.ifError(msg.data);
+    assert.ok(!msg.data);
   });
 
   it('Char data checking', function() {
@@ -75,10 +81,10 @@ describe('Rclnodejs message type data testing', function() {
 
     assertThrowsError(() => {
       msg.data = -1;
-    }, TypeError, 'out of bounds', 'Byte should be in [0, 255]');
+    }, [TypeError, RangeError], 'out of bounds', 'Byte should be in [0, 255]');
     assertThrowsError(() => {
       msg.data = 256;
-    }, TypeError, 'out of bounds', 'Byte should be in [0, 255]');
+    }, [TypeError, RangeError], 'out of bounds', 'Byte should be in [0, 255]');
   });
 
   it('String data checking', function() {
@@ -92,10 +98,10 @@ describe('Rclnodejs message type data testing', function() {
 
     assertThrowsError(() => {
       msg.data = 1;
-    }, TypeError, 'Number/String 64-bit value required', 'String data is not a string');
+    }, [TypeError, RangeError], 'Number/String 64-bit value required', 'String data is not a string');
     assertThrowsError(() => {
       msg.data = 3.14;
-    }, TypeError, 'Number/String 64-bit value required', 'String data is not a string');
+    }, [TypeError, RangeError], 'Number/String 64-bit value required', 'String data is not a string');
   });
 
   it('Int8 data checking', function() {
@@ -109,10 +115,10 @@ describe('Rclnodejs message type data testing', function() {
 
     assertThrowsError(() => {
       msg.data = -129;
-    }, TypeError, 'out of bounds', 'Int8 should be in [-128, 127]');
+    }, [TypeError, RangeError], 'out of bounds', 'Int8 should be in [-128, 127]');
     assertThrowsError(() => {
       msg.data = 128;
-    }, TypeError, 'out of bounds', 'Int8 should be in [-128, 127]');
+    }, [TypeError, RangeError], 'out of bounds', 'Int8 should be in [-128, 127]');
   });
 
   it('UInt8 data checking', function() {
@@ -126,10 +132,10 @@ describe('Rclnodejs message type data testing', function() {
 
     assertThrowsError(() => {
       msg.data = -1;
-    }, TypeError, 'out of bounds', 'UInt8 should be in [0, 256]');
+    }, [TypeError, RangeError], 'out of bounds', 'UInt8 should be in [0, 256]');
     assertThrowsError(() => {
       msg.data = 256;
-    }, TypeError, 'out of bounds', 'UInt8 should be in [0, 256]');
+    }, [TypeError, RangeError], 'out of bounds', 'UInt8 should be in [0, 256]');
   });
 
   it('Int16 data checking', function() {
@@ -143,10 +149,10 @@ describe('Rclnodejs message type data testing', function() {
 
     assertThrowsError(() => {
       msg.data = -0x7fff - 2;
-    }, TypeError, 'out of bounds', 'Int16 should be in [-0x7fff, 0x7fff]');
+    }, [TypeError, RangeError], 'out of bounds', 'Int16 should be in [-0x7fff, 0x7fff]');
     assertThrowsError(() => {
       msg.data = 0x7ffff + 1;
-    }, TypeError, 'out of bounds', 'Int16 should be in [-0x7fff, 0x7fff]');
+    }, [TypeError, RangeError], 'out of bounds', 'Int16 should be in [-0x7fff, 0x7fff]');
   });
 
   it('UInt16 data checking', function() {
@@ -160,10 +166,10 @@ describe('Rclnodejs message type data testing', function() {
 
     assertThrowsError(() => {
       msg.data = -1;
-    }, TypeError, 'out of bounds', 'UInt16 should be in [0, 0xffff]');
+    }, [TypeError, RangeError], 'out of bounds', 'UInt16 should be in [0, 0xffff]');
     assertThrowsError(() => {
       msg.data = 0xffff + 1;
-    }, TypeError, 'out of bounds', 'UInt16 should be in [0, 0xffff]');
+    }, [TypeError, RangeError], 'out of bounds', 'UInt16 should be in [0, 0xffff]');
   });
 
   it('Int32 data checking', function() {
@@ -177,10 +183,10 @@ describe('Rclnodejs message type data testing', function() {
 
     assertThrowsError(() => {
       msg.data = -0x7fffffff - 2;
-    }, TypeError, 'out of bounds', 'Int32 should be in [-0x7fffffff - 1, 0x7fffffff]');
+    }, [TypeError, RangeError], 'out of bounds', 'Int32 should be in [-0x7fffffff - 1, 0x7fffffff]');
     assertThrowsError(() => {
       msg.data = 0x7ffffffff + 1;
-    }, TypeError, 'out of bounds', 'Int32 should be in [-0x7fffffff - 1, 0x7fffffff]');
+    }, [TypeError, RangeError], 'out of bounds', 'Int32 should be in [-0x7fffffff - 1, 0x7fffffff]');
   });
 
   it('UInt32 data checking', function() {
@@ -194,10 +200,10 @@ describe('Rclnodejs message type data testing', function() {
 
     assertThrowsError(() => {
       msg.data = -1;
-    }, TypeError, 'out of bounds', 'UInt32 should be in [0, 0xffffffff]');
+    }, [TypeError, RangeError], 'out of bounds', 'UInt32 should be in [0, 0xffffffff]');
     assertThrowsError(() => {
       msg.data = 0xffffffff + 1;
-    }, TypeError, 'out of bounds', 'UInt32 should be in [0, 0xffffffff]');
+    }, [TypeError, RangeError], 'out of bounds', 'UInt32 should be in [0, 0xffffffff]');
   });
 
   it('Int64 data checking', function() {
