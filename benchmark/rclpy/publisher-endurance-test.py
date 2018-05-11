@@ -25,7 +25,7 @@ def main():
 
   times = input('How many times do you want to run? ')
   ms = input('Please enter the period of publishing a topic in millisecond ')
-  period = int(ms) / 100
+  period = int(ms) / 1000
   print('The publisher will publish a JointState topic %s times every %sms.' % (times, ms))
   print('Begin at ' + str(datetime.now()))
 
