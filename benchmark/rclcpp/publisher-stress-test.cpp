@@ -48,14 +48,12 @@ int main(int argc, char* argv[]) {
   msg->data = std::vector<uint8_t>(1024 * 1024 * 10, 255);
 
   auto totalTimes = 0;
-  int ms = 0;
   printf("How many times do you want to run?\n");
   scanf("%d", &totalTimes);
-  printf("Please enter the period of publishing a topic in millisecond\n");
-  scanf("%d", &ms);
+
   printf(
       "The publisher will publish a UInt8MultiArray topic(contains a size of "
-      "10MB array) %d times every %dms.\n", totalTimes, ms);
+      "10MB array) %d times.\n", totalTimes);
   printf("Begin at %s\n", GetCurrentTime());
 
   auto node = rclcpp::Node::make_shared("stress_publisher_rclcpp");
@@ -63,8 +61,6 @@ int main(int argc, char* argv[]) {
       node->create_publisher<std_msgs::msg::UInt8MultiArray>("stress_topic");
   auto sentTimes = 0;
 
-  auto period = std::chrono::milliseconds(ms);
-  rclcpp::WallRate wall_rate(period);
   while (rclcpp::ok()) {
     if (sentTimes > totalTimes) {
       rclcpp::shutdown();
@@ -74,7 +70,6 @@ int main(int argc, char* argv[]) {
       sentTimes++;
       rclcpp::spin_some(node);
     }
-    wall_rate.sleep();
   }
 
   return 0;
