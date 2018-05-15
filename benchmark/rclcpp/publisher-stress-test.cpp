@@ -23,6 +23,13 @@
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
 
+  auto totalTimes = 0;
+  auto amount = 0;
+  printf("How many times do you want to run?\n");
+  scanf("%d", &totalTimes);
+  printf("The amount of data(MB) to be sent in one loop.\n");
+  scanf("%d", &amount);
+
   auto heightDim = std::make_shared<std_msgs::msg::MultiArrayDimension>();
   heightDim->label = "height";
   heightDim->size = 10;
@@ -45,15 +52,11 @@ int main(int argc, char* argv[]) {
 
   auto msg = std::make_shared<std_msgs::msg::UInt8MultiArray>();
   msg->layout = *layout;
-  msg->data = std::vector<uint8_t>(1024 * 1024 * 10, 255);
-
-  auto totalTimes = 0;
-  printf("How many times do you want to run?\n");
-  scanf("%d", &totalTimes);
+  msg->data = std::vector<uint8_t>(1024 * 1024 * amount, 255);
 
   printf(
       "The publisher will publish a UInt8MultiArray topic(contains a size of "
-      "10MB array) %d times.\n", totalTimes);
+      "%dMB array) %d times.\n", amount, totalTimes);
   printf("Begin at %s\n", GetCurrentTime());
 
   auto node = rclcpp::Node::make_shared("stress_publisher_rclcpp");

@@ -16,48 +16,59 @@
 
 /* eslint-disable camelcase */
 const rclnodejs = require('../../index.js');
+const readline = require('readline');
 
-const mapData = {
-  map: {
-    header: {
-      stamp: {
-        sec: 123456,
-        nanosec: 789,
-      },
-      frame_id: 'main_frame'
-    },
-    info: {
-      map_load_time: {
-        sec: 123456,
-        nanosec: 789,
-      },
-      resolution: 1.0,
-      width: 1024,
-      height: 768,
-      origin: {
-        position: {
-          x: 0.0,
-          y: 0.0,
-          z: 0.0
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+rl.question('The amount of data(MB) to be sent for each request. ', (amount) => {
+  amount = parseInt(amount, 10);
+  const mapData = {
+    map: {
+      header: {
+        stamp: {
+          sec: 123456,
+          nanosec: 789,
         },
-        orientation: {
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-          w: 0.0
+        frame_id: 'main_frame'
+      },
+      info: {
+        map_load_time: {
+          sec: 123456,
+          nanosec: 789,
+        },
+        resolution: 1.0,
+        width: 1024,
+        height: 768,
+        origin: {
+          position: {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0
+          },
+          orientation: {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            w: 0.0
+          }
         }
-      }
-    },
-    data: Int8Array.from({length: 1024 * 1024 * 10}, (v, k) => k)
-  }
-};
+      },
+      data: Int8Array.from({length: 1024 * 1024 * amount}, (v, k) => k)
+    }
+  };
 
-rclnodejs.init().then(() => {
-  let node = rclnodejs.createNode('stress_service_rclnodejs');
-  node.createService('nav_msgs/srv/GetMap', 'get_map', (request, response) => {
-    return mapData;
+  rclnodejs.init().then(() => {
+    let node = rclnodejs.createNode('stress_service_rclnodejs');
+    node.createService('nav_msgs/srv/GetMap', 'get_map', (request, response) => {
+      return mapData;
+    });
+    rclnodejs.spin(node);
+  }).catch((e) => {
+    console.log(`Error: ${e}`);
   });
-  rclnodejs.spin(node);
-}).catch((e) => {
-  console.log(`Error: ${e}`);
+
+  rl.close();
 });

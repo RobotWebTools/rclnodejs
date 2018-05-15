@@ -24,40 +24,43 @@ const rl = readline.createInterface({
 });
 
 rl.question('How many times do you want to run? ', (times) => {
-  const message = {
-    layout: {
-      dim: [
-        {label: 'height',  size: 10, stride: 600},
-        {label: 'width',   size: 20, stride: 60},
-        {label: 'channel', size: 3,  stride: 4},
-      ],
-      data_offset: 0,
-    },
-    data: Uint8Array.from({length: 1024 * 1024 * 10}, (v, k) => k)
-  };
+  rl.question('The amount of data(MB) to be sent in one loop. ', (amount) => {
+    amount = parseInt(amount, 10);
+    const message = {
+      layout: {
+        dim: [
+          {label: 'height',  size: 10, stride: 600},
+          {label: 'width',   size: 20, stride: 60},
+          {label: 'channel', size: 3,  stride: 4},
+        ],
+        data_offset: 0,
+      },
+      data: Uint8Array.from({length: 1024 * 1024 * amount}, (v, k) => k)
+    };
 
-  rclnodejs.init().then(() => {
-    console.log('The publisher will publish a UInt8MultiArray topic(contains a size of 10MB array)' +
-        `${times} times.`);
-    console.log(`Begin at ${new Date().toString()}.`);
+    rclnodejs.init().then(() => {
+      console.log(`The publisher will publish a UInt8MultiArray topic(contains a size of ${amount}MB array)` +
+          ` ${times} times.`);
+      console.log(`Begin at ${new Date().toString()}.`);
 
-    let node = rclnodejs.createNode('stress_publisher_rclnodejs');
-    const publisher = node.createPublisher('std_msgs/msg/UInt8MultiArray', 'stress_topic');
-    let sentTimes = 0;
-    let totalTimes = parseInt(times, 10);
+      let node = rclnodejs.createNode('stress_publisher_rclnodejs');
+      const publisher = node.createPublisher('std_msgs/msg/UInt8MultiArray', 'stress_topic');
+      let sentTimes = 0;
+      let totalTimes = parseInt(times, 10);
 
-    setImmediate(() => {
-      while (sentTimes++ < totalTimes) {
-        publisher.publish(message);
-      }
-      rclnodejs.shutdown();
-      console.log(`End at ${new Date().toString()}`);
+      setImmediate(() => {
+        while (sentTimes++ < totalTimes) {
+          publisher.publish(message);
+        }
+        rclnodejs.shutdown();
+        console.log(`End at ${new Date().toString()}`);
+      });
+
+      rclnodejs.spin(node);
+    }).catch((err) => {
+      console.log(err);
     });
 
-    rclnodejs.spin(node);
-  }).catch((err) => {
-    console.log(err);
+    rl.close();
   });
-
-  rl.close();
 });

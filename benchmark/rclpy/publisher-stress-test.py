@@ -22,6 +22,10 @@ import threading
 def main():
   rclpy.init()
 
+  times = input('How many times do you want to run? ')
+  amount = input('The amount of data(MB) to be sent in one loop. ')
+  amount = int(amount)
+
   widthDim = MultiArrayDimension()
   widthDim.label = 'width'
   widthDim.size = 20;
@@ -43,10 +47,9 @@ def main():
 
   multiArray = UInt8MultiArray()
   multiArray.layout = layout
-  multiArray.data = [x & 0xff for x in range(1024 * 1024 * 10)]
+  multiArray.data = [x & 0xff for x in range(1024 * 1024 * amount)]
 
-  times = input('How many times do you want to run? ')
-  print('The publisher will publish a UInt8MultiArray topic(contains a size of 10MB array) %s times.' % times)
+  print('The publisher will publish a UInt8MultiArray topic(contains a size of %dMB array) %s times.' % (amount, times))
   print('Begin at ' + str(datetime.now()))
   node = rclpy.create_node('stress_publisher_rclpy')
   publisher = node.create_publisher(UInt8MultiArray, 'stress_topic')
