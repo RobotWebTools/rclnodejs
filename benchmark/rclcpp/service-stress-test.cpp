@@ -20,10 +20,15 @@
 
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
+
+  auto amount = 0;
+  printf("The amount of data(MB) to be sent for each request.\n");
+  scanf("%d", &amount);
+
   auto node = rclcpp::Node::make_shared("stress_service_rclcpp");
   auto sub = node->create_service<nav_msgs::srv::GetMap>(
       "get_map",
-      [](const std::shared_ptr<rmw_request_id_t> request_header,
+      [amount](const std::shared_ptr<rmw_request_id_t> request_header,
          const std::shared_ptr<nav_msgs::srv::GetMap::Request> request,
          const std::shared_ptr<nav_msgs::srv::GetMap::Response> response) {
         (void)request_header;
@@ -43,7 +48,7 @@ int main(int argc, char* argv[]) {
         response->map.info.origin.orientation.y = 0.0;
         response->map.info.origin.orientation.z = 0.0;
         response->map.info.origin.orientation.w = 0.0;
-        response->map.data = std::vector<int8_t>(1024 * 1024 * 10, 125);
+        response->map.data = std::vector<int8_t>(1024 * 1024 * amount, 125);
       });
   rclcpp::spin(node);
 

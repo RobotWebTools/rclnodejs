@@ -22,6 +22,9 @@ from builtin_interfaces.msg import *
 from sensor_msgs.msg import *
 from geometry_msgs.msg import *
 
+amount = input('The amount of data(MB) to be sent for each request. ')
+amount = int(amount)
+
 mapData = OccupancyGrid()
 stamp = Time();
 stamp.sec = 123456
@@ -57,7 +60,7 @@ info.origin = origin;
 
 mapData.header = header
 mapData.info = info
-mapData.data = [x & 0x7f for x in range(1024 * 1024 * 10)]
+mapData.data = [x & 0x7f for x in range(1024 * 1024 * amount)]
 
 def callback(request, response):
   global mapData
