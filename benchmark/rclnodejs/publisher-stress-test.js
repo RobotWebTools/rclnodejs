@@ -24,7 +24,7 @@ const rl = readline.createInterface({
 });
 
 rl.question('How many times do you want to run? ', (times) => {
-  rl.question('The amount of data(MB) to be sent in one loop. ', (amount) => {
+  rl.question('The amount of data(KB) to be sent in one loop. ', (amount) => {
     amount = parseInt(amount, 10);
     const message = {
       layout: {
@@ -35,11 +35,11 @@ rl.question('How many times do you want to run? ', (times) => {
         ],
         data_offset: 0,
       },
-      data: Uint8Array.from({length: 1024 * 1024 * amount}, (v, k) => k)
+      data: Uint8Array.from({length: 1024 * amount}, (v, k) => k)
     };
 
     rclnodejs.init().then(() => {
-      console.log(`The publisher will publish a UInt8MultiArray topic(contains a size of ${amount}MB array)` +
+      console.log(`The publisher will publish a UInt8MultiArray topic(contains a size of ${amount}KB array)` +
           ` ${times} times.`);
       console.log(`Begin at ${new Date().toString()}.`);
 

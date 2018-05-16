@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
 
   auto amount = 0;
-  printf("The amount of data(MB) to be sent for each request.\n");
+  printf("The amount of data(KB) to be sent for each request.\n");
   scanf("%d", &amount);
 
   auto node = rclcpp::Node::make_shared("stress_service_rclcpp");
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
         response->map.info.origin.orientation.y = 0.0;
         response->map.info.origin.orientation.z = 0.0;
         response->map.info.origin.orientation.w = 0.0;
-        response->map.data = std::vector<int8_t>(1024 * 1024 * amount, 125);
+        response->map.data = std::vector<int8_t>(1024 * amount, 125);
       });
   rclcpp::spin(node);
 
