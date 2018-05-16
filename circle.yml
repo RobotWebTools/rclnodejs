@@ -14,8 +14,8 @@ dependencies:
     - python3 -m pip install pyyaml setuptools argcomplete pyparsing cmake
     - mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
     - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
-    - nvm install v8.11.1
-    - nvm alias default v8.11.1
+    - nvm install v8.11.2
+    - nvm alias default v8.11.2
 
   override:
     - node --version && npm --version && rm -rf ./node_modules/
