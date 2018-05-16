@@ -23,7 +23,7 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-rl.question('The amount of data(MB) to be sent for each request. ', (amount) => {
+rl.question('The amount of data(KB) to be sent for each request. ', (amount) => {
   amount = parseInt(amount, 10);
   const mapData = {
     map: {
@@ -56,7 +56,7 @@ rl.question('The amount of data(MB) to be sent for each request. ', (amount) => 
           }
         }
       },
-      data: Int8Array.from({length: 1024 * 1024 * amount}, (v, k) => k)
+      data: Int8Array.from({length: 1024 * amount}, (v, k) => k)
     }
   };
 
