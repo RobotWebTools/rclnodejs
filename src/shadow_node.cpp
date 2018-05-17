@@ -107,7 +107,8 @@ NAN_METHOD(ShadowNode::SyncHandles) {
 void ShadowNode::Execute() {
   Nan::HandleScope scope;
   v8::Local<v8::Value> argv[1];
-  Nan::MakeCallback(Nan::New(this->persistent()), "execute", 0, argv);
+  Nan::AsyncResource res("shadow_node");
+  res.runInAsyncScope(Nan::New(this->persistent()), "execute", 0, argv);
 }
 
 void ShadowNode::CatchException(std::exception_ptr e_ptr) {
