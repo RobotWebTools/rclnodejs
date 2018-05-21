@@ -93,7 +93,8 @@ describe('Multiple nodes interation testing', function() {
         }
       });
 
-      var cppPubPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'talker');
+      var cppPubPath = path.join(utils.getAvailablePath(process.env['AMENT_PREFIX_PATH'],
+        ['lib', 'demo_nodes_cpp', 'talker']));
       var cppPublisher = childProcess.spawn(cppPubPath, ['-t', 'pycpp_js_chatter']);
       var pyPubPath = path.join(__dirname, 'py', 'talker.py');
       var pyPublisher = utils.launchPythonProcess([pyPubPath, 'pycpp_js_chatter']);
@@ -109,10 +110,8 @@ describe('Multiple nodes interation testing', function() {
       const request1 = {a: 1, b: 2};
       const request2 = {a: 3, b: 4};
 
-      var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],
-        'lib',
-        'demo_nodes_cpp',
-        'add_two_ints_server');
+      var cppServicePath = path.join(utils.getAvailablePath(process.env['AMENT_PREFIX_PATH'],
+        ['lib', 'demo_nodes_cpp', 'add_two_ints_server']));
       var cppService = childProcess.spawn(cppServicePath, ['-s', 'js_pycpp_add_two_ints']);
       var pyServicePath = path.join(__dirname, 'py', 'service.py');
       var pyService = utils.launchPythonProcess([pyServicePath, 'js_pycpp_add_two_ints']);
