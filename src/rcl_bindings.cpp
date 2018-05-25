@@ -200,17 +200,21 @@ NAN_METHOD(CreateSubscription) {
   const rosidl_message_type_support_t* ts =
       GetMessageTypeSupport(package_name, message_sub_folder, message_name);
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_subscription_init(subscription, node, ts, topic.c_str(),
-                            &subscription_ops),
-      rcl_get_error_string_safe());
+  if (ts) {
+    THROW_ERROR_IF_NOT_EQUAL(
+        RCL_RET_OK,
+        rcl_subscription_init(subscription, node, ts, topic.c_str(),
+                              &subscription_ops),
+        rcl_get_error_string_safe());
 
-  auto js_obj =
-      RclHandle::NewInstance(subscription, node_handle, [subscription, node] {
-        return rcl_subscription_fini(subscription, node);
-      });
-  info.GetReturnValue().Set(js_obj);
+    auto js_obj =
+        RclHandle::NewInstance(subscription, node_handle, [subscription, node] {
+          return rcl_subscription_fini(subscription, node);
+        });
+    info.GetReturnValue().Set(js_obj);
+  } else {
+    Nan::ThrowError(GetErrorMessageAndClear());
+  }
 }
 
 NAN_METHOD(CreatePublisher) {
@@ -231,27 +235,31 @@ NAN_METHOD(CreatePublisher) {
   const rosidl_message_type_support_t* ts =
       GetMessageTypeSupport(package_name, message_sub_folder, message_name);
 
-  // Using default options
-  rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
-  auto qos_profile = std::make_unique<rmw_qos_profile_t>();
-  qos_profile.reset(GetQoSProfile(info[5]));
+  if (ts) {
+    // Using default options
+    rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
+    auto qos_profile = std::make_unique<rmw_qos_profile_t>();
+    qos_profile.reset(GetQoSProfile(info[5]));
 
-  if (qos_profile) {
-    publisher_ops.qos = *qos_profile;
+    if (qos_profile) {
+      publisher_ops.qos = *qos_profile;
+    }
+
+    // Initialize the publisher
+    THROW_ERROR_IF_NOT_EQUAL(
+        rcl_publisher_init(publisher, node, ts, topic.c_str(), &publisher_ops),
+        RCL_RET_OK, rcl_get_error_string_safe());
+
+    // Wrap the handle into JS object
+    auto js_obj = RclHandle::NewInstance(
+        publisher, node_handle,
+        [publisher, node]() { return rcl_publisher_fini(publisher, node); });
+
+    // Everything is done
+    info.GetReturnValue().Set(js_obj);
+  } else {
+    Nan::ThrowError(GetErrorMessageAndClear());
   }
-
-  // Initialize the publisher
-  THROW_ERROR_IF_NOT_EQUAL(
-      rcl_publisher_init(publisher, node, ts, topic.c_str(), &publisher_ops),
-      RCL_RET_OK, rcl_get_error_string_safe());
-
-  // Wrap the handle into JS object
-  auto js_obj = RclHandle::NewInstance(
-      publisher, node_handle,
-      [publisher, node]() { return rcl_publisher_fini(publisher, node); });
-
-  // Everything is done
-  info.GetReturnValue().Set(js_obj);
 }
 
 NAN_METHOD(Publish) {
@@ -274,26 +282,31 @@ NAN_METHOD(CreateClient) {
 
   const rosidl_service_type_support_t* ts =
       GetServiceTypeSupport(package_name, interface_name);
-  rcl_client_t* client =
-      reinterpret_cast<rcl_client_t*>(malloc(sizeof(rcl_client_t)));
-  *client = rcl_get_zero_initialized_client();
-  rcl_client_options_t client_ops = rcl_client_get_default_options();
-  auto qos_profile = std::make_unique<rmw_qos_profile_t>();
-  qos_profile.reset(GetQoSProfile(info[4]));
 
-  if (qos_profile) {
-    client_ops.qos = *qos_profile;
+  if (ts) {
+    rcl_client_t* client =
+        reinterpret_cast<rcl_client_t*>(malloc(sizeof(rcl_client_t)));
+    *client = rcl_get_zero_initialized_client();
+    rcl_client_options_t client_ops = rcl_client_get_default_options();
+    auto qos_profile = std::make_unique<rmw_qos_profile_t>();
+    qos_profile.reset(GetQoSProfile(info[4]));
+
+    if (qos_profile) {
+      client_ops.qos = *qos_profile;
+    }
+
+    THROW_ERROR_IF_NOT_EQUAL(
+        rcl_client_init(client, node, ts, service_name.c_str(), &client_ops),
+        RCL_RET_OK, rcl_get_error_string_safe());
+
+    auto js_obj = RclHandle::NewInstance(client, node_handle, [client, node] {
+      return rcl_client_fini(client, node);
+    });
+
+    info.GetReturnValue().Set(js_obj);
+  } else {
+    Nan::ThrowError(GetErrorMessageAndClear());
   }
-
-  THROW_ERROR_IF_NOT_EQUAL(
-      rcl_client_init(client, node, ts, service_name.c_str(), &client_ops),
-      RCL_RET_OK, rcl_get_error_string_safe());
-
-  auto js_obj = RclHandle::NewInstance(client, node_handle, [client, node] {
-    return rcl_client_fini(client, node);
-  });
-
-  info.GetReturnValue().Set(js_obj);
 }
 
 NAN_METHOD(SendRequest) {
@@ -339,25 +352,30 @@ NAN_METHOD(CreateService) {
 
   const rosidl_service_type_support_t* ts =
       GetServiceTypeSupport(package_name, interface_name);
-  rcl_service_t* service =
-      reinterpret_cast<rcl_service_t*>(malloc(sizeof(rcl_service_t)));
-  *service = rcl_get_zero_initialized_service();
-  rcl_service_options_t service_ops = rcl_service_get_default_options();
-  auto qos_profile = std::make_unique<rmw_qos_profile_t>();
-  qos_profile.reset(GetQoSProfile(info[4]));
 
-  if (qos_profile) {
-    service_ops.qos = *qos_profile;
+  if (ts) {
+    rcl_service_t* service =
+        reinterpret_cast<rcl_service_t*>(malloc(sizeof(rcl_service_t)));
+    *service = rcl_get_zero_initialized_service();
+    rcl_service_options_t service_ops = rcl_service_get_default_options();
+    auto qos_profile = std::make_unique<rmw_qos_profile_t>();
+    qos_profile.reset(GetQoSProfile(info[4]));
+
+    if (qos_profile) {
+      service_ops.qos = *qos_profile;
+    }
+
+    THROW_ERROR_IF_NOT_EQUAL(
+        rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
+        RCL_RET_OK, rcl_get_error_string_safe());
+    auto js_obj = RclHandle::NewInstance(service, node_handle, [service, node] {
+      return rcl_service_fini(service, node);
+    });
+
+    info.GetReturnValue().Set(js_obj);
+  } else {
+    Nan::ThrowError(GetErrorMessageAndClear());
   }
-
-  THROW_ERROR_IF_NOT_EQUAL(
-      rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
-      RCL_RET_OK, rcl_get_error_string_safe());
-  auto js_obj = RclHandle::NewInstance(service, node_handle, [service, node] {
-    return rcl_service_fini(service, node);
-  });
-
-  info.GetReturnValue().Set(js_obj);
 }
 
 NAN_METHOD(RclTakeRequest) {

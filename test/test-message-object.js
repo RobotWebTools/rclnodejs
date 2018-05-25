@@ -105,6 +105,7 @@ describe('Rclnodejs createMessage() testing', function() {
     'std_msgs/srv/String',
     'msg/String',
     '/msg/String',
+    'unknown/msg/Unknown',
     {package: 'std_msgs', type: 'msg', name: 'CString'},
   ].forEach((testData) => {
     it('expecting exception when passing ' + testData.toString(), function() {
@@ -188,6 +189,7 @@ describe('Rclnodejs createMessageObject() testing', function() {
     'std_msgs/srv/String',
     'msg/String',
     '/msg/String',
+    'unknown/msg/Unknown',
     {package: 'std_msgs', type: 'msg', name: 'CString'},
   ].forEach((testData) => {
     it('expecting exception when passing ' + testData.toString(), function() {

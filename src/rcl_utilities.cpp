@@ -43,6 +43,8 @@ const char* lib_ext = ".dll";
 void* GetTypeSupportFunctionByInterfaceSymbolName(
     const std::string& symbol_name,
     const std::string& lib_name) {
+  // If the dlopen fails for any reason, it will return nullptr.
+  // You can use GetErrorMessageAndClear() to get error diagnostic.
   void* lib = dlopen(lib_name.c_str(), RTLD_NOW | RTLD_GLOBAL);
 
   if (lib)
@@ -77,5 +79,7 @@ const rosidl_service_type_support_t* GetServiceTypeSupport(
   else
     return nullptr;
 }
+
+const char* GetErrorMessageAndClear() { return dlerror(); }
 
 }  // namespace rclnodejs
