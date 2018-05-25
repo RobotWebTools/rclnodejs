@@ -31,6 +31,8 @@ const rosidl_service_type_support_t* GetServiceTypeSupport(
     const std::string& package_name,
     const std::string& service_name);
 
+const char* GetErrorMessageAndClear();
+
 }  // namespace rclnodejs
 
 #endif
