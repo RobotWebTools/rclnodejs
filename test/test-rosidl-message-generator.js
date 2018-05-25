@@ -15,6 +15,7 @@
 'use strict';
 
 const assert = require('assert');
+const os = require('os');
 const rclnodejs = require('../index.js');
 
 describe('ROSIDL Node.js message generator test suite', function() {
@@ -30,7 +31,9 @@ describe('ROSIDL Node.js message generator test suite', function() {
   it('Try require all message classes', function() {
     this.timeout(60 * 1000);
     const packages = require('../rosidl_gen/packages.js');
-    const installedPackagesRoot = process.env.AMENT_PREFIX_PATH.split(':');
+    const installedPackagesRoot =  (os.type() === 'Windows_NT')
+      ? process.env.AMENT_PREFIX_PATH.split(';')
+      : process.env.AMENT_PREFIX_PATH.split(':');
     let promises = [];
     installedPackagesRoot.forEach((path) => {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
