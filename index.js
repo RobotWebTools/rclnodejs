@@ -16,8 +16,8 @@
 
 const compareVersions = require('compare-versions');
 const debug = require('debug')('rclnodejs');
-const fs = require('mz/fs');
-const generator = require('./rosidl_gen/generator.js');
+const fs = require('fs');
+const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
 const Node = require('./lib/node.js');

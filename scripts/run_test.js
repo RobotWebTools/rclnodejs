@@ -20,13 +20,7 @@ const os = require('os');
 const path = require('path');
 
 let actionPath = path.join(path.dirname(__dirname), 'test', 'dodishes_action');
-let envVarSplitter;
-if (os.platform() === 'win32') {
-  envVarSplitter = ';';
-} else {
-  envVarSplitter = ':';
-}
-process.env.AMENT_PREFIX_PATH = process.env.AMENT_PREFIX_PATH + envVarSplitter + actionPath;
+process.env.AMENT_PREFIX_PATH = process.env.AMENT_PREFIX_PATH + path.delimiter + actionPath;
 
 let mocha = new Mocha();
 const testDir = path.join(__dirname, '../test/');

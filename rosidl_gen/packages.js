@@ -30,10 +30,15 @@ function getPackageName(filePath, amentExecuted) {
   if (amentExecuted) {
     return filePath.match(/\w+\/share\/(\w+)\//)[1];
   }
-  // If the |amentExecuted| equals to false, the name of the folder where this file locates
-  // will be assigned as the name of the package.
+
   let folders = path.parse(filePath).dir.split('/');
-  return folders.pop();
+  let packageName = folders.pop();
+
+  // If |packageName| equals to the file's extension, e.g. msg/srv, one level
+  // up directory will be used as the package name.
+  return packageName === path.parse(filePath).ext.substr(1)
+    ? folders.pop()
+    : packageName;
 };
 
 function getSubFolder(filePath, amentExecuted) {
@@ -59,33 +64,33 @@ function grabInterfaceInfo(filePath, amentExecuted) {
 function addInterfaceInfo(info, type) {
   let pkgName = info.pkgName;
   if (!pkgMap.has(pkgName)) {
-    pkgMap.set(pkgName, {messages: [], services: [], actions: []});
+    pkgMap.set(pkgName, {messages: [], services: [], actions: [], pkgName});
   }
   let pkg = pkgMap.get(pkgName);
   pkg[type].push(info);
 }
 
-function findPackagesInDirectory(dir, ignoreAction = false) {
+function findPackagesInDirectory(dir) {
   return new Promise((resolve, reject) => {
     let amentExecuted = true;
 
     // If there is a folder named 'share' under the root path, we consider that
     // the ament build tool has been executed and |amentExecuted| will be true.
-    fs.access((dir + '/share'), (err) => {
+    fs.access(path.join(dir, 'share'), (err) => {
       if (err) {
         amentExecuted = false;
       }
-      dir = amentExecuted ? (dir + '/share') : dir;
+      dir = amentExecuted ? path.join(dir, 'share') : dir;
 
       let walker = walk.walk(dir, {followLinks: true});
       pkgMap.clear();
       walker.on('file', (root, file, next) => {
         if (path.extname(file.name) === '.msg') {
-          addInterfaceInfo(grabInterfaceInfo(root + '/' + file.name, amentExecuted), 'messages');
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages');
         } else if (path.extname(file.name) === '.srv') {
-          addInterfaceInfo(grabInterfaceInfo(root + '/' + file.name, amentExecuted), 'services');
-        } else if (!ignoreAction && path.extname(file.name) === '.action') {
-          addInterfaceInfo(grabInterfaceInfo(root + '/' + file.name, amentExecuted), 'actions');
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services');
+        } else if (path.extname(file.name) === '.action') {
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'actions');
         }
         next();
       });
