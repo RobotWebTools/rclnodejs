@@ -51,7 +51,7 @@ describe('Testing message files generated from an action file', function() {
     testCasesData.forEach((testData) => {
       it(testData + ' should be generated', function() {
         // eslint-disable-next-line
-        assert.ok(fs.existsSync(path.join(testActionDir, actionName + testData)));
+        assert.ok(fs.existsSync(path.join(testActionDir, 'msg', actionName + testData)));
       });
     });
   });

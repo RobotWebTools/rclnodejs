@@ -57,13 +57,7 @@ function launchPythonProcess(cmdline) {
 
 function getAvailablePath(amentPrefixPath, otherDirs) {
   var availablePath;
-  var prefixPaths = [];
-
-  if (os.platform() === 'win32') {
-    prefixPaths = amentPrefixPath.split(';');
-  } else {
-    prefixPaths = amentPrefixPath.split(':');
-  }
+  var prefixPaths = amentPrefixPath.split(path.delimiter);
 
   prefixPaths.forEach((prefixPath) => {
     var appendedPath = prefixPath;
@@ -72,7 +66,7 @@ function getAvailablePath(amentPrefixPath, otherDirs) {
     });
 
     // eslint-disable-next-line
-    if (fs.existsSync(appendedPath)) {
+    if (fs.existsSync(appendedPath) || fs.existsSync(appendedPath + '.exe')) {
       availablePath = appendedPath;
     }
   });
