@@ -27,8 +27,8 @@ rl.question('How many times do you want to run? ', (times) => {
   rclnodejs.init().then(() => {
     console.log('The client will send a GetMap request continuously(response contains a size of 10MB array)' +
       ` until receiving response ${times} times.`);
-    console.log(`Begin at ${new Date().toString()}.`);
 
+    const time = process.hrtime();
     const node = rclnodejs.createNode('stress_client_rclnodejs');
     const client = node.createClient('nav_msgs/srv/GetMap', 'get_map');
     let sentTimes = 0;
@@ -39,7 +39,8 @@ rl.question('How many times do you want to run? ', (times) => {
       client.sendRequest({_dummy: true}, (response) => {
         if (++receivedTimes > totalTimes) {
           rclnodejs.shutdown();
-          console.log(`End at ${new Date().toString()}`);
+          const diff = process.hrtime(time);
+          console.log(`Benchmark took ${diff[0]} seconds and ${diff[1]} nanoseconds`);
         } else {
           setImmediate(sendRequest);
         }

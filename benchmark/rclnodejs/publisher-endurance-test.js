@@ -43,8 +43,8 @@ rl.question('How many times do you want to run? ', (times) => {
       let period = parseInt(ms, 10);
 
       console.log(`The publisher will publish a JointState topic ${times} times every ${period}ms.`);
-      console.log(`Begin at ${new Date().toString()}.`);
 
+      const time = process.hrtime();
       let node = rclnodejs.createNode('endurance_publisher_rclnodejs');
       let publisher = node.createPublisher(JointState, 'endurance_topic');
       let sentTimes = 0;
@@ -54,7 +54,8 @@ rl.question('How many times do you want to run? ', (times) => {
         if (sentTimes++ > totalTimes) {
           clearInterval(timer);
           rclnodejs.shutdown();
-          console.log(`End at ${new Date().toString()}`);
+          const diff = process.hrtime(time);
+          console.log(`Benchmark took ${diff[0]} seconds and ${diff[1]} nanoseconds`);
         } else {
           publisher.publish(state);
         }}, period);
