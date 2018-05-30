@@ -25,8 +25,8 @@ const rl = readline.createInterface({
 rl.question('How many times do you want to run? ', (times) => {
   rclnodejs.init().then(() => {
     console.log(`The client will send a SetBool request continuously until receiving response ${times} times.`);
-    console.log(`Begin at ${new Date().toString()}.`);
 
+    const time = process.hrtime();
     const node = rclnodejs.createNode('endurance_client_rclnodejs');
     const client = node.createClient('std_srvs/srv/SetBool', 'set_flag');
     let sentTimes = 0;
@@ -36,7 +36,8 @@ rl.question('How many times do you want to run? ', (times) => {
       client.sendRequest(true, (response) => {
         if (++receivedTimes > totalTimes) {
           rclnodejs.shutdown();
-          console.log(`End at ${new Date().toString()}`);
+          const diff = process.hrtime(time);
+          console.log(`Benchmark took ${diff[0]} seconds and ${diff[1]} nanoseconds`);
         } else {
           setImmediate(sendRequest);
         }

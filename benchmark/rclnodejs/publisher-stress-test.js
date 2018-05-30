@@ -41,8 +41,8 @@ rl.question('How many times do you want to run? ', (times) => {
     rclnodejs.init().then(() => {
       console.log(`The publisher will publish a UInt8MultiArray topic(contains a size of ${amount}KB array)` +
           ` ${times} times.`);
-      console.log(`Begin at ${new Date().toString()}.`);
 
+      const time = process.hrtime();
       let node = rclnodejs.createNode('stress_publisher_rclnodejs');
       const publisher = node.createPublisher('std_msgs/msg/UInt8MultiArray', 'stress_topic');
       let sentTimes = 0;
@@ -53,7 +53,8 @@ rl.question('How many times do you want to run? ', (times) => {
           publisher.publish(message);
         }
         rclnodejs.shutdown();
-        console.log(`End at ${new Date().toString()}`);
+        const diff = process.hrtime(time);
+        console.log(`Benchmark took ${diff[0]} seconds and ${diff[1]} nanoseconds`);
       });
 
       rclnodejs.spin(node);
