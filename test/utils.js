@@ -72,7 +72,7 @@ function getAvailablePath(amentPrefixPath, otherDirs) {
     });
 
     // eslint-disable-next-line
-    if (fs.existsSync(appendedPath)) {
+    if (fs.existsSync(appendedPath) || fs.existsSync(appendedPath + '.exe')) {
       availablePath = appendedPath;
     }
   });
