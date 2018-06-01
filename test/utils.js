@@ -15,7 +15,9 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
 const os = require('os');
+const path = require('path');
 const childProcess = require('child_process');
 
 function assertMember(name, obj, member, typeName) {
@@ -52,6 +54,35 @@ function launchPythonProcess(cmdline) {
   }
   return pythonProcess;
 }
-module.exports.assertMember = assertMember;
-module.exports.assertThrowsError = assertThrowsError;
-module.exports.launchPythonProcess = launchPythonProcess;
+
+function getAvailablePath(amentPrefixPath, otherDirs) {
+  var availablePath;
+  var prefixPaths = [];
+
+  if (os.platform() === 'win32') {
+    prefixPaths = amentPrefixPath.split(';');
+  } else {
+    prefixPaths = amentPrefixPath.split(':');
+  }
+
+  prefixPaths.forEach((prefixPath) => {
+    var appendedPath = prefixPath;
+    otherDirs.forEach((dir) => {
+      appendedPath = path.join(appendedPath, dir);
+    });
+
+    // eslint-disable-next-line
+    if (fs.existsSync(appendedPath)) {
+      availablePath = appendedPath;
+    }
+  });
+
+  return availablePath;
+}
+
+module.exports = {
+  assertMember: assertMember,
+  assertThrowsError: assertThrowsError,
+  launchPythonProcess: launchPythonProcess,
+  getAvailablePath: getAvailablePath
+};
