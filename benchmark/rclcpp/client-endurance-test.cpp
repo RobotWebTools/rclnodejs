@@ -29,8 +29,7 @@ int main(int argc, char* argv[]) {
   printf(
       "The client will send a SetBool request every 100ms until receiving"
       " response %d times.\n", totalTimes);
-  printf("Begin at %s\n", GetCurrentTime());
-
+  auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("endurance_client_rclcpp");
   auto client = node->create_client<std_srvs::srv::SetBool>("set_flag");
   auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
@@ -39,7 +38,8 @@ int main(int argc, char* argv[]) {
   while (rclcpp::ok()) {
     if (receivedTimes > totalTimes) {
       rclcpp::shutdown();
-      printf("End at %s\n", GetCurrentTime());
+      auto end = std::chrono::high_resolution_clock::now();
+      LogTimeConsumption(start, end);
     } else {
       auto result_future = client->async_send_request(request);
       if (rclcpp::spin_until_future_complete(node, result_future) !=

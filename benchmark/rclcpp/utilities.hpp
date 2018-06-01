@@ -12,9 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <ctime>
+#include <chrono>
+#include <iostream>
 
-char* GetCurrentTime() {
-  std::time_t result = std::time(nullptr);
-  return std::asctime(std::localtime(&result));
+template<class Clock>
+void LogTimeConsumption(const std::chrono::time_point<Clock> start, const std::chrono::time_point<Clock> end) {
+  auto consumption_in_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  std::cout << "Benchmark took "
+            << consumption_in_ms.count() / 1000 << " and "
+            << consumption_in_ms.count() % 1000 << " milliseconds"
+            << std::endl;
 }

@@ -57,8 +57,8 @@ int main(int argc, char* argv[]) {
   printf(
       "The publisher will publish a UInt8MultiArray topic(contains a size of "
       "%dKB array) %d times.\n", amount, totalTimes);
-  printf("Begin at %s\n", GetCurrentTime());
 
+  auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("stress_publisher_rclcpp");
   auto publisher =
       node->create_publisher<std_msgs::msg::UInt8MultiArray>("stress_topic");
@@ -67,7 +67,8 @@ int main(int argc, char* argv[]) {
   while (rclcpp::ok()) {
     if (sentTimes > totalTimes) {
       rclcpp::shutdown();
-      printf("End at %s\n", GetCurrentTime());
+      auto end = std::chrono::high_resolution_clock::now();
+      LogTimeConsumption(start, end);
     } else {
       publisher->publish(msg);
       sentTimes++;
