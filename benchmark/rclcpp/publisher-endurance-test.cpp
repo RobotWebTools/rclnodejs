@@ -43,8 +43,7 @@ int main(int argc, char* argv[]) {
   printf(
       "The publisher will publish a JointState topic %d times every %dms\n",
       totalTimes, ms);
-  printf("Begin at %s\n", GetCurrentTime());
-
+  auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("endurance_publisher_rclcpp");
   auto publisher =
       node->create_publisher<sensor_msgs::msg::JointState>("endurance_topic");
@@ -55,7 +54,8 @@ int main(int argc, char* argv[]) {
   while (rclcpp::ok()) {
     if (sentTimes > totalTimes) {
       rclcpp::shutdown();
-      printf("End at %s\n", GetCurrentTime());
+      auto end = std::chrono::high_resolution_clock::now();
+      LogTimeConsumption(start, end);
     } else {
       publisher->publish(msg);
       sentTimes++;
