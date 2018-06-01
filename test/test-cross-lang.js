@@ -36,7 +36,8 @@ describe('Cross-language interaction', function() {
       var node = rclnodejs.createNode('cpp_pub_js_sub');
       const RclString = 'std_msgs/msg/String';
       var destroy = false;
-      var cppTalkPath = path.join(process.env['AMENT_PREFIX_PATH'], 'lib', 'demo_nodes_cpp', 'talker');
+      var cppTalkPath = path.join(utils.getAvailablePath(process.env['AMENT_PREFIX_PATH'],
+        ['lib', 'demo_nodes_cpp', 'talker']));
       var cppTalker = childProcess.spawn(cppTalkPath, ['-t', 'cpp_js_chatter']);
       var subscription = node.createSubscription(RclString, 'cpp_js_chatter', (msg) => {
         assert.ok(/Hello World:/.test(msg.data));
@@ -150,10 +151,8 @@ describe('Cross-language interaction', function() {
       const request = {a: 1, b: 2};
 
       var destroy = false;
-      var cppServicePath = path.join(process.env['AMENT_PREFIX_PATH'],
-        'lib',
-        'demo_nodes_cpp',
-        'add_two_ints_server');
+      var cppServicePath = path.join(utils.getAvailablePath(process.env['AMENT_PREFIX_PATH'],
+        ['lib', 'demo_nodes_cpp', 'add_two_ints_server']));
       var cppService = childProcess.spawn(cppServicePath, ['-s', 'js_cpp_add_two_ints']);
       var timer = node.createTimer(100, () => {
         client.sendRequest(request, (response) => {
