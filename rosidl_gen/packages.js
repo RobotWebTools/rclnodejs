@@ -20,7 +20,6 @@ const walk = require('walk');
 const os = require('os');
 
 const generatedRoot = path.join(__dirname, '../generated/');
-let pkgMap = new Map();
 
 function getPackageName(filePath, amentExecuted) {
   if (os.type() === 'Windows_NT') {
@@ -61,7 +60,7 @@ function grabInterfaceInfo(filePath, amentExecuted) {
   return {pkgName, interfaceName, subFolder, filePath};
 }
 
-function addInterfaceInfo(info, type) {
+function addInterfaceInfo(info, type, pkgMap) {
   let pkgName = info.pkgName;
   if (!pkgMap.has(pkgName)) {
     pkgMap.set(pkgName, {messages: [], services: [], actions: [], pkgName});
@@ -83,14 +82,14 @@ function findPackagesInDirectory(dir) {
       dir = amentExecuted ? path.join(dir, 'share') : dir;
 
       let walker = walk.walk(dir, {followLinks: true});
-      pkgMap.clear();
+      let pkgMap = new Map();
       walker.on('file', (root, file, next) => {
         if (path.extname(file.name) === '.msg') {
-          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages');
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages', pkgMap);
         } else if (path.extname(file.name) === '.srv') {
-          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services');
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services', pkgMap);
         } else if (path.extname(file.name) === '.action') {
-          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'actions');
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'actions', pkgMap);
         }
         next();
       });
