@@ -19,7 +19,7 @@ template<class Clock>
 void LogTimeConsumption(const std::chrono::time_point<Clock> start, const std::chrono::time_point<Clock> end) {
   auto consumption_in_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
   std::cout << "Benchmark took "
-            << consumption_in_ms.count() / 1000 << " and "
-            << consumption_in_ms.count() % 1000 << " milliseconds"
+            << consumption_in_ms.count() / 1000 << " seconds and "
+            << consumption_in_ms.count() % 1000 << " milliseconds."
             << std::endl;
 }

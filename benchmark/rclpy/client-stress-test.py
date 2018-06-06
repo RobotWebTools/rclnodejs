@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import rclpy
-from datetime import datetime
+import math
 from nav_msgs.srv import *
+import rclpy
+import time from time
 
 def main():
   rclpy.init()
@@ -23,7 +24,7 @@ def main():
   times = input('How many times do you want to run? ')
   print(
     'The client will send a GetMap request continuously(response contains a size of 10MB array) until receiving %s response times.' % times)
-  print('Begin at ' + str(datetime.now()))
+  start = time();
   node = rclpy.create_node('stress_client_rclpy')
   client = node.create_client(GetMap, 'get_map')
   request = GetMap.Request()
@@ -34,7 +35,9 @@ def main():
     if receivedTimes > totalTimes:
       node.destroy_node()
       rclpy.shutdown()
-      print('End at ' + str(datetime.now()))
+      diff = time() - start
+      milliseconds, seconds = math.modf(diff)
+      print('Benchmark took %d seconds and %d milliseconds.' % (seconds, round(milliseconds * 1000)))
     else:
       future = client.call_async(request)
       rclpy.spin_until_future_complete(node, future)

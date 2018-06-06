@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import rclpy
-from datetime import datetime
-from std_msgs.msg import *
 from builtin_interfaces.msg import *
+import math
+import rclpy
 from sensor_msgs.msg import *
+from std_msgs.msg import *
 import threading
+import time from time
 
 def main():
   rclpy.init()
@@ -27,7 +28,7 @@ def main():
   ms = input('Please enter the period of publishing a topic in millisecond ')
   period = int(ms) / 1000
   print('The publisher will publish a JointState topic %s times every %sms.' % (times, ms))
-  print('Begin at ' + str(datetime.now()))
+  start = time();
 
   node = rclpy.create_node('endurance_publisher_rclpy')
   publisher = node.create_publisher(JointState, 'endurance_topic')
@@ -55,7 +56,9 @@ def main():
       timer.cancel()
       node.destroy_node()
       rclpy.shutdown()
-      print('End at ' + str(datetime.now()))
+      diff = time() - start
+      milliseconds, seconds = math.modf(diff)
+      print('Benchmark took %d seconds and %d milliseconds.' % (seconds, round(milliseconds * 1000)))
     else:
       publisher.publish(msg)
       sentTimes += 1

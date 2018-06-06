@@ -55,7 +55,7 @@ rl.question('How many times do you want to run? ', (times) => {
           clearInterval(timer);
           rclnodejs.shutdown();
           const diff = process.hrtime(time);
-          console.log(`Benchmark took ${diff[0]} seconds and ${diff[1]} nanoseconds`);
+          console.log(`Benchmark took ${diff[0]} seconds and ${Math.ceil(diff[1] / 1000000)} milliseconds.`);
         } else {
           publisher.publish(state);
         }}, period);
