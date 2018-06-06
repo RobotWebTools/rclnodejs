@@ -447,7 +447,11 @@ class {{=objectWrapper}} {
     {{?? field.type.isArray && !field.type.isPrimitiveType}}
     this._wrapperFields.{{=field.name}}.fill(value);
     {{?? !field.type.isPrimitiveType && !field.type.isArray}}
-    this._wrapperFields.{{=field.name}}.copy(value);
+    if (value instanceof {{=getWrapperNameByType(field.type)}}) {
+      this._wrapperFields.{{=field.name}}.copy(value);
+    } else {
+      this._wrapperFields.{{=field.name}}.copy(new {{=getWrapperNameByType(field.type)}}(value));
+    }
     {{?? !field.type.isArray && field.type.type === 'string' && it.spec.msgName !== 'String'}}
     this._wrapperFields.{{=field.name}}.data = value;
     {{?? true}}
@@ -540,7 +544,11 @@ class {{=arrayWrapper}} {
     const length = values.length;
     this._resize(length);
     values.forEach((value, index) => {
-      this._wrappers[index].copy(value);
+      if (value instanceof {{=objectWrapper}}) {
+        this._wrappers[index].copy(value);
+      } else {
+        this._wrappers[index] = new {{=objectWrapper}}(value);
+      }
     });
     {{?}}
   }
