@@ -13,17 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 import rclpy
-from datetime import datetime
 from std_srvs.srv import *
+from time import time
 
 def main():
   rclpy.init()
 
   times = input('How many times do you want to run? ')
   print('The client will send a SetBool request continuously until receiving response %s times.' % times)
-  print('Begin at ' + str(datetime.now()))
 
+  start = time();
   node = rclpy.create_node('endurance_client_rclpy')
   client = node.create_client(SetBool, 'set_flag')
   request = SetBool.Request()
@@ -35,7 +36,9 @@ def main():
     if receivedTimes > totalTimes:
       node.destroy_node()
       rclpy.shutdown()
-      print('End at ' + str(datetime.now()))
+      diff = time() - start
+      milliseconds, seconds = math.modf(diff)
+      print('Benchmark took %d seconds and %d milliseconds.' % (seconds, round(milliseconds * 1000)))
     else:
       future = client.call_async(request)
       rclpy.spin_until_future_complete(node, future)

@@ -15,9 +15,10 @@
 
 import rclpy
 from builtin_interfaces.msg import *
-from datetime import datetime
+import math
 from std_msgs.msg import *
 import threading
+from time import time
 
 def main():
   rclpy.init()
@@ -50,7 +51,7 @@ def main():
   multiArray.data = [x & 0xff for x in range(1024 * amount)]
 
   print('The publisher will publish a UInt8MultiArray topic(contains a size of %dKB array) %s times.' % (amount, times))
-  print('Begin at ' + str(datetime.now()))
+  start = time();
   node = rclpy.create_node('stress_publisher_rclpy')
   publisher = node.create_publisher(UInt8MultiArray, 'stress_topic')
   totalTimes = int(times)
@@ -60,7 +61,9 @@ def main():
     if sentTimes > totalTimes:
       node.destroy_node()
       rclpy.shutdown()
-      print('End at ' + str(datetime.now()))
+      diff = time() - start
+      milliseconds, seconds = math.modf(diff)
+      print('Benchmark took %d seconds and %d milliseconds.' % (seconds, round(milliseconds * 1000)))
     else:
       publisher.publish(multiArray)
       sentTimes += 1
