@@ -73,6 +73,12 @@ if (!fs.existsSync(publisherPath) && !fs.existsSync(subscriptionPath) &&
   compileProcess.on('close', (code) => {
     copyAll([publisherPath, subscriptionPath, listenerPath, clientPath], testCppDir);
   });
+  compileProcess.stdout.on('data', (data) => {
+    console.log(`${data}`);
+  });
+  compileProcess.stderr.on('data', (data) => {
+    console.log(`${data}`);
+  });
 } else {
   copyAll([publisherPath, subscriptionPath, , listenerPath, clientPath], testCppDir);
 }
