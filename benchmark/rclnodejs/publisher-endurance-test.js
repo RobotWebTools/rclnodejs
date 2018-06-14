@@ -15,55 +15,48 @@
 'use strict';
 
 /* eslint-disable camelcase */
+const app = require('commander');
 const rclnodejs = require('../../index.js');
-const readline = require('readline');
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+app
+  .option('-p, --period [period_ms]', 'The period(ms) to send a topic')
+  .option('-r, --run <n>', 'How many times to run')
+  .parse(process.argv);
 
-rl.question('How many times do you want to run? ', (times) => {
-  rl.question('Please enter the period of publishing a topic in millisecond ', (ms) => {
-    rclnodejs.init().then(() => {
-      const JointState = 'sensor_msgs/msg/JointState';
-      const state = {
-        header: {
-          stamp: {
-            sec: 123456,
-            nanosec: 789,
-          },
-          frame_id: 'main_frame',
-        },
-        name: ['Tom', 'Jerry'],
-        position: [1, 2],
-        velocity: [2, 3],
-        effort: [4, 5, 6],
-      };
-      let period = parseInt(ms, 10);
+rclnodejs.init().then(() => {
+  const JointState = 'sensor_msgs/msg/JointState';
+  const state = {
+    header: {
+      stamp: {
+        sec: 123456,
+        nanosec: 789,
+      },
+      frame_id: 'main_frame',
+    },
+    name: ['Tom', 'Jerry'],
+    position: [1, 2],
+    velocity: [2, 3],
+    effort: [4, 5, 6],
+  };
 
-      console.log(`The publisher will publish a JointState topic ${times} times every ${period}ms.`);
+  const time = process.hrtime();
+  let node = rclnodejs.createNode('endurance_publisher_rclnodejs');
+  let publisher = node.createPublisher(JointState, 'endurance_topic');
+  let sentTimes = 0;
+  let totalTimes = app.run || 1;
+  let period = app.period || 1;
+  console.log(`The publisher will publish a JointState topic ${totalTimes} times every ${period}ms.`);
 
-      const time = process.hrtime();
-      let node = rclnodejs.createNode('endurance_publisher_rclnodejs');
-      let publisher = node.createPublisher(JointState, 'endurance_topic');
-      let sentTimes = 0;
-      let totalTimes = parseInt(times, 10);
-
-      let timer = setInterval(() => {
-        if (sentTimes++ > totalTimes) {
-          clearInterval(timer);
-          rclnodejs.shutdown();
-          const diff = process.hrtime(time);
-          console.log(`Benchmark took ${diff[0]} seconds and ${Math.ceil(diff[1] / 1000000)} milliseconds.`);
-        } else {
-          publisher.publish(state);
-        }}, period);
-      rclnodejs.spin(node);
-    }).catch((err) => {
-      console.log(err);
-    });
-
-    rl.close();
-  });
+  let timer = setInterval(() => {
+    if (sentTimes++ > totalTimes) {
+      rclnodejs.shutdown();
+      clearInterval(timer);
+      const diff = process.hrtime(time);
+      console.log(`Benchmark took ${diff[0]} seconds and ${Math.ceil(diff[1] / 1000000)} milliseconds.`);
+    } else {
+      publisher.publish(state);
+    }}, period);
+  rclnodejs.spin(node);
+}).catch((err) => {
+  console.log(err);
 });

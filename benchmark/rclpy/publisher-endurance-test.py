@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 from builtin_interfaces.msg import *
 import math
 import rclpy
@@ -22,21 +23,26 @@ import threading
 from time import time
 
 def main():
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-p", "--period", type=int, help="The period(ms) to send a topic")
+  parser.add_argument("-r", "--run", type=int, help="How many times to run")
+  args = parser.parse_args()
+  if args.period is None:
+    args.period = 1
+  if args.run is None:
+    args.run = 1
+
   rclpy.init()
-
-  times = input('How many times do you want to run? ')
-  ms = input('Please enter the period of publishing a topic in millisecond ')
-  period = int(ms) / 1000
-  print('The publisher will publish a JointState topic %s times every %sms.' % (times, ms))
-  start = time();
-
+  period = args.period / 1000
+  print('The publisher will publish a JointState topic %s times every %sms.' % (args.run, args.period))
+  start = time()
   node = rclpy.create_node('endurance_publisher_rclpy')
   publisher = node.create_publisher(JointState, 'endurance_topic')
-  time = Time()
-  time.sec = 123456
-  time.nanosec = 789
+  stamp = Time()
+  stamp.sec = 123456
+  stamp.nanosec = 789
   header = Header()
-  header.stamp = time
+  header.stamp = stamp
   header.frame_id = 'main_frame'
   msg = JointState()
   msg.header = header
@@ -44,15 +50,15 @@ def main():
   msg.position = [1.0, 2.0]
   msg.velocity = [2.0, 3.0]
   msg.effort = [4.0, 5.0, 6.0]
-  totalTimes = int(times)
-  sentTimes = 0
+  total_times = args.run
+  sent_times = 0
 
   def publish_topic():
     nonlocal publisher
     nonlocal msg
     nonlocal timer
-    nonlocal sentTimes
-    if sentTimes > totalTimes:
+    nonlocal sent_times
+    if sent_times > total_times:
       timer.cancel()
       node.destroy_node()
       rclpy.shutdown()
@@ -61,7 +67,7 @@ def main():
       print('Benchmark took %d seconds and %d milliseconds.' % (seconds, round(milliseconds * 1000)))
     else:
       publisher.publish(msg)
-      sentTimes += 1
+      sent_times += 1
       timer = threading.Timer(period, publish_topic)
       timer.start()
 

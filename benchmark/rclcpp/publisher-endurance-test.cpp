@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <chrono>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -20,6 +21,15 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "./utilities.hpp"
+
+void ShowUsage(const std::string name) {
+    std::cerr << "Usage: " << name << " [options]\n"
+              << "\nOptions:\n"
+              << "\n--period [period_ms]\tThe period(ms) to send a topic\n"
+              << "--run <n>             \tHow many times to run\n"
+              << "--help                \toutput usage information"
+              << std::endl;
+}
 
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
@@ -33,32 +43,40 @@ int main(int argc, char* argv[]) {
   msg->velocity = std::vector<double>{2.0, 3.0};
   msg->effort = std::vector<double>{4.0, 5.0, 6.0};
 
-  auto totalTimes = 0;
-  int ms = 0;
-  printf("How many times do you want to run?\n");
-  scanf("%d", &totalTimes);
-  printf("Please enter the period of publishing a topic in millisecond\n");
-  scanf("%d", &ms);
+  auto total_times = 0;
+  auto ms = 0;
+
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if ((arg == "-h") || (arg == "--help")) {
+        ShowUsage(argv[0]);
+        return 0;
+    } else if (arg.find("--period=") != std::string::npos) {
+        ms = std::stoi(arg.substr(arg.find("=") + 1));
+    } else if (arg.find("--run=") != std::string::npos) {
+        total_times = std::stoi(arg.substr(arg.find("=") + 1));
+    }
+  }
 
   printf(
       "The publisher will publish a JointState topic %d times every %dms\n",
-      totalTimes, ms);
+      total_times, ms);
   auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("endurance_publisher_rclcpp");
   auto publisher =
       node->create_publisher<sensor_msgs::msg::JointState>("endurance_topic");
-  auto sentTimes = 0;
+  auto sent_times = 0;
 
   auto period = std::chrono::milliseconds(ms);
   rclcpp::WallRate wall_rate(period);
   while (rclcpp::ok()) {
-    if (sentTimes > totalTimes) {
+    if (sent_times > total_times) {
       rclcpp::shutdown();
       auto end = std::chrono::high_resolution_clock::now();
       LogTimeConsumption(start, end);
     } else {
       publisher->publish(msg);
-      sentTimes++;
+      sent_times++;
       rclcpp::spin_some(node);
     }
     wall_rate.sleep();

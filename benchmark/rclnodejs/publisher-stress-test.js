@@ -15,53 +15,45 @@
 'use strict';
 
 /* eslint-disable camelcase */
+const app = require('commander');
 const rclnodejs = require('../../index.js');
-const readline = require('readline');
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+app
+  .option('-s, --size [size_kb]', 'The block size')
+  .option('-r, --run <n>', 'How many times to run')
+  .parse(process.argv);
 
-rl.question('How many times do you want to run? ', (times) => {
-  rl.question('The amount of data(KB) to be sent in one loop. ', (amount) => {
-    amount = parseInt(amount, 10);
-    const message = {
-      layout: {
-        dim: [
-          {label: 'height',  size: 10, stride: 600},
-          {label: 'width',   size: 20, stride: 60},
-          {label: 'channel', size: 3,  stride: 4},
-        ],
-        data_offset: 0,
-      },
-      data: Uint8Array.from({length: 1024 * amount}, (v, k) => k)
-    };
+rclnodejs.init().then(() => {
+  const time = process.hrtime();
+  let node = rclnodejs.createNode('stress_publisher_rclnodejs');
+  const publisher = node.createPublisher('std_msgs/msg/UInt8MultiArray', 'stress_topic');
+  let sentTimes = 0;
+  let totalTimes = app.run || 1;
+  let size = app.size || 1;
+  const message = {
+    layout: {
+      dim: [
+        {label: 'height',  size: 10, stride: 600},
+        {label: 'width',   size: 20, stride: 60},
+        {label: 'channel', size: 3,  stride: 4},
+      ],
+      data_offset: 0,
+    },
+    data: Uint8Array.from({length: 1024 * size}, (v, k) => k)
+  };
+  console.log(`The publisher will publish a UInt8MultiArray topic(contains a size of ${size}KB array)` +
+  ` ${totalTimes} times.`);
 
-    rclnodejs.init().then(() => {
-      console.log(`The publisher will publish a UInt8MultiArray topic(contains a size of ${amount}KB array)` +
-          ` ${times} times.`);
-
-      const time = process.hrtime();
-      let node = rclnodejs.createNode('stress_publisher_rclnodejs');
-      const publisher = node.createPublisher('std_msgs/msg/UInt8MultiArray', 'stress_topic');
-      let sentTimes = 0;
-      let totalTimes = parseInt(times, 10);
-
-      setImmediate(() => {
-        while (sentTimes++ < totalTimes) {
-          publisher.publish(message);
-        }
-        rclnodejs.shutdown();
-        const diff = process.hrtime(time);
-        console.log(`Benchmark took ${diff[0]} seconds and ${Math.ceil(diff[1] / 1000000)} milliseconds.`);
-      });
-
-      rclnodejs.spin(node);
-    }).catch((err) => {
-      console.log(err);
-    });
-
-    rl.close();
+  setImmediate(() => {
+    while (sentTimes++ < totalTimes) {
+      publisher.publish(message);
+    }
+    rclnodejs.shutdown();
+    const diff = process.hrtime(time);
+    console.log(`Benchmark took ${diff[0]} seconds and ${Math.ceil(diff[1] / 1000000)} milliseconds.`);
   });
+
+  rclnodejs.spin(node);
+}).catch((err) => {
+  console.log(err);
 });

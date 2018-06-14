@@ -18,8 +18,6 @@ const rclnodejs = require('../../index.js');
 
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('endurance_subscription_rclnodejs');
-  let count = 0;
-
   node.createSubscription('sensor_msgs/msg/JointState', 'endurance_topic', (state) => {
   });
   rclnodejs.spin(node);

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import rclpy
 from std_srvs.srv import *
 from std_msgs.msg import *
@@ -22,10 +23,13 @@ from builtin_interfaces.msg import *
 from sensor_msgs.msg import *
 from geometry_msgs.msg import *
 
-amount = input('The amount of data(KB) to be sent for each request. ')
-amount = int(amount)
+parser = argparse.ArgumentParser()
+parser.add_argument("-s", "--size", type=int, help="The block size[kb]")
+args = parser.parse_args()
+if args.size is None:
+  args.size = 1000
 
-mapData = OccupancyGrid()
+map_data = OccupancyGrid()
 stamp = Time();
 stamp.sec = 123456
 stamp.nanosec = 789
@@ -58,13 +62,13 @@ origin.orientation = orientation
 info.map_load_time = map_load_time
 info.origin = origin;
 
-mapData.header = header
-mapData.info = info
-mapData.data = [x & 0x7f for x in range(1024 * amount)]
+map_data.header = header
+map_data.info = info
+map_data.data = [x & 0x7f for x in range(1024 * args.size)]
 
 def callback(request, response):
-  global mapData
-  response.map = mapData
+  global map_data
+  response.map = map_data
   return response
 
 def main():

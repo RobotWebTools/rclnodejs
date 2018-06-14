@@ -21,7 +21,6 @@ def callback(msg):
 
 def main():
   rclpy.init()
-
   node = rclpy.create_node('stress_subscription_rclpy')
   subscription = node.create_subscription(UInt8MultiArray, 'stress_topic', callback)
   while rclpy.ok():

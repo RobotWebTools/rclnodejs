@@ -21,7 +21,6 @@ def callback(msg):
 
 def main():
   rclpy.init()
-
   node = rclpy.create_node('endurance_subscription_rclpy')
   publisher = node.create_subscription(JointState, 'endurance_topic', callback)
   while rclpy.ok():

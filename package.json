@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "bindings": "^1.2.1",
+    "commander": "^2.12.2",
     "compare-versions": "^3.1.0",
     "debug": "^3.1.0",
     "deep-equal": "^1.0.1",

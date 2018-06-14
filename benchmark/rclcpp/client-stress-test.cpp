@@ -13,31 +13,47 @@
 // limitations under the License.
 
 #include <chrono>
+#include <iostream>
 #include <memory>
-#include <utility>
+#include <string>
 
 #include "nav_msgs/srv/get_map.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "./utilities.hpp"
 
+void ShowUsage(const std::string name) {
+    std::cerr << "Usage: " << name << " [options]\n"
+              << "\nOptions:\n"
+              << "\n--run <n>     \tHow many times to run\n"
+              << "--help          \toutput usage information"
+              << std::endl;
+}
+
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
 
-  auto totalTimes = 0;
-  printf("How many times do you want to run?\n");
-  scanf("%d", &totalTimes);
+  auto total_times = 0;
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if ((arg == "-h") || (arg == "--help")) {
+        ShowUsage(argv[0]);
+        return 0;
+    } else if (arg.find("--run=") != std::string::npos) {
+        total_times = std::stoi(arg.substr(arg.find("=") + 1));
+    }
+  }
   printf(
-      "The client will send a GetMap request(response contains a size of 10MB "
-      "array) every 100ms until receiving response %d times.\n", totalTimes);
+      "The client will send a GetMap request continuously until receiving "
+      "response %d times.\n", total_times);
 
   auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("stress_client_rclcpp");
   auto client = node->create_client<nav_msgs::srv::GetMap>("get_map");
   auto request = std::make_shared<nav_msgs::srv::GetMap::Request>();
-  auto receivedTimes = 0;
+  auto received_times = 0;
 
   while (rclcpp::ok()) {
-    if (receivedTimes > totalTimes) {
+    if (received_times > total_times) {
       rclcpp::shutdown();
       auto end = std::chrono::high_resolution_clock::now();
       LogTimeConsumption(start, end);
@@ -49,7 +65,7 @@ int main(int argc, char* argv[]) {
         return 1;
       }
       auto result = result_future.get();
-      receivedTimes++;
+      received_times++;
     }
   }
   return 0;
