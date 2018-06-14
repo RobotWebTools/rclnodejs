@@ -9,9 +9,9 @@ dependencies:
     - brew install python
     - brew install python@2
     - brew install asio tinyxml2 wget
-    - brew install tinyxml eigen pcre
+    - brew install tinyxml eigen pcre poco
     - brew install openssl
-    - python3 -m pip install pyyaml setuptools argcomplete pyparsing cmake
+    - python3 -m pip install pyyaml setuptools argcomplete pyparsing cmake catkin_pkg
     - mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
     - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
     - nvm install v8.11.2
