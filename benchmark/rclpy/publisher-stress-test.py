@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import rclpy
 from builtin_interfaces.msg import *
 import math
@@ -21,52 +22,57 @@ import threading
 from time import time
 
 def main():
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-s", "--size", type=int, help="The block size[kb]")
+  parser.add_argument("-r", "--run", type=int, help="How many times to run")
+  args = parser.parse_args()
   rclpy.init()
+  if args.size is None:
+    args.size = 1
+  if args.run is None:
+    args.run = 1
 
-  times = input('How many times do you want to run? ')
-  amount = input('The amount of data(KB) to be sent in one loop. ')
-  amount = int(amount)
+  amount = args.size
+  width_dim = MultiArrayDimension()
+  width_dim.label = 'width'
+  width_dim.size = 20;
+  width_dim.stride = 60;
 
-  widthDim = MultiArrayDimension()
-  widthDim.label = 'width'
-  widthDim.size = 20;
-  widthDim.stride = 60;
+  height_dim = MultiArrayDimension()
+  height_dim.label = 'height'
+  height_dim.size = 10;
+  height_dim.stride = 600;
 
-  heightDim = MultiArrayDimension()
-  heightDim.label = 'height'
-  heightDim.size = 10;
-  heightDim.stride = 600;
-
-  channelDim = MultiArrayDimension()
-  channelDim.label = 'channel'
-  channelDim.size = 3;
-  channelDim.stride = 4;
+  channel_dim = MultiArrayDimension()
+  channel_dim.label = 'channel'
+  channel_dim.size = 3;
+  channel_dim.stride = 4;
 
   layout = MultiArrayLayout()
-  layout.dim = [widthDim, heightDim, channelDim]
+  layout.dim = [width_dim, height_dim, channel_dim]
   layout.data_offset = 0;
 
-  multiArray = UInt8MultiArray()
-  multiArray.layout = layout
-  multiArray.data = [x & 0xff for x in range(1024 * amount)]
+  msg = UInt8MultiArray()
+  msg.layout = layout
+  msg.data = [x & 0xff for x in range(1024 * amount)]
 
-  print('The publisher will publish a UInt8MultiArray topic(contains a size of %dKB array) %s times.' % (amount, times))
-  start = time();
+  print('The publisher will publish a UInt8MultiArray topic(contains a size of %dKB array) %s times.' % (amount, args.run))
+  start = time()
   node = rclpy.create_node('stress_publisher_rclpy')
   publisher = node.create_publisher(UInt8MultiArray, 'stress_topic')
-  totalTimes = int(times)
-  sentTimes = 0
+  total_times = args.run
+  sent_times = 0
 
   while rclpy.ok():
-    if sentTimes > totalTimes:
+    if sent_times > total_times:
       node.destroy_node()
       rclpy.shutdown()
       diff = time() - start
       milliseconds, seconds = math.modf(diff)
       print('Benchmark took %d seconds and %d milliseconds.' % (seconds, round(milliseconds * 1000)))
     else:
-      publisher.publish(multiArray)
-      sentTimes += 1
+      publisher.publish(msg)
+      sent_times += 1
 
 if __name__ == '__main__':
   main()

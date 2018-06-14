@@ -13,27 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import math
 import rclpy
 from std_srvs.srv import *
 from time import time
 
 def main():
-  rclpy.init()
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-r", "--run", type=int, help="How many times to run")
+  args = parser.parse_args()
+  if args.run is None:
+    args.run = 1
 
-  times = input('How many times do you want to run? ')
-  print('The client will send a SetBool request continuously until receiving response %s times.' % times)
+  rclpy.init()
+  print('The client will send a SetBool request continuously until receiving response %s times.' % args.run)
 
   start = time();
   node = rclpy.create_node('endurance_client_rclpy')
   client = node.create_client(SetBool, 'set_flag')
   request = SetBool.Request()
   request.data = True
-  totalTimes = int(times)
-  receivedTimes = 0
+  received_times = 0
 
   while rclpy.ok():
-    if receivedTimes > totalTimes:
+    if received_times > args.run:
       node.destroy_node()
       rclpy.shutdown()
       diff = time() - start
@@ -43,7 +47,7 @@ def main():
       future = client.call_async(request)
       rclpy.spin_until_future_complete(node, future)
       if future.result() is not None:
-        receivedTimes += 1
+        received_times += 1
 
 if __name__ == '__main__':
   main()

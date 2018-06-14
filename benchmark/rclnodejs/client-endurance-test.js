@@ -14,41 +14,35 @@
 
 'use strict';
 
+const app = require('commander');
 const rclnodejs = require('../../index.js');
-const readline = require('readline');
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+app
+  .option('-r, --run <n>', 'How many times to run')
+  .parse(process.argv);
 
-rl.question('How many times do you want to run? ', (times) => {
-  rclnodejs.init().then(() => {
-    console.log(`The client will send a SetBool request continuously until receiving response ${times} times.`);
+rclnodejs.init().then(() => {
+  const time = process.hrtime();
+  const node = rclnodejs.createNode('endurance_client_rclnodejs');
+  const client = node.createClient('std_srvs/srv/SetBool', 'set_flag');
+  let receivedTimes = 0;
+  let totalTimes = app.run || 1;
+  console.log(`The client will send a SetBool request continuously until receiving response ${totalTimes} times.`);
 
-    const time = process.hrtime();
-    const node = rclnodejs.createNode('endurance_client_rclnodejs');
-    const client = node.createClient('std_srvs/srv/SetBool', 'set_flag');
-    let sentTimes = 0;
-    let receivedTimes = 0;
-    let totalTimes = parseInt(times, 10);
-    let sendRequest = function(response) {
-      client.sendRequest(true, (response) => {
-        if (++receivedTimes > totalTimes) {
-          rclnodejs.shutdown();
-          const diff = process.hrtime(time);
-          console.log(`Benchmark took ${diff[0]} seconds and ${Math.ceil(diff[1] / 1000000)} milliseconds.`);
-        } else {
-          setImmediate(sendRequest);
-        }
-      });
-    };
+  let sendRequest = function() {
+    client.sendRequest(true, (response) => {
+      if (++receivedTimes > totalTimes) {
+        rclnodejs.shutdown();
+        const diff = process.hrtime(time);
+        console.log(`Benchmark took ${diff[0]} seconds and ${Math.ceil(diff[1] / 1000000)} milliseconds.`);
+      } else {
+        setImmediate(sendRequest);
+      }
+    });
+  };
 
-    sendRequest();
-    rclnodejs.spin(node);
-  }).catch((e) => {
-    console.log(`Error: ${e}`);
-  });
-
-  rl.close();
+  sendRequest();
+  rclnodejs.spin(node);
+}).catch((e) => {
+  console.log(`Error: ${e}`);
 });

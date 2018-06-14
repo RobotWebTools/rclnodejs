@@ -13,26 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import math
 from nav_msgs.srv import *
 import rclpy
 from time import time
 
 def main():
-  rclpy.init()
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-r", "--run", type=int, help="How many times to run")
+  args = parser.parse_args()
+  if args.run is None:
+    args.run = 1
 
-  times = input('How many times do you want to run? ')
+  rclpy.init()
   print(
-    'The client will send a GetMap request continuously(response contains a size of 10MB array) until receiving %s response times.' % times)
+    'The client will send a GetMap request continuously until receiving %s response times.' % args.run)
   start = time();
   node = rclpy.create_node('stress_client_rclpy')
   client = node.create_client(GetMap, 'get_map')
   request = GetMap.Request()
-  totalTimes = int(times)
-  receivedTimes = 0
+  received_times = 0
 
   while rclpy.ok():
-    if receivedTimes > totalTimes:
+    if received_times > args.run:
       node.destroy_node()
       rclpy.shutdown()
       diff = time() - start
@@ -42,7 +46,7 @@ def main():
       future = client.call_async(request)
       rclpy.spin_until_future_complete(node, future)
       if future.result() is not None:
-        receivedTimes += 1
+        received_times += 1
 
 if __name__ == '__main__':
   main()

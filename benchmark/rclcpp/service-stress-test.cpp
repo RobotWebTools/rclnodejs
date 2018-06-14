@@ -12,18 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "nav_msgs/srv/get_map.hpp"
 #include "rclcpp/rclcpp.hpp"
 
+void ShowUsage(const std::string name) {
+    std::cerr << "Usage: " << name << " [options]\n"
+              << "\nOptions:\n"
+              << "\n--size [size_kb]\tThe block size\n"
+              << "--help            \toutput usage information"
+              << std::endl;
+}
+
 int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
 
-  auto amount = 0;
-  printf("The amount of data(KB) to be sent for each request.\n");
-  scanf("%d", &amount);
+  auto amount = 1;
+  for (int i = 1; i < argc; i++) {
+    std::string arg = argv[i];
+    if ((arg == "-h") || (arg == "--help")) {
+        ShowUsage(argv[0]);
+        return 0;
+    } else if (arg.find("--size=") != std::string::npos) {
+        amount = std::stoi(arg.substr(arg.find("=") + 1));
+    }
+  }
 
   auto node = rclcpp::Node::make_shared("stress_service_rclcpp");
   auto sub = node->create_service<nav_msgs::srv::GetMap>(
