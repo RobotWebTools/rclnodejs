@@ -20,7 +20,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/u_int8_multi_array.hpp"
-#include "./utilities.hpp"
+#include "utilities.hpp"
 
 void ShowUsage(const std::string name) {
     std::cerr << "Usage: " << name << " [options]\n"

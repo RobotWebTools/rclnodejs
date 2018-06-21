@@ -18,8 +18,12 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(nav_msgs REQUIRED)
 
-function(custom_executable target)
-  add_executable(${target} ${target}.cpp)
+include_directories(util)
+
+function(custom_executable target source)
+  add_executable(${target} ${source})
+  install(TARGETS ${target}
+    DESTINATION lib/${PROJECT_NAME})
   ament_target_dependencies(${target}
     "example_interfaces"
     "nav_msgs"
@@ -30,12 +34,10 @@ function(custom_executable target)
     "std_srvs")
 endfunction()
 
-custom_executable(publisher-endurance-test)
-custom_executable(subscription-endurance-test)
-custom_executable(publisher-stress-test)
-custom_executable(subscription-stress-test)
-custom_executable(client-endurance-test)
-custom_executable(service-endurance-test)
-custom_executable(client-stress-test)
-custom_executable(service-stress-test)
-custom_executable(startup-test)
+custom_executable(publisher-stress-test topic/publisher-stress-test.cpp)
+custom_executable(subscription-stress-test topic/subscription-stress-test.cpp)
+custom_executable(client-stress-test service/client-stress-test.cpp)
+custom_executable(service-stress-test service/service-stress-test.cpp)
+custom_executable(startup-test startup/startup-test.cpp)
+
+ament_package()
