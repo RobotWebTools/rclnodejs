@@ -1,8 +1,10 @@
-# How to Run the Benchmark tests
+# Benchmarks for ROS 2.0 clients
+
+This folder contains code used to measure the performance between different ROS 2.0 clients.
 
 ## Prerequisites
 
-1.Install ROS 2 from binary
+1.Install ROS 2.0 from binary
 
 You can download the latest binary package of ROS2 from [here](http://ci.ros2.org/view/packaging/) and follow the instructions to setup the environment.
 
@@ -16,24 +18,27 @@ Download the latest LTS edition from https://nodejs.org/en/
 
 3.[Get the code](https://github.com/RobotWebTools/rclnodejs#get-code) and [install](https://github.com/RobotWebTools/rclnodejs#build-module)
 
+## Benchmark directories
+
+The table lists the directories for each kind of the ROS 2.0 clients.
+
+Directory | Purpose |
+:----------:| ------------- |
+topic | Benchmarks for `publisher` and `subscription` features
+service | Benchmarks for `client` and `service` features
+startup | Benchamrks for measuring the startup time consumption
+
 ## Run tests
 
-There are 4 pairs of tests for each kind of languages, which implement the same functions.
-
-- Two pairs of stress testing (one is publisher/subscription, the other is client/service).
-- Two pairs of endurance testing (one is publisher/subscription, the other is client/service).
-
-1.C++ benchmark tests
-- Compile the source files: enter `benchmark/rclcpp/` and run `ament build .`
+1.Benchmark for [rclcpp](https://github.com/ros2/rclcpp)
+- Compile the source files, `cd benchmark/rclcpp/` and run `colcon build`
 - The executable files locate at `build/rclcpp_benchmark/`
-- Run the subscription/service first, then the publisher/client.
+- `your_benchamrk -h` for help.
 
-2.Python benchmark tests
+2.Benchmark for [rclpy](https://github.com/ros2/rclpy)
 - Enter the Python scripts folder `benchmark/rclpy/`
-- Run the subscription/service first, then the publisher/client.
+- `python3 your_benchamrk -h` for help.
 
-3.Node.js benchmark tests
+3.Benchmark for rclnodejs
 - Enter the Node.js scripts folder `benchmark/rclnodejs/`
-- Run the subscription/service first, then the publisher/client.
-
-The `publisher/client` will record the time when the test started and ended.
+- `node your_benchamrk -h` for help.

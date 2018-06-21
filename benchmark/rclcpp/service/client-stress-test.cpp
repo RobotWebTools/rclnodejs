@@ -17,15 +17,15 @@
 #include <memory>
 #include <string>
 
+#include "nav_msgs/srv/get_map.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "std_srvs/srv/set_bool.hpp"
-#include "./utilities.hpp"
+#include "utilities.hpp"
 
 void ShowUsage(const std::string name) {
     std::cerr << "Usage: " << name << " [options]\n"
               << "\nOptions:\n"
-              << "\n--run <n>       \tHow many times to run\n"
-              << "--help            \toutput usage information"
+              << "\n--run <n>     \tHow many times to run\n"
+              << "--help          \toutput usage information"
               << std::endl;
 }
 
@@ -43,12 +43,13 @@ int main(int argc, char* argv[]) {
     }
   }
   printf(
-      "The client will send a SetBool request continuously until receiving"
-      " response %d times.\n", total_times);
+      "The client will send a GetMap request continuously until receiving "
+      "response %d times.\n", total_times);
+
   auto start = std::chrono::high_resolution_clock::now();
-  auto node = rclcpp::Node::make_shared("endurance_client_rclcpp");
-  auto client = node->create_client<std_srvs::srv::SetBool>("set_flag");
-  auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
+  auto node = rclcpp::Node::make_shared("stress_client_rclcpp");
+  auto client = node->create_client<nav_msgs::srv::GetMap>("get_map");
+  auto request = std::make_shared<nav_msgs::srv::GetMap::Request>();
   auto received_times = 0;
 
   while (rclcpp::ok()) {
