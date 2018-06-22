@@ -13,7 +13,7 @@ RUN /bin/bash -c 'echo "deb http://packages.ros.org/ros/ubuntu xenial main" > /e
     && apt-key adv  --keyserver ha.pool.sks-keyservers.net --recv-keys 421C365BD9FF1F717815A3895523BAEEB01FA116
 
 RUN apt-get update && apt-get install -y build-essential cppcheck cmake libopencv-dev \
-    python-empy python3-dev python3-empy python3-nose python3-pip python3-pyparsing python3-setuptools python3-vcstool libtinyxml-dev libeigen3-dev python3-catkin-pkg-modules
+    python-empy python3-dev python3-empy python3-nose python3-pip python3-pyparsing python3-setuptools python3-vcstool libtinyxml-dev libeigen3-dev python3-catkin-pkg-modules python3-colcon-common-extensions
 
 # dependencies for RViz
 RUN apt-get install -y libcurl4-openssl-dev libqt5core5a libqt5gui5 libqt5opengl5 libqt5widgets5 libxaw7-dev libgles2-mesa-dev libglu1-mesa-dev qtbase5-dev

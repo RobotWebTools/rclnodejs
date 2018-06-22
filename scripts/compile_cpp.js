@@ -69,7 +69,7 @@ function copyAll(fileList, dest) {
 if (!fs.existsSync(publisherPath) && !fs.existsSync(subscriptionPath) &&
   // eslint-disable-next-line
   !fs.existsSync(listenerPath) && !fs.existsSync(clientPath)) {
-  var compileProcess = child.spawn('ament', ['build', testCppDir, '--skip-install']);
+  var compileProcess = child.spawn('colcon', ['build', '--base-paths', testCppDir]);
   compileProcess.on('close', (code) => {
     copyAll([publisherPath, subscriptionPath, listenerPath, clientPath], testCppDir);
   });

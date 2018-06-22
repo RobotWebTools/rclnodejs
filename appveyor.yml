@@ -33,7 +33,7 @@ before_build:
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
   - python -m pip install -U setuptools pip
-  - python -m pip install EmPy pyparsing pyyaml catkin_pkg
+  - python -m pip install EmPy pyparsing pyyaml catkin_pkg colcon-common-extensions
 
 build_script:
   - cd  c:\proj\rclnodejs
