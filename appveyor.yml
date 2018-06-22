@@ -18,10 +18,10 @@ before_build:
   - cd c:\
   - md download
   - cd download
-  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/asio.1.10.6.nupkg
-  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/eigen.3.3.3.nupkg
+  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2018-06-12-1/asio.1.12.1.nupkg
+  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2018-06-12-1/eigen.3.3.4.nupkg
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/tinyxml-usestl.2.6.2.nupkg
-  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/tinyxml2.4.0.1.nupkg
+  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2018-06-12-1/tinyxml2.6.0.0.nupkg
   - choco install -y -s c:\download\ asio eigen tinyxml-usestl tinyxml2
   - choco install -y wget
   - appveyor DownloadFile http://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip
@@ -31,8 +31,7 @@ before_build:
   - setx AMENT_PYTHON_EXECUTABLE "c:\Python36"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
-  - python -m pip install -U setuptools pip
-  - python -m pip install EmPy pyparsing pyyaml catkin_pkg colcon-common-extensions
+  - python -m pip install -U catkin_pkg empy pyparsing pyyaml setuptools colcon-common-extensions pip
 
 build_script:
   - cd  c:\proj\rclnodejs

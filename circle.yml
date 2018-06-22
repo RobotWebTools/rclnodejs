@@ -6,16 +6,17 @@ dependencies:
   pre:
     - brew update
     - brew uninstall python
-    - brew install python
+    - brew install python3
     - brew install python@2
-    - brew install asio tinyxml2 wget
-    - brew install tinyxml eigen pcre poco
-    - brew install openssl
-    - python3 -m pip install pyyaml setuptools argcomplete pyparsing cmake catkin_pkg colcon-common-extensions
+    - brew install wget cmake cppcheck tinyxml eigen pcre poco
+    # install dependencies for Fast-RTPS if you are using it
+    - brew install asio tinyxml2
+    - brew install opencv
+    - python3 -m pip install argcomplete catkin_pkg colcon-common-extensions coverage empy flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes mock nose pep8 pydocstyle pyparsing setuptools vcstool
     - mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
-    - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh | bash
-    - nvm install v8.11.2
-    - nvm alias default v8.11.2
+    - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+    - nvm install v8.11.3
+    - nvm alias default v8.11.3
 
   override:
     - node --version && npm --version && rm -rf ./node_modules/
