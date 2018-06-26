@@ -16,7 +16,7 @@
 
 /* eslint-disable camelcase */
 const app = require('commander');
-const rclnodejs = require('../../index.js');
+const rclnodejs = require('../../../index.js');
 
 app
   .option('-r, --run <n>', 'How many times to run')
