@@ -14,7 +14,7 @@
 
 'use strict';
 
-const rclnodejs = require('../../index.js');
+const rclnodejs = require('../../../index.js');
 
 rclnodejs.init().then(() => {
   rclnodejs.createNode('startup_node');
