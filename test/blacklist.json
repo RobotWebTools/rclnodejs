@@ -1,5 +1,5 @@
 {
-  "Linux": [],
-  "Darwin": [],
-  "Windows_NT": []
+  "Linux": ["test-actionlib.js"],
+  "Darwin": ["test-actionlib.js"],
+  "Windows_NT": ["test-actionlib.js"]
 }
