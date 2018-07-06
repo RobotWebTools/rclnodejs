@@ -19,7 +19,7 @@ const Mocha = require('mocha');
 const os = require('os');
 const path = require('path');
 
-let actionPath = path.join(path.dirname(__dirname), 'test', 'dodishes_action');
+let actionPath = path.join(path.dirname(__dirname), 'test', 'ros1_actions');
 process.env.AMENT_PREFIX_PATH = process.env.AMENT_PREFIX_PATH + path.delimiter + actionPath;
 
 fs.remove(path.join(path.dirname(__dirname), 'generated'), (err)=> {

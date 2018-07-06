@@ -21,7 +21,7 @@ const rclnodejs = require('../index.js');
 
 describe('Testing message files generated from an action file', function() {
   let testRootDir = __dirname;
-  let testActionDir = path.join(testRootDir, 'dodishes_action');
+  let testActionDir = path.join(testRootDir, 'ros1_actions');
   let pkgRootDir = path.dirname(testRootDir);
   let msgGenRootDir = path.join(pkgRootDir, 'generated');
 
@@ -57,7 +57,7 @@ describe('Testing message files generated from an action file', function() {
   });
 
   describe('JavaScript message files generated', function() {
-    let pkgPrefix = 'dodishes_action';
+    let pkgPrefix = 'ros1_actions';
     let exampleName = 'DoDishes';
     let testCasesData = [
       'ActionFeedback',
