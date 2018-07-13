@@ -669,8 +669,7 @@ const rmw_qos_profile_t* GetQosProfileFromObject(v8::Local<v8::Object> object) {
 }
 
 rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos) {
-  rmw_qos_profile_t* qos_profile =
-      reinterpret_cast<rmw_qos_profile_t*>(malloc(sizeof(rmw_qos_profile_t)));
+  rmw_qos_profile_t* qos_profile = new rmw_qos_profile_t();
 
   if (qos->IsString()) {
     *qos_profile = *GetQoSProfileFromString(
