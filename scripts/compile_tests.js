@@ -62,6 +62,7 @@ function copyFile(platform, srcFile, destFile) {
 function copyAll(fileList, dest) {
   fileList.forEach((file) => {
     copyFile(os.platform(), file, path.join(dest, path.basename(file)));
+    console.log(`cpp executables ${file} is copied to test/cpp.`);
   });
 }
 
