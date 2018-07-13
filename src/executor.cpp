@@ -62,7 +62,7 @@ void Executor::Stop() {
                  // Important Notice:
                  //  This might be called after Executor::~Executor()
                  //  Don't free Executor::async_ in Executor's dtor
-                 free(async);
+                 delete async;
                  handle_closed = true;
                });
       while (!handle_closed)
