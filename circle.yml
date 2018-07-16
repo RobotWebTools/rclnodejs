@@ -12,7 +12,7 @@ dependencies:
     # install dependencies for Fast-RTPS if you are using it
     - brew install asio tinyxml2
     - python3 -m pip install catkin_pkg empy pyparsing pyyaml setuptools argcomplete colcon-common-extensions
-    - mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
+    - mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://github.com/ros2/ros2/releases/download/release-bouncy/ros2-bouncy-macos-x86_64.tar.bz2 && tar xf ros2-bouncy-macos-x86_64.tar.bz2
     - wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
     - nvm install v8.11.3
     - nvm alias default v8.11.3

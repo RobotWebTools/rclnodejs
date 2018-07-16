@@ -45,7 +45,7 @@ function assertThrowsError(operation, errors, errMsg, message) {
 function launchPythonProcess(cmdline) {
   var pythonProcess = null;
   if (os.platform() === 'win32') {
-    cmdline.unshift('-3');
+    cmdline.unshift('-3.6');
     pythonProcess = childProcess.spawn('py', cmdline);
   } else {
     pythonProcess = childProcess.spawn('python3', cmdline);
