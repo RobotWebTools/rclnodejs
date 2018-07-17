@@ -10,7 +10,7 @@ image: Visual Studio 2017
 
 environment:
   nodejs_version: "8"
-  PYTHON3: "c:\\Python36"
+  PYTHON3: "c:\\Python37"
   PYTHON2: "c:\\Python27"
 
 clone_folder: c:\proj\rclnodejs
@@ -19,17 +19,18 @@ before_build:
   - cd c:\
   - md download
   - cd download
+  - choco install -y wget cmake
+  - "SET PATH=C:\\Program Files\\CMake\\bin;%PATH%"
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2018-06-12-1/asio.1.12.1.nupkg
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2018-06-12-1/eigen.3.3.4.nupkg
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/tinyxml-usestl.2.6.2.nupkg
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2018-06-12-1/tinyxml2.6.0.0.nupkg
   - choco install -y -s c:\download\ asio eigen tinyxml-usestl tinyxml2
-  - choco install -y wget
   - appveyor DownloadFile http://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip
   - 7z x -y "c:\download\ros2-package-windows-AMD64.zip" -o"c:\" > nul
   - setx -m OPENSSL_CONF C:\OpenSSL-Win64\bin\openssl.cfg
   - set PATH=C:\OpenSSL-Win64\bin;%PATH%
-  - setx AMENT_PYTHON_EXECUTABLE "c:\Python36"
+  - setx AMENT_PYTHON_EXECUTABLE "c:\Python37"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
   - python -m pip install -U catkin_pkg empy pyparsing pyyaml setuptools colcon-common-extensions pip
@@ -49,5 +50,5 @@ build_script:
 
 test_script:
   - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
-  - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
+  - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;C:\\Program Files\\CMake\\bin;%PATH%"
   - npm test
