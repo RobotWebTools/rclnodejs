@@ -35,7 +35,8 @@ RUN  apt update && apt install -y \
      python3-setuptools \
      python3-yaml \
      python3-colcon-common-extensions \
-     cmake
+     cmake \
+     cppcheck
 
 RUN pip3 install -U setuptools
 
