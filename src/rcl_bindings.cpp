@@ -37,7 +37,7 @@
 
 namespace rclnodejs {
 
-rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos);
+std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos);
 
 NAN_METHOD(Init) {
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
@@ -190,8 +190,7 @@ NAN_METHOD(CreateSubscription) {
 
   rcl_subscription_options_t subscription_ops =
       rcl_subscription_get_default_options();
-  auto qos_profile = std::make_unique<rmw_qos_profile_t>();
-  qos_profile.reset(GetQoSProfile(info[5]));
+  auto qos_profile = GetQoSProfile(info[5]);
 
   if (qos_profile) {
     subscription_ops.qos = *qos_profile;
@@ -238,8 +237,7 @@ NAN_METHOD(CreatePublisher) {
   if (ts) {
     // Using default options
     rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
-    auto qos_profile = std::make_unique<rmw_qos_profile_t>();
-    qos_profile.reset(GetQoSProfile(info[5]));
+    auto qos_profile = GetQoSProfile(info[5]);
 
     if (qos_profile) {
       publisher_ops.qos = *qos_profile;
@@ -288,8 +286,7 @@ NAN_METHOD(CreateClient) {
         reinterpret_cast<rcl_client_t*>(malloc(sizeof(rcl_client_t)));
     *client = rcl_get_zero_initialized_client();
     rcl_client_options_t client_ops = rcl_client_get_default_options();
-    auto qos_profile = std::make_unique<rmw_qos_profile_t>();
-    qos_profile.reset(GetQoSProfile(info[4]));
+    auto qos_profile = GetQoSProfile(info[4]);
 
     if (qos_profile) {
       client_ops.qos = *qos_profile;
@@ -358,8 +355,7 @@ NAN_METHOD(CreateService) {
         reinterpret_cast<rcl_service_t*>(malloc(sizeof(rcl_service_t)));
     *service = rcl_get_zero_initialized_service();
     rcl_service_options_t service_ops = rcl_service_get_default_options();
-    auto qos_profile = std::make_unique<rmw_qos_profile_t>();
-    qos_profile.reset(GetQoSProfile(info[4]));
+    auto qos_profile = GetQoSProfile(info[4]);
 
     if (qos_profile) {
       service_ops.qos = *qos_profile;
@@ -633,8 +629,6 @@ const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
   const rmw_qos_profile_t* qos_profile = nullptr;
   if (profile == "qos_profile_sensor_data") {
     qos_profile = &rmw_qos_profile_sensor_data;
-  } else if (profile == "qos_profile_default") {
-    qos_profile = &rmw_qos_profile_default;
   } else if (profile == "qos_profile_system_default") {
     qos_profile = &rmw_qos_profile_system_default;
   } else if (profile == "qos_profile_services_default") {
@@ -644,15 +638,17 @@ const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
   } else if (profile == "qos_profile_parameter_events") {
     qos_profile = &rmw_qos_profile_parameter_events;
   } else {
-    return nullptr;
+    return &rmw_qos_profile_default;;
   }
 
   return qos_profile;
 }
 
-const rmw_qos_profile_t* GetQosProfileFromObject(v8::Local<v8::Object> object) {
-  rmw_qos_profile_t* qos_profile =
-      reinterpret_cast<rmw_qos_profile_t*>(malloc(sizeof(rmw_qos_profile_t)));
+std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
+    v8::Local<v8::Object> object) {
+  std::unique_ptr<rmw_qos_profile_t> qos_profile =
+      std::make_unique<rmw_qos_profile_t>();
+
   qos_profile->history = static_cast<rmw_qos_history_policy_t>(
       object->Get(Nan::New("history").ToLocalChecked())->Uint32Value());
   qos_profile->depth =
@@ -668,16 +664,17 @@ const rmw_qos_profile_t* GetQosProfileFromObject(v8::Local<v8::Object> object) {
   return qos_profile;
 }
 
-rmw_qos_profile_t* GetQoSProfile(v8::Local<v8::Value> qos) {
-  rmw_qos_profile_t* qos_profile = new rmw_qos_profile_t();
+std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos) {
+  std::unique_ptr<rmw_qos_profile_t> qos_profile =
+      std::make_unique<rmw_qos_profile_t>();
 
   if (qos->IsString()) {
     *qos_profile = *GetQoSProfileFromString(
         std::string(*Nan::Utf8String(qos->ToString())));
   } else if (qos->IsObject()) {
-    *qos_profile = *GetQosProfileFromObject(qos->ToObject());
+    qos_profile = GetQosProfileFromObject(qos->ToObject());
   } else {
-    return nullptr;
+    return qos_profile;
   }
   return qos_profile;
 }
