@@ -54,9 +54,9 @@ void Executor::Stop() {
     // Make sure async_ is not used anymore
     running_.store(false);
     uv_thread_join(&thread_);
-    static bool handle_closed = false;
 
     if (uv_is_active(reinterpret_cast<uv_handle_t*>(async_))) {
+      static bool handle_closed = false;
       uv_close(reinterpret_cast<uv_handle_t*>(async_),
                [](uv_handle_t* async) -> void {
                  // Important Notice:
