@@ -24,8 +24,8 @@ namespace rclnodejs {
 
 Nan::Persistent<v8::Function> ShadowNode::constructor;
 
-ShadowNode::ShadowNode() : rcl_handle_(nullptr) {
-  handle_manager_ = std::make_unique<HandleManager>();
+ShadowNode::ShadowNode() : handle_manager_(std::make_unique<HandleManager>()),
+                           rcl_handle_(nullptr) {
   executor_ = std::make_unique<Executor>(handle_manager_.get(), this);
   rcl_handle_.reset(new Nan::Persistent<v8::Object>());
 }
