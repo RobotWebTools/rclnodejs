@@ -452,8 +452,8 @@ class {{=objectWrapper}} {
     this._wrapperFields.{{=field.name}}.data = value;
     {{?? true}}
     {{? it.spec.msgName === 'String'}}
-    this._refObject.size = value.length;
-    this._refObject.capacity = value.length + 1;
+    this._refObject.size = Buffer.byteLength(value);
+    this._refObject.capacity = Buffer.byteLength(value) + 1;
     {{?}}
     this._refObject.{{=field.name}} = value;
     {{?}}
@@ -559,12 +559,16 @@ class {{=arrayWrapper}} {
     this._refObject.size = this._wrappers.length;
     this._refObject.capacity = this._wrappers.length;
 
+    if (this._refObject.capacity === 0) {
+      this._refObject.data = null
+    } else {
     {{? usePlainTypedArray}}
     const buffer = Buffer.from(new Uint8Array(this._wrappers.buffer));
     this._refObject.data = buffer;
     {{?? true}}
     this._refObject.data = this._refArray.buffer;
     {{?}}
+    }
   }
 
   get refObject() {
