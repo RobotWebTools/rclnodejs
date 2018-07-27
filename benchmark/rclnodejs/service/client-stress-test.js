@@ -31,7 +31,7 @@ rclnodejs.init().then(() => {
   console.log('The client will send a GetMap request continuously' +
     ` until receiving response ${totalTimes} times.`);
   let sendRequest = function() {
-    client.sendRequest({_dummy: true}, (response) => {
+    client.sendRequest({}, (response) => {
       if (++receivedTimes > totalTimes) {
         rclnodejs.shutdown();
         const diff = process.hrtime(time);
