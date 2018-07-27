@@ -15,6 +15,7 @@ let refArrayType = it.spec.msgName + 'RefArray';
 const compactMsgDefJSON = JSON.stringify(JSON.parse(it.json));
 
 if (it.spec.fields.length === 0) {
+  it.spec.isEmpty = true;
   /* Following rosidl_generator_c style, put a bool member named '_dummy' */
   it.spec.fields.push({
     "type": {
@@ -270,6 +271,9 @@ class {{=objectWrapper}} {
   _initMembers() {
     this._refObject = new {{=refObjectType}}();
     {{~ it.spec.fields :field}}
+    {{? it.spec.isEmpty}}
+    this._{{=field.name}}Intialized = true;
+    {{??}}
     {{? field.type.isPrimitiveType && !field.type.isArray}}
     this._{{=field.name}}Intialized = false;
     {{?}}
@@ -280,6 +284,7 @@ class {{=objectWrapper}} {
     this._wrapperFields.{{=field.name}} = new {{=getWrapperNameByType(field.type)}}();
     {{?? it.spec.msgName === 'String'}}
     primitiveTypes.initString(this._refObject);
+    {{?}}
     {{?}}
     {{~}}
   }
