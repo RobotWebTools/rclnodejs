@@ -69,13 +69,26 @@ NAN_METHOD(CreateTimer) {
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
+  rcl_clock_t* clock =
+      reinterpret_cast<rcl_clock_t*>(malloc(sizeof(rcl_clock_t)));
+  rcl_allocator_t allocator = rcl_get_default_allocator();
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_timer_init(timer, RCL_MS_TO_NS(period_ms),
+                           rcl_clock_init(RCL_STEADY_TIME,
+                                          clock,
+                                          &allocator),
+                           rcl_get_error_string_safe());
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_timer_init(timer, clock, RCL_MS_TO_NS(period_ms),
                                           nullptr, rcl_get_default_allocator()),
                            rcl_get_error_string_safe());
 
   auto js_obj = RclHandle::NewInstance(
-      timer, nullptr, [timer] { return rcl_timer_fini(timer); });
+      timer, nullptr, [timer, clock] {
+        rcl_ret_t ret_clock = rcl_clock_fini(clock);
+        free(clock);
+        rcl_ret_t ret_timer = rcl_timer_fini(timer);
+        return ret_clock || ret_timer;
+      });
   info.GetReturnValue().Set(js_obj);
 }
 
