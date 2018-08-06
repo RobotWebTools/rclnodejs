@@ -40,7 +40,7 @@ jobs:
         - ./node_modules
     # Test
     - run: npm install istanbul coveralls
-    - run: source ~/ros2_install/ros2-osx/local_setup.bash && node scripts/compile_cpp.js && node ./node_modules/.bin/istanbul cover ./scripts/run_test.js --report lcovonly && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
+    - run: source ~/ros2_install/ros2-osx/local_setup.bash && node scripts/compile_tests.js && node ./node_modules/.bin/istanbul cover ./scripts/run_test.js --report lcovonly && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
     # Teardown
     - run: find $HOME/Library/Developer/Xcode/DerivedData -name '*.xcactivitylog' -exec cp {} $CIRCLE_ARTIFACTS/xcactivitylog \; || true
     # Save test results

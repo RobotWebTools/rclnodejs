@@ -14,7 +14,8 @@
 
 'use strict';
 
-const fs = require('fs');
+/* eslint-disable */
+const fs = require('fs-extra');
 const os = require('os');
 const path = require('path');
 const child = require('child_process');
@@ -49,7 +50,6 @@ var clientPath = getExecutablePath(client);
 
 
 function copyFile(platform, srcFile, destFile) {
-  // eslint-disable-next-line
   if (!fs.existsSync(destFile)) {
     if (os.platform() === 'win32') {
       child.spawn('cmd.exe', ['/c', `copy ${srcFile} ${destFile}`]);
@@ -65,9 +65,22 @@ function copyAll(fileList, dest) {
   });
 }
 
-// eslint-disable-next-line
+if (os.platform() !== 'win32') {
+  var subProcess = child.spawn('colcon', ['build',
+    '--base-paths', path.join(rootDir, 'test', 'rclnodejs_test_msgs')]);
+  subProcess.on('close', (code) => {
+        child.spawn('sh',
+          ['-c', `cp -r ${path.join(rootDir, 'install', 'rclnodejs_test_msgs') + '/.'} ${process.env.AMENT_PREFIX_PATH}`]);
+  });
+  subProcess.stdout.on('data', (data) => {
+    console.log(`${data}`);
+  });
+  subProcess.stderr.on('data', (data) => {
+    console.log(`${data}`);
+  });
+}
+
 if (!fs.existsSync(publisherPath) && !fs.existsSync(subscriptionPath) &&
-  // eslint-disable-next-line
   !fs.existsSync(listenerPath) && !fs.existsSync(clientPath)) {
   var compileProcess = child.spawn('colcon', ['build', '--base-paths', testCppDir]);
   compileProcess.on('close', (code) => {
@@ -82,3 +95,4 @@ if (!fs.existsSync(publisherPath) && !fs.existsSync(subscriptionPath) &&
 } else {
   copyAll([publisherPath, subscriptionPath, , listenerPath, clientPath], testCppDir);
 }
+/* eslint-enable */

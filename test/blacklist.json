@@ -1,5 +1,5 @@
 {
   "Linux": [],
   "Darwin": [],
-  "Windows_NT": []
+  "Windows_NT": ["test-non-primitive-static-array.js"]
 }

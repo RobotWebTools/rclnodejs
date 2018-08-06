@@ -214,6 +214,8 @@ const {{=refObjectType}} = StructType({
   {{=field.name}}: primitiveTypes.{{=field.type.type}},
   {{?? field.type.isPrimitiveType && field.type.isArray && field.type.isFixedSizeArray}}
   {{=field.name}}: ArrayType(primitiveTypes.{{=field.type.type}}, {{=field.type.arraySize}}),
+  {{?? !field.type.isPrimitiveType && field.type.isArray && field.type.isFixedSizeArray}}
+  {{=field.name}}: ArrayType({{=getWrapperNameByType(field.type)}}.refObjectType, {{=field.type.arraySize}}),
   {{?? field.type.isArray}}
   {{=field.name}}: {{=getWrapperNameByType(field.type)}}.refObjectArrayType,
   {{?? true}}
@@ -338,6 +340,11 @@ class {{=objectWrapper}} {
     this._wrapperFields.{{=field.name}}.fill(this._{{=field.name}}Array);
     this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
     this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+    {{?? field.type.isArray && !field.type.isPrimitiveType && field.type.isFixedSizeArray}}
+    for (let i = 0; i < this._wrapperFields.{{=field.name}}.data.length; i++) {
+      this._refObject.{{=field.name}}[i] = this._wrapperFields.{{=field.name}}.data[i].freeze(own, checkConsistency);
+      this._refObject.{{=field.name}}[i] = this._wrapperFields.{{=field.name}}.data[i].refObject;
+    }
     {{?? !field.type.isPrimitiveType || field.type.isArray}}
     this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
     this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
@@ -373,6 +380,12 @@ class {{=objectWrapper}} {
     for (let index = 0; index < refObject.{{=field.name}}.size; index++) {
       this._{{=field.name}}Array[index] = refObject.{{=field.name}}.data[index].data;
     }
+    {{?? field.type.isArray && !field.type.isPrimitiveType && field.type.isFixedSizeArray}}
+    this._refObject.{{=field.name}} = refObject.{{=field.name}};
+    this._wrapperFields.{{=field.name}}.size = {{=field.type.arraySize}}
+    for (let i = 0; i < {{=field.type.arraySize}}; i++) {
+      this._wrapperFields.{{=field.name}}.data[i].copyRefObject(refObject.{{=field.name}}[i]);
+    }
     {{?? !field.type.isPrimitiveType || field.type.isArray}}
     this._wrapperFields.{{=field.name}}.copyRefObject(refObject.{{=field.name}});
     {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
@@ -397,6 +410,10 @@ class {{=objectWrapper}} {
       } else {
         deallocator.freeStructMember(refObject.{{=field.name}}, {{=getWrapperNameByType(field.type)}}.refObjectArrayType, 'data');
       }
+    }
+    {{?? field.type.isArray && !field.type.isPrimitiveType && field.type.isFixedSizeArray}}
+    for (let i = 0; i < {{=field.type.arraySize}}; i++) {
+      {{=getWrapperNameByType(field.type)}}.freeStruct(refObject.{{=field.name}}[i]);
     }
     {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
     {{=getWrapperNameByType(field.type)}}.freeStruct(refObject.{{=field.name}});
@@ -495,6 +512,12 @@ class {{=objectWrapper}} {
     }
     {{?? field.type.isArray && field.type.isPrimitiveType && field.type.isFixedSizeArray}}
     this._wrapperFields.{{=field.name}}.fill(refObject.{{=field.name}}.toArray());
+    {{?? field.type.isArray && !field.type.isPrimitiveType && field.type.isFixedSizeArray}}
+    this._refObject.{{=field.name}} = refObject.{{=field.name}};
+    this._wrapperFields.{{=field.name}}.size = {{=field.type.arraySize}}
+    for (let i = 0; i < {{=field.type.arraySize}}; i++) {
+      this._wrapperFields.{{=field.name}}.data[i].copyRefObject(refObject.{{=field.name}}[i]);
+    }
     {{?? !field.type.isPrimitiveType || field.type.isArray || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
     this._wrapperFields.{{=field.name}}.copyRefObject(this._refObject.{{=field.name}});
     {{?}}
