@@ -42,7 +42,7 @@ function copyMsgObject(msg, obj) {
               msgArray.push(toROSMessage(msg[i].classType.elementType, o));
             });
             // 3. Assign
-            msg[i].fill(msgArray);
+            msg[i] = msgArray;
           } else {
             // It's an array of primitive-type elements or an empty array
             msg[i] = obj[i];

@@ -14,29 +14,33 @@
 
 'use strict';
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const Mocha = require('mocha');
 const os = require('os');
 const path = require('path');
 
-let mocha = new Mocha();
-const testDir = path.join(__dirname, '../test/');
-// eslint-disable-next-line
-const tests = fs.readdirSync(testDir).filter(file => {
-  return file.substr(0, 5) === 'test-';});
+fs.remove(path.join(path.dirname(__dirname), 'generated'), (err)=> {
+  if (!err) {
+    let mocha = new Mocha();
+    const testDir = path.join(__dirname, '../test/');
+    // eslint-disable-next-line
+    const tests = fs.readdirSync(testDir).filter(file => {
+      return file.substr(0, 5) === 'test-';});
 
-// eslint-disable-next-line
-let blacklist = JSON.parse(fs.readFileSync(path.join(__dirname, '../test/blacklist.json'), 'utf8'));
-let ignoredCases = blacklist[os.type()];
+    // eslint-disable-next-line
+    let blacklist = JSON.parse(fs.readFileSync(path.join(__dirname, '../test/blacklist.json'), 'utf8'));
+    let ignoredCases = blacklist[os.type()];
 
-tests.forEach(test => {
-  if (ignoredCases.indexOf(test) === -1) {
-    mocha.addFile(path.join(testDir, test));
+    tests.forEach(test => {
+      if (ignoredCases.indexOf(test) === -1) {
+        mocha.addFile(path.join(testDir, test));
+      }
+    });
+
+    mocha.run(function(failures) {
+      process.on('exit', () => {
+        process.exit(failures);
+      });
+    });
   }
-});
-
-mocha.run(function(failures) {
-  process.on('exit', () => {
-    process.exit(failures);
-  });
 });
