@@ -52,10 +52,10 @@
               '-std=c++14'
             ],
             'include_dirs': [
-              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/, '/include/ ') + '/include/')\")",
+              "<!@(node -e \"console.log(process.env.COLCON_PREFIX_PATH.replace(/:/, '/include/ ') + '/include/')\")",
             ],
             'library_dirs': [
-              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/, '/lib/ ') + '/lib/')\")",
+              "<!@(node -e \"console.log(process.env.COLCON_PREFIX_PATH.replace(/:/, '/lib/ ') + '/lib/')\")",
             ],
           }
         ],
@@ -70,7 +70,7 @@
             ],
             'include_dirs': [
               './src/third_party/dlfcn-win32/',
-              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/, '\\\include ').replace(/\\\/g, '/') + '/include')\")",
+              "<!@(node -e \"console.log(process.env.COLCON_PREFIX_PATH.replace(/;/, '\\\include ').replace(/\\\/g, '/') + '/include')\")",
             ],
             'sources': [
               './src/third_party/dlfcn-win32/dlfcn.c',
@@ -81,7 +81,7 @@
               },
               'VCLinkerTool': {
                 'AdditionalDependencies': ['psapi.lib'],
-                'AdditionalLibraryDirectories': ["<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/, '\\\lib ').replace(/\\\/g, '/') + '/lib')\")",],
+                'AdditionalLibraryDirectories': ["<!@(node -e \"console.log(process.env.COLCON_PREFIX_PATH.replace(/;/, '\\\lib ').replace(/\\\/g, '/') + '/lib')\")",],
               }
             }
           }
@@ -93,10 +93,10 @@
               'OS_MACOS'
             ],
             'include_dirs': [
-              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/, '/include/ ') + '/include/')\")",
+              "<!@(node -e \"console.log(process.env.COLCON_PREFIX_PATH.replace(/:/, '/include/ ') + '/include/')\")",
             ],
             'library_dirs': [
-                "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/, '/lib/ ') + '/lib/')\")",
+                "<!@(node -e \"console.log(process.env.COLCON_PREFIX_PATH.replace(/:/, '/lib/ ') + '/lib/')\")",
             ],
             'xcode_settings': {
               'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
