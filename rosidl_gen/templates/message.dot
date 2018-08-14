@@ -476,6 +476,11 @@ class {{=objectWrapper}} {
       throw new RangeError('The length of the array must be {{=field.type.arraySize}}.');
     }
     {{?}}
+    {{?field.type.isArray && field.type.isUpperBound}}
+    if (value.length > {{=field.type.arraySize}}) {
+      throw new RangeError('The length of array {{=field.name}} must be <= {{=field.type.arraySize}}.');
+    }
+    {{?}}
 
     {{? field.type.isArray && isTypedArrayType(field.type)}}
     this._wrapperFields['{{=field.name}}'].fill(value);
