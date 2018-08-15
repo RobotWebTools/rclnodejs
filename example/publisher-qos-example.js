@@ -27,7 +27,7 @@ rclnodejs.init().then(() => {
   qos.depth = 1;
   qos.avoidRosNameSpaceConventions = false;
 
-  const publisher = node.createPublisher('std_msgs/msg/String', 'topic', qos);
+  const publisher = node.createPublisher('std_msgs/msg/String', 'topic', {qos});
 
   let counter = 0;
   setInterval(function() {

@@ -336,7 +336,7 @@ describe('topic & serviceName getter/setter', function() {
 
   it('client: serviceName property getter', function() {
     var node = rclnodejs.createNode('client', '/servicename_getter');
-    var client = node.createClient(AddTwoInts, 'add_two_ints', (req, res) => {});
+    var client = node.createClient(AddTwoInts, 'add_two_ints');
     assert.deepStrictEqual(client.serviceName, 'add_two_ints');
     node.destroy();
   });
