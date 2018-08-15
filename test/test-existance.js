@@ -198,7 +198,7 @@ describe('rclnodejs class existance testing', function() {
     before(function() {
       node = rclnodejs.createNode('Client');
       AddTwoInts = 'example_interfaces/srv/AddTwoInts';
-      client = node.createClient(AddTwoInts, 'add_two_ints', (req, res) => {});
+      client = node.createClient(AddTwoInts, 'add_two_ints');
       service = node.createService(AddTwoInts, 'add_two_ints', (req) => {});
     });
 

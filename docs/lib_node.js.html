@@ -139,6 +139,27 @@ class Node {
     entity.handle.release();
   }
 
+  _validateOptions(options) {
+    if (options !== undefined &amp;&amp;
+        (options === null || typeof options !== 'object')) {
+      throw new TypeError('Invalid argument of options');
+    }
+
+    if (options === undefined) {
+      options = {enableTypedArray: true, qos: QoS.profileDefault};
+      return options;
+    }
+
+    if (options.enableTypedArray === undefined) {
+      options = Object.assign(options, {enableTypedArray: true});
+    }
+
+    if (options.qos === undefined) {
+      options = Object.assign(options, {qos: QoS.profileDefault});
+    }
+    return options;
+  }
+
   /**
    * Create a Timer.
    * @param {number} period - The number representing period in millisecond.
@@ -173,20 +194,23 @@ class Node {
         OR a string representing the message class, e.g. 'std_msgs/msg/String',
         OR an object representing the message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}
    * @param {string} topic - The name of the topic.
-   * @param {QoS} [qos=QoS.profileDefault] - ROS Middleware "quality of service" settings for the publisher.
+   * @param {object} options - The options argument used to parameterize the publisher.
+   * @param {boolean} options.enableTypedArray - The topic will use TypedArray if necessary, default: true.
+   * @param {QoS} options.qos - ROS Middleware "quality of service" settings for the publisher, default: QoS.profileDefault.
    * @return {Publisher} - An instance of Publisher.
    */
-  createPublisher(typeClass, topic, qos = QoS.profileDefault) {
+  createPublisher(typeClass, topic, options) {
     if (typeof (typeClass) === 'string' || typeof (typeClass) === 'object') {
       typeClass = loader.loadInterface(typeClass);
     }
 
-    if (typeof (typeClass) !== 'function' || typeof (topic) !== 'string' ||
-        (typeof (qos) !== 'string' &amp;&amp; !qos instanceof QoS)) {
+    options = this._validateOptions(options);
+
+    if (typeof (typeClass) !== 'function' || typeof (topic) !== 'string') {
       throw new TypeError('Invalid argument');
     }
 
-    let publisher = Publisher.createPublisher(this.handle, typeClass, topic, qos);
+    let publisher = Publisher.createPublisher(this.handle, typeClass, topic, options);
     debug('Finish creating publisher, topic = %s.', topic);
     this._publishers.push(publisher);
     return publisher;
@@ -208,22 +232,29 @@ class Node {
         OR a string representing the message class, e.g. 'std_msgs/msg/String',
         OR an object representing the message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}
    * @param {string} topic - The name of the topic.
+   * @param {object} options - The options argument used to parameterize the subscription.
+   * @param {boolean} options.enableTypedArray - The topic will use TypedArray if necessary, default: true.
+   * @param {QoS} options.qos - ROS Middleware "quality of service" settings for the subscription, default: QoS.profileDefault.
    * @param {SubscriptionCallback} callback - The callback to be call when receiving the topic subscribed.
-   * @param {QoS} [qos=QoS.profileDefault] - ROS Middleware "quality of service" settings for the subscription.
    * @return {Subscription} - An instance of Subscription.
    * @see {@link SubscriptionCallback}
    */
-  createSubscription(typeClass, topic, callback, qos = QoS.profileDefault) {
+  createSubscription(typeClass, topic, options, callback) {
     if (typeof (typeClass) === 'string' || typeof (typeClass) === 'object') {
       typeClass = loader.loadInterface(typeClass);
     }
 
-    if (typeof (typeClass) !== 'function' || typeof (topic) !== 'string' || typeof (callback) !== 'function' ||
-        (typeof (qos) !== 'string' &amp;&amp; !qos instanceof QoS)) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = undefined;
+    }
+    options = this._validateOptions(options);
+
+    if (typeof (typeClass) !== 'function' || typeof (topic) !== 'string' || typeof (callback) !== 'function') {
       throw new TypeError('Invalid argument');
     }
 
-    let subscription = Subscription.createSubscription(this.handle, typeClass, topic, callback, qos);
+    let subscription = Subscription.createSubscription(this.handle, typeClass, topic, options, callback);
     debug('Finish creating subscription, topic = %s.', topic);
     this._subscriptions.push(subscription);
     this.syncHandles();
@@ -237,20 +268,23 @@ class Node {
         OR a string representing the message class, e.g. 'std_msgs/msg/String',
         OR an object representing the message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}
    * @param {string} serviceName - The service name to request.
-   * @param {QoS} [qos=QoS.profileDefault] - ROS Middleware "quality of service" settings for the client.
+   * @param {object} options - The options argument used to parameterize the client.
+   * @param {boolean} options.enableTypedArray - The response will use TypedArray if necessary, default: true.
+   * @param {QoS} options.qos - ROS Middleware "quality of service" settings for the client, default: QoS.profileDefault.
    * @return {Client} - An instance of Client.
    */
-  createClient(typeClass, serviceName, qos = QoS.profileDefault) {
+  createClient(typeClass, serviceName, options) {
     if (typeof (typeClass) === 'string' || typeof (typeClass) === 'object') {
       typeClass = loader.loadInterface(typeClass);
     }
 
-    if (typeof (typeClass) !== 'function' || typeof (serviceName) !== 'string' ||
-        (typeof (qos) !== 'string' &amp;&amp; !qos instanceof QoS)) {
+    options = this._validateOptions(options);
+
+    if (typeof (typeClass) !== 'function' || typeof (serviceName) !== 'string') {
       throw new TypeError('Invalid argument');
     }
 
-    let client = Client.createClient(this.handle, serviceName, typeClass, qos);
+    let client = Client.createClient(this.handle, serviceName, typeClass, options);
     debug('Finish creating client, service = %s.', serviceName);
     this._clients.push(client);
     this.syncHandles();
@@ -278,22 +312,29 @@ class Node {
         OR a string representing the message class, e.g. 'std_msgs/msg/String',
         OR an object representing the message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}
    * @param {string} serviceName - The service name to offer.
+   * @param {object} options - The options argument used to parameterize the service.
+   * @param {boolean} options.enableTypedArray - The request will use TypedArray if necessary, default: true.
+   * @param {QoS} options.qos - ROS Middleware "quality of service" settings for the service, default: QoS.profileDefault.
    * @param {RequestCallback} callback - The callback to be called when receiving request.
-   * @param {QoS} [qos=QoS.profileDefault] - ROS Middleware "quality of service" settings for the service.
    * @return {Service} - An instance of Service.
    * @see {@link RequestCallback}
    */
-  createService(typeClass, serviceName, callback, qos = QoS.profileDefault) {
+  createService(typeClass, serviceName, options, callback) {
     if (typeof (typeClass) === 'string' || typeof (typeClass) === 'object') {
       typeClass = loader.loadInterface(typeClass);
     }
 
-    if (typeof (typeClass) !== 'function' || typeof (serviceName) !== 'string' || typeof (callback) !== 'function' ||
-        (typeof (qos) !== 'string' &amp;&amp; !qos instanceof QoS)) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = undefined;
+    }
+    options = this._validateOptions(options);
+
+    if (typeof (typeClass) !== 'function' || typeof (serviceName) !== 'string' || typeof (callback) !== 'function') {
       throw new TypeError('Invalid argument');
     }
 
-    let service = Service.createService(this.handle, serviceName, typeClass, callback, qos);
+    let service = Service.createService(this.handle, serviceName, typeClass, options, callback);
     debug('Finish creating service, service = %s.', serviceName);
     this._services.push(service);
     this.syncHandles();
@@ -412,7 +453,7 @@ module.exports = Node;
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 16:57:49 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Aug 15 2018 16:24:34 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>

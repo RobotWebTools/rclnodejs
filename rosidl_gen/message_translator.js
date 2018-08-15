@@ -116,7 +116,7 @@ function verifyMessageStruct(MessageType, obj) {
   return verifyMessage(msg, obj);
 }
 
-function toPlainObject(message) {
+function toPlainObject(message, enableTypedArray = true) {
   if (!message) return undefined;
 
   // TODO(Kenny): make sure `message` is a ROS message
@@ -126,7 +126,7 @@ function toPlainObject(message) {
     //  Note: there won't be any JavaScript array in message
     let array = [];
     message.data.forEach((e) => {
-      array.push(toPlainObject(e));  // Translate every elements
+      array.push(toPlainObject(e, enableTypedArray));  // Translate every elements
     });
     return array;
     // eslint-disable-next-line no-else-return
@@ -137,13 +137,19 @@ function toPlainObject(message) {
     for (let i in def.fields) {
       const name = def.fields[i].name;
       if (def.fields[i].type.isPrimitiveType) {
-        // Direct assignment
-        //  Note: TypedArray also falls into this branch
-        // TODO(Kenny): make sure Int64 & Uint64 type can be copied here
-        obj[name] = message[name];
+        if (def.fields[i].type.isArray &&
+            message._wrapperFields[name].constructor.useTypedArray &&
+            !enableTypedArray) {
+          obj[name] = Array.from(message[name]);
+        } else {
+          // Direct assignment
+          //  Note: TypedArray also falls into this branch if |enableTypedArray| is true
+          // TODO(Kenny): make sure Int64 & Uint64 type can be copied here
+          obj[name] = message[name];
+        }
       } else {
         // Proceed further
-        obj[name] = toPlainObject(message[name]);
+        obj[name] = toPlainObject(message[name], enableTypedArray);
       }
     }
     return obj;

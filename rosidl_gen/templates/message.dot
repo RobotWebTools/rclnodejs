@@ -396,8 +396,8 @@ class {{=objectWrapper}} {
   {{~}}
   }
 
-  toPlainObject() {
-    return translator.toPlainObject(this);
+  toPlainObject(enableTypedArray) {
+    return translator.toPlainObject(this, enableTypedArray);
   }
 
   static freeStruct(refObject) {

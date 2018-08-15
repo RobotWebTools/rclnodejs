@@ -135,7 +135,7 @@
     
 
     
-    <h4 class="name" id="createClient"><span class="type-signature"></span>createClient<span class="signature">(typeClass, serviceName, qos<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Client.html">Client</a>}</span></h4>
+    <h4 class="name" id="createClient"><span class="type-signature"></span>createClient<span class="signature">(typeClass, serviceName, options)</span><span class="type-signature"> &rarr; {<a href="Client.html">Client</a>}</span></h4>
     
 
     
@@ -167,11 +167,7 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
-        
-        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -202,19 +198,7 @@
             </td>
 
             
-                <td class="attributes">
-                
 
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
             
 
             <td class="description last">The ROS message class,
@@ -239,22 +223,75 @@
             </td>
 
             
-                <td class="attributes">
-                
 
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
             
 
             <td class="description last">The service name to request.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The options argument used to parameterize the client.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>enableTypedArray</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The response will use TypedArray if necessary, default: true.</td>
         </tr>
 
     
@@ -274,26 +311,17 @@
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
-                <td class="default">
-                
-                    QoS.profileDefault
-                
-                </td>
-            
 
-            <td class="description last">ROS Middleware "quality of service" settings for the client.</td>
+            <td class="description last">ROS Middleware "quality of service" settings for the client, default: QoS.profileDefault.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -334,7 +362,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line215">line 215</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line248">line 248</a>
     </li></ul></dd>
     
 
@@ -390,7 +418,7 @@
     
 
     
-    <h4 class="name" id="createPublisher"><span class="type-signature"></span>createPublisher<span class="signature">(typeClass, topic, qos<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Publisher.html">Publisher</a>}</span></h4>
+    <h4 class="name" id="createPublisher"><span class="type-signature"></span>createPublisher<span class="signature">(typeClass, topic, options)</span><span class="type-signature"> &rarr; {<a href="Publisher.html">Publisher</a>}</span></h4>
     
 
     
@@ -422,11 +450,7 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
-        
-        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -457,19 +481,7 @@
             </td>
 
             
-                <td class="attributes">
-                
 
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
             
 
             <td class="description last">The ROS message class,
@@ -494,22 +506,75 @@
             </td>
 
             
-                <td class="attributes">
-                
 
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
             
 
             <td class="description last">The name of the topic.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The options argument used to parameterize the publisher.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>enableTypedArray</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The topic will use TypedArray if necessary, default: true.</td>
         </tr>
 
     
@@ -529,26 +594,17 @@
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
-                <td class="default">
-                
-                    QoS.profileDefault
-                
-                </td>
-            
 
-            <td class="description last">ROS Middleware "quality of service" settings for the publisher.</td>
+            <td class="description last">ROS Middleware "quality of service" settings for the publisher, default: QoS.profileDefault.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -589,7 +645,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line151">line 151</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line174">line 174</a>
     </li></ul></dd>
     
 
@@ -645,7 +701,7 @@
     
 
     
-    <h4 class="name" id="createService"><span class="type-signature"></span>createService<span class="signature">(typeClass, serviceName, callback, qos<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Service.html">Service</a>}</span></h4>
+    <h4 class="name" id="createService"><span class="type-signature"></span>createService<span class="signature">(typeClass, serviceName, options, callback)</span><span class="type-signature"> &rarr; {<a href="Service.html">Service</a>}</span></h4>
     
 
     
@@ -677,11 +733,7 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
-        
-        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -712,19 +764,7 @@
             </td>
 
             
-                <td class="attributes">
-                
 
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
             
 
             <td class="description last">The ROS message class,
@@ -749,19 +789,7 @@
             </td>
 
             
-                <td class="attributes">
-                
 
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
             
 
             <td class="description last">The service name to offer.</td>
@@ -771,35 +799,65 @@
 
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#RequestCallback">RequestCallback</a></span>
+<span class="param-type">object</span>
 
 
             
             </td>
 
             
-                <td class="attributes">
+
+            
+
+            <td class="description last">The options argument used to parameterize the service.
+                <h6>Properties</h6>
                 
 
-                
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
 
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>enableTypedArray</code></td>
+            
+
+            <td class="type">
+            
                 
-                </td>
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
             
 
             
-                <td class="default">
-                
-                </td>
-            
 
-            <td class="description last">The callback to be called when receiving request.</td>
+            <td class="description last">The request will use TypedArray if necessary, default: true.</td>
         </tr>
 
     
@@ -819,26 +877,40 @@
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
 
-                
+            
 
+            <td class="description last">ROS Middleware "quality of service" settings for the service, default: QoS.profileDefault.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
                 
-                </td>
+<span class="param-type"><a href="global.html#RequestCallback">RequestCallback</a></span>
+
+
+            
+            </td>
+
             
 
             
-                <td class="default">
-                
-                    QoS.profileDefault
-                
-                </td>
-            
 
-            <td class="description last">ROS Middleware "quality of service" settings for the service.</td>
+            <td class="description last">The callback to be called when receiving request.</td>
         </tr>
 
     
@@ -879,7 +951,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line258">line 258</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line294">line 294</a>
     </li></ul></dd>
     
 
@@ -942,7 +1014,7 @@
     
 
     
-    <h4 class="name" id="createSubscription"><span class="type-signature"></span>createSubscription<span class="signature">(typeClass, topic, callback, qos<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Subscription.html">Subscription</a>}</span></h4>
+    <h4 class="name" id="createSubscription"><span class="type-signature"></span>createSubscription<span class="signature">(typeClass, topic, options, callback)</span><span class="type-signature"> &rarr; {<a href="Subscription.html">Subscription</a>}</span></h4>
     
 
     
@@ -974,11 +1046,7 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
-        
-        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -1009,19 +1077,7 @@
             </td>
 
             
-                <td class="attributes">
-                
 
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
             
 
             <td class="description last">The ROS message class,
@@ -1046,19 +1102,7 @@
             </td>
 
             
-                <td class="attributes">
-                
 
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
             
 
             <td class="description last">The name of the topic.</td>
@@ -1068,35 +1112,65 @@
 
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#SubscriptionCallback">SubscriptionCallback</a></span>
+<span class="param-type">object</span>
 
 
             
             </td>
 
             
-                <td class="attributes">
+
+            
+
+            <td class="description last">The options argument used to parameterize the subscription.
+                <h6>Properties</h6>
                 
 
-                
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
 
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>enableTypedArray</code></td>
+            
+
+            <td class="type">
+            
                 
-                </td>
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
             
 
             
-                <td class="default">
-                
-                </td>
-            
 
-            <td class="description last">The callback to be call when receiving the topic subscribed.</td>
+            <td class="description last">The topic will use TypedArray if necessary, default: true.</td>
         </tr>
 
     
@@ -1116,26 +1190,40 @@
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
 
-                
+            
 
+            <td class="description last">ROS Middleware "quality of service" settings for the subscription, default: QoS.profileDefault.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
                 
-                </td>
+<span class="param-type"><a href="global.html#SubscriptionCallback">SubscriptionCallback</a></span>
+
+
+            
+            </td>
+
             
 
             
-                <td class="default">
-                
-                    QoS.profileDefault
-                
-                </td>
-            
 
-            <td class="description last">ROS Middleware "quality of service" settings for the subscription.</td>
+            <td class="description last">The callback to be call when receiving the topic subscribed.</td>
         </tr>
 
     
@@ -1176,7 +1264,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line188">line 188</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line214">line 214</a>
     </li></ul></dd>
     
 
@@ -1363,7 +1451,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line120">line 120</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line141">line 141</a>
     </li></ul></dd>
     
 
@@ -1473,7 +1561,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line282">line 282</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line323">line 323</a>
     </li></ul></dd>
     
 
@@ -1626,7 +1714,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line324">line 324</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line365">line 365</a>
     </li></ul></dd>
     
 
@@ -1779,7 +1867,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line300">line 300</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line341">line 341</a>
     </li></ul></dd>
     
 
@@ -1932,7 +2020,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line336">line 336</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line377">line 377</a>
     </li></ul></dd>
     
 
@@ -2085,7 +2173,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line312">line 312</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line353">line 353</a>
     </li></ul></dd>
     
 
@@ -2238,7 +2326,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line348">line 348</a>
+        <a href="lib_node.js.html">lib/node.js</a>, <a href="lib_node.js.html#line389">line 389</a>
     </li></ul></dd>
     
 
@@ -2306,7 +2394,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 16:57:50 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Aug 15 2018 16:24:35 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>
