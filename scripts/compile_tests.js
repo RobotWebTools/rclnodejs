@@ -65,20 +65,23 @@ function copyAll(fileList, dest) {
   });
 }
 
-if (os.platform() !== 'win32') {
-  var subProcess = child.spawn('colcon', ['build',
-    '--base-paths', path.join(rootDir, 'test', 'rclnodejs_test_msgs')]);
-  subProcess.on('close', (code) => {
-        child.spawn('sh',
-          ['-c', `cp -r ${path.join(rootDir, 'install', 'rclnodejs_test_msgs') + '/.'} ${process.env.AMENT_PREFIX_PATH}`]);
-  });
-  subProcess.stdout.on('data', (data) => {
-    console.log(`${data}`);
-  });
-  subProcess.stderr.on('data', (data) => {
-    console.log(`${data}`);
-  });
-}
+var subProcess = child.spawn('colcon', ['build',
+  '--event-handlers', 'console_cohesion+', '--base-paths', path.join(rootDir, 'test', 'rclnodejs_test_msgs')]);
+subProcess.on('close', (code) => {
+  if (os.platform() === 'win32') {
+    child.spawn('cmd.exe',
+      ['/c', `xcopy ${path.join(rootDir, 'install', 'rclnodejs_test_msgs')} ${process.env.AMENT_PREFIX_PATH} /O /X /E /K`]);
+  } else {
+    child.spawn('sh',
+      ['-c', `cp -r ${path.join(rootDir, 'install', 'rclnodejs_test_msgs') + '/.'} ${process.env.AMENT_PREFIX_PATH}`]);
+  }
+});
+subProcess.stdout.on('data', (data) => {
+  console.log(`${data}`);
+});
+subProcess.stderr.on('data', (data) => {
+  console.log(`${data}`);
+});
 
 if (!fs.existsSync(publisherPath) && !fs.existsSync(subscriptionPath) &&
   !fs.existsSync(listenerPath) && !fs.existsSync(clientPath)) {
