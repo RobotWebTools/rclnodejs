@@ -9,7 +9,7 @@ image: Visual Studio 2017
 
 environment:
   nodejs_version: "8"
-  PYTHON3: "c:\\Python37"
+  PYTHON3: "c:\\Python37-x64"
   PYTHON2: "c:\\Python27"
 
 clone_folder: c:\proj\rclnodejs
