@@ -16,8 +16,8 @@
 
 const compareVersions = require('compare-versions');
 const debug = require('debug')('rclnodejs');
-const fs = require('mz/fs');
-const generator = require('./rosidl_gen/generator.js');
+const fs = require('fs');
+const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
 const Node = require('./lib/node.js');
@@ -26,6 +26,7 @@ const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
 const validator = require('./lib/validator.js');
+const ActionLib = require('ros2-actionlibjs');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -76,6 +77,9 @@ let rcl = {
 
   /** {@link module:validator|validator} object */
   validator: validator,
+
+  ActionLib: ActionLib,
+
   /**
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
@@ -104,6 +108,7 @@ let rcl = {
   */
   init(...args) {
     return new Promise((resolve, reject) => {
+      let that = this;
       if (!this._initialized) {
         getCurrentGeneratorVersion().then(version => {
           let forced = version === null || compareVersions(version, generator.version()) === -1
@@ -116,6 +121,23 @@ let rcl = {
           generator.generateAll(forced).then(() => {
             rclnodejs.init(args);
             debug('Finish initializing rcl with args = %o.', args);
+            ActionLib.config({
+              log: that.logging.getLogger('actionlibjs'),
+              time: require('./lib/actions/time_utils.js'),
+              messages: {
+                getMessage(fullName) {
+                  const [pkg, , name] = fullName.split('/');
+                  return that.require(pkg).msg[name];
+                },
+                getMessageConstants(fullName) {
+                  const [pkg, , name] = fullName.split('/');
+                  return that.require(pkg).msg[name];
+                }
+              },
+              ActionServerInterface: that.ActionServerInterface,
+              ActionClientInterface: that.ActionClientInterface
+            });
+
             this._initialized = true;
             resolve();
           }).catch(e => {
@@ -247,6 +269,9 @@ let rcl = {
   createMessageObject(type) {
     return this.createMessage(type).toPlainObject();
   },
+
+  ActionServerInterface: require('./lib/actions/action_server_interface.js'),
+  ActionClientInterface: require('./lib/actions/action_client_interface.js'),
 };
 
 process.on('SIGINT', () => {

@@ -14,38 +14,56 @@
 
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const walk = require('walk');
 const os = require('os');
 
 const generatedRoot = path.join(__dirname, '../generated/');
-let pkgMap = new Map();
 
-function getPackageName(filePath) {
+function getPackageName(filePath, amentExecuted) {
   if (os.type() === 'Windows_NT') {
     filePath = filePath.replace(/\\/g, '/');
   }
-  return filePath.match(/\w+\/share\/(\w+)\//)[1];
+
+  if (amentExecuted) {
+    return filePath.match(/\w+\/share\/(\w+)\//)[1];
+  }
+
+  let folders = path.parse(filePath).dir.split('/');
+  let packageName = folders.pop();
+
+  // If |packageName| equals to the file's extension, e.g. msg/srv, one level
+  // up directory will be used as the package name.
+  return packageName === path.parse(filePath).ext.substr(1)
+    ? folders.pop()
+    : packageName;
 };
 
-function getSubFolder(filePath) {
+function getSubFolder(filePath, amentExecuted) {
   if (os.type() === 'Windows_NT') {
     filePath = filePath.replace(/\\/g, '/');
   }
-  return filePath.match(/\w+\/share\/\w+\/(\w+)\//)[1];
+
+  if (amentExecuted) {
+    return filePath.match(/\w+\/share\/\w+\/(\w+)\//)[1];
+  }
+  // If the |amentExecuted| equals to false, the file's extension will be assigned as
+  // the name of sub folder.
+  return path.parse(filePath).ext.substr(1);
 }
 
-function grabInterfaceInfo(filePath) {
-  let pkgName = getPackageName(filePath);
+function grabInterfaceInfo(filePath, amentExecuted) {
+  let pkgName = getPackageName(filePath, amentExecuted);
   let interfaceName = path.parse(filePath).name;
-  let subFolder = getSubFolder(filePath);
+  let subFolder = getSubFolder(filePath, amentExecuted);
   return {pkgName, interfaceName, subFolder, filePath};
 }
 
-function addInterfaceInfo(info, type) {
+function addInterfaceInfo(info, type, pkgMap) {
   let pkgName = info.pkgName;
   if (!pkgMap.has(pkgName)) {
-    pkgMap.set(pkgName, {messages: [], services: []});
+    pkgMap.set(pkgName, {messages: [], services: [], actions: [], pkgName});
   }
   let pkg = pkgMap.get(pkgName);
   pkg[type].push(info);
@@ -53,24 +71,36 @@ function addInterfaceInfo(info, type) {
 
 function findPackagesInDirectory(dir) {
   return new Promise((resolve, reject) => {
-    let walker = walk.walk(dir + '/share', {followLinks: true});
-    pkgMap.clear();
+    let amentExecuted = true;
 
-    walker.on('file', (root, file, next) => {
-      if (path.extname(file.name) === '.msg') {
-        addInterfaceInfo(grabInterfaceInfo(root + '/' + file.name), 'messages');
-      } else if (path.extname(file.name) === '.srv') {
-        addInterfaceInfo(grabInterfaceInfo(root + '/' + file.name), 'services');
+    // If there is a folder named 'share' under the root path, we consider that
+    // the ament build tool has been executed and |amentExecuted| will be true.
+    fs.access(path.join(dir, 'share'), (err) => {
+      if (err) {
+        amentExecuted = false;
       }
-      next();
-    });
+      dir = amentExecuted ? path.join(dir, 'share') : dir;
 
-    walker.on('end', () => {
-      resolve(pkgMap);
-    });
+      let walker = walk.walk(dir, {followLinks: true});
+      let pkgMap = new Map();
+      walker.on('file', (root, file, next) => {
+        if (path.extname(file.name) === '.msg') {
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages', pkgMap);
+        } else if (path.extname(file.name) === '.srv') {
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services', pkgMap);
+        } else if (path.extname(file.name) === '.action') {
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'actions', pkgMap);
+        }
+        next();
+      });
 
-    walker.on('errors', (root, stats, next) => {
-      reject(stats);
+      walker.on('end', () => {
+        resolve(pkgMap);
+      });
+
+      walker.on('errors', (root, stats, next) => {
+        reject(stats);
+      });
     });
   });
 }

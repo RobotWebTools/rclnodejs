@@ -19,6 +19,9 @@ const Mocha = require('mocha');
 const os = require('os');
 const path = require('path');
 
+let actionPath = path.join(path.dirname(__dirname), 'test', 'dodishes_action');
+process.env.AMENT_PREFIX_PATH = process.env.AMENT_PREFIX_PATH + path.delimiter + actionPath;
+
 fs.remove(path.join(path.dirname(__dirname), 'generated'), (err)=> {
   if (!err) {
     let mocha = new Mocha();
