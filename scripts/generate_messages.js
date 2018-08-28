@@ -14,7 +14,7 @@
 
 'use strict';
 
-const generator = require('../rosidl_gen/generator.js');
+const generator = require('../rosidl_gen/index.js');
 
 console.log('Start to generate the JavaScript messages...');
 generator.generateAll(true).then(() => {
