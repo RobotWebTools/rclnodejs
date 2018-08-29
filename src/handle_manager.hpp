@@ -48,6 +48,10 @@ class HandleManager {
   uint32_t timer_count() const { return  timers_.size(); }
   uv_mutex_t* mutex() { return &mutex_; }
   bool is_synchronizing() const { return is_synchronizing_.load(); }
+  bool is_empty() const { return subscriptions_.size() == 0
+      && services_.size() == 0
+      && clients_.size() == 0
+      && timers_.size() == 0; }
 
  protected:
   template<typename T> void CollectHandlesByType(

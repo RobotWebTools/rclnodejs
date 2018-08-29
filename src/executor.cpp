@@ -105,38 +105,21 @@ void Executor::Run(void* arg) {
 
       {
         ScopedMutex mutex(handle_manager->mutex());
-        if (rcl_wait_set_resize_subscriptions(
-                &wait_set, handle_manager->subscription_count()) !=
-            RCL_RET_OK) {
-          throw std::runtime_error(
-              std::string(
-                  "Couldn't resize the number of subscriptions in waitset : ") +
-              rcl_get_error_string_safe());
-        }
+        if (handle_manager->is_empty())
+          continue;
 
-        if (rcl_wait_set_resize_services(
-                &wait_set, handle_manager->service_count()) != RCL_RET_OK) {
-          throw std::runtime_error(
-              std::string(
-                  "Couldn't resize the number of services in waitset : ") +
-              rcl_get_error_string_safe());
-        }
-
-        if (rcl_wait_set_resize_clients(
-                &wait_set, handle_manager->client_count()) != RCL_RET_OK) {
-          throw std::runtime_error(
-              std::string(
-                  "Couldn't resize the number of clients in waitset : ") +
-              rcl_get_error_string_safe());
-        }
-
-        if (rcl_wait_set_resize_timers(
-                &wait_set, handle_manager->timer_count()) != RCL_RET_OK) {
-          throw std::runtime_error(
-              std::string(
-                  "Couldn't resize the number of timers in waitset : ") +
-              rcl_get_error_string_safe());
-        }
+        if (rcl_wait_set_resize(
+            &wait_set,
+            handle_manager->subscription_count(),
+            // TODO(minggang): support guard conditions
+            0u,
+            handle_manager->timer_count(),
+            handle_manager->client_count(),
+            handle_manager->service_count()) != RCL_RET_OK) {
+              std::string error_message = std::string("Failed to resize: ")
+                  + std::string(rcl_get_error_string_safe());
+              throw std::runtime_error(error_message);
+            }
 
         if (!handle_manager->AddHandlesToWaitSet(&wait_set)) {
           throw std::runtime_error("Couldn't fill waitset");
@@ -154,25 +137,10 @@ void Executor::Run(void* arg) {
           }
         }
 
-        if (rcl_wait_set_clear_subscriptions(&wait_set) != RCL_RET_OK) {
-          throw std::runtime_error("Couldn't clear subscriptions from waitset");
-        }
-
-        if (rcl_wait_set_clear_services(&wait_set) != RCL_RET_OK) {
-          throw std::runtime_error("Couldn't clear servicess from waitset");
-        }
-
-        if (rcl_wait_set_clear_clients(&wait_set) != RCL_RET_OK) {
-          throw std::runtime_error("Couldn't clear clients from waitset");
-        }
-
-        if (rcl_wait_set_clear_guard_conditions(&wait_set) != RCL_RET_OK) {
-          throw std::runtime_error(
-              "Couldn't clear guard conditions from waitset");
-        }
-
-        if (rcl_wait_set_clear_timers(&wait_set) != RCL_RET_OK) {
-          throw std::runtime_error("Couldn't clear timers from waitset");
+        if (rcl_wait_set_clear(&wait_set) != RCL_RET_OK) {
+          std::string error_message = std::string("Failed to clear wait set: ")
+              + std::string(rcl_get_error_string_safe());
+          throw std::runtime_error(error_message);
         }
       }
     }
