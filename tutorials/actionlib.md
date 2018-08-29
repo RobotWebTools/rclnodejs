@@ -38,7 +38,7 @@ $ node scripts/generate_messages.js
 
 ### Build the shared library from the msg files
 ```
-$ cd test/ros1_action
+$ cd test/ros1_actions
 $ colcon build
 ```
 

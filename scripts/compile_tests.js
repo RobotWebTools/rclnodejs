@@ -66,16 +66,23 @@ function copyAll(fileList, dest) {
   });
 }
 
+function copyPkgToRos2(pkgName) {
+  let srcDir = path.join(rootDir, 'install', pkgName);
+  let destDir = process.env.COLCON_PREFIX_PATH;
+  if (os.platform() === 'win32') {
+    child.spawn('cmd.exe',
+      ['/c', `xcopy ${srcDir} ${destDir} /O /X /E /K`]);
+  } else {
+    child.spawn('sh',
+      ['-c ', '"' + `cp -fr ${srcDir}/. ${destDir}` + '"'],
+      {shell: true});
+  }
+}
+
 var subProcess = child.spawn('colcon', ['build',
   '--event-handlers', 'console_cohesion+', '--base-paths', path.join(rootDir, 'test', 'rclnodejs_test_msgs')]);
 subProcess.on('close', (code) => {
-  if (os.platform() === 'win32') {
-    child.spawn('cmd.exe',
-      ['/c', `xcopy ${path.join(rootDir, 'install', 'rclnodejs_test_msgs')} ${process.env.AMENT_PREFIX_PATH} /O /X /E /K`]);
-  } else {
-    child.spawn('sh',
-      ['-c', `cp -r ${path.join(rootDir, 'install', 'rclnodejs_test_msgs') + '/.'} ${process.env.AMENT_PREFIX_PATH}`]);
-  }
+  copyPkgToRos2('rclnodejs_test_msgs');
 });
 subProcess.stdout.on('data', (data) => {
   console.log(`${data}`);
@@ -99,4 +106,26 @@ if (!fs.existsSync(publisherPath) && !fs.existsSync(subscriptionPath) &&
 } else {
   copyAll([publisherPath, subscriptionPath, , listenerPath, clientPath], testCppDir);
 }
+
+let actionPath = path.join(rootDir, 'test', 'ros1_actions');
+process.env.AMENT_PREFIX_PATH = process.env.AMENT_PREFIX_PATH + path.delimiter + actionPath;
+
+const generator = require('../rosidl_gen/index.js');
+
+generator.generateAll(true).then(() => {
+  console.log('Generation is done.');
+
+  let actionBuildProcess = child.spawn('colcon', ['build', '--base-paths', actionPath]);
+  actionBuildProcess.on('close', (code) => {
+    copyPkgToRos2('ros1_actions');
+  });
+  actionBuildProcess.stdout.on('data', (data) => {
+    console.log(`${data}`);
+  });
+  actionBuildProcess.stderr.on('data', (data) => {
+    console.log(`${data}`);
+  });
+}).catch((e) => {
+  console.log(`Caught error: ${e}`);
+});
 /* eslint-enable */
