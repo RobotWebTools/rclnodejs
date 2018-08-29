@@ -20,10 +20,6 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 
 describe('Testing message files generated from an action file', function() {
-  // let testRootDir = __dirname;
-  // let testActionDir = path.join(testRootDir, 'ros1_actions');
-  // let pkgRootDir = path.dirname(testRootDir);
-  // let msgGenRootDir = path.join(pkgRootDir, 'generated');
 
   this.timeout(60 * 1000);
 
@@ -66,6 +62,7 @@ describe('Testing message files generated from an action file', function() {
       rclnodejs: rclnodejs
     });
     as.on('goal', function(goal) {
+      clearInterval(timer);
       done();
     });
     as.start();
@@ -76,6 +73,9 @@ describe('Testing message files generated from an action file', function() {
       rclnodejs: rclnodejs
     });
     ac.sendGoal({ goal: {dishwasher_id: 4}});
+    let timer = setInterval(() => {
+      ac.sendGoal({ goal: {dishwasher_id: 4}});
+    }, 50);
   });
 
   it('ActionLib client feedback accepted', function(done) {
@@ -101,9 +101,14 @@ describe('Testing message files generated from an action file', function() {
     });
     ac.on('feedback', function(feedback) {
       assert.strictEqual(feedback.percent_complete, 70);
+      clearInterval(timer);
       done();
     });
+
     ac.sendGoal({ goal: {dishwasher_id: 5}});
+    let timer = setInterval(() => {
+      ac.sendGoal({ goal: {dishwasher_id: 5}});
+    }, 50);
   });
 
   it('ActionLib server goal cancelled', function(done) {
@@ -128,9 +133,14 @@ describe('Testing message files generated from an action file', function() {
       }, Error);
     });
     ac.on('status', function(status) {
+      clearInterval(timer);
       done();
     });
+
     ac.sendGoal({ goal: {dishwasher_id: 6}});
+    let timer = setInterval(() => {
+      ac.sendGoal({ goal: {dishwasher_id: 6}});
+    }, 50);    
   });
 
   it('ActionLib server goal setCancelled', function(done) {
@@ -141,13 +151,12 @@ describe('Testing message files generated from an action file', function() {
     });
     as.on('goal', function(goal) {
       goal.setAccepted('goal accepted');
-
-      ac.cancel(goal.id);
-
       as.on('cancel', function(goalHandle) {
         goal.setCancelled({total_dishes_cleaned: 10}, 'canceled');
+        clearInterval(timer);
         done();
       });
+      ac.cancel(goal.id);
     });
 
     as.start();
@@ -158,6 +167,9 @@ describe('Testing message files generated from an action file', function() {
       rclnodejs: rclnodejs
     });
     ac.sendGoal({ goal: {dishwasher_id: 7}});
+    let timer = setInterval(() => {
+      ac.sendGoal({ goal: {dishwasher_id: 7}});
+    }, 50);
   });
 
   it('ActionLib server goal setRejected', function(done) {
@@ -181,10 +193,14 @@ describe('Testing message files generated from an action file', function() {
     ac.on('status', function(status) {
       if (count++ == 1) {
         assert.strictEqual(status.status_list[0].text, 'rejected');
+        clearInterval(timer);
         done();
       }
     });
     ac.sendGoal({ goal: {dishwasher_id: 8}});
+    let timer = setInterval(() => {
+      ac.sendGoal({ goal: {dishwasher_id: 8}});
+    }, 50);
   });
 
   it('ActionLib server goal setAborted', function(done) {
@@ -207,10 +223,13 @@ describe('Testing message files generated from an action file', function() {
     });
     ac.on('result', function(result) {
       assert.strictEqual(result.total_dishes_cleaned, 0);
-
+      clearInterval(timer);
       done();
     });
-    ac.sendGoal({ goal: {dishwasher_id: 9}});    
+    ac.sendGoal({ goal: {dishwasher_id: 9}});
+    let timer = setInterval(() => {
+      ac.sendGoal({ goal: {dishwasher_id: 9}});
+    }, 50); 
   });
 
   it('ActionLib sever goal setSucceeded', function(done) {
@@ -232,10 +251,14 @@ describe('Testing message files generated from an action file', function() {
     });
     ac.on('result', function(result) {
       assert.strictEqual(result.total_dishes_cleaned, 100);
+      clearInterval(timer);
       done();
     });
 
-    ac.sendGoal({ goal: {dishwasher_id: 9}});    
+    ac.sendGoal({ goal: {dishwasher_id: 10}});
+    let timer = setInterval(() => {
+      ac.sendGoal({ goal: {dishwasher_id: 10}});
+    }, 50);    
   });
 
   it('ActionLib complete process', function(done) {
@@ -265,10 +288,14 @@ describe('Testing message files generated from an action file', function() {
     });
     ac.on('result', function(result) {
       assert.strictEqual(result.total_dishes_cleaned, 100);
+      clearInterval(timer);
       done();
     });
 
     ac.sendGoal({ goal: {dishwasher_id: 11}});
+    let timer = setInterval(() => {
+      ac.sendGoal({ goal: {dishwasher_id: 11}});
+    }, 50);
   });
 
   it('ActionClient cancel', function(done) {
@@ -281,7 +308,8 @@ describe('Testing message files generated from an action file', function() {
       goal.setAccepted('goal accepted');
       ac.cancel(gGoal.goal_id.id);
     });
-    as.on('cancel', function(goalHandle) {      
+    as.on('cancel', function(goalHandle) {
+      clearInterval(timer); 
       done();
     });
     as.start();
@@ -291,7 +319,10 @@ describe('Testing message files generated from an action file', function() {
       actionServer: 'dishes12',
       rclnodejs: rclnodejs
     });
-    let gGoal = ac.sendGoal({ goal: {dishwasher_id: 12}});
+    var gGoal = ac.sendGoal({ goal: {dishwasher_id: 12}});
+    let timer = setInterval(() => {
+      gGoal = ac.sendGoal({ goal: {dishwasher_id: 12}});
+    }, 50);
   });
 
   it('ActionClient shutdown', function() {
@@ -310,7 +341,7 @@ describe('Testing message files generated from an action file', function() {
       actionServer: 'dishes13',
       rclnodejs: rclnodejs
     });
-    ac.sendGoal({ goal: {dishwasher_id: 12}});
+    ac.sendGoal({ goal: {dishwasher_id: 13}});
     ac.shutdown();
   });
 
@@ -337,11 +368,15 @@ describe('Testing message files generated from an action file', function() {
       status.status_list.forEach((s) =>{
         if (count++ == 1 && s.goal_id.id === goal.goal_id.id &&
             s.status === GoalStatus.SUCCEEDED) {
+          clearInterval(timer);
           done();
         }
       });
     });
 
-    let goal = ac.sendGoal({ goal: {dishwasher_id: 12}});
+    var goal = ac.sendGoal({ goal: {dishwasher_id: 14}});
+    let timer = setInterval(() => {
+      goal = ac.sendGoal({ goal: {dishwasher_id: 14}});
+    }, 50);
   });
 });
