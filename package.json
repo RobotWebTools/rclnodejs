@@ -35,7 +35,7 @@
     "bindings": "^1.2.1",
     "commander": "^2.12.2",
     "compare-versions": "^3.1.0",
-    "debug": "^3.1.0",
+    "debug": "^4.0.1",
     "deep-equal": "^1.0.1",
     "dot": "^1.1.2",
     "fs-extra": "^7.0.0",
@@ -47,7 +47,7 @@
     "ref-struct": "^1.1.0",
     "walk": "^2.3.9",
     "uuid": "^3.2.1",
-    "ros2-actionlibjs": "^0.0.1"
+    "ros2-actionlibjs": "^0.x.1"
   },
   "engines": {
     "node": ">= 6.10.0"
