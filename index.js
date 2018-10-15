@@ -21,12 +21,14 @@ const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
 const Node = require('./lib/node.js');
-const packages = require('./rosidl_gen/packages.js');
 const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
 const validator = require('./lib/validator.js');
 const ActionLib = require('ros2-actionlibjs');
+const Time = require('./lib/time.js');
+const Clock = require('./lib/clock.js');
+const Duration = require('./lib/duration.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -77,6 +79,15 @@ let rcl = {
 
   /** {@link module:validator|validator} object */
   validator: validator,
+
+  /** {@link Time} class */
+  Time: Time,
+
+  /** {@link Clock} class */
+  Clock: Clock,
+
+  /** {@link Duration} class */
+  Duration: Duration,
 
   ActionLib: ActionLib,
 

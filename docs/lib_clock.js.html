@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: lib/publisher.js</title>
+    <title>JSDoc: Source: lib/clock.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: lib/publisher.js</h1>
+    <h1 class="page-title">Source: lib/clock.js</h1>
 
     
 
@@ -26,7 +26,7 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>// Copyright (c) 2017 Intel Corporation. All rights reserved.
+            <pre class="prettyprint source linenums"><code>// Copyright (c) 2018 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,55 +43,35 @@
 'use strict';
 
 const rclnodejs = require('bindings')('rclnodejs');
-const debug = require('debug')('rclnodejs:publisher');
-const Entity = require('./entity.js');
+const Duration = require('./duration.js');
+
+/* eslint-disable camelcase */
 
 /**
- * @class - Class representing a Publisher in ROS
- * @hideconstructor
+ * Enum for ClockType
+ * @readonly
+ * @enum {number}
  */
-
-class Publisher extends Entity {
-  constructor(handle, typeClass, topic, options) {
-    super(handle, typeClass, options);
-    this._topic = topic;
-  }
-
-  /**
-   * @type {string}
-   */
-  get topic() {
-    return this._topic;
-  }
-
-  /**
-   * Publish a message
-   * @param {object} message - The message to be sent.
-   * @return {undefined}
-   */
-  publish(message) {
-    // Enables call by plain object/number/string argument
-    //  e.g. publisher.publish(3.14);
-    //       publisher.publish('The quick brown fox...');
-    //       publisher.publish({linear: {x: 0, y: 1, z: 2}, ...});
-    let messageToSend = (message instanceof this._typeClass)
-      ? message
-      : new this._typeClass(message);
-
-    let rawMessage = messageToSend.serialize();
-    rclnodejs.publish(this._handle, rawMessage);
-    debug(`Message of topic ${this._topic} has been published.`);
-  }
-
-  static createPublisher(nodeHandle, typeClass, topic, options) {
-    let type = typeClass.type();
-    let handle = rclnodejs.createPublisher(
-      nodeHandle, type.pkgName, type.subFolder, type.interfaceName, topic, options.qos);
-    return new Publisher(handle, typeClass, topic, options);
-  }
+const ClockType = {
+  /** @member {number} */
+  ROS_TIME: 1,
+  /** @member {number} */
+  SYSTEM_TIME: 2,
+  /** @member {number} */
+  STEADY_TIME: 3
 };
 
-module.exports = Publisher;
+/**
+ * @class - Class representing a Clock in ROS
+ */
+
+class Clock {
+  static get ClockType() {
+    return ClockType;
+  }
+}
+
+module.exports = Clock;
 </code></pre>
         </article>
     </section>
