@@ -44,16 +44,19 @@
 
 const compareVersions = require('compare-versions');
 const debug = require('debug')('rclnodejs');
-const fs = require('mz/fs');
-const generator = require('./rosidl_gen/generator.js');
+const fs = require('fs');
+const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
 const Node = require('./lib/node.js');
-const packages = require('./rosidl_gen/packages.js');
 const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
 const validator = require('./lib/validator.js');
+const ActionLib = require('ros2-actionlibjs');
+const Time = require('./lib/time.js');
+const Clock = require('./lib/clock.js');
+const Duration = require('./lib/duration.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -104,6 +107,18 @@ let rcl = {
 
   /** {@link module:validator|validator} object */
   validator: validator,
+
+  /** {@link Time} class */
+  Time: Time,
+
+  /** {@link Clock} class */
+  Clock: Clock,
+
+  /** {@link Duration} class */
+  Duration: Duration,
+
+  ActionLib: ActionLib,
+
   /**
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
@@ -132,6 +147,7 @@ let rcl = {
   */
   init(...args) {
     return new Promise((resolve, reject) => {
+      let that = this;
       if (!this._initialized) {
         getCurrentGeneratorVersion().then(version => {
           let forced = version === null || compareVersions(version, generator.version()) === -1
@@ -144,6 +160,23 @@ let rcl = {
           generator.generateAll(forced).then(() => {
             rclnodejs.init(args);
             debug('Finish initializing rcl with args = %o.', args);
+            ActionLib.config({
+              log: that.logging.getLogger('actionlibjs'),
+              time: require('./lib/actions/time_utils.js'),
+              messages: {
+                getMessage(fullName) {
+                  const [pkg, , name] = fullName.split('/');
+                  return that.require(pkg).msg[name];
+                },
+                getMessageConstants(fullName) {
+                  const [pkg, , name] = fullName.split('/');
+                  return that.require(pkg).msg[name];
+                }
+              },
+              ActionServerInterface: that.ActionServerInterface,
+              ActionClientInterface: that.ActionClientInterface
+            });
+
             this._initialized = true;
             resolve();
           }).catch(e => {
@@ -275,6 +308,9 @@ let rcl = {
   createMessageObject(type) {
     return this.createMessage(type).toPlainObject();
   },
+
+  ActionServerInterface: require('./lib/actions/action_server_interface.js'),
+  ActionClientInterface: require('./lib/actions/action_client_interface.js'),
 };
 
 process.on('SIGINT', () => {
@@ -294,13 +330,13 @@ module.exports = rcl;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Response.html">Response</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Timer.html">Timer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Duration.html">Duration</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Response.html">Response</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="Timer.html">Timer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Aug 15 2018 16:24:34 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 15 2018 15:21:03 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>
