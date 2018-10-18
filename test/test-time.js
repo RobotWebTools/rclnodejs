@@ -126,4 +126,43 @@ describe('rclnodejs Time/Clock testing', function() {
       time.add(result);
     }, TypeError);
   });
+
+  it('Test duration functions', function() {
+    let left = new Duration(0, 1);
+    let right = new Duration(0, 2);
+    assert.strictEqual(left.isEqual(right), false);
+    assert.strictEqual(left.isNotEqual(right), true);
+    assert.strictEqual(left.isGreaterThan(right), false);
+    assert.strictEqual(left.isGreaterThanOrEqual(right), false);
+    assert.strictEqual(left.isLessThan(right), true);
+    assert.strictEqual(left.isLessThanOrEqual(right), true);
+
+    left = new Duration(0, 5e9);
+    right = new Duration(5, 0);
+    assert.ok(left.isEqual(right));
+
+    assert.throws(() => {
+      left.isEqual(5e9);
+    }, TypeError);
+
+    let time = new Time();
+    assert.throws(() => {
+      left.isEqual(time);
+    }, TypeError);
+    assert.throws(() => {
+      left.isNotEqual(time);
+    }, TypeError);
+    assert.throws(() => {
+      left.isGreaterThan(time);
+    }, TypeError);
+    assert.throws(() => {
+      left.isGreaterThanOrEqual(time);
+    }, TypeError);
+    assert.throws(() => {
+      left.isLessThan(time);
+    }, TypeError);
+    assert.throws(() => {
+      left.isLessThanOrEqual(time);
+    }, TypeError);
+  });
 });
