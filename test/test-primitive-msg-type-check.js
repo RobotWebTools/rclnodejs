@@ -64,10 +64,10 @@ describe('Rclnodejs message type data testing', function() {
 
     assertThrowsError(() => {
       msg.data = -129;
-    }, TypeError, 'out of bounds', 'Char should be in [-128, 127]');
+    }, [TypeError, RangeError], 'out of bounds', 'Char should be in [-128, 127]');
     assertThrowsError(() => {
       msg.data = 128;
-    }, TypeError, 'out of bounds', 'Char should be in [-128, 127]');
+    }, [TypeError, RangeError], 'out of bounds', 'Char should be in [-128, 127]');
   });
 
   it('Byte data checking', function() {
