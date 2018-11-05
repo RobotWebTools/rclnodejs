@@ -105,7 +105,7 @@ void RclHandle::Reset() {
   }
 
   if (deleter_ && deleter_() != RCL_RET_OK) {
-    Nan::ThrowError(rcl_get_error_string_safe());
+    Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
   }
   free(pointer_);
