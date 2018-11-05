@@ -96,7 +96,7 @@ void Executor::Run(void* arg) {
                                       rcl_get_default_allocator());
     if (ret != RCL_RET_OK) {
       throw std::runtime_error(std::string("Init waitset failed: ") +
-                               rcl_get_error_string_safe());
+                               rcl_get_error_string().str);
     }
 
     while (executor->running_.load()) {
@@ -117,7 +117,7 @@ void Executor::Run(void* arg) {
             handle_manager->client_count(),
             handle_manager->service_count()) != RCL_RET_OK) {
               std::string error_message = std::string("Failed to resize: ")
-                  + std::string(rcl_get_error_string_safe());
+                  + std::string(rcl_get_error_string().str);
               throw std::runtime_error(error_message);
             }
 
@@ -129,7 +129,7 @@ void Executor::Run(void* arg) {
         if (status == RCL_RET_WAIT_SET_EMPTY) {
         } else if (status != RCL_RET_OK && status != RCL_RET_TIMEOUT) {
           throw std::runtime_error(std::string("rcl_wait() failed: ") +
-                                   rcl_get_error_string_safe());
+                                   rcl_get_error_string().str);
         } else {
           if (!uv_is_closing(
                   reinterpret_cast<uv_handle_t*>(executor->async_))) {
@@ -139,14 +139,14 @@ void Executor::Run(void* arg) {
 
         if (rcl_wait_set_clear(&wait_set) != RCL_RET_OK) {
           std::string error_message = std::string("Failed to clear wait set: ")
-              + std::string(rcl_get_error_string_safe());
+              + std::string(rcl_get_error_string().str);
           throw std::runtime_error(error_message);
         }
       }
     }
     if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
       throw std::runtime_error(std::string("Failed to destroy guard waitset:") +
-                               rcl_get_error_string_safe());
+                               rcl_get_error_string().str);
     }
   } catch (...) {
     g_exception_ptr = std::current_exception();

@@ -42,7 +42,7 @@ std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos);
 NAN_METHOD(Init) {
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_init(0, nullptr, rcl_get_default_allocator()),
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
 }
 
 NAN_METHOD(CreateNode) {
@@ -57,7 +57,7 @@ NAN_METHOD(CreateNode) {
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
       rcl_node_init(node, node_name.c_str(), name_space.c_str(), &options),
-      rcl_get_error_string_safe());
+      rcl_get_error_string().str);
 
   auto handle = RclHandle::NewInstance(node, nullptr,
                                        [node] { return rcl_node_fini(node); });
@@ -76,11 +76,11 @@ NAN_METHOD(CreateTimer) {
                            rcl_clock_init(RCL_STEADY_TIME,
                                           clock,
                                           &allocator),
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_timer_init(timer, clock, RCL_MS_TO_NS(period_ms),
                                           nullptr, rcl_get_default_allocator()),
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
 
   auto js_obj = RclHandle::NewInstance(
       timer, nullptr, [timer, clock] {
@@ -98,7 +98,7 @@ NAN_METHOD(IsTimerReady) {
   bool is_ready = false;
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_is_ready(timer, &is_ready),
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
 
   info.GetReturnValue().Set(Nan::New(is_ready));
 }
@@ -108,7 +108,7 @@ NAN_METHOD(CallTimer) {
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_call(timer),
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
 }
 
 NAN_METHOD(CancelTimer) {
@@ -116,7 +116,7 @@ NAN_METHOD(CancelTimer) {
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_cancel(timer),
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
 }
 
 NAN_METHOD(IsTimerCanceled) {
@@ -126,7 +126,7 @@ NAN_METHOD(IsTimerCanceled) {
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_timer_is_canceled(timer, &is_canceled),
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
 
   info.GetReturnValue().Set(Nan::New(is_canceled));
 }
@@ -136,7 +136,7 @@ NAN_METHOD(ResetTimer) {
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_reset(timer),
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
 }
 
 NAN_METHOD(TimerGetTimeUntilNextCall) {
@@ -146,7 +146,7 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_timer_get_time_until_next_call(timer, &remaining_time),
-      rcl_get_error_string_safe());
+      rcl_get_error_string().str);
 
   info.GetReturnValue().Set(
       Nan::New<v8::String>(std::to_string(RCL_NS_TO_MS(remaining_time)))
@@ -160,7 +160,7 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_timer_get_time_since_last_call(timer, &elapsed_time),
-      rcl_get_error_string_safe());
+      rcl_get_error_string().str);
 
   info.GetReturnValue().Set(
       Nan::New<v8::String>(std::to_string(RCL_NS_TO_MS(elapsed_time)))
@@ -205,7 +205,7 @@ NAN_METHOD(CreateClock) {
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
       rcl_clock_init(clock_type, clock, &allocator),
-      rcl_get_error_string_safe());
+      rcl_get_error_string().str);
 
   info.GetReturnValue().Set(RclHandle::NewInstance(clock,
       nullptr,
@@ -242,7 +242,7 @@ NAN_METHOD(ClockGetNow) {
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
       rcl_clock_get_now(ros_clock, &rcl_time.nanoseconds),
-      rcl_get_error_string_safe());
+      rcl_get_error_string().str);
 
   ReturnJSTimeObj(info, rcl_time.nanoseconds, rcl_time.clock_type);
 }
@@ -263,15 +263,15 @@ NAN_METHOD(StaticClockGetNow) {
       rcl_clock_init(static_cast<rcl_clock_type_t>(type),
                      &ros_clock,
                      &allocator),
-      rcl_get_error_string_safe());
+      rcl_get_error_string().str);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
       rcl_clock_get_now(&ros_clock, &rcl_time.nanoseconds),
-      rcl_get_error_string_safe());
+      rcl_get_error_string().str);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
       rcl_clock_fini(&ros_clock),
-      rcl_get_error_string_safe());
+      rcl_get_error_string().str);
 
   ReturnJSTimeObj(info, rcl_time.nanoseconds, rcl_time.clock_type);
 }
@@ -314,7 +314,7 @@ NAN_METHOD(RclTake) {
   rcl_ret_t ret = rcl_take(subscription, msg_taken, nullptr);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
-    Nan::ThrowError(rcl_get_error_string_safe());
+    Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
     info.GetReturnValue().Set(Nan::False());
     return;
@@ -355,7 +355,7 @@ NAN_METHOD(CreateSubscription) {
         RCL_RET_OK,
         rcl_subscription_init(subscription, node, ts, topic.c_str(),
                               &subscription_ops),
-        rcl_get_error_string_safe());
+        rcl_get_error_string().str);
 
     auto js_obj =
         RclHandle::NewInstance(subscription, node_handle, [subscription, node] {
@@ -397,7 +397,7 @@ NAN_METHOD(CreatePublisher) {
     // Initialize the publisher
     THROW_ERROR_IF_NOT_EQUAL(
         rcl_publisher_init(publisher, node, ts, topic.c_str(), &publisher_ops),
-        RCL_RET_OK, rcl_get_error_string_safe());
+        RCL_RET_OK, rcl_get_error_string().str);
 
     // Wrap the handle into JS object
     auto js_obj = RclHandle::NewInstance(
@@ -417,7 +417,7 @@ NAN_METHOD(Publish) {
 
   void* buffer = node::Buffer::Data(info[1]->ToObject());
   THROW_ERROR_IF_NOT_EQUAL(rcl_publish(publisher, buffer), RCL_RET_OK,
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
 
   info.GetReturnValue().Set(Nan::Undefined());
 }
@@ -445,7 +445,7 @@ NAN_METHOD(CreateClient) {
 
     THROW_ERROR_IF_NOT_EQUAL(
         rcl_client_init(client, node, ts, service_name.c_str(), &client_ops),
-        RCL_RET_OK, rcl_get_error_string_safe());
+        RCL_RET_OK, rcl_get_error_string().str);
 
     auto js_obj = RclHandle::NewInstance(client, node_handle, [client, node] {
       return rcl_client_fini(client, node);
@@ -464,7 +464,7 @@ NAN_METHOD(SendRequest) {
   int64_t sequence_number;
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_request(client, buffer, &sequence_number),
-                           RCL_RET_OK, rcl_get_error_string_safe());
+                           RCL_RET_OK, rcl_get_error_string().str);
 
   info.GetReturnValue().Set(Nan::New((uint32_t)sequence_number));
 }
@@ -514,7 +514,7 @@ NAN_METHOD(CreateService) {
 
     THROW_ERROR_IF_NOT_EQUAL(
         rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
-        RCL_RET_OK, rcl_get_error_string_safe());
+        RCL_RET_OK, rcl_get_error_string().str);
     auto js_obj = RclHandle::NewInstance(service, node_handle, [service, node] {
       return rcl_service_fini(service, node);
     });
@@ -551,7 +551,7 @@ NAN_METHOD(SendResponse) {
       RclHandle::Unwrap<RclHandle>(info[2]->ToObject())->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_response(service, header, buffer),
-                           RCL_RET_OK, rcl_get_error_string_safe());
+                           RCL_RET_OK, rcl_get_error_string().str);
 }
 
 NAN_METHOD(ValidateFullTopicName) {
@@ -563,7 +563,7 @@ NAN_METHOD(ValidateFullTopicName) {
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
-      Nan::ThrowError(rmw_get_error_string_safe());
+      Nan::ThrowError(rmw_get_error_string().str);
     }
     rmw_reset_error();
     return info.GetReturnValue().Set(Nan::Undefined());
@@ -596,7 +596,7 @@ NAN_METHOD(ValidateNodeName) {
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
-      Nan::ThrowError(rmw_get_error_string_safe());
+      Nan::ThrowError(rmw_get_error_string().str);
     }
     rmw_reset_error();
     return info.GetReturnValue().Set(Nan::Undefined());
@@ -629,7 +629,7 @@ NAN_METHOD(ValidateTopicName) {
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
-      Nan::ThrowError(rmw_get_error_string_safe());
+      Nan::ThrowError(rmw_get_error_string().str);
     }
     rmw_reset_error();
     return info.GetReturnValue().Set(Nan::Undefined());
@@ -662,7 +662,7 @@ NAN_METHOD(ValidateNamespace) {
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
-      Nan::ThrowError(rmw_get_error_string_safe());
+      Nan::ThrowError(rmw_get_error_string().str);
     }
     rmw_reset_error();
     return info.GetReturnValue().Set(Nan::Undefined());
@@ -701,7 +701,7 @@ NAN_METHOD(ExpandTopicName) {
       rcutils_string_map_init(&substitutions_map, 0, rcutils_allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
     if (rcutils_ret == RCUTILS_RET_BAD_ALLOC) {
-      Nan::ThrowError(rcutils_get_error_string_safe());
+      Nan::ThrowError(rcutils_get_error_string().str);
     }
     rcutils_reset_error();
     info.GetReturnValue().Set(Nan::Undefined());
@@ -710,13 +710,13 @@ NAN_METHOD(ExpandTopicName) {
   rcl_ret_t ret = rcl_get_default_topic_name_substitutions(&substitutions_map);
   if (ret != RCL_RET_OK) {
     if (ret == RCL_RET_BAD_ALLOC) {
-      Nan::ThrowError(rcl_get_error_string_safe());
+      Nan::ThrowError(rcl_get_error_string().str);
     }
     rcl_reset_error();
 
     rcutils_ret = rcutils_string_map_fini(&substitutions_map);
     if (rcutils_ret != RCUTILS_RET_OK) {
-      Nan::ThrowError(rcutils_get_error_string_safe());
+      Nan::ThrowError(rcutils_get_error_string().str);
       rcutils_reset_error();
     }
     info.GetReturnValue().Set(Nan::Undefined());
@@ -729,14 +729,14 @@ NAN_METHOD(ExpandTopicName) {
 
   rcutils_ret = rcutils_string_map_fini(&substitutions_map);
   if (rcutils_ret != RCUTILS_RET_OK) {
-    Nan::ThrowError(rcutils_get_error_string_safe());
+    Nan::ThrowError(rcutils_get_error_string().str);
     rcutils_reset_error();
     allocator.deallocate(expanded_topic, allocator.state);
     info.GetReturnValue().Set(Nan::Undefined());
     return;
   }
   if (ret != RCL_RET_OK) {
-    Nan::ThrowError(rcl_get_error_string_safe());
+    Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
     info.GetReturnValue().Set(Nan::Undefined());
     return;
@@ -832,7 +832,7 @@ std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos) {
 
 NAN_METHOD(Shutdown) {
   THROW_ERROR_IF_NOT_EQUAL(rcl_shutdown(), RCL_RET_OK,
-                           rcl_get_error_string_safe());
+                           rcl_get_error_string().str);
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
@@ -894,7 +894,7 @@ NAN_METHOD(setLoggerLevel) {
 
   rcutils_ret_t ret = rcutils_logging_set_logger_level(name.c_str(), level);
   if (ret != RCUTILS_RET_OK) {
-    Nan::ThrowError(rcutils_get_error_string_safe());
+    Nan::ThrowError(rcutils_get_error_string().str);
     rcutils_reset_error();
   }
   info.GetReturnValue().Set(Nan::Undefined());
@@ -905,7 +905,7 @@ NAN_METHOD(GetLoggerEffectiveLevel) {
   int logger_level = rcutils_logging_get_logger_effective_level(name.c_str());
 
   if (logger_level < 0) {
-    Nan::ThrowError(rcutils_get_error_string_safe());
+    Nan::ThrowError(rcutils_get_error_string().str);
     rcutils_reset_error();
     info.GetReturnValue().Set(Nan::Undefined());
     return;
