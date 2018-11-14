@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Publisher</title>
+    <title>JSDoc: Class: ROSClock</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Publisher</h1>
+    <h1 class="page-title">Class: ROSClock</h1>
 
     
 
@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Publisher<span class="signature">()</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>ROSClock<span class="signature">()</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">- Class representing a Publisher in ROS</div>
+            <div class="class-description">- Class representing a ROSClock in ROS</div>
         
     
 </header>
@@ -40,7 +40,21 @@
     
         
 
+    
+    <h2>Constructor</h2>
+    
 
+    
+    <h4 class="name" id="ROSClock"><span class="type-signature"></span>new ROSClock<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Create a ROSClock.
+</div>
 
 
 
@@ -83,7 +97,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_publisher.js.html">lib/publisher.js</a>, <a href="lib_publisher.js.html#line26">line 26</a>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -125,26 +139,34 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
+
+    
+        <h3 class="subsection-title">Methods</h3>
 
         
             
-<h4 class="name" id="topic"><span class="type-signature"></span>topic<span class="type-signature"> :string</span></h4>
+
+    
+
+    
+    <h4 class="name" id="get:isRosTimeActive"><span class="type-signature"></span>get:isRosTimeActive<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Return status that whether the ROS time is active.
+</div>
 
 
 
 
 
 
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
 
 
-        </li>
-    </ul>
 
 
 
@@ -179,7 +201,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_publisher.js.html">lib/publisher.js</a>, <a href="lib_publisher.js.html#line35">line 35</a>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line65">line 65</a>
     </li></ul></dd>
     
 
@@ -195,11 +217,39 @@
 
 
 
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
         
-    
+<div class="param-desc">
+    Return true if the time is active, otherwise return false.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
 
     
-        <h3 class="subsection-title">Methods</h3>
+
+
+
+
 
         
             
@@ -207,7 +257,7 @@
     
 
     
-    <h4 class="name" id="publish"><span class="type-signature"></span>publish<span class="signature">(message)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <h4 class="name" id="set:isRosTimeActive"><span class="type-signature"></span>set:isRosTimeActive<span class="signature">(enabled)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
     
 
     
@@ -215,7 +265,7 @@
 
 
 <div class="description">
-    Publish a message
+    Set the status of ROS time.
 </div>
 
 
@@ -251,13 +301,13 @@
 
         <tr>
             
-                <td class="name"><code>message</code></td>
+                <td class="name"><code>enabled</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">boolean</span>
 
 
             
@@ -267,7 +317,7 @@
 
             
 
-            <td class="description last">The message to be sent.</td>
+            <td class="description last">Set the ROS time to be active.</td>
         </tr>
 
     
@@ -308,7 +358,160 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_publisher.js.html">lib/publisher.js</a>, <a href="lib_publisher.js.html#line44">line 44</a>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line76">line 76</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="set:rosTimeOverride"><span class="type-signature"></span>set:rosTimeOverride<span class="signature">(time)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set the status of ROS time.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>time</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Time.html">Time</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The time to be set override.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line88">line 88</a>
     </li></ul></dd>
     
 

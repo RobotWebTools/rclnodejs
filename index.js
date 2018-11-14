@@ -27,7 +27,8 @@ const rclnodejs = require('bindings')('rclnodejs');
 const validator = require('./lib/validator.js');
 const ActionLib = require('ros2-actionlibjs');
 const Time = require('./lib/time.js');
-const Clock = require('./lib/clock.js');
+const TimeSource = require('./lib/time_source.js');
+const {Clock, ROSClock} = require('./lib/clock.js');
 const Duration = require('./lib/duration.js');
 
 function inherits(target, source) {
@@ -83,8 +84,14 @@ let rcl = {
   /** {@link Time} class */
   Time: Time,
 
+  /** {@link TimeSource} class */
+  TimeSource: TimeSource,
+
   /** {@link Clock} class */
   Clock: Clock,
+
+  /** {@link ROSClock} class */
+  ROSClock: ROSClock,
 
   /** {@link Duration} class */
   Duration: Duration,

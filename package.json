@@ -47,7 +47,8 @@
     "ref-struct": "^1.1.0",
     "walk": "^2.3.9",
     "uuid": "^3.2.1",
-    "ros2-actionlibjs": "^0.x.1"
+    "ros2-actionlibjs": "^0.x.1",
+    "int64-napi": "^1.0.1"
   },
   "engines": {
     "node": ">= 6.10.0"
