@@ -168,11 +168,12 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
 }
 
 NAN_METHOD(CreateTimePoint) {
-  int64_t nanoseconds = info[0]->IntegerValue();
+  std::string str(*v8::String::Utf8Value(info[0]));
   uint32_t clock_type = info[1]->Uint32Value();
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(malloc(sizeof(rcl_time_point_t)));
-  time_point->nanoseconds = nanoseconds;
+
+  time_point->nanoseconds = std::stoll(str);
   time_point->clock_type = static_cast<rcl_clock_type_t>(clock_type);
 
   auto js_obj = RclHandle::NewInstance(
@@ -185,20 +186,82 @@ NAN_METHOD(GetNanoseconds) {
       RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_time_point_t* time_point = reinterpret_cast<rcl_time_point_t*>(
       time_point_handle->ptr());
+  info.GetReturnValue().Set(Nan::New<v8::String>(
+      std::to_string(time_point->nanoseconds)).ToLocalChecked());
+}
 
-  info.GetReturnValue().Set(
-      Nan::New(static_cast<double>(time_point->nanoseconds)));
+NAN_METHOD(CreateDuration) {
+  std::string str(*v8::String::Utf8Value(info[0]));
+  rcl_duration_t* duration =
+      reinterpret_cast<rcl_duration_t*>(malloc(sizeof(rcl_duration_t)));
+  duration->nanoseconds = std::stoll(str);
+
+  auto js_obj = RclHandle::NewInstance(
+      duration, nullptr, nullptr);
+  info.GetReturnValue().Set(js_obj);
+}
+
+NAN_METHOD(GetDurationNanoseconds) {
+    RclHandle* duration_handle =
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_duration_t* duration = reinterpret_cast<rcl_duration_t*>(
+      duration_handle->ptr());
+
+  info.GetReturnValue().Set(Nan::New<v8::String>(
+      std::to_string(duration->nanoseconds)).ToLocalChecked());
+}
+
+NAN_METHOD(SetRosTimeOverrideIsEnabled) {
+  RclHandle* clock_handle =
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
+      clock_handle->ptr());
+  bool enabled = Nan::To<bool>(info[1]).FromJust();
+
+  if (enabled) {
+    THROW_ERROR_IF_NOT_EQUAL(
+        RCL_RET_OK, rcl_enable_ros_time_override(clock),
+        rcl_get_error_string().str);
+  } else {
+    THROW_ERROR_IF_NOT_EQUAL(
+        RCL_RET_OK, rcl_disable_ros_time_override(clock),
+        rcl_get_error_string().str);
+  }
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_METHOD(SetRosTimeOverride) {
+  RclHandle* clock_handle =
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
+      clock_handle->ptr());
+  RclHandle* time_point_handle =
+      RclHandle::Unwrap<RclHandle>(info[1]->ToObject());
+  rcl_time_point_t* time_point = reinterpret_cast<rcl_time_point_t*>(
+      time_point_handle->ptr());
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_set_ros_time_override(clock, time_point->nanoseconds),
+      rcl_get_error_string().str);
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_METHOD(GetRosTimeOverrideIsEnabled) {
+  RclHandle* clock_handle =
+      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
+      clock_handle->ptr());
+
+  bool is_enabled;
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_is_enabled_ros_time_override(clock, &is_enabled),
+      rcl_get_error_string().str);
+  info.GetReturnValue().Set(Nan::New(is_enabled));
 }
 
 NAN_METHOD(CreateClock) {
-  int32_t type = Nan::To<int32_t>(info[0]).FromJust();
-
-  if (type < RCL_ROS_TIME && type > RCL_STEADY_TIME) {
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
-  }
-
-  auto clock_type = static_cast<rcl_clock_type_t>(type);
+  auto clock_type = static_cast<rcl_clock_type_t>(Nan::To<int32_t>(
+      info[0]).FromJust());
   rcl_clock_t* clock =
       reinterpret_cast<rcl_clock_t*>(malloc(sizeof(rcl_clock_t)));
   rcl_allocator_t allocator = rcl_get_default_allocator();
@@ -235,16 +298,16 @@ static void ReturnJSTimeObj(Nan::NAN_METHOD_ARGS_TYPE info,
 }
 
 NAN_METHOD(ClockGetNow) {
-  rcl_clock_t* ros_clock = reinterpret_cast<rcl_clock_t*>(
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
       RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
-  rcl_time_point_t rcl_time;
-  rcl_time.clock_type = ros_clock->type;
+  rcl_time_point_t time_point;
+  time_point.clock_type = clock->type;
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-      rcl_clock_get_now(ros_clock, &rcl_time.nanoseconds),
+      rcl_clock_get_now(clock, &time_point.nanoseconds),
       rcl_get_error_string().str);
 
-  ReturnJSTimeObj(info, rcl_time.nanoseconds, rcl_time.clock_type);
+  ReturnJSTimeObj(info, time_point.nanoseconds, time_point.clock_type);
 }
 
 NAN_METHOD(StaticClockGetNow) {
@@ -964,6 +1027,11 @@ BindingMethod binding_methods[] = {
     {"timeDiff", TimeDiff},
     {"createTimePoint", CreateTimePoint},
     {"getNanoseconds", GetNanoseconds},
+    {"createDuration", CreateDuration},
+    {"getDurationNanoseconds", GetDurationNanoseconds},
+    {"setRosTimeOverrideIsEnabled", SetRosTimeOverrideIsEnabled},
+    {"setRosTimeOverride", SetRosTimeOverride},
+    {"getRosTimeOverrideIsEnabled", GetRosTimeOverrideIsEnabled},
     {"rclTake", RclTake},
     {"createSubscription", CreateSubscription},
     {"createPublisher", CreatePublisher},

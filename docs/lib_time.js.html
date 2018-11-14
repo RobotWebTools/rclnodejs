@@ -44,8 +44,8 @@
 
 const rclnodejs = require('bindings')('rclnodejs');
 const Duration = require('./duration.js');
-const Clock = require('./clock.js');
-const Entity = require('./entity.js');
+const ClockType = require('./clock_type.js');
+const int64 = require('int64-napi');
 
 /**
  * @class - Class representing a Time in ROS
@@ -54,56 +54,79 @@ const Entity = require('./entity.js');
 class Time {
   /**
    * Create a Time.
-   * @param {number} [seconds=0] - The second part of the time.
-   * @param {number} [nanoseconds=0] - The nanosecond part of the time.
+   * @param {number|string} [seconds=0] - The second part of the time.
+   * @param {number|string} [nanoseconds=0] - The nanosecond part of the time.
    * @param {ClockType} [clockType=Clock.ClockType.SYSTEM_TIME] - The clock type.
    */
-  constructor(seconds = 0, nanoseconds = 0, clockType = Clock.ClockType.SYSTEM_TIME) {
-    if (typeof seconds !== 'number' || typeof nanoseconds !== 'number' ||
-        typeof clockType !== 'number') {
-      throw new TypeError('Invalid argument');
+  constructor(seconds = 0, nanoseconds = 0, clockType = ClockType.SYSTEM_TIME) {
+    if (typeof seconds !== 'number' &amp;&amp; typeof seconds !== 'string') {
+      throw new TypeError('Invalid argument of seconds');
     }
 
-    if (seconds &lt; 0) {
+    if (typeof nanoseconds !== 'number' &amp;&amp; typeof nanoseconds !== 'string') {
+      throw new TypeError('Invalid argument of nanoseconds');
+    }
+
+    if (typeof clockType !== 'number') {
+      throw new TypeError('Invalid argument of clockType');
+    }
+
+    if (int64.lt(seconds, 0) || (typeof seconds === 'string' &amp;&amp; seconds.startsWith('-'))) {
       throw new RangeError('seconds value must not be negative');
     }
 
-    if (nanoseconds &lt; 0) {
+    if (int64.lt(nanoseconds, 0) || (typeof nanoseconds === 'string' &amp;&amp; nanoseconds.startsWith('-'))) {
       throw new RangeError('nanoseconds value must not be negative');
     }
 
-    this._nanoseconds = nanoseconds + seconds * 1e9;
-    if (Number.isSafeInteger(this._nanoseconds)) {
-      this._handle = rclnodejs.createTimePoint(this._nanoseconds, clockType);
-      this._clockType = clockType;
-    } else {
-      throw new RangeError('Total nanoseconds value is too large to be represented in JavaScript');
-    }
+    this._nanoseconds = int64.from(seconds).multiply(1e9).add(nanoseconds);
+    this._handle = rclnodejs.createTimePoint(this._nanoseconds.toString(), clockType);
+    this._clockType = clockType;
   }
 
   /**
    * Get the the clock type of the Time object.
+   * @name Time#get:clockType
+   * @function
    * @return {ClockType} - The clock type.
    */
+
   get clockType() {
     return this._clockType;
   }
 
   /**
-   * Get the time in nanosecond.
-   * @return {number} - value in nanosecond.
+   * Get the nanosecond part of the time.
+   * @name Time#get:nanoseconds
+   * @function
+   * @return {number|string} - value in nanosecond, if the value is greater than Number.MAX_SAFE_INTEGER (2^53-1), will be presented in string of decimal format.
    */
+
   get nanoseconds() {
-    return rclnodejs.getNanoseconds(this._handle);
+    let str = rclnodejs.getNanoseconds(this._handle);
+    let nano;
+
+    if (str.startsWith('-')) {
+      nano = int64.negative(int64.from(str));
+    } else {
+      nano = int64.from(str);
+    }
+    if (Number.isFinite(nano.toNumber())) {
+      return nano.toNumber();
+    }
+    return nano.toString();
   }
 
   /**
    * Get the time as separate seconds and nanoseconds component.
+   * @name Time#get:secondsAndNanoseconds
+   * @function
    * @return {object} - object with properties seconds and nanoseconds.
    */
+
   get secondsAndNanoseconds() {
-    let seconds = this.nanoseconds / 1e9;
-    let nanoseconds = this.nanoseconds % 1e9;
+    let seconds = this._nanoseconds.divide(1e9).toNumber();
+    let nanoseconds = this._nanoseconds.mod(1e9).toNumber();
     return {seconds, nanoseconds};
   }
 
@@ -114,7 +137,7 @@ class Time {
    */
   add(other) {
     if (other instanceof Duration) {
-      return new Time(0, this._nanoseconds + other.nanoseconds, this._clockType);
+      return new Time(0, int64.add(this._nanoseconds, other.nanoseconds).toString(), this._clockType);
     }
     throw new TypeError('Invalid argument');
   }
@@ -129,9 +152,9 @@ class Time {
       if (other._clockType !== this._clockType) {
         throw new TypeError('Can\'t subtract times with different clock types');
       }
-      return new Duration(0, this._nanoseconds - other.nanoseconds);
+      return new Duration(0, int64.subtract(this._nanoseconds, other._nanoseconds).toString());
     } else if (other instanceof Duration) {
-      return new Time(0, this._nanoseconds - other.nanoseconds, this._clockType);
+      return new Time(0, int64.subtract(this._nanoseconds, other._nanoseconds).toString(), this._clockType);
     }
     throw new TypeError('Invalid argument');
   }
@@ -141,12 +164,12 @@ class Time {
    * @param {Time} other - The time object to be compared.
    * @return {boolean} Return true if they are equal.
    */
-  isEqual(other) {
+  eq(other) {
     if (other instanceof Time) {
       if (other._clockType !== this._clockType) {
         throw new TypeError('Can\'t compare times with different clock types');
       }
-      return this.nanoseconds === other.nanoseconds;
+      return this._nanoseconds.eq(other.nanoseconds);
     }
     throw new TypeError('Invalid argument');
   }
@@ -156,8 +179,13 @@ class Time {
    * @param {Time} other - The time object to be compared.
    * @return {boolean} Return true if they are not equal.
    */
-  isNotEqual(other) {
-    return !this.isEqual(other);
+  ne(other) {
+    if (other instanceof Time) {
+      if (other._clockType !== this._clockType) {
+        throw new TypeError('Can\'t compare times with different clock types');
+      }
+      return this._nanoseconds.ne(other.nanoseconds);
+    }
   }
 
   /**
@@ -165,12 +193,12 @@ class Time {
    * @param {Time} other - The time object to be compared.
    * @return {boolean} Return true if it's less than other.
    */
-  isLessThan(other) {
+  lt(other) {
     if (other instanceof Time) {
       if (other._clockType !== this._clockType) {
         throw new TypeError('Can\'t compare times with different clock types');
       }
-      return this.nanoseconds &lt; other.nanoseconds;
+      return this._nanoseconds.lt(other.nanoseconds);
     }
     throw new TypeError('Invalid argument');
   }
@@ -180,8 +208,14 @@ class Time {
    * @param {Time} other - The time object to be compared.
    * @return {boolean} Return true if it's less than or equal with other.
    */
-  isLessThanOrEqual(other) {
-    return this.isEqual(other) || this.isLessThan(other);
+  lte(other) {
+    if (other instanceof Time) {
+      if (other._clockType !== this._clockType) {
+        throw new TypeError('Can\'t compare times with different clock types');
+      }
+      return this._nanoseconds.lte(other.nanoseconds);
+    }
+    throw new TypeError('Invalid argument');
   }
 
   /**
@@ -189,12 +223,12 @@ class Time {
    * @param {Time} other - The time object to be compared.
    * @return {boolean} Return true if it's greater than other.
    */
-  isGreaterThan(other) {
+  gt(other) {
     if (other instanceof Time) {
       if (other._clockType !== this._clockType) {
         throw new TypeError('Can\'t compare times with different clock types');
       }
-      return this.nanoseconds > other.nanoseconds;
+      return this._nanoseconds.gt(other.nanoseconds);
     }
     throw new TypeError('Invalid argument');
   }
@@ -204,8 +238,24 @@ class Time {
    * @param {Time} other - The time object to be compared.
    * @return {boolean} Return true if it's greater than or equal with other.
    */
-  isGreaterThanOrEqual(other) {
-    return this.isEqual(other) || this.isGreaterThan(other);
+  gte(other) {
+    if (other instanceof Time) {
+      if (other._clockType !== this._clockType) {
+        throw new TypeError('Can\'t compare times with different clock types');
+      }
+      return this._nanoseconds.gte(other.nanoseconds);
+    }
+    throw new TypeError('Invalid argument');
+  }
+
+  /**
+   * Create a Time object from a message of builtin_interfaces/msg/Time
+   * @param {object} msg - The message to be created from.
+   * @param {ClockType} [clockType=Clock.ClockType.SYSTEM_TIME] - The type of the time object.
+   * @return {Time} Return the created Time object.
+   */
+  static fromMsg(msg, clockType = ClockType.ROS_TIME) {
+    return new Time(msg.sec, msg.nanoseconds, clockType);
   }
 }
 
@@ -220,13 +270,13 @@ module.exports = Time;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Duration.html">Duration</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Response.html">Response</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="Timer.html">Timer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Duration.html">Duration</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Response.html">Response</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TimeSource.html">TimeSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Oct 18 2018 10:52:06 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Nov 16 2018 10:28:17 GMT+0800 (China Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

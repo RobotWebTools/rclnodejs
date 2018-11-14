@@ -43,6 +43,7 @@
 'use strict';
 
 const rclnodejs = require('bindings')('rclnodejs');
+const int64 = require('int64-napi');
 
 /**
  * @class - Class representing a Duration in ROS
@@ -51,19 +52,51 @@ const rclnodejs = require('bindings')('rclnodejs');
 class Duration {
   /**
    * Create a Duration.
-   * @param {number} [seconds=0] - The second part of the duration.
-   * @param {number} [nanoseconds=0] - The nanosecond part of the duration.
+   * @param {number|string} [seconds=0] - The second part of the duration.
+   * @param {number|string} [nanoseconds=0] - The nanosecond part of the duration.
    */
   constructor(seconds = 0, nanoseconds = 0) {
-    this._nanoseconds = nanoseconds + seconds * 1e9;
-
-    if (!Number.isSafeInteger(this._nanoseconds)) {
-      throw new RangeError('Total nanoseconds value is too large to be represented in JavaScript');
+    if (typeof seconds !== 'number' &amp;&amp; typeof seconds !== 'string') {
+      throw new TypeError('Invalid argument of seconds');
     }
+
+    if (typeof nanoseconds !== 'number' &amp;&amp; typeof nanoseconds !== 'string') {
+      throw new TypeError('Invalid argument of nanoseconds');
+    }
+
+    let secondInt64 = int64.from(seconds);
+    let nanoInt64 = int64.from(nanoseconds);
+
+    if (typeof seconds === 'string' &amp;&amp; seconds.startsWith('-')) {
+      secondInt64 = int64.negative(secondInt64);
+    }
+    if (typeof nanoseconds === 'string' &amp;&amp; nanoseconds.startsWith('-')) {
+      nanoInt64 = int64.negative(nanoInt64);
+    }
+    this._nanoseconds = secondInt64.multiply(1e9).add(nanoInt64);
+    this._handle = rclnodejs.createDuration(this._nanoseconds.toString());
   }
 
+  /**
+   * Get the nanosecond part of the Duration.
+   * @name Duration#get:nanoseconds
+   * @function
+   * @return {number|string} - value in nanosecond, if the value is greater than Number.MAX_SAFE_INTEGER (2^53-1), will be presented in string of decimal format.
+   */
+
   get nanoseconds() {
-    return this._nanoseconds;
+    let nanoStr = rclnodejs.getDurationNanoseconds(this._handle);
+    let nano;
+
+    if (nanoStr.startsWith('-')) {
+      nano = int64.negative(int64.from(nanoStr));
+    } else {
+      nano = int64.from(nanoStr);
+    }
+    if (Number.isFinite(nano.toNumber())) {
+      return nano.toNumber();
+    }
+    return nano.toString();
   }
 
   /**
@@ -71,9 +104,9 @@ class Duration {
    * @param {Duration} other - The Duration object to be compared.
    * @return {boolean} Return true if they are equal.
    */
-  isEqual(other) {
+  eq(other) {
     if (other instanceof Duration) {
-      return other.nanoseconds === this.nanoseconds;
+      return this._nanoseconds.eq(other.nanoseconds);
     }
     throw new TypeError(`Can't compare duration with object of type: ${other.constructor.name}`);
   }
@@ -83,8 +116,11 @@ class Duration {
    * @param {Duration} other - The Duration object to be compared.
    * @return {boolean} Return true if they are not equal.
    */
-  isNotEqual(other) {
-    return !this.isEqual(other);
+  ne(other) {
+    if (other instanceof Duration) {
+      return this._nanoseconds.ne(other.nanoseconds);
+    }
+    throw new TypeError('Invalid argument');
   }
 
   /**
@@ -92,9 +128,9 @@ class Duration {
    * @param {Duration} other - The Duration object to be compared.
    * @return {boolean} Return true if it's less than other.
    */
-  isLessThan(other) {
+  lt(other) {
     if (other instanceof Duration) {
-      return this.nanoseconds &lt; other.nanoseconds;
+      return this._nanoseconds.lt(other.nanoseconds);
     }
     throw new TypeError('Invalid argument');
   }
@@ -104,8 +140,11 @@ class Duration {
    * @param {Duration} other - The Duration object to be compared.
    * @return {boolean} Return true if it's less than or equal with other.
    */
-  isLessThanOrEqual(other) {
-    return this.isEqual(other) || this.isLessThan(other);
+  lte(other) {
+    if (other instanceof Duration) {
+      return this._nanoseconds.lte(other.nanoseconds);
+    }
+    throw new TypeError('Invalid argument');
   }
 
   /**
@@ -113,9 +152,9 @@ class Duration {
    * @param {Duration} other - The Duration object to be compared.
    * @return {boolean} Return true if it's greater than other.
    */
-  isGreaterThan(other) {
+  gt(other) {
     if (other instanceof Duration) {
-      return this.nanoseconds > other.nanoseconds;
+      return this._nanoseconds.gt(other.nanoseconds);
     }
     throw new TypeError('Invalid argument');
   }
@@ -125,8 +164,11 @@ class Duration {
    * @param {Duration} other - The Duration object to be compared.
    * @return {boolean} Return true if it's greater than or equal with other.
    */
-  isGreaterThanOrEqual(other) {
-    return this.isEqual(other) || this.isGreaterThan(other);
+  gte(other) {
+    if (other instanceof Duration) {
+      return this._nanoseconds.gte(other.nanoseconds);
+    }
+    throw new TypeError('Invalid argument');
   }
 }
 
@@ -141,13 +183,13 @@ module.exports = Duration;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Duration.html">Duration</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Response.html">Response</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="Timer.html">Timer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Duration.html">Duration</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Response.html">Response</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="Service.html">Service</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TimeSource.html">TimeSource</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Oct 18 2018 10:52:06 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Nov 16 2018 10:28:17 GMT+0800 (China Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

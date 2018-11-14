@@ -17,6 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const {Time, Clock, Duration} = rclnodejs;
+const {ClockType} = Clock;
 
 describe('rclnodejs Time/Clock testing', function() {
   this.timeout(60 * 1000);
@@ -32,18 +33,32 @@ describe('rclnodejs Time/Clock testing', function() {
   it('Construct time object', function() {
     let time = new Time(1, 64);
     assert.strictEqual(time.nanoseconds, 1000000064);
-    assert.strictEqual(time.clockType, Clock.ClockType.SYSTEM_TIME);
+    assert.strictEqual(time.clockType, ClockType.SYSTEM_TIME);
 
-    assert.throws(() => {
-      new Time(0, Number.MAX_SAFE_INTEGER + 1);
-    }, RangeError);
+    time = new Time(0, Number.MAX_SAFE_INTEGER);
+    assert.strictEqual(time.nanoseconds, 9007199254740991);
+
+    // The nanoseconds property will be presented in a string, if the value excesses 2^53-1
+    time = new Time(0, '9007199254740992');
+    assert.strictEqual(time.nanoseconds, '9007199254740992');
+
+    time = new Time(0, '9223372036854775807');
+    assert.strictEqual(time.nanoseconds, '9223372036854775807');
 
     assert.throws(() => {
       new Time(1, 1, 'SYSTEM_TIME');
     }, TypeError);
 
     assert.throws(() => {
+      new Time({seconds: 0, nanoseconds: 0});
+    }, TypeError);
+
+    assert.throws(() => {
       new Time(-1, 0);
+    }, RangeError);
+
+    assert.throws(() => {
+      new Time(0, '-9007199254740992');
     }, RangeError);
 
     assert.throws(() => {
@@ -64,60 +79,68 @@ describe('rclnodejs Time/Clock testing', function() {
     duration = new Duration(0, -1);
     assert.strictEqual(duration.nanoseconds, -1);
 
-    assert.throws(() => {
-      new Duration(0, Number.MAX_SAFE_INTEGER + 1);
-    }, RangeError);
+    duration = new Duration(0, Number.MAX_SAFE_INTEGER);
+    assert.strictEqual(duration.nanoseconds, 9007199254740991);
+
+    duration = new Duration(0, '9007199254740992');
+    assert.strictEqual(duration.nanoseconds, '9007199254740992');
+
+    duration = new Duration(0, '-9007199254740992');
+    assert.strictEqual(duration.nanoseconds, '-9007199254740992');
+
+    duration = new Duration(0, '9223372036854775807');
+    assert.strictEqual(duration.nanoseconds, '9223372036854775807');
   });
 
   it('Test time functions', function() {
     let left = new Time(0, 1);
     let right = new Time(0, 2);
 
-    assert.strictEqual(left.isEqual(right), false);
-    assert.strictEqual(left.isNotEqual(right), true);
-    assert.strictEqual(left.isLessThan(right), true);
-    assert.strictEqual(left.isLessThanOrEqual(right), true);
-    assert.strictEqual(left.isGreaterThan(right), false);
-    assert.strictEqual(left.isGreaterThanOrEqual(right), false);
+    assert.strictEqual(left.eq(right), false);
+    assert.strictEqual(left.ne(right), true);
+    assert.strictEqual(left.lt(right), true);
+    assert.strictEqual(left.lte(right), true);
+    assert.strictEqual(left.gt(right), false);
+    assert.strictEqual(left.gte(right), false);
 
-    left = new Time(0, 1, Clock.ClockType.SYSTEM_TIME);
-    right = new Time(0, 2, Clock.ClockType.STEADY_TIME);
+    left = new Time(0, 1, ClockType.SYSTEM_TIME);
+    right = new Time(0, 2, ClockType.STEADY_TIME);
 
     assert.throws(() => {
-      left.isEqual(right);
+      left.eq(right);
     }, TypeError);
 
     assert.throws(() => {
-      left.isNotEqual(right);
+      left.ne(right);
     }, TypeError);
 
     assert.throws(() => {
-      left.isLessThan(right);
+      left.lt(right);
     }, TypeError);
 
     assert.throws(() => {
-      left.isLessThanOrEqual(right);
+      left.lte(right);
     }, TypeError);
 
     assert.throws(() => {
-      left.isGreaterThan(right);
+      left.gt(right);
     }, TypeError);
 
     assert.throws(() => {
-      left.isGreaterThanOrEqual(right);
+      left.gte(right);
     }, TypeError);
 
-    let time = new Time(0, 1, Clock.ClockType.STEADY_TIME);
+    let time = new Time(0, 1, ClockType.STEADY_TIME);
     let duration = new Duration(0, 1);
     let result = time.add(duration);
     assert.ok(result instanceof Time);
     assert.strictEqual(result.nanoseconds, 2);
-    assert.strictEqual(result.clockType, Clock.ClockType.STEADY_TIME);
+    assert.strictEqual(result.clockType, ClockType.STEADY_TIME);
 
     result = time.sub(duration);
     assert.ok(result instanceof Time);
     assert.strictEqual(result.nanoseconds, 0);
-    assert.strictEqual(result.clockType, Clock.ClockType.STEADY_TIME);
+    assert.strictEqual(result.clockType, ClockType.STEADY_TIME);
 
     let diff = time.sub(result);
     assert.ok(diff instanceof Duration);
@@ -130,39 +153,39 @@ describe('rclnodejs Time/Clock testing', function() {
   it('Test duration functions', function() {
     let left = new Duration(0, 1);
     let right = new Duration(0, 2);
-    assert.strictEqual(left.isEqual(right), false);
-    assert.strictEqual(left.isNotEqual(right), true);
-    assert.strictEqual(left.isGreaterThan(right), false);
-    assert.strictEqual(left.isGreaterThanOrEqual(right), false);
-    assert.strictEqual(left.isLessThan(right), true);
-    assert.strictEqual(left.isLessThanOrEqual(right), true);
+    assert.strictEqual(left.eq(right), false);
+    assert.strictEqual(left.ne(right), true);
+    assert.strictEqual(left.gt(right), false);
+    assert.strictEqual(left.gte(right), false);
+    assert.strictEqual(left.lt(right), true);
+    assert.strictEqual(left.lte(right), true);
 
     left = new Duration(0, 5e9);
     right = new Duration(5, 0);
-    assert.ok(left.isEqual(right));
+    assert.ok(left.eq(right));
 
     assert.throws(() => {
-      left.isEqual(5e9);
+      left.eq(5e9);
     }, TypeError);
 
     let time = new Time();
     assert.throws(() => {
-      left.isEqual(time);
+      left.eq(time);
     }, TypeError);
     assert.throws(() => {
-      left.isNotEqual(time);
+      left.ne(time);
     }, TypeError);
     assert.throws(() => {
-      left.isGreaterThan(time);
+      left.gt(time);
     }, TypeError);
     assert.throws(() => {
-      left.isGreaterThanOrEqual(time);
+      left.gte(time);
     }, TypeError);
     assert.throws(() => {
-      left.isLessThan(time);
+      left.lt(time);
     }, TypeError);
     assert.throws(() => {
-      left.isLessThanOrEqual(time);
+      left.lte(time);
     }, TypeError);
   });
 });
