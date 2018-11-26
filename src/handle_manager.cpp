@@ -66,19 +66,20 @@ void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
 
 bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
   for (auto& timer : timers_) {
-    if (rcl_wait_set_add_timer(wait_set, timer) != RCL_RET_OK)
+    if (rcl_wait_set_add_timer(wait_set, timer, nullptr) != RCL_RET_OK)
       return false;
   }
   for (auto& subscription : subscriptions_) {
-    if (rcl_wait_set_add_subscription(wait_set, subscription) != RCL_RET_OK)
+    if (rcl_wait_set_add_subscription(
+        wait_set, subscription, nullptr) != RCL_RET_OK)
       return false;
   }
   for (auto& client : clients_) {
-    if (rcl_wait_set_add_client(wait_set, client) != RCL_RET_OK)
+    if (rcl_wait_set_add_client(wait_set, client, nullptr) != RCL_RET_OK)
       return false;
   }
   for (auto& service : services_) {
-    if (rcl_wait_set_add_service(wait_set, service) != RCL_RET_OK)
+    if (rcl_wait_set_add_service(wait_set, service, nullptr) != RCL_RET_OK)
       return false;
   }
 
