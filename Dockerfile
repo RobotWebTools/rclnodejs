@@ -54,7 +54,7 @@ RUN wget https://ci.ros2.org/view/packaging/job/packaging_xenial_linux/lastSucce
 RUN echo "source $ROS2_WS/ros2-linux/local_setup.bash" >> $HOME/.bashrc
 
 # Install nvm, Node.js and node-gyp
-ENV NODE_VERSION v10.13.0
+ENV NODE_VERSION v10.14.0
 RUN wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash \
     && . $HOME/.nvm/nvm.sh \
     && nvm install $NODE_VERSION && nvm alias default $NODE_VERSION
