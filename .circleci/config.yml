@@ -22,6 +22,7 @@ jobs:
     - run: brew install python
     - run: brew install python@2
     - run: brew install wget cmake cppcheck tinyxml eigen pcre poco
+    - run: brew install openssl
     - run: brew install asio
     - run: brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/02f04f84902937422d529945bbabdcb6491b147a/Formula/tinyxml2.rb
     - run: python3 -m pip install catkin_pkg empy pyparsing pyyaml setuptools argcomplete colcon-common-extensions
@@ -41,7 +42,7 @@ jobs:
         - ./node_modules
     # Test
     - run: npm install istanbul coveralls
-    - run: source ~/ros2_install/ros2-osx/local_setup.bash && node scripts/compile_tests.js && node ./node_modules/.bin/istanbul cover ./scripts/run_test.js --report lcovonly && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
+    - run: source ~/ros2_install/ros2-osx/local_setup.bash && export OPENSSL_ROOT_DIR="/usr/local/opt/openssl" && node scripts/compile_tests.js && node ./node_modules/.bin/istanbul cover ./scripts/run_test.js --report lcovonly && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
     # Teardown
     - run: find $HOME/Library/Developer/Xcode/DerivedData -name '*.xcactivitylog' -exec cp {} $CIRCLE_ARTIFACTS/xcactivitylog \; || true
     # Save test results

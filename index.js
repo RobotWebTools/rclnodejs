@@ -30,6 +30,7 @@ const Time = require('./lib/time.js');
 const TimeSource = require('./lib/time_source.js');
 const {Clock, ROSClock} = require('./lib/clock.js');
 const Duration = require('./lib/duration.js');
+const Context = require('./lib/context.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -102,14 +103,15 @@ let rcl = {
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
    * @param {string} namespace - The namespace used in ROS, default is an empty string.
+   * @param {Context} context - The context, default is Context.defaultContext().
    * @return {Node} The instance of Node.
    */
-  createNode(nodeName, namespace = '') {
+  createNode(nodeName, namespace = '', context = Context.defaultContext()) {
     if (typeof (nodeName) !== 'string' || typeof (namespace) !== 'string') {
       throw new TypeError('Invalid argument.');
     }
 
-    let handle = rclnodejs.createNode(nodeName, namespace);
+    let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
     let node =  new rclnodejs.ShadowNode();
 
     node.init(nodeName, namespace);
@@ -121,10 +123,10 @@ let rcl = {
 
   /**
   * Init the module.
-  * @param {array} args - The command line arguments to pass to rcl.
+  * @param {Context} context - The context, default is Context.defaultContext().
   * @return {Promise<undefined>} A Promise.
   */
-  init(...args) {
+  init(context = Context.defaultContext()) {
     return new Promise((resolve, reject) => {
       let that = this;
       if (!this._initialized) {
@@ -137,8 +139,8 @@ let rcl = {
           }
 
           generator.generateAll(forced).then(() => {
-            rclnodejs.init(args);
-            debug('Finish initializing rcl with args = %o.', args);
+            this._context = context;
+            rclnodejs.init(context.handle());
             ActionLib.config({
               log: that.logging.getLogger('actionlibjs'),
               time: require('./lib/actions/time_utils.js'),
@@ -157,6 +159,7 @@ let rcl = {
             });
 
             this._initialized = true;
+            // this._context = undefined;
             resolve();
           }).catch(e => {
             reject(e);
@@ -186,10 +189,10 @@ let rcl = {
   },
 
   /**
-   * Terminate the node, this will destory all the allocated resources and quit.
+   * @param {Context} context - The context to be shutdown.
    * @return {undefined}
    */
-  shutdown() {
+  shutdown(context) {
     if (!this._initialized) {
       throw new Error('The module rclnodejs has been shut.');
     }
@@ -198,8 +201,11 @@ let rcl = {
       node.stopSpinning();
       node.destroy();
     });
-
-    rclnodejs.shutdown();
+    if (!context) {
+      Context.shutdownDefaultContext();
+    } else {
+      context.shutdown();
+    }
     this._nodes = [];
     this._initialized = false;
   },

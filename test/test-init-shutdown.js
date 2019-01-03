@@ -94,6 +94,6 @@ describe('Node destroy testing', function() {
   it('rclnodejs create node without init', function() {
     assert.throws(function() {
       rclnodejs.createNode('my_node');
-    }, /has not been called/, 'Failed to createNode');
+    });
   });
 });
