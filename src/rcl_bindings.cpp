@@ -40,14 +40,24 @@ namespace rclnodejs {
 std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos);
 
 NAN_METHOD(Init) {
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
+  rcl_ret_t ret = rcl_init_options_init(&init_options, allocator);
+
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_init(0, nullptr, rcl_get_default_allocator()),
+                           rcl_init(0, nullptr, &init_options, context),
                            rcl_get_error_string().str);
 }
 
 NAN_METHOD(CreateNode) {
   std::string node_name(*v8::String::Utf8Value(info[0]));
   std::string name_space(*v8::String::Utf8Value(info[1]));
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[2]->ToObject());
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(malloc(sizeof(rcl_node_t)));
 
@@ -56,7 +66,8 @@ NAN_METHOD(CreateNode) {
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
-      rcl_node_init(node, node_name.c_str(), name_space.c_str(), &options),
+      rcl_node_init(node, node_name.c_str(), name_space.c_str(), context,
+          &options),
       rcl_get_error_string().str);
 
   auto handle = RclHandle::NewInstance(node, nullptr,
@@ -66,6 +77,9 @@ NAN_METHOD(CreateNode) {
 
 NAN_METHOD(CreateTimer) {
   int64_t period_ms = info[0]->IntegerValue();
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[1]->ToObject());
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
@@ -78,8 +92,9 @@ NAN_METHOD(CreateTimer) {
                                           &allocator),
                            rcl_get_error_string().str);
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_timer_init(timer, clock, RCL_MS_TO_NS(period_ms),
-                                          nullptr, rcl_get_default_allocator()),
+                           rcl_timer_init(timer, clock, context,
+                              RCL_MS_TO_NS(period_ms), nullptr,
+                                  rcl_get_default_allocator()),
                            rcl_get_error_string().str);
 
   auto js_obj = RclHandle::NewInstance(
@@ -893,8 +908,24 @@ std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos) {
   return qos_profile;
 }
 
+int DestroyContext(rcl_context_t* context) {
+  rcl_ret_t ret = RCL_RET_OK;
+  if (context->impl) {
+    if (rcl_context_is_valid(context)) {
+      if (RCL_RET_OK != rcl_shutdown(context)) {
+        Nan::ThrowError(rcl_get_error_string().str);
+      }
+      ret = rcl_context_fini(context);
+    }
+  }
+  return ret;
+}
+
 NAN_METHOD(Shutdown) {
-  THROW_ERROR_IF_NOT_EQUAL(rcl_shutdown(), RCL_RET_OK,
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
+  THROW_ERROR_IF_NOT_EQUAL(rcl_shutdown(context), RCL_RET_OK,
                            rcl_get_error_string().str);
   info.GetReturnValue().Set(Nan::Undefined());
 }
@@ -1002,6 +1033,24 @@ NAN_METHOD(IsEnableFor) {
   info.GetReturnValue().Set(Nan::New(enabled));
 }
 
+NAN_METHOD(CreateContext) {
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(malloc(sizeof(rcl_context_t)));
+  *context = rcl_get_zero_initialized_context();
+  auto js_obj = RclHandle::NewInstance(context, nullptr,
+      std::bind(DestroyContext, context));
+
+  info.GetReturnValue().Set(js_obj);
+}
+
+NAN_METHOD(IsContextValid) {
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
+  bool is_valid = rcl_context_is_valid(context);
+  info.GetReturnValue().Set(Nan::New(is_valid));
+}
+
 uint32_t GetBindingMethodsCount(BindingMethod* methods) {
   uint32_t count = 0;
   while (methods[count].function) {
@@ -1058,6 +1107,8 @@ BindingMethod binding_methods[] = {
     {"getLoggerEffectiveLevel", GetLoggerEffectiveLevel},
     {"log", Log},
     {"isEnableFor", IsEnableFor},
+    {"createContext", CreateContext},
+    {"ok", IsContextValid},
     {"", nullptr}};
 
 }  // namespace rclnodejs
