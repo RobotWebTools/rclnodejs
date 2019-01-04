@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Client</title>
+    <title>JSDoc: Class: Clock</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Client</h1>
+    <h1 class="page-title">Class: Clock</h1>
 
     
 
@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Client<span class="signature">()</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Clock<span class="signature">(clockType<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">- Class representing a Client in ROS</div>
+            <div class="class-description">- Class representing a Clock in ROS</div>
         
     
 </header>
@@ -40,6 +40,21 @@
     
         
 
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="Clock"><span class="type-signature"></span>new Clock<span class="signature">(clockType<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Create a Clock.
+</div>
 
 
 
@@ -48,6 +63,74 @@
 
 
 
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>clockType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ClockType">ClockType</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    Clock.ClockType.SYSTEM_TIME
+                
+                </td>
+            
+
+            <td class="description last">The type of the clock to be created.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -83,7 +166,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line26">line 26</a>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line25">line 25</a>
     </li></ul></dd>
     
 
@@ -129,22 +212,16 @@
 
         
             
-<h4 class="name" id="serviceName"><span class="type-signature"></span>serviceName<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="clockType"><span class="type-signature"></span>clockType<span class="type-signature"></span></h4>
 
 
 
 
+<div class="description">
+    Get ClockType of this Clock object.
+</div>
 
 
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -179,7 +256,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line84">line 84</a>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line39">line 39</a>
     </li></ul></dd>
     
 
@@ -207,7 +284,7 @@
     
 
     
-    <h4 class="name" id="sendRequest"><span class="type-signature"></span>sendRequest<span class="signature">(request, callback)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <h4 class="name" id="now"><span class="type-signature"></span>now<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Time.html">Time</a>}</span></h4>
     
 
     
@@ -215,7 +292,7 @@
 
 
 <div class="description">
-    Send the request and will be notified asynchronously if receiving the repsonse.
+    Return the current time.
 </div>
 
 
@@ -224,78 +301,6 @@
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>request</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The request to be submitted.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="global.html#ResponseCallback">ResponseCallback</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Thc callback function for receiving the server response.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -331,19 +336,12 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_client.js.html">lib/client.js</a>, <a href="lib_client.js.html#line50">line 50</a>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line47">line 47</a>
     </li></ul></dd>
     
 
     
 
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="global.html#ResponseCallback">ResponseCallback</a></li>
-        </ul>
-    </dd>
     
 
     
@@ -364,6 +362,10 @@
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    Return the current time.
+</div>
+
 
 
 <dl>
@@ -372,7 +374,7 @@
     </dt>
     <dd>
         
-<span class="param-type">undefined</span>
+<span class="param-type"><a href="Time.html">Time</a></span>
 
 
     </dd>

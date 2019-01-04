@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: lib/timer.js</title>
+    <title>JSDoc: Source: lib/clock.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: lib/timer.js</h1>
+    <h1 class="page-title">Source: lib/clock.js</h1>
 
     
 
@@ -26,7 +26,7 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>// Copyright (c) 2017 Intel Corporation. All rights reserved.
+            <pre class="prettyprint source linenums"><code>// Copyright (c) 2018 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,80 +43,95 @@
 'use strict';
 
 const rclnodejs = require('bindings')('rclnodejs');
+const Time = require('./time.js');
+const ClockType = require('./clock_type.js');
 
 /**
-  * @class - Class representing a Timer in ROS
-  * @hideconstructor
-  */
+ * @class - Class representing a Clock in ROS
+ */
 
-class Timer {
-  constructor(handle, period, callback) {
-    this._handle = handle;
-    this._period = period;
-    this.callback = callback;
-  }
-
+class Clock {
   /**
-   * @type {number}
+   * Create a Clock.
+   * @param {ClockType} [clockType=Clock.ClockType.SYSTEM_TIME] - The type of the clock to be created.
    */
-  get period() {
-    return this._period;
-  }
-
-  get handle() {
-    return this._handle;
+  constructor(clockType = ClockType.SYSTEM_TIME) {
+    this._clockType = clockType;
+    this._handle = rclnodejs.createClock(this._clockType);
   }
 
   /**
-   * Check if the timer is ready.
-   * @return {boolean} Return true if timer is ready, otherwise return false.
+   * Get ClockType of this Clock object.
+   * @return {ClockType} Return the type of the clock.
    */
-  isReady() {
-    return rclnodejs.isTimerReady(this._handle);
+  get clockType() {
+    return this._clockType;
   }
 
   /**
-   * Check if the timer is canceled.
-   * @return {boolean} Return true if timer is canceled, otherwise return false.
+   * Return the current time.
+   * @return {Time} Return the current time.
    */
-  isCanceled() {
-    return rclnodejs.isTimerCanceled(this._handle);
+  now() {
+    let time = rclnodejs.clockGetNow(this._handle);
+    return new Time(time.sec, time.nanosec, this._clockType);
+  }
+}
+
+/**
+ * @class - Class representing a ROSClock in ROS
+ */
+
+class ROSClock extends Clock {
+  /**
+   * Create a ROSClock.
+   */
+  constructor() {
+    super(ClockType.ROS_TIME);
   }
 
   /**
-   * Cancel the timer.
+   * Return status that whether the ROS time is active.
+   * @name ROSClock#get:isRosTimeActive
+   * @function
+   * @return {boolean} Return true if the time is active, otherwise return false.
+   */
+
+  get isRosTimeActive() {
+    return rclnodejs.getRosTimeOverrideIsEnabled(this._handle);
+  }
+
+  /**
+   * Set the status of ROS time.
+   * @param {boolean} enabled - Set the ROS time to be active.
+   * @name ROSClock#set:isRosTimeActive
+   * @function
    * @return {undefined}
    */
-  cancel() {
-    rclnodejs.cancelTimer(this._handle);
+
+  set isRosTimeActive(enabled) {
+    rclnodejs.setRosTimeOverrideIsEnabled(this._handle, enabled);
   }
 
   /**
-   * Reset the timer.
+   * Set the status of ROS time.
+   * @param {Time} time - The time to be set override.
+   * @name ROSClock#set:rosTimeOverride
+   * @function
    * @return {undefined}
    */
-  reset() {
-    rclnodejs.resetTimer(this._handle);
-  }
 
-  /**
-   * Get the interval since the last call of this timer.
-   * @return {number} - the interval value - ms.
-   */
-  timeSinceLastCall() {
-    return parseInt(rclnodejs.timerGetTimeSinceLastCall(this._handle), 10);
+  set rosTimeOverride(time) {
+    if (!(time instanceof Time)) {
+      throw new TypeError('Invalid argument, must be type of Time');
+    }
+    rclnodejs.setRosTimeOverride(this._handle, time._handle);
   }
+}
 
-  /**
-   * Get the interval until the next call will happen.
-   * @return {number} - the interval value - ms.
-   */
-  timeUntilNextCall() {
-    return parseInt(rclnodejs.timerGetTimeUntilNextCall(this._handle), 10);
-  }
-};
+Clock.ClockType = ClockType;
 
-module.exports = Timer;
+module.exports = {Clock, ROSClock};
 </code></pre>
         </article>
     </section>

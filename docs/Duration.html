@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Logging</title>
+    <title>JSDoc: Class: Duration</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Logging</h1>
+    <h1 class="page-title">Class: Duration</h1>
 
     
 
@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Logging<span class="signature">()</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Duration<span class="signature">(seconds<span class="signature-attributes">opt</span>, nanoseconds<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">- Class representing logger in ROS</div>
+            <div class="class-description">- Class representing a Duration in ROS</div>
         
     
 </header>
@@ -40,6 +40,21 @@
     
         
 
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="Duration"><span class="type-signature"></span>new Duration<span class="signature">(seconds<span class="signature-attributes">opt</span>, nanoseconds<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Create a Duration.
+</div>
 
 
 
@@ -48,6 +63,119 @@
 
 
 
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>seconds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The second part of the duration.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nanoseconds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The nanosecond part of the duration.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -83,7 +211,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line70">line 70</a>
+        <a href="lib_duration.js.html">lib/duration.js</a>, <a href="lib_duration.js.html#line24">line 24</a>
     </li></ul></dd>
     
 
@@ -135,7 +263,7 @@
     
 
     
-    <h4 class="name" id=".getLogger"><span class="type-signature">(static) </span>getLogger<span class="signature">(name)</span><span class="type-signature"> &rarr; {<a href="Logging.html">Logging</a>}</span></h4>
+    <h4 class="name" id="eq"><span class="type-signature"></span>eq<span class="signature">(other)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -143,7 +271,7 @@
 
 
 <div class="description">
-    Create a logger by name.
+    Determine whether two Duration objects are equal.
 </div>
 
 
@@ -179,13 +307,13 @@
 
         <tr>
             
-                <td class="name"><code>name</code></td>
+                <td class="name"><code>other</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type"><a href="Duration.html">Duration</a></span>
 
 
             
@@ -195,7 +323,7 @@
 
             
 
-            <td class="description last">name of the logger.</td>
+            <td class="description last">The Duration object to be compared.</td>
         </tr>
 
     
@@ -236,7 +364,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line180">line 180</a>
+        <a href="lib_duration.js.html">lib/duration.js</a>, <a href="lib_duration.js.html#line79">line 79</a>
     </li></ul></dd>
     
 
@@ -263,7 +391,7 @@
 
         
 <div class="param-desc">
-    Return the logger object.
+    Return true if they are equal.
 </div>
 
 
@@ -274,7 +402,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Logging.html">Logging</a></span>
+<span class="param-type">boolean</span>
 
 
     </dd>
@@ -292,7 +420,7 @@
     
 
     
-    <h4 class="name" id="debug"><span class="type-signature"></span>debug<span class="signature">(message)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="get:nanoseconds"><span class="type-signature"></span>get:nanoseconds<span class="signature">()</span><span class="type-signature"> &rarr; {number|string}</span></h4>
     
 
     
@@ -300,7 +428,118 @@
 
 
 <div class="description">
-    Log a message with the DEBUG severity.
+    Get the nanosecond part of the Duration.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_duration.js.html">lib/duration.js</a>, <a href="lib_duration.js.html#line52">line 52</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - value in nanosecond, if the value is greater than Number.MAX_SAFE_INTEGER (2^53-1), will be presented in string of decimal format.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="gt"><span class="type-signature"></span>gt<span class="signature">(other)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Determine whether the Duration object is greater than another one.
 </div>
 
 
@@ -336,13 +575,13 @@
 
         <tr>
             
-                <td class="name"><code>message</code></td>
+                <td class="name"><code>other</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type"><a href="Duration.html">Duration</a></span>
 
 
             
@@ -352,7 +591,7 @@
 
             
 
-            <td class="description last">message to be logged.</td>
+            <td class="description last">The Duration object to be compared.</td>
         </tr>
 
     
@@ -393,7 +632,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line103">line 103</a>
+        <a href="lib_duration.js.html">lib/duration.js</a>, <a href="lib_duration.js.html#line127">line 127</a>
     </li></ul></dd>
     
 
@@ -420,7 +659,7 @@
 
         
 <div class="param-desc">
-    Return true if the message has been logged.
+    Return true if it's greater than other.
 </div>
 
 
@@ -431,7 +670,7 @@
     </dt>
     <dd>
         
-<span class="param-type">bool</span>
+<span class="param-type">boolean</span>
 
 
     </dd>
@@ -449,7 +688,7 @@
     
 
     
-    <h4 class="name" id="error"><span class="type-signature"></span>error<span class="signature">(message)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="gte"><span class="type-signature"></span>gte<span class="signature">(other)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -457,7 +696,7 @@
 
 
 <div class="description">
-    Log a message with the ERROR severity.
+    Determine whether the Duration object is greater than or equal with another one.
 </div>
 
 
@@ -493,13 +732,13 @@
 
         <tr>
             
-                <td class="name"><code>message</code></td>
+                <td class="name"><code>other</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type"><a href="Duration.html">Duration</a></span>
 
 
             
@@ -509,7 +748,7 @@
 
             
 
-            <td class="description last">message to be logged.</td>
+            <td class="description last">The Duration object to be compared.</td>
         </tr>
 
     
@@ -550,7 +789,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line133">line 133</a>
+        <a href="lib_duration.js.html">lib/duration.js</a>, <a href="lib_duration.js.html#line139">line 139</a>
     </li></ul></dd>
     
 
@@ -577,7 +816,7 @@
 
         
 <div class="param-desc">
-    Return true if the message has been logged.
+    Return true if it's greater than or equal with other.
 </div>
 
 
@@ -588,7 +827,7 @@
     </dt>
     <dd>
         
-<span class="param-type">bool</span>
+<span class="param-type">boolean</span>
 
 
     </dd>
@@ -606,7 +845,7 @@
     
 
     
-    <h4 class="name" id="fatal"><span class="type-signature"></span>fatal<span class="signature">(message)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="lt"><span class="type-signature"></span>lt<span class="signature">(other)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -614,7 +853,7 @@
 
 
 <div class="description">
-    Log a message with the FATAL severity.
+    Determine whether the Duration object is less than another one.
 </div>
 
 
@@ -650,13 +889,13 @@
 
         <tr>
             
-                <td class="name"><code>message</code></td>
+                <td class="name"><code>other</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type"><a href="Duration.html">Duration</a></span>
 
 
             
@@ -666,7 +905,7 @@
 
             
 
-            <td class="description last">message to be logged.</td>
+            <td class="description last">The Duration object to be compared.</td>
         </tr>
 
     
@@ -707,7 +946,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line143">line 143</a>
+        <a href="lib_duration.js.html">lib/duration.js</a>, <a href="lib_duration.js.html#line103">line 103</a>
     </li></ul></dd>
     
 
@@ -734,7 +973,7 @@
 
         
 <div class="param-desc">
-    Return true if the message has been logged.
+    Return true if it's less than other.
 </div>
 
 
@@ -745,7 +984,7 @@
     </dt>
     <dd>
         
-<span class="param-type">bool</span>
+<span class="param-type">boolean</span>
 
 
     </dd>
@@ -763,7 +1002,7 @@
     
 
     
-    <h4 class="name" id="info"><span class="type-signature"></span>info<span class="signature">(message)</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="lte"><span class="type-signature"></span>lte<span class="signature">(other)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -771,7 +1010,7 @@
 
 
 <div class="description">
-    Log a message with the INFO severity.
+    Determine whether the Duration object is less than or equal with another one.
 </div>
 
 
@@ -807,13 +1046,13 @@
 
         <tr>
             
-                <td class="name"><code>message</code></td>
+                <td class="name"><code>other</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type"><a href="Duration.html">Duration</a></span>
 
 
             
@@ -823,7 +1062,7 @@
 
             
 
-            <td class="description last">message to be logged.</td>
+            <td class="description last">The Duration object to be compared.</td>
         </tr>
 
     
@@ -864,7 +1103,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line113">line 113</a>
+        <a href="lib_duration.js.html">lib/duration.js</a>, <a href="lib_duration.js.html#line115">line 115</a>
     </li></ul></dd>
     
 
@@ -891,7 +1130,7 @@
 
         
 <div class="param-desc">
-    Return true if the message has been logged.
+    Return true if it's less than or equal with other.
 </div>
 
 
@@ -902,7 +1141,7 @@
     </dt>
     <dd>
         
-<span class="param-type">bool</span>
+<span class="param-type">boolean</span>
 
 
     </dd>
@@ -920,7 +1159,7 @@
     
 
     
-    <h4 class="name" id="loggerEffectiveLevel"><span class="type-signature"></span>loggerEffectiveLevel<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="global.html#LoggingSeverity">LoggingSeverity</a>}</span></h4>
+    <h4 class="name" id="ne"><span class="type-signature"></span>ne<span class="signature">(other)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
     
 
     
@@ -928,331 +1167,7 @@
 
 
 <div class="description">
-    Get the logging severity level.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line93">line 93</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    - The severity level of the logger.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="global.html#LoggingSeverity">LoggingSeverity</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="LoggingSeverity"><span class="type-signature"></span>LoggingSeverity<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="global.html#LoggingSeverity">LoggingSeverity</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Get LoggingSeverity enum.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line161">line 161</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Return LoggingSeverity enum.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="global.html#LoggingSeverity">LoggingSeverity</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="name"><span class="type-signature"></span>name<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Get name of the logger.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line170">line 170</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    logger's name.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">string</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="setLoggerLevel"><span class="type-signature"></span>setLoggerLevel<span class="signature">(level)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Set the logging severity level.
+    Determine whether two Duration objects are not equal.
 </div>
 
 
@@ -1288,13 +1203,13 @@
 
         <tr>
             
-                <td class="name"><code>level</code></td>
+                <td class="name"><code>other</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#LoggingSeverity">LoggingSeverity</a></span>
+<span class="param-type"><a href="Duration.html">Duration</a></span>
 
 
             
@@ -1304,7 +1219,7 @@
 
             
 
-            <td class="description last">The logging severity level.</td>
+            <td class="description last">The Duration object to be compared.</td>
         </tr>
 
     
@@ -1345,160 +1260,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line81">line 81</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">undefined</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="warn"><span class="type-signature"></span>warn<span class="signature">(message)</span><span class="type-signature"> &rarr; {bool}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Log a message with the WARN severity.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>message</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">message to be logged.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="lib_logging.js.html">lib/logging.js</a>, <a href="lib_logging.js.html#line123">line 123</a>
+        <a href="lib_duration.js.html">lib/duration.js</a>, <a href="lib_duration.js.html#line91">line 91</a>
     </li></ul></dd>
     
 
@@ -1525,7 +1287,7 @@
 
         
 <div class="param-desc">
-    Return true if the message has been logged.
+    Return true if they are not equal.
 </div>
 
 
@@ -1536,7 +1298,7 @@
     </dt>
     <dd>
         
-<span class="param-type">bool</span>
+<span class="param-type">boolean</span>
 
 
     </dd>
