@@ -48,8 +48,8 @@ RUN git config --global user.name $GIT_USER_NAME \
 ENV ROS2_WS=/root
 WORKDIR $ROS2_WS
 
-RUN wget https://ci.ros2.org/view/packaging/job/packaging_xenial_linux/lastSuccessfulBuild/artifact/ws/ros2-package-linux-x86_64.tar.bz2 \
-    && tar xf ros2-package-linux-x86_64.tar.bz2
+RUN wget https://github.com/ros2/ros2/releases/download/release-crystal-20181214/ros2-crystal-20181214-linux-xenial-x86_64.tar.bz2 \
+    && tar xf ros2-crystal-20181214-linux-xenial-x86_64.tar.bz2
 
 RUN echo "source $ROS2_WS/ros2-linux/local_setup.bash" >> $HOME/.bashrc
 

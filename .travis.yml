@@ -7,7 +7,7 @@ branches:
   only:
   - develop
   - master
-  - actionlib
+  - crystal-clemmys
 
 before_install:
   - sudo docker pull ubuntu:xenial
