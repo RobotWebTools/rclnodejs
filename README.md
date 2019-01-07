@@ -89,7 +89,7 @@ npm install
 
 ### Install from npmjs
 
-Please run `npm i rclnodjs` to install the latest version OR `npm i rclnodjs@<version>` to install a specific version.
+Please run `npm i rclnodejs` to install the latest version **OR** `npm i rclnodejs@<version>` to install a specific version.
 
 ### Install from GitHub
 

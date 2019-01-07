@@ -1,3 +1,5 @@
+# rclnodejs [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://travis-ci.org/RobotWebTools/rclnodejs)
+
 `rclnodejs` is a Node.js client for Robot Operating System (ROS) v2.0. It provides extremely simple & easy API for ROS 2.0 programming, the following example shows how to create a ROS 2.0 node and then publish a string message in only 6 lines of code.
 
 ``` JavaScript
@@ -10,17 +12,32 @@ rclnodejs.init().then(() => {
 });
 ```
 
-# Install ROS 2.0
-Befire install rclnodejs, make sure ROS 2.0 is installed first. Read and follow the [Installation Guide](https://github.com/ros2/ros2/wiki/Installation) to install ROS 2.0
+## Install ROS 2.0
 
-# Install rclnodejs
+Before install rclnodejs, make sure ROS 2.0 is installed first. Read and follow the [Installation Guide](https://index.ros.org/doc/ros2/Installation/) to install ROS 2.0
+
+## Install rclnodejs
+
 After ROS 2.0 is installed, run the following command
 
-```
+``` bash
 npm i --save rclnodejs
 ```
 
-# More Examples
+## Match with ROS 2.0 Stable Releases
+
+The latest release of rclnodejs is always verified with the [master](https://github.com/ros2/ros2) branch of ROS 2.0, but usually we will publish a new version after each ROS 2.0 release. Please find the specific version if you want to build your apps on one of ROS 2.0.
+
+ROS 2.0 Release | rclnodejs Version |
+:------------: |  :-------------: |
+[Bouncy Bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy) | [0.3.5](https://www.npmjs.com/package/rclnodejs/v/0.3.5)
+[Crystal Clemmys](https://github.com/ros2/ros2/releases/tag/release-crystal-20181214) | [0.8.0](https://www.npmjs.com/package/rclnodejs/v/0.8.0)
+
+## Document
+
+Please browse our online [doucment](http://robotwebtools.org/rclnodejs/docs/index.html) to learn the detailed usage if you needed.
+
+## More Examples
 
 Use complex message
 
@@ -59,8 +76,6 @@ rclnodejs.init().then(() => {
 });
 ```
 
-
-
 Create a service
 
 ```JavaScript
@@ -90,6 +105,6 @@ Send a request in a client
 
 ```
 
-# License
-Apache License Version 2.0
+## License
 
+Apache License Version 2.0
