@@ -10,8 +10,8 @@ branches:
   - actionlib
 
 before_install:
-  - sudo docker pull ubuntu:xenial
+  - sudo docker pull ubuntu:bionic
   - sudo docker build -t rcldocker .
 
 script:
-  - sudo docker run -v $(pwd):/root/rclnodejs --rm rcldocker bash -i -c 'cd /root/rclnodejs && cppcheck --enable=all src/*.cpp src/*.hpp && ./scripts/build.sh && npm test'
+  - sudo docker run -v $(pwd):/root/rclnodejs --rm rcldocker bash -i -c 'cd /root/rclnodejs && cppcheck --suppress=syntaxError --enable=all src/*.cpp src/*.hpp && ./scripts/build.sh && npm test'
