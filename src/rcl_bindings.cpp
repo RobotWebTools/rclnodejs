@@ -16,6 +16,7 @@
 
 #include <rcl/error_handling.h>
 #include <rcl/expand_topic_name.h>
+#include <rcl/graph.h>
 #include <rcl/node.h>
 #include <rcl/rcl.h>
 #include <rcl/validate_topic_name.h>
@@ -1051,6 +1052,159 @@ NAN_METHOD(IsContextValid) {
   info.GetReturnValue().Set(Nan::New(is_valid));
 }
 
+void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
+                          v8::Local<v8::Array>* result_list) {
+  for (int i = 0; i < names_and_types.names.size; ++i) {
+    auto item = v8::Object::New(v8::Isolate::GetCurrent());
+    std::string topic_name = names_and_types.names.data[i];
+    item->Set(Nan::New("name").ToLocalChecked(),
+              Nan::New(names_and_types.names.data[i]).ToLocalChecked());
+
+    v8::Local<v8::Array> type_list =
+      Nan::New<v8::Array>(names_and_types.types[i].size);
+    for (int j = 0; j < names_and_types.types[i].size; ++j) {
+      Nan::Set(
+        type_list, j,
+        Nan::New(names_and_types.types[i].data[j]).ToLocalChecked());
+    }
+    item->Set(Nan::New("types").ToLocalChecked(), type_list);
+    Nan::Set(*result_list, i, item);
+  }
+}
+
+NAN_METHOD(GetPublisherNamesAndTypesByNode) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string node_name = *Nan::Utf8String(info[1]->ToString());
+  std::string node_namespace = *Nan::Utf8String(info[2]->ToString());
+  bool no_demangle = Nan::To<bool>(info[3]).FromJust();
+
+  rcl_names_and_types_t topic_names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_get_publisher_names_and_types_by_node(node, &allocator, no_demangle,
+          node_name.c_str(), node_namespace.c_str(), &topic_names_and_types),
+      "Failed to get_publisher_names_and_types.");
+
+  v8::Local<v8::Array> result_list =
+      Nan::New<v8::Array>(topic_names_and_types.names.size);
+  ExtractNamesAndTypes(topic_names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_names_and_types_fini(&topic_names_and_types),
+      "Failed to destroy topic_names_and_types");
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(GetSubscriptionNamesAndTypesByNode) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string node_name = *Nan::Utf8String(info[1]->ToString());
+  std::string node_namespace = *Nan::Utf8String(info[2]->ToString());
+  bool no_demangle = Nan::To<bool>(info[3]).FromJust();
+
+  rcl_names_and_types_t topic_names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_get_subscriber_names_and_types_by_node(node, &allocator, no_demangle,
+          node_name.c_str(), node_namespace.c_str(), &topic_names_and_types),
+      "Failed to get_publisher_names_and_types.");
+
+  v8::Local<v8::Array> result_list =
+      Nan::New<v8::Array>(topic_names_and_types.names.size);
+  ExtractNamesAndTypes(topic_names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_names_and_types_fini(&topic_names_and_types),
+      "Failed to destroy topic_names_and_types");
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(GetServiceNamesAndTypesByNode) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string node_name = *Nan::Utf8String(info[1]->ToString());
+  std::string node_namespace = *Nan::Utf8String(info[2]->ToString());
+
+  rcl_names_and_types_t service_names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_get_service_names_and_types_by_node(node, &allocator,
+          node_name.c_str(), node_namespace.c_str(), &service_names_and_types),
+      "Failed to get_publisher_names_and_types.");
+
+  v8::Local<v8::Array> result_list =
+      Nan::New<v8::Array>(service_names_and_types.names.size);
+  ExtractNamesAndTypes(service_names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_names_and_types_fini(&service_names_and_types),
+      "Failed to destroy topic_names_and_types");
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(GetTopicNamesAndTypes) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  bool no_demangle = Nan::To<bool>(info[1]).FromJust();
+  rcl_names_and_types_t topic_names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+
+  THROW_ERROR_IF_NOT_EQUAL(
+    RCL_RET_OK,
+    rcl_get_topic_names_and_types(node, &allocator, no_demangle,
+        &topic_names_and_types),
+    "Failed to get_publisher_names_and_types.");
+
+  v8::Local<v8::Array> result_list =
+      Nan::New<v8::Array>(topic_names_and_types.names.size);
+  ExtractNamesAndTypes(topic_names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_names_and_types_fini(&topic_names_and_types),
+      "Failed to destroy topic_names_and_types");
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(GetServiceNamesAndTypes) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  rcl_names_and_types_t service_names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+
+  THROW_ERROR_IF_NOT_EQUAL(
+    RCL_RET_OK,
+    rcl_get_service_names_and_types(node, &allocator, &service_names_and_types),
+    "Failed to get_publisher_names_and_types.");
+
+  v8::Local<v8::Array> result_list =
+      Nan::New<v8::Array>(service_names_and_types.names.size);
+  ExtractNamesAndTypes(service_names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_names_and_types_fini(&service_names_and_types),
+      "Failed to destroy topic_names_and_types");
+
+  info.GetReturnValue().Set(result_list);
+}
+
 uint32_t GetBindingMethodsCount(BindingMethod* methods) {
   uint32_t count = 0;
   while (methods[count].function) {
@@ -1109,6 +1263,11 @@ BindingMethod binding_methods[] = {
     {"isEnableFor", IsEnableFor},
     {"createContext", CreateContext},
     {"ok", IsContextValid},
+    {"getPublisherNamesAndTypesByNode", GetPublisherNamesAndTypesByNode},
+    {"getSubscriptionNamesAndTypesByNode", GetSubscriptionNamesAndTypesByNode},
+    {"getServiceNamesAndTypesByNode", GetServiceNamesAndTypesByNode},
+    {"getTopicNamesAndTypes", GetTopicNamesAndTypes},
+    {"getServiceNamesAndTypes", GetServiceNamesAndTypes},
     {"", nullptr}};
 
 }  // namespace rclnodejs
