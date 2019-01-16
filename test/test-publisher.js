@@ -21,11 +21,11 @@ const {message} = rclnodejs;
 describe('rclnodejs publisher test suite', function() {
   this.timeout(60 * 1000);
 
-  before(function() {
+  beforeEach(function() {
     return rclnodejs.init();
   });
 
-  after(function() {
+  afterEach(function() {
     rclnodejs.shutdown();
   });
 
