@@ -11,21 +11,13 @@ master | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?bran
 
 ### Get ready for ROS 2
 
-1.Build from scratch.
+1.Install ROS 2.0 from binary package.
 
-ROS is a cross-platform system, which covers Linux, macOS and Windows, and the `rclnodejs` module is developed on the [`master`](https://github.com/ros2/ros2/blob/master/ros2.repos) branch of ROS, so you have to build ROS from scratch at the present stage. Please select the platform you want to work on, then reference the instruction to build ROS (please build wiht flag `--merge-install`).
+ROS 2.0 is a cross-platform system, which covers Linux, macOS and Windows, and the `rclnodejs` module is developed against the [`master`](https://github.com/ros2/ros2/blob/master/ros2.repos) branch of ROS 2.0. You can download the latest binary packages from [ROS 2.0 build farm](http://ci.ros2.org/view/packaging/) and follow the instructions of [Linux](https://index.ros.org/doc/ros2/Installation/Linux-Install-Binary/)/[macOS](https://index.ros.org/doc/ros2/Installation/OSX-Install-Binary/)/[Windows](https://index.ros.org/doc/ros2/Installation/Windows-Install-Binary/) to setup the environment (If you want to run your apps on a stable release of ROS 2.0, e.g. crystal-clemmys, please see the section `Running on Stable Release of ROS 2.0`).
 
-* [Linux](https://github.com/ros2/ros2/wiki/Linux-Development-Setup)
-* [macOS](https://github.com/ros2/ros2/wiki/OSX-Development-Setup)
-* [Windows](https://github.com/ros2/ros2/wiki/Windows-Development-Setup)
+2.Build ROS 2.0 from scratch.
 
-2.Get the binary package.
-
-Alternatively, you can download the latest binary package of ROS2 from [here](http://ci.ros2.org/view/packaging/) and follow the instructions to setup the environment.
-
-* [Linux](https://github.com/ros2/ros2/wiki/Linux-Install-Binary)
-* [macOS](https://github.com/ros2/ros2/wiki/OSX-Install-Binary)
-* [Windows](https://github.com/ros2/ros2/wiki/Windows-Install-Binary)
+Alternatively, you can build ROS 2.0 from scratch. Please select the platform you want to work on, then reference the instructions of [Linux](https://index.ros.org/doc/ros2/Installation/Linux-Development-Setup/)/[macOS](https://index.ros.org/doc/ros2/Installation/OSX-Development-Setup/)/[Windows](https://index.ros.org/doc/ros2/Installation/Windows-Development-Setup/) to build ROS 2.0 (please build wiht flag `--merge-install`).
 
 ### Install `Node.js`
 
@@ -85,21 +77,18 @@ npm install
   set PATH=<path\to\python 2.x>;%PATH%
 ```
 
-## Install rclnodejs by npm
+## Running on Stable Release of ROS 2.0
 
-### Install from npmjs
+If you want to select a stable release of ROS 2.0 as your platform, we have a table to illustrate the relationship between some stable release with a specific verion of rclnodejs.
 
-Please run `npm i rclnodejs` to install the latest version **OR** `npm i rclnodejs@<version>` to install a specific version.
+ROS 2.0 release | NPM version | Github branch |
+:------------: |  :-------------: | :-------------: |
+[Bouncy Bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy) | [0.3.5](https://www.npmjs.com/package/rclnodejs/v/0.3.5) | [bouncy-bolson](https://github.com/RobotWebTools/rclnodejs/tree/bouncy-bolson)
+[Crystal Clemmys](https://github.com/ros2/ros2/releases/tag/release-crystal-20181214) | [0.8.0](https://www.npmjs.com/package/rclnodejs/v/0.8.0) | [crystal-clemmys](https://github.com/RobotWebTools/rclnodejs/tree/crystal-clemmys)
 
-### Install from GitHub
+* Install from npmjs: run `npm i rclnodejs@<version>` to install a specific version.
 
-You can also install `rclnodejs` from Github to experience the latest features, please add the following line into the `dependencies` section of your `package.json` file.
-
-```"rclnodejs": "RobotWebTools/rclnodejs"```
-
-We don't offer a release of rclnodejs against a specific release of ROS 2, e.g. [bouncy-bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy), as the one pubilshed on npmjs is always built against the master branch of ROS 2, but we do have the branch which is against a release of ROS 2 on GitHub. You can checkout the [branches](https://github.com/RobotWebTools/rclnodejs/branches) we have, then add it to your `package.json`, e.g. if you want to use ROS 2 Bouncy Bolson:
-
-```"rclnodejs": "RobotWebTools/rclnodejs#bouncy-bolson"```
+* Install from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json`.
 
 ## Run Unit Test
 
@@ -138,11 +127,13 @@ rclnodejs.init().then(() => {
 });
 ```
 
-There are also several useful examples under the `example` folder, which will show you how to use some important features, including `timer/subscription/publisher/client/service`, in `rclnodejs`. You are encouraged to try these examples to understand them.
+There are also several useful examples under the `example` folder, which will show you how to use some important features, including `timer/subscription/publisher/client/service/time/node graph`. You are encouraged to try these examples to understand them.
 
 ## API Specification
 
-The API spec is generated by `jsdoc`, you can manually run `npm run docs` to create them by yourself, or just use the existing documents under `docs` folder. To visit the on-line version, please navigate to http://robotwebtools.org/rclnodejs/docs/index.html in your browser.
+The API spec is generated by `jsdoc`, you can manually run `npm run docs` to create them by yourself, or just use the existing documents under `docs` folder.
+
+To visit the on-line version, please navigate to http://robotwebtools.org/rclnodejs/docs/index.html in your browser.
 
 ## Experimental - Deprecated
 
