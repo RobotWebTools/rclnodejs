@@ -7,7 +7,8 @@
     "rclnodejs",
     "ros2",
     "ros",
-    "rcl"
+    "rcl",
+    "robotics"
   ],
   "scripts": {
     "install": "node-gyp rebuild",
