@@ -26,12 +26,10 @@ npm i --save rclnodejs
 
 ## Match with ROS 2.0 Stable Releases
 
-The latest release of rclnodejs is always verified with the [master](https://github.com/ros2/ros2) branch of ROS 2.0, but usually we will publish a new version after each ROS 2.0 release. Please find the specific version if you want to build your apps on one of ROS 2.0.
-
-ROS 2.0 Release | rclnodejs Version |
-:------------: |  :-------------: |
-[Bouncy Bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy) | [0.3.5](https://www.npmjs.com/package/rclnodejs/v/0.3.5)
-[Crystal Clemmys](https://github.com/ros2/ros2/releases/tag/release-crystal-20181214) | [0.8.0](https://www.npmjs.com/package/rclnodejs/v/0.8.0)
+ROS 2.0 release | NPM version | Github branch |
+:------------: |  :-------------: | :-------------: |
+[Bouncy Bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy) | [0.3.5](https://www.npmjs.com/package/rclnodejs/v/0.3.5) | [bouncy-bolson](https://github.com/RobotWebTools/rclnodejs/tree/bouncy-bolson)
+[Crystal Clemmys Patch Release 1](https://github.com/ros2/ros2/releases/tag/release-crystal-20190117) | [0.9.0](https://www.npmjs.com/package/rclnodejs/v/0.9.0) | [crystal-clemmys](https://github.com/RobotWebTools/rclnodejs/tree/crystal-clemmys)
 
 ## Document
 

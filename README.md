@@ -84,7 +84,7 @@ If you want to select a stable release of ROS 2.0 as your platform, we have a ta
 ROS 2.0 release | NPM version | Github branch |
 :------------: |  :-------------: | :-------------: |
 [Bouncy Bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy) | [0.3.5](https://www.npmjs.com/package/rclnodejs/v/0.3.5) | [bouncy-bolson](https://github.com/RobotWebTools/rclnodejs/tree/bouncy-bolson)
-[Crystal Clemmys](https://github.com/ros2/ros2/releases/tag/release-crystal-20181214) | [0.8.0](https://www.npmjs.com/package/rclnodejs/v/0.8.0) | [crystal-clemmys](https://github.com/RobotWebTools/rclnodejs/tree/crystal-clemmys)
+[Crystal Clemmys Patch Release 1](https://github.com/ros2/ros2/releases/tag/release-crystal-20190117) | [0.9.0](https://www.npmjs.com/package/rclnodejs/v/0.9.0) | [crystal-clemmys](https://github.com/RobotWebTools/rclnodejs/tree/crystal-clemmys)
 
 * Install from npmjs: run `npm i rclnodejs@<version>` to install a specific version.
 
