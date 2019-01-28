@@ -76,15 +76,18 @@ void ShadowNode::StopRunning() {
   handle_manager_->ClearHandles();
 }
 
-void ShadowNode::StartRunning() {
+void ShadowNode::StartRunning(rcl_context_t* context) {
   handle_manager_->CollectHandles(this->handle());
-  executor_->Start();
+  executor_->Start(context);
 }
 
 NAN_METHOD(ShadowNode::Start) {
   auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   if (me)
-    me->StartRunning();
+    me->StartRunning(context);
 
   info.GetReturnValue().Set(Nan::Undefined());
 }

@@ -159,7 +159,6 @@ let rcl = {
             });
 
             this._initialized = true;
-            // this._context = undefined;
             resolve();
           }).catch(e => {
             reject(e);
@@ -185,7 +184,7 @@ let rcl = {
     if (node.spinning) {
       throw new Error('The node is already spinning.');
     }
-    node.startSpinning();
+    node.startSpinning(this._context.handle());
   },
 
   /**
@@ -208,6 +207,7 @@ let rcl = {
     }
     this._nodes = [];
     this._initialized = false;
+    this._context = undefined;
   },
   /**
    * Return status that whether the module is shut down.
