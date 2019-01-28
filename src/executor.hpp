@@ -20,6 +20,8 @@
 #include <atomic>
 #include <exception>
 
+struct rcl_context_t;
+
 namespace rclnodejs {
 
 class HandleManager;
@@ -35,7 +37,7 @@ class Executor {
   Executor(HandleManager* handle_manager, Delegate* delegate);
   ~Executor();
 
-  void Start();
+  void Start(rcl_context_t* context);
   void Stop();
 
   static void DoWork(uv_async_t* handle);
@@ -47,6 +49,7 @@ class Executor {
 
   HandleManager* handle_manager_;
   Delegate* delegate_;
+  rcl_context_t* context_;
 
   std::atomic_bool running_;
 };

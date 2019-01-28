@@ -27,7 +27,10 @@ namespace rclnodejs {
 static std::exception_ptr g_exception_ptr = nullptr;
 
 Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
-    : async_(nullptr), handle_manager_(handle_manager), delegate_(delegate) {
+    : async_(nullptr),
+      handle_manager_(handle_manager),
+      context_(nullptr),
+      delegate_(delegate) {
   running_.store(false);
 }
 
@@ -35,9 +38,10 @@ Executor::~Executor() {
   // Note: don't free this->async_ in ctor
 }
 
-void Executor::Start() {
+void Executor::Start(rcl_context_t* context) {
   if (!running_.load()) {
     async_ = new uv_async_t();
+    context_ = context;
     uv_async_init(uv_default_loop(), async_, DoWork);
     async_->data = this;
 
@@ -93,7 +97,7 @@ void Executor::Run(void* arg) {
   try {
     rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
     rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0,
-                                      rcl_get_default_allocator());
+        executor->context_, rcl_get_default_allocator());
     if (ret != RCL_RET_OK) {
       throw std::runtime_error(std::string("Init waitset failed: ") +
                                rcl_get_error_string().str);
