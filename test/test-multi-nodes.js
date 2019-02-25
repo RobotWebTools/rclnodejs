@@ -119,7 +119,7 @@ describe('Multiple nodes interation testing', function() {
       var count = 1;
       var reachToCppService = false, reachToPyService = false;
       var client = node.createClient(AddTwoInts, 'js_pycpp_add_two_ints');
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(500, () => {
         if (count % 2) {
           client.sendRequest(request1, (response) => {
             if (!reachToCppService) {
