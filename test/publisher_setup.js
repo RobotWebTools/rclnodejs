@@ -23,10 +23,13 @@ rclnodejs.init().then(function() {
   const msg = 'Greeting from publisher';
 
   var publisher = node.createPublisher(RclString, 'topic');
-  publisher.publish(msg);
+  var timer = node.createTimer(100, () => {
+    publisher.publish(msg);
+  });
   rclnodejs.spin(node);
 
   process.on('SIGINT', function() {
+    timer.cancel();
     node.destroy();
     rclnodejs.shutdown();
     process.exit(0);

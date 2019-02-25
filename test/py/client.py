@@ -43,16 +43,18 @@ def main():
   request.b = 2
 
   msg = Int8()
-  while rclpy.ok():
-    future = client.call_async(request)
-    rclpy.spin_until_future_complete(node, future)
-    response = future.result()
-    if response is not None:
-      msg.data = response.sum
+
+  while not client.wait_for_service(timeout_sec=1.0):
+    node.get_logger().info('service not available, waiting again...')
+
+  future = client.call_async(request)
+  rclpy.spin_until_future_complete(node, future)
+
+  if future.result() is not None:
+      msg.data = future.result().sum
+      print(future.result().sum)
       publisher.publish(msg)
-
-    time.sleep(0.1)
-
+  time.sleep(0.1)
   cleanup()
 
 

@@ -26,12 +26,16 @@ rclnodejs.init().then(function() {
     b: 2,
   };
   var publisher = node.createPublisher(Int8, 'back_add_two_ints');
-  client.sendRequest(request, (response) => {
-    publisher.publish(response.sum);
+  var timer = node.createTimer(100, () => {
+    client.sendRequest(request, (response) => {
+      publisher.publish(response.sum);
+    });
   });
+
   rclnodejs.spin(node);
 
   process.on('SIGINT', function() {
+    timer.cancel();
     node.destroy();
     rclnodejs.shutdown();
     process.exit(0);

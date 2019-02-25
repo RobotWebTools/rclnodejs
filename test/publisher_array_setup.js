@@ -37,10 +37,13 @@ rclnodejs.init().then(function() {
     effort: [4, 5, 6],
   };
 
-  publisher.publish(state);
+  var timer = node.createTimer(100, () => {
+    publisher.publish(state);
+  });
   rclnodejs.spin(node);
 
   process.on('SIGINT', function() {
+    timer.cancel();
     node.destroy();
     rclnodejs.shutdown();
     process.exit(0);
