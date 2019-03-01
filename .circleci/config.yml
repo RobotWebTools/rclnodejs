@@ -20,19 +20,16 @@ jobs:
     - run: brew update
     - run: brew uninstall python
     - run: brew install python
-    - run: brew install wget cmake cppcheck tinyxml eigen pcre poco
+    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre poco
     - run: brew install openssl
     - run: brew install asio
-    - run: brew tap osrf/simulation
-    - run: brew install osrf/simulation/tinyxml2@6.2.0
-    - run: brew link --force tinyxml2@6.2.0
     - run: python3 -m pip install catkin_pkg empy pyparsing pyyaml setuptools argcomplete colcon-common-extensions
     - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
     - run: wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
     - run: echo "source $HOME/.bashrc" >> ~/.bash_profile
     - run: cat ~/.bash_profile
-    - run: nvm install v10.15.1
-    - run: nvm alias default v10.15.1
+    - run: nvm install v10.15.2
+    - run: nvm alias default v10.15.2
     - run: node --version && npm --version && rm -rf ./node_modules/
     - run: source ~/ros2_install/ros2-osx/local_setup.bash && git submodule init && git submodule update && npm install --python=python2.7
     - run: export PATH="/usr/local/opt/python@2/libexec/bin:$PATH" && npm run lint
