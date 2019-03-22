@@ -45,13 +45,13 @@ git submodule update --init --recursive
 
 ## Build Module
 
-Before you build the module, you should make sure the ROS2 environments were loaded. You can check if the `AMENT_PREFIX_PATH` environment variable was set:
+Before you build the module, you should make sure the ROS2 environments were loaded. You can check if the `COLCON_PREFIX_PATH` environment variable was set:
 
-* For Windows: `echo %AMENT_PREFIX_PATH%` in the command prompt.
+* For Windows: `echo %COLCON_PREFIX_PATH%` in the command prompt.
 
-* For Linux and macOS: `echo $AMENT_PREFIX_PATH` in the terminal.
+* For Linux and macOS: `echo $COLCON_PREFIX_PATH` in the terminal.
 
-If the `AMENT_PREFIX_PATH` is unset, you should load the ROS2 environments:
+If the `COLCON_PREFIX_PATH` is unset, you should load the ROS2 environments:
 
 * For Windows, open the command prompt and run
 
