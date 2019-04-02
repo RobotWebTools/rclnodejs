@@ -33,7 +33,7 @@ before_build:
   - setx AMENT_PYTHON_EXECUTABLE "c:\Python37"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
-  - python -m pip install -U catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools colcon-common-extensions pip
+  - python -m pip install -U catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools colcon-common-extensions numpy
 
 build_script:
   - cd  c:\proj\rclnodejs
