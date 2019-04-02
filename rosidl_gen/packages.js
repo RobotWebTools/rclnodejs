@@ -14,6 +14,7 @@
 
 'use strict';
 
+const debug = require('debug')('rosidl_gen:packages');
 const fs = require('fs');
 const path = require('path');
 const walk = require('walk');
@@ -99,7 +100,8 @@ function findPackagesInDirectory(dir) {
       });
 
       walker.on('errors', (root, stats, next) => {
-        reject(stats);
+        debug(stats);
+        next();
       });
     });
   });
