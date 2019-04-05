@@ -37,8 +37,9 @@ class Executor {
   Executor(HandleManager* handle_manager, Delegate* delegate);
   ~Executor();
 
-  void Start(rcl_context_t* context);
+  void Start(rcl_context_t* context, int32_t time_out);
   void Stop();
+  int32_t time_out() { return time_out_; }
 
   static void DoWork(uv_async_t* handle);
   static void Run(void* arg);
@@ -50,6 +51,7 @@ class Executor {
   HandleManager* handle_manager_;
   Delegate* delegate_;
   rcl_context_t* context_;
+  int32_t time_out_;
 
   std::atomic_bool running_;
 };

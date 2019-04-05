@@ -31,7 +31,7 @@ class ShadowNode : public Nan::ObjectWrap,
                    public Executor::Delegate {
  public:
   static void Init(v8::Local<v8::Object> exports);
-  void StartRunning(rcl_context_t* context);
+  void StartRunning(rcl_context_t* context, int32_t timeout);
   void StopRunning();
 
   Nan::Persistent<v8::Object>* rcl_handle() { return rcl_handle_.get(); }

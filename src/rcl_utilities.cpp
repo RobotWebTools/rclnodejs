@@ -80,6 +80,8 @@ const rosidl_service_type_support_t* GetServiceTypeSupport(
     return nullptr;
 }
 
-const char* GetErrorMessageAndClear() { return dlerror(); }
+const char* GetErrorMessageAndClear() {
+  return dlerror();
+}
 
 }  // namespace rclnodejs

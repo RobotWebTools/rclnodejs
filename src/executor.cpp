@@ -20,6 +20,7 @@
 #include <string>
 
 #include "handle_manager.hpp"
+#include "rcl_bindings.hpp"
 #include "spdlog/spdlog.h"
 
 namespace rclnodejs {
@@ -29,8 +30,8 @@ static std::exception_ptr g_exception_ptr = nullptr;
 Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
     : async_(nullptr),
       handle_manager_(handle_manager),
-      context_(nullptr),
-      delegate_(delegate) {
+      delegate_(delegate),
+      context_(nullptr) {
   running_.store(false);
 }
 
@@ -38,10 +39,12 @@ Executor::~Executor() {
   // Note: don't free this->async_ in ctor
 }
 
-void Executor::Start(rcl_context_t* context) {
+void Executor::Start(rcl_context_t* context, int32_t time_out) {
   if (!running_.load()) {
     async_ = new uv_async_t();
     context_ = context;
+    time_out_ = time_out;
+
     uv_async_init(uv_default_loop(), async_, DoWork);
     async_->data = this;
 
@@ -96,8 +99,9 @@ void Executor::Run(void* arg) {
 
   try {
     rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
-    rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, 0,
-        executor->context_, rcl_get_default_allocator());
+    rcl_ret_t ret =
+        rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, 0, executor->context_,
+                          rcl_get_default_allocator());
     if (ret != RCL_RET_OK) {
       throw std::runtime_error(std::string("Init waitset failed: ") +
                                rcl_get_error_string().str);
@@ -112,31 +116,37 @@ void Executor::Run(void* arg) {
         if (handle_manager->is_empty())
           continue;
 
-        if (rcl_wait_set_resize(
-            &wait_set,
-            handle_manager->subscription_count(),
-            // TODO(minggang): support guard conditions
-            0u,
-            handle_manager->timer_count(),
-            handle_manager->client_count(),
-            handle_manager->service_count(),
-            // TODO(minggang): support events.
-            0u) != RCL_RET_OK) {
-              std::string error_message = std::string("Failed to resize: ")
-                  + std::string(rcl_get_error_string().str);
-              throw std::runtime_error(error_message);
-            }
+        if (rcl_wait_set_resize(&wait_set, handle_manager->subscription_count(),
+                                // TODO(minggang): support guard conditions
+                                1u, handle_manager->timer_count(),
+                                handle_manager->client_count(),
+                                handle_manager->service_count(),
+                                // TODO(minggang): support events.
+                                0u) != RCL_RET_OK) {
+          std::string error_message = std::string("Failed to resize: ") +
+                                      std::string(rcl_get_error_string().str);
+          throw std::runtime_error(error_message);
+        }
 
         if (!handle_manager->AddHandlesToWaitSet(&wait_set)) {
           throw std::runtime_error("Couldn't fill waitset");
         }
 
-        rcl_ret_t status = rcl_wait(&wait_set, RCL_MS_TO_NS(10));
+        rcl_wait_set_add_guard_condition(&wait_set, g_sigint_gc, nullptr);
+
+        int64_t time_out =
+            executor->time_out() < 0 ? -1 : RCL_MS_TO_NS(executor->time_out());
+
+        rcl_ret_t status = rcl_wait(&wait_set, time_out);
         if (status == RCL_RET_WAIT_SET_EMPTY) {
         } else if (status != RCL_RET_OK && status != RCL_RET_TIMEOUT) {
           throw std::runtime_error(std::string("rcl_wait() failed: ") +
                                    rcl_get_error_string().str);
         } else {
+          if (wait_set.size_of_guard_conditions == 1 &&
+              wait_set.guard_conditions[0]) {
+            executor->running_.store(false);
+          }
           if (!uv_is_closing(
                   reinterpret_cast<uv_handle_t*>(executor->async_))) {
             uv_async_send(executor->async_);
@@ -144,12 +154,14 @@ void Executor::Run(void* arg) {
         }
 
         if (rcl_wait_set_clear(&wait_set) != RCL_RET_OK) {
-          std::string error_message = std::string("Failed to clear wait set: ")
-              + std::string(rcl_get_error_string().str);
+          std::string error_message =
+              std::string("Failed to clear wait set: ") +
+              std::string(rcl_get_error_string().str);
           throw std::runtime_error(error_message);
         }
       }
     }
+
     if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
       throw std::runtime_error(std::string("Failed to destroy guard waitset:") +
                                rcl_get_error_string().str);
