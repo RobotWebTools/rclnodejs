@@ -24,8 +24,8 @@ namespace rclnodejs {
 
 Nan::Persistent<v8::Function> ShadowNode::constructor;
 
-ShadowNode::ShadowNode() : handle_manager_(std::make_unique<HandleManager>()),
-                           rcl_handle_(nullptr) {
+ShadowNode::ShadowNode()
+    : handle_manager_(std::make_unique<HandleManager>()), rcl_handle_(nullptr) {
   executor_ = std::make_unique<Executor>(handle_manager_.get(), this);
   rcl_handle_.reset(new Nan::Persistent<v8::Object>());
 }
@@ -76,18 +76,19 @@ void ShadowNode::StopRunning() {
   handle_manager_->ClearHandles();
 }
 
-void ShadowNode::StartRunning(rcl_context_t* context) {
+void ShadowNode::StartRunning(rcl_context_t* context, int32_t timeout) {
   handle_manager_->CollectHandles(this->handle());
-  executor_->Start(context);
+  executor_->Start(context, timeout);
 }
 
 NAN_METHOD(ShadowNode::Start) {
   auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
   RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  auto timeout = Nan::To<int32_t>(info[1]).FromJust();
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   if (me)
-    me->StartRunning(context);
+    me->StartRunning(context, timeout);
 
   info.GetReturnValue().Set(Nan::Undefined());
 }

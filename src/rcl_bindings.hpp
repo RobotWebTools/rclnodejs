@@ -16,6 +16,8 @@
 #define RCLNODEJS_RCL_BINDINGS_HPP_
 
 #include <nan.h>
+#include <rcl/rcl.h>
+
 #include <string>
 
 namespace rclnodejs {
@@ -26,6 +28,8 @@ typedef struct {
   const char* name;
   JsCFuntcion function;
 } BindingMethod;
+
+extern rcl_guard_condition_t* g_sigint_gc;
 
 uint32_t GetBindingMethodsCount(BindingMethod* methods);
 

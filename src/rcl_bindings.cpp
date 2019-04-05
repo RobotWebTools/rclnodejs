@@ -26,7 +26,6 @@
 #include <rmw/validate_namespace.h>
 #include <rmw/validate_node_name.h>
 #include <rosidl_generator_c/string_functions.h>
-
 #include <memory>
 #include <string>
 
@@ -34,9 +33,30 @@
 #include "macros.hpp"
 #include "rcl_handle.hpp"
 #include "rcl_utilities.hpp"
-#include "shadow_node.hpp"
 
 namespace rclnodejs {
+
+rcl_guard_condition_t* g_sigint_gc = nullptr;
+
+#ifdef OS_WINDOWS
+_crt_signal_t g_original_signal_handler = NULL;
+#else
+sig_t g_original_signal_handler = NULL;
+#endif  // OS_WINDOWS
+
+static void Catch(int signo) {
+  if (g_sigint_gc) {
+    rcl_ret_t ret = rcl_trigger_guard_condition(g_sigint_gc);
+    if (ret != RCL_RET_OK) {
+      Nan::ThrowError(rcl_get_error_string().str);
+      rcl_reset_error();
+    }
+  }
+
+  if (g_original_signal_handler != nullptr) {
+    g_original_signal_handler(signo);
+  }
+}
 
 std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos);
 
@@ -51,6 +71,15 @@ NAN_METHOD(Init) {
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_init(0, nullptr, &init_options, context),
                            rcl_get_error_string().str);
+
+  g_sigint_gc = reinterpret_cast<rcl_guard_condition_t*>(
+      malloc(sizeof(rcl_guard_condition_t)));
+  *g_sigint_gc = rcl_get_zero_initialized_guard_condition();
+  rcl_guard_condition_options_t sigint_gc_options =
+      rcl_guard_condition_get_default_options();
+  rcl_guard_condition_init(g_sigint_gc, context, sigint_gc_options);
+
+  g_original_signal_handler = signal(SIGINT, Catch);
 }
 
 NAN_METHOD(CreateNode) {
@@ -65,11 +94,10 @@ NAN_METHOD(CreateNode) {
   *node = rcl_get_zero_initialized_node();
   rcl_node_options_t options = rcl_node_get_default_options();
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_node_init(node, node_name.c_str(), name_space.c_str(), context,
-          &options),
-      rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_node_init(node, node_name.c_str(),
+                                         name_space.c_str(), context, &options),
+                           rcl_get_error_string().str);
 
   auto handle = RclHandle::NewInstance(node, nullptr,
                                        [node] { return rcl_node_fini(node); });
@@ -88,23 +116,20 @@ NAN_METHOD(CreateTimer) {
       reinterpret_cast<rcl_clock_t*>(malloc(sizeof(rcl_clock_t)));
   rcl_allocator_t allocator = rcl_get_default_allocator();
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_clock_init(RCL_STEADY_TIME,
-                                          clock,
-                                          &allocator),
+                           rcl_clock_init(RCL_STEADY_TIME, clock, &allocator),
                            rcl_get_error_string().str);
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_timer_init(timer, clock, context,
-                              RCL_MS_TO_NS(period_ms), nullptr,
-                                  rcl_get_default_allocator()),
-                           rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_timer_init(timer, clock, context, RCL_MS_TO_NS(period_ms), nullptr,
+                     rcl_get_default_allocator()),
+      rcl_get_error_string().str);
 
-  auto js_obj = RclHandle::NewInstance(
-      timer, nullptr, [timer, clock] {
-        rcl_ret_t ret_clock = rcl_clock_fini(clock);
-        free(clock);
-        rcl_ret_t ret_timer = rcl_timer_fini(timer);
-        return ret_clock || ret_timer;
-      });
+  auto js_obj = RclHandle::NewInstance(timer, nullptr, [timer, clock] {
+    rcl_ret_t ret_clock = rcl_clock_fini(clock);
+    free(clock);
+    rcl_ret_t ret_timer = rcl_timer_fini(timer);
+    return ret_clock || ret_timer;
+  });
   info.GetReturnValue().Set(js_obj);
 }
 
@@ -192,18 +217,18 @@ NAN_METHOD(CreateTimePoint) {
   time_point->nanoseconds = std::stoll(str);
   time_point->clock_type = static_cast<rcl_clock_type_t>(clock_type);
 
-  auto js_obj = RclHandle::NewInstance(
-      time_point, nullptr, nullptr);
+  auto js_obj = RclHandle::NewInstance(time_point, nullptr, nullptr);
   info.GetReturnValue().Set(js_obj);
 }
 
 NAN_METHOD(GetNanoseconds) {
   RclHandle* time_point_handle =
       RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-  rcl_time_point_t* time_point = reinterpret_cast<rcl_time_point_t*>(
-      time_point_handle->ptr());
-  info.GetReturnValue().Set(Nan::New<v8::String>(
-      std::to_string(time_point->nanoseconds)).ToLocalChecked());
+  rcl_time_point_t* time_point =
+      reinterpret_cast<rcl_time_point_t*>(time_point_handle->ptr());
+  info.GetReturnValue().Set(
+      Nan::New<v8::String>(std::to_string(time_point->nanoseconds))
+          .ToLocalChecked());
 }
 
 NAN_METHOD(CreateDuration) {
@@ -212,49 +237,43 @@ NAN_METHOD(CreateDuration) {
       reinterpret_cast<rcl_duration_t*>(malloc(sizeof(rcl_duration_t)));
   duration->nanoseconds = std::stoll(str);
 
-  auto js_obj = RclHandle::NewInstance(
-      duration, nullptr, nullptr);
+  auto js_obj = RclHandle::NewInstance(duration, nullptr, nullptr);
   info.GetReturnValue().Set(js_obj);
 }
 
 NAN_METHOD(GetDurationNanoseconds) {
-    RclHandle* duration_handle =
+  RclHandle* duration_handle =
       RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-  rcl_duration_t* duration = reinterpret_cast<rcl_duration_t*>(
-      duration_handle->ptr());
+  rcl_duration_t* duration =
+      reinterpret_cast<rcl_duration_t*>(duration_handle->ptr());
 
-  info.GetReturnValue().Set(Nan::New<v8::String>(
-      std::to_string(duration->nanoseconds)).ToLocalChecked());
+  info.GetReturnValue().Set(
+      Nan::New<v8::String>(std::to_string(duration->nanoseconds))
+          .ToLocalChecked());
 }
 
 NAN_METHOD(SetRosTimeOverrideIsEnabled) {
-  RclHandle* clock_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
-      clock_handle->ptr());
+  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
   bool enabled = Nan::To<bool>(info[1]).FromJust();
 
   if (enabled) {
-    THROW_ERROR_IF_NOT_EQUAL(
-        RCL_RET_OK, rcl_enable_ros_time_override(clock),
-        rcl_get_error_string().str);
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_enable_ros_time_override(clock),
+                             rcl_get_error_string().str);
   } else {
-    THROW_ERROR_IF_NOT_EQUAL(
-        RCL_RET_OK, rcl_disable_ros_time_override(clock),
-        rcl_get_error_string().str);
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_disable_ros_time_override(clock),
+                             rcl_get_error_string().str);
   }
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(SetRosTimeOverride) {
-  RclHandle* clock_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
-      clock_handle->ptr());
+  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
   RclHandle* time_point_handle =
       RclHandle::Unwrap<RclHandle>(info[1]->ToObject());
-  rcl_time_point_t* time_point = reinterpret_cast<rcl_time_point_t*>(
-      time_point_handle->ptr());
+  rcl_time_point_t* time_point =
+      reinterpret_cast<rcl_time_point_t*>(time_point_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_set_ros_time_override(clock, time_point->nanoseconds),
@@ -263,45 +282,40 @@ NAN_METHOD(SetRosTimeOverride) {
 }
 
 NAN_METHOD(GetRosTimeOverrideIsEnabled) {
-  RclHandle* clock_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
-  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
-      clock_handle->ptr());
+  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
 
   bool is_enabled;
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK, rcl_is_enabled_ros_time_override(clock, &is_enabled),
-      rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_is_enabled_ros_time_override(clock, &is_enabled),
+                           rcl_get_error_string().str);
   info.GetReturnValue().Set(Nan::New(is_enabled));
 }
 
 NAN_METHOD(CreateClock) {
-  auto clock_type = static_cast<rcl_clock_type_t>(Nan::To<int32_t>(
-      info[0]).FromJust());
+  auto clock_type =
+      static_cast<rcl_clock_type_t>(Nan::To<int32_t>(info[0]).FromJust());
   rcl_clock_t* clock =
       reinterpret_cast<rcl_clock_t*>(malloc(sizeof(rcl_clock_t)));
   rcl_allocator_t allocator = rcl_get_default_allocator();
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-      rcl_clock_init(clock_type, clock, &allocator),
-      rcl_get_error_string().str);
+                           rcl_clock_init(clock_type, clock, &allocator),
+                           rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(RclHandle::NewInstance(clock,
-      nullptr,
-      [clock]() {
-        return rcl_clock_fini(clock);
-      }));
+  info.GetReturnValue().Set(RclHandle::NewInstance(
+      clock, nullptr, [clock]() { return rcl_clock_fini(clock); }));
 }
 
-static void ReturnJSTimeObj(Nan::NAN_METHOD_ARGS_TYPE info,
+static void ReturnJSTimeObj(
+    Nan::NAN_METHOD_ARGS_TYPE info,
     int64_t nanoseconds,
     rcl_clock_type_t clock_type = RCL_CLOCK_UNINITIALIZED) {
   auto obj = v8::Object::New(v8::Isolate::GetCurrent());
 
-  const auto sec = static_cast<std::int32_t>(
-      RCL_NS_TO_S(nanoseconds));
-  const auto nanosec = static_cast<std::int32_t>(
-      nanoseconds % (1000 * 1000 * 1000));
+  const auto sec = static_cast<std::int32_t>(RCL_NS_TO_S(nanoseconds));
+  const auto nanosec =
+      static_cast<std::int32_t>(nanoseconds % (1000 * 1000 * 1000));
   const int32_t type = clock_type;
 
   obj->Set(Nan::New("sec").ToLocalChecked(), Nan::New(sec));
@@ -320,8 +334,8 @@ NAN_METHOD(ClockGetNow) {
   time_point.clock_type = clock->type;
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-      rcl_clock_get_now(clock, &time_point.nanoseconds),
-      rcl_get_error_string().str);
+                           rcl_clock_get_now(clock, &time_point.nanoseconds),
+                           rcl_get_error_string().str);
 
   ReturnJSTimeObj(info, time_point.nanoseconds, time_point.clock_type);
 }
@@ -339,28 +353,26 @@ NAN_METHOD(StaticClockGetNow) {
   rcl_allocator_t allocator = rcl_get_default_allocator();
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-      rcl_clock_init(static_cast<rcl_clock_type_t>(type),
-                     &ros_clock,
-                     &allocator),
-      rcl_get_error_string().str);
+                           rcl_clock_init(static_cast<rcl_clock_type_t>(type),
+                                          &ros_clock, &allocator),
+                           rcl_get_error_string().str);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-      rcl_clock_get_now(&ros_clock, &rcl_time.nanoseconds),
-      rcl_get_error_string().str);
+                           rcl_clock_get_now(&ros_clock, &rcl_time.nanoseconds),
+                           rcl_get_error_string().str);
 
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-      rcl_clock_fini(&ros_clock),
-      rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_clock_fini(&ros_clock),
+                           rcl_get_error_string().str);
 
   ReturnJSTimeObj(info, rcl_time.nanoseconds, rcl_time.clock_type);
 }
 
 NAN_METHOD(TimeDiff) {
-  int64_t s_sec  = Nan::To<int32_t>(info[0]).FromJust();
+  int64_t s_sec = Nan::To<int32_t>(info[0]).FromJust();
   uint32_t s_nano = Nan::To<uint32_t>(info[1]).FromJust();
   int32_t s_type = Nan::To<int32_t>(info[2]).FromJust();
 
-  int64_t f_sec  = Nan::To<int32_t>(info[3]).FromJust();
+  int64_t f_sec = Nan::To<int32_t>(info[3]).FromJust();
   uint32_t f_nano = Nan::To<uint32_t>(info[4]).FromJust();
   int32_t f_type = Nan::To<int32_t>(info[5]).FromJust();
 
@@ -868,7 +880,7 @@ const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
   } else if (profile == "qos_profile_parameter_events") {
     qos_profile = &rmw_qos_profile_parameter_events;
   } else {
-    return &rmw_qos_profile_default;;
+    return &rmw_qos_profile_default;
   }
 
   return qos_profile;
@@ -928,6 +940,16 @@ NAN_METHOD(Shutdown) {
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   THROW_ERROR_IF_NOT_EQUAL(rcl_shutdown(context), RCL_RET_OK,
                            rcl_get_error_string().str);
+
+  if (g_sigint_gc) {
+    rcl_guard_condition_fini(g_sigint_gc);
+    free(g_sigint_gc);
+    g_sigint_gc = nullptr;
+  }
+
+  signal(SIGINT, g_original_signal_handler);
+  g_original_signal_handler = nullptr;
+
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
@@ -1019,8 +1041,7 @@ NAN_METHOD(Log) {
 
   if (enabled) {
     rcutils_log_location_t logging_location = {function_name.c_str(),
-                                               file_name.c_str(),
-                                               line_number};
+                                               file_name.c_str(), line_number};
     rcutils_log(&logging_location, severity, name.c_str(), message.c_str());
   }
 
@@ -1039,7 +1060,7 @@ NAN_METHOD(CreateContext) {
       reinterpret_cast<rcl_context_t*>(malloc(sizeof(rcl_context_t)));
   *context = rcl_get_zero_initialized_context();
   auto js_obj = RclHandle::NewInstance(context, nullptr,
-      std::bind(DestroyContext, context));
+                                       std::bind(DestroyContext, context));
 
   info.GetReturnValue().Set(js_obj);
 }
@@ -1061,11 +1082,10 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
               Nan::New(names_and_types.names.data[i]).ToLocalChecked());
 
     v8::Local<v8::Array> type_list =
-      Nan::New<v8::Array>(names_and_types.types[i].size);
+        Nan::New<v8::Array>(names_and_types.types[i].size);
     for (int j = 0; j < names_and_types.types[i].size; ++j) {
-      Nan::Set(
-        type_list, j,
-        Nan::New(names_and_types.types[i].data[j]).ToLocalChecked());
+      Nan::Set(type_list, j,
+               Nan::New(names_and_types.types[i].data[j]).ToLocalChecked());
     }
     item->Set(Nan::New("types").ToLocalChecked(), type_list);
     Nan::Set(*result_list, i, item);
@@ -1082,20 +1102,19 @@ NAN_METHOD(GetPublisherNamesAndTypesByNode) {
   rcl_names_and_types_t topic_names_and_types =
       rcl_get_zero_initialized_names_and_types();
   rcl_allocator_t allocator = rcl_get_default_allocator();
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_get_publisher_names_and_types_by_node(node, &allocator, no_demangle,
-          node_name.c_str(), node_namespace.c_str(), &topic_names_and_types),
-      "Failed to get_publisher_names_and_types.");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_get_publisher_names_and_types_by_node(
+                               node, &allocator, no_demangle, node_name.c_str(),
+                               node_namespace.c_str(), &topic_names_and_types),
+                           "Failed to get_publisher_names_and_types.");
 
   v8::Local<v8::Array> result_list =
       Nan::New<v8::Array>(topic_names_and_types.names.size);
   ExtractNamesAndTypes(topic_names_and_types, &result_list);
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_names_and_types_fini(&topic_names_and_types),
-      "Failed to destroy topic_names_and_types");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&topic_names_and_types),
+                           "Failed to destroy topic_names_and_types");
 
   info.GetReturnValue().Set(result_list);
 }
@@ -1110,20 +1129,19 @@ NAN_METHOD(GetSubscriptionNamesAndTypesByNode) {
   rcl_names_and_types_t topic_names_and_types =
       rcl_get_zero_initialized_names_and_types();
   rcl_allocator_t allocator = rcl_get_default_allocator();
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_get_subscriber_names_and_types_by_node(node, &allocator, no_demangle,
-          node_name.c_str(), node_namespace.c_str(), &topic_names_and_types),
-      "Failed to get_publisher_names_and_types.");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_get_subscriber_names_and_types_by_node(
+                               node, &allocator, no_demangle, node_name.c_str(),
+                               node_namespace.c_str(), &topic_names_and_types),
+                           "Failed to get_publisher_names_and_types.");
 
   v8::Local<v8::Array> result_list =
       Nan::New<v8::Array>(topic_names_and_types.names.size);
   ExtractNamesAndTypes(topic_names_and_types, &result_list);
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_names_and_types_fini(&topic_names_and_types),
-      "Failed to destroy topic_names_and_types");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&topic_names_and_types),
+                           "Failed to destroy topic_names_and_types");
 
   info.GetReturnValue().Set(result_list);
 }
@@ -1139,18 +1157,18 @@ NAN_METHOD(GetServiceNamesAndTypesByNode) {
   rcl_allocator_t allocator = rcl_get_default_allocator();
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
-      rcl_get_service_names_and_types_by_node(node, &allocator,
-          node_name.c_str(), node_namespace.c_str(), &service_names_and_types),
+      rcl_get_service_names_and_types_by_node(
+          node, &allocator, node_name.c_str(), node_namespace.c_str(),
+          &service_names_and_types),
       "Failed to get_publisher_names_and_types.");
 
   v8::Local<v8::Array> result_list =
       Nan::New<v8::Array>(service_names_and_types.names.size);
   ExtractNamesAndTypes(service_names_and_types, &result_list);
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_names_and_types_fini(&service_names_and_types),
-      "Failed to destroy topic_names_and_types");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&service_names_and_types),
+                           "Failed to destroy topic_names_and_types");
 
   info.GetReturnValue().Set(result_list);
 }
@@ -1164,19 +1182,18 @@ NAN_METHOD(GetTopicNamesAndTypes) {
   rcl_allocator_t allocator = rcl_get_default_allocator();
 
   THROW_ERROR_IF_NOT_EQUAL(
-    RCL_RET_OK,
-    rcl_get_topic_names_and_types(node, &allocator, no_demangle,
-        &topic_names_and_types),
-    "Failed to get_publisher_names_and_types.");
+      RCL_RET_OK,
+      rcl_get_topic_names_and_types(node, &allocator, no_demangle,
+                                    &topic_names_and_types),
+      "Failed to get_publisher_names_and_types.");
 
   v8::Local<v8::Array> result_list =
       Nan::New<v8::Array>(topic_names_and_types.names.size);
   ExtractNamesAndTypes(topic_names_and_types, &result_list);
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_names_and_types_fini(&topic_names_and_types),
-      "Failed to destroy topic_names_and_types");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&topic_names_and_types),
+                           "Failed to destroy topic_names_and_types");
 
   info.GetReturnValue().Set(result_list);
 }
@@ -1188,19 +1205,18 @@ NAN_METHOD(GetServiceNamesAndTypes) {
       rcl_get_zero_initialized_names_and_types();
   rcl_allocator_t allocator = rcl_get_default_allocator();
 
-  THROW_ERROR_IF_NOT_EQUAL(
-    RCL_RET_OK,
-    rcl_get_service_names_and_types(node, &allocator, &service_names_and_types),
-    "Failed to get_publisher_names_and_types.");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_get_service_names_and_types(
+                               node, &allocator, &service_names_and_types),
+                           "Failed to get_publisher_names_and_types.");
 
   v8::Local<v8::Array> result_list =
       Nan::New<v8::Array>(service_names_and_types.names.size);
   ExtractNamesAndTypes(service_names_and_types, &result_list);
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_names_and_types_fini(&service_names_and_types),
-      "Failed to destroy topic_names_and_types");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&service_names_and_types),
+                           "Failed to destroy topic_names_and_types");
 
   info.GetReturnValue().Set(result_list);
 }

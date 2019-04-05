@@ -175,16 +175,17 @@ let rcl = {
   /**
    * Start to spin the node, which triggers the event loop to start to check the incoming events.
    * @param {Node} node - The node to be spun.
+   * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
    * @return {undefined}
    */
-  spin(node) {
+  spin(node, timeout = 10) {
     if (!(node instanceof rclnodejs.ShadowNode)) {
       throw new TypeError('Invalid argument.');
     }
     if (node.spinning) {
       throw new Error('The node is already spinning.');
     }
-    node.startSpinning(this._context.handle());
+    node.startSpinning(this._context.handle(), timeout);
   },
 
   /**
