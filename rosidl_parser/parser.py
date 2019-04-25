@@ -16,6 +16,7 @@ import sys
 import json
 
 import rosidl_parser
+from rosidl_adapter import parser
 
 def get_json_object_from_base_type_object(base_type_obj):
      return {'pkgName': base_type_obj.pkg_name, 'type': base_type_obj.type,
@@ -50,7 +51,7 @@ if __name__ == '__main__':
         print ('Wrong number of argments')
         sys.exit(1)
     try:
-        parser_method = getattr(rosidl_parser, sys.argv[1])
+        parser_method = getattr(parser, sys.argv[1])
         spec = parser_method(sys.argv[2], sys.argv[3])
 
         if sys.argv[1] == 'parse_message_file':
