@@ -757,7 +757,11 @@ class {{=arrayWrapper}} {
 {{? it.spec.constants != undefined && it.spec.constants.length}}
 // Define constants ({{=it.spec.constants.length}} in total)
 {{~ it.spec.constants :c}}
+{{? c.type === "string"}}
+Object.defineProperty({{=objectWrapper}}, "{{=c.name}}", {value: "{{=c.value}}", writable: false, enumerable: true, configurable: true});
+{{?? true}}
 Object.defineProperty({{=objectWrapper}}, "{{=c.name}}", {value: {{=c.value}}, writable: false, enumerable: true, configurable: true});
+{{?}}
 {{~}}
 {{?}}
 
