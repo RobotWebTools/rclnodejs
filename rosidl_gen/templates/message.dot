@@ -60,7 +60,7 @@ function getPrimitiveNameByType(type) {
     return 'Char';
   } else if (type.type === 'byte') {
     return 'Byte';
-  } else if (type.type === 'string') {
+  } else if (type.type === 'string' || type.type === 'wstring') {
     return 'String';
   } else {
     return '';
@@ -279,11 +279,25 @@ class {{=objectWrapper}} {
     this._{{=field.name}}Intialized = true;
     {{??}}
     {{? field.type.isPrimitiveType && !field.type.isArray}}
+    {{? field.default_value === null}}
     this._{{=field.name}}Intialized = false;
+    {{?? field.type.type === 'string'}}
+    this._refObject.{{=field.name}} = "{{=field.default_value.replace(/"/g, '\\"')}}";
+    this._{{=field.name}}Intialized = true;
+    {{??}}
+    this._refObject.{{=field.name}} = {{=field.default_value}};
+    this._{{=field.name}}Intialized = true;
+    {{?}}
     {{?}}
 
     {{? field.type.isArray}}
     this._wrapperFields.{{=field.name}} = {{=getWrapperNameByType(field.type)}}.createArray();
+    {{? field.default_value !== null && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
+    this._{{=field.name}}Array = {{=JSON.stringify(field.default_value)}};
+    {{?}}
+    {{? field.default_value !== null && field.type.isPrimitiveType && isTypedArrayType(field.type)}}
+    this._wrapperFields.{{=field.name}}.fill({{=getTypedArrayName(field.type)}}.from({{=JSON.stringify(field.default_value)}}));
+    {{?}}
     {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
     this._wrapperFields.{{=field.name}} = new {{=getWrapperNameByType(field.type)}}();
     {{?? it.spec.msgName === 'String'}}
@@ -337,9 +351,15 @@ class {{=objectWrapper}} {
       this._refObject.{{=field.name}}[i] = this._wrapperFields.{{=field.name}}.data[i];
     }
     {{?? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
-    this._wrapperFields.{{=field.name}}.fill(this._{{=field.name}}Array);
-    this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
-    this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+    if (!own) {
+      this._wrapperFields.{{=field.name}}.fill(this._{{=field.name}}Array);
+      this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
+      this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+    } else {
+      this._wrapperFields.{{=field.name}}.fill([]);
+      this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
+      this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+    }
     {{?? field.type.isArray && !field.type.isPrimitiveType && field.type.isFixedSizeArray}}
     for (let i = 0; i < this._wrapperFields.{{=field.name}}.data.length; i++) {
       this._refObject.{{=field.name}}[i] = this._wrapperFields.{{=field.name}}.data[i].freeze(own, checkConsistency);
@@ -348,6 +368,13 @@ class {{=objectWrapper}} {
     {{?? !field.type.isPrimitiveType || field.type.isArray}}
     this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
     this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+    {{? field.type.isArray && field.type.isPrimitiveType }}
+    if (own) {
+      this._wrapperFields.{{=field.name}}.fill({{=getTypedArrayName(field.type)}}.from([]));
+      this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
+      this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+    }
+    {{?}}
     {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
     if (own) {
       this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);

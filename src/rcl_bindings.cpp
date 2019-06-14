@@ -390,7 +390,7 @@ NAN_METHOD(RclTake) {
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
   void* msg_taken = node::Buffer::Data(info[1]->ToObject());
-  rcl_ret_t ret = rcl_take(subscription, msg_taken, nullptr);
+  rcl_ret_t ret = rcl_take(subscription, msg_taken, nullptr, nullptr);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
     Nan::ThrowError(rcl_get_error_string().str);
@@ -495,7 +495,7 @@ NAN_METHOD(Publish) {
       RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
 
   void* buffer = node::Buffer::Data(info[1]->ToObject());
-  THROW_ERROR_IF_NOT_EQUAL(rcl_publish(publisher, buffer), RCL_RET_OK,
+  THROW_ERROR_IF_NOT_EQUAL(rcl_publish(publisher, buffer, nullptr), RCL_RET_OK,
                            rcl_get_error_string().str);
 
   info.GetReturnValue().Set(Nan::Undefined());

@@ -25,7 +25,8 @@ before_build:
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2018-06-12-1/eigen.3.3.4.nupkg
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2017-04-04-1/tinyxml-usestl.2.6.2.nupkg
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2018-06-12-1/tinyxml2.6.0.0.nupkg
-  - choco install -y -s c:\download\ asio eigen tinyxml-usestl tinyxml2
+  - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2019-02-15-1/log4cxx.0.10.0.nupkg
+  - choco install -y -s c:\download\ asio eigen tinyxml-usestl tinyxml2 log4cxx
   - appveyor DownloadFile http://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip
   - 7z x -y "c:\download\ros2-package-windows-AMD64.zip" -o"c:\" > nul
   - setx -m OPENSSL_CONF C:\OpenSSL-Win64\bin\openssl.cfg
@@ -33,7 +34,7 @@ before_build:
   - setx AMENT_PYTHON_EXECUTABLE "c:\Python37"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
-  - python -m pip install -U catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools colcon-common-extensions numpy
+  - python -m pip install -U catkin_pkg empy lark-parser lxml numpy opencv-python pyparsing pyyaml setuptools colcon-common-extensions numpy
 
 build_script:
   - cd  c:\proj\rclnodejs

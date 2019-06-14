@@ -34,6 +34,7 @@ def get_json_object_from_msg_spec_object(msg_spec_object):
     for field in msg_spec_object.fields:
         dict_field = {'name': field.name}
         dict_field['type'] = get_json_object_from_type_object(field.type)
+        dict_field['default_value'] = field.default_value
         fields.append(dict_field)
 
     constants = []
