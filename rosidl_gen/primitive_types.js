@@ -58,6 +58,7 @@ module.exports = {
   char: ref.types.char,
   byte: ref.types.byte,
   string: StringRefStruct,
+  wstring: StringRefStruct,
   initString: initString
 };
 
