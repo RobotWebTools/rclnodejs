@@ -1,13 +1,25 @@
-# rclnodejs - ROS Client Library for JavaScript language[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=develop)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=develop)[![npm](https://img.shields.io/npm/dt/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs)[![GitHub license](https://img.shields.io/github/license/RobotWebTools/rclnodejs.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE)[![node](https://img.shields.io/node/v/rclnodejs.svg)](https://nodejs.org/en/download/releases/)[![dependencies Status](https://david-dm.org/RobotWebTools/rclnodejs/status.svg)](https://david-dm.org/RobotWebTools/rclnodejs)
+# rclnodejs - ROS Client Library for JavaScript language![npm](https://img.shields.io/npm/v/rclnodejs.svg)[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=develop)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=develop)[![npm](https://img.shields.io/npm/dt/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs)[![GitHub license](https://img.shields.io/github/license/RobotWebTools/rclnodejs.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE)[![node](https://img.shields.io/node/v/rclnodejs.svg)](https://nodejs.org/en/download/releases/)[![dependencies Status](https://david-dm.org/RobotWebTools/rclnodejs/status.svg)](https://david-dm.org/RobotWebTools/rclnodejs)
 
 Branch | Linux Build | macOS Build | Windows Build |
 ------------ |  :-------------: | :-------------: | :-------------: |
 develop | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://travis-ci.org/RobotWebTools/rclnodejs) | [![macOS Build Status](https://circleci.com/gh/RobotWebTools/rclnodejs/tree/develop.svg?style=shield)](https://circleci.com/gh/RobotWebTools/rclnodejs) | [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/develop?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/develop)
 master | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=master)](https://travis-ci.org/RobotWebTools/rclnodejs) | [![macOS Build Status](https://circleci.com/gh/RobotWebTools/rclnodejs/tree/master.svg?style=shield)](https://circleci.com/gh/RobotWebTools/rclnodejs) | [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/master?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/master)
 
-[![NPM](https://nodei.co/npm/rclnodejs.png)](https://nodei.co/npm/rclnodejs/)
+## Match with ROS 2.0 Stable Releases
 
-## Build Environment
+If you want to select a stable release of ROS 2.0 as your platform, please check the table below.
+
+ROS 2.0 release | NPM version |
+:------------: |  :-------------: |
+Dashing Diademata Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-dashing-20190614) | [0.10.0](https://www.npmjs.com/package/rclnodejs/v/0.10.0) |
+Crystal Clemmys Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-crystal-20190117)/[2](https://github.com/ros2/ros2/releases/tag/release-crystal-20190214)/[3](https://github.com/ros2/ros2/releases/tag/release-crystal-20190314)/[4](https://github.com/ros2/ros2/releases/tag/release-crystal-20190408)| [0.9.0](https://www.npmjs.com/package/rclnodejs/v/0.9.0) | [crystal-clemmys](https://github.com/RobotWebTools/rclnodejs/tree/crystal-clemmys) |
+[Bouncy Bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy) | [0.3.5](https://www.npmjs.com/package/rclnodejs/v/0.3.5) | [bouncy-bolson](https://github.com/RobotWebTools/rclnodejs/tree/bouncy-bolson)
+
+* Install from npmjs: run `npm i rclnodejs@<version>` to install a specific version.
+
+* Install from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json`.
+
+## Build from Scratch
 
 ### Get ready for ROS 2
 
@@ -29,7 +41,7 @@ The `Node.js` version we selected is the latest LTS [`Carbon`](https://nodejs.or
 * Download from Node.js offical [website](https://nodejs.org/en/), and install it.
 * Use the Node Version Manager ([nvm](https://github.com/creationix/nvm)) to install it.
 
-## Get Code
+### Get Code
 
 Open a terminal, and input:
 
@@ -43,7 +55,7 @@ then enter the folder `rclnodejs`, and get the submodule:
 git submodule update --init --recursive
 ```
 
-## Build Module
+### Build Module
 
 Before you build the module, you should make sure the ROS2 environments were loaded. You can check if the `COLCON_PREFIX_PATH` environment variable was set:
 
@@ -76,19 +88,6 @@ npm install
 ```bash
   set PATH=<path\to\python 2.x>;%PATH%
 ```
-
-## Match with ROS 2.0 Stable Releases
-
-If you want to select a stable release of ROS 2.0 as your platform, please check the table below.
-
-ROS 2.0 release | NPM version |
-:------------: |  :-------------: |
-Crystal Clemmys Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-crystal-20190117)/[2](https://github.com/ros2/ros2/releases/tag/release-crystal-20190214)/[3](https://github.com/ros2/ros2/releases/tag/release-crystal-20190314)/[4](https://github.com/ros2/ros2/releases/tag/release-crystal-20190408)| [0.9.0](https://www.npmjs.com/package/rclnodejs/v/0.9.0) | [crystal-clemmys](https://github.com/RobotWebTools/rclnodejs/tree/crystal-clemmys) |
-[Bouncy Bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy) | [0.3.5](https://www.npmjs.com/package/rclnodejs/v/0.3.5) | [bouncy-bolson](https://github.com/RobotWebTools/rclnodejs/tree/bouncy-bolson)
-
-* Install from npmjs: run `npm i rclnodejs@<version>` to install a specific version.
-
-* Install from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json`.
 
 ## Run Unit Test
 
