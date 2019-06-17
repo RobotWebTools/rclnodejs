@@ -28,8 +28,8 @@ jobs:
     - run: wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
     - run: echo "source $HOME/.bashrc" >> ~/.bash_profile
     - run: cat ~/.bash_profile
-    - run: nvm install v10.15.2
-    - run: nvm alias default v10.15.2
+    - run: nvm install v10.16.0
+    - run: nvm alias default v10.16.0
     - run: node --version && npm --version && rm -rf ./node_modules/
     - run: source ~/ros2_install/ros2-osx/local_setup.bash && git submodule init && git submodule update && npm install --python=python2.7
     - run: export PATH="/usr/local/opt/python@2/libexec/bin:$PATH" && npm run lint

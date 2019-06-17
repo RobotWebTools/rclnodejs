@@ -44,7 +44,7 @@ RUN export CHOOSE_ROS_DISTRO=crystal && rosdep install --default-yes --from-path
 RUN echo "source $ROS2_WS/ros2-linux/local_setup.bash" >> $HOME/.bashrc
 
 # Install nvm, Node.js and node-gyp
-ENV NODE_VERSION v10.15.2
+ENV NODE_VERSION v10.16.0
 RUN wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash \
     && . $HOME/.nvm/nvm.sh \
     && nvm install $NODE_VERSION && nvm alias default $NODE_VERSION
