@@ -11,6 +11,7 @@ If you want to select a stable release of ROS 2.0 as your platform, please check
 
 ROS 2.0 release | NPM version |
 :------------: |  :-------------: |
+Dashing Diademata Patch Release [2](https://github.com/ros2/ros2/releases/tag/release-dashing-20190806) | [0.10.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.1) |
 Dashing Diademata Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-dashing-20190614) | [0.10.0](https://www.npmjs.com/package/rclnodejs/v/0.10.0) |
 Crystal Clemmys Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-crystal-20190117)/[2](https://github.com/ros2/ros2/releases/tag/release-crystal-20190214)/[3](https://github.com/ros2/ros2/releases/tag/release-crystal-20190314)/[4](https://github.com/ros2/ros2/releases/tag/release-crystal-20190408)| [0.9.0](https://www.npmjs.com/package/rclnodejs/v/0.9.0) | [crystal-clemmys](https://github.com/RobotWebTools/rclnodejs/tree/crystal-clemmys) |
 [Bouncy Bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy) | [0.3.5](https://www.npmjs.com/package/rclnodejs/v/0.3.5) | [bouncy-bolson](https://github.com/RobotWebTools/rclnodejs/tree/bouncy-bolson)
