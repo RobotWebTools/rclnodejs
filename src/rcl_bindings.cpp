@@ -1233,8 +1233,8 @@ NAN_METHOD(ServiceServerIsAvailable) {
                                node, client, &is_available),
                            "Failed to get service state.");
 
-  v8::Isolate* isolate = info.GetIsolate();
-  info.GetReturnValue().Set(v8::Boolean::New(isolate, is_available));
+  v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(is_available);
+  info.GetReturnValue().Set(result);
 }
 
 uint32_t GetBindingMethodsCount(BindingMethod* methods) {
