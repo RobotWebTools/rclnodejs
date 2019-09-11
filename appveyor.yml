@@ -42,7 +42,6 @@ build_script:
   - git submodule update
   - ps: Install-Product node $env:nodejs_version x64
   - call c:\ros2-windows\local_setup.bat
-  - node -e "console.log(process.env.COLCON_PREFIX_PATH)"
   - "SET PATH=%PYTHON2%;%PYTHON2%\\bin;%PYTHON2%\\Scripts;%PATH%"
   - node --version
   - npm --version

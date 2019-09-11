@@ -18,10 +18,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt update && apt install -y \
   python3-colcon-common-extensions \
   python3-pip \
   python-rosdep \
-  python3-vcstool \
   libpython3-dev \
-  libtinyxml2.6.2v5 \
-  libtinyxml2-dev \
   cppcheck
 
 RUN rosdep init
