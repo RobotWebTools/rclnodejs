@@ -26,7 +26,7 @@ rclnodejs.init().then(function() {
     b: 2,
   };
   var publisher = node.createPublisher(Int8, 'back_add_two_ints');
-  var timer = node.createTimer(100, () => {
+  client.pollForService().then(() => {
     client.sendRequest(request, (response) => {
       publisher.publish(response.sum);
     });
