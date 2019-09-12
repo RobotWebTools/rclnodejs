@@ -25,7 +25,7 @@ rclnodejs.init().then(() => {
     b: Math.floor(Math.random() * 100),
   };
 
-  client.pollForService(1000).then(result => {
+  client.waitForService(1000).then(result => {
     if (!result) {
       console.log('Error: service not available');
       rclnodejs.shutdown();
