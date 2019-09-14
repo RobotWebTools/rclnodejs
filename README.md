@@ -151,6 +151,7 @@ project. The next step is to send a pull request (PR) for review. The PR will be
 Special thanks to the people who contribute.
 
 * [martins-mozeiko](https://github.com/martins-mozeiko)
+* [Teo Koon Peng](https://github.com/koonpeng)
 
 ## License
 

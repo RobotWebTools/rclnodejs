@@ -1221,6 +1221,22 @@ NAN_METHOD(GetServiceNamesAndTypes) {
   info.GetReturnValue().Set(result_list);
 }
 
+NAN_METHOD(ServiceServerIsAvailable) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  RclHandle* client_handle = RclHandle::Unwrap<RclHandle>(info[1]->ToObject());
+  rcl_client_t* client = reinterpret_cast<rcl_client_t*>(client_handle->ptr());
+
+  bool is_available;
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_service_server_is_available(
+                               node, client, &is_available),
+                           "Failed to get service state.");
+
+  v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(is_available);
+  info.GetReturnValue().Set(result);
+}
+
 uint32_t GetBindingMethodsCount(BindingMethod* methods) {
   uint32_t count = 0;
   while (methods[count].function) {
@@ -1284,6 +1300,7 @@ BindingMethod binding_methods[] = {
     {"getServiceNamesAndTypesByNode", GetServiceNamesAndTypesByNode},
     {"getTopicNamesAndTypes", GetTopicNamesAndTypes},
     {"getServiceNamesAndTypes", GetServiceNamesAndTypes},
+    {"serviceServerIsAvailable", ServiceServerIsAvailable},
     {"", nullptr}};
 
 }  // namespace rclnodejs

@@ -25,10 +25,17 @@ rclnodejs.init().then(() => {
     b: Math.floor(Math.random() * 100),
   };
 
-  console.log(`Sending: ${typeof request}`, request);
-  client.sendRequest(request, (response) => {
-    console.log(`Result: ${typeof response}`, response);
-    rclnodejs.shutdown();
+  client.waitForService(1000).then(result => {
+    if (!result) {
+      console.log('Error: service not available');
+      rclnodejs.shutdown();
+      return;
+    }
+    console.log(`Sending: ${typeof request}`, request);
+    client.sendRequest(request, (response) => {
+      console.log(`Result: ${typeof response}`, response);
+      rclnodejs.shutdown();
+    });
   });
 
   rclnodejs.spin(node);
