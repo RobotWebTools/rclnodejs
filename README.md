@@ -139,6 +139,30 @@ To visit the on-line version, please navigate to http://robotwebtools.org/rclnod
 
 * [actionlib](https://github.com/RobotWebTools/rclnodejs/blob/develop/tutorials/actionlib.md) - as the [rcl](https://github.com/ros2/rcl) library has implemented the action related functions, we are going to drop this one and we don't garantee the current actionlib can work with [rclcpp](https://github.com/ros2/rclcpp).
 
+## Troubleshooting
+
+### Maximum call stack size exceeded error when running in Jest
+When running tests in Jest, you may see an error like this:
+```
+RangeError: Maximum call stack size exceeded
+
+      at debug (../node_modules/ref/node_modules/debug/src/debug.js:1:1)
+      at Object.writePointer [as _writePointer] (../node_modules/ref/lib/ref.js:746:3)
+      at Object.writePointer [as _writePointer] (../node_modules/ref/lib/ref.js:747:11)
+      at Object.writePointer [as _writePointer] (../node_modules/ref/lib/ref.js:747:11)
+      at Object.writePointer [as _writePointer] (../node_modules/ref/lib/ref.js:747:11)
+      at Object.writePointer [as _writePointer] (../node_modules/ref/lib/ref.js:747:11)
+      at Object.writePointer [as _writePointer] (../node_modules/ref/lib/ref.js:747:11)
+      at Object.writePointer [as _writePointer] (../node_modules/ref/lib/ref.js:747:11)
+      at Object.writePointer [as _writePointer] (../node_modules/ref/lib/ref.js:747:11)
+      at Object.writePointer [as _writePointer] (../node_modules/ref/lib/ref.js:747:11)
+```
+This is caused by a bug in `ref` which happens when you `require` it multiple times. There is a fix available for `ref` but it's no longer being maintained and the author has not published it.
+
+
+If it is required to use Jest, a solution would be to fork `ref` and use npm shrinkwrap to installed a patched version.
+
+
 ## Get Involved
 
 ### Contributing
