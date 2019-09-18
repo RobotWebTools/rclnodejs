@@ -82,13 +82,9 @@ int main(int argc, char ** argv)
     printf("service not available, waiting again...\n");
   }
 
-  // TODO(wjwwood): make it like `client->send_request(node, request)->sum`
-  // TODO(wjwwood): consider error condition
-  rmw_qos_profile_t custom_qos_profile = rmw_qos_profile_default;
-  custom_qos_profile.depth = 7;
   auto msg = std::make_shared<std_msgs::msg::Int8>();
   publisher = node->create_publisher<std_msgs::msg::Int8>(
-    std::string("back_") + topic, custom_qos_profile);
+    std::string("back_") + topic, 7);
 
 
   auto future_result = client->async_send_request(request);
@@ -99,7 +95,7 @@ int main(int argc, char ** argv)
   {
     // printf("Result of add_two_ints: %zd\n", future_result.get()->sum);
     msg->data = future_result.get()->sum;
-    publisher->publish(msg);
+    publisher->publish(*msg);
   } else {
     printf("add_two_ints_client_async was interrupted. Exiting.\n");
   }  
