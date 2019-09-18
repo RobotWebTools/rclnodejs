@@ -75,9 +75,6 @@ int main(int argc, char* argv[]) {
 
   auto node = rclcpp::Node::make_shared("cpp_publisher");
 
-  rmw_qos_profile_t custom_qos_profile = rmw_qos_profile_default;
-  custom_qos_profile.depth = 7;
-
   if (rcutils_cli_option_exist(argv, argv + argc, "-h")) {
     print_usage();
     return 0;
@@ -93,78 +90,78 @@ int main(int argc, char* argv[]) {
   }
 
   // Bool
-  auto bool_publisher = node->create_publisher<std_msgs::msg::Bool>(topic, custom_qos_profile);
+  auto bool_publisher = node->create_publisher<std_msgs::msg::Bool>(topic, 7);
   auto bool_msg = std::make_shared<std_msgs::msg::Bool>();
   bool_msg->data = true;
 
   // Byte
-  auto byte_publisher = node->create_publisher<std_msgs::msg::Byte>(topic, custom_qos_profile);
+  auto byte_publisher = node->create_publisher<std_msgs::msg::Byte>(topic, 7);
   auto byte_msg = std::make_shared<std_msgs::msg::Byte>();
   byte_msg->data = 255;
 
   // Char
-  auto char_publisher = node->create_publisher<std_msgs::msg::Char>(topic, custom_qos_profile);
+  auto char_publisher = node->create_publisher<std_msgs::msg::Char>(topic, 7);
   auto char_msg = std::make_shared<std_msgs::msg::Char>();
   char_msg->data = 'A';
 
   // String
-  auto string_publisher = node->create_publisher<std_msgs::msg::String>(topic, custom_qos_profile);
+  auto string_publisher = node->create_publisher<std_msgs::msg::String>(topic, 7);
   auto string_msg = std::make_shared<std_msgs::msg::String>();
   string_msg->data = std::string("Hello World");
 
   // Int8
-  auto int8_publisher = node->create_publisher<std_msgs::msg::Int8>(topic, custom_qos_profile);
+  auto int8_publisher = node->create_publisher<std_msgs::msg::Int8>(topic, 7);
   auto int8_msg = std::make_shared<std_msgs::msg::Int8>();
   int8_msg->data = 127;
 
   // UInt8
-  auto uint8_publisher = node->create_publisher<std_msgs::msg::UInt8>(topic, custom_qos_profile);
+  auto uint8_publisher = node->create_publisher<std_msgs::msg::UInt8>(topic, 7);
   auto uint8_msg = std::make_shared<std_msgs::msg::UInt8>();
   uint8_msg->data = 255;
 
   // Int16
-  auto int16_publisher = node->create_publisher<std_msgs::msg::Int16>(topic, custom_qos_profile);
+  auto int16_publisher = node->create_publisher<std_msgs::msg::Int16>(topic, 7);
   auto int16_msg = std::make_shared<std_msgs::msg::Int16>();
   int16_msg->data = 0x7fff;
 
   // UInt16
-  auto uint16_publisher = node->create_publisher<std_msgs::msg::UInt16>(topic, custom_qos_profile);
+  auto uint16_publisher = node->create_publisher<std_msgs::msg::UInt16>(topic, 7);
   auto uint16_msg = std::make_shared<std_msgs::msg::UInt16>();
   uint16_msg->data = 0xffff;
 
   // Int32
-  auto int32_publisher = node->create_publisher<std_msgs::msg::Int32>(topic, custom_qos_profile);
+  auto int32_publisher = node->create_publisher<std_msgs::msg::Int32>(topic, 7);
   auto int32_msg = std::make_shared<std_msgs::msg::Int32>();
   int32_msg->data = 0x7fffffffL;
 
   // UInt32
-  auto uint32_publisher = node->create_publisher<std_msgs::msg::UInt32>(topic, custom_qos_profile);
+  auto uint32_publisher = node->create_publisher<std_msgs::msg::UInt32>(topic, 7);
   auto uint32_msg = std::make_shared<std_msgs::msg::UInt32>();
   uint32_msg->data = 0xffffffffUL;
 
   // Int64
-  auto int64_publisher = node->create_publisher<std_msgs::msg::Int64>(topic, custom_qos_profile);
+  auto int64_publisher = node->create_publisher<std_msgs::msg::Int64>(topic, 7);
   auto int64_msg = std::make_shared<std_msgs::msg::Int64>();
   long long max_js_int = (2LL << 52) - 1;
   int64_msg->data = max_js_int;
 
   // UInt64
-  auto uint64_publisher = node->create_publisher<std_msgs::msg::UInt64>(topic, custom_qos_profile);
+  auto uint64_publisher = node->create_publisher<std_msgs::msg::UInt64>(topic, 7);
   auto uint64_msg = std::make_shared<std_msgs::msg::UInt64>();
   uint64_msg->data = max_js_int;
 
   // Float32
-  auto float32_publisher = node->create_publisher<std_msgs::msg::Float32>(topic, custom_qos_profile);
+  auto float32_publisher = node->create_publisher<std_msgs::msg::Float32>(topic, 7);
   auto float32_msg = std::make_shared<std_msgs::msg::Float32>();
   float32_msg->data = 3.14;
 
   // Float64
-  auto float64_publisher = node->create_publisher<std_msgs::msg::Float64>(topic, custom_qos_profile);
+  auto float64_publisher = node->create_publisher<std_msgs::msg::Float64>(topic, 7);
   auto float64_msg = std::make_shared<std_msgs::msg::Float64>();
   float64_msg->data = 3.1415926;
 
   // ColorRGBA
-  auto colorrgba_publisher = node->create_publisher<std_msgs::msg::ColorRGBA>(topic, custom_qos_profile);
+  auto colorrgba_publisher = node->create_publisher<std_msgs::msg::ColorRGBA>(topic, 7);
   auto colorrgba_msg = std::make_shared<std_msgs::msg::ColorRGBA>();
   colorrgba_msg->a = 0.5;
   colorrgba_msg->r = 127;
@@ -172,7 +169,7 @@ int main(int argc, char* argv[]) {
   colorrgba_msg->b = 255;
 
   // Array
-  auto array_publisher = node->create_publisher<std_msgs::msg::ByteMultiArray>(topic, custom_qos_profile);
+  auto array_publisher = node->create_publisher<std_msgs::msg::ByteMultiArray>(topic, 7);
   auto dim = std::make_shared<std_msgs::msg::MultiArrayDimension>();
   dim->label = std::string("length");
   dim->size = 1;
@@ -187,7 +184,7 @@ int main(int argc, char* argv[]) {
   array_msg->data = std::vector<uint8_t>{65, 66, 67};
 
   // Header
-  auto header_publisher = node->create_publisher<std_msgs::msg::Header>(topic, custom_qos_profile);
+  auto header_publisher = node->create_publisher<std_msgs::msg::Header>(topic, 7);
   auto time = std::make_shared<builtin_interfaces::msg::Time>();
   time->sec = 123456;
   time->nanosec = 789;
@@ -197,7 +194,7 @@ int main(int argc, char* argv[]) {
   header_msg->frame_id = std::string("main frame");
 
   // Complex object: JointState
-  auto jointstate_publisher = node->create_publisher<sensor_msgs::msg::JointState>(topic, custom_qos_profile);
+  auto jointstate_publisher = node->create_publisher<sensor_msgs::msg::JointState>(topic, 7);
   auto head_time = std::make_shared<builtin_interfaces::msg::Time>();
   head_time->sec = 123456;
   head_time->nanosec = 789;
@@ -218,58 +215,58 @@ int main(int argc, char* argv[]) {
     // std::cout << "Publishing: '" << msg->data << "'" << std::endl;
     switch (msg_type_map[msg_type]) {
       case 1:
-        bool_publisher->publish(bool_msg);
+        bool_publisher->publish(*bool_msg);
         break;
       case 2:
-        byte_publisher->publish(byte_msg);
+        byte_publisher->publish(*byte_msg);
         break;
       case 3:
-        char_publisher->publish(char_msg);
+        char_publisher->publish(*char_msg);
         break;
       case 4:
-        string_publisher->publish(string_msg);
+        string_publisher->publish(*string_msg);
         break;
       case 5:
-        int8_publisher->publish(int8_msg);
+        int8_publisher->publish(*int8_msg);
         break;
       case 6:
-        uint8_publisher->publish(uint8_msg);
+        uint8_publisher->publish(*uint8_msg);
         break;
       case 7:
-        int16_publisher->publish(int16_msg);
+        int16_publisher->publish(*int16_msg);
         break;
       case 8:
-        uint16_publisher->publish(uint16_msg);
+        uint16_publisher->publish(*uint16_msg);
         break;
       case 9:
-        int32_publisher->publish(int32_msg);
+        int32_publisher->publish(*int32_msg);
         break;
       case 10:
-        uint32_publisher->publish(uint32_msg);
+        uint32_publisher->publish(*uint32_msg);
         break;
       case 11:
-        int64_publisher->publish(int64_msg);
+        int64_publisher->publish(*int64_msg);
         break;
       case 12:
-        uint64_publisher->publish(uint64_msg);
+        uint64_publisher->publish(*uint64_msg);
         break;
       case 13:
-        float32_publisher->publish(float32_msg);
+        float32_publisher->publish(*float32_msg);
         break;
       case 14:
-        float64_publisher->publish(float64_msg);
+        float64_publisher->publish(*float64_msg);
         break;
       case 15:
-        colorrgba_publisher->publish(colorrgba_msg);
+        colorrgba_publisher->publish(*colorrgba_msg);
         break;
       case 16:
-        array_publisher->publish(array_msg);
+        array_publisher->publish(*array_msg);
         break;
       case 17:
-        header_publisher->publish(header_msg);
+        header_publisher->publish(*header_msg);
         break;
       case 18:
-        jointstate_publisher->publish(jointstate_msg);
+        jointstate_publisher->publish(*jointstate_msg);
         break;
       default:
         std::cerr << "Unsupported message types" << std::endl;

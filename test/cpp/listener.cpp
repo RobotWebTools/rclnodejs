@@ -34,7 +34,7 @@ void print_usage()
 
 void chatterCallback(const std_msgs::msg::String::SharedPtr msg)
 {
-  publisher->publish(msg);
+  publisher->publish(*msg);
 }
 
 
@@ -48,17 +48,15 @@ int main(int argc, char * argv[])
     print_usage();
     return 0;
   }
-  rmw_qos_profile_t custom_qos_profile = rmw_qos_profile_default;
-  custom_qos_profile.depth = 7;
   auto topic = std::string("chatter");
   if (rcutils_cli_option_exist(argv, argv + argc, "-t")) {
     topic = std::string(rcutils_cli_get_option(argv, argv + argc, "-t"));
   }
 
   publisher = node->create_publisher<std_msgs::msg::String>(
-    std::string("back_") + topic, custom_qos_profile);
+    std::string("back_") + topic, 7);
   auto sub = node->create_subscription<std_msgs::msg::String>(
-    topic, chatterCallback, rmw_qos_profile_default);
+    topic, 7, chatterCallback);
   
   rclcpp::spin(node);
 
