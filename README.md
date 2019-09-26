@@ -177,6 +177,7 @@ Special thanks to the people who contribute.
 
 * [martins-mozeiko](https://github.com/martins-mozeiko)
 * [Teo Koon Peng](https://github.com/koonpeng)
+* [Alex Mikhalev](https://github.com/amikhalev)
 
 ## License
 
