@@ -36,7 +36,7 @@ def main():
 
   rclpy.init()
   node = rclpy.create_node('py_talker')
-  publisher = node.create_publisher(String, topic)
+  publisher = node.create_publisher(String, topic, 10)
 
   msg = String()
   msg.data = 'Hello World'

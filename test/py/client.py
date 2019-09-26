@@ -37,7 +37,7 @@ def main():
   rclpy.init()
   node = rclpy.create_node('add_client')
   client = node.create_client(AddTwoInts, service)
-  publisher = node.create_publisher(Int8, 'back_' + service)
+  publisher = node.create_publisher(Int8, 'back_' + service, 10)
   request = AddTwoInts.Request()
   request.a = 1
   request.b = 2
