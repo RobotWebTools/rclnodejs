@@ -39,8 +39,8 @@ def main():
 
   rclpy.init()
   node = rclpy.create_node('py_listener')
-  publisher = node.create_publisher(String, 'back_' + topic)
-  subscription = node.create_subscription(String, topic, callback)
+  publisher = node.create_publisher(String, 'back_' + topic, 10)
+  subscription = node.create_subscription(String, topic, callback, 10)
   while rclpy.ok():
     rclpy.spin_once(node)
 
