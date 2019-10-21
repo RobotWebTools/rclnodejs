@@ -19,6 +19,7 @@ const path = require('path');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
+const kill = require('tree-kill');
 
 describe('Cross-language interaction', function() {
   this.timeout(60 * 1000);
@@ -36,14 +37,12 @@ describe('Cross-language interaction', function() {
       var node = rclnodejs.createNode('cpp_pub_js_sub');
       const RclString = 'std_msgs/msg/String';
       var destroy = false;
-      var cppTalkPath = path.join(utils.getAvailablePath(process.env['AMENT_PREFIX_PATH'],
-        ['lib', 'demo_nodes_cpp', 'talker']));
-      var cppTalker = childProcess.spawn(cppTalkPath, ['-t', 'cpp_js_chatter']);
-      var subscription = node.createSubscription(RclString, 'cpp_js_chatter', (msg) => {
+      var cppTalker = childProcess.spawn('ros2', ['run', 'demo_nodes_cpp', 'talker']);
+      var subscription = node.createSubscription(RclString, 'chatter', (msg) => {
         assert.ok(/Hello World:/.test(msg.data));
         if (!destroy) {
           node.destroy();
-          cppTalker.kill('SIGINT');
+          kill(cppTalker.pid, 'SIGINT');
           destroy = true;
           done();
         }
@@ -147,20 +146,18 @@ describe('Cross-language interaction', function() {
     it('Node.js client should work with C++ service', function(done) {
       var node = rclnodejs.createNode('js_cpp_add_client');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
-      var client = node.createClient(AddTwoInts, 'js_cpp_add_two_ints');
+      var client = node.createClient(AddTwoInts, 'add_two_ints');
       const request = {a: 1, b: 2};
 
       var destroy = false;
-      var cppServicePath = path.join(utils.getAvailablePath(process.env['AMENT_PREFIX_PATH'],
-        ['lib', 'demo_nodes_cpp', 'add_two_ints_server']));
-      var cppService = childProcess.spawn(cppServicePath, ['-s', 'js_cpp_add_two_ints']);
+      var cppService = childProcess.spawn('ros2', ['run', 'demo_nodes_cpp', 'add_two_ints_server']);
       var timer = node.createTimer(100, () => {
         client.sendRequest(request, (response) => {
           if (!destroy) {
             timer.cancel();
             assert.deepStrictEqual(response.sum, 3);
             node.destroy();
-            cppService.kill('SIGINT');
+            kill(cppService.pid, 'SIGINT');
             destroy = true;
             done();
           }

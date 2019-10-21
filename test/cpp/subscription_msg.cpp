@@ -135,7 +135,7 @@ void jointstateCallback(sensor_msgs::msg::JointState::SharedPtr msg) {
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  auto node = rclcpp::Node::make_shared("cpp_subscription");
+  auto node = rclcpp::Node::make_shared("cpp_subscription", rclcpp::NodeOptions());
 
   // Bool
   bool_pub = node->create_publisher<std_msgs::msg::Bool>(

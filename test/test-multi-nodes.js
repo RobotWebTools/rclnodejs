@@ -19,6 +19,7 @@ const path = require('path');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
+const kill = require('tree-kill');
 
 describe('Multiple nodes interation testing', function() {
   this.timeout(60 * 1000);
@@ -67,11 +68,11 @@ describe('Multiple nodes interation testing', function() {
       const RclString = 'std_msgs/msg/String';
 
       var receivedFromPy = false, receivedFromCpp = false;
-      var subscription = node.createSubscription(RclString, 'pycpp_js_chatter', (msg) => {
+      var subscription = node.createSubscription(RclString, 'chatter', (msg) => {
         if (!receivedFromCpp) {
           if (new RegExp('Hello World:').test(msg.data)) {
             receivedFromCpp = true;
-            cppPublisher.kill('SIGINT');
+            kill(cppPublisher.pid, 'SIGINT');
 
             if (receivedFromPy) {
               node.destroy();
@@ -83,7 +84,7 @@ describe('Multiple nodes interation testing', function() {
         if (!receivedFromPy) {
           if (new RegExp('Hello World').test(msg.data)) {
             receivedFromPy = true;
-            pyPublisher.kill('SIGINT');
+            kill(pyPublisher.pid, 'SIGINT');
 
             if (receivedFromCpp) {
               node.destroy();
@@ -93,11 +94,9 @@ describe('Multiple nodes interation testing', function() {
         }
       });
 
-      var cppPubPath = path.join(utils.getAvailablePath(process.env['AMENT_PREFIX_PATH'],
-        ['lib', 'demo_nodes_cpp', 'talker']));
-      var cppPublisher = childProcess.spawn(cppPubPath, ['-t', 'pycpp_js_chatter']);
+      var cppPublisher = childProcess.spawn('ros2', ['run', 'demo_nodes_cpp', 'talker']);
       var pyPubPath = path.join(__dirname, 'py', 'talker.py');
-      var pyPublisher = utils.launchPythonProcess([pyPubPath, 'pycpp_js_chatter']);
+      var pyPublisher = utils.launchPythonProcess([pyPubPath, 'chatter']);
 
       rclnodejs.spin(node);
     });
