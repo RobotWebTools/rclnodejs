@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 
   rclcpp::init(argc, argv);
 
-  auto node = rclcpp::Node::make_shared("cpp_publisher");
+  auto node = rclcpp::Node::make_shared("cpp_publisher", rclcpp::NodeOptions());
 
   if (rcutils_cli_option_exist(argv, argv + argc, "-h")) {
     print_usage();

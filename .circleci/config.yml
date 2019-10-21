@@ -20,7 +20,8 @@ jobs:
     - run: brew update
     - run: brew uninstall python
     - run: brew install python
-    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre poco
+    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre
+    - run: brew install https://raw.githubusercontent.com/alebcay/homebrew-core/419873be053a08233d9fd3952f2615c139902434/Formula/poco.rb
     - run: brew install openssl
     - run: brew install asio console_bridge
     - run: python3 -m pip install catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools argcomplete colcon-common-extensions numpy

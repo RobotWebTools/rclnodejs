@@ -42,7 +42,7 @@ void chatterCallback(const std_msgs::msg::String::SharedPtr msg)
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  auto node = rclcpp::Node::make_shared("listener");
+  auto node = rclcpp::Node::make_shared("listener", rclcpp::NodeOptions());
 
   if (rcutils_cli_option_exist(argv, argv + argc, "-h")) {
     print_usage();

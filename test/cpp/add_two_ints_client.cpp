@@ -57,7 +57,7 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
 
-  auto node = rclcpp::Node::make_shared("add_two_ints_client");
+  auto node = rclcpp::Node::make_shared("add_two_ints_client", rclcpp::NodeOptions());
 
   if (rcutils_cli_option_exist(argv, argv + argc, "-h")) {
     print_usage();

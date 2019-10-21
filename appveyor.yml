@@ -6,7 +6,7 @@ branches:
     - develop
     - actionlib
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 environment:
   nodejs_version: "10"
@@ -50,6 +50,6 @@ build_script:
   - npm run lint
 
 test_script:
-  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
+  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;C:\\Program Files\\CMake\\bin;%PATH%"
   - npm test

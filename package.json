@@ -30,7 +30,8 @@
   },
   "devDependencies": {
     "eslint": "^5.14.1",
-    "mocha": "^6.0.1"
+    "mocha": "^6.0.1",
+    "tree-kill": "^1.2.1"
   },
   "dependencies": {
     "bindings": "^1.2.1",

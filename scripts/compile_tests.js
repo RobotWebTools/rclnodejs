@@ -106,26 +106,4 @@ if (!fs.existsSync(publisherPath) && !fs.existsSync(subscriptionPath) &&
 } else {
   copyAll([publisherPath, subscriptionPath, , listenerPath, clientPath], testCppDir);
 }
-
-let actionPath = path.join(rootDir, 'test', 'ros1_actions');
-process.env.AMENT_PREFIX_PATH = process.env.AMENT_PREFIX_PATH + path.delimiter + actionPath;
-
-const generator = require('../rosidl_gen/index.js');
-
-generator.generateAll(true).then(() => {
-  console.log('Generation is done.');
-
-  let actionBuildProcess = child.spawn('colcon', ['build', '--base-paths', actionPath]);
-  actionBuildProcess.on('close', (code) => {
-    copyPkgToRos2('ros1_actions');
-  });
-  actionBuildProcess.stdout.on('data', (data) => {
-    console.log(`${data}`);
-  });
-  actionBuildProcess.stderr.on('data', (data) => {
-    console.log(`${data}`);
-  });
-}).catch((e) => {
-  console.log(`Caught error: ${e}`);
-});
 /* eslint-enable */
