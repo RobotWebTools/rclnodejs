@@ -17,6 +17,8 @@ Dashing Diademata Patch Release [1](https://github.com/ros2/ros2/releases/tag/re
 Crystal Clemmys Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-crystal-20190117)/[2](https://github.com/ros2/ros2/releases/tag/release-crystal-20190214)/[3](https://github.com/ros2/ros2/releases/tag/release-crystal-20190314)/[4](https://github.com/ros2/ros2/releases/tag/release-crystal-20190408)| [0.9.0](https://www.npmjs.com/package/rclnodejs/v/0.9.0) | [crystal-clemmys](https://github.com/RobotWebTools/rclnodejs/tree/crystal-clemmys) |
 [Bouncy Bolson](https://github.com/ros2/ros2/releases/tag/release-bouncy) | [0.3.5](https://www.npmjs.com/package/rclnodejs/v/0.3.5) | [bouncy-bolson](https://github.com/RobotWebTools/rclnodejs/tree/bouncy-bolson)
 
+* Verify that you are using a compatible version of node between 6.10 - 10.99: run  `node -v` for your node version info. 
+
 * Install from npmjs: run `npm i rclnodejs@<version>` to install a specific version.
 
 * Install from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json`.
@@ -36,9 +38,9 @@ Alternatively, you can build ROS 2.0 from scratch. Please select the platform yo
 ### Install `Node.js`
 
 **Notice:**
-`rclnodejs` use some new feature of ECMAScript 6, we recommend using the latest LTS Node.js. The lowest LTS Node.js we used to verify the unit tests is `6.10.0`. Your Node.js version should not be lower than this verion.
+`rclnodejs` should only be used with node versions between 6.10 - 10.99. The lowest LTS Node.js we used to verify the unit tests is `6.10.0`. And there is a known issue installing rclnodejs with versions of node >= 11.0.
 
-The `Node.js` version we selected is the latest LTS [`Carbon`](https://nodejs.org/download/release/latest-carbon/) (8.x). You can install it:
+The `Node.js` version we selected is the LTS [`Carbon`](https://nodejs.org/download/release/latest-carbon/) (8.x). You can install it:
 
 * Download from Node.js offical [website](https://nodejs.org/en/), and install it.
 * Use the Node Version Manager ([nvm](https://github.com/creationix/nvm)) to install it.
