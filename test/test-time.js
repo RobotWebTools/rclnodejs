@@ -151,7 +151,7 @@ describe('rclnodejs Time/Clock testing', function() {
 
     let nanos = time._nanoseconds;
     time.secondsAndNanoseconds;
-    assert.strictEqual(time._nanoseconds,nanos);
+    assert.strictEqual(time._nanoseconds, nanos);
   });
 
   it('Test duration functions', function() {
