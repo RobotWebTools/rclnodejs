@@ -32,7 +32,7 @@ RUN git config --global user.name $GIT_USER_NAME \
 ENV ROS2_WS=/root
 WORKDIR $ROS2_WS
 
-RUN wget https://ci.ros2.org/view/packaging/job/packaging_linux/lastSuccessfulBuild/artifact/ws/ros2-package-linux-x86_64.tar.bz2 \
+RUN wget https://ci.ros2.org/view/packaging/job/packaging_linux/lastStableBuild/artifact/ws/ros2-package-linux-x86_64.tar.bz2 \
     && tar xf ros2-package-linux-x86_64.tar.bz2
 
 # [Ubuntu 18.04]
