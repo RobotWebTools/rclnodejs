@@ -21,6 +21,7 @@
       ],
       'include_dirs': [
         '.',
+        'src/third_party/spdlog/include/',
         "<!(node -e \"require('nan')\")",
       ],
       'cflags!': [
@@ -68,7 +69,6 @@
               '-std=c++14'
             ],
             'include_dirs': [
-              './src/third_party/spdlog/include/',
               './src/third_party/dlfcn-win32/',
               "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '\\\include ').replace(/\\\/g, '/') + '/include')\")",
             ],
@@ -93,7 +93,6 @@
               'OS_MACOS'
             ],
             'include_dirs': [
-              './src/third_party/spdlog/include/',
               "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/ ') + '/include/')\")",
             ],
             'library_dirs': [
