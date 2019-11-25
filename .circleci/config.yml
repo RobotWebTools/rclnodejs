@@ -20,12 +20,11 @@ jobs:
     - run: brew update
     - run: brew uninstall python
     - run: brew install python
-    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre
-    - run: brew install https://raw.githubusercontent.com/alebcay/homebrew-core/419873be053a08233d9fd3952f2615c139902434/Formula/poco.rb
+    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre poco
     - run: brew install openssl
     - run: brew install asio console_bridge
     - run: python3 -m pip install catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools argcomplete colcon-common-extensions numpy
-    - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastStableBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
+    - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://github.com/ros2/ros2/releases/download/release-eloquent-20191122/ros2-eloquent-20191122-macos-amd64.tar.bz2 && tar xf ros2-eloquent-20191122-macos-amd64.tar.bz2
     - run: wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
     - run: echo "source $HOME/.bashrc" >> ~/.bash_profile
     - run: cat ~/.bash_profile
