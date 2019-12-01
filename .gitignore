@@ -15,3 +15,5 @@ tags
 cpplint.py
 generated
 dist
+.vscode
+.project

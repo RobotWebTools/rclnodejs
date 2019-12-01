@@ -1,6 +1,3 @@
-/* eslint-disable camelcase */
-// Copyright (c) 2018 Intel Corporation. All rights reserved.
-
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,13 +12,12 @@
 
 'use strict';
 
-const generator = require('../rosidl_gen/index.js');
-const tsd_generator = require('../rostsd_gen/index.js');
+const generator = require('../rostsd_gen/index.js');
 
-console.log('Start JavaScript message generation...');
-generator.generateAll(true).then(() => {
-  tsd_generator.generateAll(); // create message.d.ts
-  console.log('Generation complete.');
-}).catch((e) => {
+console.log('Start TypeScript declaration file generation...');
+try {
+  generator.generateAll();
+  console.log('Generation is done.');
+} catch (e) {
   console.log(`Caught error: ${e}`);
-});
+}
