@@ -3,6 +3,7 @@
   "version": "0.10.3",
   "description": "ROS2.0 JavaScript client with Node.js",
   "main": "index.js",
+  "types": "@types/index",
   "keywords": [
     "rclnodejs",
     "ros2",
@@ -31,7 +32,11 @@
   "devDependencies": {
     "eslint": "^5.14.1",
     "mocha": "^6.0.1",
-    "tree-kill": "^1.2.1"
+    "tree-kill": "^1.2.1",
+    "@typescript-eslint/eslint-plugin": "^2.3.1",
+    "@typescript-eslint/parser": "^2.3.1",
+    "typescript": "^3.7.2",
+    "dtslint": "^2.0.2"
   },
   "dependencies": {
     "bindings": "^1.2.1",
