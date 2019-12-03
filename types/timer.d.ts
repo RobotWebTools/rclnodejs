@@ -1,9 +1,8 @@
 
-declare module "rclnodejs" {
+declare module 'rclnodejs' {
   
   /**
-    * @class - Class representing a Timer in ROS
-    * @hideconstructor
+    * A ROS Timer
     */
   class Timer {
 
