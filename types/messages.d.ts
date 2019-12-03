@@ -873,60 +873,6 @@ declare module 'rclnodejs' {
     }
   }
 
-  namespace tf2_msgs {
-    namespace msg {
-      export type LookupTransformAction = {
-        action_goal: tf2_msgs.msg.LookupTransformActionGoal,
-        action_result: tf2_msgs.msg.LookupTransformActionResult,
-        action_feedback: tf2_msgs.msg.LookupTransformActionFeedback
-      };
-      export type LookupTransformActionFeedback = {
-        header: std_msgs.msg.Header,
-        status: actionlib_msgs.msg.GoalStatus,
-        feedback: tf2_msgs.msg.LookupTransformFeedback
-      };
-      export type LookupTransformActionGoal = {
-        header: std_msgs.msg.Header,
-        goal_id: actionlib_msgs.msg.GoalID,
-        goal: tf2_msgs.msg.LookupTransformGoal
-      };
-      export type LookupTransformActionResult = {
-        header: std_msgs.msg.Header,
-        status: actionlib_msgs.msg.GoalStatus,
-        result: tf2_msgs.msg.LookupTransformResult
-      };
-      export type LookupTransformFeedback = {
-      };
-      export type LookupTransformGoal = {
-        target_frame: string,
-        source_frame: string,
-        source_time: builtin_interfaces.msg.Time,
-        timeout: builtin_interfaces.msg.Duration,
-        target_time: builtin_interfaces.msg.Time,
-        fixed_frame: string,
-        advanced: boolean
-      };
-      export type LookupTransformResult = {
-        transform: geometry_msgs.msg.TransformStamped,
-        error: tf2_msgs.msg.TF2Error
-      };
-      export type TF2Error = {
-        NO_ERROR: 0,
-        LOOKUP_ERROR: 1,
-        CONNECTIVITY_ERROR: 2,
-        EXTRAPOLATION_ERROR: 3,
-        INVALID_ARGUMENT_ERROR: 4,
-        TIMEOUT_ERROR: 5,
-        TRANSFORM_ERROR: 6,
-        error: undefined,
-        error_string: string
-      };
-      export type TFMessage = {
-        transforms: geometry_msgs.msg.TransformStamped[]
-      };
-    }
-  }
-
   namespace trajectory_msgs {
     namespace msg {
       export type JointTrajectory = {
@@ -1236,15 +1182,6 @@ declare module 'rclnodejs' {
     std_msgs.msg.UInt8 |
     std_msgs.msg.UInt8MultiArray |
     stereo_msgs.msg.DisparityImage |
-    tf2_msgs.msg.LookupTransformAction |
-    tf2_msgs.msg.LookupTransformActionFeedback |
-    tf2_msgs.msg.LookupTransformActionGoal |
-    tf2_msgs.msg.LookupTransformActionResult |
-    tf2_msgs.msg.LookupTransformFeedback |
-    tf2_msgs.msg.LookupTransformGoal |
-    tf2_msgs.msg.LookupTransformResult |
-    tf2_msgs.msg.TF2Error |
-    tf2_msgs.msg.TFMessage |
     trajectory_msgs.msg.JointTrajectory |
     trajectory_msgs.msg.JointTrajectoryPoint |
     trajectory_msgs.msg.MultiDOFJointTrajectory |

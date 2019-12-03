@@ -1,9 +1,8 @@
-// / <reference path="base.d.ts" />
 
-// import { rclnodejs } from "rclnodejs";
+// eslint-disable-next-line spaced-comment
+/// <reference path="base.d.ts" /> 
 
 declare module 'rclnodejs' {
-	
 
 	/**
 	 * Create a node.
