@@ -1,5 +1,5 @@
 
-declare module "rclnodejs" {
+declare module 'rclnodejs' {
 
   /**
    * @class - Class representing a Duration in ROS

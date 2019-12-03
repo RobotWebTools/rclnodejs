@@ -1,31 +1,33 @@
 
-declare module "rclnodejs" {
+declare module 'rclnodejs' {
 
   /**
-   * @class - Class representing a Clock in ROS
+   * ROS Clock.
    */
   class Clock {
     /**
      * Create a Clock.
-     * @param {ClockType} [clockType=ClockType.SYSTEM_TIME] - The type of the clock to be created.
+     * @param clockType - Type of the clock to create; default = ClockType.SYSTEM_TIME.
      */
     constructor(clockType?: ClockType);
 
     /**
      * Get ClockType of this Clock object.
-     * @return {ClockType} Return the type of the clock.
+     * 
+     * @return  Type of this clock.
      */
     readonly clockType: ClockType;
 
     /**
      * Return the current time.
-     * @return {Time} Return the current time.
+     * 
+     * @return Return the current time.
      */
     now(): Time;
   }
 
   /**
-   * @class - Class representing a ROSClock in ROS
+   * A ROSClock. 
    */
 
   class ROSClock extends Clock {

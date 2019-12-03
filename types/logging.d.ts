@@ -1,5 +1,5 @@
 
-declare module "rclnodejs" {
+declare module 'rclnodejs' {
 
   // added to match rcl export in index.js. 
   // todo: discuss with rclnodejs team about inconsistent naming;

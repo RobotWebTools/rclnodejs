@@ -1,5 +1,5 @@
 
-declare module "rclnodejs" {
+declare module 'rclnodejs' {
 
   /** Class representing middleware quality of service */
   class QoS {
@@ -59,37 +59,37 @@ declare module "rclnodejs" {
      * Default profileref.
      * @name QoS#static get:profileDefault
      */
-    export const profileDefault = "qos_profile_default";
+    export const profileDefault = 'qos_profile_default';
 
     /**
        * Default system profileref.
        * @name QoS#static get:profileSystemDefault
        */
-    export const profileSystemDefault = "qos_profile_system_default";
+    export const profileSystemDefault = 'qos_profile_system_default';
 
     /**
      * Sensor data profileref.
      * @name QoS#static get:profileSensorData
      */
-    export const profileSensorData = "qos_profile_sensor_data";
+    export const profileSensorData = 'qos_profile_sensor_data';
 
     /**
      *  Default services profileref.
      * @name QoS#static get:profileServicesDefault
      */
-    export const profileServicesDefault = "qos_profile_services_default";
+    export const profileServicesDefault = 'qos_profile_services_default';
 
     /**
      * Parameters profileref.
      * @name QoS#static get:profileParameters
      */
-    export const profileParameters = "qos_profile_parameters";
+    export const profileParameters = 'qos_profile_parameters';
 
     /**
      * The parameter events profileref.
      * @name QoS#static get:profileParameterEvents
      */
-    export const profileParameterEvents = "qos_profile_parameter_events";
+    export const profileParameterEvents = 'qos_profile_parameter_events';
 
 
     export type ProfileRef = string;

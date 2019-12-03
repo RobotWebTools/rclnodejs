@@ -1,8 +1,8 @@
 
-declare module "rclnodejs" {
+declare module 'rclnodejs' {
+
   /**
-   * @class - Class representing a Context in ROS
-   * @hideconstructor
+   * Class representing a Context in ROS
    */
   class Context {
 
@@ -18,13 +18,13 @@ declare module "rclnodejs" {
      */
     tryShutdown(): void;
 
-	/**
+    /**
      * Get the global default Context object.
      * @return {Context} - default Context
      */
     static defaultContext(): Context;
 
-	/**
+    /**
      * Shutdown the default context.
      * @return {undefined}
      */

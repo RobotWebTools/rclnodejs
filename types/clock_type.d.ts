@@ -1,5 +1,5 @@
 
-declare module "rclnodejs" {
+declare module 'rclnodejs' {
   
   /**
    * Enum for ClockType

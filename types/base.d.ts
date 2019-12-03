@@ -1,3 +1,4 @@
+/* eslint-disable spaced-comment */
 /// <reference path="client.d.ts" />
 /// <reference path="clock_type.d.ts" />
 /// <reference path="clock.d.ts" />

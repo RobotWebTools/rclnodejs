@@ -1,9 +1,8 @@
 
-declare module "rclnodejs" {
+declare module 'rclnodejs' {
 
   /**
-   * @class - Class representing a common object in RCL.
-   * @ignore
+   *Class representing a common object in RCL.
    */
   class Entity {
     options: object;

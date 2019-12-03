@@ -1,9 +1,8 @@
-/// <reference path="base.d.ts" />
+// / <reference path="base.d.ts" />
 
-//import { rclnodejs } from "rclnodejs";
+// import { rclnodejs } from "rclnodejs";
 
-declare module "rclnodejs" {
-
+declare module 'rclnodejs' {
 	
 
 	/**

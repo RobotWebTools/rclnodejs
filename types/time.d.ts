@@ -1,8 +1,8 @@
 
-declare module "rclnodejs" {
+declare module 'rclnodejs' {
 
   /**
-   * @class - Class representing a Time in ROS
+   * Represents a ROS Time
    */
   class Time {
 
