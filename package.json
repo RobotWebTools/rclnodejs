@@ -15,7 +15,7 @@
     "install": "node-gyp rebuild",
     "docs": "cd docs && make",
     "test": "node ./scripts/compile_tests.js && node ./scripts/run_test.js",
-    "lint": "eslint --max-warnings=0 index.js scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
+    "lint": "eslint --max-warnings=0 index.js types/*.d.ts scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
     "postinstall": "node scripts/generate_messages.js"
   },
   "authors": [
@@ -30,13 +30,13 @@
     "url": "git+https://github.com/RobotWebTools/rclnodejs.git"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.10.0",
+    "@typescript-eslint/parser": "^2.3.1",
+    "dtslint": "^2.0.2",
     "eslint": "^5.14.1",
     "mocha": "^6.0.1",
     "tree-kill": "^1.2.1",
-    "@typescript-eslint/eslint-plugin": "^2.3.1",
-    "@typescript-eslint/parser": "^2.3.1",
-    "typescript": "^3.7.2",
-    "dtslint": "^2.0.2"
+    "typescript": "^3.7.2"
   },
   "dependencies": {
     "bindings": "^1.2.1",
