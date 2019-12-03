@@ -15,8 +15,9 @@
 const generator = require('../rostsd_gen/index.js');
 
 console.log('Start TypeScript declaration file generation...');
-generator.generateAll(true).then(() => {
+try {
+  generator.generateAll();
   console.log('Generation is done.');
-}).catch((e) => {
+} catch (e) {
   console.log(`Caught error: ${e}`);
-});
+}
