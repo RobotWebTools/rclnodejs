@@ -9,8 +9,8 @@
     "ros2",
     "ros",
     "rcl",
-		"robotics",
-		"typescript"
+    "robotics",
+    "typescript"
   ],
   "scripts": {
     "install": "node-gyp rebuild",
