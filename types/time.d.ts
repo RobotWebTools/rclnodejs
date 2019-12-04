@@ -1,4 +1,4 @@
-import { Message } from "rclnodejs";
+import { Message } from 'rclnodejs';
 
 declare module 'rclnodejs' {
 
