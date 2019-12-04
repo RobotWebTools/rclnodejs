@@ -2,11 +2,11 @@
 declare module 'rclnodejs' {
 
   /**
-	 * Middleware quality of service
-	 */ 
+   * Middleware quality of service
+   */ 
   class QoS {
 		
-		/**
+    /**
      * Create a QoS.
 		 * 
      * @param history - The history value default = RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT 
