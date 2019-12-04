@@ -61,7 +61,7 @@ function getPkgInfos(generatedRoot) {
   for (let pkg of pkgs) {
 
     if (pkg.endsWith('.json')) continue;
-    if (pkg.startsWith('actionlib')) continue;
+    //if (pkg.startsWith('actionlib')) continue;
 
     console.log('processing pkg', pkg);
 
@@ -77,7 +77,8 @@ function getPkgInfos(generatedRoot) {
       const typeClass = fileName2Typeclass(filename);
 
       if (typeClass.type === 'srv') { // skip __srv__<action>
-        if (!typeClass.name.endsWith('Request') || !typeClass.name.endsWith('Response')) {
+        if (!typeClass.name.endsWith('Request') && !typeClass.name.endsWith('Response')) {
+          console.log('skip:', typeClass.name);
           continue;
         }
       }
@@ -127,7 +128,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
 
       // omit namespaces that are not 'msg' or 'srv'
       // e.g., action_tutorials.action.FibonacciActionXXX
-      if (msgInfo.typeClass.type.startsWith('action')) continue;
+      //if (msgInfo.typeClass.type.startsWith('action')) continue;
       // if (msgInfo.typeClass.name.includes('Fibonacci')) continue;
 
       if (msgInfo.typeClass.type != curNS) {
