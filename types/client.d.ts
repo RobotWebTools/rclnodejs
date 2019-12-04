@@ -31,10 +31,11 @@ declare module 'rclnodejs' {
      * 
      * 
      * @param timeout - Maximum amount of time to wait. If timeout
-     *                  is `undefined` or `< 0` then wait indefinitely.
+     *                  is `< 0` then wait indefinitely, default =
+		 * 									wait indefinitely.
      * @returns True if the service is available; otherwise return false.
      */
-    waitForService(timeout: number): Promise<boolean>;
+    waitForService(timeout?: number): Promise<boolean>;
 
     /**
      * Name of the service to which requests are made.

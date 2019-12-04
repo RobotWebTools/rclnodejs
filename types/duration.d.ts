@@ -45,7 +45,7 @@ declare module 'rclnodejs' {
      * @param other - The Duration this is compare to.
      * @returns True if this duration is less than other duration.
      */
-    lt(other: Duration): void;
+    lt(other: Duration): boolean;
 
     /**
      * Test if this Duration is less than or equal to another Duration.
@@ -53,7 +53,7 @@ declare module 'rclnodejs' {
      * @param other - The Duration this is compare to.
      * @returns True if this duration is less than or equal to other duration.
      */
-    lte(other: Duration): void;
+    lte(other: Duration): boolean;
 
     /**
      * Test if this Duration is greater than another Duration.

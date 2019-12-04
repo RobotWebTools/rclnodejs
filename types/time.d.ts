@@ -31,7 +31,7 @@ declare module 'rclnodejs' {
     /**
      * Get the time as a plain JavaScript object.
      */
-    readonly secondsAndNanoseconds: { seconds: number; nanoseconds: number };
+    readonly secondsAndNanoseconds: {seconds: number, nanoseconds: number};
 
     /**
      * Add a duration to this time object.
