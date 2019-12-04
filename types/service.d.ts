@@ -2,7 +2,7 @@
 declare module 'rclnodejs' {
 
   /**
-   * A ROS Service that implements an interface.
+   * A ROS Service server that implements an interface.
    */
   class Service extends Entity {
 

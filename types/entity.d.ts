@@ -2,7 +2,7 @@
 declare module 'rclnodejs' {
 
   /**
-   *Class representing a common object in RCL.
+   * A common object in RCL.
    */
   class Entity {
     options: object;
@@ -10,5 +10,4 @@ declare module 'rclnodejs' {
     readonly typedArrayEnabled: boolean;
     readonly typeClass: TypeClass;
   }
-
 }

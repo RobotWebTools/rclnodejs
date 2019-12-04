@@ -2,65 +2,72 @@
 declare module 'rclnodejs' {
 
   /**
-   * @class - Class representing a Duration in ROS
+   * A ROS Duration is a measure of elapsed time. 
+	 * A duration consists of 2 components: seconds and nanoseconds.
    */
-
   class Duration {
+
     /**
      * Create a Duration.
-     * @param {number|string} [seconds=0] - The second part of the duration.
-     * @param {number|string} [nanoseconds=0] - The nanosecond part of the duration.
+     * 
+     * @param seconds - The seconds component of the duration, default = 0.
+     * @param nanoseconds - The nanoseconds component of the duration, default = 0.
      */
     constructor(seconds?: number | string, nanoseconds?: number | string);
 
     /**
-     * Get the nanosecond part of the Duration.
-     * @name Duration#get:nanoseconds
-     * @function
-     * @return {number|string} - value in nanosecond, if the value is greater than Number.MAX_SAFE_INTEGER (2^53-1), will be presented in string of decimal format.
+     * Get the nanosecond component of the Duration.
+     * 
+     * @returns The nanoseconds, if the value is greater than Number.MAX_SAFE_INTEGER (2^53-1), 
+     *         will be presented in a string of decimal format.
      */
-
     readonly nanoseconds: number | string;
 
     /**
-     * Determine whether two Duration objects are equal.
-     * @param {Duration} other - The Duration object to be compared.
-     * @return {boolean} Return true if they are equal.
+     * Test if this Duration is equal to another Duration.
+     * 
+     * @param other - The Duration this is compare to.
+     * @returns True if this duration is equal to other duration.
      */
     eq(other: Duration): boolean;
 
     /**
-     * Determine whether two Duration objects are not equal.
-     * @param {Duration} other - The Duration object to be compared.
-     * @return {boolean} Return true if they are not equal.
+     * Test if this Duration is not equal to another Duration.
+     * 
+     * @param other - The Duration this is compare to.
+     * @returns True if this duration is not equal to other duration.
      */
     ne(other: Duration): boolean;
 
     /**
-     * Determine whether the Duration object is less than another one.
-     * @param {Duration} other - The Duration object to be compared.
-     * @return {boolean} Return true if it's less than other.
+     * Test if this Duration is less than another Duration.
+     * 
+     * @param other - The Duration this is compare to.
+     * @returns True if this duration is less than other duration.
      */
     lt(other: Duration): void;
 
     /**
-     * Determine whether the Duration object is less than or equal with another one.
-     * @param {Duration} other - The Duration object to be compared.
-     * @return {boolean} Return true if it's less than or equal with other.
+     * Test if this Duration is less than or equal to another Duration.
+     * 
+     * @param other - The Duration this is compare to.
+     * @returns True if this duration is less than or equal to other duration.
      */
     lte(other: Duration): void;
 
     /**
-     * Determine whether the Duration object is greater than another one.
-     * @param {Duration} other - The Duration object to be compared.
-     * @return {boolean} Return true if it's greater than other.
+     * Test if this Duration is greater than another Duration.
+     * 
+     * @param other - The Duration this is compare to.
+     * @returns True if this duration is greater than other duration.
      */
     gt(other: Duration): boolean;
 
     /**
-     * Determine whether the Duration object is greater than or equal with another one.
-     * @param {Duration} other - The Duration object to be compared.
-     * @return {boolean} Return true if it's greater than or equal with other.
+     * Test if this Duration is greater than or equal another Duration.
+     * 
+     * @param other - The Duration this is compare to.
+     * @returns True if this duration is greater than or equal to other duration.
      */
     gte(other: Duration): boolean;
   }

@@ -6,78 +6,96 @@ declare module 'rclnodejs' {
 
 	/**
 	 * Create a node.
-	 * @param {string} nodeName - The name used to register in ROS.
-	 * @param {string} namespace - The namespace used in ROS, default is an empty string.
-	 * @param {Context} context - The context, default is Context.defaultContext().
-	 * @return {Node} The instance of Node.
+	 * 
+	 * @remarks
+	 * See {@link Node}
+	 * 
+	 * @param nodeName - The name used to register in ROS.
+	 * @param namespace - The namespace used in ROS, default is an empty string.
+	 * @param context - The context, default is Context.defaultContext().
+	 * @returns The new Node instance.
 	 */
 	function createNode(nodeName: string, namespace?: string, context?: Context): Node;
 
 	/**
-	* Init the module.
-	* @param {Context} context - The context, default is Context.defaultContext().
-	* @return {Promise<undefined>} A Promise.
-	*/
+	 * Init the module.
+	 * 
+	 * @param context - The context, default is Context.defaultContext().
+	 * @returns A Promise.
+	 */
 	function init(context?: Context): Promise<void>;
 
 	/**
-	 * Start to spin the node, which triggers the event loop to start to check the incoming events.
-	 * @param {Node} node - The node to be spun.
-	 * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
-	 * @return {undefined}
+	 * Spin up the node event loop to check for incoming events.
+	 * 
+	 * @param node - The node to be spun.
+	 * @param timeout - ms to wait, block forever if negative, return immediately when 0, default is 10.
 	 */
 	function spin(node: Node, timeout?: number): void;
 
 	/**
-	 * @param {Context} context - The context to be shutdown.
-	 * @return {undefined}
+	 * Stop all activity, destroy all nodes and node components.
+	 * 
+	 * @param context - The context, default is Context.defaultContext()
 	 */
 	function shutdown(context?: Context): void;
 
 	/**
-	 * Return status that whether the module is shut down.
-	 * @return {boolean} Return true if the module is shut down, otherwise return false.
+	 * Test if the module is shutdown.
+	 * 
+	 * @returns True if the module is shut down, otherwise return false.
 	 */
 	function isShutdown(): boolean;
 
 	/**
 	 * Get the interface package, which is used by publisher/subscription or client/service.
-	 * @param {string} name - The name of interface to be required.
-	 * @return {object} - the object of the required package/interface.
+	 * 
+	 * @param  name - The name of interface to be required.
+	 * @returns The object of the required package/interface.
 	 */
 	function require(name: string): object;
 
 	/**
-	 * Search packgaes which locate under path $AMENT_PREFIX_PATH, regenerate all JavaScript structs files from the IDL of
-	 * messages(.msg) and services(.srv) and put these files under folder 'generated'. Any existing files under
-	 * this folder will be overwritten after the execution.
-	 * @return {Promise<undefined>} A Promise.
+	 * Generate JavaScript structs files from the IDL of
+	 * messages(.msg) and services(.srv). 
+	 * Search packages which locate under path $AMENT_PREFIX_PATH
+	 * and output JS files into the 'generated' folder. 
+	 * Any existing files under the generated folder will
+	 * be overwritten.
+	 * 
+	 * @returns A Promise.
 	 */
 	function regenerateAll(): Promise<void>;
 
 	/**
-	 * Judge if the topic/service is hidden, see http://design.ros2.org/articles/topic_and_service_names.html#hidden-topic-or-service-names
-	 * @param {string} name - Name of topic/service.
-	 * @return {boolean} - True if a given topic or service name is hidden, otherwise False.
+	 * Judge if the topic or service is hidden, 
+	 * 
+	 * @remarks
+	 * See {@link http://design.ros2.org/articles/topic_and_service_names.html#hidden-topic-or-service-names}
+	 * 
+	 * @param name - Name of topic or service.
+	 * @returns True if a given topic or service name is hidden, otherwise False.
 	 */
 	function isTopicOrServiceHidden(name: string): boolean;
 
 	/**
-	 * Expand a given topic name using given node name and namespace as well.
-	 * @param {string} topicName - Topic name to be expanded.
-	 * @param {string} nodeName - Name of the node that this topic is associated with.
-	 * @param {string} nodeNamespace - Namespace that the topic is within.
-	 * @return {string} Expanded topic name which is fully qualified.
+	 * Expand a given topic name using given node name and namespace.
+	 * 
+	 * @param  topicName - Topic name to be expanded.
+	 * @param  nodeName - Name of the node that this topic is associated with.
+	 * @param  nodeNamespace - Namespace that the topic is within.
+	 * @returns Expanded topic name which is fully qualified.
 	 */
 	function expandTopicName(topicName: string, nodeName: string, nodeNamespace?: string): string
 
 
 	/**
-	 * Create a plain JavaScript by specified type identifier
-	 * @param {string|Object} type -- the type identifier, acceptable formats could be 'std_msgs/std/String'
+	 * Create a plain JavaScript message object.
+	 * 
+	 * @param type - type identifier, acceptable formats could be 'std_msgs/std/String'
 	 *                                or {package: 'std_msgs', type: 'msg', name: 'String'}
-	 * @return {Object|undefined} A plain JavaScript of that type
+	 * @returns A Message object or undefined if type is not recognized.
 	 */
-	function createMessageObject(type: string | object): object;
+	function createMessageObject(type: TypeClass): Message;
 
 }

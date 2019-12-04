@@ -2,16 +2,11 @@
 declare module 'rclnodejs' {
   
   /**
-   * Enum for ClockType
-   * @readonly
-   * @enum {number}
+   * Clock type identifiers
    */
   enum ClockType {
-    /** @member {number} */
     ROS_TIME = 1,
-    /** @member {number} */
     SYSTEM_TIME = 2,
-    /** @member {number} */
     STEADY_TIME = 3
   }
 

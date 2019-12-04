@@ -2,31 +2,32 @@
 declare module 'rclnodejs' {
 
   /**
-   * Class representing a Context in ROS
+   * Encapsulates the lifecycle of the module from init to shutdown.
+   * 
+   * @remarks
+   * Context objects should not be reused, and are finalized in their destructor.
    */
   class Context {
 
     /**
      * Shutdown the context.
-     * @return {undefined}
      */
     shutdown(): void;
 
     /**
      * Try to shutdown the context.
-     * @return {undefined}
      */
     tryShutdown(): void;
 
     /**
      * Get the global default Context object.
-     * @return {Context} - default Context
+     * 
+     * @returns The default Context
      */
     static defaultContext(): Context;
 
     /**
      * Shutdown the default context.
-     * @return {undefined}
      */
     static shutdownDefaultContext(): void;
     

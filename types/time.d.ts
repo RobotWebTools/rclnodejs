@@ -1,3 +1,4 @@
+import { Message } from "rclnodejs";
 
 declare module 'rclnodejs' {
 
@@ -8,100 +9,102 @@ declare module 'rclnodejs' {
 
     /**
      * Create a Time.
-     * @param {number|string} [seconds=0] - The second part of the time.
-     * @param {number|string} [nanoseconds=0] - The nanosecond part of the time.
-     * @param {ClockType} [clockType=Clock.ClockType.SYSTEM_TIME] - The clock type.
+		 * 
+     * @param seconds - The seconds component of the time, default = 0.
+     * @param nanoseconds - The nanoseconds component of the time, default = 0.
+     * @param clockType - The clock type, default = Clock.ClockType.SYSTEM_TIME
      */
     constructor(seconds?: number | string, nanoseconds?: number | string, clockType?: ClockType);
 
     /**
      * Get the the clock type of the Time object.
-     * @name Time#get:clockType
-     * @function
-     * @return {ClockType} - The clock type.
      */
-
     readonly clockType: ClockType;
 
     /**
      * Get the nanosecond part of the time.
-     * @name Time#get:nanoseconds
-     * @function
-     * @return {number|string} - value in nanosecond, if the value is greater than Number.MAX_SAFE_INTEGER (2^53-1), will be presented in string of decimal format.
+		 * If the value is greater than Number.MAX_SAFE_INTEGER (2^53-1) it 
+		 * will be returned in a string of decimal format.
      */
     readonly nanoseconds: number | string;
 
     /**
-     * Get the time as separate seconds and nanoseconds component.
-     * @name Time#get:secondsAndNanoseconds
-     * @function
-     * @return {object} - object with properties seconds and nanoseconds.
+     * Get the time as a plain JavaScript object.
      */
     readonly secondsAndNanoseconds: { seconds: number; nanoseconds: number };
 
     /**
      * Add a duration to this time object.
-     * @param {Duration} other - The Duration object to be added.
-     * @return {Time} Return the result of a new Time object.
+		 * 
+     * @param other - The Duration object to be added.
+     * @returns The sum of this and other duration.
      */
     add(other: Duration): Time;
 
     /**
-     * Subtract a duration/time to this time object.
-     * @param {Duration|Time} other - The time to be subtracted.
-     * @return {Duration|Time} Return the result.
+     * Subtract a duration or time from this time object.
+		 * 
+     * @param other - The time to be subtracted.
+     * @returns The difference between this and other time.
      */
     sub(other: Duration | Time): Duration | Time;
 
     /**
-     * Determine whether two Time objects are equal.
-     * @param {Time} other - The time object to be compared.
-     * @return {boolean} Return true if they are equal.
+     * Test if this Time is equal to another Time.
+     * 
+     * @param other - The Time this is compare to.
+     * @returns True if this time is equal to other time.
      */
     eq(other: Time): boolean;
 
     /**
-     * Determine whether two Time objects are not equal.
-     * @param {Time} other - The time object to be compared.
-     * @return {boolean} Return true if they are not equal.
+     * Test if this Time is not equal to another Time.
+     * 
+     * @param other - The Time this is compare to.
+     * @returns True if this time is not equal to other time.
      */
     ne(other: Time): boolean;
 
     /**
-     * Determine whether the time is less than another one.
-     * @param {Time} other - The time object to be compared.
-     * @return {boolean} Return true if it's less than other.
+     * Test if this Time is less than another Time.
+     * 
+     * @param other - The Time this is compare to.
+     * @returns True if this time is less than other time.
      */
     lt(other: Time): boolean;
 
     /**
-     * Determine whether the time is less than or equal with another one.
-     * @param {Time} other - The time object to be compared.
-     * @return {boolean} Return true if it's less than or equal with other.
+     * Test if this Time is less than or equal to another Time.
+     * 
+     * @param other - The Time this is compare to.
+     * @returns True if this time is less than or equal to other time.
      */
     lte(other: Time): boolean;
 
     /**
-     * Determine whether the time is greater than another one.
-     * @param {Time} other - The time object to be compared.
-     * @return {boolean} Return true if it's greater than other.
+     * Test if this Time is greater than another Time.
+     * 
+     * @param other - The Time this is compare to.
+     * @returns True if this time is greater than other time.
      */
     gt(other: Time): boolean;
 
     /**
-     * Determine whether the time is greater than or equal with another one.
-     * @param {Time} other - The time object to be compared.
-     * @return {boolean} Return true if it's greater than or equal with other.
+     * Test if this Time is greater than or equal to another Time.
+     * 
+     * @param other - The Time this is compare to.
+     * @returns True if this time is greater than or equal to other time.
      */
     gte(other: Time): boolean;
 
     /**
      * Create a Time object from a message of builtin_interfaces/msg/Time
-     * @param {object} msg - The message to be created from.
-     * @param {ClockType} [clockType=Clock.ClockType.SYSTEM_TIME] - The type of the time object.
-     * @return {Time} Return the created Time object.
+		 * 
+     * @param msg - The message to be created from.
+     * @param clockType- The type of the time object.
+     * @returns The new Time.
      */
-    static fromMsg(msg: object, clockType: ClockType): Time;
+    static fromMsg(msg: Message, clockType: ClockType): Time;
   }
 
 }

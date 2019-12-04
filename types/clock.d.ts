@@ -2,52 +2,50 @@
 declare module 'rclnodejs' {
 
   /**
-   * ROS Clock.
+   * A ROS Clock.
    */
   class Clock {
+		
     /**
      * Create a Clock.
-     * @param clockType - Type of the clock to create; default = ClockType.SYSTEM_TIME.
+     * 
+     * @param clockType - Type of the clock to create; default = {@link ClockType.SYSTEM_TIME}.
      */
     constructor(clockType?: ClockType);
 
     /**
-     * Get ClockType of this Clock object.
+     * Get ClockType of this Clock.
      * 
-     * @return  Type of this clock.
+     * @returns Type of this clock.
      */
     readonly clockType: ClockType;
 
     /**
      * Return the current time.
      * 
-     * @return Return the current time.
+     * @returns The current time.
      */
     now(): Time;
   }
 
   /**
-   * A ROSClock. 
+   * A ROS ROSClock. 
    */
-
   class ROSClock extends Clock {
+
     /**
      * Create a ROSClock.
      */
     constructor();
 
     /**
-     * Status that whether the ROS time is active.
-     * @name ROSClock#get:isRosTimeActive
+     * Determine if the clock is active.
      */
     isRosTimeActive: boolean;
-
 
     /**
      * Status of ROS time.
      */
-
     rosTimeOverride: Time;
   }
-
 }

@@ -2,48 +2,50 @@
 declare module 'rclnodejs' {
   
   /**
-    * A ROS Timer
+    * A ROS Timer that periodically executes a callback.
     */
   class Timer {
 
     /**
-     * @type {number}
+     * Time between callbacks in milliseconds.
      */
     readonly period: number;
 
     /**
      * Check if the timer is ready.
-     * @return {boolean} Return true if timer is ready, otherwise return false.
+     * 
+     * @returns True if timer is ready, otherwise return false.
      */
     isReady(): boolean;
 
     /**
-     * Check if the timer is canceled.
-     * @return {boolean} Return true if timer is canceled, otherwise return false.
+     * Check if the timer has been cancelled.
+     * 
+     * @returns True if timer has been canceled, otherwise return false.
      */
     isCanceled(): boolean;
 
     /**
      * Cancel the timer.
-     * @return {undefined}
      */
     cancel(): void;
 
     /**
      * Reset the timer.
-     * @return {undefined}
      */
     reset(): void;
 
     /**
      * Get the interval since the last call of this timer.
-     * @return {number} - the interval value - ms.
+     * 
+     * @returns The interval value in milliseconds.
      */
     timeSinceLastCall(): number;
 
     /**
      * Get the interval until the next call will happen.
-     * @return {number} - the interval value - ms.
+     * 
+     * @returns The interval value in milliseconds
      */
     timeUntilNextCall(): number;
   }

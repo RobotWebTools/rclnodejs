@@ -2,7 +2,7 @@
 declare module 'rclnodejs' {
 
   /**
-   * A ROS Subscription listening for published messages for a specific topic.
+   * A ROS Subscription for published messages on a topic.
    */
   class Subscription extends Entity {
 
