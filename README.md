@@ -141,7 +141,7 @@ To visit the on-line version, please navigate to http://robotwebtools.org/rclnod
 
 ## Experimental - Deprecated
 
-* [actionlib](https://github.com/RobotWebTools/rclnodejs/blob/develop/tutorials/actionlib.md) - as the [rcl](https://github.com/ros2/rcl) library has implemented the action related functions, we are going to drop this one and we don't garantee the current actionlib can work with [rclcpp](https://github.com/ros2/rclcpp).
+* [actionlib](https://github.com/RobotWebTools/rclnodejs/blob/develop/tutorials/actionlib.md) - as the [rcl](https://github.com/ros2/rcl) library has implemented the action related functions, we are going to drop this one and we don't guarantee the current actionlib can work with [rclcpp](https://github.com/ros2/rclcpp).
 
 ## Troubleshooting
 
