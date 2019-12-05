@@ -14,12 +14,7 @@
 // limitations under the License.
 
 
-// create messages.d.ts containing from each typeclass definition
-// - write header txt into outfile
-// - find each pkg
-// --  create typescript namespace
-// --  for each pkg msg file
-// ---   create a typescript type definition
+// create interfaces.d.ts containing from each typeclass definition
 /* Example output for std_msgs_msg_String
 declare module "rclnodejs" {
   namespace std_msgs {
@@ -47,7 +42,7 @@ function generateAll() {
   console.log('pkg count:', pkgInfos.length);
 
   // write message.d.ts file
-  const messagesFilePath = path.join(__dirname, '../types/messages.d.ts');
+  const messagesFilePath = path.join(__dirname, '../types/interfaces.d.ts');
   const fd = fs.openSync(messagesFilePath, 'w');
   savePkgInfoAsTSD(pkgInfos, fd);
 }
