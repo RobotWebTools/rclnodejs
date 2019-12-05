@@ -89,8 +89,6 @@ function findPackagesInDirectory(dir) {
           addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages', pkgMap);
         } else if (path.extname(file.name) === '.srv') {
           addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services', pkgMap);
-        } else if (path.extname(file.name) === '.action') {
-          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'actions', pkgMap);
         }
         next();
       });
