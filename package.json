@@ -3,7 +3,7 @@
   "version": "0.10.4",
   "description": "ROS2.0 JavaScript client with Node.js",
   "main": "index.js",
-  "types": "@types/index",
+  "types": "types/index.d.ts",
   "keywords": [
     "rclnodejs",
     "ros2",
