@@ -120,7 +120,7 @@ In your tsconfig.json file include the following compiler options:
 }
 ```
 
-Here's the first example implemented in TypeScript.
+Here's an earlier JavaScript example reimplemented in TypeScript.
 ```
 import * as rclnodejs from 'rclnodejs';
 rclnodejs.init().then(() => {
@@ -131,15 +131,17 @@ rclnodejs.init().then(() => {
 });
 ```
 
-In this example you may notice that other than the `import` statement the code is virtually identical to the JavaScript version. Where the benefits of using TypeScript kick in is when using smart coding tools such as Visual Studio Code or the CodeMix plugin for Eclipse. These productivity tools use the provided type declaration files to  help you learn the api and code with it more accurately and quickly.
+In this example you may notice that other than the `import` statement the code is virtually identical to the JavaScript version. Where the benefits of using TypeScript kick in is when using smart coding tools such as Visual Studio Code or the CodeMix plugin for Eclipse. These productivity tools use the rclnodejs type declaration files to help you learn the api and code with it more accurately and quickly.
 
-For example the ROS2 messages are defined in the interfaces.d.ts module and can be created as shown:
+Type aliases are provided for the ROS2 messages in the types/interfaces.d.ts file. To use a message type alias follow the naming pattern <pkg_name>.[msg|srv].<type>, e.g., sensor_msgs.msg.LaserScan or the std_msgs.msg.String as shown below. 
 ```
    const msg: rclnodejs.std_msgs.msg.String = {
      data: 'hello ROS2 from rclnodejs'
    }
 ```
-While this is a trivial example, when working with more complex message types such as sensor data, developers can greatly benefit from typing information to detect issues while coding rather than at runtime. 
+**Note** that the interface.d.ts file is updated each time the generate_messages.js script is run.
+
+While the code snippet above is a trivial message example, when working with more complex message types such as sensor data, developers can benefit from typing information to help detect issues earlier in the develpment cycle.
 
 ## License
 
