@@ -1,6 +1,8 @@
 # rclnodejs [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://travis-ci.org/RobotWebTools/rclnodejs)
 
-`rclnodejs` is a Node.js client for Robot Operating System (ROS) v2.0. It provides extremely simple & easy API for ROS 2.0 programming, the following example shows how to create a ROS 2.0 node and then publish a string message in only 6 lines of code.
+`rclnodejs` is a Node.js client for the Robot Operating System (ROS) v2.0. It provides a simple and easy JavaScript API for ROS 2.0 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects. 
+
+The following JavaScript example demonstrates how to create a ROS 2.0 node and then publish a string message in only 6 lines of code. 
 
 ``` JavaScript
 const rclnodejs = require('rclnodejs');
@@ -30,9 +32,9 @@ Please check the [table](https://github.com/RobotWebTools/rclnodejs#match-with-r
 
 ## Document
 
-Please browse our online [doucment](http://robotwebtools.org/rclnodejs/docs/index.html) to learn the detailed usage if you needed.
+API [documentation](http://robotwebtools.org/rclnodejs/docs/index.html) is available online.
 
-## More Examples
+## JavaScript Examples
 
 Use complex message
 
@@ -99,6 +101,45 @@ Send a request in a client
   });
 
 ```
+
+## Using rclnodejs with TypeScript
+In your node project install the rclnodejs package as described above. You will also need the TypeScript compiler and node typings installed.
+```
+  npm install typescript @types/node -D
+```
+
+In your tsconfig.json file include the following compiler options:
+```json
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es6",
+    ...
+  }
+}
+```
+
+Here's the first example implemented in TypeScript.
+```
+import * as rclnodejs from 'rclnodejs';
+rclnodejs.init().then(() => {
+  const node = rclnodejs.createNode('publisher_example_node');
+  const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
+  publisher.publish(`Hello ROS 2.0 from rclnodejs`);
+  rclnodejs.spin(node);
+});
+```
+
+In this example you may notice that other than the `import` statement the code is virtually identical to the JavaScript version. Where the benefits of using TypeScript kick in is when using smart coding tools such as Visual Studio Code or the CodeMix plugin for Eclipse. These productivity tools use the provided type declaration files to  help you learn the api and code with it more accurately and quickly.
+
+For example the ROS2 messages are defined in the interfaces.d.ts module and can be created as shown:
+```
+   const msg: rclnodejs.std_msgs.msg.String = {
+     data: 'hello ROS2 from rclnodejs'
+   }
+```
+While this is a trivial example, when working with more complex message types such as sensor data, developers can greatly benefit from typing information to detect issues while coding rather than at runtime. 
 
 ## License
 
