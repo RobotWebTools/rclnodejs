@@ -153,7 +153,7 @@ Your tsconfig.json file should include the following compiler options:
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "es6",
-    ...
+    // your additional options here
   }
 }
 ```
