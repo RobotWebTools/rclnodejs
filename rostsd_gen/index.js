@@ -31,7 +31,6 @@ declare module "rclnodejs" {
 
 const path = require('path');
 const fs = require('fs');
-const rclnodejs = require('../index.js');
 const loader = require('../lib/interface_loader.js');
 
 
