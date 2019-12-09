@@ -32,8 +32,8 @@ RUN git config --global user.name $GIT_USER_NAME \
 ENV ROS2_WS=/root
 WORKDIR $ROS2_WS
 
-RUN wget https://ci.ros2.org/view/packaging/job/packaging_linux/lastStableBuild/artifact/ws/ros2-package-linux-x86_64.tar.bz2 \
-    && tar xf ros2-package-linux-x86_64.tar.bz2
+RUN wget https://github.com/ros2/ros2/releases/download/release-eloquent-20191122/ros2-eloquent-20191122-linux-bionic-amd64.tar.bz2 \
+    && tar xf ros2-eloquent-20191122-linux-bionic-amd64.tar.bz2
 
 # [Ubuntu 18.04]
 RUN rosdep install --from-paths $ROS2_WS/ros2-linux/share --ignore-src --rosdistro dashing -y --skip-keys "console_bridge fastcdr fastrtps libopensplice67 libopensplice69 osrf_testing_tools_cpp poco_vendor rmw_connext_cpp rosidl_typesupport_connext_c rosidl_typesupport_connext_cpp rti-connext-dds-5.3.1 tinyxml_vendor tinyxml2_vendor urdfdom urdfdom_headers"

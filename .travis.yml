@@ -5,9 +5,7 @@ sudo: required
 
 branches:
   only:
-  - develop
-  - master
-  - actionlib
+  - typescript
 
 before_install:
   - sudo docker pull ubuntu:bionic
