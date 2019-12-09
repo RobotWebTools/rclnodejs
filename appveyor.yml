@@ -28,7 +28,6 @@ before_build:
   - choco install -y -s c:\download\ asio cunit eigen tinyxml-usestl tinyxml2 log4cxx
   - appveyor DownloadFile https://github.com/ros2/ros2/releases/download/release-eloquent-20191122/ros2-eloquent-20191122-windows-release-amd64.zip
   - 7z x -y "ros2-eloquent-20191122-windows-release-amd64.zip" -o"c:\" > nul
-  - 7z x -y "c:\download\ros2-package-windows-AMD64.zip" -o"c:\" > nul
   - setx -m OPENSSL_CONF C:\OpenSSL-Win64\bin\openssl.cfg
   - set PATH=C:\OpenSSL-Win64\bin;%PATH%
   - setx AMENT_PYTHON_EXECUTABLE "c:\Python37"
