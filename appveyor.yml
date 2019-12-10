@@ -6,7 +6,7 @@ branches:
     - develop
     - actionlib
 
-image: Visual Studio 2019
+image: Previous Visual Studio 2019
 
 environment:
   nodejs_version: "10"
@@ -20,6 +20,7 @@ before_build:
   - md download
   - cd download
   - choco install -y wget cmake
+  - choco install -y vcredist140
   - "SET PATH=C:\\Program Files\\CMake\\bin;%PATH%"
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2019-10-24/asio.1.12.1.nupkg
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2019-10-24/cunit.2.1.3.nupkg
@@ -35,7 +36,7 @@ before_build:
   - setx AMENT_PYTHON_EXECUTABLE "c:\Python37"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
-  - python -m pip install -U catkin_pkg empy lark-parser lxml opencv-python pyparsing pyyaml setuptools colcon-common-extensions numpy
+  - python -m pip install -U catkin_pkg cryptography empy ifcfg lark-parser lxml netifaces numpy opencv-python pyparsing pyyaml setuptools colcon-common-extensions
 
 build_script:
   - cd  c:\proj\rclnodejs
