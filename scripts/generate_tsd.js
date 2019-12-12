@@ -12,11 +12,11 @@
 
 'use strict';
 
-const generator = require('../rostsd_gen/index.js');
+const tsdGenerator = require('../rostsd_gen/index.js');
 
 console.log('Start TypeScript declaration file generation...');
 try {
-  generator.generateAll();
+  tsdGenerator.generateAll();
   console.log('Generation is done.');
 } catch (e) {
   console.log(`Caught error: ${e}`);

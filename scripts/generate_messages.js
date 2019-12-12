@@ -16,11 +16,11 @@
 'use strict';
 
 const generator = require('../rosidl_gen/index.js');
-const tsd_generator = require('../rostsd_gen/index.js');
+const tsdGenerator = require('../rostsd_gen/index.js');
 
 console.log('Start JavaScript message generation...');
 generator.generateAll(true).then(() => {
-  tsd_generator.generateAll(); // create message.d.ts
+  tsdGenerator.generateAll(); // create interfaces.d.ts
   console.log('Generation complete.');
 }).catch((e) => {
   console.log(`Caught error: ${e}`);

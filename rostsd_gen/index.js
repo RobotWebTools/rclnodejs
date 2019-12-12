@@ -38,8 +38,7 @@ function generateAll() {
   // load pkg and interface info (msgs and srvs)
   const generatedPath = path.join(__dirname, '../generated/');
   const pkgInfos = getPkgInfos(generatedPath);
-  console.log('pkg count:', pkgInfos.length);
-
+  
   // write message.d.ts file
   const messagesFilePath = path.join(__dirname, '../types/interfaces.d.ts');
   const fd = fs.openSync(messagesFilePath, 'w');
@@ -53,11 +52,7 @@ function getPkgInfos(generatedRoot) {
   let pkgs = fs.readdirSync(rootDir);
 
   for (let pkg of pkgs) {
-
     if (pkg.endsWith('.json')) continue;
-    //if (pkg.startsWith('actionlib')) continue;
-
-    console.log('processing pkg', pkg);
 
     const pkgInfo = {
       name: pkg,
@@ -72,7 +67,6 @@ function getPkgInfos(generatedRoot) {
 
       if (typeClass.type === 'srv') { // skip __srv__<action>
         if (!typeClass.name.endsWith('Request') && !typeClass.name.endsWith('Response')) {
-          //console.log('skip:', typeClass.name);
           continue;
         }
       }
@@ -119,11 +113,6 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
 
     let curNS = null;
     for (const msgInfo of pkgInfo.messages) {
-
-      // omit namespaces that are not 'msg' or 'srv'
-      // e.g., action_tutorials.action.FibonacciActionXXX
-      //if (msgInfo.typeClass.type.startsWith('action')) continue;
-      // if (msgInfo.typeClass.name.includes('Fibonacci')) continue;
 
       if (msgInfo.typeClass.type != curNS) {
         if (curNS) { // close current ns 
@@ -288,218 +277,8 @@ function createMessage(type) {
 }
 
 
-const tsd_generator = {
-  // version() {
-  //   // eslint-disable-next-line
-  //   return fse.readJsonSync(path.join(__dirname, 'generator.json')).version;
-  // },
-
+const tsdGenerator = {
   generateAll
 };
 
-module.exports = tsd_generator;
-
-/*
-dev notes -------------------------------
-namespace sensor_msgs {
-
-  namespace msg {
-
-    type LaserScan = {
-      header: std_msgs.msg.Header;
-    }
-
-  }
-}
-
-
- msgInfo:
- {
-  name: string,
-  typeClass: typeClass, // {package, type, name}
-  type: type,           // {pkgName: 'std_msgs', subFolder: 'msg', interfaceName: 'String'};
-  def: def
- }
-
- pkgInfo:
- {
-   name: string;
-   messages: Array<msgInfo>
- }
-
- Example Spec object from parser
-
- {
-  "constants": [
-    {
-      "type": "uint8",
-      "name": "PRIMARY_STATE_UNKNOWN",
-      "value": 0
-    },
-    {
-      "type": "uint8",
-      "name": "PRIMARY_STATE_UNCONFIGURED",
-      "value": 1
-    }
-  ],
-  "fields": [
-    {
-      "name": "header",
-      "type": {
-        "isArray": false,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": false,
-        "isFixedSizeArray": false,
-        "pkgName": "std_msgs",
-        "type": "Header",
-        "stringUpperBound": null,
-        "isPrimitiveType": false
-      },
-      "default_value": null
-    },
-    {
-      "name": "angle_min",
-      "type": {
-        "isArray": false,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": false,
-        "isFixedSizeArray": false,
-        "pkgName": null,
-        "type": "float32",
-        "stringUpperBound": null,
-        "isPrimitiveType": true
-      },
-      "default_value": null
-    },
-    {
-      "name": "angle_max",
-      "type": {
-        "isArray": false,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": false,
-        "isFixedSizeArray": false,
-        "pkgName": null,
-        "type": "float32",
-        "stringUpperBound": null,
-        "isPrimitiveType": true
-      },
-      "default_value": null
-    },
-    {
-      "name": "angle_increment",
-      "type": {
-        "isArray": false,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": false,
-        "isFixedSizeArray": false,
-        "pkgName": null,
-        "type": "float32",
-        "stringUpperBound": null,
-        "isPrimitiveType": true
-      },
-      "default_value": null
-    },
-    {
-      "name": "time_increment",
-      "type": {
-        "isArray": false,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": false,
-        "isFixedSizeArray": false,
-        "pkgName": null,
-        "type": "float32",
-        "stringUpperBound": null,
-        "isPrimitiveType": true
-      },
-      "default_value": null
-    },
-    {
-      "name": "scan_time",
-      "type": {
-        "isArray": false,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": false,
-        "isFixedSizeArray": false,
-        "pkgName": null,
-        "type": "float32",
-        "stringUpperBound": null,
-        "isPrimitiveType": true
-      },
-      "default_value": null
-    },
-    {
-      "name": "range_min",
-      "type": {
-        "isArray": false,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": false,
-        "isFixedSizeArray": false,
-        "pkgName": null,
-        "type": "float32",
-        "stringUpperBound": null,
-        "isPrimitiveType": true
-      },
-      "default_value": null
-    },
-    {
-      "name": "range_max",
-      "type": {
-        "isArray": false,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": false,
-        "isFixedSizeArray": false,
-        "pkgName": null,
-        "type": "float32",
-        "stringUpperBound": null,
-        "isPrimitiveType": true
-      },
-      "default_value": null
-    },
-    {
-      "name": "ranges",
-      "type": {
-        "isArray": true,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": true,
-        "isFixedSizeArray": null,
-        "pkgName": null,
-        "type": "float32",
-        "stringUpperBound": null,
-        "isPrimitiveType": true
-      },
-      "default_value": null
-    },
-    {
-      "name": "intensities",
-      "type": {
-        "isArray": true,
-        "arraySize": null,
-        "isUpperBound": false,
-        "isDynamicArray": true,
-        "isFixedSizeArray": null,
-        "pkgName": null,
-        "type": "float32",
-        "stringUpperBound": null,
-        "isPrimitiveType": true
-      },
-      "default_value": null
-    }
-  ],
-  "baseType": {
-    "pkgName": "sensor_msgs",
-    "type": "LaserScan",
-    "stringUpperBound": null,
-    "isPrimitiveType": false
-  },
-  "msgName": "LaserScan"
-}
-*/
+module.exports = tsdGenerator;
