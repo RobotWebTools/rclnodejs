@@ -65,28 +65,32 @@ function getPkgInfos(generatedRoot) {
     for (let filename of files) {
       const typeClass = fileName2Typeclass(filename);
 
-      if (typeClass.type === 'srv') { // skip __srv__<action>
-        if (!typeClass.name.endsWith('Request') && !typeClass.name.endsWith('Response')) {
-          continue;
+      try {
+        if (typeClass.type === 'srv') { // skip __srv__<action>
+          if (!typeClass.name.endsWith('Request') && !typeClass.name.endsWith('Response')) {
+            continue;
+          }
         }
-      }
 
-      const msg = createMessage(typeClass);
-      const type = msg.constructor.type();
-      const def = msg.constructor.ROSMessageDef;
+        const msg = createMessage(typeClass);
+        const type = msg.constructor.type();
+        const def = msg.constructor.ROSMessageDef;
 
-      const msgInfo = {
-        name: def.msgName,
-        typeClass: typeClass,
-        type: type,
-        def: def
+        const msgInfo = {
+          name: def.msgName,
+          typeClass: typeClass,
+          type: type,
+          def: def
+        };
+
+        pkgInfo.messages.push(msgInfo);
+      } catch (e) {
+        console.log(`Unable to generate tsd info: ${e.message}`);
       };
-
-      pkgInfo.messages.push(msgInfo);
     }
 
     pkgInfos.push(pkgInfo);
-  };
+  }
 
   return pkgInfos;
 }
