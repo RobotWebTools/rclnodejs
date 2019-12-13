@@ -24,6 +24,7 @@ const Node = require('./lib/node.js');
 const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
+const tsdGenerator = require('./rostsd_gen/index.js');
 const validator = require('./lib/validator.js');
 const ActionLib = require('ros2-actionlibjs');
 const Time = require('./lib/time.js');
@@ -236,10 +237,11 @@ let rcl = {
   regenerateAll() {
     // This will trigger to regererate all the JS structs used for messages and services,
     // to overwrite the existing ones although they have been created.
-    debug('Begin to regenerate JavaScript code from ROS IDL files.');
+    debug('Begin regeneration of JavaScript code from ROS IDL files.');
     return new Promise((resolve, reject) => {
       generator.generateAll(true).then(() => {
-        debug('Finish regenerating.');
+        tsdGenerator.generateAll(); // create interfaces.d.ts
+        debug('Finish regeneration.');
         resolve();
       }).catch((e) => {
         reject(e);

@@ -7,7 +7,6 @@ branches:
   only:
   - develop
   - master
-  - actionlib
 
 before_install:
   - sudo docker pull ubuntu:bionic
