@@ -86,7 +86,11 @@ function findPackagesInDirectory(dir) {
       let pkgMap = new Map();
       walker.on('file', (root, file, next) => {
         if (path.extname(file.name) === '.msg') {
-          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages', pkgMap);
+          // Some .msg files were generated prior to 0.3.2 for .action files,
+          // which has been disabled. So these files should be ignored here.
+          if (path.dirname(root).split(path.sep).pop() !== 'action') {
+            addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages', pkgMap);
+          }
         } else if (path.extname(file.name) === '.srv') {
           addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services', pkgMap);
         }
