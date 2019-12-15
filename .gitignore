@@ -14,7 +14,7 @@ npm-debug.log
 tags
 cpplint.py
 generated
-types/interface.d.ts
+types/interfaces.d.ts
 dist
 .vscode
 .project
