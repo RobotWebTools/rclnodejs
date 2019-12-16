@@ -1,4 +1,4 @@
-# rclnodejs - ROS2 Client Library for JavaScript [![npm](https://img.shields.io/npm/v/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs)[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=develop)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=develop)[![npm](https://img.shields.io/npm/dm/rclnodejs)](https://www.npmjs.com/package/rclnodejs)[![GitHub license](https://img.shields.io/github/license/RobotWebTools/rclnodejs.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE)[![node](https://img.shields.io/node/v/rclnodejs.svg)](https://nodejs.org/en/download/releases/)[![dependencies Status](https://david-dm.org/RobotWebTools/rclnodejs/status.svg)](https://david-dm.org/RobotWebTools/rclnodejs)
+# rclnodejs - ROS2 Client Library for JavaScript [![npm](https://img.shields.io/npm/v/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs)[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=develop)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=develop)[![npm](https://img.shields.io/npm/dm/rclnodejs)](https://www.npmjs.com/package/rclnodejs)[![GitHub license](https://img.shields.io/github/license/RobotWebTools/rclnodejs.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE)[![node](https://img.shields.io/node/v/rclnodejs.svg)](https://nodejs.org/en/download/releases/)[![dependencies Status](https://david-dm.org/RobotWebTools/rclnodejs/status.svg)](https://david-dm.org/RobotWebTools/rclnodejs)[![npm type definitions](https://img.shields.io/npm/types/rclnodejs)](https://www.npmjs.com/package/rclnodejs)
 
 Branch | Linux Build | macOS Build | Windows Build |
 ------------ |  :-------------: | :-------------: | :-------------: |
@@ -11,7 +11,8 @@ If you want to select a stable release of ROS 2.0 as your platform, please check
 
 ROS 2.0 release | NPM version |
 :------------: |  :-------------: |
-Dashing Diademata Patch Release [4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20191122) | [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3) |
+[Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20191122) | [0.11.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.11.1) |
+Dashing Diademata Patch Release [4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)  | [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3) |
 Dashing Diademata Patch Release [3](https://github.com/ros2/ros2/releases/tag/release-dashing-20190910) | [0.10.2](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.2) |
 Dashing Diademata Patch Release [2](https://github.com/ros2/ros2/releases/tag/release-dashing-20190806) | [0.10.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.1) |
 Dashing Diademata Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-dashing-20190614) | [0.10.0](https://www.npmjs.com/package/rclnodejs/v/0.10.0) |
