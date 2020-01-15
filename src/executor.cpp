@@ -96,8 +96,7 @@ void Executor::Run(void* arg) {
 
   try {
     rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
-    rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, 0,
-        executor->context_, rcl_get_default_allocator());
+    rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, rcl_get_default_allocator());
     if (ret != RCL_RET_OK) {
       throw std::runtime_error(std::string("Init waitset failed: ") +
                                rcl_get_error_string().str);
@@ -119,9 +118,9 @@ void Executor::Run(void* arg) {
             0u,
             handle_manager->timer_count(),
             handle_manager->client_count(),
-            handle_manager->service_count(),
+            handle_manager->service_count()
             // TODO(minggang): support events.
-            0u) != RCL_RET_OK) {
+            ) != RCL_RET_OK) {
               std::string error_message = std::string("Failed to resize: ")
                   + std::string(rcl_get_error_string().str);
               throw std::runtime_error(error_message);
