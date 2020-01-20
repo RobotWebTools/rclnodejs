@@ -192,22 +192,6 @@ function saveMsgInfoAsTSD(msgInfo, fd) {
 
   fs.writeSync(fd, typeTemplate);
 
-  // write constant definitions
-  // for (let i = 0; i < msgInfo.def.constants.length; i++) {
-  //   const constant = msgInfo.def.constants[i];
-  //   const constantType = primitiveType2JSName(constant.type);
-  //   const tmpl = (constantType == 'string') ?
-  //     `        readonly ${constant.name}?: '${constant.value}'` :
-  //     `        readonly ${constant.name}?: ${constant.value}`;
-  //   fs.writeSync(fd, tmpl);
-
-  //   if (i != msgInfo.def.constants.length - 1) {
-  //     fs.writeSync(fd, ',\n');
-  //   } else if (msgInfo.def.fields.length > 0) {
-  //     fs.writeSync(fd, ',\n');
-  //   }
-  // }
-
   // write field definitions
   for (let i = 0; i < msgInfo.def.fields.length; i++) {
     const field = msgInfo.def.fields[i];
