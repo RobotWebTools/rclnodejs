@@ -157,7 +157,26 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
       fs.writeSync(fd, ' |\n');
     }
   }
+  fs.writeSync(fd, ';\n\n');
 
+  const fullMessageNameStrings = [];
+  for (const messageName of fullMessageNames) {
+    fullMessageNameStrings.push(messageName.replace(/\./g, '/'));
+  }
+
+  // write message type class string
+  // e.g. type MessageTypeClassStr =
+  //             'string' |
+  //             'std_msgs/msg/Bool' |
+  //             'std_msgs/msg/Byte' |
+  //             ...
+  fs.writeSync(fd, '  type MessageTypeClassStr = \n');
+  for (let i=0; i < fullMessageNameStrings.length; i++) {
+    fs.writeSync(fd, `    '${fullMessageNameStrings[i]}'`);
+    if (i != fullMessageNames.length-1) {
+      fs.writeSync(fd, ' |\n');
+    }
+  }
   fs.writeSync(fd, ';\n');
 
   // close module declare
@@ -167,7 +186,6 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
 
 
 function saveMsgInfoAsTSD(msgInfo, fd) {
-
   // write type = xxxx {
   const typeTemplate =
     `      export type ${msgInfo.typeClass.name} = {\n`;
@@ -175,20 +193,20 @@ function saveMsgInfoAsTSD(msgInfo, fd) {
   fs.writeSync(fd, typeTemplate);
 
   // write constant definitions
-  for (let i = 0; i < msgInfo.def.constants.length; i++) {
-    const constant = msgInfo.def.constants[i];
-    const constantType = primitiveType2JSName(constant.type);
-    const tmpl = (constantType == 'string') ?
-      `        ${constant.name}?: '${constant.value}'` :
-      `        ${constant.name}?: ${constant.value}`;
-    fs.writeSync(fd, tmpl);
+  // for (let i = 0; i < msgInfo.def.constants.length; i++) {
+  //   const constant = msgInfo.def.constants[i];
+  //   const constantType = primitiveType2JSName(constant.type);
+  //   const tmpl = (constantType == 'string') ?
+  //     `        readonly ${constant.name}?: '${constant.value}'` :
+  //     `        readonly ${constant.name}?: ${constant.value}`;
+  //   fs.writeSync(fd, tmpl);
 
-    if (i != msgInfo.def.constants.length - 1) {
-      fs.writeSync(fd, ',\n');
-    } else if (msgInfo.def.fields.length > 0) {
-      fs.writeSync(fd, ',\n');
-    }
-  }
+  //   if (i != msgInfo.def.constants.length - 1) {
+  //     fs.writeSync(fd, ',\n');
+  //   } else if (msgInfo.def.fields.length > 0) {
+  //     fs.writeSync(fd, ',\n');
+  //   }
+  // }
 
   // write field definitions
   for (let i = 0; i < msgInfo.def.fields.length; i++) {
@@ -207,6 +225,19 @@ function saveMsgInfoAsTSD(msgInfo, fd) {
 
   // end of def
   fs.writeSync(fd, '      };\n');
+
+  // write wrapper interfaces
+  if (msgInfo.def.constants.length) {
+    fs.writeSync(fd, `      export interface ${msgInfo.typeClass.name}Wrapper {\n`);
+    for (const constant of msgInfo.def.constants) {
+      const constantType = primitiveType2JSName(constant.type);
+      const tmpl = `        readonly ${constant.name}: ${constantType};\n`;
+      fs.writeSync(fd, tmpl);
+    }
+    const ctorTmpl = `        new(other?: ${msgInfo.typeClass.name}): ${msgInfo.typeClass.name}\n`;
+    fs.writeSync(fd, ctorTmpl);
+    fs.writeSync(fd, '      }\n');
+  }
 }
 
 
