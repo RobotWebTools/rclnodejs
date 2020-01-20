@@ -38,7 +38,7 @@ function generateAll() {
   // load pkg and interface info (msgs and srvs)
   const generatedPath = path.join(__dirname, '../generated/');
   const pkgInfos = getPkgInfos(generatedPath);
-  
+
   // write message.d.ts file
   const messagesFilePath = path.join(__dirname, '../types/interfaces.d.ts');
   const fd = fs.openSync(messagesFilePath, 'w');
@@ -115,7 +115,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
     for (const msgInfo of pkgInfo.messages) {
 
       if (msgInfo.typeClass.type != curNS) {
-        if (curNS) { // close current ns 
+        if (curNS) { // close current ns
           fs.writeSync(fd, '    }\n');
         }
 
@@ -155,9 +155,9 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
     fs.writeSync(fd, '    ' +  fullMessageNames[i]);
     if (i != fullMessageNames.length-1) {
       fs.writeSync(fd, ' |\n');
-    } 
+    }
   }
-  
+
   fs.writeSync(fd, ';\n');
 
   // close module declare
@@ -179,8 +179,8 @@ function saveMsgInfoAsTSD(msgInfo, fd) {
     const constant = msgInfo.def.constants[i];
     const constantType = primitiveType2JSName(constant.type);
     const tmpl = (constantType == 'string') ?
-      `        ${constant.name}: '${constant.value}'` :
-      `        ${constant.name}: ${constant.value}`;
+      `        ${constant.name}?: '${constant.value}'` :
+      `        ${constant.name}?: ${constant.value}`;
     fs.writeSync(fd, tmpl);
 
     if (i != msgInfo.def.constants.length - 1) {
@@ -256,7 +256,7 @@ function fileName2Typeclass(filename) {
   const array = filename.split(regex).filter(Boolean);
 
   if (!array || array.length != 3) {
-    // todo: throw error 
+    // todo: throw error
     console.log('ERRORRROOROR', array);
     return;
   }
