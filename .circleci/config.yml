@@ -18,8 +18,6 @@ jobs:
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
     - run: brew update
-    - run: brew uninstall python
-    - run: brew install python
     - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre poco
     - run: brew install openssl
     - run: brew install asio console_bridge
