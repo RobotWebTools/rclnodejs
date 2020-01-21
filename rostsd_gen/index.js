@@ -56,7 +56,8 @@ function getPkgInfos(generatedRoot) {
 
     const pkgInfo = {
       name: pkg,
-      messages: []
+      messages: [],
+      services: []
     };
 
     const pkgPath = path.join(rootDir, pkg);
@@ -67,6 +68,7 @@ function getPkgInfos(generatedRoot) {
 
       if (typeClass.type === 'srv') { // skip __srv__<action>
         if (!typeClass.name.endsWith('Request') && !typeClass.name.endsWith('Response')) {
+          pkgInfo.services.push(typeClass);
           continue;
         }
       }
@@ -177,7 +179,25 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
       fs.writeSync(fd, ' |\n');
     }
   }
-  fs.writeSync(fd, ';\n');
+  fs.writeSync(fd, ';\n\n');
+
+  // write service type class string
+  fs.writeSync(fd, '  type ServiceTypeClassStr = \n');
+  for (let i = 0; i < pkgInfos.length; i++) {
+    const pkg = pkgInfos[i];
+    for (let j = 0; j < pkg.services.length; j++) {
+      const srv = pkg.services[j];
+      const srvTypeClassStr = `${srv.package}/${srv.type}/${srv.name}`;
+      fs.writeSync(fd, `    '${srvTypeClassStr}'`);
+
+      if (i !== pkgInfos.length - 1 || j !== pkg.services.length - 1) {
+        fs.writeSync(fd, ' |\n');
+      }
+    }
+  }
+  fs.writeSync(fd, ';\n\n');
+
+  fs.writeSync(fd, '  type TypeClassStr = MessageTypeClassStr | ServiceTypeClassStr;\n');
 
   // close module declare
   fs.writeSync(fd, '}\n');
