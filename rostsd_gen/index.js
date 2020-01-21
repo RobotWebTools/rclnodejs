@@ -258,7 +258,7 @@ function primitiveType2JSName(type) {
   switch (type) {
   case 'char':
   case 'byte':
-  case 'uin8':
+  case 'uint8':
   case 'int8':
   case 'int16':
   case 'uint16':
