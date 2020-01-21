@@ -182,20 +182,25 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(fd, ';\n\n');
 
   // write service type class string
-  fs.writeSync(fd, '  type ServiceTypeClassStr = \n');
-  for (let i = 0; i < pkgInfos.length; i++) {
-    const pkg = pkgInfos[i];
-    for (let j = 0; j < pkg.services.length; j++) {
-      const srv = pkg.services[j];
+  const services = [];
+  for (const pkg of pkgInfos) {
+    services.push(...pkg.services);
+  }
+  if (!services.length) {
+    fs.writeSync(fd, '  type ServiceTypeClassStr = never;\n\n');
+  } else {
+    fs.writeSync(fd, '  type ServiceTypeClassStr = \n');
+    for (let i = 0; i < services.length; i++) {
+      const srv = services[i];
       const srvTypeClassStr = `${srv.package}/${srv.type}/${srv.name}`;
       fs.writeSync(fd, `    '${srvTypeClassStr}'`);
 
-      if (i !== pkgInfos.length - 1 || j !== pkg.services.length - 1) {
+      if (i !== services.length - 1) {
         fs.writeSync(fd, ' |\n');
       }
     }
+    fs.writeSync(fd, ';\n\n');
   }
-  fs.writeSync(fd, ';\n\n');
 
   fs.writeSync(fd, '  type TypeClassStr = MessageTypeClassStr | ServiceTypeClassStr;\n');
 
