@@ -236,17 +236,15 @@ function saveMsgInfoAsTSD(msgInfo, fd) {
   fs.writeSync(fd, '      };\n');
 
   // write wrapper interfaces
-  if (msgInfo.def.constants.length) {
-    fs.writeSync(fd, `      export interface ${msgInfo.typeClass.name}Wrapper {\n`);
-    for (const constant of msgInfo.def.constants) {
-      const constantType = primitiveType2JSName(constant.type);
-      const tmpl = `        readonly ${constant.name}: ${constantType};\n`;
-      fs.writeSync(fd, tmpl);
-    }
-    const ctorTmpl = `        new(other?: ${msgInfo.typeClass.name}): ${msgInfo.typeClass.name}\n`;
-    fs.writeSync(fd, ctorTmpl);
-    fs.writeSync(fd, '      }\n');
+  fs.writeSync(fd, `      export interface ${msgInfo.typeClass.name}Wrapper {\n`);
+  for (const constant of msgInfo.def.constants) {
+    const constantType = primitiveType2JSName(constant.type);
+    const tmpl = `        readonly ${constant.name}: ${constantType};\n`;
+    fs.writeSync(fd, tmpl);
   }
+  const ctorTmpl = `        new(other?: ${msgInfo.typeClass.name}): ${msgInfo.typeClass.name}\n`;
+  fs.writeSync(fd, ctorTmpl);
+  fs.writeSync(fd, '      }\n');
 }
 
 
