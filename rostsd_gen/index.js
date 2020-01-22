@@ -113,6 +113,8 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
 `;
     fs.writeSync(fd, pkgNamespaceTemplate);
 
+    saveMsgConstantsAsTSD(pkgInfo, fd);
+
     let curNS = null;
     for (const msgInfo of pkgInfo.messages) {
 
@@ -207,6 +209,35 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   // close module declare
   fs.writeSync(fd, '}\n');
   fs.closeSync(fd);
+}
+
+
+function saveMsgConstantsAsTSD(pkgInfo, fd) {
+  fs.writeSync(fd, '    namespace constants {\n');
+  for (const msgInfo of pkgInfo.messages) {
+    if (!msgInfo.def.constants.length) {
+      continue;
+    }
+    fs.writeSync(fd, `      export const enum ${msgInfo.typeClass.name} {\n`);
+    for (const constant of msgInfo.def.constants) {
+      const constantType = primitiveType2JSName(constant.type);
+      let value = undefined;
+      switch (constantType) {
+      case 'string':
+        value = `'${constant.value}'`;
+        break;
+      case 'boolean':
+        // true and false are not allowed in const enums for some reason
+        value = constant.value ? 1 : 0;
+        break;
+      default:
+        value = constant.value;
+      }
+      fs.writeSync(fd, `        ${constant.name} = ${value},\n`);
+    }
+    fs.writeSync(fd, '      }\n');
+  }
+  fs.writeSync(fd, '    }\n');
 }
 
 
