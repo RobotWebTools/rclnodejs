@@ -53,7 +53,7 @@ declare module 'rclnodejs' {
 	 * @param  name - The name of interface to be required.
 	 * @returns The object of the required package/interface.
 	 */
-	function require(name: TypeClassStr): object;
+	function require(name: TypeClassName): object;
 
 	/**
 	 * Generate JavaScript structs files from the IDL of

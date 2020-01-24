@@ -167,12 +167,12 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   }
 
   // write message type class string
-  // e.g. type MessageTypeClassStr =
+  // e.g. type MessageTypeClassName =
   //             'string' |
   //             'std_msgs/msg/Bool' |
   //             'std_msgs/msg/Byte' |
   //             ...
-  fs.writeSync(fd, '  type MessageTypeClassStr = \n');
+  fs.writeSync(fd, '  type MessageTypeClassName = \n');
   for (let i=0; i < fullMessageNameStrings.length; i++) {
     fs.writeSync(fd, `    '${fullMessageNameStrings[i]}'`);
     if (i != fullMessageNames.length-1) {
@@ -187,9 +187,9 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
     services.push(...pkg.services);
   }
   if (!services.length) {
-    fs.writeSync(fd, '  type ServiceTypeClassStr = never;\n\n');
+    fs.writeSync(fd, '  type ServiceTypeClassName = never;\n\n');
   } else {
-    fs.writeSync(fd, '  type ServiceTypeClassStr = \n');
+    fs.writeSync(fd, '  type ServiceTypeClassName = \n');
     for (let i = 0; i < services.length; i++) {
       const srv = services[i];
       const srvTypeClassStr = `${srv.package}/${srv.type}/${srv.name}`;
@@ -202,7 +202,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
     fs.writeSync(fd, ';\n\n');
   }
 
-  fs.writeSync(fd, '  type TypeClassStr = MessageTypeClassStr | ServiceTypeClassStr;\n');
+  fs.writeSync(fd, '  type TypeClassName = MessageTypeClassName | ServiceTypeClassName;\n');
 
   // close module declare
   fs.writeSync(fd, '}\n');

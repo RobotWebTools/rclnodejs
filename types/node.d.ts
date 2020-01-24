@@ -7,7 +7,7 @@ declare module 'rclnodejs' {
 	 */
   type TypeClass =
     (() => any) |
-    TypeClassStr |   // a string representing the message class, e.g. 'std_msgs/msg/String',
+    TypeClassName |   // a string representing the message class, e.g. 'std_msgs/msg/String',
     {          // object representing a message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}
       package: string;
       type: string;
