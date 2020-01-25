@@ -1221,6 +1221,47 @@ NAN_METHOD(GetServiceNamesAndTypes) {
   info.GetReturnValue().Set(result_list);
 }
 
+NAN_METHOD(GetNodeNames) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  rcutils_string_array_t node_names =
+    rcutils_get_zero_initialized_string_array();
+  rcutils_string_array_t node_namespaces =
+    rcutils_get_zero_initialized_string_array();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_get_node_names(
+                               node, allocator, &node_names, &node_namespaces),
+                           "Failed to get_node_names.");
+
+  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(node_names.size);
+
+  for (int i = 0; i < node_names.size; ++i) {
+    auto item = v8::Object::New(v8::Isolate::GetCurrent());
+
+    item->Set(Nan::New("name").ToLocalChecked(),
+              Nan::New(node_names.data[i]).ToLocalChecked());
+    item->Set(Nan::New("namespace").ToLocalChecked(),
+              Nan::New(node_namespaces.data[i]).ToLocalChecked());
+
+    Nan::Set(result_list, i, item);
+  }
+
+  rcutils_ret_t fini_names_ret = rcutils_string_array_fini(&node_names);
+  rcutils_ret_t fini_namespaces_ret =
+    rcutils_string_array_fini(&node_namespaces);
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           fini_names_ret,
+                           "Failed to destroy node_names");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           fini_namespaces_ret,
+                           "Failed to destroy node_namespaces");
+
+  info.GetReturnValue().Set(result_list);
+}
+
 NAN_METHOD(ServiceServerIsAvailable) {
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
@@ -1300,6 +1341,7 @@ BindingMethod binding_methods[] = {
     {"getServiceNamesAndTypesByNode", GetServiceNamesAndTypesByNode},
     {"getTopicNamesAndTypes", GetTopicNamesAndTypes},
     {"getServiceNamesAndTypes", GetServiceNamesAndTypes},
+    {"getNodeNames", GetNodeNames},
     {"serviceServerIsAvailable", ServiceServerIsAvailable},
     {"", nullptr}};
 
