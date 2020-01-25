@@ -121,6 +121,23 @@ declare module 'rclnodejs' {
   type NamesAndTypesQueryResult = {
     name: string;
     types: Array<string>;
+	}
+	
+	/**
+	 * Result of Node.getNodeNames() query
+	 *
+	 * @example
+	 * ```
+	 * [ 
+	 *   { name: 'gazebo',                namespace: '/' },
+	 *   { name: 'robot_state_publisher', namespace: '/' },
+	 *   { name: 'cam2image',             namespace: '/demo' }
+	 * ]
+	 * ```
+	 */
+  type NodeNamesQueryResult = {
+    name: string;
+    namespace: string;
   }
 
 
@@ -308,7 +325,19 @@ declare module 'rclnodejs' {
 		 *        ]
 		 */
     getServiceNamesAndTypes(): Array<NamesAndTypesQueryResult>
-
+		
+    /**
+		 * Get the list of nodes discovered by the provided node.
+		 * 
+		 * @returns An array of the names and namespaces.
+		 *        [ 
+		 *          { name: 'gazebo',                namespace: '/' },
+		 *          { name: 'robot_state_publisher', namespace: '/' },
+		 *          { name: 'cam2image',             namespace: '/demo' }
+		 *        ]
+		 */
+    getNodeNames(): Array<NodeNamesQueryResult>;
+		
   }
 
 

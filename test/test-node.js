@@ -304,6 +304,17 @@ describe('rcl node methods testing', function() {
       });
     });
   });
+
+  it('node.getNodeNames', function() {
+    var nodeNames = node.getNodeNames();
+
+    var currentNode = nodeNames.find(function(nodeName) {
+      return nodeName.name === 'my_node';
+    });
+
+    assert.ok(currentNode);
+    assert.strictEqual(currentNode.namespace, '/my_ns');
+  });
 });
 
 describe('topic & serviceName getter/setter', function() {
