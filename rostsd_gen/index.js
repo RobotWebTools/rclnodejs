@@ -206,6 +206,9 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
 
   // close module declare
   fs.writeSync(fd, '}\n');
+
+  saveMsgWrappersAsTSD(pkgInfos, fd);
+
   fs.closeSync(fd);
 }
 
@@ -235,6 +238,35 @@ function saveMsgConstantsAsTSD(msgInfo, fd) {
 }
 
 
+/**
+ * Writes the message fields as typescript definitions.
+ *
+ * @param {*} msgInfo ros message info
+ * @param {*} fd file descriptor
+ * @param {string} indent The amount of indent, in spaces
+ * @param {string} lineEnd The character to put at the end of each line, usually ','
+ * or ';'
+ * @param {string} typePrefix The prefix to put before the type name for
+ * non-primitive types
+ * @returns {undefined}
+ */
+function saveMsgFieldsAsTSD(msgInfo, fd, indent=0, lineEnd=',', typePrefix='') {
+  const indentStr = ' '.repeat(indent);
+  for (let i = 0; i < msgInfo.def.fields.length; i++) {
+    const field = msgInfo.def.fields[i];
+    const fieldType = fieldType2JSName(field);
+    const tp = field.type.isPrimitiveType ? '' : typePrefix;
+    const tmpl = `${indentStr}${field.name}: ${tp}${fieldType}`;
+    fs.writeSync(fd, tmpl);
+    if (field.type.isArray) {
+      fs.writeSync(fd, '[]');
+    }
+    fs.writeSync(fd, lineEnd);
+    fs.writeSync(fd, '\n');
+  }
+}
+
+
 function saveMsgInfoAsTSD(msgInfo, fd) {
   saveMsgConstantsAsTSD(msgInfo, fd);
 
@@ -245,33 +277,46 @@ function saveMsgInfoAsTSD(msgInfo, fd) {
   fs.writeSync(fd, typeTemplate);
 
   // write field definitions
-  for (let i = 0; i < msgInfo.def.fields.length; i++) {
-    const field = msgInfo.def.fields[i];
-    const fieldType = fieldType2JSName(field);
-    const tmpl = `        ${field.name}: ${fieldType}`;
-    fs.writeSync(fd, tmpl);
-    if (field.type.isArray) {
-      fs.writeSync(fd, '[]');
-    }
-    if (i != msgInfo.def.fields.length - 1) {
-      fs.writeSync(fd, ',');
-    }
-    fs.writeSync(fd, '\n');
-  }
+  saveMsgFieldsAsTSD(msgInfo, fd, 8);
 
   // end of def
   fs.writeSync(fd, '      };\n');
+}
 
-  // write wrapper interfaces
-  fs.writeSync(fd, `      export interface ${msgInfo.typeClass.name}Wrapper {\n`);
-  for (const constant of msgInfo.def.constants) {
-    const constantType = primitiveType2JSName(constant.type);
-    const tmpl = `        readonly ${constant.name}: ${constantType};\n`;
-    fs.writeSync(fd, tmpl);
+
+function saveMsgWrappersAsTSD(pkgs, fd) {
+  for (const pkgInfo of pkgs) {
+    for (const msgInfo of pkgInfo.messages) {
+      const typeClass = msgInfo.typeClass;
+      const mangledName = `${typeClass.package}__${typeClass.type}__${typeClass.name}`;
+      const wrapperModule = `rclnodejs/generated/${pkgInfo.name}/${mangledName}`;
+      fs.writeSync(fd, `declare module '${wrapperModule}' {\n`);
+      fs.writeSync(fd, "  import * as rclnodejs from 'rclnodejs';\n");
+      fs.writeSync(fd, `  class ${typeClass.name}Wrapper {\n`);
+
+      // constants
+      for (const constant of msgInfo.def.constants) {
+        const constantType = primitiveType2JSName(constant.type);
+        const tmpl = `    static readonly ${constant.name}: ${constantType};\n`;
+        fs.writeSync(fd, tmpl);
+      }
+
+      // fields
+      saveMsgFieldsAsTSD(msgInfo, fd, 4, ';', 'rclnodejs.');
+
+      // constructor
+      const typedef = `rclnodejs.${typeClass.package}.${typeClass.type}.${typeClass.name}`;
+      const ctorTmpl = `    constructor(other?: ${typedef});\n`;
+      fs.writeSync(fd, ctorTmpl);
+      fs.writeSync(fd, '  }\n'); // close interface
+
+      // allows module to be import with `import * as Foo from 'foo'`
+      fs.writeSync(fd, `  namespace ${typeClass.name}Wrapper { }\n`);
+
+      fs.writeSync(fd, `  export = ${typeClass.name}Wrapper;\n`);
+      fs.writeSync(fd, '}\n'); // close module
+    }
   }
-  const ctorTmpl = `        new(other?: ${msgInfo.typeClass.name}): ${msgInfo.typeClass.name}\n`;
-  fs.writeSync(fd, ctorTmpl);
-  fs.writeSync(fd, '      }\n');
 }
 
 
