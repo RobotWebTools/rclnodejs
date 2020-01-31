@@ -19,6 +19,10 @@
 #include "shadow_node.hpp"
 #include "spdlog/spdlog.h"
 
+#ifdef SPDLOG_DEBUG_ON
+#include "spdlog/sinks/stdout_color_sinks.h"
+#endif
+
 void InitModule(v8::Local<v8::Object> exports) {
   for (uint32_t i = 0;
        i < rclnodejs::GetBindingMethodsCount(rclnodejs::binding_methods); i++) {
