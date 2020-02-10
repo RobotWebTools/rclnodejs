@@ -315,6 +315,26 @@ describe('rcl node methods testing', function() {
     assert.ok(currentNode);
     assert.strictEqual(currentNode.namespace, '/my_ns');
   });
+
+  it('node.countPublishers', function() {
+    assert.strictEqual(node.countPublishers('chatter'), 0);
+
+    node.createPublisher(RclString, 'chatter');
+    assert.strictEqual(node.countPublishers('chatter'), 1);
+
+    node.createPublisher(RclString, 'chatter');
+    assert.strictEqual(node.countPublishers('chatter'), 2);
+  });
+
+  it('node.countSubscribers', function() {
+    assert.strictEqual(node.countSubscribers('chatter'), 0);
+
+    node.createSubscription(RclString, 'chatter', () => {});
+    assert.strictEqual(node.countSubscribers('chatter'), 1);
+
+    node.createSubscription(RclString, 'chatter', () => {});
+    assert.strictEqual(node.countSubscribers('chatter'), 2);
+  });
 });
 
 describe('topic & serviceName getter/setter', function() {

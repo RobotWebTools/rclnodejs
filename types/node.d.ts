@@ -337,7 +337,20 @@ declare module 'rclnodejs' {
 		 *        ]
 		 */
     getNodeNames(): Array<NodeNamesQueryResult>;
-		
+    
+    /**
+     * Return the number of publishers on a given topic.
+     * @param topic - The name of the topic.
+     * @returns Number of publishers on the given topic.
+     */
+    countPublishers(topic: string): number;
+
+    /**
+     * Return the number of subscribers on a given topic.
+     * @param topic - The name of the topic.
+     * @returns Number of subscribers on the given topic.
+     */
+    countSubscribers(topic: string): number;
   }
 
 
