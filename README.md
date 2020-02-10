@@ -222,6 +222,7 @@ Special thanks to the people who contribute.
 * [Teo Koon Peng](https://github.com/koonpeng)
 * [Alex Mikhalev](https://github.com/amikhalev)
 * [Wayne Parrott](https://github.com/wayneparrott)
+* [Matt Richard](https://github.com/mattrichard)
 
 ## License
 
