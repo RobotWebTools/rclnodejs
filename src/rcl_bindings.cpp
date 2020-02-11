@@ -1262,6 +1262,38 @@ NAN_METHOD(GetNodeNames) {
   info.GetReturnValue().Set(result_list);
 }
 
+NAN_METHOD(CountPublishers) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string topic_name = *Nan::Utf8String(info[1]->ToString());
+
+  size_t count = 0;
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_count_publishers(
+                               node, topic_name.c_str(), &count),
+                           "Failed to count publishers.");
+
+  v8::Local<v8::Integer> result
+    = Nan::New<v8::Integer>(static_cast<int32_t>(count));
+  info.GetReturnValue().Set(result);
+}
+
+NAN_METHOD(CountSubscribers) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string topic_name = *Nan::Utf8String(info[1]->ToString());
+
+  size_t count = 0;
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_count_subscribers(
+                               node, topic_name.c_str(), &count),
+                           "Failed to count subscribers.");
+
+  v8::Local<v8::Integer> result
+    = Nan::New<v8::Integer>(static_cast<int32_t>(count));
+  info.GetReturnValue().Set(result);
+}
+
 NAN_METHOD(ServiceServerIsAvailable) {
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
@@ -1342,6 +1374,8 @@ BindingMethod binding_methods[] = {
     {"getTopicNamesAndTypes", GetTopicNamesAndTypes},
     {"getServiceNamesAndTypes", GetServiceNamesAndTypes},
     {"getNodeNames", GetNodeNames},
+    {"countPublishers", CountPublishers},
+    {"countSubscribers", CountSubscribers},
     {"serviceServerIsAvailable", ServiceServerIsAvailable},
     {"", nullptr}};
 

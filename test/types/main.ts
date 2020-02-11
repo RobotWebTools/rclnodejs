@@ -58,6 +58,12 @@ node.getTopicNamesAndTypes();
 // $ExpectType NodeNamesQueryResult[]
 node.getNodeNames();
 
+// $ExpectType number
+node.countPublishers(TOPIC);
+
+// $ExpectType number
+node.countSubscribers(TOPIC);
+
 
 // ---- Publisher ----
 // $ExpectType Publisher
