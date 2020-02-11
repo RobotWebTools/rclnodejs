@@ -1,4 +1,3 @@
-
 // eslint-disable-next-line spaced-comment
 /// <reference path="base.d.ts" />
 
@@ -53,7 +52,8 @@ declare module 'rclnodejs' {
 	 * @param  name - The name of interface to be required.
 	 * @returns The object of the required package/interface.
 	 */
-	function require(name: TypeClassName): object;
+	function require<T extends MessageTypeClassName>(name: T): MessageWrapperType<T>;
+	function require(name: string): object;
 
 	/**
 	 * Generate JavaScript structs files from the IDL of
