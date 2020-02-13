@@ -16,7 +16,6 @@
 
 #include <vector>
 
-#include "rcl_handle.hpp"
 #include "spdlog/spdlog.h"
 
 namespace rclnodejs {
@@ -47,12 +46,16 @@ void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
         Nan::Get(node, Nan::New("_clients").ToLocalChecked());
     Nan::MaybeLocal<v8::Value> services =
         Nan::Get(node, Nan::New("_services").ToLocalChecked());
+    Nan::MaybeLocal<v8::Value> guard_conditions =
+        Nan::Get(node, Nan::New("_guards").ToLocalChecked());
 
     CollectHandlesByType(timers.ToLocalChecked()->ToObject(), &timers_);
     CollectHandlesByType(subscriptions.ToLocalChecked()->ToObject(),
                          &subscriptions_);
     CollectHandlesByType(clients.ToLocalChecked()->ToObject(), &clients_);
     CollectHandlesByType(services.ToLocalChecked()->ToObject(), &services_);
+    CollectHandlesByType(guard_conditions.ToLocalChecked()->ToObject(),
+                         &guard_conditions_);
   }
 
   is_synchronizing_.store(false);
@@ -60,30 +63,83 @@ void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
 
   SPDLOG_DEBUG(
       spdlog::get("rclnodejs"),
-      "Add {0:d} timers, {1:d} subscriptions, {2:d} clients, {3:d} services.",
-      timers_.size(), subscriptions_.size(), clients_.size(), services_.size());
+      "Add {0:d} timers, {1:d} subscriptions, {2:d} clients, " +
+          "{3:d} services, {4:d} guards.",
+      timers_.size(),
+      subscriptions_.size(),
+      clients_.size(),
+      services_.size(),
+      guard_conditions_.size());
 }
 
 bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
   for (auto& timer : timers_) {
-    if (rcl_wait_set_add_timer(wait_set, timer, nullptr) != RCL_RET_OK)
+    rcl_timer_t* rcl_timer = reinterpret_cast<rcl_timer_t*>(timer->ptr());
+    if (rcl_wait_set_add_timer(wait_set, rcl_timer, nullptr) != RCL_RET_OK)
       return false;
   }
   for (auto& subscription : subscriptions_) {
-    if (rcl_wait_set_add_subscription(wait_set, subscription, nullptr) !=
+    rcl_subscription_t* rcl_subscription  =
+        reinterpret_cast<rcl_subscription_t*>(subscription->ptr());
+    if (rcl_wait_set_add_subscription(wait_set, rcl_subscription, nullptr) !=
         RCL_RET_OK)
       return false;
   }
   for (auto& client : clients_) {
-    if (rcl_wait_set_add_client(wait_set, client, nullptr) != RCL_RET_OK)
+    rcl_client_t* rcl_client = reinterpret_cast<rcl_client_t*>(client->ptr());
+    if (rcl_wait_set_add_client(wait_set, rcl_client, nullptr) != RCL_RET_OK)
       return false;
   }
   for (auto& service : services_) {
-    if (rcl_wait_set_add_service(wait_set, service, nullptr) != RCL_RET_OK)
+    rcl_service_t* rcl_service =
+        reinterpret_cast<rcl_service_t*>(service->ptr());
+    if (rcl_wait_set_add_service(wait_set, rcl_service, nullptr) != RCL_RET_OK)
+      return false;
+  }
+  for (auto& guard_condition : guard_conditions_) {
+    rcl_guard_condition_t* rcl_guard_condition =
+        reinterpret_cast<rcl_guard_condition_t*>(guard_condition->ptr());
+    if (rcl_wait_set_add_guard_condition(wait_set, rcl_guard_condition, nullptr)
+        !=  RCL_RET_OK)
       return false;
   }
 
   return true;
+}
+
+#define FILTER_READY_ENTITIES(ENTITY_TYPE) \
+  size_t idx; \
+  size_t idx_max; \
+  idx_max = wait_set->size_of_ ## ENTITY_TYPE ## s; \
+  const rcl_ ## ENTITY_TYPE ## _t ** struct_ptr = wait_set->ENTITY_TYPE ## s; \
+  for (idx = 0; idx < idx_max; idx ++) { \
+    if (struct_ptr[idx]) { \
+      for (auto& ENTITY_TYPE : ENTITY_TYPE ## s_) { \
+        if (struct_ptr[idx] == ENTITY_TYPE->ptr()) { \
+          filtered_handles_.push_back(ENTITY_TYPE); \
+        } \
+      } \
+    } \
+  }
+
+void HandleManager::FilterHandles(rcl_wait_set_t* wait_set) {
+  filtered_handles_.clear();
+
+  {
+    FILTER_READY_ENTITIES(subscription)
+  }
+  {
+    FILTER_READY_ENTITIES(client)
+  }
+  {
+    FILTER_READY_ENTITIES(service)
+  }
+  {
+    FILTER_READY_ENTITIES(timer)
+  }
+  {
+    FILTER_READY_ENTITIES(guard_condition)
+  }
 }
 
 void HandleManager::ClearHandles() {
@@ -94,10 +150,9 @@ void HandleManager::ClearHandles() {
   guard_conditions_.clear();
 }
 
-template <typename T>
 void HandleManager::CollectHandlesByType(
     const v8::Local<v8::Object>& typeObject,
-    std::vector<const T*>* vec) {
+    std::vector<rclnodejs::RclHandle*>* vec) {
   Nan::HandleScope scope;
 
   if (typeObject->IsArray()) {
@@ -112,7 +167,7 @@ void HandleManager::CollectHandlesByType(
       rclnodejs::RclHandle* rcl_handle =
           rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
               handle.ToLocalChecked()->ToObject());
-      vec->push_back(reinterpret_cast<T*>(rcl_handle->ptr()));
+      vec->push_back(rcl_handle);
     }
   }
 }

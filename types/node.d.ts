@@ -214,7 +214,15 @@ declare module 'rclnodejs' {
 		 * @returns An instance of Service.
 		 */
     createService(typeClass: TypeClass, serviceName: string,
-      options: Options, callback: ServiceRequestCallback): Service;
+			options: Options, callback: ServiceRequestCallback): Service;
+
+    /**
+		 * Create a guard condition.
+		 * 
+		 * @param callback - The callback to be called when the guard condition is triggered.
+		 * @return An instance of GuardCondition.
+		 */
+    createGuardCondition(callback: () => any): GuardCondition;
 
 
     /**
