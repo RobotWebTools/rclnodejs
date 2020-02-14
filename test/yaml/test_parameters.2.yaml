@@ -1,0 +1,15 @@
+/**:
+  ros__parameters:
+    int_param: 2
+    bool_param: True
+
+test_node:
+  ros__parameters:
+    int_param: 3
+
+another_node:
+  ros__parameters:
+    int_param: 4
+    double_param: 1.0
+    param_group:
+      bool_array_param: [true, false, false]

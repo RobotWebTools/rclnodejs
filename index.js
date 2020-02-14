@@ -21,6 +21,7 @@ const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
 const Node = require('./lib/node.js');
+const Parameters = require('./lib/parameter.js');
 const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
@@ -74,8 +75,6 @@ let rcl = {
   _initialized: false,
   _nodes: [],
 
-  /** {@link QoS} class */
-  QoS: QoS,
 
   /** {@link Logging} class */
   logging: logging,
@@ -83,41 +82,57 @@ let rcl = {
   /** {@link module:validator|validator} object */
   validator: validator,
 
+  ActionLib: ActionLib,
+
+  /** {@link Clock} class */
+  Clock: Clock,
+
+  /** {@link Context} class */
+  Context: Context,
+
+  /** {@link Duration} class */
+  Duration: Duration,
+
+  /** {@link Node} class */
+  Node: Node,
+
+  /** {@link Parameters}  */
+  Parameters: Parameters,
+
+  /** {@link QoS} class */
+  QoS: QoS,
+  
+  /** {@link ROSClock} class */
+  ROSClock: ROSClock,
+
   /** {@link Time} class */
   Time: Time,
 
   /** {@link TimeSource} class */
   TimeSource: TimeSource,
 
-  /** {@link Clock} class */
-  Clock: Clock,
-
-  /** {@link ROSClock} class */
-  ROSClock: ROSClock,
-
-  /** {@link Duration} class */
-  Duration: Duration,
-
-  ActionLib: ActionLib,
-
   /**
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
    * @param {string} namespace - The namespace used in ROS, default is an empty string.
    * @param {Context} context - The context, default is Context.defaultContext().
+   * @param {NodeOptions} options - The options to configure the new node behavior.
    * @return {Node} The instance of Node.
    */
-  createNode(nodeName, namespace = '', context = Context.defaultContext()) {
+  createNode(nodeName, namespace = '', context = Context.defaultContext(),
+    options = Node.NodeOptions.defaultOptions) {
+  
     if (typeof (nodeName) !== 'string' || typeof (namespace) !== 'string') {
       throw new TypeError('Invalid argument.');
     }
 
-    let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
-    let node =  new rclnodejs.ShadowNode();
-
-    node.init(nodeName, namespace);
-    debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
+    const handle = rclnodejs.createNode(nodeName, namespace, context.handle());
+    const node =  new rclnodejs.ShadowNode();
     node.handle = handle;
+    
+    node.init(nodeName, namespace, context, options);
+    debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
+    
     this._nodes.push(node);
     return node;
   },
@@ -125,9 +140,10 @@ let rcl = {
   /**
   * Init the module.
   * @param {Context} context - The context, default is Context.defaultContext().
+  * @param {String[]} argv - Process commandline arguments.
   * @return {Promise<undefined>} A Promise.
   */
-  init(context = Context.defaultContext()) {
+  init(context = Context.defaultContext(), argv = process.argv) {
     return new Promise((resolve, reject) => {
       let that = this;
       if (!this._initialized) {
@@ -141,7 +157,7 @@ let rcl = {
 
           generator.generateAll(forced).then(() => {
             this._context = context;
-            rclnodejs.init(context.handle());
+            rclnodejs.init(context.handle(), argv);
             ActionLib.config({
               log: that.logging.getLogger('actionlibjs'),
               time: require('./lib/actions/time_utils.js'),
@@ -299,6 +315,19 @@ let rcl = {
 
   ActionServerInterface: require('./lib/actions/action_server_interface.js'),
   ActionClientInterface: require('./lib/actions/action_client_interface.js'),
+
+
+  getParameterOverrides(context = Context.defaultContext()) {
+    return rclnodejs.getParameterOverrides(context.handle());
+  },
+
+  helloWorld() {
+    return rclnodejs.helloWorld();
+  },
+
+  stringArrayTest() {
+    return rclnodejs.stringArrayTest();
+  }
 };
 
 process.on('SIGINT', () => {

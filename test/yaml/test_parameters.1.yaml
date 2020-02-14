@@ -1,0 +1,5 @@
+test_node:
+  ros__parameters:
+    int_param: 1
+    param_group:
+      string_param: foo

@@ -13,17 +13,19 @@ declare module 'rclnodejs' {
 	 * @param nodeName - The name used to register in ROS.
 	 * @param namespace - The namespace used in ROS, default is an empty string.
 	 * @param context - The context, default is Context.defaultContext().
+   * @param options - The node options, default is NodeOptions.defaultOptions.
 	 * @returns The new Node instance.
 	 */
-	function createNode(nodeName: string, namespace?: string, context?: Context): Node;
+	function createNode(nodeName: string, namespace?: string, context?: Context, options?: NodeOptions): Node;
 
 	/**
 	 * Init the module.
 	 * 
 	 * @param context - The context, default is Context.defaultContext().
+   * @param argv - The commandline arguments, the default value is process.argv.
 	 * @returns A Promise.
 	 */
-	function init(context?: Context): Promise<void>;
+	function init(context?: Context, argv?: string[]): Promise<void>;
 
 	/**
 	 * Spin up the node event loop to check for incoming events.
