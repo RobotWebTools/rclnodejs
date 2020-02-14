@@ -109,7 +109,7 @@ NAN_METHOD(ShadowNode::SyncHandles) {
   }
 }
 
-void ShadowNode::Execute(const std::vector<rclnodejs::RclHandle*> &handles) {
+void ShadowNode::Execute(const std::vector<rclnodejs::RclHandle*>& handles) {
   Nan::HandleScope scope;
   Nan::AsyncResource res("shadow_node");
 

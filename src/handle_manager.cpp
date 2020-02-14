@@ -107,39 +107,29 @@ bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
   return true;
 }
 
-#define FILTER_READY_ENTITIES(ENTITY_TYPE) \
-  size_t idx; \
-  size_t idx_max; \
-  idx_max = wait_set->size_of_ ## ENTITY_TYPE ## s; \
-  const rcl_ ## ENTITY_TYPE ## _t ** struct_ptr = wait_set->ENTITY_TYPE ## s; \
-  for (idx = 0; idx < idx_max; idx ++) { \
-    if (struct_ptr[idx]) { \
-      for (auto& ENTITY_TYPE : ENTITY_TYPE ## s_) { \
-        if (struct_ptr[idx] == ENTITY_TYPE->ptr()) { \
-          filtered_handles_.push_back(ENTITY_TYPE); \
-        } \
-      } \
-    } \
-  }
+void HandleManager::CollectReadyHandles(rcl_wait_set_t* wait_set) {
+  ready_handles_.clear();
 
-void HandleManager::FilterHandles(rcl_wait_set_t* wait_set) {
-  filtered_handles_.clear();
-
-  {
-    FILTER_READY_ENTITIES(subscription)
-  }
-  {
-    FILTER_READY_ENTITIES(client)
-  }
-  {
-    FILTER_READY_ENTITIES(service)
-  }
-  {
-    FILTER_READY_ENTITIES(timer)
-  }
-  {
-    FILTER_READY_ENTITIES(guard_condition)
-  }
+  CollectReadyHandlesByType(
+    wait_set->subscriptions,
+    wait_set->size_of_subscriptions,
+    subscriptions_);
+  CollectReadyHandlesByType(
+    wait_set->clients,
+    wait_set->size_of_clients,
+    clients_);
+  CollectReadyHandlesByType(
+    wait_set->services,
+    wait_set->size_of_services,
+    services_);
+  CollectReadyHandlesByType(
+    wait_set->timers,
+    wait_set->size_of_timers,
+    timers_);
+  CollectReadyHandlesByType(
+    wait_set->guard_conditions,
+    wait_set->size_of_guard_conditions,
+    guard_conditions_);
 }
 
 void HandleManager::ClearHandles() {
@@ -168,6 +158,22 @@ void HandleManager::CollectHandlesByType(
           rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
               handle.ToLocalChecked()->ToObject());
       vec->push_back(rcl_handle);
+    }
+  }
+}
+
+template<typename T>
+void HandleManager::CollectReadyHandlesByType(
+    const T** struct_ptr,
+    size_t size,
+    const std::vector<rclnodejs::RclHandle*>& handles) {
+  for (size_t idx = 0; idx < size; ++idx) {
+    if (struct_ptr[idx]) {
+      for (auto& handle : handles) {
+        if (struct_ptr[idx] == handle->ptr()) {
+          ready_handles_.push_back(handle);
+        }
+      }
     }
   }
 }

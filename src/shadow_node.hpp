@@ -39,7 +39,7 @@ class ShadowNode : public Nan::ObjectWrap,
   HandleManager* handle_manager() { return handle_manager_.get(); }
 
   // Executor::Delegate overrides:
-  void Execute(const std::vector<rclnodejs::RclHandle*> &handles) override;
+  void Execute(const std::vector<rclnodejs::RclHandle*>& handles) override;
   void CatchException(std::exception_ptr e_ptr) override;
 
  private:

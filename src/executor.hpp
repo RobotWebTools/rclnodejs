@@ -34,7 +34,7 @@ class Executor {
   class Delegate {
    public:
     virtual void Execute(
-        const std::vector<rclnodejs::RclHandle *> &handles) = 0;
+        const std::vector<rclnodejs::RclHandle *>& handles) = 0;
     virtual void CatchException(std::exception_ptr e_ptr) = 0;
   };
 

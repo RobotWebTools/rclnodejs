@@ -89,7 +89,7 @@ void Executor::DoWork(uv_async_t* handle) {
       g_exception_ptr = nullptr;
     }
     executor->delegate_->Execute(
-        executor->handle_manager_->get_filtered_handles());
+        executor->handle_manager_->get_ready_handles());
   }
 }
 
@@ -149,7 +149,7 @@ void Executor::Run(void* arg) {
             executor->running_.store(false);
           }
 
-          handle_manager->FilterHandles(&wait_set);
+          handle_manager->CollectReadyHandles(&wait_set);
 
           if (!uv_is_closing(
                   reinterpret_cast<uv_handle_t*>(executor->async_))) {
