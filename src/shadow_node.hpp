@@ -34,6 +34,7 @@ class ShadowNode : public Nan::ObjectWrap,
   static void Init(v8::Local<v8::Object> exports);
   void StartRunning(rcl_context_t* context, int32_t timeout);
   void StopRunning();
+  void RunOnce(rcl_context_t* context, int32_t timeout);
 
   Nan::Persistent<v8::Object>* rcl_handle() { return rcl_handle_.get(); }
   HandleManager* handle_manager() { return handle_manager_.get(); }
@@ -51,6 +52,7 @@ class ShadowNode : public Nan::ObjectWrap,
   static NAN_METHOD(Stop);
   static NAN_METHOD(Start);
   static NAN_METHOD(SyncHandles);
+  static NAN_METHOD(SpinOnce);
   static NAN_GETTER(HandleGetter);
   static NAN_SETTER(HandleSetter);
 

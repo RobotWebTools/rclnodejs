@@ -191,6 +191,22 @@ let rcl = {
   },
 
   /**
+   * Execute one item of work or wait until a timeout expires.
+   * @param {Node} node - The node to be spun.
+   * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
+   * @return {undefined}
+   */
+  spinOnce(node, timeout = 10) {
+    if (!(node instanceof rclnodejs.ShadowNode)) {
+      throw new TypeError('Invalid argument.');
+    }
+    if (node.spinning) {
+      throw new Error('The node is already spinning.');
+    }
+    node.spinOnce(this._context.handle(), timeout);
+  },
+
+  /**
    * @param {Context} context - The context to be shutdown.
    * @return {undefined}
    */

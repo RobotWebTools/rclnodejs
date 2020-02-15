@@ -34,6 +34,14 @@ declare module 'rclnodejs' {
 	function spin(node: Node, timeout?: number): void;
 
 	/**
+	 * Execute one item of work or wait until a timeout expires.
+	 * 
+	 * @param node - The node to be spun.
+	 * @param timeout - ms to wait, block forever if negative, return immediately when 0, default is 10.
+	 */
+	function spinOnce(node: Node, timeout?: number): void;
+
+	/**
 	 * Stop all activity, destroy all nodes and node components.
 	 * 
 	 * @param context - The context, default is Context.defaultContext()
