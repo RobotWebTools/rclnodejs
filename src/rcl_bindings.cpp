@@ -104,6 +104,38 @@ NAN_METHOD(CreateNode) {
   info.GetReturnValue().Set(handle);
 }
 
+NAN_METHOD(CreateGuardCondition) {
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
+
+  rcl_guard_condition_t* gc = reinterpret_cast<rcl_guard_condition_t*>(
+      malloc(sizeof(rcl_guard_condition_t)));
+
+  *gc = rcl_get_zero_initialized_guard_condition();
+  rcl_guard_condition_options_t gc_options =
+      rcl_guard_condition_get_default_options();
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_guard_condition_init(gc, context, gc_options),
+                           rcl_get_error_string().str);
+
+  auto handle = RclHandle::NewInstance(gc, nullptr, [gc] {
+    return rcl_guard_condition_fini(gc);
+  });
+  info.GetReturnValue().Set(handle);
+}
+
+NAN_METHOD(TriggerGuardCondition) {
+  RclHandle* gc_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  rcl_guard_condition_t* gc =
+      reinterpret_cast<rcl_guard_condition_t*>(gc_handle->ptr());
+
+  rcl_ret_t ret = rcl_trigger_guard_condition(gc);
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_trigger_guard_condition(gc),
+                           rcl_get_error_string().str);
+}
+
 NAN_METHOD(CreateTimer) {
   int64_t period_ms = info[0]->IntegerValue();
   RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[1]->ToObject());
@@ -1321,6 +1353,8 @@ uint32_t GetBindingMethodsCount(BindingMethod* methods) {
 BindingMethod binding_methods[] = {
     {"init", Init},
     {"createNode", CreateNode},
+    {"createGuardCondition", CreateGuardCondition},
+    {"triggerGuardCondition", TriggerGuardCondition},
     {"createTimer", CreateTimer},
     {"isTimerReady", IsTimerReady},
     {"callTimer", CallTimer},

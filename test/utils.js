@@ -74,9 +74,14 @@ function getAvailablePath(amentPrefixPath, otherDirs) {
   return availablePath;
 }
 
+function delay(ms) {
+  return new Promise((resolve) => { setTimeout(resolve, ms); });
+}
+
 module.exports = {
   assertMember: assertMember,
   assertThrowsError: assertThrowsError,
   launchPythonProcess: launchPythonProcess,
-  getAvailablePath: getAvailablePath
+  getAvailablePath: getAvailablePath,
+  delay: delay
 };

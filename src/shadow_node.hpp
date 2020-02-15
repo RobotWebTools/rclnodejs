@@ -19,6 +19,7 @@
 
 #include <exception>
 #include <memory>
+#include <vector>
 
 #include "executor.hpp"
 
@@ -38,7 +39,7 @@ class ShadowNode : public Nan::ObjectWrap,
   HandleManager* handle_manager() { return handle_manager_.get(); }
 
   // Executor::Delegate overrides:
-  void Execute() override;
+  void Execute(const std::vector<rclnodejs::RclHandle*>& handles) override;
   void CatchException(std::exception_ptr e_ptr) override;
 
  private:

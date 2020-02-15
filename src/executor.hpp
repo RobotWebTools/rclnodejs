@@ -19,6 +19,9 @@
 
 #include <atomic>
 #include <exception>
+#include <vector>
+
+#include "rcl_handle.hpp"
 
 struct rcl_context_t;
 
@@ -30,7 +33,8 @@ class Executor {
  public:
   class Delegate {
    public:
-    virtual void Execute() = 0;
+    virtual void Execute(
+        const std::vector<rclnodejs::RclHandle *>& handles) = 0;
     virtual void CatchException(std::exception_ptr e_ptr) = 0;
   };
 

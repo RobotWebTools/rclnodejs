@@ -5,6 +5,7 @@
 /// <reference path="context.d.ts" />
 /// <reference path="duration.d.ts" />
 /// <reference path="entity.d.ts" />
+/// <reference path="guard_condition.d.ts" />
 /// <reference path="interfaces.d.ts" />
 /// <reference path="logging.d.ts" />
 /// <reference path="node.d.ts" />

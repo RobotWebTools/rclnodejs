@@ -88,7 +88,8 @@ void Executor::DoWork(uv_async_t* handle) {
       rcl_reset_error();
       g_exception_ptr = nullptr;
     }
-    executor->delegate_->Execute();
+    executor->delegate_->Execute(
+        executor->handle_manager_->get_ready_handles());
   }
 }
 
@@ -117,8 +118,8 @@ void Executor::Run(void* arg) {
           continue;
 
         if (rcl_wait_set_resize(&wait_set, handle_manager->subscription_count(),
-                                // TODO(minggang): support guard conditions
-                                1u, handle_manager->timer_count(),
+                                handle_manager->guard_condition_count() + 1u,
+                                handle_manager->timer_count(),
                                 handle_manager->client_count(),
                                 handle_manager->service_count(),
                                 // TODO(minggang): support events.
@@ -147,6 +148,9 @@ void Executor::Run(void* arg) {
               wait_set.guard_conditions[0]) {
             executor->running_.store(false);
           }
+
+          handle_manager->CollectReadyHandles(&wait_set);
+
           if (!uv_is_closing(
                   reinterpret_cast<uv_handle_t*>(executor->async_))) {
             uv_async_send(executor->async_);

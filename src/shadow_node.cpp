@@ -15,6 +15,7 @@
 #include "shadow_node.hpp"
 
 #include <memory>
+#include <vector>
 
 #include "executor.hpp"
 #include "handle_manager.hpp"
@@ -108,11 +109,18 @@ NAN_METHOD(ShadowNode::SyncHandles) {
   }
 }
 
-void ShadowNode::Execute() {
+void ShadowNode::Execute(const std::vector<rclnodejs::RclHandle*>& handles) {
   Nan::HandleScope scope;
-  v8::Local<v8::Value> argv[1];
   Nan::AsyncResource res("shadow_node");
-  res.runInAsyncScope(Nan::New(this->persistent()), "execute", 0, argv);
+
+  v8::Local<v8::Array> results = Nan::New<v8::Array>(handles.size());
+  for (size_t i = 0; i < handles.size(); ++i) {
+    Nan::Set(results, i, handles[i]->handle());
+  }
+
+  v8::Local<v8::Value> argv[] = { results };
+
+  res.runInAsyncScope(Nan::New(this->persistent()), "execute", 1, argv);
 }
 
 void ShadowNode::CatchException(std::exception_ptr e_ptr) {
