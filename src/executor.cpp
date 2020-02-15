@@ -118,7 +118,7 @@ void Executor::Run(void* arg) {
           continue;
 
         if (rcl_wait_set_resize(&wait_set, handle_manager->subscription_count(),
-                                handle_manager->guard_contition_count() + 1u,
+                                handle_manager->guard_condition_count() + 1u,
                                 handle_manager->timer_count(),
                                 handle_manager->client_count(),
                                 handle_manager->service_count(),

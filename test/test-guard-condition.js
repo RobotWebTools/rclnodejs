@@ -1,5 +1,3 @@
-// Copyright (c) 2017 Intel Corporation. All rights reserved.
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,6 +13,7 @@
 'use strict';
 
 const assert = require('assert');
+const sinon = require('sinon');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 
@@ -41,54 +40,40 @@ describe('rclnodejs guard condition test suite', function() {
   });
 
   it('Test trigger', async function() {
-    let called = false;
+    let callback = sinon.spy();
 
-    function func() {
-      called = true;
-    }
-
-    const gc = node.createGuardCondition(func);
+    const gc = node.createGuardCondition(callback);
 
     await utils.delay(timeout);
-    assert.strictEqual(called, false);
+    assert(callback.notCalled);
 
     gc.trigger();
     await utils.delay(timeout);
-    assert.strictEqual(called, true);
+    assert(callback.calledOnce);
 
     node.destroyGuardCondition(gc);
   });
 
   it('Test double trigger', async function() {
-    let called1 = false;
-    let called2 = false;
+    let callback1 = sinon.spy();
+    let callback2 = sinon.spy();
 
-    function func1() {
-      called1 = true;
-    }
-
-    function func2() {
-      called2 = true;
-    }
-
-    const gc1 = node.createGuardCondition(func1);
-    const gc2 = node.createGuardCondition(func2);
+    const gc1 = node.createGuardCondition(callback1);
+    const gc2 = node.createGuardCondition(callback2);
 
     await utils.delay(timeout);
-    assert.strictEqual(called1, false);
-    assert.strictEqual(called2, false);
+    assert(callback1.notCalled);
+    assert(callback2.notCalled);
 
     gc1.trigger();
     gc2.trigger();
     await utils.delay(timeout);
-    assert.strictEqual(called1, true);
-    assert.strictEqual(called2, true);
+    assert(callback1.calledOnce);
+    assert(callback2.calledOnce);
 
-    called1 = false;
-    called2 = false;
     await utils.delay(timeout);
-    assert.strictEqual(called1, false);
-    assert.strictEqual(called2, false);
+    assert(callback1.calledOnce);
+    assert(callback2.calledOnce);
 
     node.destroyGuardCondition(gc1);
     node.destroyGuardCondition(gc2);

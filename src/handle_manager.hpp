@@ -49,7 +49,7 @@ class HandleManager {
   uint32_t service_count() const { return services_.size(); }
   uint32_t client_count() const { return clients_.size(); }
   uint32_t timer_count() const { return  timers_.size(); }
-  uint32_t guard_contition_count() const { return guard_conditions_.size(); }
+  uint32_t guard_condition_count() const { return guard_conditions_.size(); }
   std::vector<rclnodejs::RclHandle*>
       get_ready_handles() const { return ready_handles_; }
   uv_mutex_t* mutex() { return &mutex_; }
