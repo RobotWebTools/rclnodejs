@@ -44,11 +44,11 @@ describe('rclnodejs guard condition test suite', function() {
 
     const gc = node.createGuardCondition(callback);
 
-    await utils.delay(timeout);
+    await utils.delay(timeout + 1);
     assert(callback.notCalled);
 
     gc.trigger();
-    await utils.delay(timeout);
+    await utils.delay(timeout + 1);
     assert(callback.calledOnce);
 
     node.destroyGuardCondition(gc);
@@ -61,17 +61,17 @@ describe('rclnodejs guard condition test suite', function() {
     const gc1 = node.createGuardCondition(callback1);
     const gc2 = node.createGuardCondition(callback2);
 
-    await utils.delay(timeout);
+    await utils.delay(timeout + 1);
     assert(callback1.notCalled);
     assert(callback2.notCalled);
 
     gc1.trigger();
     gc2.trigger();
-    await utils.delay(timeout);
+    await utils.delay(timeout + 1);
     assert(callback1.calledOnce);
     assert(callback2.calledOnce);
 
-    await utils.delay(timeout);
+    await utils.delay(timeout + 1);
     assert(callback1.calledOnce);
     assert(callback2.calledOnce);
 
