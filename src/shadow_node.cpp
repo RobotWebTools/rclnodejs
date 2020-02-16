@@ -68,8 +68,9 @@ NAN_GETTER(ShadowNode::HandleGetter) {
 
 NAN_SETTER(ShadowNode::HandleSetter) {
   auto* me = ShadowNode::Unwrap<ShadowNode>(info.Holder());
-  if (value->ToObject()->InternalFieldCount() > 0)
-    me->rcl_handle()->Reset(value->ToObject());
+  auto obj = Nan::To<v8::Object>(value).ToLocalChecked();
+  if (obj->InternalFieldCount() > 0)
+    me->rcl_handle()->Reset(obj);
 }
 
 void ShadowNode::StopRunning() {
@@ -84,7 +85,8 @@ void ShadowNode::StartRunning(rcl_context_t* context, int32_t timeout) {
 
 NAN_METHOD(ShadowNode::Start) {
   auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   auto timeout = Nan::To<int32_t>(info[1]).FromJust();
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());

@@ -65,7 +65,8 @@ NAN_METHOD(Init) {
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
   rcl_ret_t ret = rcl_init_options_init(&init_options, allocator);
 
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
@@ -83,9 +84,10 @@ NAN_METHOD(Init) {
 }
 
 NAN_METHOD(CreateNode) {
-  std::string node_name(*v8::String::Utf8Value(info[0]));
-  std::string name_space(*v8::String::Utf8Value(info[1]));
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[2]->ToObject());
+  std::string node_name(*Nan::Utf8String(info[0]));
+  std::string name_space(*Nan::Utf8String(info[1]));
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[2]).ToLocalChecked());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
@@ -105,7 +107,8 @@ NAN_METHOD(CreateNode) {
 }
 
 NAN_METHOD(CreateGuardCondition) {
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
@@ -127,7 +130,8 @@ NAN_METHOD(CreateGuardCondition) {
 }
 
 NAN_METHOD(TriggerGuardCondition) {
-  RclHandle* gc_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* gc_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_guard_condition_t* gc =
       reinterpret_cast<rcl_guard_condition_t*>(gc_handle->ptr());
 
@@ -137,8 +141,9 @@ NAN_METHOD(TriggerGuardCondition) {
 }
 
 NAN_METHOD(CreateTimer) {
-  int64_t period_ms = info[0]->IntegerValue();
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[1]->ToObject());
+  int64_t period_ms = Nan::To<int64_t>(info[0]).FromJust();
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[1]).ToLocalChecked());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   rcl_timer_t* timer =
@@ -166,7 +171,8 @@ NAN_METHOD(CreateTimer) {
 }
 
 NAN_METHOD(IsTimerReady) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
   bool is_ready = false;
 
@@ -177,7 +183,8 @@ NAN_METHOD(IsTimerReady) {
 }
 
 NAN_METHOD(CallTimer) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_call(timer),
@@ -185,7 +192,8 @@ NAN_METHOD(CallTimer) {
 }
 
 NAN_METHOD(CancelTimer) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_cancel(timer),
@@ -193,7 +201,8 @@ NAN_METHOD(CancelTimer) {
 }
 
 NAN_METHOD(IsTimerCanceled) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
   bool is_canceled = false;
 
@@ -205,7 +214,8 @@ NAN_METHOD(IsTimerCanceled) {
 }
 
 NAN_METHOD(ResetTimer) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_reset(timer),
@@ -213,7 +223,8 @@ NAN_METHOD(ResetTimer) {
 }
 
 NAN_METHOD(TimerGetTimeUntilNextCall) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
   int64_t remaining_time = 0;
 
@@ -227,7 +238,8 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
 }
 
 NAN_METHOD(TimerGetTimeSinceLastCall) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
   int64_t elapsed_time = 0;
 
@@ -241,8 +253,8 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
 }
 
 NAN_METHOD(CreateTimePoint) {
-  std::string str(*v8::String::Utf8Value(info[0]));
-  uint32_t clock_type = info[1]->Uint32Value();
+  std::string str(*Nan::Utf8String(info[0]));
+  uint32_t clock_type = Nan::To<uint32_t>(info[1]).FromJust();
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(malloc(sizeof(rcl_time_point_t)));
 
@@ -254,8 +266,8 @@ NAN_METHOD(CreateTimePoint) {
 }
 
 NAN_METHOD(GetNanoseconds) {
-  RclHandle* time_point_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* time_point_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(time_point_handle->ptr());
   info.GetReturnValue().Set(
@@ -264,7 +276,7 @@ NAN_METHOD(GetNanoseconds) {
 }
 
 NAN_METHOD(CreateDuration) {
-  std::string str(*v8::String::Utf8Value(info[0]));
+  std::string str(*Nan::Utf8String(info[0]));
   rcl_duration_t* duration =
       reinterpret_cast<rcl_duration_t*>(malloc(sizeof(rcl_duration_t)));
   duration->nanoseconds = std::stoll(str);
@@ -274,8 +286,8 @@ NAN_METHOD(CreateDuration) {
 }
 
 NAN_METHOD(GetDurationNanoseconds) {
-  RclHandle* duration_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* duration_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_duration_t* duration =
       reinterpret_cast<rcl_duration_t*>(duration_handle->ptr());
 
@@ -285,7 +297,8 @@ NAN_METHOD(GetDurationNanoseconds) {
 }
 
 NAN_METHOD(SetRosTimeOverrideIsEnabled) {
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
   bool enabled = Nan::To<bool>(info[1]).FromJust();
 
@@ -300,10 +313,11 @@ NAN_METHOD(SetRosTimeOverrideIsEnabled) {
 }
 
 NAN_METHOD(SetRosTimeOverride) {
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
-  RclHandle* time_point_handle =
-      RclHandle::Unwrap<RclHandle>(info[1]->ToObject());
+  RclHandle* time_point_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[1]).ToLocalChecked());
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(time_point_handle->ptr());
 
@@ -314,7 +328,8 @@ NAN_METHOD(SetRosTimeOverride) {
 }
 
 NAN_METHOD(GetRosTimeOverrideIsEnabled) {
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
 
   bool is_enabled;
@@ -361,7 +376,8 @@ static void ReturnJSTimeObj(
 
 NAN_METHOD(ClockGetNow) {
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
   rcl_time_point_t time_point;
   time_point.clock_type = clock->type;
 
@@ -429,11 +445,12 @@ NAN_METHOD(TimeDiff) {
 }
 
 NAN_METHOD(RclTake) {
-  RclHandle* subscription_handle =
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
-  void* msg_taken = node::Buffer::Data(info[1]->ToObject());
+  void* msg_taken = node::Buffer::Data(
+      Nan::To<v8::Object>(info[1]).ToLocalChecked());
   rcl_ret_t ret = rcl_take(subscription, msg_taken, nullptr, nullptr);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
@@ -451,7 +468,8 @@ NAN_METHOD(RclTake) {
 }
 
 NAN_METHOD(CreateSubscription) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string package_name(*Nan::Utf8String(info[1]->ToString()));
   std::string message_sub_folder(*Nan::Utf8String(info[2]->ToString()));
@@ -492,7 +510,8 @@ NAN_METHOD(CreateSubscription) {
 
 NAN_METHOD(CreatePublisher) {
   // Extract arguments
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string package_name(*Nan::Utf8String(info[1]->ToString()));
   std::string message_sub_folder(*Nan::Utf8String(info[2]->ToString()));
@@ -536,9 +555,11 @@ NAN_METHOD(CreatePublisher) {
 
 NAN_METHOD(Publish) {
   rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
 
-  void* buffer = node::Buffer::Data(info[1]->ToObject());
+  void* buffer = node::Buffer::Data(
+      Nan::To<v8::Object>(info[1]).ToLocalChecked());
   THROW_ERROR_IF_NOT_EQUAL(rcl_publish(publisher, buffer, nullptr), RCL_RET_OK,
                            rcl_get_error_string().str);
 
@@ -546,7 +567,8 @@ NAN_METHOD(Publish) {
 }
 
 NAN_METHOD(CreateClient) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string service_name(*Nan::Utf8String(info[1]->ToString()));
   std::string interface_name(*Nan::Utf8String(info[2]->ToString()));
@@ -582,8 +604,10 @@ NAN_METHOD(CreateClient) {
 
 NAN_METHOD(SendRequest) {
   rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
-  void* buffer = node::Buffer::Data(info[1]->ToObject());
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
+  void* buffer = node::Buffer::Data(
+      Nan::To<v8::Object>(info[1]).ToLocalChecked());
   int64_t sequence_number;
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_request(client, buffer, &sequence_number),
@@ -594,14 +618,16 @@ NAN_METHOD(SendRequest) {
 
 NAN_METHOD(RclTakeResponse) {
   rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
-  int64_t sequence_number = info[1]->IntegerValue();
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
+  int64_t sequence_number = Nan::To<int64_t>(info[1]).FromJust();
 
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
   header->sequence_number = sequence_number;
 
-  void* taken_response = node::Buffer::Data(info[2]->ToObject());
+  void* taken_response = node::Buffer::Data(
+      Nan::To<v8::Object>(info[2]).ToLocalChecked());
   rcl_ret_t ret = rcl_take_response(client, header, taken_response);
   free(header);
 
@@ -615,7 +641,8 @@ NAN_METHOD(RclTakeResponse) {
 }
 
 NAN_METHOD(CreateService) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string service_name(*Nan::Utf8String(info[1]->ToString()));
   std::string interface_name(*Nan::Utf8String(info[2]->ToString()));
@@ -650,11 +677,13 @@ NAN_METHOD(CreateService) {
 
 NAN_METHOD(RclTakeRequest) {
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
 
-  void* taken_request = node::Buffer::Data(info[2]->ToObject());
+  void* taken_request = node::Buffer::Data(
+      Nan::To<v8::Object>(info[2]).ToLocalChecked());
   rcl_ret_t ret = rcl_take_request(service, header, taken_request);
   if (ret != RCL_RET_SERVICE_TAKE_FAILED) {
     auto js_obj = RclHandle::NewInstance(header);
@@ -667,11 +696,14 @@ NAN_METHOD(RclTakeRequest) {
 
 NAN_METHOD(SendResponse) {
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
-      RclHandle::Unwrap<RclHandle>(info[0]->ToObject())->ptr());
-  void* buffer = node::Buffer::Data(info[1]->ToObject());
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
+  void* buffer = node::Buffer::Data(
+      Nan::To<v8::Object>(info[1]).ToLocalChecked());
 
   rmw_request_id_t* header = reinterpret_cast<rmw_request_id_t*>(
-      RclHandle::Unwrap<RclHandle>(info[2]->ToObject())->ptr());
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[2]).ToLocalChecked())->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_response(service, header, buffer),
                            RCL_RET_OK, rcl_get_error_string().str);
@@ -877,7 +909,8 @@ NAN_METHOD(ExpandTopicName) {
 }
 
 NAN_METHOD(GetNodeName) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   const char* node_name = rcl_node_get_name(node);
   if (!node_name) {
@@ -888,7 +921,8 @@ NAN_METHOD(GetNodeName) {
 }
 
 NAN_METHOD(GetNamespace) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   const char* node_namespace = rcl_node_get_namespace(node);
   if (!node_namespace) {
@@ -924,13 +958,17 @@ std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
       std::make_unique<rmw_qos_profile_t>();
 
   qos_profile->history = static_cast<rmw_qos_history_policy_t>(
-      object->Get(Nan::New("history").ToLocalChecked())->Uint32Value());
+      Nan::To<uint32_t>(
+          object->Get(Nan::New("history").ToLocalChecked())).FromJust());
   qos_profile->depth =
-      object->Get(Nan::New("depth").ToLocalChecked())->Uint32Value();
+      Nan::To<uint32_t>(
+          object->Get(Nan::New("depth").ToLocalChecked())).FromJust();
   qos_profile->reliability = static_cast<rmw_qos_reliability_policy_t>(
-      object->Get(Nan::New("reliability").ToLocalChecked())->Uint32Value());
+      Nan::To<uint32_t>(
+          object->Get(Nan::New("reliability").ToLocalChecked())).FromJust());
   qos_profile->durability = static_cast<rmw_qos_durability_policy_t>(
-      object->Get(Nan::New("durability").ToLocalChecked())->Uint32Value());
+      Nan::To<uint32_t>(
+          object->Get(Nan::New("durability").ToLocalChecked())).FromJust());
   qos_profile->avoid_ros_namespace_conventions =
       object->Get(Nan::New("avoidRosNameSpaceConventions").ToLocalChecked())
           ->BooleanValue();
@@ -946,7 +984,8 @@ std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos) {
     *qos_profile = *GetQoSProfileFromString(
         std::string(*Nan::Utf8String(qos->ToString())));
   } else if (qos->IsObject()) {
-    qos_profile = GetQosProfileFromObject(qos->ToObject());
+    qos_profile = GetQosProfileFromObject(
+        Nan::To<v8::Object>(qos).ToLocalChecked());
   } else {
     return qos_profile;
   }
@@ -967,7 +1006,8 @@ int DestroyContext(rcl_context_t* context) {
 }
 
 NAN_METHOD(Shutdown) {
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   THROW_ERROR_IF_NOT_EQUAL(rcl_shutdown(context), RCL_RET_OK,
@@ -986,7 +1026,8 @@ NAN_METHOD(Shutdown) {
 }
 
 NAN_METHOD(InitString) {
-  void* buffer = node::Buffer::Data(info[0]->ToObject());
+  void* buffer = node::Buffer::Data(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rosidl_generator_c__String* ptr =
       reinterpret_cast<rosidl_generator_c__String*>(buffer);
 
@@ -1039,7 +1080,7 @@ NAN_METHOD(CreateArrayBufferCleaner) {
 
 NAN_METHOD(setLoggerLevel) {
   std::string name(*Nan::Utf8String(info[0]->ToString()));
-  int level = info[1]->IntegerValue();
+  int level = Nan::To<int64_t>(info[1]).FromJust();
 
   rcutils_ret_t ret = rcutils_logging_set_logger_level(name.c_str(), level);
   if (ret != RCUTILS_RET_OK) {
@@ -1064,10 +1105,10 @@ NAN_METHOD(GetLoggerEffectiveLevel) {
 
 NAN_METHOD(Log) {
   std::string name(*Nan::Utf8String(info[0]->ToString()));
-  int severity = info[1]->IntegerValue();
+  int severity = Nan::To<int64_t>(info[1]).FromJust();
   std::string message(*Nan::Utf8String(info[2]->ToString()));
   std::string function_name(*Nan::Utf8String(info[3]->ToString()));
-  size_t line_number = info[4]->IntegerValue();
+  size_t line_number = Nan::To<int64_t>(info[4]).FromJust();
   std::string file_name(*Nan::Utf8String(info[5]->ToString()));
   bool enabled = rcutils_logging_logger_is_enabled_for(name.c_str(), severity);
 
@@ -1082,7 +1123,7 @@ NAN_METHOD(Log) {
 
 NAN_METHOD(IsEnableFor) {
   std::string name(*Nan::Utf8String(info[0]->ToString()));
-  int severity = info[1]->IntegerValue();
+  int severity = Nan::To<int64_t>(info[1]).FromJust();
   bool enabled = rcutils_logging_logger_is_enabled_for(name.c_str(), severity);
   info.GetReturnValue().Set(Nan::New(enabled));
 }
@@ -1098,7 +1139,8 @@ NAN_METHOD(CreateContext) {
 }
 
 NAN_METHOD(IsContextValid) {
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   bool is_valid = rcl_context_is_valid(context);
@@ -1125,7 +1167,8 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
 }
 
 NAN_METHOD(GetPublisherNamesAndTypesByNode) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string node_name = *Nan::Utf8String(info[1]->ToString());
   std::string node_namespace = *Nan::Utf8String(info[2]->ToString());
@@ -1152,7 +1195,8 @@ NAN_METHOD(GetPublisherNamesAndTypesByNode) {
 }
 
 NAN_METHOD(GetSubscriptionNamesAndTypesByNode) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string node_name = *Nan::Utf8String(info[1]->ToString());
   std::string node_namespace = *Nan::Utf8String(info[2]->ToString());
@@ -1179,7 +1223,8 @@ NAN_METHOD(GetSubscriptionNamesAndTypesByNode) {
 }
 
 NAN_METHOD(GetServiceNamesAndTypesByNode) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string node_name = *Nan::Utf8String(info[1]->ToString());
   std::string node_namespace = *Nan::Utf8String(info[2]->ToString());
@@ -1206,7 +1251,8 @@ NAN_METHOD(GetServiceNamesAndTypesByNode) {
 }
 
 NAN_METHOD(GetTopicNamesAndTypes) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   bool no_demangle = Nan::To<bool>(info[1]).FromJust();
   rcl_names_and_types_t topic_names_and_types =
@@ -1231,7 +1277,8 @@ NAN_METHOD(GetTopicNamesAndTypes) {
 }
 
 NAN_METHOD(GetServiceNamesAndTypes) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   rcl_names_and_types_t service_names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -1254,7 +1301,8 @@ NAN_METHOD(GetServiceNamesAndTypes) {
 }
 
 NAN_METHOD(GetNodeNames) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   rcutils_string_array_t node_names =
     rcutils_get_zero_initialized_string_array();
@@ -1295,7 +1343,8 @@ NAN_METHOD(GetNodeNames) {
 }
 
 NAN_METHOD(CountPublishers) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string topic_name = *Nan::Utf8String(info[1]->ToString());
 
@@ -1311,7 +1360,8 @@ NAN_METHOD(CountPublishers) {
 }
 
 NAN_METHOD(CountSubscribers) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string topic_name = *Nan::Utf8String(info[1]->ToString());
 
@@ -1327,9 +1377,11 @@ NAN_METHOD(CountSubscribers) {
 }
 
 NAN_METHOD(ServiceServerIsAvailable) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  RclHandle* client_handle = RclHandle::Unwrap<RclHandle>(info[1]->ToObject());
+  RclHandle* client_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[1]).ToLocalChecked());
   rcl_client_t* client = reinterpret_cast<rcl_client_t*>(client_handle->ptr());
 
   bool is_available;
