@@ -70,8 +70,10 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
         ExecuteReadyHandles();
 
       if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
-        throw std::runtime_error(std::string("Failed to destroy guard waitset:") +
-                                rcl_get_error_string().str);
+        std::string error_message =
+            std::string("Failed to destroy guard waitset:") +
+            std::string(rcl_get_error_string().str);
+        throw std::runtime_error(error_message);
       }
     } catch (...) {
       g_exception_ptr = std::current_exception();
