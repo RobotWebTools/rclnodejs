@@ -308,6 +308,14 @@ describe('rcl node methods testing', function() {
   it('node.getNodeNames', function() {
     var nodeNames = node.getNodeNames();
 
+    var currentNode = nodeNames.indexOf('my_node');
+
+    assert.notStrictEqual(currentNode, -1);
+  });
+
+  it('node.getNodeNamesAndNamespaces', function() {
+    var nodeNames = node.getNodeNamesAndNamespaces();
+
     var currentNode = nodeNames.find(function(nodeName) {
       return nodeName.name === 'my_node';
     });

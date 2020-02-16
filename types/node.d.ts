@@ -337,15 +337,22 @@ declare module 'rclnodejs' {
     /**
 		 * Get the list of nodes discovered by the provided node.
 		 * 
-		 * @returns An array of the names and namespaces.
-		 *        [ 
-		 *          { name: 'gazebo',                namespace: '/' },
-		 *          { name: 'robot_state_publisher', namespace: '/' },
-		 *          { name: 'cam2image',             namespace: '/demo' }
-		 *        ]
+		 * @returns An array of the node names.
 		 */
-    getNodeNames(): Array<NodeNamesQueryResult>;
-    
+    getNodeNames(): string[];
+
+    /**
+     * Get the list of nodes and their namespaces discovered by the provided node.
+     * 
+     * @returns An array of the node names and namespaces.
+     *        [ 
+     *          { name: 'gazebo',                namespace: '/' },
+     *          { name: 'robot_state_publisher', namespace: '/' },
+     *          { name: 'cam2image',             namespace: '/demo' }
+     *        ]
+     */
+    getNodeNamesAndNamespaces(): Array<NodeNamesQueryResult>;
+
     /**
      * Return the number of publishers on a given topic.
      * @param topic - The name of the topic.
