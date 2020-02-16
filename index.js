@@ -26,7 +26,6 @@ const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
 const tsdGenerator = require('./rostsd_gen/index.js');
 const validator = require('./lib/validator.js');
-const ActionLib = require('ros2-actionlibjs');
 const Time = require('./lib/time.js');
 const TimeSource = require('./lib/time_source.js');
 const {Clock, ROSClock} = require('./lib/clock.js');
@@ -98,8 +97,6 @@ let rcl = {
   /** {@link Duration} class */
   Duration: Duration,
 
-  ActionLib: ActionLib,
-
   /**
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
@@ -143,23 +140,6 @@ let rcl = {
           generator.generateAll(forced).then(() => {
             this._context = context;
             rclnodejs.init(context.handle());
-            ActionLib.config({
-              log: that.logging.getLogger('actionlibjs'),
-              time: require('./lib/actions/time_utils.js'),
-              messages: {
-                getMessage(fullName) {
-                  const [pkg, , name] = fullName.split('/');
-                  return that.require(pkg).msg[name];
-                },
-                getMessageConstants(fullName) {
-                  const [pkg, , name] = fullName.split('/');
-                  return that.require(pkg).msg[name];
-                }
-              },
-              ActionServerInterface: that.ActionServerInterface,
-              ActionClientInterface: that.ActionClientInterface
-            });
-
             this._initialized = true;
             resolve();
           }).catch(e => {
@@ -313,9 +293,6 @@ let rcl = {
   createMessageObject(type) {
     return this.createMessage(type).toPlainObject();
   },
-
-  ActionServerInterface: require('./lib/actions/action_server_interface.js'),
-  ActionClientInterface: require('./lib/actions/action_client_interface.js'),
 };
 
 process.on('SIGINT', () => {
