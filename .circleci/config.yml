@@ -18,16 +18,18 @@ jobs:
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
     - run: brew update
-    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre poco
+    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre
+    # Pin poco to 1.9.4
+    - run: brew install https://raw.githubusercontent.com/alebcay/homebrew-core/055f2f99de581160b142c3ccad392766e7b99d28/Formula/poco.rb
     - run: brew install openssl
     - run: brew install asio console_bridge
     - run: python3 -m pip install catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools argcomplete colcon-common-extensions numpy
-    - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastStableBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
-    - run: wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+    - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
+    - run: wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
     - run: echo "source $HOME/.bashrc" >> ~/.bash_profile
     - run: cat ~/.bash_profile
-    - run: nvm install v10.16.1
-    - run: nvm alias default v10.16.1
+    - run: nvm install v10.19.0
+    - run: nvm alias default v10.19.0
     - run: node --version && npm --version && rm -rf ./node_modules/
     - run: source ~/ros2_install/ros2-osx/local_setup.bash && git submodule init && git submodule update && npm install --python=python2.7
     - run: export PATH="/usr/local/opt/python@2/libexec/bin:$PATH" && npm run lint

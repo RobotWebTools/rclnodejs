@@ -32,7 +32,7 @@ RUN git config --global user.name $GIT_USER_NAME \
 ENV ROS2_WS=/root
 WORKDIR $ROS2_WS
 
-RUN wget https://ci.ros2.org/view/packaging/job/packaging_linux/lastStableBuild/artifact/ws/ros2-package-linux-x86_64.tar.bz2 \
+RUN wget https://ci.ros2.org/view/packaging/job/packaging_linux/lastSuccessfulBuild/artifact/ws/ros2-package-linux-x86_64.tar.bz2 \
     && tar xf ros2-package-linux-x86_64.tar.bz2
 
 # [Ubuntu 18.04]
@@ -41,8 +41,8 @@ RUN rosdep install --from-paths $ROS2_WS/ros2-linux/share --ignore-src --rosdist
 RUN echo "source $ROS2_WS/ros2-linux/local_setup.bash" >> $HOME/.bashrc
 
 # Install nvm, Node.js and node-gyp
-ENV NODE_VERSION v10.16.1
-RUN wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash \
+ENV NODE_VERSION v10.19.0
+RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash \
     && . $HOME/.nvm/nvm.sh \
     && nvm install $NODE_VERSION && nvm alias default $NODE_VERSION
 
