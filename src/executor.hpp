@@ -16,6 +16,7 @@
 #define RCLNODEJS_EXECUTOR_HPP_
 
 #include <uv.h>
+#include <rcl/wait.h>
 
 #include <atomic>
 #include <exception>
@@ -43,12 +44,16 @@ class Executor {
 
   void Start(rcl_context_t* context, int32_t time_out);
   void Stop();
+  void SpinOnce(rcl_context_t* context, int32_t time_out);
   int32_t time_out() { return time_out_; }
 
   static void DoWork(uv_async_t* handle);
   static void Run(void* arg);
 
  private:
+  bool WaitForReadyCallbacks(rcl_wait_set_t* wait_set, int32_t time_out);
+  void ExecuteReadyHandles();
+
   uv_async_t* async_;
   uv_thread_t thread_;
 

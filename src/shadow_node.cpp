@@ -52,6 +52,7 @@ void ShadowNode::Init(v8::Local<v8::Object> exports) {
   Nan::SetPrototypeMethod(tpl, "start", Start);
   Nan::SetPrototypeMethod(tpl, "stop", Stop);
   Nan::SetPrototypeMethod(tpl, "syncHandles", SyncHandles);
+  Nan::SetPrototypeMethod(tpl, "spinOnce", SpinOnce);
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("ShadowNode").ToLocalChecked(), tpl->GetFunction());
@@ -82,6 +83,11 @@ void ShadowNode::StartRunning(rcl_context_t* context, int32_t timeout) {
   executor_->Start(context, timeout);
 }
 
+void ShadowNode::RunOnce(rcl_context_t* context, int32_t timeout) {
+  handle_manager_->CollectHandles(this->handle());
+  executor_->SpinOnce(context, timeout);
+}
+
 NAN_METHOD(ShadowNode::Start) {
   auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
   RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
@@ -98,6 +104,18 @@ NAN_METHOD(ShadowNode::Stop) {
   auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
   if (me)
     me->StopRunning();
+
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
+NAN_METHOD(ShadowNode::SpinOnce) {
+  auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0]->ToObject());
+  auto timeout = Nan::To<int32_t>(info[1]).FromJust();
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
+  if (me)
+    me->RunOnce(context, timeout);
 
   info.GetReturnValue().Set(Nan::Undefined());
 }

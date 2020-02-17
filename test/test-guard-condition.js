@@ -15,11 +15,9 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const rclnodejs = require('../index.js');
-const utils = require('./utils.js');
 
 describe('rclnodejs guard condition test suite', function() {
   var node;
-  var timeout = 10;
   this.timeout(60 * 1000);
 
   before(function() {
@@ -32,46 +30,45 @@ describe('rclnodejs guard condition test suite', function() {
 
   beforeEach(function() {
     node = rclnodejs.createNode('guard_node');
-    rclnodejs.spin(node, timeout);
   });
 
   afterEach(function() {
     node.destroy();
   });
 
-  it('Test trigger', async function() {
+  it('Test trigger', function() {
     let callback = sinon.spy();
 
     const gc = node.createGuardCondition(callback);
 
-    await utils.delay(timeout + 1);
+    rclnodejs.spinOnce(node);
     assert(callback.notCalled);
 
     gc.trigger();
-    await utils.delay(timeout + 1);
+    rclnodejs.spinOnce(node);
     assert(callback.calledOnce);
 
     node.destroyGuardCondition(gc);
   });
 
-  it('Test double trigger', async function() {
+  it('Test double trigger', function() {
     let callback1 = sinon.spy();
     let callback2 = sinon.spy();
 
     const gc1 = node.createGuardCondition(callback1);
     const gc2 = node.createGuardCondition(callback2);
 
-    await utils.delay(timeout + 1);
+    rclnodejs.spinOnce(node);
     assert(callback1.notCalled);
     assert(callback2.notCalled);
 
     gc1.trigger();
     gc2.trigger();
-    await utils.delay(timeout + 1);
+    rclnodejs.spinOnce(node);
     assert(callback1.calledOnce);
     assert(callback2.calledOnce);
 
-    await utils.delay(timeout + 1);
+    rclnodejs.spinOnce(node);
     assert(callback1.calledOnce);
     assert(callback2.calledOnce);
 
