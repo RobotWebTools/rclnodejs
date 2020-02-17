@@ -55,8 +55,11 @@ node.getSubscriptionNamesAndTypesByNode(NODE_NAME);
 // $ExpectType NamesAndTypesQueryResult[]
 node.getTopicNamesAndTypes();
 
-// $ExpectType NodeNamesQueryResult[]
+// $ExpectType string[]
 node.getNodeNames();
+
+// $ExpectType NodeNamesQueryResult[]
+node.getNodeNamesAndNamespaces();
 
 // $ExpectType number
 node.countPublishers(TOPIC);
