@@ -38,6 +38,7 @@
       ],
       'libraries': [
         '-lrcl',
+        '-lrcl_action',
         '-lrcutils',
         '-lrmw',
         '-lrosidl_generator_c',

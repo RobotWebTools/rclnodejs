@@ -133,6 +133,7 @@ void ShadowNode::Execute(const std::vector<rclnodejs::RclHandle*>& handles) {
 
   v8::Local<v8::Array> results = Nan::New<v8::Array>(handles.size());
   for (size_t i = 0; i < handles.size(); ++i) {
+    handles[i]->SyncProperties();
     Nan::Set(results, i, handles[i]->handle());
   }
 
