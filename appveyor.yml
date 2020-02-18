@@ -4,7 +4,7 @@ branches:
   only:
     - master
     - develop
-    - actionlib
+    - actions
 
 image: Visual Studio 2017
 
