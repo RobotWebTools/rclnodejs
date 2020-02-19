@@ -33,6 +33,9 @@ void RclHandle::Init(v8::Local<v8::Object> exports) {
   tpl->SetClassName(Nan::New("RclHandle").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
+  Nan::SetAccessor(tpl->InstanceTemplate(),
+                   Nan::New("properties").ToLocalChecked(),
+                   PropertiesGetter);
   Nan::SetPrototypeMethod(tpl, "release", Release);
   Nan::SetPrototypeMethod(tpl, "dismiss", Dismiss);
 
@@ -46,6 +49,25 @@ void RclHandle::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     obj->Wrap(info.This());
     info.GetReturnValue().Set(info.This());
   }
+}
+
+void RclHandle::SyncProperties() {
+  auto obj = v8::Object::New(v8::Isolate::GetCurrent());
+
+  for (auto it = properties_.begin(); it != properties_.end(); it++) {
+    obj->Set(Nan::New(it->first).ToLocalChecked(), Nan::New(it->second));
+  }
+
+  properties_obj_ = obj;
+}
+
+NAN_GETTER(RclHandle::PropertiesGetter) {
+  auto* me = RclHandle::Unwrap<RclHandle>(info.Holder());
+
+  if (!me->properties_obj_.IsEmpty())
+    info.GetReturnValue().Set(me->properties_obj_);
+  else
+    info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(RclHandle::Release) {

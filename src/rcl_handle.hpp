@@ -19,6 +19,8 @@
 
 #include <functional>
 #include <set>
+#include <string>
+#include <map>
 
 namespace rclnodejs {
 
@@ -42,6 +44,9 @@ class RclHandle : public Nan::ObjectWrap {
   void Reset();
   void AddChild(RclHandle* child) { children_.insert(child); }
   void RemoveChild(RclHandle* child) { children_.erase(child); }
+  void SetBoolProperty(const std::string& name, bool value) {
+      properties_[name] = value; }
+  void SyncProperties();
 
  private:
   RclHandle();
@@ -51,10 +56,13 @@ class RclHandle : public Nan::ObjectWrap {
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static NAN_METHOD(Release);
   static NAN_METHOD(Dismiss);
+  static NAN_GETTER(PropertiesGetter);
 
  private:
   void* pointer_;
   RclHandle* parent_;
+  std::map<std::string, bool> properties_;
+  v8::Local<v8::Object> properties_obj_;
 
   std::function<int()> deleter_;
   std::set<RclHandle*> children_;

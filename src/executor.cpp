@@ -157,11 +157,27 @@ bool Executor::WaitForReadyCallbacks(
   if (handle_manager_->is_empty())
     return false;
 
-  if (rcl_wait_set_resize(wait_set, handle_manager_->subscription_count(),
-                          handle_manager_->guard_condition_count() + 1u,
-                          handle_manager_->timer_count(),
-                          handle_manager_->client_count(),
-                          handle_manager_->service_count(),
+  size_t num_subscriptions = 0u;
+  size_t num_guard_conditions = 0u;
+  size_t num_timers = 0u;
+  size_t num_clients = 0u;
+  size_t num_services = 0u;
+
+  if (!handle_manager_->GetEntityCounts(&num_subscriptions,
+                                        &num_guard_conditions,
+                                        &num_timers,
+                                        &num_clients,
+                                        &num_services)) {
+    std::string error_message = std::string("Failed to get entity counts: ") +
+                                std::string(rcl_get_error_string().str);
+    throw std::runtime_error(error_message);
+  }
+
+  if (rcl_wait_set_resize(wait_set, num_subscriptions,
+                          num_guard_conditions + 1u,
+                          num_timers,
+                          num_clients,
+                          num_services,
                           // TODO(minggang): support events.
                           0u) != RCL_RET_OK) {
     std::string error_message = std::string("Failed to resize: ") +
@@ -188,7 +204,12 @@ bool Executor::WaitForReadyCallbacks(
       running_.store(false);
     }
 
-    handle_manager_->CollectReadyHandles(wait_set);
+    if (!handle_manager_->CollectReadyHandles(wait_set)) {
+      std::string error_message =
+          std::string("Failed to collect ready handles: ") +
+          std::string(rcl_get_error_string().str);
+      throw std::runtime_error(error_message);
+    }
   }
 
   if (rcl_wait_set_clear(wait_set) != RCL_RET_OK) {
