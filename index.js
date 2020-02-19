@@ -21,6 +21,7 @@ const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
 const Node = require('./lib/node.js');
+const Parameters = require('./lib/parameter.js');
 const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
@@ -74,6 +75,9 @@ let rcl = {
   _initialized: false,
   _nodes: [],
 
+  /** {@link Context} class */
+  Context: Context,
+
   /** {@link QoS} class */
   QoS: QoS,
 
@@ -100,23 +104,30 @@ let rcl = {
 
   ActionLib: ActionLib,
 
+  NodeOptions: Node.NodeOptions,
+
   /**
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
    * @param {string} namespace - The namespace used in ROS, default is an empty string.
    * @param {Context} context - The context, default is Context.defaultContext().
+   * @param {NodeOptions} options - The options to configure the new node behavior.
    * @return {Node} The instance of Node.
    */
-  createNode(nodeName, namespace = '', context = Context.defaultContext()) {
+  createNode(nodeName, namespace = '', context = Context.defaultContext(),
+    options = Node.NodeOptions.defaultOptions) {
+  
     if (typeof (nodeName) !== 'string' || typeof (namespace) !== 'string') {
       throw new TypeError('Invalid argument.');
     }
 
     let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
     let node =  new rclnodejs.ShadowNode();
-
-    node.init(nodeName, namespace);
+	  node.handle = handle;
+    
+    node.init(nodeName, namespace, context, options);
     debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
+    
     node.handle = handle;
     node.context = context;
     this._nodes.push(node);
@@ -126,9 +137,10 @@ let rcl = {
   /**
   * Init the module.
   * @param {Context} context - The context, default is Context.defaultContext().
+  * @param {String[]} argv - Process commandline arguments.
   * @return {Promise<undefined>} A Promise.
   */
-  init(context = Context.defaultContext()) {
+  init(context = Context.defaultContext(), argv = process.argv) {
     return new Promise((resolve, reject) => {
       let that = this;
       if (!this._initialized) {
@@ -142,7 +154,7 @@ let rcl = {
 
           generator.generateAll(forced).then(() => {
             this._context = context;
-            rclnodejs.init(context.handle());
+            rclnodejs.init(context.handle(), argv);
             ActionLib.config({
               log: that.logging.getLogger('actionlibjs'),
               time: require('./lib/actions/time_utils.js'),

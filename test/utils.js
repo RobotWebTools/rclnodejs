@@ -74,9 +74,18 @@ function getAvailablePath(amentPrefixPath, otherDirs) {
   return availablePath;
 }
 
+// example call from async function/method:   
+//   
+//  await assertUtils.createDelay(500);
+//
+function createDelay(millis) {
+  return new Promise(resolve => setTimeout(resolve, millis));
+}
+
 module.exports = {
   assertMember: assertMember,
   assertThrowsError: assertThrowsError,
-  launchPythonProcess: launchPythonProcess,
-  getAvailablePath: getAvailablePath
+  createDelay: createDelay,
+  getAvailablePath: getAvailablePath,
+  launchPythonProcess: launchPythonProcess
 };

@@ -9,6 +9,7 @@
 /// <reference path="interfaces.d.ts" />
 /// <reference path="logging.d.ts" />
 /// <reference path="node.d.ts" />
+/// <reference path="parameter.d.ts" />
 /// <reference path="publisher.d.ts" />
 /// <reference path="qos.d.ts" />
 /// <reference path="service.d.ts" />

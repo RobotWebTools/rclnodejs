@@ -1,3 +1,8 @@
+
+// eslint camelcase: ["error", {ignoreImports: true}]
+
+import { Parameters } from 'rclnodejs'; 
+import { rcl_interfaces as rclinterfaces } from 'rclnodejs';
 import { QoS } from 'rclnodejs';
 
 declare module 'rclnodejs' {
@@ -141,6 +146,44 @@ declare module 'rclnodejs' {
   }
 
 
+/**
+ * NodeOptions specify configuration choices during the 
+ * node instantiation process.  
+ * @class
+ */
+class NodeOptions {
+
+  /**
+   * Create a new instance with default property values.
+   */
+  constructor();
+
+  /**
+   * When true  
+   * Default value = true;
+   * @returns {boolean} - 
+   */
+  startParameterServices: boolean;
+
+  /**
+   * An array of Parameters that serve as overrides for a node's default
+   * parameters. Default = empty array [].
+   */
+  parameterOverrides: Array<Parameters.Parameter>;
+
+  /**
+   * True indicates that a node shold declare declare parameters from
+   * it's parameter-overrides 
+   */
+  automaticallyDeclareParametersFromOverrides: boolean;
+  
+
+  /**
+   * Returns an instance configured with default options.
+   */
+  static defaultOptions: NodeOptions; 
+} 
+
 	/**
 	 * Node is the primary entrypoint in a ROS system for communication.
 	 * It can be used to create ROS entities such as publishers, subscribers,
@@ -161,6 +204,11 @@ declare module 'rclnodejs' {
 		 * @returns The node namespace.
 		 */
     namespace(): string;
+
+    /**
+     * Get the nodeOptions provided through the constructor.
+     */
+    options(): NodeOptions;
 
     /**
 		 * Create a Timer.
@@ -267,6 +315,188 @@ declare module 'rclnodejs' {
 		 */
     destroyTimer(timer: Timer): void;
 
+    /**
+     * Declare a parameter.
+     * 
+     * Internally, register a parameter and it's descriptor. 
+     * If a parameter-override exists, it's value will replace that of the parameter
+     * unless ignoreOverride is true.
+     * If the descriptor is undefined, then a ParameterDescriptor will be inferred 
+     * from the parameter's state.
+     * 
+     * If a parameter by the same name has already been declared then an Error is thrown.
+     * A parameter must be undeclared before attempting to redeclare it.
+     * 
+     * @param parameter - Parameter to declare.
+     * @param descriptor - Optional descriptor for parameter. 
+     * @param ignoreOveride - When true disregard any parameter-override that may be present.
+     * @returns The newly declared parameter.
+     */
+    declareParameter(parameter: Parameters.Parameter, descriptor?: Parameters.ParameterDescriptor, 
+        ignoreOveride?: boolean): Parameters.Parameter;
+
+    /**
+     * Declare a list of parameters.
+     * 
+     * Internally register parameters with their corresponding descriptor one by one
+     * in the order they are provided. This is an atomic operation. If an error 
+     * occurs the process halts and no further parameters are declared. 
+     * Parameters that have already been processed are undeclared.
+     * 
+     * While descriptors is an optional parameter, when provided there must be
+     * a descriptor for each parameter; otherwise an Error is thrown. 
+     * If descriptors is not provided then a descriptor will be inferred 
+     * from each parameter's state.
+     *  
+     * When a parameter-override is available, the parameter's value 
+     * will be replaced with that of the parameter-override unless ignoreOverrides
+     * is true.
+     * 
+     * If a parameter by the same name has already been declared then an Error is thrown.
+     * A parameter must be undeclared before attempting to redeclare it.
+     * 
+     * @param parameters - The parameters to declare.
+     * @param descriptors - Optional descriptors, a 1-1 correspondence with parameters. 
+     * @param ignoreOverrides - When true, parameter-overrides are 
+     *    not considered, i.e.,ignored.
+     * @returns The declared parameters.
+     */
+    declareParameters(parameters: Array<Parameters.Parameter>, 
+      descriptors?: Array<Parameters.ParameterDescriptor>, 
+      ignoreOverrides?: boolean): Array<Parameters.Parameter>;
+
+    /**
+     * Undeclare a parameter.
+     * 
+     * Readonly parameters can not be undeclared or updated. 
+     * @param name - Name of parameter to undeclare.
+     */
+    undeclareParameter(name: string): void;
+
+    /**
+     * Determine a parameter has been declared.
+     * 
+     * @param name - Name of the parameter
+     * @returns True if parameter exists; false otherwise.
+     */
+    hasParameter(name: string): boolean;
+
+    /**
+     * Get a declared parameter by name.
+     * 
+     * If unable to locate a declared parameter then a 
+     * parameter with type == PARAMETER_NOT_SET is returned.
+     * 
+     * @param name - The name of the parameter. 
+     * @returns The parameter.
+     */   
+    getParameter(name: string): Parameters.Parameter;
+
+    /**
+     * Get a list of parameters.
+     * 
+     * Find and return the declared parameters. 
+     * If no names are provided return all declared parameters. 
+     * 
+     * If unable to locate a declared parameter then a 
+     * parameter with type == PARAMETER_NOT_SET is returned in 
+     * it's place.
+     * 
+     * @param names - The names of the declared parameters 
+     *    to find or null indicating to return all declared parameters.
+     * @returns The parameters. 
+     */ 
+    getParameters(name?: Array<string>): Array<Parameters.Parameter>;
+
+    /**
+     * Get the names of all declared parameters.
+     * 
+     * @returna The declared parameter names or empty array if 
+     *    no parameters have been declared. 
+     */
+    getParameterNames(): Array<string>;
+    
+    /**
+     * Get the list of parameter-overrides found on the commandline and
+     * in the NodeOptions.parameter_overrides property.
+     * 
+     * @return An array of Parameters
+     */
+    getParameterOverrides(): Array<Parameters.Parameter>;
+
+    /**
+     * Determine if a parameter descriptor exists.
+     * 
+     * @param name - The name of a descriptor to detect.
+     * @returns True if a descriptor has been declared; otherwise false.
+     */
+    hasParameterDescriptor(name: string): boolean;
+
+    /**
+     * Get a declared parameter descriptor by name.
+     * 
+     * If unable to locate a declared parameter descriptor then a 
+     * descriptor with type == PARAMETER_NOT_SET is returned.
+     * 
+     * @param name - The name of the parameter descriptor to find. 
+     * @returns The parameter descriptor.
+     */
+    getParameterDescriptor(name: string): Parameters.ParameterDescriptor;
+
+    /**
+     * Find a list of declared ParameterDescriptors. 
+     * 
+     * If no names are provided return all declared descriptors. 
+     * 
+     * If unable to locate a declared descriptor then a 
+     * descriptor with type == PARAMETER_NOT_SET is returned in 
+     * it's place.
+     * 
+     * @param names - The names of the declared parameter 
+     *    descriptors to find or null indicating to return all declared descriptors.
+     * @return The parameter descriptors. 
+     */
+    getParameterDescriptors(name?: string[]): Parameters.ParameterDescriptor[];
+
+    /**
+     * Replace a declared parameter.
+     * 
+     * The parameter being replaced must be a declared parameter who's descriptor
+     * is not readOnly; otherwise an Error is thrown.
+     * 
+     * @param parameter - The new parameter.
+     * @returns The result of the operation.  
+     */
+    setParameter(parameter: Parameters.Parameter): rclinterfaces.msg.SetParametersResult;
+
+    /**
+     * Replace a list of declared parameters.
+     * 
+     * Declared parameters are replaced in the order they are provided and
+     * a ParameterEvent is published for each individual parameter change.
+     * 
+     * If an error occurs, the process is stopped and returned. Parameters
+     * set before an error remain unchanged.
+     * 
+     * @param parameters - The parameters to set.
+     * @returns An array of SetParameterResult, one for each parameter that was set.
+     */
+    setParameters(parameters: Array<Parameters.Parameter>): Array<rclinterfaces.msg.SetParametersResult>;
+
+    /**
+     * Repalce a list of declared parameters atomically.
+     * 
+     * Declared parameters are replaced in the order they are provided.
+     * A single ParameterEvent is published collectively for all changed
+     * parameters.
+     * 
+     * If an error occurs, the process stops immediately. All parameters updated to 
+     * the point of the error are reverted to their previous state.
+     * 
+     * @param parameters - The parameters to set.
+     * @returns Describes the result of setting 1 or more parameters.
+     */
+    setParametersAtomically(parameters: Array<Parameters.Parameter>): rclinterfaces.msg.SetParametersResult;
 
     /**
 		 * Get a remote node's published topics.
