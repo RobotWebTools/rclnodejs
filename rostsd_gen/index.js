@@ -69,19 +69,9 @@ function getPkgInfos(generatedRoot) {
         if (!typeClass.name.endsWith('Request') && !typeClass.name.endsWith('Response')) {
           continue;
         }
-      } else if (typeClass.type === 'action') { // skip __action__<action>
-        if (
-          !typeClass.name.endsWith('SendGoal') &&
-          !typeClass.name.endsWith('Request') &&
-          !typeClass.name.endsWith('Response') &&
-          !typeClass.name.endsWith('Result') &&
-          !typeClass.name.endsWith('GetResult') &&
-          !typeClass.name.endsWith('Goal') &&
-          !typeClass.name.endsWith('Feedback') &&
-          !typeClass.name.endsWith('FeedbackMessage')
-        ) {
-          continue;
-        }
+      } else if (typeClass.type === 'action') {
+        // TODO (mattrichard): Enable .d.ts generation of actions
+        continue;
       }
 
       const msg = createMessage(typeClass);
