@@ -76,7 +76,7 @@ NAN_METHOD(Init) {
   // preprocess argc & argv
   v8::Local<v8::Array> jsArgv = v8::Local<v8::Array>::Cast(info[1]);
   int argc = jsArgv->Length();
-  const char *argv[argc];
+  char **argv =  reinterpret_cast<char **>(malloc(argc * sizeof(char *)));
   for (int i = 0; i < argc; i++) {
     v8::Local<v8::Value> jsElement = jsArgv->Get(i);
     argv[i] = strdup(*Nan::Utf8String(jsElement));
@@ -152,7 +152,7 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args, v8::Isola
   v8::Local<v8::Array> nodes = v8::Array::New(isolate);
 
   // iterate over nodes
-  for (uint i=0; i < parsed_args->num_nodes; i++) {
+  for (int i=0; i < parsed_args->num_nodes; i++) {
     v8::Local<v8::Object> node = v8::Object::New(isolate);
     node->Set(Nan::New("name").ToLocalChecked(),
               Nan::New(parsed_args->node_names[i]).ToLocalChecked());
@@ -161,7 +161,7 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args, v8::Isola
 
     // iterate over node.parameters
     v8::Local<v8::Array> parameters = v8::Array::New(isolate);
-    for (uint j=0; j < node_parameters.num_params; j++) {
+    for (int j=0; j < node_parameters.num_params; j++) {
       v8::Local<v8::Object> parameter = v8::Object::New(isolate);
 
       parameter->Set(Nan::New("name").ToLocalChecked(),
