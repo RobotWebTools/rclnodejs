@@ -290,13 +290,14 @@ bool HandleManager::CollectReadyActionHandles(rcl_wait_set_t* wait_set) {
       return false;
     }
 
-    action_client->SetProperty("isFeedbackReady", is_feedback_ready);
-    action_client->SetProperty("isStatusReady", is_status_ready);
-    action_client->SetProperty("isGoalResponseReady", is_goal_response_ready);
-    action_client->SetProperty("isCancelResponseReady",
-                               is_cancel_response_ready);
-    action_client->SetProperty("isResultResponseReady",
-                               is_result_response_ready);
+    action_client->SetBoolProperty("isFeedbackReady", is_feedback_ready);
+    action_client->SetBoolProperty("isStatusReady", is_status_ready);
+    action_client->SetBoolProperty("isGoalResponseReady",
+                                   is_goal_response_ready);
+    action_client->SetBoolProperty("isCancelResponseReady",
+                                   is_cancel_response_ready);
+    action_client->SetBoolProperty("isResultResponseReady",
+                                   is_result_response_ready);
 
     if (is_feedback_ready || is_status_ready || is_goal_response_ready ||
         is_cancel_response_ready || is_result_response_ready) {
@@ -323,10 +324,12 @@ bool HandleManager::CollectReadyActionHandles(rcl_wait_set_t* wait_set) {
       return false;
     }
 
-    action_server->SetProperty("isGoalRequestReady", is_goal_request_ready);
-    action_server->SetProperty("isCancelRequestReady", is_cancel_request_ready);
-    action_server->SetProperty("isResultRequestReady", is_result_request_ready);
-    action_server->SetProperty("isGoalExpired", is_goal_expired);
+    action_server->SetBoolProperty("isGoalRequestReady", is_goal_request_ready);
+    action_server->SetBoolProperty("isCancelRequestReady",
+                                   is_cancel_request_ready);
+    action_server->SetBoolProperty("isResultRequestReady",
+                                   is_result_request_ready);
+    action_server->SetBoolProperty("isGoalExpired", is_goal_expired);
 
     if (is_goal_request_ready || is_cancel_request_ready ||
         is_result_request_ready || is_goal_expired) {

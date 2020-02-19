@@ -43,7 +43,7 @@ class RclHandle : public Nan::ObjectWrap {
   void Reset();
   void AddChild(RclHandle* child) { children_.insert(child); }
   void RemoveChild(RclHandle* child) { children_.erase(child); }
-  void SetProperty(const std::string& name, bool value) {
+  void SetBoolProperty(const std::string& name, bool value) {
       properties_[name] = value; }
   void SyncProperties();
 
