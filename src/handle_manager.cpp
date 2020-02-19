@@ -14,8 +14,8 @@
 
 #include "handle_manager.hpp"
 
-#include <vector>
 #include <rcl_action/rcl_action.h>
+#include <vector>
 
 #include "spdlog/spdlog.h"
 
@@ -153,7 +153,7 @@ bool HandleManager::CollectReadyHandles(rcl_wait_set_t* wait_set) {
     wait_set->guard_conditions,
     wait_set->size_of_guard_conditions,
     guard_conditions_);
-  
+
   return CollectReadyActionHandles(wait_set);
 }
 

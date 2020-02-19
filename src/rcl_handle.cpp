@@ -54,7 +54,7 @@ void RclHandle::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 void RclHandle::SyncProperties() {
   auto obj = v8::Object::New(v8::Isolate::GetCurrent());
 
-  for (auto& it = properties_.begin(); it != properties_.end(); it++) {
+  for (auto it = properties_.begin(); it != properties_.end(); it++) {
     obj->Set(Nan::New(it->first).ToLocalChecked(), Nan::New(it->second));
   }
 

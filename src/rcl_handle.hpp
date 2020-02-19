@@ -19,6 +19,7 @@
 
 #include <functional>
 #include <set>
+#include <string>
 #include <map>
 
 namespace rclnodejs {
