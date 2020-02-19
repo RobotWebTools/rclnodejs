@@ -45,7 +45,7 @@ function createSendGoalRequestSpec(pkgName, interfaceName) {
           isDynamicArray: false,
           isFixedSizeArray: null,
           pkgName: pkgName,
-          type: 'Fibonacci_Goal',
+          type: `${interfaceName}_Goal`,
           stringUpperBound: null,
           isPrimitiveType: false
         },
@@ -76,7 +76,7 @@ function createSendGoalResponseSpec(pkgName, interfaceName) {
           isDynamicArray: false,
           isFixedSizeArray: null,
           pkgName: null,
-          type: 'boolean',
+          type: 'bool',
           stringUpperBound: null,
           isPrimitiveType: true
         },
@@ -155,7 +155,7 @@ function createGetResultResponseSpec(pkgName, interfaceName) {
           isDynamicArray: false,
           isFixedSizeArray: null,
           pkgName: pkgName,
-          type: 'Fibonacci_Result',
+          type: `${interfaceName}_Result`,
           stringUpperBound: null,
           isPrimitiveType: false
         },
@@ -187,7 +187,7 @@ function createFeedbackMessageSpec(pkgName, interfaceName) {
           isDynamicArray: false,
           isFixedSizeArray: null,
           pkgName: pkgName,
-          type: 'Fibonacci_Feedback',
+          type: `${interfaceName}_Feedback`,
           stringUpperBound: null,
           isPrimitiveType: false
         },
