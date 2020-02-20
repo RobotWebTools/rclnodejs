@@ -136,7 +136,7 @@ let rcl = {
   /**
   * Init the module.
   * @param {Context} context - The context, default is Context.defaultContext().
-  * @param {String[]} argv - Process commandline arguments.
+  * @param {string[]} argv - Process commandline arguments.
   * @return {Promise<undefined>} A Promise.
   */
   init(context = Context.defaultContext(), argv = process.argv) {
