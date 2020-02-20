@@ -61,6 +61,11 @@ if __name__ == '__main__':
             json_obj = {'pkgName': spec.pkg_name, 'srvName': spec.srv_name,
                 'request': get_json_object_from_msg_spec_object(spec.request),
                 'response': get_json_object_from_msg_spec_object(spec.response)}
+        elif sys.argv[1] == 'parse_action_file':
+            json_obj = {'pkgName': spec.pkg_name, 'actionName': spec.action_name,
+                'goal': get_json_object_from_msg_spec_object(spec.goal),
+                'result': get_json_object_from_msg_spec_object(spec.result),
+                'feedback': get_json_object_from_msg_spec_object(spec.feedback)}
         else:
             assert False, "unknown method '%s'" % sys.argv[1]
 

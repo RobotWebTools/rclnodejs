@@ -15,7 +15,6 @@
 'use strict';
 
 const fse = require('fs-extra');
-const generateIDLFromAction = require('./action_generator.js');
 const generateJSStructFromIDL = require('./idl_generator.js');
 const packages = require('./packages.js');
 const path = require('path');
@@ -23,41 +22,11 @@ const path = require('path');
 const generatedRoot = path.join(__dirname, '../generated/');
 const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(path.delimiter);
 
-async function generateJSStructFromAction(pkg) {
-  const results = [];
-  pkg.actions.forEach(action => {
-    // TODO(minggang): Currently the ament build tool does not support to generate
-    // the .msg files from .action files, so we will not check the existence of these
-    // files. Once ament support the action, we will check it first.
-    results.push(generateIDLFromAction(action));
-  });
-  const idls = await Promise.all(results);
-  idls.forEach((idl) => {
-    idl.generatedInterfaces.forEach((interfaceName) => {
-      pkg.messages.push({
-        pkgName: pkg.pkgName,
-        interfaceName,
-        subFolder: 'msg',
-        filePath: path.join(idl.dir, interfaceName + '.msg')});
-    });
-  });
-
-  // After adding the idls generated just now, it's going to create the JavaScript
-  // files for the whole package.
-  await generateJSStructFromIDL(pkg, generatedRoot);
-}
-
 async function generateInPath(path) {
   const results = [];
   const pkgs = await packages.findPackagesInDirectory(path);
   pkgs.forEach((pkg) => {
-    if (pkg.actions.length !== 0) {
-      // Generate the JavaScript message struct from .action file.
-      results.push(generateJSStructFromAction(pkg));
-    } else {
-      // Generate the JavaScript message struct from .msg/.srv file.
-      results.push(generateJSStructFromIDL(pkg, generatedRoot));
-    }
+    results.push(generateJSStructFromIDL(pkg, generatedRoot));
   });
   await Promise.all(results);
 }

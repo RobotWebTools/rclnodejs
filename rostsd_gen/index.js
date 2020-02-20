@@ -71,6 +71,9 @@ function getPkgInfos(generatedRoot) {
           pkgInfo.services.push(typeClass);
           continue;
         }
+      } else if (typeClass.type === 'action') {
+        // TODO (mattrichard): Enable .d.ts generation of actions
+        continue;
       }
 
       const msg = createMessage(typeClass);

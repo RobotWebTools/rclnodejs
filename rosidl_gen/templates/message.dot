@@ -164,12 +164,21 @@ function getWrapperNameByType(type) {
   }
 }
 
-function getModulePathByType(type) {
+function getModulePathByType(type, messageInfo) {
   if (type.isPrimitiveType) {
     return 'std_msgs__msg__' + getPrimitiveNameByType(type) + '.js';
-  } else {
-    return type.pkgName + '__msg__' + type.type + '.js';
   }
+
+  if (
+    messageInfo &&
+    messageInfo.subFolder === 'action' &&
+    messageInfo.pkgName === type.pkgName &&
+    (type.type.endsWith('_Goal') || type.type.endsWith('_Result') || type.type.endsWith('_Feedback'))
+  ) {
+    return type.pkgName + '__action__' + type.type + '.js';
+  }
+
+  return type.pkgName + '__msg__' + type.type + '.js';
 }
 
 function getPackageNameByType(type) {
@@ -201,7 +210,7 @@ const translator = require('../../rosidl_gen/message_translator.js');
 
 {{~ it.spec.fields :field}}
 {{? shouldRequire(it.spec.baseType, field.type)}}
-const {{=getWrapperNameByType(field.type)}} = require('../../generated/{{=getPackageNameByType(field.type)}}/{{=getModulePathByType(field.type)}}');
+const {{=getWrapperNameByType(field.type)}} = require('../../generated/{{=getPackageNameByType(field.type)}}/{{=getModulePathByType(field.type, it.messageInfo)}}');
 {{?}}
 {{~}}
 
