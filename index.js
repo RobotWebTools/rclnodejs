@@ -128,7 +128,6 @@ let rcl = {
     node.init(nodeName, namespace, context, options);
     debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
     
-    node.handle = handle;
     node.context = context;
     this._nodes.push(node);
     return node;
