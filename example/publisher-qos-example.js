@@ -15,7 +15,7 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-const {QoS} = rclnodejs;
+const { QoS } = rclnodejs;
 
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_qos_example_node');
@@ -27,7 +27,7 @@ rclnodejs.init().then(() => {
   qos.depth = 1;
   qos.avoidRosNameSpaceConventions = false;
 
-  const publisher = node.createPublisher('std_msgs/msg/String', 'topic', {qos});
+  const publisher = node.createPublisher('std_msgs/msg/String', 'topic', { qos });
 
   let counter = 0;
   setInterval(function() {

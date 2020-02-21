@@ -36,9 +36,9 @@ function getPackageName(filePath, amentExecuted) {
 
   // If |packageName| equals to the file's extension, e.g. msg/srv, one level
   // up directory will be used as the package name.
-  return packageName === path.parse(filePath).ext.substr(1)
-    ? folders.pop()
-    : packageName;
+  return packageName === path.parse(filePath).ext.substr(1) ?
+    folders.pop() :
+    packageName;
 };
 
 function getSubFolder(filePath, amentExecuted) {
@@ -58,13 +58,13 @@ function grabInterfaceInfo(filePath, amentExecuted) {
   let pkgName = getPackageName(filePath, amentExecuted);
   let interfaceName = path.parse(filePath).name;
   let subFolder = getSubFolder(filePath, amentExecuted);
-  return {pkgName, interfaceName, subFolder, filePath};
+  return { pkgName, interfaceName, subFolder, filePath };
 }
 
 function addInterfaceInfo(info, type, pkgMap) {
   let pkgName = info.pkgName;
   if (!pkgMap.has(pkgName)) {
-    pkgMap.set(pkgName, {messages: [], services: [], actions: [], pkgName});
+    pkgMap.set(pkgName, { messages: [], services: [], actions: [], pkgName });
   }
   let pkg = pkgMap.get(pkgName);
   pkg[type].push(info);
@@ -82,17 +82,19 @@ function findPackagesInDirectory(dir) {
       }
       dir = amentExecuted ? path.join(dir, 'share') : dir;
 
-      let walker = walk.walk(dir, {followLinks: true});
+      let walker = walk.walk(dir, { followLinks: true });
       let pkgMap = new Map();
       walker.on('file', (root, file, next) => {
         if (path.extname(file.name) === '.msg') {
           // Some .msg files were generated prior to 0.3.2 for .action files,
           // which has been disabled. So these files should be ignored here.
           if (path.dirname(root).split(path.sep).pop() !== 'action') {
-            addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages', pkgMap);
+            addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages',
+              pkgMap);
           }
         } else if (path.extname(file.name) === '.srv') {
-          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services', pkgMap);
+          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services',
+            pkgMap);
         }
         next();
       });

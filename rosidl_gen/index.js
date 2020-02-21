@@ -38,7 +38,8 @@ async function generateJSStructFromAction(pkg) {
         pkgName: pkg.pkgName,
         interfaceName,
         subFolder: 'msg',
-        filePath: path.join(idl.dir, interfaceName + '.msg')});
+        filePath: path.join(idl.dir, interfaceName + '.msg')
+      });
     });
   });
 

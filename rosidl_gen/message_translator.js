@@ -77,30 +77,30 @@ function verifyMessage(message, obj) {
       if (def.fields[i].type.isPrimitiveType) {
         // check type/existence
         switch (def.fields[i].type) {
-        case 'char':
-        case 'int16':
-        case 'int32':
-        case 'int64':
-        case 'byte':
-        case 'uint16':
-        case 'uint32':
-        case 'uint64':
-        case 'float32':
-        case 'float64':
-          if (typeof obj[name] != 'number') {
-            return false;
-          }
-          break;
-        case 'bool':
-          if (typeof obj[name] != 'boolean') {
-            return false;
-          }
-          break;
-        case 'string':
-          if (typeof obj[name] != 'string') {
-            return false;
-          }
-          break;
+          case 'char':
+          case 'int16':
+          case 'int32':
+          case 'int64':
+          case 'byte':
+          case 'uint16':
+          case 'uint32':
+          case 'uint64':
+          case 'float32':
+          case 'float64':
+            if (typeof obj[name] != 'number') {
+              return false;
+            }
+            break;
+          case 'bool':
+            if (typeof obj[name] != 'boolean') {
+              return false;
+            }
+            break;
+          case 'string':
+            if (typeof obj[name] != 'string') {
+              return false;
+            }
+            break;
         }
       } else if (!verifyMessage(message[name], obj[name])) {
         // Proceed further on this member
@@ -126,7 +126,7 @@ function toPlainObject(message, enableTypedArray = true) {
     //  Note: there won't be any JavaScript array in message
     let array = [];
     message.data.forEach((e) => {
-      array.push(toPlainObject(e, enableTypedArray));  // Translate every elements
+      array.push(toPlainObject(e, enableTypedArray)); // Translate every elements
     });
     return array;
     // eslint-disable-next-line no-else-return
@@ -138,8 +138,8 @@ function toPlainObject(message, enableTypedArray = true) {
       const name = def.fields[i].name;
       if (def.fields[i].type.isPrimitiveType) {
         if (def.fields[i].type.isArray &&
-            message._wrapperFields[name].constructor.useTypedArray &&
-            !enableTypedArray) {
+          message._wrapperFields[name].constructor.useTypedArray &&
+          !enableTypedArray) {
           obj[name] = Array.from(message[name]);
         } else {
           // Direct assignment
