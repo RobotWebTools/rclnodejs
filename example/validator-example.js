@@ -15,7 +15,7 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-const {validator} = rclnodejs;
+const { validator } = rclnodejs;
 
 console.log('validation of topic "/node_name/chatter" is ' + validator.validateFullTopicName('/node_name/chatter'));
 console.log('validation of node "my_node" is ' + validator.validateNodeName('my_node'));

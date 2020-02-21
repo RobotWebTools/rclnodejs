@@ -46,21 +46,23 @@ rclnodejs.init().then(() => {
         header: {
           stamp: {
             sec: 11223,
-            nanosec: 44556},
+            nanosec: 44556
+          },
           frame_id: 'f001',
         },
         height: 240,
-        width: 320, encoding: 'rgba',
+        width: 320,
+        encoding: 'rgba',
         is_bigendian: false,
         step: 320 * 16,
         is_dense: false,
-        data: Uint8Array.from({length: 320 * 240}, (v, k) => k),
+        data: Uint8Array.from({ length: 320 * 240 }, (v, k) => k),
       }
     };
 
     goal.publishFeedback(feedback);
     setTimeout(() => {
-      goal.setSucceeded({total_dishes_cleaned: 10}, 'done');
+      goal.setSucceeded({ total_dishes_cleaned: 10 }, 'done');
     }, 500);
   });
 

@@ -18,7 +18,7 @@
     "test": "node ./scripts/compile_tests.js && node ./scripts/run_test.js && dtslint test/types",
     "lint": "eslint --max-warnings=0 index.js types/*.d.ts scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
     "postinstall": "node scripts/generate_messages.js",
-    "format": "js-beautify --config jsbeautifyrc -r lib/*.js rostsd_gen/*.js rosidl_gen/*.js rosidl_parser/*.js test/*.js example/*.js"
+    "format": "js-beautify --config jsbeautifyrc -r lib/*.js rostsd_gen/*.js rosidl_gen/*.js rosidl_parser/*.js"
   },
   "authors": [
     "Minggang Wang <minggang.wang@intel.com>",

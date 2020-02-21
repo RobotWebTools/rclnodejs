@@ -21,7 +21,7 @@ const parser = require('../rosidl_parser/rosidl_parser.js');
 
 dot.templateSettings.strip = false;
 dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
-const dots = dot.process({path: path.join(__dirname, '../rosidl_gen/templates')});
+const dots = dot.process({ path: path.join(__dirname, '../rosidl_gen/templates') });
 
 function removeExtraSpaceLines(str) {
   return str.replace(/^\s*\n/gm, '');
@@ -35,7 +35,7 @@ async function writeGeneratedCode(dir, fileName, code) {
 function generateServiceJSStruct(serviceInfo, dir) {
   dir = path.join(dir, `${serviceInfo.pkgName}`);
   const fileName = serviceInfo.pkgName + '__' + serviceInfo.subFolder + '__' + serviceInfo.interfaceName + '.js';
-  const generatedCode = removeExtraSpaceLines(dots.service({serviceInfo: serviceInfo}));
+  const generatedCode = removeExtraSpaceLines(dots.service({ serviceInfo: serviceInfo }));
   return writeGeneratedCode(dir, fileName, generatedCode);
 }
 

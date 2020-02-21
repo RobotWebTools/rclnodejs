@@ -28,12 +28,12 @@ const StringRefStruct = StructType({
 
 function initString(str, own = false) {
   if (own) {
-    if (! str instanceof Buffer) {
+    if (!str instanceof Buffer) {
       throw new TypeError('Invalid argument: should provide a Node Buffer to bindingsStringInit()');
     }
     rclnodejs.initString(str);
   } else {
-    if (! str instanceof StringRefStruct) {
+    if (!str instanceof StringRefStruct) {
       throw new TypeError('Invalid argument: should provide a type of StringRefStruct');
     }
 
