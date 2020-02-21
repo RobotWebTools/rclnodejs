@@ -21,6 +21,7 @@ const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
 const Node = require('./lib/node.js');
+const NodeOptions = require('./lib/node_options.js');
 const Parameters = require('./lib/parameter.js');
 const path = require('path');
 const QoS = require('./lib/qos.js');
@@ -101,7 +102,7 @@ let rcl = {
   /** {@link Duration} class */
   Duration: Duration,
 
-  NodeOptions: Node.NodeOptions,
+  NodeOptions: NodeOptions,
 
   /**
    * Create a node.
@@ -112,7 +113,7 @@ let rcl = {
    * @return {Node} The instance of Node.
    */
   createNode(nodeName, namespace = '', context = Context.defaultContext(),
-    options = Node.NodeOptions.defaultOptions) {
+    options = NodeOptions.defaultOptions) {
   
     if (typeof (nodeName) !== 'string' || typeof (namespace) !== 'string') {
       throw new TypeError('Invalid argument.');
