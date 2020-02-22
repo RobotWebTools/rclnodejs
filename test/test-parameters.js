@@ -29,7 +29,6 @@ const {
   IntegerRange,
   PARAMETER_REL_TOL } = require('../lib/parameter.js');
 
-
 const NodeOptions = rclnodejs.NodeOptions;
 const Context = rclnodejs.Context;
 
@@ -64,12 +63,10 @@ const DOUBLE_ARRAY_DESCRIPTOR = new ParameterDescriptor(
   'dbleArrD', ParameterType.PARAMETER_DOUBLE_ARRAY
 );
 
-
-describe('rclnodejs parameters test suite', function () {
-
-  describe('parameter api tests', function () {
-
-    it('Parameter constructor', function () {
+describe('rclnodejs parameters test suite', function() {
+  
+  describe('parameter api tests', function() {
+    it('Parameter constructor', function() {
       let param = new Parameter('str_param', ParameterType.PARAMETER_STRING, 'foobar');
 
       assert.equal(param.name, 'str_param');
@@ -77,7 +74,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.equal(param.value, 'foobar');
     });
 
-    it('Parameter update', function () {
+    it('Parameter update', function() {
       let param = new Parameter('int_param', ParameterType.PARAMETER_INTEGER, 100);
       assert.strictEqual(param.value, 100);
 
@@ -91,65 +88,63 @@ describe('rclnodejs parameters test suite', function () {
     });
   });
 
-  // describe('range tests', function () {
+  describe('range tests', function() {
 
-  //   it('Math IsClose test', function () {
-  //     assert.ok(IsClose.isClose(1.0, 1.0, PARAMETER_REL_TOL));
-  //     assert.ok(!IsClose.isClose(1.0, 1.1, PARAMETER_REL_TOL));
-  //     assert.ok(IsClose.isClose(1.0, 1.1, 0.11));
-  //   });
+    it('Math IsClose test', function() {
+      assert.ok(IsClose.isClose(1.0, 1.0, PARAMETER_REL_TOL));
+      assert.ok(!IsClose.isClose(1.0, 1.1, PARAMETER_REL_TOL));
+      assert.ok(IsClose.isClose(1.0, 1.1, 0.11));
+    });
 
-  //   it('IntegerRange test', function () {
-  //     const range = new IntegerRange(0, 100, 1);
+    it('IntegerRange test', function() {
+      const range = new IntegerRange(0, 100, 1);
 
-  //     // test property accessors
-  //     assert.equal(range.fromValue, 0);
-  //     assert.equal(range.toValue, 100);
-  //     assert.equal(range.step, 1);
+      // test property accessors
+      assert.equal(range.fromValue, 0);
+      assert.equal(range.toValue, 100);
+      assert.equal(range.step, 1);
 
-  //     // test midpoint
-  //     assert.ok(range.inRange(50));
+      // test midpoint
+      assert.ok(range.inRange(50));
 
-  //     // test lower boundary
-  //     assert.ok(range.inRange(1));
-  //     assert.ok(range.inRange(0));
-  //     assert.ok(!range.inRange(-1));
+      // test lower boundary
+      assert.ok(range.inRange(1));
+      assert.ok(range.inRange(0));
+      assert.ok(!range.inRange(-1));
 
-  //     // test upper boundary
-  //     assert.ok(range.inRange(99));
-  //     assert.ok(range.inRange(100));
-  //     assert.ok(!range.inRange(101));
-  //   });
+      // test upper boundary
+      assert.ok(range.inRange(99));
+      assert.ok(range.inRange(100));
+      assert.ok(!range.inRange(101));
+    });
 
-  //   it('FloatingPointRange test', function () {
-  //     const range = new FloatingPointRange(-10.0, 10.0, 0.25);
+    it('FloatingPointRange test', function() {
+      const range = new FloatingPointRange(-10.0, 10.0, 0.25);
 
-  //     // test property accessors
-  //     assert.equal(range.fromValue, -10);
-  //     assert.equal(range.toValue, 10);
-  //     assert.equal(range.step, 0.25);
+      // test property accessors
+      assert.equal(range.fromValue, -10);
+      assert.equal(range.toValue, 10);
+      assert.equal(range.step, 0.25);
 
-  //     // test midpoint
-  //     assert.ok(range.inRange(0.0));
+      // test midpoint
+      assert.ok(range.inRange(0.0));
 
-  //     // test lower boundary
-  //     assert.ok(range.inRange(-9));
-  //     assert.ok(range.inRange(-10));
-  //     assert.ok(!range.inRange(-11));
+      // test lower boundary
+      assert.ok(range.inRange(-9));
+      assert.ok(range.inRange(-10));
+      assert.ok(!range.inRange(-11));
 
-  //     // test upper boundary
-  //     assert.ok(range.inRange(9));
-  //     assert.ok(range.inRange(10));
-  //     assert.ok(range.inRange(10.000009));
-  //     assert.ok(range.inRange(10.00001));
-  //     assert.ok(!range.inRange(10.00002));
-  //   });
+      // test upper boundary
+      assert.ok(range.inRange(9));
+      assert.ok(range.inRange(10));
+      assert.ok(range.inRange(10.000009));
+      assert.ok(range.inRange(10.00001));
+      assert.ok(!range.inRange(10.00002));
+    });
+  });
 
-  // });
-
-  describe('parameter-descriptor tests', function () {
-
-    it('String descriptor test', function () {
+  describe('parameter-descriptor tests', function() {
+    it('String descriptor test', function() {
       assert.equal('strD', STRING_DESCRIPTOR.name);
       assert.equal(ParameterType.PARAMETER_STRING, STRING_DESCRIPTOR.type);
       assert.equal('no description', STRING_DESCRIPTOR.description);
@@ -160,7 +155,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.ok(STRING_READONLY_DESCRIPTOR.readOnly);
     });
 
-    it('Integer descriptor with [0-255] range test', function () {
+    it('Integer descriptor with [0-255] range test', function() {
 
       const descriptor = new ParameterDescriptor(
         'int_param', ParameterType.PARAMETER_INTEGER);
@@ -183,7 +178,7 @@ describe('rclnodejs parameters test suite', function () {
         RangeError);
     });
 
-    it('Integer descriptor with [0-255], step=5 range test', function () {
+    it('Integer descriptor with [0-255], step=5 range test', function() {
 
       const descriptor = new ParameterDescriptor(
         'int_param', ParameterType.PARAMETER_INTEGER);
@@ -207,18 +202,18 @@ describe('rclnodejs parameters test suite', function () {
     });
   });
 
-  describe('rcl parameter-overrides test', function () {
+  describe('rcl parameter-overrides test', function() {
     const NODE_NAME = 'test_node';
 
     let node;
     this.timeout(60 * 1000);
 
-    afterEach(function () {
+    afterEach(function() {
       if (node) node.destroy();
       rclnodejs.shutdown();
     });
 
-    it('cli parameter-override: 1 global param', async function () {
+    it('cli parameter-override: 1 global param', async function() {
 
       await rclnodejs.init(
         Context.defaultContext(),
@@ -233,7 +228,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.equal(overrides[0].value, 'foobar', 'expected parameterOverride.value == foobar');
     });
 
-    it('cli parameter-override: 1 global param redefined', async function () {
+    it('cli parameter-override: 1 global param redefined', async function() {
 
       await rclnodejs.init(
         Context.defaultContext(),
@@ -249,7 +244,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.equal(overrides[0].value, 'helloworld', 'expected parameterOverride.value == helloworld');
     });
 
-    it('cli parameter override, global & node:param', async function () {
+    it('cli parameter override, global & node:param', async function() {
 
       await rclnodejs.init(
         Context.defaultContext(),
@@ -268,7 +263,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.equal(overrides[1].value, '123', 'expected parameterOverride.value == 123');
     });
 
-    it('cli parameter override, filter out other node parameters', async function () {
+    it('cli parameter override, filter out other node parameters', async function() {
 
       await rclnodejs.init(
         Context.defaultContext(),
@@ -285,7 +280,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.equal(overrides[0].value, 'foobar', 'expected parameterOverride.value == foobar');
     });
 
-    it('cli + constructor parameter overrides', async function () {
+    it('cli + constructor parameter overrides', async function() {
 
       await rclnodejs.init(
         Context.defaultContext(),
@@ -305,7 +300,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.equal(overrides[0].value, 'helloworld', 'expected parameterOverride.value == helloworld');
     });
 
-    it('cli load parameter.yaml file ', async function () {
+    it('cli load parameter.yaml file ', async function() {
 
       await rclnodejs.init(
         Context.defaultContext(),
@@ -325,7 +320,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.equal(overrides[1].value, 'foo', 'expected parameterOverride.value == foo');
     });
 
-    it('cli load from parameter.yaml file with global /** param group ', async function () {
+    it('cli load from parameter.yaml file with global /** param group ', async function() {
 
       await rclnodejs.init(
         Context.defaultContext(),
@@ -345,7 +340,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.equal(overrides[1].value, true, 'expected bool_param.value == true');
     });
 
-    it('override param from parameter.yaml file ', async function () {
+    it('override param from parameter.yaml file ', async function() {
 
       await rclnodejs.init(
         Context.defaultContext(),
