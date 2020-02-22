@@ -32,8 +32,8 @@ rclnodejs.init().then(() => {
     console.log('Reset the timer.');
     timer.reset();
     console.log('The next call will be ' +
-                timer.timeUntilNextCall() +
-                'ms later.');
+      timer.timeUntilNextCall() +
+      'ms later.');
 
     console.log('Shuting down...');
     rclnodejs.shutdown();

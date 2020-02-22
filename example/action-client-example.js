@@ -27,7 +27,7 @@ rclnodejs.init().then(() => {
     rclnodejs: rclnodejs
   });
 
-  let goal = ac.sendGoal({ goal: {dishwasher_id: 1}});
+  let goal = ac.sendGoal({ goal: { dishwasher_id: 1 } });
   console.log(`The goal was sent, the goal id is ${goal.goal_id.id}`);
 
   ac.on('feedback', (feedback) => {
@@ -35,9 +35,9 @@ rclnodejs.init().then(() => {
   });
 
   ac.on('status', (status) => {
-    status.status_list.forEach((s) =>{
+    status.status_list.forEach((s) => {
       if (s.goal_id.id === goal.goal_id.id &&
-          s.status === GoalStatus.SUCCEEDED) {
+        s.status === GoalStatus.SUCCEEDED) {
         console.log(`The goal, whose id is ${s.goal_id.id}, has been executed successfully.`);
       }
     });

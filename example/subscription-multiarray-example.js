@@ -37,7 +37,8 @@ rclnodejs.init().then(() => {
     for (let i = 0; i < height; i++) {
       for (let j = 0; j < weight; j++) {
         for (let k = 0; k < channel; k++) {
-          console.log(`multiArray(${i},${j},${k}) = ${multiArray.data[offset + weightStride*i + channelStride*j + k]}`);
+          console.log(
+            `multiArray(${i},${j},${k}) = ${multiArray.data[offset + weightStride*i + channelStride*j + k]}`);
         }
       }
     }

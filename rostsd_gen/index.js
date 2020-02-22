@@ -169,7 +169,8 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
     fs.writeSync(fd, `    '${key}': ${messagesMap[key]}_WrapperType,\n`);
   }
   fs.writeSync(fd, '  };\n');
-  fs.writeSync(fd, '  type MessageWrapperType<T> = T extends MessageTypeClassName ? MessageTypeClassWrappersMap[T] : object;\n\n');
+  fs.writeSync(fd,
+    '  type MessageWrapperType<T> = T extends MessageTypeClassName ? MessageTypeClassWrappersMap[T] : object;\n\n');
 
   // write service type class string
   const services = [];
@@ -225,7 +226,7 @@ function saveMsgWrapperAsTSD(msgInfo, fd) {
  * non-primitive types
  * @returns {undefined}
  */
-function saveMsgFieldsAsTSD(msgInfo, fd, indent=0, lineEnd=',', typePrefix='') {
+function saveMsgFieldsAsTSD(msgInfo, fd, indent = 0, lineEnd = ',', typePrefix = '') {
   const indentStr = ' '.repeat(indent);
   for (let i = 0; i < msgInfo.def.fields.length; i++) {
     const field = msgInfo.def.fields[i];
@@ -272,28 +273,28 @@ function primitiveType2JSName(type) {
   let jsName;
 
   switch (type) {
-  case 'char':
-  case 'byte':
-  case 'uint8':
-  case 'int8':
-  case 'int16':
-  case 'uint16':
-  case 'int32':
-  case 'uint32':
-  case 'int64':
-  case 'uint64':
-  case 'float32':
-  case 'float64':
-  case 'double':
-    jsName = 'number';
-    break;
-  case 'bool':
-    jsName = 'boolean';
-    break;
-  case 'string':
-  case 'wstring':
-    jsName = 'string';
-    break;
+    case 'char':
+    case 'byte':
+    case 'uint8':
+    case 'int8':
+    case 'int16':
+    case 'uint16':
+    case 'int32':
+    case 'uint32':
+    case 'int64':
+    case 'uint64':
+    case 'float32':
+    case 'float64':
+    case 'double':
+      jsName = 'number';
+      break;
+    case 'bool':
+      jsName = 'boolean';
+      break;
+    case 'string':
+    case 'wstring':
+      jsName = 'string';
+      break;
   }
 
   return jsName;
