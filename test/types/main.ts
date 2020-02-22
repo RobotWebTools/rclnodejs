@@ -22,7 +22,18 @@ rclnodejs.shutdown();
 // ---- Context -----
 
 
+// ---- NodeOptions ----
+// $ExpectType NodeOptions
+const nodeOptions = new rclnodejs.NodeOptions();
 
+// $ExpectType boolean
+nodeOptions.startParameterServices;
+
+// $ExpectType boolean
+nodeOptions.automaticallyDeclareParametersFromOverrides;
+
+// $ExpectType Parameter[]
+nodeOptions.parameterOverrides;
 
 // ---- Node -----
 // $ExpectType Node
