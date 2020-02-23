@@ -18,30 +18,33 @@
 
 const rclnodejs = require('../index.js');
 
-rclnodejs.init().then(() => {
-  var node = rclnodejs.createNode('Header_publisher');
-  const Header = 'std_msgs/msg/Header';
+rclnodejs
+  .init()
+  .then(() => {
+    var node = rclnodejs.createNode('Header_publisher');
+    const Header = 'std_msgs/msg/Header';
 
-  const header = {
-    stamp: {
-      sec: 123456,
-      nanosec: 789,
-    },
-    frame_id: 'main frame',
-  };
+    const header = {
+      stamp: {
+        sec: 123456,
+        nanosec: 789,
+      },
+      frame_id: 'main frame',
+    };
 
-  var publisher = node.createPublisher(Header, 'Header_channel');
-  var timer = node.createTimer(100, () => {
-    publisher.publish(header);
+    var publisher = node.createPublisher(Header, 'Header_channel');
+    var timer = node.createTimer(100, () => {
+      publisher.publish(header);
+    });
+
+    rclnodejs.spin(node);
+    process.on('SIGINT', m => {
+      timer.cancel();
+      node.destroy();
+      rclnodejs.shutdown();
+      process.exit(0);
+    });
+  })
+  .catch(err => {
+    console.log(err);
   });
-
-  rclnodejs.spin(node);
-  process.on('SIGINT', (m) => {
-    timer.cancel();
-    node.destroy();
-    rclnodejs.shutdown();
-    process.exit(0);
-  });  
-}).catch((err) => {
-  console.log(err);
-});

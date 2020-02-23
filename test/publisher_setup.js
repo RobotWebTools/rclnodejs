@@ -16,24 +16,27 @@
 
 const rclnodejs = require('../index.js');
 
-rclnodejs.init().then(function() {
-  var node = rclnodejs.createNode('publisher');
-  const RclString = 'std_msgs/msg/String';
+rclnodejs
+  .init()
+  .then(function() {
+    var node = rclnodejs.createNode('publisher');
+    const RclString = 'std_msgs/msg/String';
 
-  const msg = 'Greeting from publisher';
+    const msg = 'Greeting from publisher';
 
-  var publisher = node.createPublisher(RclString, 'topic');
-  var timer = node.createTimer(100, () => {
-    publisher.publish(msg);
+    var publisher = node.createPublisher(RclString, 'topic');
+    var timer = node.createTimer(100, () => {
+      publisher.publish(msg);
+    });
+    rclnodejs.spin(node);
+
+    process.on('SIGINT', function() {
+      timer.cancel();
+      node.destroy();
+      rclnodejs.shutdown();
+      process.exit(0);
+    });
+  })
+  .catch(function(err) {
+    console.log(err);
   });
-  rclnodejs.spin(node);
-
-  process.on('SIGINT', function() {
-    timer.cancel();
-    node.destroy();
-    rclnodejs.shutdown();
-    process.exit(0);
-  });
-}).catch(function(err) {
-  console.log(err);
-});

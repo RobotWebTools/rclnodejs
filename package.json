@@ -18,7 +18,7 @@
     "test": "node ./scripts/compile_tests.js && node ./scripts/run_test.js && dtslint test/types",
     "lint": "eslint --max-warnings=0 index.js types/*.d.ts scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
     "postinstall": "node scripts/generate_messages.js",
-    "format": "js-beautify --config jsbeautifyrc -r lib/*.js rostsd_gen/*.js rosidl_gen/*.js rosidl_parser/*.js"
+    "format": "prettier --trailing-comma es5 --single-quote --write '{.,lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test}/*.{js,md,ts}'"
   },
   "authors": [
     "Minggang Wang <minggang.wang@intel.com>",
@@ -37,8 +37,10 @@
     "deep-equal": "^1.1.1",
     "dtslint": "^3.0.0",
     "eslint": "^6.8.0",
-    "js-beautify": "^1.10.3",
+    "husky": "^4.2.3",
+    "lint-staged": "^10.0.7",
     "mocha": "^7.0.1",
+    "prettier": "^1.19.1",
     "sinon": "^9.0.0",
     "tree-kill": "^1.2.1",
     "typescript": "^3.7.2"
@@ -59,6 +61,16 @@
     "walk": "^2.3.9",
     "uuid": "^3.2.1",
     "int64-napi": "^1.0.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ds,md}": [
+      "prettier --trailing-comma es5 --single-quote --write"
+    ]
   },
   "engines": {
     "node": ">= 8.12.0 <11.0.0"

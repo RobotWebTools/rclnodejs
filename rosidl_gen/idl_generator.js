@@ -21,7 +21,9 @@ const parser = require('../rosidl_parser/rosidl_parser.js');
 
 dot.templateSettings.strip = false;
 dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
-const dots = dot.process({ path: path.join(__dirname, '../rosidl_gen/templates') });
+const dots = dot.process({
+  path: path.join(__dirname, '../rosidl_gen/templates'),
+});
 
 function removeExtraSpaceLines(str) {
   return str.replace(/^\s*\n/gm, '');
@@ -34,30 +36,49 @@ async function writeGeneratedCode(dir, fileName, code) {
 
 function generateServiceJSStruct(serviceInfo, dir) {
   dir = path.join(dir, `${serviceInfo.pkgName}`);
-  const fileName = serviceInfo.pkgName + '__' + serviceInfo.subFolder + '__' + serviceInfo.interfaceName + '.js';
-  const generatedCode = removeExtraSpaceLines(dots.service({ serviceInfo: serviceInfo }));
+  const fileName =
+    serviceInfo.pkgName +
+    '__' +
+    serviceInfo.subFolder +
+    '__' +
+    serviceInfo.interfaceName +
+    '.js';
+  const generatedCode = removeExtraSpaceLines(
+    dots.service({ serviceInfo: serviceInfo })
+  );
   return writeGeneratedCode(dir, fileName, generatedCode);
 }
 
 async function generateMessageJSStruct(messageInfo, dir) {
-  const spec = await parser.parseMessageFile(messageInfo.pkgName, messageInfo.filePath);
+  const spec = await parser.parseMessageFile(
+    messageInfo.pkgName,
+    messageInfo.filePath
+  );
   dir = path.join(dir, `${spec.baseType.pkgName}`);
-  const fileName = spec.baseType.pkgName + '__' + messageInfo.subFolder + '__' + spec.msgName + '.js';
+  const fileName =
+    spec.baseType.pkgName +
+    '__' +
+    messageInfo.subFolder +
+    '__' +
+    spec.msgName +
+    '.js';
 
-  const generatedCode = removeExtraSpaceLines(dots.message({
-    messageInfo: messageInfo,
-    spec: spec,
-    json: JSON.stringify(spec, null, '  '),
-  }));
+  const generatedCode = removeExtraSpaceLines(
+    dots.message({
+      messageInfo: messageInfo,
+      spec: spec,
+      json: JSON.stringify(spec, null, '  '),
+    })
+  );
   await writeGeneratedCode(dir, fileName, generatedCode);
 }
 
 async function generateJSStructFromIDL(pkg, dir) {
   const results = [];
-  pkg.messages.forEach((messageInfo) => {
+  pkg.messages.forEach(messageInfo => {
     results.push(generateMessageJSStruct(messageInfo, dir));
   });
-  pkg.services.forEach((serviceInfo) => {
+  pkg.services.forEach(serviceInfo => {
     results.push(generateServiceJSStruct(serviceInfo, dir));
   });
   await Promise.all(results);

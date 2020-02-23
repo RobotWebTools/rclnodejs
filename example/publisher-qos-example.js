@@ -22,12 +22,16 @@ rclnodejs.init().then(() => {
 
   let qos = new QoS();
   qos.hitory = QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT;
-  qos.reliability = QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT;
-  qos.durability = QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT;
+  qos.reliability =
+    QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT;
+  qos.durability =
+    QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT;
   qos.depth = 1;
   qos.avoidRosNameSpaceConventions = false;
 
-  const publisher = node.createPublisher('std_msgs/msg/String', 'topic', { qos });
+  const publisher = node.createPublisher('std_msgs/msg/String', 'topic', {
+    qos,
+  });
 
   let counter = 0;
   setInterval(function() {

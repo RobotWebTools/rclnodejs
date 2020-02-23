@@ -18,11 +18,14 @@ const rclnodejs = require('bindings')('rclnodejs');
 
 let deallocator = {
   delayFreeStructMember(refObj, type, name) {
-    return rclnodejs.createArrayBufferCleaner(refObj.ref(), type.fields[name].offset);
+    return rclnodejs.createArrayBufferCleaner(
+      refObj.ref(),
+      type.fields[name].offset
+    );
   },
   freeStructMember(refObj, type, name) {
     rclnodejs.freeMemeoryAtOffset(refObj.ref(), type.fields[name].offset);
-  }
+  },
 };
 
 module.exports = deallocator;

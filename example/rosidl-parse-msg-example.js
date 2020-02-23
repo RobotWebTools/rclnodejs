@@ -20,13 +20,16 @@ const rosInstallPath = process.env.AMENT_PREFIX_PATH;
 const packageName = 'std_msgs';
 const packagePath = rosInstallPath + '/share/std_msgs/msg/ColorRGBA.msg';
 
-parser.parseMessageFile(packageName, packagePath).then((spec) => {
-  console.log(`msg name: ${spec.msgName}`);
+parser
+  .parseMessageFile(packageName, packagePath)
+  .then(spec => {
+    console.log(`msg name: ${spec.msgName}`);
 
-  console.log('fields includes:');
-  spec.fields.forEach((field) => {
-    console.log(field);
+    console.log('fields includes:');
+    spec.fields.forEach(field => {
+      console.log(field);
+    });
+  })
+  .catch(e => {
+    console.log(e);
   });
-}).catch((e) => {
-  console.log(e);
-});

@@ -1,20 +1,22 @@
 import { Message } from 'rclnodejs';
 
 declare module 'rclnodejs' {
-
   /**
    * Represents a ROS Time
    */
   class Time {
-
     /**
      * Create a Time.
-		 * 
+     *
      * @param seconds - The seconds component of the time, default = 0.
      * @param nanoseconds - The nanoseconds component of the time, default = 0.
      * @param clockType - The clock type, default = Clock.ClockType.SYSTEM_TIME
      */
-    constructor(seconds?: number | string, nanoseconds?: number | string, clockType?: ClockType);
+    constructor(
+      seconds?: number | string,
+      nanoseconds?: number | string,
+      clockType?: ClockType
+    );
 
     /**
      * Get the the clock type of the Time object.
@@ -23,19 +25,19 @@ declare module 'rclnodejs' {
 
     /**
      * Get the nanosecond part of the time.
-		 * If the value is greater than Number.MAX_SAFE_INTEGER (2^53-1) it 
-		 * will be returned in a string of decimal format.
+     * If the value is greater than Number.MAX_SAFE_INTEGER (2^53-1) it
+     * will be returned in a string of decimal format.
      */
     readonly nanoseconds: number | string;
 
     /**
      * Get the time as a plain JavaScript object.
      */
-    readonly secondsAndNanoseconds: {seconds: number, nanoseconds: number};
+    readonly secondsAndNanoseconds: { seconds: number; nanoseconds: number };
 
     /**
      * Add a duration to this time object.
-		 * 
+     *
      * @param other - The Duration object to be added.
      * @returns The sum of this and other duration.
      */
@@ -43,7 +45,7 @@ declare module 'rclnodejs' {
 
     /**
      * Subtract a duration or time from this time object.
-		 * 
+     *
      * @param other - The time to be subtracted.
      * @returns The difference between this and other time.
      */
@@ -51,7 +53,7 @@ declare module 'rclnodejs' {
 
     /**
      * Test if this Time is equal to another Time.
-     * 
+     *
      * @param other - The Time this is compare to.
      * @returns True if this time is equal to other time.
      */
@@ -59,7 +61,7 @@ declare module 'rclnodejs' {
 
     /**
      * Test if this Time is not equal to another Time.
-     * 
+     *
      * @param other - The Time this is compare to.
      * @returns True if this time is not equal to other time.
      */
@@ -67,7 +69,7 @@ declare module 'rclnodejs' {
 
     /**
      * Test if this Time is less than another Time.
-     * 
+     *
      * @param other - The Time this is compare to.
      * @returns True if this time is less than other time.
      */
@@ -75,7 +77,7 @@ declare module 'rclnodejs' {
 
     /**
      * Test if this Time is less than or equal to another Time.
-     * 
+     *
      * @param other - The Time this is compare to.
      * @returns True if this time is less than or equal to other time.
      */
@@ -83,7 +85,7 @@ declare module 'rclnodejs' {
 
     /**
      * Test if this Time is greater than another Time.
-     * 
+     *
      * @param other - The Time this is compare to.
      * @returns True if this time is greater than other time.
      */
@@ -91,7 +93,7 @@ declare module 'rclnodejs' {
 
     /**
      * Test if this Time is greater than or equal to another Time.
-     * 
+     *
      * @param other - The Time this is compare to.
      * @returns True if this time is greater than or equal to other time.
      */
@@ -99,13 +101,11 @@ declare module 'rclnodejs' {
 
     /**
      * Create a Time object from a message of builtin_interfaces/msg/Time
-		 * 
+     *
      * @param msg - The message to be created from.
      * @param clockType- The type of the time object.
      * @returns The new Time.
      */
     static fromMsg(msg: Message, clockType: ClockType): Time;
   }
-
 }
-
