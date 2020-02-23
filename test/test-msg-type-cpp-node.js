@@ -19,6 +19,7 @@
 const assert = require('assert');
 const path = require('path');
 const childProcess = require('child_process');
+const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 
@@ -333,7 +334,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       var publisher = node.createPublisher(ColorRGBA, 'ColorRGBA_js_cpp_channel');
       var subscription = node.createSubscription(ColorRGBA, 'back_ColorRGBA_js_cpp_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
+        assert.ok(deepEqual(msg, backMsg));
 
         timer.cancel();
         node.destroy();
@@ -366,7 +367,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       var publisher = node.createPublisher(ByteMultiArray, 'Array_js_cpp_channel');
       var subscription = node.createSubscription(ByteMultiArray, 'back_ByteMultiArray_js_cpp_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
+        assert.ok(deepEqual(msg, backMsg));
 
         timer.cancel();
         node.destroy();
@@ -392,7 +393,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
 
       var publisher = node.createPublisher(Header, 'Header_js_cpp_channel');
       var subscription = node.createSubscription(Header, 'back_Header_js_cpp_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
+        assert.ok(deepEqual(msg, backMsg));
 
         timer.cancel();
         node.destroy();
@@ -426,7 +427,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var destroy = false;
       var publisher = node.createPublisher(JointState, 'JointState_js_cpp_channel');
       var subscription = node.createSubscription(JointState, 'back_JointState_js_cpp_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
+        assert.ok(deepEqual(msg, backMsg));
 
         timer.cancel();
         node.destroy();

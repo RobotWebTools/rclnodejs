@@ -18,6 +18,7 @@
 
 const assert = require('assert');
 const childProcess = require('child_process');
+const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 
@@ -355,7 +356,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Array']);
       var publisher = node.createPublisher(ByteMultiArray, 'Array_js_py_channel');
       var subscription = node.createSubscription(ByteMultiArray, 'Array_js_py_back_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
+        assert.ok(deepEqual(msg, backMsg));
         timer.cancel();
         node.destroy();
         pySubscription.kill('SIGINT');
@@ -381,7 +382,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'ColorRGBA']);
       var publisher = node.createPublisher(ColorRGBA, 'ColorRGBA_js_py_channel');
       var subscription = node.createSubscription(ColorRGBA, 'ColorRGBA_js_py_back_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
+        assert.ok(deepEqual(msg, backMsg));
         timer.cancel();
         node.destroy();
         pySubscription.kill('SIGINT');
@@ -443,7 +444,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'JointState']);
       var publisher = node.createPublisher(JointState, 'JointState_js_py_channel');
       var subscription = node.createSubscription(JointState, 'JointState_js_py_back_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
+        assert.ok(deepEqual(msg, backMsg));
         timer.cancel();
         node.destroy();
         pySubscription.kill('SIGINT');
