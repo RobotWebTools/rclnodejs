@@ -16,6 +16,7 @@
 
 const assert = require('assert');
 const childProcess = require('child_process');
+const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const translator = require('../rosidl_gen/message_translator.js');
 const arrayGen = require('./array_generator.js');
@@ -157,7 +158,7 @@ describe('rclnodejs message communication', function() {
           if (isTypedArray(v.data)) {
             assert.deepStrictEqual(msg.data, v.data);
           } else {
-            assert.deepEqual(msg.data, v.data);
+            assert.ok(deepEqual(msg.data, v.data));
           }
         }
 
