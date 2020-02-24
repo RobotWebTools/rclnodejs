@@ -45,5 +45,7 @@ rules:
   valid-jsdoc: 2
   yoda: [2, "never"]
 
+extends: [prettier]
+
 parserOptions:
   ecmaVersion: 2017
