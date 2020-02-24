@@ -9,7 +9,7 @@ branches:
 image: Visual Studio 2017
 
 environment:
-  nodejs_version: "10"
+  nodejs_version: "12"
   PYTHON3: "c:\\Python37-x64"
   PYTHON2: "c:\\Python27"
 

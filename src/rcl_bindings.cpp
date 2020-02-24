@@ -630,13 +630,18 @@ NAN_METHOD(RclTake) {
 }
 
 NAN_METHOD(CreateSubscription) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string package_name(*Nan::Utf8String(info[1]->ToString()));
-  std::string message_sub_folder(*Nan::Utf8String(info[2]->ToString()));
-  std::string message_name(*Nan::Utf8String(info[3]->ToString()));
-  std::string topic(*Nan::Utf8String(info[4]->ToString()));
+  std::string package_name(
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
+  std::string message_sub_folder(
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
+  std::string message_name(
+      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
+  std::string topic(
+      *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
 
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(malloc(sizeof(rcl_subscription_t)));
@@ -671,14 +676,19 @@ NAN_METHOD(CreateSubscription) {
 }
 
 NAN_METHOD(CreatePublisher) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   // Extract arguments
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string package_name(*Nan::Utf8String(info[1]->ToString()));
-  std::string message_sub_folder(*Nan::Utf8String(info[2]->ToString()));
-  std::string message_name(*Nan::Utf8String(info[3]->ToString()));
-  std::string topic(*Nan::Utf8String(info[4]->ToString()));
+  std::string package_name(
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
+  std::string message_sub_folder(
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
+  std::string message_name(
+      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
+  std::string topic(
+      *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
 
   // Prepare publisher object
   rcl_publisher_t* publisher =
@@ -738,12 +748,16 @@ NAN_METHOD(GetTopic) {
 }
 
 NAN_METHOD(CreateClient) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string service_name(*Nan::Utf8String(info[1]->ToString()));
-  std::string interface_name(*Nan::Utf8String(info[2]->ToString()));
-  std::string package_name(*Nan::Utf8String(info[3]->ToString()));
+  std::string service_name(
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
+  std::string interface_name(
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
+  std::string package_name(
+      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
 
   const rosidl_service_type_support_t* ts =
       GetServiceTypeSupport(package_name, interface_name);
@@ -812,12 +826,16 @@ NAN_METHOD(RclTakeResponse) {
 }
 
 NAN_METHOD(CreateService) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string service_name(*Nan::Utf8String(info[1]->ToString()));
-  std::string interface_name(*Nan::Utf8String(info[2]->ToString()));
-  std::string package_name(*Nan::Utf8String(info[3]->ToString()));
+  std::string service_name(
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
+  std::string interface_name(
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
+  std::string package_name(
+      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
 
   const rosidl_service_type_support_t* ts =
       GetServiceTypeSupport(package_name, interface_name);
@@ -890,9 +908,11 @@ NAN_METHOD(SendResponse) {
 }
 
 NAN_METHOD(ValidateFullTopicName) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   int validation_result;
   size_t invalid_index;
-  std::string topic_name(*Nan::Utf8String(info[0]->ToString()));
+  std::string topic_name(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
   rmw_ret_t ret = rmw_validate_full_topic_name(
       topic_name.c_str(), &validation_result, &invalid_index);
 
@@ -923,9 +943,11 @@ NAN_METHOD(ValidateFullTopicName) {
 }
 
 NAN_METHOD(ValidateNodeName) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   int validation_result;
   size_t invalid_index;
-  std::string node_name(*Nan::Utf8String(info[0]->ToString()));
+  std::string node_name(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
   rmw_ret_t ret = rmw_validate_node_name(node_name.c_str(), &validation_result,
                                          &invalid_index);
 
@@ -956,9 +978,11 @@ NAN_METHOD(ValidateNodeName) {
 }
 
 NAN_METHOD(ValidateTopicName) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   int validation_result;
   size_t invalid_index;
-  std::string topic_name(*Nan::Utf8String(info[0]->ToString()));
+  std::string topic_name(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
   rmw_ret_t ret = rcl_validate_topic_name(topic_name.c_str(),
                                           &validation_result, &invalid_index);
 
@@ -989,9 +1013,11 @@ NAN_METHOD(ValidateTopicName) {
 }
 
 NAN_METHOD(ValidateNamespace) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   int validation_result;
   size_t invalid_index;
-  std::string namespace_name(*Nan::Utf8String(info[0]->ToString()));
+  std::string namespace_name(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
   rmw_ret_t ret = rmw_validate_namespace(namespace_name.c_str(),
                                          &validation_result, &invalid_index);
 
@@ -1022,9 +1048,13 @@ NAN_METHOD(ValidateNamespace) {
 }
 
 NAN_METHOD(ExpandTopicName) {
-  std::string topic_name(*Nan::Utf8String(info[0]->ToString()));
-  std::string node_name(*Nan::Utf8String(info[1]->ToString()));
-  std::string node_namespace(*Nan::Utf8String(info[2]->ToString()));
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  std::string topic_name(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+  std::string node_name(
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
+  std::string node_namespace(
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
 
   char* expanded_topic = nullptr;
   rcl_allocator_t allocator = rcl_get_default_allocator();
@@ -1134,6 +1164,7 @@ const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
 
 std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
     v8::Local<v8::Object> object) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   std::unique_ptr<rmw_qos_profile_t> qos_profile =
       std::make_unique<rmw_qos_profile_t>();
 
@@ -1151,18 +1182,19 @@ std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
           object->Get(Nan::New("durability").ToLocalChecked())).FromJust());
   qos_profile->avoid_ros_namespace_conventions =
       object->Get(Nan::New("avoidRosNameSpaceConventions").ToLocalChecked())
-          ->BooleanValue();
+          ->BooleanValue(currentContent).FromJust();
 
   return qos_profile;
 }
 
 std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   std::unique_ptr<rmw_qos_profile_t> qos_profile =
       std::make_unique<rmw_qos_profile_t>();
 
   if (qos->IsString()) {
-    *qos_profile = *GetQoSProfileFromString(
-        std::string(*Nan::Utf8String(qos->ToString())));
+    *qos_profile = *GetQoSProfileFromString(std::string(
+        *Nan::Utf8String(qos->ToString(currentContent).ToLocalChecked())));
   } else if (qos->IsObject()) {
     qos_profile = GetQosProfileFromObject(
         Nan::To<v8::Object>(qos).ToLocalChecked());
@@ -1259,7 +1291,9 @@ NAN_METHOD(CreateArrayBufferCleaner) {
 }
 
 NAN_METHOD(setLoggerLevel) {
-  std::string name(*Nan::Utf8String(info[0]->ToString()));
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  std::string name(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
   int level = Nan::To<int64_t>(info[1]).FromJust();
 
   rcutils_ret_t ret = rcutils_logging_set_logger_level(name.c_str(), level);
@@ -1271,7 +1305,9 @@ NAN_METHOD(setLoggerLevel) {
 }
 
 NAN_METHOD(GetLoggerEffectiveLevel) {
-  std::string name(*Nan::Utf8String(info[0]->ToString()));
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  std::string name(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
   int logger_level = rcutils_logging_get_logger_effective_level(name.c_str());
 
   if (logger_level < 0) {
@@ -1284,12 +1320,17 @@ NAN_METHOD(GetLoggerEffectiveLevel) {
 }
 
 NAN_METHOD(Log) {
-  std::string name(*Nan::Utf8String(info[0]->ToString()));
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  std::string name(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
   int severity = Nan::To<int64_t>(info[1]).FromJust();
-  std::string message(*Nan::Utf8String(info[2]->ToString()));
-  std::string function_name(*Nan::Utf8String(info[3]->ToString()));
+  std::string message(
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
+  std::string function_name(
+      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
   size_t line_number = Nan::To<int64_t>(info[4]).FromJust();
-  std::string file_name(*Nan::Utf8String(info[5]->ToString()));
+  std::string file_name(
+      *Nan::Utf8String(info[5]->ToString(currentContent).ToLocalChecked()));
   bool enabled = rcutils_logging_logger_is_enabled_for(name.c_str(), severity);
 
   if (enabled) {
@@ -1302,7 +1343,9 @@ NAN_METHOD(Log) {
 }
 
 NAN_METHOD(IsEnableFor) {
-  std::string name(*Nan::Utf8String(info[0]->ToString()));
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  std::string name(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
   int severity = Nan::To<int64_t>(info[1]).FromJust();
   bool enabled = rcutils_logging_logger_is_enabled_for(name.c_str(), severity);
   info.GetReturnValue().Set(Nan::New(enabled));
@@ -1347,11 +1390,14 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
 }
 
 NAN_METHOD(GetPublisherNamesAndTypesByNode) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string node_name = *Nan::Utf8String(info[1]->ToString());
-  std::string node_namespace = *Nan::Utf8String(info[2]->ToString());
+  std::string node_name =
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
+  std::string node_namespace =
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
   bool no_demangle = Nan::To<bool>(info[3]).FromJust();
 
   rcl_names_and_types_t topic_names_and_types =
@@ -1375,11 +1421,14 @@ NAN_METHOD(GetPublisherNamesAndTypesByNode) {
 }
 
 NAN_METHOD(GetSubscriptionNamesAndTypesByNode) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string node_name = *Nan::Utf8String(info[1]->ToString());
-  std::string node_namespace = *Nan::Utf8String(info[2]->ToString());
+  std::string node_name =
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
+  std::string node_namespace =
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
   bool no_demangle = Nan::To<bool>(info[3]).FromJust();
 
   rcl_names_and_types_t topic_names_and_types =
@@ -1403,11 +1452,14 @@ NAN_METHOD(GetSubscriptionNamesAndTypesByNode) {
 }
 
 NAN_METHOD(GetServiceNamesAndTypesByNode) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string node_name = *Nan::Utf8String(info[1]->ToString());
-  std::string node_namespace = *Nan::Utf8String(info[2]->ToString());
+  std::string node_name =
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
+  std::string node_namespace =
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
 
   rcl_names_and_types_t service_names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -1523,10 +1575,12 @@ NAN_METHOD(GetNodeNames) {
 }
 
 NAN_METHOD(CountPublishers) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string topic_name = *Nan::Utf8String(info[1]->ToString());
+  std::string topic_name =
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
 
   size_t count = 0;
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
@@ -1540,10 +1594,12 @@ NAN_METHOD(CountPublishers) {
 }
 
 NAN_METHOD(CountSubscribers) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string topic_name = *Nan::Utf8String(info[1]->ToString());
+  std::string topic_name =
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
 
   size_t count = 0;
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
