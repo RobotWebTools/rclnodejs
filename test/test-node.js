@@ -262,7 +262,6 @@ describe('rcl node methods testing', function() {
 
     var invalidParams = [
       ['get/parameters?', /topic name is invalid/],
-      ,
       ['get/42parameters', /topic name is invalid/],
       ['foo/{bad_sub}', /unknown substitution/],
     ];
