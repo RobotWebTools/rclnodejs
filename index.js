@@ -102,7 +102,11 @@ let rcl = {
   /** {@link Duration} class */
   Duration: Duration,
 
+  /** {@link NodeOptions} class */
   NodeOptions: NodeOptions,
+
+  /** {@link Parameters} */
+  Parameters: Parameters,
 
   /**
    * Create a node.
