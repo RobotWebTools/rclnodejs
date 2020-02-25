@@ -16,7 +16,7 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const {Clock, ROSClock, TimeSource, Time} = rclnodejs;
+const { Clock, ROSClock, TimeSource, Time } = rclnodejs;
 const int64 = require('int64-napi');
 
 describe('rclnodejs TimeSource testing', function() {
@@ -40,7 +40,7 @@ describe('rclnodejs TimeSource testing', function() {
     let pub = node.createPublisher('builtin_interfaces/msg/Time', 'clock');
     let count = 0;
     timer = setInterval(() => {
-      pub.publish({sec: count, nanosec: 0});
+      pub.publish({ sec: count, nanosec: 0 });
       count += 1;
     }, 1000);
   }
@@ -93,7 +93,10 @@ describe('rclnodejs TimeSource testing', function() {
     assert.strictEqual(clock.isRosTimeActive, true);
 
     assert.ok(timeSource._clockSubscription);
-    assert.strictEqual(clock.now().eq(new Time(0, 0, Clock.ClockType.ROS_TIME)), true);
+    assert.strictEqual(
+      clock.now().eq(new Time(0, 0, Clock.ClockType.ROS_TIME)),
+      true
+    );
 
     publishClockMessage();
     setTimeout(() => {

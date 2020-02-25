@@ -35,7 +35,9 @@ describe('rclnodejs interactive testing', function() {
       const RclString = 'std_msgs/msg/String';
       var publisher = childProcess.fork(`${__dirname}/publisher_setup.js`);
       var destroy = false;
-      var subscription = node.createSubscription(RclString, 'topic', function(msg) {
+      var subscription = node.createSubscription(RclString, 'topic', function(
+        msg
+      ) {
         assert.deepStrictEqual(typeof msg, 'object');
         assert.ok('data' in msg);
         assert.deepStrictEqual(msg.data, 'Greeting from publisher');
@@ -46,7 +48,7 @@ describe('rclnodejs interactive testing', function() {
           destroy = true;
           done();
         }
-      });      
+      });
       rclnodejs.spin(node);
     });
   });
@@ -56,25 +58,35 @@ describe('rclnodejs interactive testing', function() {
       var node = rclnodejs.createNode('client_service');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       const Int8 = 'std_msgs/msg/Int8';
-      var service = node.createService(AddTwoInts, 'add_two_ints', (request, response) => {
-        assert.ok('a' in request);
-        assert.deepStrictEqual(typeof request.a, 'number');
-        assert.ok('b' in request);
-        assert.deepStrictEqual(typeof request.b, 'number');
-        let result = response.template;
-        result.sum = request.a + request.b;
-        response.send(result);
-      });
-      var subscription = node.createSubscription(Int8, 'back_add_two_ints', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, 3);
+      var service = node.createService(
+        AddTwoInts,
+        'add_two_ints',
+        (request, response) => {
+          assert.ok('a' in request);
+          assert.deepStrictEqual(typeof request.a, 'number');
+          assert.ok('b' in request);
+          assert.deepStrictEqual(typeof request.b, 'number');
+          let result = response.template;
+          result.sum = request.a + request.b;
+          response.send(result);
+        }
+      );
+      var subscription = node.createSubscription(
+        Int8,
+        'back_add_two_ints',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, 3);
 
-        node.destroy();
-        pyClient.kill('SIGINT');
-        done();
-      });
+          node.destroy();
+          pyClient.kill('SIGINT');
+          done();
+        }
+      );
       rclnodejs.spin(node);
 
-      var pyClient = childProcess.fork(`${__dirname}/client_setup.js`, {silent: true});
+      var pyClient = childProcess.fork(`${__dirname}/client_setup.js`, {
+        silent: true,
+      });
     });
   });
 });

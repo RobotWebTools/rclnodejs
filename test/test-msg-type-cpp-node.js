@@ -40,20 +40,23 @@ describe('Rclnodejs - Cpp message type testing', function() {
   });
 
   describe('Primitive message types', function() {
-
     it('Bool', function(done) {
       var node = rclnodejs.createNode('bool_js_publisher');
       const Bool = 'std_msgs/msg/Bool';
       const msg = true;
 
       var publisher = node.createPublisher(Bool, 'Bool_js_cpp_channel');
-      var subscription = node.createSubscription(Bool, 'back_Bool_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        Bool,
+        'back_Bool_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -67,13 +70,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const msg = 0x41;
 
       var publisher = node.createPublisher(Byte, 'Byte_js_cpp_channel');
-      var subscription = node.createSubscription(Byte, 'back_Byte_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        Byte,
+        'back_Byte_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -81,20 +88,23 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-
     it('Char', function(done) {
       var node = rclnodejs.createNode('char_js_publisher');
       const Char = 'std_msgs/msg/Char';
       const msg = 0x61;
 
       var publisher = node.createPublisher(Char, 'Char_js_cpp_channel');
-      var subscription = node.createSubscription(Char, 'back_Char_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        Char,
+        'back_Char_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -108,13 +118,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const msg = 'Hello World';
 
       var publisher = node.createPublisher(RclString, 'String_js_cpp_channel');
-      var subscription = node.createSubscription(RclString, 'back_String_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        RclString,
+        'back_String_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -129,13 +143,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var destroy = false;
 
       var publisher = node.createPublisher(Int8, 'Int8_js_cpp_channel');
-      var subscription = node.createSubscription(Int8, 'back_Int8_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        Int8,
+        'back_Int8_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -149,13 +167,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const msg = 0xff;
 
       var publisher = node.createPublisher(UInt8, 'UInt8_js_cpp_channel');
-      var subscription = node.createSubscription(UInt8, 'back_UInt8_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        UInt8,
+        'back_UInt8_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -169,13 +191,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const msg = 0x7fff;
 
       var publisher = node.createPublisher(Int16, 'Int16_js_cpp_channel');
-      var subscription = node.createSubscription(Int16, 'back_Int16_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        Int16,
+        'back_Int16_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -190,13 +216,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var destroy = false;
 
       var publisher = node.createPublisher(UInt16, 'UInt16_js_cpp_channel');
-      var subscription = node.createSubscription(UInt16, 'back_UInt16_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        UInt16,
+        'back_UInt16_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -209,13 +239,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const msg = 0x7fffffff;
 
       var publisher = node.createPublisher(Int32, 'Int32_js_cpp_channel');
-      var subscription = node.createSubscription(Int32, 'back_Int32_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        Int32,
+        'back_Int32_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -229,13 +263,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const msg = 0xffffffff;
 
       var publisher = node.createPublisher(UInt32, 'UInt32_js_cpp_channel');
-      var subscription = node.createSubscription(UInt32, 'back_UInt32_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        UInt32,
+        'back_UInt32_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -248,13 +286,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const msg = Number.MAX_SAFE_INTEGER;
 
       var publisher = node.createPublisher(Int64, 'Int64_js_cpp_channel');
-      var subscription = node.createSubscription(Int64, 'back_Int64_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        Int64,
+        'back_Int64_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -268,13 +310,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var destroy = false;
 
       var publisher = node.createPublisher(UInt64, 'UInt64_js_cpp_channel');
-      var subscription = node.createSubscription(UInt64, 'back_UInt64_js_cpp_channel', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, msg);
+      var subscription = node.createSubscription(
+        UInt64,
+        'back_UInt64_js_cpp_channel',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, msg);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -287,13 +333,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const msg = 3.14;
 
       var publisher = node.createPublisher(Float32, 'Float32_js_cpp_channel');
-      var subscription = node.createSubscription(Float32, 'back_Float32_js_cpp_channel', (backMsg) => {
-        assert.ok(Math.abs(msg - backMsg.data) < 0.01);
+      var subscription = node.createSubscription(
+        Float32,
+        'back_Float32_js_cpp_channel',
+        backMsg => {
+          assert.ok(Math.abs(msg - backMsg.data) < 0.01);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -306,18 +356,22 @@ describe('Rclnodejs - Cpp message type testing', function() {
       const msg = 3.1415926;
 
       var publisher = node.createPublisher(Float64, 'Float64_js_cpp_channel');
-      var subscription = node.createSubscription(Float64, 'back_Float64_js_cpp_channel', (backMsg) => {
-        assert.ok(Math.abs(msg - backMsg.data) < 0.0000001);
+      var subscription = node.createSubscription(
+        Float64,
+        'back_Float64_js_cpp_channel',
+        backMsg => {
+          assert.ok(Math.abs(msg - backMsg.data) < 0.0000001);
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
-    });    
+    });
   });
 
   describe('Compound message types', function() {
@@ -332,14 +386,21 @@ describe('Rclnodejs - Cpp message type testing', function() {
       };
       var destroy = false;
 
-      var publisher = node.createPublisher(ColorRGBA, 'ColorRGBA_js_cpp_channel');
-      var subscription = node.createSubscription(ColorRGBA, 'back_ColorRGBA_js_cpp_channel', (backMsg) => {
-        assert.ok(deepEqual(msg, backMsg));
+      var publisher = node.createPublisher(
+        ColorRGBA,
+        'ColorRGBA_js_cpp_channel'
+      );
+      var subscription = node.createSubscription(
+        ColorRGBA,
+        'back_ColorRGBA_js_cpp_channel',
+        backMsg => {
+          assert.ok(deepEqual(msg, backMsg));
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -365,14 +426,21 @@ describe('Rclnodejs - Cpp message type testing', function() {
         data: [65, 66, 67],
       };
 
-      var publisher = node.createPublisher(ByteMultiArray, 'Array_js_cpp_channel');
-      var subscription = node.createSubscription(ByteMultiArray, 'back_ByteMultiArray_js_cpp_channel', (backMsg) => {
-        assert.ok(deepEqual(msg, backMsg));
+      var publisher = node.createPublisher(
+        ByteMultiArray,
+        'Array_js_cpp_channel'
+      );
+      var subscription = node.createSubscription(
+        ByteMultiArray,
+        'back_ByteMultiArray_js_cpp_channel',
+        backMsg => {
+          assert.ok(deepEqual(msg, backMsg));
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -392,13 +460,17 @@ describe('Rclnodejs - Cpp message type testing', function() {
       };
 
       var publisher = node.createPublisher(Header, 'Header_js_cpp_channel');
-      var subscription = node.createSubscription(Header, 'back_Header_js_cpp_channel', (backMsg) => {
-        assert.ok(deepEqual(msg, backMsg));
+      var subscription = node.createSubscription(
+        Header,
+        'back_Header_js_cpp_channel',
+        backMsg => {
+          assert.ok(deepEqual(msg, backMsg));
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
 
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
@@ -425,14 +497,21 @@ describe('Rclnodejs - Cpp message type testing', function() {
       };
 
       var destroy = false;
-      var publisher = node.createPublisher(JointState, 'JointState_js_cpp_channel');
-      var subscription = node.createSubscription(JointState, 'back_JointState_js_cpp_channel', (backMsg) => {
-        assert.ok(deepEqual(msg, backMsg));
+      var publisher = node.createPublisher(
+        JointState,
+        'JointState_js_cpp_channel'
+      );
+      var subscription = node.createSubscription(
+        JointState,
+        'back_JointState_js_cpp_channel',
+        backMsg => {
+          assert.ok(deepEqual(msg, backMsg));
 
-        timer.cancel();
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });

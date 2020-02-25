@@ -31,15 +31,17 @@ describe('ROSIDL Node.js message generator test suite', function() {
   it('Try require all message classes', function() {
     this.timeout(60 * 1000);
     const packages = require('../rosidl_gen/packages.js');
-    const installedPackagesRoot =  (os.type() === 'Windows_NT')
-      ? process.env.AMENT_PREFIX_PATH.split(';')
-      : process.env.AMENT_PREFIX_PATH.split(':');
+    const installedPackagesRoot =
+      os.type() === 'Windows_NT'
+        ? process.env.AMENT_PREFIX_PATH.split(';')
+        : process.env.AMENT_PREFIX_PATH.split(':');
     let promises = [];
-    installedPackagesRoot.forEach((path) => {
-      let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
-        pkgs.forEach((pkg) => {
-          pkg.messages.forEach((info) => {
-            const s = info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
+    installedPackagesRoot.forEach(path => {
+      let promise = packages.findPackagesInDirectory(path).then(pkgs => {
+        pkgs.forEach(pkg => {
+          pkg.messages.forEach(info => {
+            const s =
+              info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
             assert(rclnodejs.require(s));
           });
         });
@@ -57,8 +59,8 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(typeof msg.data, 'string');
     assert.equal(msg.data, '123570');
 
-    for (let i = 0; i < 100; ++ i) {
-      msg.data = 'message + ' + i;  // Testing string assignment multiple times (string de-allocation)
+    for (let i = 0; i < 100; ++i) {
+      msg.data = 'message + ' + i; // Testing string assignment multiple times (string de-allocation)
     }
 
     msg = new String();
@@ -83,20 +85,20 @@ describe('ROSIDL Node.js message generator test suite', function() {
     let Duration = rclnodejs.require('builtin_interfaces').msg.Duration;
     let msg = new Duration();
     msg.sec = 1024;
-    msg.nanosec = 0xAAAA5555;
+    msg.nanosec = 0xaaaa5555;
     assert.equal(msg.sec, 1024);
-    assert.equal(msg.nanosec, 0xAAAA5555);
+    assert.equal(msg.nanosec, 0xaaaa5555);
 
     let msg2 = new Duration(msg);
     assert.equal(msg2.sec, 1024);
-    assert.equal(msg2.nanosec, 0xAAAA5555);
+    assert.equal(msg2.nanosec, 0xaaaa5555);
 
     msg.sec = 2048;
-    msg.nanosec = 0x5555AAAA;
+    msg.nanosec = 0x5555aaaa;
     assert.equal(msg.sec, 2048);
-    assert.equal(msg.nanosec, 0x5555AAAA);
+    assert.equal(msg.nanosec, 0x5555aaaa);
     assert.equal(msg2.sec, 1024);
-    assert.equal(msg2.nanosec, 0xAAAA5555);
+    assert.equal(msg2.nanosec, 0xaaaa5555);
   });
 
   it('Testing assignment of an all-primitive message - Time', function() {
@@ -142,7 +144,6 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(msg.orientation.y, 4567.25);
     assert.equal(msg.orientation.z, 7890.5);
 
-
     // Copy ctor
     let copy = new Pose(msg);
     assert.equal(copy.position.x, 123.5);
@@ -186,32 +187,32 @@ describe('ROSIDL Node.js message generator test suite', function() {
     let array = new Int32.ArrayType(5);
 
     assert(array.data instanceof Int32Array);
-    assert(typeof array.data[5] === 'undefined');  // No such index
+    assert(typeof array.data[5] === 'undefined'); // No such index
     assert.equal(array.size, 5);
     assert.equal(array.capacity, 5);
 
     // Assignment of message.data
     const int32Data = [153, 26, 777, 666, 999];
-    for (let i = 0; i < int32Data.length; ++ i) {
+    for (let i = 0; i < int32Data.length; ++i) {
       array.data[i] = int32Data[i];
-      assert.equal(array.data[i], int32Data[i]);  // Verifying
+      assert.equal(array.data[i], int32Data[i]); // Verifying
     }
 
     // Array deep copy
     let array2 = new Int32.ArrayType();
     array2.copy(array);
-    for (let i = 0; i < int32Data.length; ++ i) {
+    for (let i = 0; i < int32Data.length; ++i) {
       assert.equal(array2.data[i], int32Data[i]);
     }
 
     // Change array2
-    for (let i = 0; i < array2.length; ++ i) {
+    for (let i = 0; i < array2.length; ++i) {
       array2.data[i] = 0;
     }
 
     // Values in array1 are NOT changed
-    for (let i = 0; i < array.length; ++ i) {
-      assert.equal(array.data[i], int32Data[i]);  // Verifying
+    for (let i = 0; i < array.length; ++i) {
+      assert.equal(array.data[i], int32Data[i]); // Verifying
     }
 
     // Resize

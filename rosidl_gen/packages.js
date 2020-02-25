@@ -36,10 +36,10 @@ function getPackageName(filePath, amentExecuted) {
 
   // If |packageName| equals to the file's extension, e.g. msg/srv, one level
   // up directory will be used as the package name.
-  return packageName === path.parse(filePath).ext.substr(1) ?
-    folders.pop() :
-    packageName;
-};
+  return packageName === path.parse(filePath).ext.substr(1)
+    ? folders.pop()
+    : packageName;
+}
 
 function getSubFolder(filePath, amentExecuted) {
   if (os.type() === 'Windows_NT') {
@@ -76,7 +76,7 @@ function findPackagesInDirectory(dir) {
 
     // If there is a folder named 'share' under the root path, we consider that
     // the ament build tool has been executed and |amentExecuted| will be true.
-    fs.access(path.join(dir, 'share'), (err) => {
+    fs.access(path.join(dir, 'share'), err => {
       if (err) {
         amentExecuted = false;
       }
@@ -88,13 +88,24 @@ function findPackagesInDirectory(dir) {
         if (path.extname(file.name) === '.msg') {
           // Some .msg files were generated prior to 0.3.2 for .action files,
           // which has been disabled. So these files should be ignored here.
-          if (path.dirname(root).split(path.sep).pop() !== 'action') {
-            addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages',
-              pkgMap);
+          if (
+            path
+              .dirname(root)
+              .split(path.sep)
+              .pop() !== 'action'
+          ) {
+            addInterfaceInfo(
+              grabInterfaceInfo(path.join(root, file.name), amentExecuted),
+              'messages',
+              pkgMap
+            );
           }
         } else if (path.extname(file.name) === '.srv') {
-          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services',
-            pkgMap);
+          addInterfaceInfo(
+            grabInterfaceInfo(path.join(root, file.name), amentExecuted),
+            'services',
+            pkgMap
+          );
         }
         next();
       });
@@ -112,7 +123,7 @@ function findPackagesInDirectory(dir) {
 }
 
 let packages = {
-  findPackagesInDirectory: findPackagesInDirectory
+  findPackagesInDirectory: findPackagesInDirectory,
 };
 
 module.exports = packages;

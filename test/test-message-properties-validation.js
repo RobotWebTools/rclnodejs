@@ -34,110 +34,125 @@ describe('Rclnodejs message properities validation', function() {
   /* eslint-disable comma-spacing */
   [
     {
-      pkg: 'std_msgs', type: 'Header',
+      pkg: 'std_msgs',
+      type: 'Header',
       value: {
-        stamp: {sec: 11223, nanosec: 44556},
+        stamp: { sec: 11223, nanosec: 44556 },
         frame_id: 'f001',
-      }
+      },
     },
     {
-      pkg: 'geometry_msgs', type: 'Pose',
+      pkg: 'geometry_msgs',
+      type: 'Pose',
       value: {
-        position:    {x: 1.5,  y: 2.75,  z: 3.0, },
-        orientation: {x: 1.5,  y: 2.75,  z: 3.0, w: 1.0, },
-      }
+        position: { x: 1.5, y: 2.75, z: 3.0 },
+        orientation: { x: 1.5, y: 2.75, z: 3.0, w: 1.0 },
+      },
     },
     {
-      pkg: 'geometry_msgs', type: 'Transform',
+      pkg: 'geometry_msgs',
+      type: 'Transform',
       value: {
-        translation: {x: 1.5,  y: 2.75,   z: 3.0, },
-        rotation:    {x: 1.5,  y: 2.75,   z: 3.0, w: 1.0, },
-      }
+        translation: { x: 1.5, y: 2.75, z: 3.0 },
+        rotation: { x: 1.5, y: 2.75, z: 3.0, w: 1.0 },
+      },
     },
     {
-      pkg: 'std_msgs', type: 'MultiArrayDimension',
+      pkg: 'std_msgs',
+      type: 'MultiArrayDimension',
       value: {
-        label: 'label name 0', size: 256, stride: 4,
-      }
+        label: 'label name 0',
+        size: 256,
+        stride: 4,
+      },
     },
     {
-      pkg: 'sensor_msgs', type: 'JointState',
+      pkg: 'sensor_msgs',
+      type: 'JointState',
       value: {
         header: {
-          stamp: {sec: 11223, nanosec: 44556},
+          stamp: { sec: 11223, nanosec: 44556 },
           frame_id: '1234567x',
         },
         name: ['Willy', 'Tacky'],
         position: [1, 7, 3, 4, 2, 2, 8],
         velocity: [8, 9, 6, 4],
-        effort:   [1, 0, 2, 6, 7],
+        effort: [1, 0, 2, 6, 7],
       },
     },
     {
-      pkg: 'std_msgs', type: 'Float32MultiArray',
+      pkg: 'std_msgs',
+      type: 'Float32MultiArray',
       value: {
         layout: {
           dim: [
-            {label: 'height',  size: 480, stride: 921600},
-            {label: 'width',   size: 640, stride: 1920},
-            {label: 'channel', size: 3,   stride: 8},
+            { label: 'height', size: 480, stride: 921600 },
+            { label: 'width', size: 640, stride: 1920 },
+            { label: 'channel', size: 3, stride: 8 },
           ],
           data_offset: 1024,
         },
         data: [1.0, 2.0, 3.0, 8.5, 6.75, 0.5, -0.25],
-      }
+      },
     },
     {
-      pkg: 'std_msgs', type: 'Int32MultiArray',
+      pkg: 'std_msgs',
+      type: 'Int32MultiArray',
       value: {
         layout: {
           dim: [
-            {label: 'height',  size: 10, stride: 600},
-            {label: 'width',   size: 20, stride: 60},
-            {label: 'channel', size: 3,   stride: 4},
+            { label: 'height', size: 10, stride: 600 },
+            { label: 'width', size: 20, stride: 60 },
+            { label: 'channel', size: 3, stride: 4 },
           ],
           data_offset: 0,
         },
         data: Int32Array.from([-10, 1, 2, 3, 8, 6, 0, -25]),
-      }
+      },
     },
     {
-      pkg: 'std_msgs', type: 'Int16MultiArray',
+      pkg: 'std_msgs',
+      type: 'Int16MultiArray',
       value: {
         layout: {
           dim: [
-            {label: 'height',  size: 10, stride: 600},
-            {label: 'width',   size: 20, stride: 60},
-            {label: 'channel', size: 3,   stride: 4},
+            { label: 'height', size: 10, stride: 600 },
+            { label: 'width', size: 20, stride: 60 },
+            { label: 'channel', size: 3, stride: 4 },
           ],
           data_offset: 0,
         },
         data: Int16Array.from([-10, 1, 2, 3, 8, 6, 0, -25]), // Provide data via TypedArray
-      }
+      },
     },
     {
-      pkg: 'std_msgs', type: 'Int8MultiArray',
+      pkg: 'std_msgs',
+      type: 'Int8MultiArray',
       value: {
         layout: {
           dim: [
-            {label: 'height',  size: 10, stride: 600},
-            {label: 'width',   size: 20, stride: 60},
-            {label: 'channel', size: 3,   stride: 4},
+            { label: 'height', size: 10, stride: 600 },
+            { label: 'width', size: 20, stride: 60 },
+            { label: 'channel', size: 3, stride: 4 },
           ],
           data_offset: 0,
         },
         data: Int8Array.from([-10, 1, 2, 3, 8, 6, 0, -25]), // Provide data via TypedArray
-      }
+      },
     },
     {
-      pkg: 'sensor_msgs', type: 'PointCloud',
+      pkg: 'sensor_msgs',
+      type: 'PointCloud',
       value: {
         header: {
-          stamp: {sec: 11223, nanosec: 44556},
+          stamp: { sec: 11223, nanosec: 44556 },
           frame_id: 'f001',
         },
         points: [
-          {x:0, y:1, z:3}, {x:0, y:1, z:3}, {x:0, y:1, z:3}, {x:0, y:1, z:3},
+          { x: 0, y: 1, z: 3 },
+          { x: 0, y: 1, z: 3 },
+          { x: 0, y: 1, z: 3 },
+          { x: 0, y: 1, z: 3 },
         ],
         channels: [
           {
@@ -149,7 +164,7 @@ describe('Rclnodejs message properities validation', function() {
             values: [10.0, 21.5, 2.0, 3.75],
           },
         ],
-      }
+      },
     },
   ].forEach((testData, index) => {
     it(`Test properties of ${testData.pkg}/${testData.type}.msg, case ${index}`, function() {

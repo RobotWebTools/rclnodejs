@@ -16,15 +16,22 @@
 
 const rclnodejs = require('../index.js');
 
-rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('subscription_message_example_node');
-  let count = 0;
+rclnodejs
+  .init()
+  .then(() => {
+    const node = rclnodejs.createNode('subscription_message_example_node');
+    let count = 0;
 
-  node.createSubscription('sensor_msgs/msg/JointState', 'JointState', (state) => {
-    console.log(`Received message No. ${++count}: `, state);
+    node.createSubscription(
+      'sensor_msgs/msg/JointState',
+      'JointState',
+      state => {
+        console.log(`Received message No. ${++count}: `, state);
+      }
+    );
+
+    rclnodejs.spin(node);
+  })
+  .catch(e => {
+    console.log(e);
   });
-
-  rclnodejs.spin(node);
-}).catch(e => {
-  console.log(e);
-});

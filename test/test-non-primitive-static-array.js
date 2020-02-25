@@ -42,20 +42,27 @@ describe('Test message which has a static non-primitive array', function() {
 
   it('Assigned with an array whose length is 2', function(done) {
     const node = rclnodejs.createNode('publish_time');
-    let publisher = node.createPublisher('rclnodejs_test_msgs/msg/StaticArrayNonPrimitives', 'time');
+    let publisher = node.createPublisher(
+      'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
+      'time'
+    );
     let timer = setInterval(() => {
       assert.doesNotThrow(() => {
         console.log('length is ' + time_value.length);
-        publisher.publish({time_value});
+        publisher.publish({ time_value });
       }, RangeError);
     }, 100);
 
-    node.createSubscription('rclnodejs_test_msgs/msg/StaticArrayNonPrimitives', 'time', (msg) => {
-      clearInterval(timer);
-      assert.deepStrictEqual(msg.time_value, time_value);
-      node.destroy();
-      done();
-    });
+    node.createSubscription(
+      'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
+      'time',
+      msg => {
+        clearInterval(timer);
+        assert.deepStrictEqual(msg.time_value, time_value);
+        node.destroy();
+        done();
+      }
+    );
 
     rclnodejs.spin(node);
   });
@@ -63,20 +70,25 @@ describe('Test message which has a static non-primitive array', function() {
   it('Assigned with an array whose length is greater than 2', function(done) {
     time_value.push(time);
     const node = rclnodejs.createNode('publish_time');
-    let publisher = node.createPublisher('rclnodejs_test_msgs/msg/StaticArrayNonPrimitives', 'time');
+    let publisher = node.createPublisher(
+      'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
+      'time'
+    );
     assert.throws(() => {
-      publisher.publish({time_value});
+      publisher.publish({ time_value });
     }, RangeError);
     node.destroy();
     done();
   });
 
-
   it('Assigned with an array whose length is less than 2', function(done) {
     const node = rclnodejs.createNode('publish_time');
-    let publisher = node.createPublisher('rclnodejs_test_msgs/msg/StaticArrayNonPrimitives', 'time');
+    let publisher = node.createPublisher(
+      'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
+      'time'
+    );
     assert.throws(() => {
-      publisher.publish({time_value: time_value.slice(0, 0)});
+      publisher.publish({ time_value: time_value.slice(0, 0) });
     }, RangeError);
     node.destroy();
     done();

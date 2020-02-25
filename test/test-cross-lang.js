@@ -33,12 +33,16 @@ describe('Cross-language interaction', function() {
   });
 
   describe('Node.js Subcription', function() {
-    it('Node.js subscription should receive msg from C++ publisher', (done) => {
+    it('Node.js subscription should receive msg from C++ publisher', done => {
       var node = rclnodejs.createNode('cpp_pub_js_sub');
       const RclString = 'std_msgs/msg/String';
       var destroy = false;
-      var cppTalker = childProcess.spawn('ros2', ['run', 'demo_nodes_cpp', 'talker']);
-      var subscription = node.createSubscription(RclString, 'chatter', (msg) => {
+      var cppTalker = childProcess.spawn('ros2', [
+        'run',
+        'demo_nodes_cpp',
+        'talker',
+      ]);
+      var subscription = node.createSubscription(RclString, 'chatter', msg => {
         assert.ok(/Hello World:/.test(msg.data));
         if (!destroy) {
           node.destroy();
@@ -50,42 +54,53 @@ describe('Cross-language interaction', function() {
       rclnodejs.spin(node);
     });
 
-    it('Node.js subscription should receive msg from Python publisher', (done) => {
+    it('Node.js subscription should receive msg from Python publisher', done => {
       var node = rclnodejs.createNode('cpp_pub_py_sub');
       const RclString = 'std_msgs/msg/String';
       var destroy = false;
       var pyTalker = utils.launchPythonProcess([`${__dirname}/py/talker.py`]);
-      var subscription = node.createSubscription(RclString, 'py_js_chatter', (msg) => {
-        assert.ok(/Hello World/.test(msg.data));
-        if (!destroy) {
-          node.destroy();
-          pyTalker.kill('SIGINT');
-          destroy = true;
-          done();
+      var subscription = node.createSubscription(
+        RclString,
+        'py_js_chatter',
+        msg => {
+          assert.ok(/Hello World/.test(msg.data));
+          if (!destroy) {
+            node.destroy();
+            pyTalker.kill('SIGINT');
+            destroy = true;
+            done();
+          }
         }
-      });
+      );
       rclnodejs.spin(node);
     });
   });
 
   describe('Node.js publisher', function() {
-    it('Cpp subscription should receive msg from Node.js publisher', (done) => {
+    it('Cpp subscription should receive msg from Node.js publisher', done => {
       var node = rclnodejs.createNode('js_pub_cpp_sub');
       const RclString = 'std_msgs/msg/String';
 
       let msg = 'Greeting from Node.js publisher';
       let cppListenerPath = path.join(__dirname, 'cpp', 'listener');
-      var cppListener = childProcess.spawn(cppListenerPath, ['-t', 'js_cpp_chatter']);
+      var cppListener = childProcess.spawn(cppListenerPath, [
+        '-t',
+        'js_cpp_chatter',
+      ]);
       var publisher = node.createPublisher(RclString, 'js_cpp_chatter');
 
-      var subscription = node.createSubscription(RclString, 'back_js_cpp_chatter', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
+      var subscription = node.createSubscription(
+        RclString,
+        'back_js_cpp_chatter',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
 
-        timer.cancel();
-        node.destroy();
-        cppListener.kill('SIGINT');
-        done();
-      });
+          timer.cancel();
+          node.destroy();
+          cppListener.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -97,16 +112,22 @@ describe('Cross-language interaction', function() {
       const RclString = 'std_msgs/msg/String';
 
       let text = 'Greeting from Node.js publisher to Python subscription';
-      var pyListener = utils.launchPythonProcess([`${__dirname}/py/listener.py`]);
+      var pyListener = utils.launchPythonProcess([
+        `${__dirname}/py/listener.py`,
+      ]);
       var publisher = node.createPublisher(RclString, 'js_py_chatter');
-      var subscription = node.createSubscription(RclString, 'back_js_py_chatter', (msg) => {
-        assert.deepStrictEqual(msg.data, text);
+      var subscription = node.createSubscription(
+        RclString,
+        'back_js_py_chatter',
+        msg => {
+          assert.deepStrictEqual(msg.data, text);
 
-        timer.cancel();
-        pyListener.kill('SIGINT');
-        node.destroy();
-        done();
-      });
+          timer.cancel();
+          pyListener.kill('SIGINT');
+          node.destroy();
+          done();
+        }
+      );
       var msg = text;
 
       var timer = node.createTimer(100, () => {
@@ -125,10 +146,10 @@ describe('Cross-language interaction', function() {
 
       var pyService = utils.launchPythonProcess([`${__dirname}/py/service.py`]);
       var client = node.createClient(AddTwoInts, 'js_py_add_two_ints');
-      const request = {a: 1, b: 2};
+      const request = { a: 1, b: 2 };
 
       var timer = node.createTimer(100, () => {
-        client.sendRequest(request, (response) => {
+        client.sendRequest(request, response => {
           if (!destroy) {
             assert.deepStrictEqual(response.sum, 3);
             timer.cancel();
@@ -136,7 +157,7 @@ describe('Cross-language interaction', function() {
             pyService.kill('SIGINT');
             destroy = true;
             done();
-          }      
+          }
         });
       });
 
@@ -147,12 +168,16 @@ describe('Cross-language interaction', function() {
       var node = rclnodejs.createNode('js_cpp_add_client');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var client = node.createClient(AddTwoInts, 'add_two_ints');
-      const request = {a: 1, b: 2};
+      const request = { a: 1, b: 2 };
 
       var destroy = false;
-      var cppService = childProcess.spawn('ros2', ['run', 'demo_nodes_cpp', 'add_two_ints_server']);
+      var cppService = childProcess.spawn('ros2', [
+        'run',
+        'demo_nodes_cpp',
+        'add_two_ints_server',
+      ]);
       var timer = node.createTimer(100, () => {
-        client.sendRequest(request, (response) => {
+        client.sendRequest(request, response => {
           if (!destroy) {
             timer.cancel();
             assert.deepStrictEqual(response.sum, 3);
@@ -173,19 +198,27 @@ describe('Cross-language interaction', function() {
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       const Int8 = 'std_msgs/msg/Int8';
 
-      var service = node.createService(AddTwoInts, 'py_js_add_two_ints', (request, response) => {
-        assert.deepStrictEqual(typeof request.a, 'number');
-        assert.deepStrictEqual(typeof request.b, 'number');
-        let result = response.template;
-        result.sum = request.a + request.b;
-        response.send(result);
-      });
-      var subscription = node.createSubscription(Int8, 'back_py_js_add_two_ints', (msg) => {
-        assert.deepStrictEqual(msg.data, 3);
-        node.destroy();
-        pyClient.kill('SIGINT');
-        done();
-      });
+      var service = node.createService(
+        AddTwoInts,
+        'py_js_add_two_ints',
+        (request, response) => {
+          assert.deepStrictEqual(typeof request.a, 'number');
+          assert.deepStrictEqual(typeof request.b, 'number');
+          let result = response.template;
+          result.sum = request.a + request.b;
+          response.send(result);
+        }
+      );
+      var subscription = node.createSubscription(
+        Int8,
+        'back_py_js_add_two_ints',
+        msg => {
+          assert.deepStrictEqual(msg.data, 3);
+          node.destroy();
+          pyClient.kill('SIGINT');
+          done();
+        }
+      );
       rclnodejs.spin(node);
 
       var pyClient = utils.launchPythonProcess([`${__dirname}/py/client.py`]);
@@ -196,25 +229,36 @@ describe('Cross-language interaction', function() {
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       const Int8 = 'std_msgs/msg/Int8';
 
-      var service = node.createService(AddTwoInts, 'cpp_js_add_two_ints', (request, response) => {
-        assert.deepStrictEqual(typeof request.a, 'number');
-        assert.deepStrictEqual(typeof request.b, 'number');
-        let result = response.template;
-        result.sum = request.a + request.b;
-        response.send(result);
-      });
+      var service = node.createService(
+        AddTwoInts,
+        'cpp_js_add_two_ints',
+        (request, response) => {
+          assert.deepStrictEqual(typeof request.a, 'number');
+          assert.deepStrictEqual(typeof request.b, 'number');
+          let result = response.template;
+          result.sum = request.a + request.b;
+          response.send(result);
+        }
+      );
 
-      var subscription = node.createSubscription(Int8, 'back_cpp_js_add_two_ints', (backMsg) => {
-        assert.deepStrictEqual(backMsg.data, 5);
+      var subscription = node.createSubscription(
+        Int8,
+        'back_cpp_js_add_two_ints',
+        backMsg => {
+          assert.deepStrictEqual(backMsg.data, 5);
 
-        node.destroy();
-        cppClient.kill('SIGINT');
-        done();
-      });
+          node.destroy();
+          cppClient.kill('SIGINT');
+          done();
+        }
+      );
       rclnodejs.spin(node);
 
       var cppClientPath = path.join(__dirname, 'cpp', 'add_two_ints_client');
-      var cppClient = childProcess.spawn(cppClientPath, ['-s', 'cpp_js_add_two_ints']);
+      var cppClient = childProcess.spawn(cppClientPath, [
+        '-s',
+        'cpp_js_add_two_ints',
+      ]);
     });
   });
 });

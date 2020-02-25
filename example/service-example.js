@@ -16,18 +16,25 @@
 
 const rclnodejs = require('../index.js');
 
-rclnodejs.init().then(() => {
-  let node = rclnodejs.createNode('service_example_node');
+rclnodejs
+  .init()
+  .then(() => {
+    let node = rclnodejs.createNode('service_example_node');
 
-  node.createService('example_interfaces/srv/AddTwoInts', 'add_two_ints', (request, response) => {
-    console.log(`Incoming request: ${typeof request}`, request);
-    let result = response.template;
-    result.sum = request.a + request.b;
-    console.log(`Sending response: ${typeof result}`, result, '\n--');
-    response.send(result);
+    node.createService(
+      'example_interfaces/srv/AddTwoInts',
+      'add_two_ints',
+      (request, response) => {
+        console.log(`Incoming request: ${typeof request}`, request);
+        let result = response.template;
+        result.sum = request.a + request.b;
+        console.log(`Sending response: ${typeof result}`, result, '\n--');
+        response.send(result);
+      }
+    );
+
+    rclnodejs.spin(node);
+  })
+  .catch(e => {
+    console.log(`Error: ${e}`);
   });
-
-  rclnodejs.spin(node);
-}).catch((e) => {
-  console.log(`Error: ${e}`);
-});

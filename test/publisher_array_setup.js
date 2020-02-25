@@ -18,36 +18,39 @@
 
 const rclnodejs = require('../index.js');
 
-rclnodejs.init().then(function() {
-  var node = rclnodejs.createNode('array_message_publisher');
-  const JointState = 'sensor_msgs/msg/JointState';
-  var publisher = node.createPublisher(JointState, 'JointState');
+rclnodejs
+  .init()
+  .then(function() {
+    var node = rclnodejs.createNode('array_message_publisher');
+    const JointState = 'sensor_msgs/msg/JointState';
+    var publisher = node.createPublisher(JointState, 'JointState');
 
-  const state = {
-    header: {
-      stamp: {
-        sec: 123456,
-        nanosec: 789,
+    const state = {
+      header: {
+        stamp: {
+          sec: 123456,
+          nanosec: 789,
+        },
+        frame_id: 'main frame',
       },
-      frame_id: 'main frame',
-    },
-    name: ['Tom', 'Jerry'],
-    position: [1, 2],
-    velocity: [2, 3],
-    effort: [4, 5, 6],
-  };
+      name: ['Tom', 'Jerry'],
+      position: [1, 2],
+      velocity: [2, 3],
+      effort: [4, 5, 6],
+    };
 
-  var timer = node.createTimer(100, () => {
-    publisher.publish(state);
-  });
-  rclnodejs.spin(node);
+    var timer = node.createTimer(100, () => {
+      publisher.publish(state);
+    });
+    rclnodejs.spin(node);
 
-  process.on('SIGINT', function() {
-    timer.cancel();
-    node.destroy();
-    rclnodejs.shutdown();
-    process.exit(0);
+    process.on('SIGINT', function() {
+      timer.cancel();
+      node.destroy();
+      rclnodejs.shutdown();
+      process.exit(0);
+    });
+  })
+  .catch(function(err) {
+    console.log(err);
   });
-}).catch(function(err) {
-  console.log(err);
-});
