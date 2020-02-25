@@ -17,7 +17,16 @@
 const rclnodejs = require('../index.js');
 const { validator } = rclnodejs;
 
-console.log('validation of topic "/node_name/chatter" is ' + validator.validateFullTopicName('/node_name/chatter'));
-console.log('validation of node "my_node" is ' + validator.validateNodeName('my_node'));
-console.log('validation of topic "chatter" is ' + validator.validateTopicName('chatter'));
-console.log('validation of namespace "/my_ns" is ' + validator.validateNamespace('/my_ns'));
+console.log(
+  'validation of topic "/node_name/chatter" is ' +
+    validator.validateFullTopicName('/node_name/chatter')
+);
+console.log(
+  'validation of node "my_node" is ' + validator.validateNodeName('my_node')
+);
+console.log(
+  'validation of topic "chatter" is ' + validator.validateTopicName('chatter')
+);
+console.log(
+  'validation of namespace "/my_ns" is ' + validator.validateNamespace('/my_ns')
+);

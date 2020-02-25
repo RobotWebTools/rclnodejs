@@ -26,22 +26,25 @@ function assertMember(name, obj, member, typeName) {
 }
 
 function assertThrowsError(operation, errors, errMsg, message) {
-  assert.throws(operation, function(err) {
-    var containedMsg = new RegExp(errMsg);
+  assert.throws(
+    operation,
+    function(err) {
+      var containedMsg = new RegExp(errMsg);
 
-    if (errors instanceof Array) {
-      var foundError = false;
-      errors.forEach((e) => {
-        if (err instanceof e)
-          foundError = true;
-      });
-      return foundError;
-    } else if ((err instanceof errors) && containedMsg.test(err)) {
-      return true;
-    }
+      if (errors instanceof Array) {
+        var foundError = false;
+        errors.forEach(e => {
+          if (err instanceof e) foundError = true;
+        });
+        return foundError;
+      } else if (err instanceof errors && containedMsg.test(err)) {
+        return true;
+      }
 
-    return false;
-  }, message);
+      return false;
+    },
+    message
+  );
 }
 
 function launchPythonProcess(cmdline) {
@@ -59,9 +62,9 @@ function getAvailablePath(amentPrefixPath, otherDirs) {
   var availablePath;
   var prefixPaths = amentPrefixPath.split(path.delimiter);
 
-  prefixPaths.forEach((prefixPath) => {
+  prefixPaths.forEach(prefixPath => {
     var appendedPath = prefixPath;
-    otherDirs.forEach((dir) => {
+    otherDirs.forEach(dir => {
       appendedPath = path.join(appendedPath, dir);
     });
 
@@ -74,8 +77,8 @@ function getAvailablePath(amentPrefixPath, otherDirs) {
   return availablePath;
 }
 
-// example call from async function/method:   
-//   
+// example call from async function/method:
+//
 //  await assertUtils.createDelay(500);
 //
 function createDelay(millis) {
@@ -87,5 +90,5 @@ module.exports = {
   assertThrowsError: assertThrowsError,
   createDelay: createDelay,
   getAvailablePath: getAvailablePath,
-  launchPythonProcess: launchPythonProcess
+  launchPythonProcess: launchPythonProcess,
 };

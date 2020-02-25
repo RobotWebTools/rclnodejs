@@ -72,8 +72,8 @@ describe('Node destroy testing', function() {
 
     var timer = node.createTimer(0.1, () => {});
     assert.deepStrictEqual(1, node._timers.length);
-    
-    // don't forget that node always has at least 
+
+    // don't forget that node always has at least
     // 1 publisher, the node.parameterEventPublisher
     const int16 = 'std_msgs/msg/Int16';
     var pub1 = node.createPublisher(int16, 'pub1_topic');

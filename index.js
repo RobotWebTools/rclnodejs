@@ -30,13 +30,13 @@ const tsdGenerator = require('./rostsd_gen/index.js');
 const validator = require('./lib/validator.js');
 const Time = require('./lib/time.js');
 const TimeSource = require('./lib/time_source.js');
-const {Clock, ROSClock} = require('./lib/clock.js');
+const { Clock, ROSClock } = require('./lib/clock.js');
 const Duration = require('./lib/duration.js');
 const Context = require('./lib/context.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
-  properties.forEach((property) => {
+  properties.forEach(property => {
     target.prototype[property] = source.prototype[property];
   });
 }
@@ -116,54 +116,70 @@ let rcl = {
    * @param {NodeOptions} options - The options to configure the new node behavior.
    * @return {Node} The instance of Node.
    */
-  createNode(nodeName, namespace = '', context = Context.defaultContext(),
-    options = NodeOptions.defaultOptions) {
-  
-    if (typeof (nodeName) !== 'string' || typeof (namespace) !== 'string') {
+  createNode(
+    nodeName,
+    namespace = '',
+    context = Context.defaultContext(),
+    options = NodeOptions.defaultOptions
+  ) {
+    if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
       throw new TypeError('Invalid argument.');
     }
 
     let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
-    let node =  new rclnodejs.ShadowNode();
+    let node = new rclnodejs.ShadowNode();
     node.handle = handle;
-    
+
     node.init(nodeName, namespace, context, options);
-    debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
-    
+    debug(
+      'Finish initializing node, name = %s and namespace = %s.',
+      nodeName,
+      namespace
+    );
+
     node.context = context;
     this._nodes.push(node);
     return node;
   },
 
   /**
-  * Init the module.
-  * @param {Context} context - The context, default is Context.defaultContext().
-  * @param {string[]} argv - Process commandline arguments.
-  * @return {Promise<undefined>} A Promise.
-  */
+   * Init the module.
+   * @param {Context} context - The context, default is Context.defaultContext().
+   * @param {string[]} argv - Process commandline arguments.
+   * @return {Promise<undefined>} A Promise.
+   */
   init(context = Context.defaultContext(), argv = process.argv) {
     return new Promise((resolve, reject) => {
       let that = this;
       if (!this._initialized) {
-        getCurrentGeneratorVersion().then(version => {
-          let forced = version === null || compareVersions(version, generator.version()) === -1
-            ? true
-            : false;
-          if (forced) {
-            debug('The generator will begin to create JavaScript code from ROS IDL files...');
-          }
+        getCurrentGeneratorVersion()
+          .then(version => {
+            let forced =
+              version === null ||
+              compareVersions(version, generator.version()) === -1
+                ? true
+                : false;
+            if (forced) {
+              debug(
+                'The generator will begin to create JavaScript code from ROS IDL files...'
+              );
+            }
 
-          generator.generateAll(forced).then(() => {
-            this._context = context;
-            rclnodejs.init(context.handle(), argv);
-            this._initialized = true;
-            resolve();
-          }).catch(e => {
+            generator
+              .generateAll(forced)
+              .then(() => {
+                this._context = context;
+                rclnodejs.init(context.handle(), argv);
+                this._initialized = true;
+                resolve();
+              })
+              .catch(e => {
+                reject(e);
+              });
+          })
+          .catch(e => {
             reject(e);
           });
-        }).catch(e => {
-          reject(e);
-        });
       } else {
         throw new Error('The module rclnodejs has been initialized.');
       }
@@ -211,7 +227,7 @@ let rcl = {
       throw new Error('The module rclnodejs has been shut.');
     }
 
-    this._nodes.forEach((node) => {
+    this._nodes.forEach(node => {
       node.stopSpinning();
       node.destroy();
     });
@@ -252,13 +268,16 @@ let rcl = {
     // to overwrite the existing ones although they have been created.
     debug('Begin regeneration of JavaScript code from ROS IDL files.');
     return new Promise((resolve, reject) => {
-      generator.generateAll(true).then(() => {
-        tsdGenerator.generateAll(); // create interfaces.d.ts
-        debug('Finish regeneration.');
-        resolve();
-      }).catch((e) => {
-        reject(e);
-      });
+      generator
+        .generateAll(true)
+        .then(() => {
+          tsdGenerator.generateAll(); // create interfaces.d.ts
+          debug('Finish regeneration.');
+          resolve();
+        })
+        .catch(e => {
+          reject(e);
+        });
     });
   },
 
@@ -268,12 +287,12 @@ let rcl = {
    * @return {boolean} - True if a given topic or service name is hidden, otherwise False.
    */
   isTopicOrServiceHidden(name) {
-    if (typeof (name) !== 'string') {
+    if (typeof name !== 'string') {
       throw new TypeError('Invalid argument');
     }
 
     let arr = name.split('/');
-    for (let i= 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
       if (arr[i].startsWith('_')) return true;
     }
     return false;

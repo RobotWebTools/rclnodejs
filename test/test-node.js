@@ -64,27 +64,42 @@ describe('rclnodejs node test suite', function() {
       var nodeName = 'example_node_invalid_name?',
         nodeNamespace = 'ns';
 
-      assertThrowsError(() => {
-        var node = rclnodejs.createNode(nodeName, nodeNamespace);
-      }, Error, 'must not contain characters other than', 'Invalid node name!');
+      assertThrowsError(
+        () => {
+          var node = rclnodejs.createNode(nodeName, nodeNamespace);
+        },
+        Error,
+        'must not contain characters other than',
+        'Invalid node name!'
+      );
     });
 
     it('Try creating a node with an invliad relative nampespace', function() {
       var nodeName = 'example_node_with_invalid_rel_ns',
         nodeNamespace = 'ns?';
 
-      assertThrowsError(() => {
-        var node = rclnodejs.createNode(nodeName, nodeNamespace);
-      }, Error, 'must not contain characters other than', 'Invalid relative namespace name!');
+      assertThrowsError(
+        () => {
+          var node = rclnodejs.createNode(nodeName, nodeNamespace);
+        },
+        Error,
+        'must not contain characters other than',
+        'Invalid relative namespace name!'
+      );
     });
 
     it('Try creating a node with an invalid absolute namespace', function() {
       var nodeName = 'example_node_with_abs_ns',
         nodeNamespace = '/ns?';
 
-      assertThrowsError(() => {
-        var node = rclnodejs.createNode(nodeName, nodeNamespace);
-      }, Error, 'must not contain characters other than', 'Invalid absolute namespace name!');
+      assertThrowsError(
+        () => {
+          var node = rclnodejs.createNode(nodeName, nodeNamespace);
+        },
+        Error,
+        'must not contain characters other than',
+        'Invalid absolute namespace name!'
+      );
     });
 
     it('Try creating a node with invalid type of parameters', function() {
@@ -93,19 +108,24 @@ describe('rclnodejs node test suite', function() {
         [undefined, '/ns'],
         [null, '/ns'],
         [false, '/ns'],
-        [{name: 'invalidName'}, '/ns'],
+        [{ name: 'invalidName' }, '/ns'],
         ['validName', 2],
         ['validName', true],
-        ['validName', {ns: '/invalidns'}],
+        ['validName', { ns: '/invalidns' }],
         ['validName', ['ns', 3]],
         ['validName', new RegExp('abc')],
-        [undefined, null]
+        [undefined, null],
       ];
 
       invalidParams.forEach(function(param) {
-        assertThrowsError(() => {
-          var node = rclnodejs.createNode(param[0], param[1]);
-        }, TypeError, 'Invalid argument', 'The parameters type is invalid!');
+        assertThrowsError(
+          () => {
+            var node = rclnodejs.createNode(param[0], param[1]);
+          },
+          TypeError,
+          'Invalid argument',
+          'The parameters type is invalid!'
+        );
       });
     });
   });
@@ -147,13 +167,18 @@ describe('rcl node methods testing', function() {
     var invalidParams = [
       ['chatter?', Error, /topic name is invalid/],
       ['/chatter/42_is_the_answer', Error, /topic name is invalid/],
-      ['/chatter/{bad_sub}', Error, /unknown substitution/]
+      ['/chatter/{bad_sub}', Error, /unknown substitution/],
     ];
 
     invalidParams.forEach(function(invalidParam) {
-      assertThrowsError(() => {
-        node.createPublisher(RclString, invalidParam[0]);
-      }, invalidParam[1], invalidParam[2], 'Failed to createPublisher');
+      assertThrowsError(
+        () => {
+          node.createPublisher(RclString, invalidParam[0]);
+        },
+        invalidParam[1],
+        invalidParam[2],
+        'Failed to createPublisher'
+      );
     });
   });
 
@@ -164,15 +189,15 @@ describe('rcl node methods testing', function() {
       [undefined, 'validServiceName'],
       [null, 'validServiceName'],
       [true, 'validServiceName'],
-      [{f: 'abc'}, 'validServiceName'],
+      [{ f: 'abc' }, 'validServiceName'],
       [['a', 'b', 'c'], 'validSerivceName'],
       [RclString, 2],
       [RclString, undefined],
       [RclString, null],
       [RclString, false],
-      [RclString, {n: 'invalidServiceName'}],
+      [RclString, { n: 'invalidServiceName' }],
       [RclString, [1, 2, 3]],
-      [undefined, null]
+      [undefined, null],
     ];
 
     invalidParams.forEach(function(invalidParam) {
@@ -188,13 +213,18 @@ describe('rcl node methods testing', function() {
     var invalidParams = [
       ['chatter?', /topic name is invalid/],
       ['/chatter/42_is_the_answer', /topic name is invalid/],
-      ['/chatter/{bad_sub}', /unknown substitution/]
+      ['/chatter/{bad_sub}', /unknown substitution/],
     ];
 
     invalidParams.forEach(function(invalidParam) {
-      assertThrowsError(() => {
-        node.createSubscription(RclString, invalidParam[0], () => {});
-      }, Error, invalidParam[1], 'Failed to createSubscription');
+      assertThrowsError(
+        () => {
+          node.createSubscription(RclString, invalidParam[0], () => {});
+        },
+        Error,
+        invalidParam[1],
+        'Failed to createSubscription'
+      );
     });
   });
 
@@ -205,20 +235,24 @@ describe('rcl node methods testing', function() {
       [undefined, 'validTopicName', undefined],
       [null, 'validTopicName', null],
       [true, 'validTopicName', undefined],
-      [{f: 'abc'}, 'validTopicName', null],
+      [{ f: 'abc' }, 'validTopicName', null],
       [['a', 'b', 'c'], 'validTopicName', undefined],
       [RclString, 2, null],
       [RclString, undefined, undefined],
       [RclString, null, null],
       [RclString, false, undefined],
-      [RclString, {n: 'invalidServiceName'}, null],
+      [RclString, { n: 'invalidServiceName' }, null],
       [RclString, [1, 2, 3], undefined],
-      [undefined, null, null]
+      [undefined, null, null],
     ];
 
     invalidParams.forEach(function(invalidParam) {
       assert.throws(() => {
-        node.createSubscription(invalidParam[0], invalidParam[1], invalidParam[2]);
+        node.createSubscription(
+          invalidParam[0],
+          invalidParam[1],
+          invalidParam[2]
+        );
       });
     });
   });
@@ -227,15 +261,21 @@ describe('rcl node methods testing', function() {
     node.createClient(GetParameters, 'get/parameters');
 
     var invalidParams = [
-      ['get/parameters?', /topic name is invalid/], ,
+      ['get/parameters?', /topic name is invalid/],
+      ,
       ['get/42parameters', /topic name is invalid/],
-      ['foo/{bad_sub}', /unknown substitution/]
+      ['foo/{bad_sub}', /unknown substitution/],
     ];
 
     invalidParams.forEach(function(invalidParam) {
-      assertThrowsError(() => {
-        node.createClient(GetParameters, invalidParam[0]);
-      }, Error, invalidParam[1], 'Failed to createClient');
+      assertThrowsError(
+        () => {
+          node.createClient(GetParameters, invalidParam[0]);
+        },
+        Error,
+        invalidParam[1],
+        'Failed to createClient'
+      );
     });
   });
 
@@ -246,15 +286,15 @@ describe('rcl node methods testing', function() {
       [undefined, 'validServiceName'],
       [null, 'validServiceName'],
       [true, 'validServiceName'],
-      [{f: 'abc'}, 'validServiceName'],
+      [{ f: 'abc' }, 'validServiceName'],
       [['a', 'b', 'c'], 'validServiceName'],
       [GetParameters, 2],
       [GetParameters, undefined],
       [GetParameters, null],
       [GetParameters, false],
-      [GetParameters, {n: 'invalidServiceName'}],
+      [GetParameters, { n: 'invalidServiceName' }],
       [GetParameters, [1, 2, 3]],
-      [undefined, null]
+      [undefined, null],
     ];
 
     invalidParams.forEach(function(invalidParam) {
@@ -270,13 +310,18 @@ describe('rcl node methods testing', function() {
     var invalidParams = [
       ['get/parameters?', /topic name is invalid/],
       ['get/42parameters', /topic name is invalid/],
-      ['foo/{bad_sub}', /unknown substitution/]
+      ['foo/{bad_sub}', /unknown substitution/],
     ];
 
     invalidParams.forEach(function(invalidParam) {
-      assertThrowsError(() => {
-        node.createService(GetParameters, invalidParam[0], () => {});
-      }, Error, invalidParam[1], 'Failed to createService');
+      assertThrowsError(
+        () => {
+          node.createService(GetParameters, invalidParam[0], () => {});
+        },
+        Error,
+        invalidParam[1],
+        'Failed to createService'
+      );
     });
   });
 
@@ -287,15 +332,15 @@ describe('rcl node methods testing', function() {
       [undefined, 'validTopicName', undefined],
       [null, 'validTopicName', null],
       [true, 'validTopicName', undefined],
-      [{f: 'abc'}, 'validTopicName', null],
+      [{ f: 'abc' }, 'validTopicName', null],
       [['a', 'b', 'c'], 'validTopicName', undefined],
       [GetParameters, 2, null],
       [GetParameters, undefined, undefined],
       [GetParameters, null, null],
       [GetParameters, false, undefined],
-      [GetParameters, {n: 'invalidServiceName'}, null],
+      [GetParameters, { n: 'invalidServiceName' }, null],
       [GetParameters, [1, 2, 3], undefined],
-      [undefined, null, null]
+      [undefined, null, null],
     ];
 
     invalidParams.forEach(function(invalidParam) {
@@ -368,7 +413,7 @@ describe('topic & serviceName getter/setter', function() {
 
   it('subscription: topic property getter', function() {
     var node = rclnodejs.createNode('subscription', '/topic_getter');
-    var subscription = node.createSubscription(RclString, 'chatter', (msg) => {});
+    var subscription = node.createSubscription(RclString, 'chatter', msg => {});
     assert.deepStrictEqual(subscription.topic, 'chatter');
     node.destroy();
   });
@@ -382,8 +427,8 @@ describe('topic & serviceName getter/setter', function() {
 
   it('service: topic property getter', function() {
     var node = rclnodejs.createNode('service', '/servicename_getter');
-    var service = node.createService(AddTwoInts, 'add_two_ints', (req) => {});
+    var service = node.createService(AddTwoInts, 'add_two_ints', req => {});
     assert.deepStrictEqual(service.serviceName, 'add_two_ints');
     node.destroy();
-  });  
+  });
 });

@@ -21,7 +21,9 @@ const packages = require('./packages.js');
 const path = require('path');
 
 const generatedRoot = path.join(__dirname, '../generated/');
-const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(path.delimiter);
+const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
+  path.delimiter
+);
 
 async function generateJSStructFromAction(pkg) {
   const results = [];
@@ -32,13 +34,13 @@ async function generateJSStructFromAction(pkg) {
     results.push(generateIDLFromAction(action));
   });
   const idls = await Promise.all(results);
-  idls.forEach((idl) => {
-    idl.generatedInterfaces.forEach((interfaceName) => {
+  idls.forEach(idl => {
+    idl.generatedInterfaces.forEach(interfaceName => {
       pkg.messages.push({
         pkgName: pkg.pkgName,
         interfaceName,
         subFolder: 'msg',
-        filePath: path.join(idl.dir, interfaceName + '.msg')
+        filePath: path.join(idl.dir, interfaceName + '.msg'),
       });
     });
   });
@@ -51,7 +53,7 @@ async function generateJSStructFromAction(pkg) {
 async function generateInPath(path) {
   const results = [];
   const pkgs = await packages.findPackagesInDirectory(path);
-  pkgs.forEach((pkg) => {
+  pkgs.forEach(pkg => {
     if (pkg.actions.length !== 0) {
       // Generate the JavaScript message struct from .action file.
       results.push(generateJSStructFromAction(pkg));
@@ -71,8 +73,11 @@ async function generateAll(forcedGenerating) {
   // all the JavaScript files will be created.
   const exist = await fse.exists(generatedRoot);
   if (forcedGenerating || !exist) {
-    await fse.copy(path.join(__dirname, 'generator.json'), path.join(generatedRoot, 'generator.json'));
-    installedPackagePaths.forEach((path) => {
+    await fse.copy(
+      path.join(__dirname, 'generator.json'),
+      path.join(generatedRoot, 'generator.json')
+    );
+    installedPackagePaths.forEach(path => {
       results.push(generateInPath(path));
     });
     await Promise.all(results);
@@ -87,7 +92,7 @@ const generator = {
 
   generateAll,
   generateInPath,
-  generatedRoot
+  generatedRoot,
 };
 
 module.exports = generator;

@@ -1,26 +1,23 @@
 // eslint camelcase: ["error", {ignoreImports: true}]
 
-import { Parameters } from 'rclnodejs'; 
-
+import { Parameters } from 'rclnodejs';
 
 declare module 'rclnodejs' {
-
   /**
-   * NodeOptions specify configuration choices during the 
-   * node instantiation process.  
+   * NodeOptions specify configuration choices during the
+   * node instantiation process.
    * @class
    */
   class NodeOptions {
-
     /**
      * Create a new instance with default property values.
      */
     constructor();
 
     /**
-     * When true  
+     * When true
      * Default value = true;
-     * @returns {boolean} - 
+     * @returns {boolean} -
      */
     startParameterServices: boolean;
 
@@ -32,14 +29,13 @@ declare module 'rclnodejs' {
 
     /**
      * True indicates that a node shold declare declare parameters from
-     * it's parameter-overrides 
+     * it's parameter-overrides
      */
     automaticallyDeclareParametersFromOverrides: boolean;
-    
 
     /**
      * Returns an instance configured with default options.
      */
-    static defaultOptions: NodeOptions; 
+    static defaultOptions: NodeOptions;
   }
 }

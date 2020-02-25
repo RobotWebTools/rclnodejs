@@ -1,158 +1,148 @@
-
 // eslint camelcase: ["error", {ignoreImports: true}]
 
-import { Parameters } from 'rclnodejs'; 
+import { Parameters } from 'rclnodejs';
 import { rcl_interfaces as rclinterfaces } from 'rclnodejs';
 import { QoS } from 'rclnodejs';
 
 declare module 'rclnodejs' {
-
-	/**
-	 * Identifies type of ROS message such as msg or srv.
-	 */
+  /**
+   * Identifies type of ROS message such as msg or srv.
+   */
   type TypeClass =
-    (() => any) |
-    TypeClassName |   // a string representing the message class, e.g. 'std_msgs/msg/String',
-    {          // object representing a message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}
-      package: string;
-      type: string;
-      name: string
-    };
+    | (() => any)
+    | TypeClassName // a string representing the message class, e.g. 'std_msgs/msg/String',
+    | {
+        // object representing a message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}
+        package: string;
+        type: string;
+        name: string;
+      };
 
-
-	/**
-	 * Configuration options when creating new Publishers, Subscribers,
-	 * Clients and Services.
-	 *
-	 * See {@link DEFAULT_OPTIONS}
-	 */
+  /**
+   * Configuration options when creating new Publishers, Subscribers,
+   * Clients and Services.
+   *
+   * See {@link DEFAULT_OPTIONS}
+   */
   type Options = {
     enableTypedArray?: boolean;
     qos?: QoS | QoS.ProfileRef;
-  }
-
+  };
 
   /**
-	 * A service response to a client request.
-	 *
-	 * @remarks
-	 * You can use {@link response.template | response.template} to get an empty result message.
-	 */
+   * A service response to a client request.
+   *
+   * @remarks
+   * You can use {@link response.template | response.template} to get an empty result message.
+   */
   class ServiceResponse {
-
     /**
-		 * Get an empty response message object.
-		 * The template will be a message of type: <pkg>.srv.<serviceTypeClass>_Response.
-		 * e.g., example_interface/srv/AddTwoInts_Response
-		 */
+     * Get an empty response message object.
+     * The template will be a message of type: <pkg>.srv.<serviceTypeClass>_Response.
+     * e.g., example_interface/srv/AddTwoInts_Response
+     */
     readonly template: Message;
 
     /**
-		 * The service that this response object is attaching to.
-		 */
+     * The service that this response object is attaching to.
+     */
     readonly service: Service;
 
     /**
-		 * Send this response to client (the service caller)
-		 *
-		 * @param  response - Response message.
-		 *
-		 * @remarks
-		 * see {@link Response.template}
-		 */
+     * Send this response to client (the service caller)
+     *
+     * @param  response - Response message.
+     *
+     * @remarks
+     * see {@link Response.template}
+     */
     send(response: Message): void;
   }
 
-	/**
-	 * A callback for receiving published messages.
-	 *
-	 * @param message - The published message.
-	 *
-	 * @remarks
-	 * See {@link Node#createSubscription | Node.createSubscription}
-	 * See {@link Node#createPublisher | Node.createPublisher}
-	 * See {@link Publisher}
-	 * See {@link Subscription}
-	 */
-  type SubscriptionCallback = (
+  /**
+   * A callback for receiving published messages.
+   *
+   * @param message - The published message.
+   *
+   * @remarks
+   * See {@link Node#createSubscription | Node.createSubscription}
+   * See {@link Node#createPublisher | Node.createPublisher}
+   * See {@link Publisher}
+   * See {@link Subscription}
+   */
+  type SubscriptionCallback =
     // * @param message - The published message
-    (message: Message) => void
-  );
+    (message: Message) => void;
 
-
-	/**
-	 * Callback for receiving service requests from a client.
-	 *
-	 * @param request - The request sent to the service
-	 * @param response - The response to the client.
-	 *
-	 * @remarks
-	 * Use {@link Response.send | response.send()} to send response object to client
-	 *
-	 * See {@link Node.createService | Node.createService}
-	 * See {@link Client.sendRequest | Client.sendRequest}
-	 * See {@link Client}
-	 * See {@link Service}
-	 * See {@link Response.send | Response.send}
-	 */
+  /**
+   * Callback for receiving service requests from a client.
+   *
+   * @param request - The request sent to the service
+   * @param response - The response to the client.
+   *
+   * @remarks
+   * Use {@link Response.send | response.send()} to send response object to client
+   *
+   * See {@link Node.createService | Node.createService}
+   * See {@link Client.sendRequest | Client.sendRequest}
+   * See {@link Client}
+   * See {@link Service}
+   * See {@link Response.send | Response.send}
+   */
   type ServiceRequestCallback = (
-    (request: Message, response: ServiceResponse) => void
-  );
+    request: Message,
+    response: ServiceResponse
+  ) => void;
 
+  /**
+   * Callback for receiving periodic interrupts from a Timer.
+   *
+   * @remarks
+   * See {@link Node.createTimer | Node.createTimer}
+   * See {@link Timer}
+   */
+  type TimerRequestCallback = () => void;
 
-	/**
-	 * Callback for receiving periodic interrupts from a Timer.
-	 *
-	 * @remarks
-	 * See {@link Node.createTimer | Node.createTimer}
-	 * See {@link Timer}
-	 */
-  type TimerRequestCallback = (
-    () => void
-  );
-
-	/**
-	 * Standard result of Node.getXXXNamesAndTypes() queries
-	 *
-	 * @example
-	 * ```
-	 * [
-	 *   { name: '/rosout', types: [ 'rcl_interfaces/msg/Log' ] },
-	 *   { name: '/scan',   types: [ 'sensor_msgs/msg/LaserScan' ] },
-	 *   { name: '/topic',  types: [ 'std_msgs/msg/String' ] }
-	 * ]
-	 * ```
-	 */
+  /**
+   * Standard result of Node.getXXXNamesAndTypes() queries
+   *
+   * @example
+   * ```
+   * [
+   *   { name: '/rosout', types: [ 'rcl_interfaces/msg/Log' ] },
+   *   { name: '/scan',   types: [ 'sensor_msgs/msg/LaserScan' ] },
+   *   { name: '/topic',  types: [ 'std_msgs/msg/String' ] }
+   * ]
+   * ```
+   */
   type NamesAndTypesQueryResult = {
     name: string;
     types: Array<string>;
-	}
-	
-	/**
-	 * Result of Node.getNodeNames() query
-	 *
-	 * @example
-	 * ```
-	 * [ 
-	 *   { name: 'gazebo',                namespace: '/' },
-	 *   { name: 'robot_state_publisher', namespace: '/' },
-	 *   { name: 'cam2image',             namespace: '/demo' }
-	 * ]
-	 * ```
-	 */
+  };
+
+  /**
+   * Result of Node.getNodeNames() query
+   *
+   * @example
+   * ```
+   * [
+   *   { name: 'gazebo',                namespace: '/' },
+   *   { name: 'robot_state_publisher', namespace: '/' },
+   *   { name: 'cam2image',             namespace: '/demo' }
+   * ]
+   * ```
+   */
   type NodeNamesQueryResult = {
     name: string;
     namespace: string;
-  }
+  };
 
-
-	/**
-	 * Node is the primary entrypoint in a ROS system for communication.
-	 * It can be used to create ROS entities such as publishers, subscribers,
-	 * services, clients and timers.
-	 */
+  /**
+   * Node is the primary entrypoint in a ROS system for communication.
+   * It can be used to create ROS entities such as publishers, subscribers,
+   * services, clients and timers.
+   */
   class Node {
-
     /**
      * Get the name of the node.
      *
@@ -161,10 +151,10 @@ declare module 'rclnodejs' {
     name(): string;
 
     /**
-		 * Get the namespace of the node.
-		 *
-		 * @returns The node namespace.
-		 */
+     * Get the namespace of the node.
+     *
+     * @returns The node namespace.
+     */
     namespace(): string;
 
     /**
@@ -173,171 +163,195 @@ declare module 'rclnodejs' {
     options(): NodeOptions;
 
     /**
-		 * Create a Timer.
-		 *
-		 * @param period - Elapsed time between interrupt events (milliseconds).
-		 * @param callback - Called on timeout interrupt.
-		 * @param context - Context, default is Context.defaultContext().
-		 * @returns New instance of Timer.
-		 */
-    createTimer(period: number, callback: TimerRequestCallback, context?: Context): Timer;
+     * Create a Timer.
+     *
+     * @param period - Elapsed time between interrupt events (milliseconds).
+     * @param callback - Called on timeout interrupt.
+     * @param context - Context, default is Context.defaultContext().
+     * @returns New instance of Timer.
+     */
+    createTimer(
+      period: number,
+      callback: TimerRequestCallback,
+      context?: Context
+    ): Timer;
 
     /**
-		 * Create a Publisher.
-		 *
-		 * @param typeClass - Type of message that will be published.
-		 * @param topic - Name of the topic the publisher will publish to.
-		 * @param options - Configuration options, see DEFAULT_OPTIONS
-		 * @returns New instance of Publisher.
-		 */
-    createPublisher(typeClass: TypeClass, topic: string, options?: Options): Publisher;
+     * Create a Publisher.
+     *
+     * @param typeClass - Type of message that will be published.
+     * @param topic - Name of the topic the publisher will publish to.
+     * @param options - Configuration options, see DEFAULT_OPTIONS
+     * @returns New instance of Publisher.
+     */
+    createPublisher(
+      typeClass: TypeClass,
+      topic: string,
+      options?: Options
+    ): Publisher;
 
     /**
-		 * Create a Subscription.
-		 *
-		 * @param typeClass - Type of ROS messages the subscription will subscribe to
-		 * @param topic - Name of the topic the subcription will subscribe to.
-		 * @param options - Configuration options, see DEFAULT_OPTIONS
-		 * @param callback - Called when a new message is received.
-		 * @returns New instance of Subscription.
-		 */
-    createSubscription(typeClass: TypeClass, topic: string,
-      options: Options, callback: SubscriptionCallback): Subscription;
+     * Create a Subscription.
+     *
+     * @param typeClass - Type of ROS messages the subscription will subscribe to
+     * @param topic - Name of the topic the subcription will subscribe to.
+     * @param options - Configuration options, see DEFAULT_OPTIONS
+     * @param callback - Called when a new message is received.
+     * @returns New instance of Subscription.
+     */
+    createSubscription(
+      typeClass: TypeClass,
+      topic: string,
+      options: Options,
+      callback: SubscriptionCallback
+    ): Subscription;
 
     /**
-		 * Create a Client for making server requests.
-		 *
-		 * @param typeClass -  Service type.
-		 * @param serviceName - Service name.
-		 * @param options - The options argument used to parameterize the client.
-		 * @returns New instance of Client.
-		 */
-    createClient(typeClass: TypeClass, serviceName: string, options?: Options): Client;
+     * Create a Client for making server requests.
+     *
+     * @param typeClass -  Service type.
+     * @param serviceName - Service name.
+     * @param options - The options argument used to parameterize the client.
+     * @returns New instance of Client.
+     */
+    createClient(
+      typeClass: TypeClass,
+      serviceName: string,
+      options?: Options
+    ): Client;
 
     /**
-		 * Create a Service.
-		 *
-		 * @param typeClass - Service type
-		 * @param serviceName - Name of the service.
-		 * @param options - Configuration options
-		 * @param callback - Notified for receiving incoming requests.
-		 * @returns An instance of Service.
-		 */
-    createService(typeClass: TypeClass, serviceName: string,
-			options: Options, callback: ServiceRequestCallback): Service;
+     * Create a Service.
+     *
+     * @param typeClass - Service type
+     * @param serviceName - Name of the service.
+     * @param options - Configuration options
+     * @param callback - Notified for receiving incoming requests.
+     * @returns An instance of Service.
+     */
+    createService(
+      typeClass: TypeClass,
+      serviceName: string,
+      options: Options,
+      callback: ServiceRequestCallback
+    ): Service;
 
     /**
-		 * Create a guard condition.
-		 * 
-		 * @param callback - The callback to be called when the guard condition is triggered.
-		 * @return An instance of GuardCondition.
-		 */
+     * Create a guard condition.
+     *
+     * @param callback - The callback to be called when the guard condition is triggered.
+     * @return An instance of GuardCondition.
+     */
     createGuardCondition(callback: () => any): GuardCondition;
 
-
     /**
-		 * Destroy all entities allocated by this node, including
-		 * Timers, Publishers, Subscriptions, Clients, Services
-		 * and Timers.
-		 */
+     * Destroy all entities allocated by this node, including
+     * Timers, Publishers, Subscriptions, Clients, Services
+     * and Timers.
+     */
     destroy(): void;
 
     /**
-		 * Destroy a Publisher.
-		 *
-		 * @param publisher - Publisher to be destroyed.
-		 */
+     * Destroy a Publisher.
+     *
+     * @param publisher - Publisher to be destroyed.
+     */
     destroyPublisher(publisher: Publisher): void;
 
     /**
-		 * Destroy a Subscription.
-		 *
-		 * @param subscription - Subscription to be destroyed.
-		 */
+     * Destroy a Subscription.
+     *
+     * @param subscription - Subscription to be destroyed.
+     */
     destroySubscription(subscription: Subscription): void;
 
     /**
-		 * Destroy a Client.
-		 *
-		 * @param client - Client to be destroyed.
-		 */
+     * Destroy a Client.
+     *
+     * @param client - Client to be destroyed.
+     */
     destroyClient(client: Client): void;
 
     /**
-		 * Destroy a Service.
-		 *
-		 * @param service - Service to be destroyed.
-		 */
+     * Destroy a Service.
+     *
+     * @param service - Service to be destroyed.
+     */
     destroyService(service: Service): void;
 
     /**
-		 * Destroy a Timer.
-		 *
-		 * @param timer - Timer to be destroyed.
-		 */
+     * Destroy a Timer.
+     *
+     * @param timer - Timer to be destroyed.
+     */
     destroyTimer(timer: Timer): void;
 
     /**
      * Declare a parameter.
-     * 
-     * Internally, register a parameter and it's descriptor. 
+     *
+     * Internally, register a parameter and it's descriptor.
      * If a parameter-override exists, it's value will replace that of the parameter
      * unless ignoreOverride is true.
-     * If the descriptor is undefined, then a ParameterDescriptor will be inferred 
+     * If the descriptor is undefined, then a ParameterDescriptor will be inferred
      * from the parameter's state.
-     * 
+     *
      * If a parameter by the same name has already been declared then an Error is thrown.
      * A parameter must be undeclared before attempting to redeclare it.
-     * 
+     *
      * @param parameter - Parameter to declare.
-     * @param descriptor - Optional descriptor for parameter. 
+     * @param descriptor - Optional descriptor for parameter.
      * @param ignoreOveride - When true disregard any parameter-override that may be present.
      * @returns The newly declared parameter.
      */
-    declareParameter(parameter: Parameters.Parameter, descriptor?: Parameters.ParameterDescriptor, 
-        ignoreOveride?: boolean): Parameters.Parameter;
+    declareParameter(
+      parameter: Parameters.Parameter,
+      descriptor?: Parameters.ParameterDescriptor,
+      ignoreOveride?: boolean
+    ): Parameters.Parameter;
 
     /**
      * Declare a list of parameters.
-     * 
+     *
      * Internally register parameters with their corresponding descriptor one by one
-     * in the order they are provided. This is an atomic operation. If an error 
-     * occurs the process halts and no further parameters are declared. 
+     * in the order they are provided. This is an atomic operation. If an error
+     * occurs the process halts and no further parameters are declared.
      * Parameters that have already been processed are undeclared.
-     * 
+     *
      * While descriptors is an optional parameter, when provided there must be
-     * a descriptor for each parameter; otherwise an Error is thrown. 
-     * If descriptors is not provided then a descriptor will be inferred 
+     * a descriptor for each parameter; otherwise an Error is thrown.
+     * If descriptors is not provided then a descriptor will be inferred
      * from each parameter's state.
-     *  
-     * When a parameter-override is available, the parameter's value 
+     *
+     * When a parameter-override is available, the parameter's value
      * will be replaced with that of the parameter-override unless ignoreOverrides
      * is true.
-     * 
+     *
      * If a parameter by the same name has already been declared then an Error is thrown.
      * A parameter must be undeclared before attempting to redeclare it.
-     * 
+     *
      * @param parameters - The parameters to declare.
-     * @param descriptors - Optional descriptors, a 1-1 correspondence with parameters. 
-     * @param ignoreOverrides - When true, parameter-overrides are 
+     * @param descriptors - Optional descriptors, a 1-1 correspondence with parameters.
+     * @param ignoreOverrides - When true, parameter-overrides are
      *    not considered, i.e.,ignored.
      * @returns The declared parameters.
      */
-    declareParameters(parameters: Array<Parameters.Parameter>, 
-      descriptors?: Array<Parameters.ParameterDescriptor>, 
-      ignoreOverrides?: boolean): Array<Parameters.Parameter>;
+    declareParameters(
+      parameters: Array<Parameters.Parameter>,
+      descriptors?: Array<Parameters.ParameterDescriptor>,
+      ignoreOverrides?: boolean
+    ): Array<Parameters.Parameter>;
 
     /**
      * Undeclare a parameter.
-     * 
-     * Readonly parameters can not be undeclared or updated. 
+     *
+     * Readonly parameters can not be undeclared or updated.
      * @param name - Name of parameter to undeclare.
      */
     undeclareParameter(name: string): void;
 
     /**
      * Determine a parameter has been declared.
-     * 
+     *
      * @param name - Name of the parameter
      * @returns True if parameter exists; false otherwise.
      */
@@ -345,50 +359,52 @@ declare module 'rclnodejs' {
 
     /**
      * Get a declared parameter by name.
-     * 
-     * If unable to locate a declared parameter then a 
+     *
+     * If unable to locate a declared parameter then a
      * parameter with type == PARAMETER_NOT_SET is returned.
-     * 
-     * @param name - The name of the parameter. 
+     *
+     * @param name - The name of the parameter.
      * @returns The parameter.
-     */   
+     */
+
     getParameter(name: string): Parameters.Parameter;
 
     /**
      * Get a list of parameters.
-     * 
-     * Find and return the declared parameters. 
-     * If no names are provided return all declared parameters. 
-     * 
-     * If unable to locate a declared parameter then a 
-     * parameter with type == PARAMETER_NOT_SET is returned in 
+     *
+     * Find and return the declared parameters.
+     * If no names are provided return all declared parameters.
+     *
+     * If unable to locate a declared parameter then a
+     * parameter with type == PARAMETER_NOT_SET is returned in
      * it's place.
-     * 
-     * @param names - The names of the declared parameters 
+     *
+     * @param names - The names of the declared parameters
      *    to find or null indicating to return all declared parameters.
-     * @returns The parameters. 
-     */ 
+     * @returns The parameters.
+     */
+
     getParameters(name?: Array<string>): Array<Parameters.Parameter>;
 
     /**
      * Get the names of all declared parameters.
-     * 
-     * @returna The declared parameter names or empty array if 
-     *    no parameters have been declared. 
+     *
+     * @returna The declared parameter names or empty array if
+     *    no parameters have been declared.
      */
     getParameterNames(): Array<string>;
-    
+
     /**
      * Get the list of parameter-overrides found on the commandline and
      * in the NodeOptions.parameter_overrides property.
-     * 
+     *
      * @return An array of Parameters
      */
     getParameterOverrides(): Array<Parameters.Parameter>;
 
     /**
      * Determine if a parameter descriptor exists.
-     * 
+     *
      * @param name - The name of a descriptor to detect.
      * @returns True if a descriptor has been declared; otherwise false.
      */
@@ -396,148 +412,165 @@ declare module 'rclnodejs' {
 
     /**
      * Get a declared parameter descriptor by name.
-     * 
-     * If unable to locate a declared parameter descriptor then a 
+     *
+     * If unable to locate a declared parameter descriptor then a
      * descriptor with type == PARAMETER_NOT_SET is returned.
-     * 
-     * @param name - The name of the parameter descriptor to find. 
+     *
+     * @param name - The name of the parameter descriptor to find.
      * @returns The parameter descriptor.
      */
     getParameterDescriptor(name: string): Parameters.ParameterDescriptor;
 
     /**
-     * Find a list of declared ParameterDescriptors. 
-     * 
-     * If no names are provided return all declared descriptors. 
-     * 
-     * If unable to locate a declared descriptor then a 
-     * descriptor with type == PARAMETER_NOT_SET is returned in 
+     * Find a list of declared ParameterDescriptors.
+     *
+     * If no names are provided return all declared descriptors.
+     *
+     * If unable to locate a declared descriptor then a
+     * descriptor with type == PARAMETER_NOT_SET is returned in
      * it's place.
-     * 
-     * @param names - The names of the declared parameter 
+     *
+     * @param names - The names of the declared parameter
      *    descriptors to find or null indicating to return all declared descriptors.
-     * @return The parameter descriptors. 
+     * @return The parameter descriptors.
      */
     getParameterDescriptors(name?: string[]): Parameters.ParameterDescriptor[];
 
     /**
      * Replace a declared parameter.
-     * 
+     *
      * The parameter being replaced must be a declared parameter who's descriptor
      * is not readOnly; otherwise an Error is thrown.
-     * 
+     *
      * @param parameter - The new parameter.
-     * @returns The result of the operation.  
+     * @returns The result of the operation.
      */
-    setParameter(parameter: Parameters.Parameter): rclinterfaces.msg.SetParametersResult;
+    setParameter(
+      parameter: Parameters.Parameter
+    ): rclinterfaces.msg.SetParametersResult;
 
     /**
      * Replace a list of declared parameters.
-     * 
+     *
      * Declared parameters are replaced in the order they are provided and
      * a ParameterEvent is published for each individual parameter change.
-     * 
+     *
      * If an error occurs, the process is stopped and returned. Parameters
      * set before an error remain unchanged.
-     * 
+     *
      * @param parameters - The parameters to set.
      * @returns An array of SetParameterResult, one for each parameter that was set.
      */
-    setParameters(parameters: Array<Parameters.Parameter>): Array<rclinterfaces.msg.SetParametersResult>;
+    setParameters(
+      parameters: Array<Parameters.Parameter>
+    ): Array<rclinterfaces.msg.SetParametersResult>;
 
     /**
      * Repalce a list of declared parameters atomically.
-     * 
+     *
      * Declared parameters are replaced in the order they are provided.
      * A single ParameterEvent is published collectively for all changed
      * parameters.
-     * 
-     * If an error occurs, the process stops immediately. All parameters updated to 
+     *
+     * If an error occurs, the process stops immediately. All parameters updated to
      * the point of the error are reverted to their previous state.
-     * 
+     *
      * @param parameters - The parameters to set.
      * @returns Describes the result of setting 1 or more parameters.
      */
-    setParametersAtomically(parameters: Array<Parameters.Parameter>): rclinterfaces.msg.SetParametersResult;
+    setParametersAtomically(
+      parameters: Array<Parameters.Parameter>
+    ): rclinterfaces.msg.SetParametersResult;
 
     /**
-		 * Get a remote node's published topics.
-		 *
-		 * @param remoteNodeName - Name of a remote node.
-		 * @param namespace - Name of the remote namespace.
-		 * @param  noDemangle - If true, topic names and types returned will not be demangled, default: false.
-		 * @returns An array of the names and types.
-		 *        [
-		 *          { name: '/rosout', types: [ 'rcl_interfaces/msg/Log' ] },
-		 *          { name: '/scan', types: [ 'sensor_msgs/msg/LaserScan' ] }
-		 *        ]
-		 */
-    getPublisherNamesAndTypesByNode(remoteNodeName: string, namespace?: string,
-      noDemangle?: boolean): Array<NamesAndTypesQueryResult>;
+     * Get a remote node's published topics.
+     *
+     * @param remoteNodeName - Name of a remote node.
+     * @param namespace - Name of the remote namespace.
+     * @param  noDemangle - If true, topic names and types returned will not be demangled, default: false.
+     * @returns An array of the names and types.
+     *        [
+     *          { name: '/rosout', types: [ 'rcl_interfaces/msg/Log' ] },
+     *          { name: '/scan', types: [ 'sensor_msgs/msg/LaserScan' ] }
+     *        ]
+     */
+    getPublisherNamesAndTypesByNode(
+      remoteNodeName: string,
+      namespace?: string,
+      noDemangle?: boolean
+    ): Array<NamesAndTypesQueryResult>;
 
     /**
-		 * Get a remote node's subscribed topics.
-		 *
-		 * @param nodeName - Name of the remote node.
-		 * @param namespace - Name of the remote namespace.
-		 * @param noDemangle - If true topic, names and types returned will not be demangled, default: false.
-		 * @returns An array of the names and types.
-		 *        [
-		 *          { name: '/topic', types: [ 'std_msgs/msg/String' ] }
-		 *        ]s
-		 */
-    getSubscriptionNamesAndTypesByNode(remoteNodeName: string, namespace?: string,
-      noDemangle?: boolean): Array<NamesAndTypesQueryResult>;
+     * Get a remote node's subscribed topics.
+     *
+     * @param nodeName - Name of the remote node.
+     * @param namespace - Name of the remote namespace.
+     * @param noDemangle - If true topic, names and types returned will not be demangled, default: false.
+     * @returns An array of the names and types.
+     *        [
+     *          { name: '/topic', types: [ 'std_msgs/msg/String' ] }
+     *        ]s
+     */
+    getSubscriptionNamesAndTypesByNode(
+      remoteNodeName: string,
+      namespace?: string,
+      noDemangle?: boolean
+    ): Array<NamesAndTypesQueryResult>;
 
     /**
-		 * Get a remote node's service topics.
-		 *
-		 * @param remoteNodeName - Name of the remote node.
-		 * @param namespace - Name of the remote namespace.
-		 * @returns An array of the names and types.
-		 *        [
-		 *          { name: '/rosout', types: [ 'rcl_interfaces/msg/Log' ] },
-		 *          ...
-		 *        ]
-		 */
-    getServiceNamesAndTypesByNode(remoteNodeName: string, namespace?: string): Array<NamesAndTypesQueryResult>;
+     * Get a remote node's service topics.
+     *
+     * @param remoteNodeName - Name of the remote node.
+     * @param namespace - Name of the remote namespace.
+     * @returns An array of the names and types.
+     *        [
+     *          { name: '/rosout', types: [ 'rcl_interfaces/msg/Log' ] },
+     *          ...
+     *        ]
+     */
+    getServiceNamesAndTypesByNode(
+      remoteNodeName: string,
+      namespace?: string
+    ): Array<NamesAndTypesQueryResult>;
 
     /**
-		 * Get this node's topics and corresponding types.
-		 *
-		 * @param noDemangle - If true. topic names and types returned will not be demangled, default: false.
-		 * @returns An array of the names and types.
-		 *        [
-		 *         { name: '/rosout', types: [ 'rcl_interfaces/msg/Log' ] },
-		 *         { name: '/scan', types: [ 'sensor_msgs/msg/LaserScan' ] },
-		 *         { name: '/topic', types: [ 'std_msgs/msg/String' ] }
-		 *        ]
-		 */
-    getTopicNamesAndTypes(noDemangle?: boolean): Array<NamesAndTypesQueryResult>;
+     * Get this node's topics and corresponding types.
+     *
+     * @param noDemangle - If true. topic names and types returned will not be demangled, default: false.
+     * @returns An array of the names and types.
+     *        [
+     *         { name: '/rosout', types: [ 'rcl_interfaces/msg/Log' ] },
+     *         { name: '/scan', types: [ 'sensor_msgs/msg/LaserScan' ] },
+     *         { name: '/topic', types: [ 'std_msgs/msg/String' ] }
+     *        ]
+     */
+    getTopicNamesAndTypes(
+      noDemangle?: boolean
+    ): Array<NamesAndTypesQueryResult>;
 
     /**
-		 * Get this node's service names and corresponding types.
-		 *
-		 * @returns An array of the names and types.
-		 *        [
-		 *          { name: '/start_motor', types: [ 'rplidar_ros/srv/Control' ] },
-		 *          { name: '/stop_motor',  types: [ 'rplidar_ros/srv/Control' ] }
-		 *        ]
-		 */
-    getServiceNamesAndTypes(): Array<NamesAndTypesQueryResult>
-		
+     * Get this node's service names and corresponding types.
+     *
+     * @returns An array of the names and types.
+     *        [
+     *          { name: '/start_motor', types: [ 'rplidar_ros/srv/Control' ] },
+     *          { name: '/stop_motor',  types: [ 'rplidar_ros/srv/Control' ] }
+     *        ]
+     */
+    getServiceNamesAndTypes(): Array<NamesAndTypesQueryResult>;
+
     /**
-		 * Get the list of nodes discovered by the provided node.
-		 * 
-		 * @returns An array of the node names.
-		 */
+     * Get the list of nodes discovered by the provided node.
+     *
+     * @returns An array of the node names.
+     */
     getNodeNames(): string[];
 
     /**
      * Get the list of nodes and their namespaces discovered by the provided node.
-     * 
+     *
      * @returns An array of the node names and namespaces.
-     *        [ 
+     *        [
      *          { name: 'gazebo',                namespace: '/' },
      *          { name: 'robot_state_publisher', namespace: '/' },
      *          { name: 'cam2image',             namespace: '/demo' }
@@ -560,22 +593,18 @@ declare module 'rclnodejs' {
     countSubscribers(topic: string): number;
   }
 
-
   namespace rclnodejs {
-
     /**
-		 * Default options when creating a Node, Publisher, Subscription, Client or Service
-		 *
-		 * ```ts
-		 * {
-		 *   enableTypedArray: true,
-		 *   qos: QoS.profileDefault
-		 * }
-		 *
-		 * ```
-		 */
+     * Default options when creating a Node, Publisher, Subscription, Client or Service
+     *
+     * ```ts
+     * {
+     *   enableTypedArray: true,
+     *   qos: QoS.profileDefault
+     * }
+     *
+     * ```
+     */
     export const DEFAULT_OPTIONS: Options;
-
   }
-
 }

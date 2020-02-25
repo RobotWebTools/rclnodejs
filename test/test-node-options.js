@@ -20,22 +20,23 @@ const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
 
-
 const NodeOptions = rclnodejs.NodeOptions;
 
 const {
   ParameterType,
   Parameter,
-  ParameterDescriptor } = require('../lib/parameter.js');
-
+  ParameterDescriptor,
+} = require('../lib/parameter.js');
 
 describe('rclnodejs NodeOptions test suite', function() {
-
   it('constructor test', function() {
     const nodeOptions = new NodeOptions();
 
     assert.strictEqual(nodeOptions.startParameterServices, true);
-    assert.strictEqual(nodeOptions.automaticallyDeclareParametersFromOverrides, false);
+    assert.strictEqual(
+      nodeOptions.automaticallyDeclareParametersFromOverrides,
+      false
+    );
     assert.ok(Array.isArray(nodeOptions.parameterOverrides));
     assert.strictEqual(nodeOptions.parameterOverrides.length, 0);
   });
@@ -44,21 +45,31 @@ describe('rclnodejs NodeOptions test suite', function() {
     const nodeOptions = NodeOptions.defaultOptions;
 
     assert.strictEqual(nodeOptions.startParameterServices, true);
-    assert.strictEqual(nodeOptions.automaticallyDeclareParametersFromOverrides, false);
+    assert.strictEqual(
+      nodeOptions.automaticallyDeclareParametersFromOverrides,
+      false
+    );
     assert.ok(Array.isArray(nodeOptions.parameterOverrides));
     assert.strictEqual(nodeOptions.parameterOverrides.length, 0);
   });
 
   it('setters/getters test', function() {
     const nodeOptions = new NodeOptions();
-    const param = new Parameter('str_param', ParameterType.PARAMETER_STRING, 'foobar');
-    
+    const param = new Parameter(
+      'str_param',
+      ParameterType.PARAMETER_STRING,
+      'foobar'
+    );
+
     nodeOptions.startParameterServices = false;
     nodeOptions.automaticallyDeclareParametersFromOverrides = true;
     nodeOptions.parameterOverrides = param;
 
     assert.strictEqual(nodeOptions.startParameterServices, false);
-    assert.strictEqual(nodeOptions.automaticallyDeclareParametersFromOverrides, true);
+    assert.strictEqual(
+      nodeOptions.automaticallyDeclareParametersFromOverrides,
+      true
+    );
     assert.ok(Array.isArray(nodeOptions.parameterOverrides));
     assert.strictEqual(nodeOptions.parameterOverrides.length, 1);
     assert.strictEqual(nodeOptions.parameterOverrides[0].name, 'str_param');
@@ -72,11 +83,9 @@ describe('rclnodejs NodeOptions test suite', function() {
     assert.strictEqual(nodeOptions.parameterOverrides[0].name, 'str_param');
 
     assertThrowsError(
-      () => nodeOptions.parameterOverrides = new Object(),
+      () => (nodeOptions.parameterOverrides = new Object()),
       TypeError,
       'Expected Parameter*'
     );
   });
-    
 });
-

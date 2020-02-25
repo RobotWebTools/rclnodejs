@@ -20,19 +20,22 @@ const rosInstallPath = process.env.AMENT_PREFIX_PATH;
 const packageName = 'std_srvs';
 const packagePath = rosInstallPath + '/share/std_srvs/srv/SetBool.srv';
 
-parser.parseServiceFile(packageName, packagePath).then((spec) => {
-  console.log(`srv name: ${spec.srvName}`);
-  console.log(`pkg name: ${spec.pkgName}`);
+parser
+  .parseServiceFile(packageName, packagePath)
+  .then(spec => {
+    console.log(`srv name: ${spec.srvName}`);
+    console.log(`pkg name: ${spec.pkgName}`);
 
-  console.log('srv request fields includes:');
-  spec.request.fields.forEach((field) => {
-    console.log(field);
-  });
+    console.log('srv request fields includes:');
+    spec.request.fields.forEach(field => {
+      console.log(field);
+    });
 
-  console.log('srv response fields includes:');
-  spec.response.fields.forEach((field) => {
-    console.log(field);
+    console.log('srv response fields includes:');
+    spec.response.fields.forEach(field => {
+      console.log(field);
+    });
+  })
+  .catch(e => {
+    console.log(e);
   });
-}).catch((e) => {
-  console.log(e);
-});

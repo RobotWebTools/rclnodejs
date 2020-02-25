@@ -29,7 +29,7 @@ describe('Node extra destroy methods testing', function() {
   });
 
   it('destroyPublisher()', function() {
-    // don't forget that node always has at least 
+    // don't forget that node always has at least
     // 1 publisher, the node.parameterEventPublisher
     var node = rclnodejs.createNode('node1');
     const RclString = 'std_msgs/msg/String';
@@ -37,12 +37,17 @@ describe('Node extra destroy methods testing', function() {
     var publisher = node.createPublisher(RclString, 'chatter');
     assert.deepStrictEqual(node._publishers.length, 2);
 
-    assertThrowsError(function() {
-      node.destroyPublisher('publisher');
-    }, TypeError, 'Invalid argument', 'Invalid type of parameter');
+    assertThrowsError(
+      function() {
+        node.destroyPublisher('publisher');
+      },
+      TypeError,
+      'Invalid argument',
+      'Invalid type of parameter'
+    );
 
     node.destroyPublisher(publisher);
-    assert.deepStrictEqual(node._publishers.length, 1);  
+    assert.deepStrictEqual(node._publishers.length, 1);
   });
 
   it('destroySubscription()', function() {
@@ -52,9 +57,14 @@ describe('Node extra destroy methods testing', function() {
     var subscription = node.createSubscription(RclString, 'chatter', () => {});
     assert.deepStrictEqual(node._subscriptions.length, 1);
 
-    assertThrowsError(function() {
-      node.destroySubscription('subscription');
-    }, TypeError, 'Invalid argument', 'Invalid type of parameter');
+    assertThrowsError(
+      function() {
+        node.destroySubscription('subscription');
+      },
+      TypeError,
+      'Invalid argument',
+      'Invalid type of parameter'
+    );
 
     node.destroySubscription(subscription);
     assert.deepStrictEqual(node._subscriptions.length, 0);
@@ -67,9 +77,14 @@ describe('Node extra destroy methods testing', function() {
     var client = node.createClient(AddTwoInts, 'add_two_ints');
     assert.deepStrictEqual(node._clients.length, 1);
 
-    assertThrowsError(function() {
-      node.destroyClient('client');
-    }, TypeError, 'Invalid argument', 'Invalid type of parameter');
+    assertThrowsError(
+      function() {
+        node.destroyClient('client');
+      },
+      TypeError,
+      'Invalid argument',
+      'Invalid type of parameter'
+    );
 
     node.destroyClient(client);
     assert.deepStrictEqual(node._clients.length, 0);
@@ -79,16 +94,25 @@ describe('Node extra destroy methods testing', function() {
     const nodeOptions = rclnodejs.NodeOptions.defaultOptions;
     nodeOptions.startParameterServices = false;
 
-    var node = rclnodejs.createNode('node4', '', 
-      rclnodejs.Context.defaultContext(), nodeOptions);
+    var node = rclnodejs.createNode(
+      'node4',
+      '',
+      rclnodejs.Context.defaultContext(),
+      nodeOptions
+    );
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     // const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
     var service = node.createService(AddTwoInts, 'add_two_ints', () => {});
     assert.deepStrictEqual(node._services.length, 1);
 
-    assertThrowsError(function() {
-      node.destroyService('service');
-    }, TypeError, 'Invalid argument', 'Invalid type of parameter');
+    assertThrowsError(
+      function() {
+        node.destroyService('service');
+      },
+      TypeError,
+      'Invalid argument',
+      'Invalid type of parameter'
+    );
 
     node.destroyService(service);
     assert.deepStrictEqual(node._services.length, 0);
@@ -99,9 +123,14 @@ describe('Node extra destroy methods testing', function() {
     var timer = node.createTimer(1000, () => {});
     assert.deepStrictEqual(node._timers.length, 1);
 
-    assertThrowsError(function() {
-      node.destroyTimer('timer');
-    }, TypeError, 'Invalid argument', 'Invalid type of parameter');
+    assertThrowsError(
+      function() {
+        node.destroyTimer('timer');
+      },
+      TypeError,
+      'Invalid argument',
+      'Invalid type of parameter'
+    );
 
     node.destroyTimer(timer);
     assert.deepStrictEqual(node._timers.length, 0);

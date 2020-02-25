@@ -2,13 +2,10 @@
 
 import { rcl_interfaces as rclinterfaces } from 'rclnodejs';
 
-
 declare module 'rclnodejs' {
-
   namespace Parameters {
-  
     /**
-     * Type identifier for a parameter. 
+     * Type identifier for a parameter.
      */
     export const enum ParameterType {
       PARAMETER_NOT_SET = 0,
@@ -20,42 +17,43 @@ declare module 'rclnodejs' {
       PARAMETER_BOOL_ARRAY = 6,
       PARAMETER_INTEGER_ARRAY = 7,
       PARAMETER_DOUBLE_ARRAY = 8,
-      PARAMETER_STRING_ARRAY = 9
+      PARAMETER_STRING_ARRAY = 9,
     }
 
     /**
      * A node parameter.
      */
     class Parameter {
-
       /**
        * Create a Parameter instance from an rlc_interfaces/msg/Parameter message.
-       * 
+       *
        * @param parameterMsg - The message to convert to a parameter.
        * @returns The new instance.
        */
-      static fromParameterMessage(parameterMsg: rclinterfaces.msg.Parameter): Parameter;
-        
+      static fromParameterMessage(
+        parameterMsg: rclinterfaces.msg.Parameter
+      ): Parameter;
+
       /**
        * Create new parameter instances.
-       * 
-       * @param name - The parameter name, must be a valid name. 
+       *
+       * @param name - The parameter name, must be a valid name.
        * @param type - The type identifier.
        * @param {value - The parameter value.
        */
       constructor(name: string, type: ParameterType, value?: any);
 
-      /** 
+      /**
        * The parameter name.
        */
-      readonly name: string; 
+      readonly name: string;
 
       /**
        *  The parameter type.
        */
       readonly type: ParameterType;
 
-      /** 
+      /**
        * The parameter value.
        * Value must be compatible with the type property.
        */
@@ -72,7 +70,7 @@ declare module 'rclnodejs' {
        *
        * @returns The new instance.
        */
-      toParameterMessage(): rclinterfaces.msg.Parameter
+      toParameterMessage(): rclinterfaces.msg.Parameter;
 
       /**
        * Create a ParameterValue message from this instance.
@@ -103,83 +101,87 @@ declare module 'rclnodejs' {
        * @param readOnly - True indicates a parameter of this type can not be modified. Default = false.
        * @param range - An optional IntegerRange or FloatingPointRange. 
        */
-      constructor(name: string, type: ParameterType, description?: string, readOnly?: boolean, 
-        range?: Range);
+      constructor(
+        name: string,
+        type: ParameterType,
+        description?: string,
+        readOnly?: boolean,
+        range?: Range
+      );
 
-      /** 
+      /**
        * The name property.
-       */      
+       */
+
       readonly name: string;
 
-      /** 
+      /**
        * The type property.
        */
       readonly type: ParameterType;
 
-      /** 
+      /**
        * A descriptive string property.
        */
       readonly description: string;
 
-      /** 
+      /**
        * The readOnly property.
        */
       readonly readOnly: boolean;
 
-      /** 
-       * Get additionalConstraints property. 
+      /**
+       * Get additionalConstraints property.
        */
-      additionalConstraints: string; 
+      additionalConstraints: string;
 
-      /** 
-       * Determine if rangeConstraint property has been set. 
-       * 
+      /**
+       * Determine if rangeConstraint property has been set.
+       *
        * @returns True if a range property is defined; falst otherwise.
        */
       hasRange(): boolean;
 
-      /** 
-       * Get range property. 
-       */ 
+      /**
+       * Get range property.
+       */
+
       rangeConstraint: Range;
 
-      /** 
-       * Check the state and ensure it is valid. 
+      /**
+       * Check the state and ensure it is valid.
        * Throw a TypeError if invalid state is detected.
        */
       validate(): void;
 
-      /** 
-       * Check a parameter for consistency with this descriptor. 
+      /**
+       * Check a parameter for consistency with this descriptor.
        * Throw an Error if an inconsistent state is detected.
        *
        * @param parameter - The parameter to test for consistency.
        */
       validateParameter(parameter: Parameter): void;
 
-      /** 
-       * Create a ParameterDescriptor message from this descriptor. 
-       * 
+      /**
+       * Create a ParameterDescriptor message from this descriptor.
+       *
        * @returns The new message.
        */
       toMessage(): rclinterfaces.msg.ParameterDescriptor;
-
     }
-  
 
     /**
-     * An abstract class defining a range of numbers between 2 points inclusively 
+     * An abstract class defining a range of numbers between 2 points inclusively
      * divided by a step value.
      * @class
      */
     abstract class Range {
-      
       /**
        * Create a new instance.
-       * 
+       *
        * @param fromValue - The lowest inclusive value in range
        * @param toValue - The highest inclusive value in range
-       * @param step - The internal unit size. 
+       * @param step - The internal unit size.
        */
       constructor(from: number, to: number, step?: number);
 
@@ -188,30 +190,30 @@ declare module 'rclnodejs' {
        */
       readonly fromValue: number;
 
-      /** 
+      /**
        * The highest inclusive value in range.
        */
       readonly toValue: number;
 
-      /** 
+      /**
        * The internal unit size.
        */
-      readonly step: number; 
- 
-      /** 
+      readonly step: number;
+
+      /**
        * Determine if a value is within this range.
        * A TypeError is thrown when value is not a number.
        * Subclasses should override and call this method for basic type checking.
-       * 
-       * @param value - The number to check. 
+       *
+       * @param value - The number to check.
        * @returns True if value satisfies the range; false otherwise.
        */
       inRange(value: number): boolean;
 
-      /** 
-       * Abstract method that determines if a ParameterType is compatible. 
+      /**
+       * Abstract method that determines if a ParameterType is compatible.
        * Subclasses must implement this method.
-       * 
+       *
        * @param parameterType - The parameter type to test.
        * @returns True if parameterType is compatible; otherwise return false.
        */
@@ -222,52 +224,49 @@ declare module 'rclnodejs' {
      * Defines a range for floating point values.
      */
     class FloatingPointRange extends Range {
-
       /**
        * Create a new instance.
        * @constructor
        * @param {number} fromValue - The lowest inclusive value in range
        * @param {number} toValue - The highest inclusive value in range
-       * @param {number} step - The internal unit size. 
+       * @param {number} step - The internal unit size.
        */
       constructor(from: number, to: number, step?: number);
 
-      /**  
-       * Determine if a ParameterType is compatible. 
-       * 
+      /**
+       * Determine if a ParameterType is compatible.
+       *
        * @param parameterType - The parameter type to test.
        * @returns True if parameterType is compatible; otherwise return false.
        */
       isValidType(parameterType: ParameterType): boolean;
-    
-      /** 
+
+      /**
        * Determine if a value is within this range.
        * A TypeError is thrown when value is not a number.
-       * 
-       * @param value - The number to check. 
+       *
+       * @param value - The number to check.
        * @returns True if value satisfies the range; false otherwise.
        */
       inRange(value: number): boolean;
-
     }
 
     /**
-     *  
+     *
      */
     class IntegerRange extends FloatingPointRange {
-      
       /**
        * Create a new instance.
        * @constructor
        * @param {number} fromValue - The lowest inclusive value in range
        * @param {number} toValue - The highest inclusive value in range
-       * @param {number} step - The internal unit size. 
+       * @param {number} step - The internal unit size.
        */
       constructor(from: number, to: number, step?: number);
 
-      /**  
-       * Determine if a ParameterType is compatible. 
-       * 
+      /**
+       * Determine if a ParameterType is compatible.
+       *
        * @param parameterType - The parameter type to test.
        * @returns True if parameterType is compatible; otherwise return false.
        */
@@ -277,16 +276,16 @@ declare module 'rclnodejs' {
     /**
      * Infer a ParameterType for JS primitive types:
      * string, boolean, number and arrays of these types.
-     * A TypeError is thrown for a value who's type is not one of 
+     * A TypeError is thrown for a value who's type is not one of
      * the set listed.
-     * @param value - The value to infer it's ParameterType 
-     * @returns The ParameterType that best scribes the value. 
+     * @param value - The value to infer it's ParameterType
+     * @returns The ParameterType that best scribes the value.
      */
     function parameterTypeFromValue(value: any): ParameterType;
 
     /**
      * Determine if a number maps to is a valid ParameterType.
-     * 
+     *
      * @param parameterType - The value to test.
      * @returns True if value is a valid ParameterType; false otherwise.
      */
@@ -294,7 +293,7 @@ declare module 'rclnodejs' {
 
     /**
      * Test if value can be represented by a ParameterType.
-     * 
+     *
      * @param value - The value to test.
      * @param type - The ParameterType to test value against.
      * @returns True if value can be represented by type.

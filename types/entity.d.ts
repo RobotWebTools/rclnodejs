@@ -1,6 +1,4 @@
-
 declare module 'rclnodejs' {
-
   /**
    * A common object in RCL.
    */

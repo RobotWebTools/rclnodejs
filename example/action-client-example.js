@@ -18,36 +18,45 @@
 
 const rclnodejs = require('../index.js');
 
-rclnodejs.init().then(() => {
-  const GoalStatus = rclnodejs.require('actionlib_msgs/msg/GoalStatus');
+rclnodejs
+  .init()
+  .then(() => {
+    const GoalStatus = rclnodejs.require('actionlib_msgs/msg/GoalStatus');
 
-  const ac = new rclnodejs.ActionClientInterface({
-    type: 'ros1_actions/msg/DoDishes',
-    actionServer: 'dishes',
-    rclnodejs: rclnodejs
-  });
+    const ac = new rclnodejs.ActionClientInterface({
+      type: 'ros1_actions/msg/DoDishes',
+      actionServer: 'dishes',
+      rclnodejs: rclnodejs,
+    });
 
-  let goal = ac.sendGoal({ goal: { dishwasher_id: 1 } });
-  console.log(`The goal was sent, the goal id is ${goal.goal_id.id}`);
+    let goal = ac.sendGoal({ goal: { dishwasher_id: 1 } });
+    console.log(`The goal was sent, the goal id is ${goal.goal_id.id}`);
 
-  ac.on('feedback', (feedback) => {
-    console.log(`${feedback.percent_complete}% of the task has been completed.`);
-  });
+    ac.on('feedback', feedback => {
+      console.log(
+        `${feedback.percent_complete}% of the task has been completed.`
+      );
+    });
 
-  ac.on('status', (status) => {
-    status.status_list.forEach((s) => {
-      if (s.goal_id.id === goal.goal_id.id &&
-        s.status === GoalStatus.SUCCEEDED) {
-        console.log(`The goal, whose id is ${s.goal_id.id}, has been executed successfully.`);
+    ac.on('status', status => {
+      status.status_list.forEach(s => {
+        if (
+          s.goal_id.id === goal.goal_id.id &&
+          s.status === GoalStatus.SUCCEEDED
+        ) {
+          console.log(
+            `The goal, whose id is ${s.goal_id.id}, has been executed successfully.`
+          );
+        }
+      });
+    });
+
+    ac.on('result', result => {
+      if (result) {
+        console.log(`${result.total_dishes_cleaned} dishes have been cleaned.`);
       }
     });
+  })
+  .catch(err => {
+    console.error(err);
   });
-
-  ac.on('result', (result) => {
-    if (result) {
-      console.log(`${result.total_dishes_cleaned} dishes have been cleaned.`);
-    }
-  });
-}).catch((err) => {
-  console.error(err);
-});

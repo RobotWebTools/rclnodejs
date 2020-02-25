@@ -27,47 +27,28 @@ describe('rcl node remapping', function() {
   });
 
   it('remap node name', async function() {
+    const ARGV = ['--ros-args', '-r', 'my_node:__node:=foo'];
 
-    const ARGV = [
-      '--ros-args', 
-      '-r', 'my_node:__node:=foo',
-    ];
+    await rclnodejs.init(rclnodejs.Context.defaultContext(), ARGV);
 
-    await rclnodejs.init(
-      rclnodejs.Context.defaultContext(),
-      ARGV
-    );
-
-    node = rclnodejs.createNode('my_node'); 
+    node = rclnodejs.createNode('my_node');
 
     assert.equal(node.name(), 'foo');
   });
 
   it('remap node namespace', async function() {
-    const ARGV = [
-      '--ros-args', 
-      '-r', 'my_node:__ns:=/foo',
-    ];
+    const ARGV = ['--ros-args', '-r', 'my_node:__ns:=/foo'];
 
-    await rclnodejs.init(
-      rclnodejs.Context.defaultContext(),
-      ARGV
-    );
-    node = rclnodejs.createNode('my_node', '/my_ns'); 
+    await rclnodejs.init(rclnodejs.Context.defaultContext(), ARGV);
+    node = rclnodejs.createNode('my_node', '/my_ns');
 
     assert.equal(node.namespace(), '/foo');
   });
 
   it('remap publisher topic', async function() {
-    const ARGV = [
-      '--ros-args', 
-      '-r', 'my_node:/my_topic:=/foo_topic',
-    ];
+    const ARGV = ['--ros-args', '-r', 'my_node:/my_topic:=/foo_topic'];
 
-    await rclnodejs.init(
-      rclnodejs.Context.defaultContext(),
-      ARGV
-    );
+    await rclnodejs.init(rclnodejs.Context.defaultContext(), ARGV);
     node = rclnodejs.createNode('my_node');
     let publisher = node.createPublisher('std_msgs/msg/String', 'my_topic');
 
@@ -75,43 +56,45 @@ describe('rcl node remapping', function() {
   });
 
   it('remap service name', async function() {
-    const ARGV = [
-      '--ros-args', 
-      '-r', 'my_node:my_service:=foo_service',
-    ];
+    const ARGV = ['--ros-args', '-r', 'my_node:my_service:=foo_service'];
 
-    await rclnodejs.init(
-      rclnodejs.Context.defaultContext(),
-      ARGV
-    );
+    await rclnodejs.init(rclnodejs.Context.defaultContext(), ARGV);
     node = rclnodejs.createNode('my_node');
-    let service = node.createService('example_interfaces/srv/AddTwoInts', 'my_service', (request) => {});  
-    
+    let service = node.createService(
+      'example_interfaces/srv/AddTwoInts',
+      'my_service',
+      request => {}
+    );
+
     assert.equal(service.serviceName, 'foo_service');
   });
 
   it('remap node, namespace, topic and servicename', async function() {
     const ARGV = [
       '--ros-args',
-      '-r', 'my_node:__node:=foo_node',
-      '-r', 'foo_node:__ns:=/foo_ns',
-      '-r', 'foo_node:/my_topic:=foo_topic',
-      '-r', 'foo_node:my_service:=foo_service',
+      '-r',
+      'my_node:__node:=foo_node',
+      '-r',
+      'foo_node:__ns:=/foo_ns',
+      '-r',
+      'foo_node:/my_topic:=foo_topic',
+      '-r',
+      'foo_node:my_service:=foo_service',
     ];
 
-    await rclnodejs.init(
-      rclnodejs.Context.defaultContext(),
-      ARGV
-    );
+    await rclnodejs.init(rclnodejs.Context.defaultContext(), ARGV);
 
-    node = rclnodejs.createNode('my_node', '/my_ns'); 
+    node = rclnodejs.createNode('my_node', '/my_ns');
     let publisher = node.createPublisher('std_msgs/msg/String', '/my_topic');
-    let service = node.createService('example_interfaces/srv/AddTwoInts', 'my_service', (request) => {});
+    let service = node.createService(
+      'example_interfaces/srv/AddTwoInts',
+      'my_service',
+      request => {}
+    );
 
     assert.equal(node.name(), 'foo_node');
     assert.equal(node.namespace(), '/foo_ns');
     assert.equal(publisher.topic, 'foo_topic');
     assert.equal(service.serviceName, 'foo_service');
   });
-
 });

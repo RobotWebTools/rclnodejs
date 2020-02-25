@@ -19,24 +19,27 @@ const rclnodejs = require('../index.js');
 var rclType = process.argv[2];
 var rclValue = eval(process.argv[3]);
 
-rclnodejs.init().then(() => {
-  var node = rclnodejs.createNode(rclType + '_publisher');
-  var msgType = rclnodejs.require('std_msgs').msg[rclType];
-  var msg = new msgType();
-  msg.data = rclValue;
+rclnodejs
+  .init()
+  .then(() => {
+    var node = rclnodejs.createNode(rclType + '_publisher');
+    var msgType = rclnodejs.require('std_msgs').msg[rclType];
+    var msg = new msgType();
+    msg.data = rclValue;
 
-  var publisher = node.createPublisher(msgType, rclType + '_channel');
-  var timer = node.createTimer(100, () => {
-    publisher.publish(msg);
+    var publisher = node.createPublisher(msgType, rclType + '_channel');
+    var timer = node.createTimer(100, () => {
+      publisher.publish(msg);
+    });
+
+    rclnodejs.spin(node);
+    process.on('SIGINT', m => {
+      timer.cancel();
+      node.destroy();
+      rclnodejs.shutdown();
+      process.exit(0);
+    });
+  })
+  .catch(err => {
+    console.log(err);
   });
-
-  rclnodejs.spin(node);
-  process.on('SIGINT', (m) => {
-    timer.cancel();
-    node.destroy();
-    rclnodejs.shutdown();
-    process.exit(0);
-  });  
-}).catch((err) => {
-  console.log(err);
-});

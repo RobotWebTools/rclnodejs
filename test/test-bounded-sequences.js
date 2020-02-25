@@ -57,7 +57,7 @@ describe('Test bounded sequeces', function() {
     uint64_values_default: [1, 2, 3],
     string_values: ['hello', 'world'],
     basic_types_values: [primitives, primitives],
-    alignment_check: 100
+    alignment_check: 100,
   };
 
   const expected = {
@@ -79,20 +79,20 @@ describe('Test bounded sequeces', function() {
     string_values: ['hello', 'world'],
     basic_types_values: [primitives, primitives],
     bool_values_default: [false, true, false],
-    byte_values_default: Uint8Array.from([0,1,255]),
-    char_values_default: Int8Array.from([0,1,127]),
-    float32_values_default: Float32Array.from([1.125,0,-1.125]),
-    float64_values_default: Float64Array.from([3.1415,0,-3.1415]),
-    int16_values_default: Int16Array.from([0,32767,-32768]),
-    int32_values_default: Int32Array.from([0,2147483647,-2147483648]),
-    int8_values_default: Int8Array.from([0,127,-128]),
+    byte_values_default: Uint8Array.from([0, 1, 255]),
+    char_values_default: Int8Array.from([0, 1, 127]),
+    float32_values_default: Float32Array.from([1.125, 0, -1.125]),
+    float64_values_default: Float64Array.from([3.1415, 0, -3.1415]),
+    int16_values_default: Int16Array.from([0, 32767, -32768]),
+    int32_values_default: Int32Array.from([0, 2147483647, -2147483648]),
+    int8_values_default: Int8Array.from([0, 127, -128]),
     string_values_default: ['', 'max value', 'min value'],
-    uint16_values_default: Uint16Array.from([0,1,65535]),
-    uint32_values_default: Uint32Array.from([0,1,4294967295]),
-    uint8_values_default: Uint8Array.from([0,1,255]),
+    uint16_values_default: Uint16Array.from([0, 1, 65535]),
+    uint32_values_default: Uint32Array.from([0, 1, 4294967295]),
+    uint8_values_default: Uint8Array.from([0, 1, 255]),
     alignment_check: 100,
     constants_values: [],
-    defaults_values: []
+    defaults_values: [],
   };
 
   before(function() {
@@ -105,19 +105,26 @@ describe('Test bounded sequeces', function() {
 
   it('Assigned with bounded sequences', function(done) {
     const node = rclnodejs.createNode('bounded_sequences');
-    let publisher = node.createPublisher('test_msgs/msg/BoundedSequences', 'bounded_sequences');
+    let publisher = node.createPublisher(
+      'test_msgs/msg/BoundedSequences',
+      'bounded_sequences'
+    );
     let timer = setInterval(() => {
       assert.doesNotThrow(() => {
         publisher.publish(msg);
       }, RangeError);
     }, 100);
 
-    node.createSubscription('test_msgs/msg/BoundedSequences', 'bounded_sequences', (response) => {
-      clearInterval(timer);
-      assert.deepEqual(response, expected);
-      node.destroy();
-      done();
-    });
+    node.createSubscription(
+      'test_msgs/msg/BoundedSequences',
+      'bounded_sequences',
+      response => {
+        clearInterval(timer);
+        assert.deepEqual(response, expected);
+        node.destroy();
+        done();
+      }
+    );
 
     rclnodejs.spin(node);
   });

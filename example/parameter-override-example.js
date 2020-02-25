@@ -12,7 +12,6 @@
 
 const rclnodejs = require('../index.js');
 
-
 const ParameterType = rclnodejs.Parameters.ParameterType;
 const Parameter = rclnodejs.Parameters.Parameter;
 const ParameterDescriptor = rclnodejs.Parameters.ParameterDescriptor;
@@ -21,10 +20,7 @@ async function main() {
   const NODE_NAME = 'my_node';
 
   // commandline override of param1
-  const argv = [
-    '--ros-args',
-    '-p', NODE_NAME + ':param1:=hello ros2'
-  ];
+  const argv = ['--ros-args', '-p', NODE_NAME + ':param1:=hello ros2'];
 
   // initialize rclnodejs with commandline argv
   await rclnodejs.init(rclnodejs.Context.defaultContext(), argv);
@@ -32,21 +28,27 @@ async function main() {
   const node = rclnodejs.createNode(NODE_NAME);
 
   // define param
-  const parameter = new Parameter('param1', ParameterType.PARAMETER_STRING, 'hello world');
-  const parameterDescriptor = new ParameterDescriptor('param1', ParameterType.PARAMETER_STRING);
+  const parameter = new Parameter(
+    'param1',
+    ParameterType.PARAMETER_STRING,
+    'hello world'
+  );
+  const parameterDescriptor = new ParameterDescriptor(
+    'param1',
+    ParameterType.PARAMETER_STRING
+  );
 
   // declare param1
   node.declareParameter(parameter, parameterDescriptor);
   console.log(`Declared parameter: ${parameter.name}`);
-  
-  if (! node.hasParameter('param1')) {
+
+  if (!node.hasParameter('param1')) {
     console.error(`Unable to find parameter: ${parameter.name}`);
     return;
   }
 
-  console.log('Parameter overridden: ', node.getParameter('param1')); 
+  console.log('Parameter overridden: ', node.getParameter('param1'));
   console.log(node.getParameterDescriptor('param1'));
-  
 }
 
 main();
