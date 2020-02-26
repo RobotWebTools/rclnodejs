@@ -16,8 +16,8 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const {Time, Clock, Duration} = rclnodejs;
-const {ClockType} = Clock;
+const { Time, Clock, Duration } = rclnodejs;
+const { ClockType } = Clock;
 
 describe('rclnodejs Time/Clock testing', function() {
   this.timeout(60 * 1000);
@@ -50,7 +50,7 @@ describe('rclnodejs Time/Clock testing', function() {
     }, TypeError);
 
     assert.throws(() => {
-      new Time({seconds: 0, nanoseconds: 0});
+      new Time({ seconds: 0, nanoseconds: 0 });
     }, TypeError);
 
     assert.throws(() => {

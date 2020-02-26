@@ -20,12 +20,14 @@ const packages = require('./packages.js');
 const path = require('path');
 
 const generatedRoot = path.join(__dirname, '../generated/');
-const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(path.delimiter);
+const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
+  path.delimiter
+);
 
 async function generateInPath(path) {
   const results = [];
   const pkgs = await packages.findPackagesInDirectory(path);
-  pkgs.forEach((pkg) => {
+  pkgs.forEach(pkg => {
     results.push(generateJSStructFromIDL(pkg, generatedRoot));
   });
   await Promise.all(results);
@@ -39,8 +41,11 @@ async function generateAll(forcedGenerating) {
   // all the JavaScript files will be created.
   const exist = await fse.exists(generatedRoot);
   if (forcedGenerating || !exist) {
-    await fse.copy(path.join(__dirname, 'generator.json'), path.join(generatedRoot, 'generator.json'));
-    installedPackagePaths.forEach((path) => {
+    await fse.copy(
+      path.join(__dirname, 'generator.json'),
+      path.join(generatedRoot, 'generator.json')
+    );
+    installedPackagePaths.forEach(path => {
       results.push(generateInPath(path));
     });
     await Promise.all(results);
@@ -55,7 +60,7 @@ const generator = {
 
   generateAll,
   generateInPath,
-  generatedRoot
+  generatedRoot,
 };
 
 module.exports = generator;

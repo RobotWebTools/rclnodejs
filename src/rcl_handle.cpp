@@ -39,8 +39,11 @@ void RclHandle::Init(v8::Local<v8::Object> exports) {
   Nan::SetPrototypeMethod(tpl, "release", Release);
   Nan::SetPrototypeMethod(tpl, "dismiss", Dismiss);
 
-  constructor.Reset(tpl->GetFunction());
-  exports->Set(Nan::New("RclHandle").ToLocalChecked(), tpl->GetFunction());
+  v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
+
+  constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
+  exports->Set(Nan::New("RclHandle").ToLocalChecked(),
+               tpl->GetFunction(context).ToLocalChecked());
 }
 
 void RclHandle::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {

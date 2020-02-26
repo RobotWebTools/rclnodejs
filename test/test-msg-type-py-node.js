@@ -18,6 +18,7 @@
 
 const assert = require('assert');
 const childProcess = require('child_process');
+const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 
@@ -41,15 +42,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = true;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Bool']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Bool',
+      ]);
       var publisher = node.createPublisher(Bool, 'Bool_js_py_channel');
-      var subscription = node.createSubscription(Bool, 'Bool_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Bool,
+        'Bool_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -62,15 +70,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 'A';
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Byte']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Byte',
+      ]);
       var publisher = node.createPublisher(Byte, 'Byte_js_py_channel');
-      var subscription = node.createSubscription(Byte, 'Byte_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg.charCodeAt(0), backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Byte,
+        'Byte_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg.charCodeAt(0), backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -83,15 +98,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 0x61;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Char']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Char',
+      ]);
       var publisher = node.createPublisher(Char, 'Char_js_py_channel');
-      var subscription = node.createSubscription(Char, 'Char_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Char,
+        'Char_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -104,15 +126,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 'Hello World';
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'String']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'String',
+      ]);
       var publisher = node.createPublisher(String, 'String_js_py_channel');
-      var subscription = node.createSubscription(String, 'String_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        String,
+        'String_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -125,15 +154,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 0x7f;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Int8']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Int8',
+      ]);
       var publisher = node.createPublisher(Int8, 'Int8_js_py_channel');
-      var subscription = node.createSubscription(Int8, 'Int8_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Int8,
+        'Int8_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -146,15 +182,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 0xff;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'UInt8']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'UInt8',
+      ]);
       var publisher = node.createPublisher(UInt8, 'UInt8_js_py_channel');
-      var subscription = node.createSubscription(UInt8, 'UInt8_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        UInt8,
+        'UInt8_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -167,15 +210,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 0x7fff;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Int16']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Int16',
+      ]);
       var publisher = node.createPublisher(Int16, 'Int16_js_py_channel');
-      var subscription = node.createSubscription(Int16, 'Int16_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Int16,
+        'Int16_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -188,15 +238,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 0xffff;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'UInt16']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'UInt16',
+      ]);
       var publisher = node.createPublisher(UInt16, 'UInt16_js_py_channel');
-      var subscription = node.createSubscription(UInt16, 'UInt16_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        UInt16,
+        'UInt16_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -209,15 +266,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 0x7fffffff;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Int32']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Int32',
+      ]);
       var publisher = node.createPublisher(Int32, 'Int32_js_py_channel');
-      var subscription = node.createSubscription(Int32, 'Int32_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Int32,
+        'Int32_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -230,15 +294,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 0xffffffff;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'UInt32']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'UInt32',
+      ]);
       var publisher = node.createPublisher(UInt32, 'UInt32_js_py_channel');
-      var subscription = node.createSubscription(UInt32, 'UInt32_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        UInt32,
+        'UInt32_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -251,15 +322,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = Number.MAX_SAFE_INTEGER;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Int64']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Int64',
+      ]);
       var publisher = node.createPublisher(Int64, 'Int64_js_py_channel');
-      var subscription = node.createSubscription(Int64, 'Int64_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Int64,
+        'Int64_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -272,15 +350,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = Number.MAX_SAFE_INTEGER;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'UInt64']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'UInt64',
+      ]);
       var publisher = node.createPublisher(UInt64, 'UInt64_js_py_channel');
-      var subscription = node.createSubscription(UInt64, 'UInt64_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg.data);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        UInt64,
+        'UInt64_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg.data);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -293,15 +378,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 3.14;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Float32']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Float32',
+      ]);
       var publisher = node.createPublisher(Float32, 'Float32_js_py_channel');
-      var subscription = node.createSubscription(Float32, 'Float32_js_py_back_channel', (backMsg) => {
-        assert.ok(Math.abs(msg - backMsg.data) < 0.01);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Float32,
+        'Float32_js_py_back_channel',
+        backMsg => {
+          assert.ok(Math.abs(msg - backMsg.data) < 0.01);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -314,15 +406,22 @@ describe('Rclnodejs - Python message type testing', function() {
       const msg = 3.1415926;
       var destroy = false;
 
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Float64']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Float64',
+      ]);
       var publisher = node.createPublisher(Float64, 'Float64_js_py_channel');
-      var subscription = node.createSubscription(Float64, 'Float64_js_py_back_channel', (backMsg) => {
-        assert.ok(Math.abs(msg - backMsg.data) < 0.0000001);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Float64,
+        'Float64_js_py_back_channel',
+        backMsg => {
+          assert.ok(Math.abs(msg - backMsg.data) < 0.0000001);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -352,15 +451,25 @@ describe('Rclnodejs - Python message type testing', function() {
       };
 
       var destroy = false;
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Array']);
-      var publisher = node.createPublisher(ByteMultiArray, 'Array_js_py_channel');
-      var subscription = node.createSubscription(ByteMultiArray, 'Array_js_py_back_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });       
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Array',
+      ]);
+      var publisher = node.createPublisher(
+        ByteMultiArray,
+        'Array_js_py_channel'
+      );
+      var subscription = node.createSubscription(
+        ByteMultiArray,
+        'Array_js_py_back_channel',
+        backMsg => {
+          assert.ok(deepEqual(msg, backMsg));
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
@@ -378,19 +487,29 @@ describe('Rclnodejs - Python message type testing', function() {
       };
 
       var destroy = false;
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'ColorRGBA']);
-      var publisher = node.createPublisher(ColorRGBA, 'ColorRGBA_js_py_channel');
-      var subscription = node.createSubscription(ColorRGBA, 'ColorRGBA_js_py_back_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'ColorRGBA',
+      ]);
+      var publisher = node.createPublisher(
+        ColorRGBA,
+        'ColorRGBA_js_py_channel'
+      );
+      var subscription = node.createSubscription(
+        ColorRGBA,
+        'ColorRGBA_js_py_back_channel',
+        backMsg => {
+          assert.ok(deepEqual(msg, backMsg));
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
-      rclnodejs.spin(node);      
+      rclnodejs.spin(node);
     });
 
     it('Header', function(done) {
@@ -406,19 +525,26 @@ describe('Rclnodejs - Python message type testing', function() {
       };
 
       var destroy = false;
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'Header']);
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'Header',
+      ]);
       var publisher = node.createPublisher(Header, 'Header_js_py_channel');
-      var subscription = node.createSubscription(Header, 'Header_js_py_back_channel', (backMsg) => {
-        assert.deepStrictEqual(msg, backMsg);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var subscription = node.createSubscription(
+        Header,
+        'Header_js_py_back_channel',
+        backMsg => {
+          assert.deepStrictEqual(msg, backMsg);
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
-      rclnodejs.spin(node);      
+      rclnodejs.spin(node);
     });
 
     it('Complex object', function(done) {
@@ -440,19 +566,29 @@ describe('Rclnodejs - Python message type testing', function() {
       };
 
       var destroy = false;
-      var pySubscription = utils.launchPythonProcess([`${__dirname}/py/subscription_msg.py`, 'JointState']);
-      var publisher = node.createPublisher(JointState, 'JointState_js_py_channel');
-      var subscription = node.createSubscription(JointState, 'JointState_js_py_back_channel', (backMsg) => {
-        assert.deepEqual(msg, backMsg);
-        timer.cancel();
-        node.destroy();
-        pySubscription.kill('SIGINT');
-        done();
-      });
+      var pySubscription = utils.launchPythonProcess([
+        `${__dirname}/py/subscription_msg.py`,
+        'JointState',
+      ]);
+      var publisher = node.createPublisher(
+        JointState,
+        'JointState_js_py_channel'
+      );
+      var subscription = node.createSubscription(
+        JointState,
+        'JointState_js_py_back_channel',
+        backMsg => {
+          assert.ok(deepEqual(msg, backMsg));
+          timer.cancel();
+          node.destroy();
+          pySubscription.kill('SIGINT');
+          done();
+        }
+      );
       var timer = node.createTimer(100, () => {
         publisher.publish(msg);
       });
-      rclnodejs.spin(node);      
+      rclnodejs.spin(node);
     });
   });
 });

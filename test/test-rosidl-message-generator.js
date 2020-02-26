@@ -31,15 +31,17 @@ describe('ROSIDL Node.js message generator test suite', function() {
   it('Try require all message classes', function() {
     this.timeout(60 * 1000);
     const packages = require('../rosidl_gen/packages.js');
-    const installedPackagesRoot =  (os.type() === 'Windows_NT')
-      ? process.env.AMENT_PREFIX_PATH.split(';')
-      : process.env.AMENT_PREFIX_PATH.split(':');
+    const installedPackagesRoot =
+      os.type() === 'Windows_NT'
+        ? process.env.AMENT_PREFIX_PATH.split(';')
+        : process.env.AMENT_PREFIX_PATH.split(':');
     let promises = [];
-    installedPackagesRoot.forEach((path) => {
-      let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
-        pkgs.forEach((pkg) => {
-          pkg.messages.forEach((info) => {
-            const s = info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
+    installedPackagesRoot.forEach(path => {
+      let promise = packages.findPackagesInDirectory(path).then(pkgs => {
+        pkgs.forEach(pkg => {
+          pkg.messages.forEach(info => {
+            const s =
+              info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
             assert(rclnodejs.require(s));
           });
         });
@@ -57,8 +59,8 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(typeof msg.data, 'string');
     assert.equal(msg.data, '123570');
 
-    for (let i = 0; i < 100; ++ i) {
-      msg.data = 'message + ' + i;  // Testing string assignment multiple times (string de-allocation)
+    for (let i = 0; i < 100; ++i) {
+      msg.data = 'message + ' + i; // Testing string assignment multiple times (string de-allocation)
     }
 
     msg = new String();
@@ -83,20 +85,20 @@ describe('ROSIDL Node.js message generator test suite', function() {
     let Duration = rclnodejs.require('builtin_interfaces').msg.Duration;
     let msg = new Duration();
     msg.sec = 1024;
-    msg.nanosec = 0xAAAA5555;
+    msg.nanosec = 0xaaaa5555;
     assert.equal(msg.sec, 1024);
-    assert.equal(msg.nanosec, 0xAAAA5555);
+    assert.equal(msg.nanosec, 0xaaaa5555);
 
     let msg2 = new Duration(msg);
     assert.equal(msg2.sec, 1024);
-    assert.equal(msg2.nanosec, 0xAAAA5555);
+    assert.equal(msg2.nanosec, 0xaaaa5555);
 
     msg.sec = 2048;
-    msg.nanosec = 0x5555AAAA;
+    msg.nanosec = 0x5555aaaa;
     assert.equal(msg.sec, 2048);
-    assert.equal(msg.nanosec, 0x5555AAAA);
+    assert.equal(msg.nanosec, 0x5555aaaa);
     assert.equal(msg2.sec, 1024);
-    assert.equal(msg2.nanosec, 0xAAAA5555);
+    assert.equal(msg2.nanosec, 0xaaaa5555);
   });
 
   it('Testing assignment of an all-primitive message - Time', function() {
@@ -142,7 +144,6 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(msg.orientation.y, 4567.25);
     assert.equal(msg.orientation.z, 7890.5);
 
-
     // Copy ctor
     let copy = new Pose(msg);
     assert.equal(copy.position.x, 123.5);
@@ -181,74 +182,37 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(copy.position.z, 78901.125);
   });
 
-  it('Testing constants - GoalStatus', function() {
-    let GoalStatus = rclnodejs.require('actionlib_msgs').msg.GoalStatus;
-    let msg = new GoalStatus();
-    assert.equal(typeof msg.PENDING, 'undefined');
-    assert.equal(typeof GoalStatus.PENDING, 'number');
-    assert.equal(GoalStatus.PENDING, 0);
-
-    /*
-    uint8 PENDING         = 0   # The goal has yet to be processed by the action server.
-    uint8 ACTIVE          = 1   # The goal is currently being processed by the action server.
-    uint8 PREEMPTED       = 2   # The goal received a cancel request after it started executing
-                                #   and has since completed its execution (Terminal State).
-    uint8 SUCCEEDED       = 3   # The goal was achieved successfully by the action server
-                                #   (Terminal State).
-    uint8 ABORTED         = 4   # The goal was aborted during execution by the action server due
-                                #    to some failure (Terminal State).
-    uint8 REJECTED        = 5   # The goal was rejected by the action server without being processed,
-                                #    because the goal was unattainable or invalid (Terminal State).
-    uint8 PREEMPTING      = 6   # The goal received a cancel request after it started executing
-                                #    and has not yet completed execution.
-    uint8 RECALLING       = 7   # The goal received a cancel request before it started executing, but
-                                #    the action server has not yet confirmed that the goal is canceled.
-    uint8 RECALLED        = 8   # The goal received a cancel request before it started executing
-                                #    and was successfully cancelled (Terminal State).
-    uint8 LOST            = 9   # An action client can determine that a goal is LOST. This should not
-    */
-
-    const constantsName  = ['PENDING', 'ACTIVE', 'PREEMPTED', 'SUCCEEDED', 'ABORTED',
-      'REJECTED', 'PREEMPTING', 'RECALLING', 'RECALLED', 'LOST'];
-    const cconstantsValue = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    for (let i = 0; i < constantsName.length; ++ i) {
-      assert.equal(typeof msg[constantsName[i]], 'undefined');
-      assert.equal(typeof GoalStatus[constantsName[i]], 'number');
-      assert.equal(GoalStatus[constantsName[i]], cconstantsValue[i]);
-    }
-  });
-
   it('Testing array - Int32', function() {
     let Int32 = rclnodejs.require('std_msgs').msg.Int32;
     let array = new Int32.ArrayType(5);
 
     assert(array.data instanceof Int32Array);
-    assert(typeof array.data[5] === 'undefined');  // No such index
+    assert(typeof array.data[5] === 'undefined'); // No such index
     assert.equal(array.size, 5);
     assert.equal(array.capacity, 5);
 
     // Assignment of message.data
     const int32Data = [153, 26, 777, 666, 999];
-    for (let i = 0; i < int32Data.length; ++ i) {
+    for (let i = 0; i < int32Data.length; ++i) {
       array.data[i] = int32Data[i];
-      assert.equal(array.data[i], int32Data[i]);  // Verifying
+      assert.equal(array.data[i], int32Data[i]); // Verifying
     }
 
     // Array deep copy
     let array2 = new Int32.ArrayType();
     array2.copy(array);
-    for (let i = 0; i < int32Data.length; ++ i) {
+    for (let i = 0; i < int32Data.length; ++i) {
       assert.equal(array2.data[i], int32Data[i]);
     }
 
     // Change array2
-    for (let i = 0; i < array2.length; ++ i) {
+    for (let i = 0; i < array2.length; ++i) {
       array2.data[i] = 0;
     }
 
     // Values in array1 are NOT changed
-    for (let i = 0; i < array.length; ++ i) {
-      assert.equal(array.data[i], int32Data[i]);  // Verifying
+    for (let i = 0; i < array.length; ++i) {
+      assert.equal(array.data[i], int32Data[i]); // Verifying
     }
 
     // Resize

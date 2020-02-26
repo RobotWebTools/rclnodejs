@@ -16,30 +16,33 @@
 
 const rclnodejs = require('../index.js');
 
-rclnodejs.init().then(() => {
-  let node = rclnodejs.createNode('timer_example_node');
+rclnodejs
+  .init()
+  .then(() => {
+    let node = rclnodejs.createNode('timer_example_node');
 
-  let timer = node.createTimer(1000, () => {
-    console.log('One second escaped!');
+    let timer = node.createTimer(1000, () => {
+      console.log('One second escaped!');
 
-    console.log('Cancel this timer.');
-    timer.cancel();
+      console.log('Cancel this timer.');
+      timer.cancel();
 
-    if (timer.isCanceled()) {
-      console.log('The timer has been canceled successfully.');
-    }
+      if (timer.isCanceled()) {
+        console.log('The timer has been canceled successfully.');
+      }
 
-    console.log('Reset the timer.');
-    timer.reset();
-    console.log('The next call will be ' +
-                timer.timeUntilNextCall() +
-                'ms later.');
+      console.log('Reset the timer.');
+      timer.reset();
+      console.log(
+        'The next call will be ' + timer.timeUntilNextCall() + 'ms later.'
+      );
 
-    console.log('Shuting down...');
-    rclnodejs.shutdown();
+      console.log('Shuting down...');
+      rclnodejs.shutdown();
+    });
+
+    rclnodejs.spin(node);
+  })
+  .catch(e => {
+    console.log(e);
   });
-
-  rclnodejs.spin(node);
-}).catch((e) => {
-  console.log(e);
-});

@@ -16,7 +16,7 @@
 
 function generateValues(Type, maxLength, range, negative, round, extra) {
   if (!extra) extra = [];
-  const length = Math.floor(Math.random() * (maxLength -1) + 1);
+  const length = Math.floor(Math.random() * (maxLength - 1) + 1);
   let array = new Type(length + extra.length);
   for (let i = 0; i < length; ++i) {
     let value = round(Math.random() * range);
@@ -31,9 +31,15 @@ function generateValues(Type, maxLength, range, negative, round, extra) {
   return array;
 }
 
-function positive(v) {return v;}
-function negative(v) {return -v;}
-function noRound(v) {return v;}
+function positive(v) {
+  return v;
+}
+function negative(v) {
+  return -v;
+}
+function noRound(v) {
+  return v;
+}
 
 // const arrayGen = require('./array_generator.js');
 // const arrayLength = 100 * 1024;

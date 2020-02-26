@@ -201,9 +201,9 @@ function extractMemberNames(fields) {
 {{? usePlainTypedArray}}
 const rclnodejs = require('bindings')('rclnodejs');
 {{?}}
-const StructType = require('ref-struct');
-const ref = require('ref');
-const ArrayType = require('ref-array');
+const ref = require('ref-napi');
+const StructType = require('ref-struct-di')(ref);
+const ArrayType = require('ref-array-di')(ref);
 const primitiveTypes = require('../../rosidl_gen/primitive_types.js');
 const deallocator = require('../../rosidl_gen/deallocator.js');
 const translator = require('../../rosidl_gen/message_translator.js');

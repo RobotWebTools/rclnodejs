@@ -33,23 +33,33 @@ describe('Destroying non-existent objects testing', function() {
 
   it('Destroy a non-existent node', function() {
     var node = null;
-    assertThrowsError(() => {
-      node.destroy();
-    }, TypeError, 'Cannot read property', 'Trying to destroy an empty node!');
+    assertThrowsError(
+      () => {
+        node.destroy();
+      },
+      TypeError,
+      'Cannot read property',
+      'Trying to destroy an empty node!'
+    );
 
     var node = rclnodejs.createNode('node1', '/non_existent');
     node.destroy();
 
-    // It's OK to destroy a node multiple times 
+    // It's OK to destroy a node multiple times
     // so long as the resources are freed in rcl layer.
     node.destroy();
   });
 
   it('Destroy a non-existent publisher', function() {
     var node = rclnodejs.createNode('node2', '/non_existent');
-    assertThrowsError(() => {
-      node.destroyPublisher(null);
-    }, TypeError, 'Invalid argument', 'Trying to destroy an empty publisher!');
+    assertThrowsError(
+      () => {
+        node.destroyPublisher(null);
+      },
+      TypeError,
+      'Invalid argument',
+      'Trying to destroy an empty publisher!'
+    );
 
     const RclString = 'std_msgs/msg/String';
     var publisher = node.createPublisher(RclString, 'chatter2');
@@ -61,9 +71,14 @@ describe('Destroying non-existent objects testing', function() {
 
   it('Destroy a non-existent subscription', function() {
     var node = rclnodejs.createNode('node3', '/non_existent');
-    assertThrowsError(() => {
-      node.destroySubscription(null);
-    }, TypeError, 'Invalid argument', 'Trying to destroy an empty subscription!');
+    assertThrowsError(
+      () => {
+        node.destroySubscription(null);
+      },
+      TypeError,
+      'Invalid argument',
+      'Trying to destroy an empty subscription!'
+    );
 
     const RclString = 'std_msgs/msg/String';
     var subscription = node.createSubscription(RclString, 'chatter3', () => {});
@@ -75,9 +90,14 @@ describe('Destroying non-existent objects testing', function() {
 
   it('Destroy a non-existent client', function() {
     var node = rclnodejs.createNode('node4', '/non_existent');
-    assertThrowsError(() => {
-      node.destroyClient(null);
-    }, TypeError, 'Invalid argument', 'Trying to destroy an empty client!');
+    assertThrowsError(
+      () => {
+        node.destroyClient(null);
+      },
+      TypeError,
+      'Invalid argument',
+      'Trying to destroy an empty client!'
+    );
 
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     var client = node.createClient(AddTwoInts, 'add_two_ints');
@@ -89,13 +109,21 @@ describe('Destroying non-existent objects testing', function() {
 
   it('Destroy a non-existent service', function() {
     var node = rclnodejs.createNode('node5', '/non_existent');
-    assertThrowsError(() => {
-      node.destroyService(null);
-    }, TypeError, 'Invalid argument', 'Trying to destroy an empty service!');
+    assertThrowsError(
+      () => {
+        node.destroyService(null);
+      },
+      TypeError,
+      'Invalid argument',
+      'Trying to destroy an empty service!'
+    );
 
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
-    var service = node.createService(AddTwoInts, 'add_two_ints',
-      (request, response) =>{});
+    var service = node.createService(
+      AddTwoInts,
+      'add_two_ints',
+      (request, response) => {}
+    );
     node.destroyService(service);
 
     // OK to destroy a service multiple times
@@ -104,12 +132,19 @@ describe('Destroying non-existent objects testing', function() {
 
   it('Destroy a non-existent timer', function() {
     var node = rclnodejs.createNode('node6', '/non_existent');
-    assertThrowsError(() => {
-      node.destroyTimer(null);
-    }, TypeError, 'Invalid argument', 'Trying to destroy an empty timer!');
+    assertThrowsError(
+      () => {
+        node.destroyTimer(null);
+      },
+      TypeError,
+      'Invalid argument',
+      'Trying to destroy an empty timer!'
+    );
 
     var count = 0;
-    var timer = node.createTimer(100, () => { count++; });
+    var timer = node.createTimer(100, () => {
+      count++;
+    });
     node.destroyTimer(timer);
 
     // OK to destroy a timer multiple times
@@ -132,13 +167,23 @@ describe('Fuzzing API calls testing', function() {
     var node = rclnodejs.createNode('node1', '/unregistered');
     const UnknownMsgType = 'std_msgs/msg/Foo';
 
-    assertThrowsError(() => {
-      node.createPublisher(UnknownMsgType, 'chatter');
-    }, Error, 'does not exist', 'Unrecoginzed message types!');
+    assertThrowsError(
+      () => {
+        node.createPublisher(UnknownMsgType, 'chatter');
+      },
+      Error,
+      'does not exist',
+      'Unrecoginzed message types!'
+    );
 
-    assertThrowsError(() => {
-      node.createSubscription(UnknownMsgType, 'chatter', (msg) => {});
-    }, Error, 'does not exist', 'Unrecoginzed message type!');
+    assertThrowsError(
+      () => {
+        node.createSubscription(UnknownMsgType, 'chatter', msg => {});
+      },
+      Error,
+      'does not exist',
+      'Unrecoginzed message type!'
+    );
 
     node.destroy();
   });
@@ -147,13 +192,23 @@ describe('Fuzzing API calls testing', function() {
     var node = rclnodejs.createNode('node2', '/unregistered');
     const UnknownInterface = 'example_interfaces/srv/Bar';
 
-    assertThrowsError(() => {
-      node.createClient(UnknownInterface, 'chatter');
-    }, Error, 'does not exist', 'Unrecoginzed service interface!');
+    assertThrowsError(
+      () => {
+        node.createClient(UnknownInterface, 'chatter');
+      },
+      Error,
+      'does not exist',
+      'Unrecoginzed service interface!'
+    );
 
-    assertThrowsError(() => {
-      node.createService(UnknownInterface, 'chatter', (req, res) => {});
-    }, Error, 'does not exist', 'Unrecoginzed service interface!');
+    assertThrowsError(
+      () => {
+        node.createService(UnknownInterface, 'chatter', (req, res) => {});
+      },
+      Error,
+      'does not exist',
+      'Unrecoginzed service interface!'
+    );
 
     node.destroy();
   });
@@ -163,9 +218,14 @@ describe('Fuzzing API calls testing', function() {
     const RclString = 'std_msgs/msg/String';
 
     var publisher = node.createPublisher(RclString, 'chatter7');
-    assertThrowsError(() => {
-      publisher.publish({a: 1});
-    }, TypeError, 'Invalid argument', `Type should be ${RclString}`);
+    assertThrowsError(
+      () => {
+        publisher.publish({ a: 1 });
+      },
+      TypeError,
+      'Invalid argument',
+      `Type should be ${RclString}`
+    );
 
     rclnodejs.spin(node);
     node.destroy();
@@ -176,15 +236,28 @@ describe('Fuzzing API calls testing', function() {
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
     var client = node.createClient(AddTwoInts, 'add_two_ints');
-    var service = node.createService(AddTwoInts, 'add_two_ints', (request, response) => {
-      assert.throws(() => {
-        request.b;
-      }, Error, 'This should never be reached.');
-    });
+    var service = node.createService(
+      AddTwoInts,
+      'add_two_ints',
+      (request, response) => {
+        assert.throws(
+          () => {
+            request.b;
+          },
+          Error,
+          'This should never be reached.'
+        );
+      }
+    );
 
-    assertThrowsError(() => {
-      client.sendRequest({a: 1}, (response) => {});
-    }, TypeError, 'Invalid argument', 'request.b does not exist');
+    assertThrowsError(
+      () => {
+        client.sendRequest({ a: 1 }, response => {});
+      },
+      TypeError,
+      'Invalid argument',
+      'request.b does not exist'
+    );
     rclnodejs.spin(node);
     node.destroy();
   });
@@ -197,19 +270,28 @@ describe('Fuzzing API calls testing', function() {
     var publisher = node.createPublisher(RclString, 'chatter9');
     var subscription = node.createSubscription(RclString, 'chatter9', () => {});
     var client = node.createClient(AddTwoInts, 'add_two_ints');
-    var service = node.createService(AddTwoInts, 'add_two_ints', (request, response) => {});
+    var service = node.createService(
+      AddTwoInts,
+      'add_two_ints',
+      (request, response) => {}
+    );
   });
 
   it('timer Creating with inconsistent type', function() {
     var node = rclnodejs.createNode('node3', '/inconsistent');
     const invalidParams = [
       ['100', () => {}],
-      [100, null]
+      [100, null],
     ];
-    invalidParams.forEach((param) => {
-      assertThrowsError(() => {
-        node.createTimer(param[0], param[1]);
-      }, TypeError, 'Invalid argument', 'Failed to createTimer!');
+    invalidParams.forEach(param => {
+      assertThrowsError(
+        () => {
+          node.createTimer(param[0], param[1]);
+        },
+        TypeError,
+        'Invalid argument',
+        'Failed to createTimer!'
+      );
     });
 
     node.destroy();
@@ -220,10 +302,14 @@ describe('Fuzzing API calls testing', function() {
     const RclString = 'std_msgs/msg/String';
 
     var publisher = node.createPublisher(RclString, 'race_channel');
-    var subscription = node.createSubscription(RclString, 'race_channel', (msg) => {
-      node.destroy();
-      done();
-    });
+    var subscription = node.createSubscription(
+      RclString,
+      'race_channel',
+      msg => {
+        node.destroy();
+        done();
+      }
+    );
 
     publisher.publish('hello world!');
     rclnodejs.spin(node);
@@ -239,8 +325,8 @@ describe('Fuzzing API calls testing', function() {
       done();
     });
 
-    let request = { a: 1, b: 2};
-    client.sendRequest(request, (response) => {
+    let request = { a: 1, b: 2 };
+    client.sendRequest(request, response => {
       throw new Error('never reached');
     });
     rclnodejs.spin(node);
@@ -257,17 +343,26 @@ describe('Fuzzing API calls testing', function() {
     }
     /* eslint-disable camelcase */
     const value = {
-      header: {stamp: {sec: 11223, nanosec: 44556}, frame_id: 'f001', },
-      height: 240, width: 320, encoding: 'rgba', is_bigendian: false, step: 320*16, is_dense: false,
+      header: { stamp: { sec: 11223, nanosec: 44556 }, frame_id: 'f001' },
+      height: 240,
+      width: 320,
+      encoding: 'rgba',
+      is_bigendian: false,
+      step: 320 * 16,
+      is_dense: false,
       data: Uint8Array.from(uint8Data),
     };
 
     var publisher = node.createPublisher(Image, 'performance');
-    var subscription = node.createSubscription(Image, 'performance', (message) => {
-      assert.deepStrictEqual(message.data.length, dataLength);
-      node.destroy();
-      done();
-    });
+    var subscription = node.createSubscription(
+      Image,
+      'performance',
+      message => {
+        assert.deepStrictEqual(message.data.length, dataLength);
+        node.destroy();
+        done();
+      }
+    );
     publisher.publish(value);
     rclnodejs.spin(node);
   });

@@ -31,7 +31,12 @@ describe('rclnodejs module existance testing', function() {
     });
 
     it('createMessageObject method should exist', function() {
-      assertMember('createMessageObject', rclnodejs, rclnodejs.createMessageObject, 'function');
+      assertMember(
+        'createMessageObject',
+        rclnodejs,
+        rclnodejs.createMessageObject,
+        'function'
+      );
     });
 
     it('createNode method should exist', function() {
@@ -43,7 +48,12 @@ describe('rclnodejs module existance testing', function() {
     });
 
     it('regenerateAll method should exist', function() {
-      assertMember('regenerateAll', rclnodejs, rclnodejs.regenerateAll, 'function');
+      assertMember(
+        'regenerateAll',
+        rclnodejs,
+        rclnodejs.regenerateAll,
+        'function'
+      );
     });
 
     it('require method should exist', function() {
@@ -59,11 +69,21 @@ describe('rclnodejs module existance testing', function() {
     });
 
     it('expandTopicName method should exist', function() {
-      assertMember('expandTopicName', rclnodejs, rclnodejs.expandTopicName, 'function');
+      assertMember(
+        'expandTopicName',
+        rclnodejs,
+        rclnodejs.expandTopicName,
+        'function'
+      );
     });
 
     it('isTopicOrServiceHidden method should exist', function() {
-      assertMember('isTopicOrServiceHidden', rclnodejs, rclnodejs.isTopicOrServiceHidden, 'function');
+      assertMember(
+        'isTopicOrServiceHidden',
+        rclnodejs,
+        rclnodejs.isTopicOrServiceHidden,
+        'function'
+      );
     });
   });
 });
@@ -125,7 +145,12 @@ describe('rclnodejs class existance testing', function() {
     });
 
     it('createSubscription method should exist', function() {
-      assertMember('createSubscription', node, node.createSubscription, 'function');
+      assertMember(
+        'createSubscription',
+        node,
+        node.createSubscription,
+        'function'
+      );
     });
 
     it('createTimer method should exist', function() {
@@ -141,7 +166,12 @@ describe('rclnodejs class existance testing', function() {
     });
 
     it('destroySubscription method should exist', function() {
-      assertMember('destroySubscription', node, node.destroySubscription, 'function');
+      assertMember(
+        'destroySubscription',
+        node,
+        node.destroySubscription,
+        'function'
+      );
     });
 
     it('destroyClient method should exist', function() {
@@ -162,7 +192,7 @@ describe('rclnodejs class existance testing', function() {
 
     it('namespace method should exist', function() {
       assertMember('namespace', node, node.namespace, 'function');
-    });        
+    });
   });
 
   describe('Publisher & Subscription class', function() {
@@ -189,7 +219,7 @@ describe('rclnodejs class existance testing', function() {
 
     it('topic member of a subscription should exist', function() {
       assertMember('topic', subscription, subscription.topic, 'string');
-    });    
+    });
   });
 
   describe('Client & Service class', function() {
@@ -199,7 +229,7 @@ describe('rclnodejs class existance testing', function() {
       node = rclnodejs.createNode('Client');
       AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       client = node.createClient(AddTwoInts, 'add_two_ints');
-      service = node.createService(AddTwoInts, 'add_two_ints', (req) => {});
+      service = node.createService(AddTwoInts, 'add_two_ints', req => {});
     });
 
     after(function() {
@@ -212,7 +242,7 @@ describe('rclnodejs class existance testing', function() {
 
     it('serviceName member of a service should exist', function() {
       assertMember('serviceName', service, service.serviceName, 'string');
-    });    
+    });
   });
 
   describe('Timer class', function() {
@@ -250,11 +280,21 @@ describe('rclnodejs class existance testing', function() {
     });
 
     it('timeSinceLastCall method should exist', function() {
-      assertMember('timeSinceLastCall', timer, timer.timeSinceLastCall, 'function');
-    });    
+      assertMember(
+        'timeSinceLastCall',
+        timer,
+        timer.timeSinceLastCall,
+        'function'
+      );
+    });
 
     it('timeUntilNextCall method should exist', function() {
-      assertMember('timeUntilNextCall', timer, timer.timeUntilNextCall, 'function');
+      assertMember(
+        'timeUntilNextCall',
+        timer,
+        timer.timeUntilNextCall,
+        'function'
+      );
     });
   });
 
@@ -266,7 +306,12 @@ describe('rclnodejs class existance testing', function() {
     });
 
     it('should have getter avoidRosNameSpaceConventions', function() {
-      assertMember('avoidRosNameSpaceConventions', qos, qos.avoidRosNameSpaceConventions, 'boolean');
+      assertMember(
+        'avoidRosNameSpaceConventions',
+        qos,
+        qos.avoidRosNameSpaceConventions,
+        'boolean'
+      );
     });
 
     it('should have getter depth', function() {
@@ -278,8 +323,12 @@ describe('rclnodejs class existance testing', function() {
     });
 
     it('should have static getter DurabilityPolicy', function() {
-      assertMember('DurabilityPolicy', rclnodejs.QoS,
-        rclnodejs.QoS.DurabilityPolicy, 'object');
+      assertMember(
+        'DurabilityPolicy',
+        rclnodejs.QoS,
+        rclnodejs.QoS.DurabilityPolicy,
+        'object'
+      );
     });
 
     it('should have getter history', function() {
@@ -287,31 +336,66 @@ describe('rclnodejs class existance testing', function() {
     });
 
     it('should have static getter HistoryPolicy', function() {
-      assertMember('HistoryPolicy', rclnodejs.QoS, rclnodejs.QoS.HistoryPolicy, 'object');
+      assertMember(
+        'HistoryPolicy',
+        rclnodejs.QoS,
+        rclnodejs.QoS.HistoryPolicy,
+        'object'
+      );
     });
 
     it('should have static getter profileDefault', function() {
-      assertMember('profileDefault', rclnodejs.QoS, rclnodejs.QoS.profileDefault, 'string');
+      assertMember(
+        'profileDefault',
+        rclnodejs.QoS,
+        rclnodejs.QoS.profileDefault,
+        'string'
+      );
     });
 
     it('should have static getter profileParameterEvents', function() {
-      assertMember('profileParameterEvents', rclnodejs.QoS, rclnodejs.QoS.profileParameterEvents, 'string');
+      assertMember(
+        'profileParameterEvents',
+        rclnodejs.QoS,
+        rclnodejs.QoS.profileParameterEvents,
+        'string'
+      );
     });
 
     it('should have static getter profileParameters', function() {
-      assertMember('profileParameters', rclnodejs.QoS, rclnodejs.QoS.profileParameters, 'string');
+      assertMember(
+        'profileParameters',
+        rclnodejs.QoS,
+        rclnodejs.QoS.profileParameters,
+        'string'
+      );
     });
 
     it('should have static getter profileSensorData', function() {
-      assertMember('profileSensorData', rclnodejs.QoS, rclnodejs.QoS.profileSensorData, 'string');
+      assertMember(
+        'profileSensorData',
+        rclnodejs.QoS,
+        rclnodejs.QoS.profileSensorData,
+        'string'
+      );
     });
 
     it('should have static getter profileServicesDefault', function() {
-      assertMember('profileServicesDefault', rclnodejs.QoS, rclnodejs.QoS.profileServicesDefault, 'string');
+      assertMember(
+        'profileServicesDefault',
+        rclnodejs.QoS,
+        rclnodejs.QoS.profileServicesDefault,
+        'string'
+      );
     });
 
     it('should have static getter profileSystemDefault', function() {
-      assertMember('profileSystemDefault', rclnodejs.QoS, rclnodejs.QoS.profileSystemDefault, 'string');
+      assertMember(
+        'profileSystemDefault',
+        rclnodejs.QoS,
+        rclnodejs.QoS.profileSystemDefault,
+        'string'
+      );
     });
 
     it('should have getter reliability', function() {
@@ -319,74 +403,120 @@ describe('rclnodejs class existance testing', function() {
     });
 
     it('should have static getter ReliabilityPolicy', function() {
-      assertMember('ReliabilityPolicy', rclnodejs.QoS, rclnodejs.QoS.ReliabilityPolicy, 'object');
+      assertMember(
+        'ReliabilityPolicy',
+        rclnodejs.QoS,
+        rclnodejs.QoS.ReliabilityPolicy,
+        'object'
+      );
     });
 
     it('should have setter avoidRosNameSpaceConventions', function() {
       qos.avoidRosNameSpaceConventions = true;
       assert.ok(qos.avoidRosNameSpaceConventions);
 
-      assertThrowsError(() => {
-        qos.avoidRosNameSpaceConventions = 1;
-      }, TypeError, 'Invalid argument', 'Failed to call setter');
+      assertThrowsError(
+        () => {
+          qos.avoidRosNameSpaceConventions = 1;
+        },
+        TypeError,
+        'Invalid argument',
+        'Failed to call setter'
+      );
     });
 
     it('should have setter depth', function() {
       qos.depth = 0;
       assert.deepStrictEqual(qos.depth, 0);
 
-      assertThrowsError(() => {
-        qos.depth = 'abc';
-      }, TypeError, 'Invalid argument', 'Failed to call setter');
+      assertThrowsError(
+        () => {
+          qos.depth = 'abc';
+        },
+        TypeError,
+        'Invalid argument',
+        'Failed to call setter'
+      );
     });
 
     it('should have setter durability', function() {
       qos.durability = 0;
       assert.deepStrictEqual(qos.durability, 0);
 
-      assertThrowsError(() => {
-        qos.durability = 'abc';
-      }, TypeError, 'Invalid argument', 'Failed to call setter');
+      assertThrowsError(
+        () => {
+          qos.durability = 'abc';
+        },
+        TypeError,
+        'Invalid argument',
+        'Failed to call setter'
+      );
     });
 
     it('should have setter history', function() {
       qos.history = 0;
       assert.deepStrictEqual(qos.history, 0);
 
-      assertThrowsError(() => {
-        qos.history = 'abc';
-      }, TypeError, 'Invalid argument', 'Failed to call setter');
+      assertThrowsError(
+        () => {
+          qos.history = 'abc';
+        },
+        TypeError,
+        'Invalid argument',
+        'Failed to call setter'
+      );
     });
 
     it('should have setter reliability', function() {
       qos.reliability = 0;
       assert.deepStrictEqual(qos.reliability, 0);
 
-      assertThrowsError(() => {
-        qos.reliability = 'abc';
-      }, TypeError, 'Invalid argument', 'Failed to call setter');
+      assertThrowsError(
+        () => {
+          qos.reliability = 'abc';
+        },
+        TypeError,
+        'Invalid argument',
+        'Failed to call setter'
+      );
     });
   });
 
   describe('Validator class', function() {
     it('should have validateFullTopicName method', function() {
-      assertMember('validateFullTopicName', rclnodejs.validator,
-        rclnodejs.validator.validateFullTopicName, 'function');
+      assertMember(
+        'validateFullTopicName',
+        rclnodejs.validator,
+        rclnodejs.validator.validateFullTopicName,
+        'function'
+      );
     });
 
     it('should have validateNodeName method', function() {
-      assertMember('validateNodeName', rclnodejs.validator,
-        rclnodejs.validator.validateNodeName, 'function');
+      assertMember(
+        'validateNodeName',
+        rclnodejs.validator,
+        rclnodejs.validator.validateNodeName,
+        'function'
+      );
     });
 
     it('should have validateTopicName method', function() {
-      assertMember('validateTopicName', rclnodejs.validator,
-        rclnodejs.validator.validateTopicName, 'function');
+      assertMember(
+        'validateTopicName',
+        rclnodejs.validator,
+        rclnodejs.validator.validateTopicName,
+        'function'
+      );
     });
 
     it('should have validateNamespace method', function() {
-      assertMember('validateNamespace', rclnodejs.validator,
-        rclnodejs.validator.validateNamespace, 'function');
+      assertMember(
+        'validateNamespace',
+        rclnodejs.validator,
+        rclnodejs.validator.validateNamespace,
+        'function'
+      );
     });
   });
 });

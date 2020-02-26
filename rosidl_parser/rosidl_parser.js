@@ -47,11 +47,11 @@ let rosidlParser = {
 
   _assembleCommand(args) {
     let command = `${pythonExe} ${__dirname}/parser.py`;
-    args.forEach((arg) => {
+    args.forEach(arg => {
       command += ' ' + arg;
     });
     return command;
-  }
+  },
 };
 
 module.exports = rosidlParser;

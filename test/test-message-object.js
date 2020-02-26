@@ -31,15 +31,17 @@ describe('Rclnodejs createMessage() testing', function() {
 
   it('Test .createMessage() for every message in system', function() {
     const packages = require('../rosidl_gen/packages.js');
-    const installedPackagesRoot =  (os.type() === 'Windows_NT')
-      ? process.env.AMENT_PREFIX_PATH.split(';')
-      : process.env.AMENT_PREFIX_PATH.split(':');
+    const installedPackagesRoot =
+      os.type() === 'Windows_NT'
+        ? process.env.AMENT_PREFIX_PATH.split(';')
+        : process.env.AMENT_PREFIX_PATH.split(':');
     let promises = [];
-    installedPackagesRoot.forEach((path) => {
-      let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
-        pkgs.forEach((pkg) => {
-          pkg.messages.forEach((info) => {
-            const s = info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
+    installedPackagesRoot.forEach(path => {
+      let promise = packages.findPackagesInDirectory(path).then(pkgs => {
+        pkgs.forEach(pkg => {
+          pkg.messages.forEach(info => {
+            const s =
+              info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
             rclnodejs.createMessage(s);
 
             rclnodejs.createMessage({
@@ -109,17 +111,19 @@ describe('Rclnodejs createMessage() testing', function() {
     'msg/String',
     '/msg/String',
     'unknown/msg/Unknown',
-    {package: 'std_msgs', type: 'msg', name: 'CString'},
-  ].forEach((testData) => {
+    { package: 'std_msgs', type: 'msg', name: 'CString' },
+  ].forEach(testData => {
     it('expecting exception when passing ' + testData.toString(), function() {
-      assert.throws(() => {
-        rclnodejs.createMessage(testData);
-      }, function(e) {
-        return e instanceof Error;
-      });
+      assert.throws(
+        () => {
+          rclnodejs.createMessage(testData);
+        },
+        function(e) {
+          return e instanceof Error;
+        }
+      );
     });
   });
-
 });
 
 describe('Rclnodejs createMessageObject() testing', function() {
@@ -135,15 +139,17 @@ describe('Rclnodejs createMessageObject() testing', function() {
 
   it('Test .createMessageObject() for every message in system', function() {
     const packages = require('../rosidl_gen/packages.js');
-    const installedPackagesRoot =  (os.type() === 'Windows_NT')
-      ? process.env.AMENT_PREFIX_PATH.split(';')
-      : process.env.AMENT_PREFIX_PATH.split(':');
+    const installedPackagesRoot =
+      os.type() === 'Windows_NT'
+        ? process.env.AMENT_PREFIX_PATH.split(';')
+        : process.env.AMENT_PREFIX_PATH.split(':');
     let promises = [];
-    installedPackagesRoot.forEach((path) => {
-      let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
-        pkgs.forEach((pkg) => {
-          pkg.messages.forEach((info) => {
-            const s = info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
+    installedPackagesRoot.forEach(path => {
+      let promise = packages.findPackagesInDirectory(path).then(pkgs => {
+        pkgs.forEach(pkg => {
+          pkg.messages.forEach(info => {
+            const s =
+              info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
             rclnodejs.createMessageObject(s);
 
             rclnodejs.createMessageObject({
@@ -195,15 +201,17 @@ describe('Rclnodejs createMessageObject() testing', function() {
     'msg/String',
     '/msg/String',
     'unknown/msg/Unknown',
-    {package: 'std_msgs', type: 'msg', name: 'CString'},
-  ].forEach((testData) => {
+    { package: 'std_msgs', type: 'msg', name: 'CString' },
+  ].forEach(testData => {
     it('expecting exception when passing ' + testData.toString(), function() {
-      assert.throws(() => {
-        rclnodejs.createMessageObject(testData);
-      }, function(e) {
-        return e instanceof Error;
-      });
+      assert.throws(
+        () => {
+          rclnodejs.createMessageObject(testData);
+        },
+        function(e) {
+          return e instanceof Error;
+        }
+      );
     });
   });
-
 });
