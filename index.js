@@ -150,6 +150,14 @@ let rcl = {
    */
   init(context = Context.defaultContext(), argv = process.argv) {
     return new Promise((resolve, reject) => {
+      // check argv for correct value and state
+      if (!Array.isArray(argv)) {
+        throw new TypeError('argv must be an array.');
+      }
+      if (argv.reduce((hasNull, arg) => typeof arg !== 'string', false)) {
+        throw new TypeError('argv elements must not be null');
+      }
+
       let that = this;
       if (!this._initialized) {
         getCurrentGeneratorVersion()
