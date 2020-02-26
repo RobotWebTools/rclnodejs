@@ -15,7 +15,8 @@ declare module 'rclnodejs' {
     constructor();
 
     /**
-     * When true
+     * A flag controlling the startup of a node's parameter-service.
+     * When true a node will start it's parameter-service during initialization.
      * Default value = true;
      * @returns {boolean} -
      */
@@ -28,13 +29,13 @@ declare module 'rclnodejs' {
     parameterOverrides: Array<Parameters.Parameter>;
 
     /**
-     * True indicates that a node shold declare declare parameters from
-     * it's parameter-overrides
+     * Instructs a node if it should declare parameters from it's 
+     * parameter-overrides.
      */
     automaticallyDeclareParametersFromOverrides: boolean;
 
     /**
-     * Returns an instance configured with default options.
+     * An instance configured with default values.
      */
     static defaultOptions: NodeOptions;
   }

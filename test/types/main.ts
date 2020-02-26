@@ -20,7 +20,8 @@ rclnodejs.isShutdown();
 rclnodejs.shutdown();
 
 // ---- Context -----
-
+// $ExpectType Context
+const context = rclnodejs.Context.defaultContext();
 
 // ---- NodeOptions ----
 // $ExpectType NodeOptions

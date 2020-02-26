@@ -22,6 +22,7 @@
 #include <rcl/rcl.h>
 #include <rcl/validate_topic_name.h>
 #include <rcl_yaml_param_parser/types.h>
+#include <rcl_yaml_param_parser/parser.h>
 #include <rmw/error_handling.h>
 #include <rmw/rmw.h>
 #include <rmw/validate_full_topic_name.h>
@@ -39,7 +40,7 @@
 namespace rclnodejs {
 
 rcl_guard_condition_t* g_sigint_gc = nullptr;
-static v8::Local<v8::Object> wrapParameters(rcl_params_t *params, v8::Isolate* isolate);  // NOLINT(whitespace/line_length)
+static v8::Local<v8::Object> wrapParameters(rcl_params_t *params);  // NOLINT(whitespace/line_length)
 
 #ifdef OS_WINDOWS
 _crt_signal_t g_original_signal_handler = NULL;
@@ -77,16 +78,27 @@ NAN_METHOD(Init) {
   // preprocess argc & argv
   v8::Local<v8::Array> jsArgv = v8::Local<v8::Array>::Cast(info[1]);
   int argc = jsArgv->Length();
-  char **argv = reinterpret_cast<char **>(malloc(argc * sizeof(char *)));
-  for (int i = 0; i < argc; i++) {
-    v8::Local<v8::Value> jsElement = jsArgv->Get(i);
-    argv[i] = strdup(*Nan::Utf8String(jsElement));
+  char **argv = nullptr;
+  if (argc > 0) {
+    argv = reinterpret_cast<char **>(malloc(argc * sizeof(char *)));
+    for (int i = 0; i < argc; i++) {
+      Nan::MaybeLocal<v8::Value> jsElement = Nan::Get(jsArgv, i);
+      char *arg = *Nan::Utf8String(jsElement.ToLocalChecked());
+      int len = std::strlen(arg) + 1;
+      argv[i] = reinterpret_cast<char *>(malloc(len * sizeof(char *)));
+      snprintf(argv[i], len, "%s", arg);
+    }
   }
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_init(argc, argc > 0 ? argv: nullptr,
                                     &init_options, context),
                            rcl_get_error_string().str);
+
+  for (int i = 0; i < argc; i++) {
+    free(argv[i]);
+  }
+  free(argv);
 
   g_sigint_gc = reinterpret_cast<rcl_guard_condition_t*>(
       malloc(sizeof(rcl_guard_condition_t)));
@@ -116,10 +128,9 @@ NAN_METHOD(GetParameterOverrides) {
     return;
   }
 
-  v8::Isolate * isolate = info.GetIsolate();
-  v8::Local<v8::Object> result = wrapParameters(params, isolate);
+  info.GetReturnValue().Set(wrapParameters(params));
 
-  info.GetReturnValue().Set(result);
+  rcl_yaml_node_struct_fini(params);
 }
 
 static const int PARAMETER_NOT_SET = 0;
@@ -149,43 +160,49 @@ type Node = {
 
 parameters = array<Node>;
 */
-static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args, v8::Isolate* isolate) {  // NOLINT(whitespace/line_length)
-  v8::Local<v8::Array> nodes = v8::Array::New(isolate);
+static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
+  v8::Local<v8::Array> nodes = Nan::New<v8::Array>();
 
   // iterate over nodes
   for (int i=0; i < parsed_args->num_nodes; i++) {
-    v8::Local<v8::Object> node = v8::Object::New(isolate);
-    node->Set(Nan::New("name").ToLocalChecked(),
-              Nan::New(parsed_args->node_names[i]).ToLocalChecked());
+    v8::Local<v8::Object> node = Nan::New<v8::Object>();
+    Nan::Set(node,
+             Nan::New("name").ToLocalChecked(),
+             Nan::New(parsed_args->node_names[i]).ToLocalChecked());
 
     rcl_node_params_t node_parameters = parsed_args->params[i];
 
     // iterate over node.parameters
-    v8::Local<v8::Array> parameters = v8::Array::New(isolate);
+    v8::Local<v8::Array> parameters = Nan::New<v8::Array>();
     for (int j=0; j < node_parameters.num_params; j++) {
-      v8::Local<v8::Object> parameter = v8::Object::New(isolate);
+      v8::Local<v8::Object> parameter = Nan::New<v8::Object>();
 
-      parameter->Set(Nan::New("name").ToLocalChecked(),
-                     Nan::New(parsed_args->params[i].parameter_names[j]).ToLocalChecked());  // NOLINT(whitespace/line_length)
+      Nan::Set(parameter,
+              Nan::New("name").ToLocalChecked(),
+              Nan::New(parsed_args->params[i].parameter_names[j]).
+                ToLocalChecked());
 
       int param_type = PARAMETER_NOT_SET;
 
       // for each value, find type & actual value
       rcl_variant_t value = node_parameters.parameter_values[j];
-      if (value.bool_value != NULL) {
+      if (value.bool_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BOOL;
-        parameter->Set(Nan::New("value").ToLocalChecked(),
-            (*value.bool_value ? Nan::True() : Nan::False()));
+        Nan::Set(parameter,
+                 Nan::New("value").ToLocalChecked(),
+                 (*value.bool_value ? Nan::True() : Nan::False()));
       }
       else if (value.integer_value != NULL) {  // NOLINT()
         param_type = PARAMETER_INTEGER;
-        parameter->Set(Nan::New("value").ToLocalChecked(),
-                       v8::Number::New(isolate, *value.integer_value));
+        Nan::Set(parameter,
+                 Nan::New("value").ToLocalChecked(),
+                 Nan::New<v8::Number>(*value.integer_value));
       }
       else if (value.double_value != NULL) {  // NOLINT()
         param_type = PARAMETER_DOUBLE;
-        parameter->Set(Nan::New("value").ToLocalChecked(),
-                       v8::Number::New(isolate, *value.double_value));
+        Nan::Set(parameter,
+                 Nan::New("value").ToLocalChecked(),
+                 Nan::New<v8::Number>(*value.double_value));
       }
       else if (value.string_value != NULL) {  // NOLINT()
         param_type = PARAMETER_STRING;
@@ -194,52 +211,61 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args, v8::Isola
       }
       else if (value.bool_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BOOL_ARRAY;
-        v8::Local<v8::Array> bool_array = v8::Array::New(isolate);
+        v8::Local<v8::Array> bool_array = Nan::New<v8::Array>();
+
         for (int k=0; k < value.bool_array_value->size; k++) {
-          bool_array->Set(k, (value.bool_array_value->values[k] ? Nan::True() : Nan::False()) );  // NOLINT(whitespace/line_length)
+          Nan::Set(bool_array, k,
+                  (value.bool_array_value->values[k] ?
+                    Nan::True() : Nan::False()) );
         }
-        parameter->Set(Nan::New("value").ToLocalChecked(), bool_array);
+        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), bool_array);
       }
       else if (value.string_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_STRING_ARRAY;
-        v8::Local<v8::Array> string_array = v8::Array::New(isolate);
+        v8::Local<v8::Array> string_array = Nan::New<v8::Array>();
         for (int k=0; k < value.string_array_value->size; k++) {
-          string_array->Set(k, Nan::New(value.string_array_value->data[k]).ToLocalChecked());  // NOLINT(whitespace/line_length)
+          Nan::Set(string_array, k,
+                   Nan::New(value.string_array_value->data[k]).
+                    ToLocalChecked());  // NOLINT(whitespace/line_length)
         }
-        parameter->Set(Nan::New("value").ToLocalChecked(), string_array);
+        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), string_array);
       }
       else if (value.byte_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BYTE_ARRAY;
-        v8::Local<v8::Array> byte_array = v8::Array::New(isolate);
+        v8::Local<v8::Array> byte_array = Nan::New<v8::Array>();
         for (int k=0; k < value.byte_array_value->size; k++) {
-          byte_array->Set(k, v8::Number::New(isolate, value.byte_array_value->values[k]));  // NOLINT(whitespace/line_length)
+          Nan::Set(byte_array, k,
+                   Nan::New(value.byte_array_value->values[k]));
         }
-        parameter->Set(Nan::New("value").ToLocalChecked(), byte_array);
+        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), byte_array);
       }
       else if (value.integer_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_INTEGER_ARRAY;
-        v8::Local<v8::Array> int_array = v8::Array::New(isolate);
+        v8::Local<v8::Array> int_array = Nan::New<v8::Array>();
         for (int k=0; k < value.integer_array_value->size; k++) {
-          int_array->Set(k, v8::Number::New(isolate, value.integer_array_value->values[k]));  // NOLINT(whitespace/line_length)
+          Nan::Set(int_array, k,
+                   Nan::New<v8::Number>(value.integer_array_value->values[k]));
         }
-        parameter->Set(Nan::New("value").ToLocalChecked(), int_array);
+        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), int_array);
       }
       else if (value.double_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_DOUBLE_ARRAY;
-        v8::Local<v8::Array> dbl_array = v8::Array::New(isolate);
+        v8::Local<v8::Array> dbl_array = Nan::New<v8::Array>();
         for (int k=0; k < value.double_array_value->size; k++) {
-          dbl_array->Set(k, v8::Number::New(isolate, value.double_array_value->values[k]));  // NOLINT(whitespace/line_length)
+          Nan::Set(dbl_array, k,
+                   Nan::New<v8::Number>(value.double_array_value->values[k]));  // NOLINT(whitespace/line_length)
         }
-        parameter->Set(Nan::New("value").ToLocalChecked(), dbl_array);
+        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), dbl_array);
       }
 
-      parameter->Set(Nan::New("type").ToLocalChecked(),
-                     v8::Number::New(isolate, param_type));
-      parameters->Set(j, parameter);
+      Nan::Set(parameter,
+               Nan::New("type").ToLocalChecked(),
+               Nan::New<v8::Number>(param_type));
+      Nan::Set(parameters, j, parameter);
     }
 
-    node->Set(Nan::New("parameters").ToLocalChecked(), parameters);
-    nodes->Set(i, node);
+    Nan::Set(node, Nan::New("parameters").ToLocalChecked(), parameters);
+    Nan::Set(nodes, i, node);
   }
 
   return nodes;
