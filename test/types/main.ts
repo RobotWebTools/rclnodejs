@@ -1,10 +1,9 @@
 /// <reference path='../../types/index.d.ts' />
 import * as rclnodejs from 'rclnodejs';
 
-const NODE_NAME = "test_node";
-const TYPE_CLASS = "std_msgs/msg/String";
-const TOPIC = "topic";
-
+const NODE_NAME = 'test_node';
+const TYPE_CLASS = 'std_msgs/msg/String';
+const TOPIC = 'topic';
 
 // ---- rclnodejs -----
 // $ExpectType Promise<void>
@@ -79,7 +78,6 @@ node.countPublishers(TOPIC);
 // $ExpectType number
 node.countSubscribers(TOPIC);
 
-
 // ---- Publisher ----
 // $ExpectType Publisher
 const publisher = node.createPublisher(TYPE_CLASS, TOPIC);
@@ -100,28 +98,34 @@ publisher.typeClass;
 publisher.typedArrayEnabled;
 
 // $ExpectType void
-publisher.publish("");
-
+publisher.publish('');
 
 // ---- Subscription ----
 // $ExpectType Subscription
-const subscription = node.createSubscription(TYPE_CLASS, TOPIC, {}, (msg: rclnodejs.Message) => {});
+const subscription = node.createSubscription(
+  TYPE_CLASS,
+  TOPIC,
+  {},
+  (msg: rclnodejs.Message) => {}
+);
 
 // $ExpectType string
 subscription.topic;
 
-
 // ---- Service ----
 // $ExpectType Service
-const service = node.createService(TYPE_CLASS, 'abc', {},
-	(request: rclnodejs.Message, response: rclnodejs.ServiceResponse) => {});
+const service = node.createService(
+  TYPE_CLASS,
+  'abc',
+  {},
+  (request: rclnodejs.Message, response: rclnodejs.ServiceResponse) => {}
+);
 
 // $ExpectType string
 service.serviceName;
 
 // $ExpectType object
 service.options;
-
 
 // ---- Client ----
 // $ExpectType Client
@@ -136,10 +140,9 @@ client.isServiceServerAvailable();
 // $ExpectType Promise<boolean>
 client.waitForService();
 
-
 // ---- Timer ----
 // ExpectType rclnodejs.TimerRequestCallback
-const timerCallback = () => { };
+const timerCallback = () => {};
 
 // $ExpectType Timer
 const timer = node.createTimer(100, timerCallback);
@@ -162,13 +165,11 @@ timer.isCanceled();
 // $ExpectType void
 timer.cancel();
 
-
 // ---- Duration ----
 // $ExpectType Duration
 const duration1: rclnodejs.Duration = new rclnodejs.Duration();
 
-const duration2: rclnodejs.Duration =
-	new rclnodejs.Duration(100, '1000');
+const duration2: rclnodejs.Duration = new rclnodejs.Duration(100, '1000');
 
 // $ExpectType string | number
 duration1.nanoseconds;
@@ -191,14 +192,15 @@ duration1.gt(duration2);
 // $ExpectType boolean
 duration1.gte(duration2);
 
-
 // ---- Time ----
 // $ExpectType Time
 const time1 = new rclnodejs.Time(100, 100);
 
 // $ExpectType Time
-const time2 = rclnodejs.Time.fromMsg('helloworld',
-	rclnodejs.ClockType.SYSTEM_TIME);
+const time2 = rclnodejs.Time.fromMsg(
+  'helloworld',
+  rclnodejs.ClockType.SYSTEM_TIME
+);
 
 // $ExpectType ClockType
 time1.clockType;
@@ -236,7 +238,6 @@ time1.gt(time2);
 // $ExpectType boolean
 time1.gte(time2);
 
-
 // ---- Clock -----
 // $ExpectType Clock
 const clock = new rclnodejs.Clock(rclnodejs.ClockType.SYSTEM_TIME);
@@ -247,10 +248,7 @@ clock.clockType;
 // $ExpectType Time
 clock.now();
 
-
 // ---- ROS Clock -----
-
-
 
 // ---- Logging -----
 // $ExpectType Logging
@@ -279,4 +277,3 @@ logger.error('test msg');
 
 // $ExpectType boolean
 logger.fatal('test msg');
-
