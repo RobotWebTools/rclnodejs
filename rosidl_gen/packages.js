@@ -39,7 +39,7 @@ function getPackageName(filePath, amentExecuted) {
   return packageName === path.parse(filePath).ext.substr(1)
     ? folders.pop()
     : packageName;
-};
+}
 
 function getSubFolder(filePath, amentExecuted) {
   if (os.type() === 'Windows_NT') {
@@ -58,13 +58,13 @@ function grabInterfaceInfo(filePath, amentExecuted) {
   let pkgName = getPackageName(filePath, amentExecuted);
   let interfaceName = path.parse(filePath).name;
   let subFolder = getSubFolder(filePath, amentExecuted);
-  return {pkgName, interfaceName, subFolder, filePath};
+  return { pkgName, interfaceName, subFolder, filePath };
 }
 
 function addInterfaceInfo(info, type, pkgMap) {
   let pkgName = info.pkgName;
   if (!pkgMap.has(pkgName)) {
-    pkgMap.set(pkgName, {messages: [], services: [], actions: [], pkgName});
+    pkgMap.set(pkgName, { messages: [], services: [], actions: [], pkgName });
   }
   let pkg = pkgMap.get(pkgName);
   pkg[type].push(info);
@@ -76,25 +76,42 @@ function findPackagesInDirectory(dir) {
 
     // If there is a folder named 'share' under the root path, we consider that
     // the ament build tool has been executed and |amentExecuted| will be true.
-    fs.access(path.join(dir, 'share'), (err) => {
+    fs.access(path.join(dir, 'share'), err => {
       if (err) {
         amentExecuted = false;
       }
       dir = amentExecuted ? path.join(dir, 'share') : dir;
 
-      let walker = walk.walk(dir, {followLinks: true});
+      let walker = walk.walk(dir, { followLinks: true });
       let pkgMap = new Map();
       walker.on('file', (root, file, next) => {
         if (path.extname(file.name) === '.msg') {
           // Some .msg files were generated prior to 0.3.2 for .action files,
           // which has been disabled. So these files should be ignored here.
-          if (path.dirname(root).split(path.sep).pop() !== 'action') {
-            addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'messages', pkgMap);
+          if (
+            path
+              .dirname(root)
+              .split(path.sep)
+              .pop() !== 'action'
+          ) {
+            addInterfaceInfo(
+              grabInterfaceInfo(path.join(root, file.name), amentExecuted),
+              'messages',
+              pkgMap
+            );
           }
         } else if (path.extname(file.name) === '.srv') {
-          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'services', pkgMap);
+          addInterfaceInfo(
+            grabInterfaceInfo(path.join(root, file.name), amentExecuted),
+            'services',
+            pkgMap
+          );
         } else if (path.extname(file.name) === '.action') {
-          addInterfaceInfo(grabInterfaceInfo(path.join(root, file.name), amentExecuted), 'actions', pkgMap);
+          addInterfaceInfo(
+            grabInterfaceInfo(path.join(root, file.name), amentExecuted),
+            'actions',
+            pkgMap
+          );
         }
         next();
       });
@@ -112,7 +129,7 @@ function findPackagesInDirectory(dir) {
 }
 
 let packages = {
-  findPackagesInDirectory: findPackagesInDirectory
+  findPackagesInDirectory: findPackagesInDirectory,
 };
 
 module.exports = packages;

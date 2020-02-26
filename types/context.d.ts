@@ -1,14 +1,11 @@
-
 declare module 'rclnodejs' {
-
   /**
    * Encapsulates the lifecycle of the module from init to shutdown.
-   * 
+   *
    * @remarks
    * Context objects should not be reused, and are finalized in their destructor.
    */
   class Context {
-
     /**
      * Shutdown the context.
      */
@@ -21,7 +18,7 @@ declare module 'rclnodejs' {
 
     /**
      * Get the global default Context object.
-     * 
+     *
      * @returns The default Context
      */
     static defaultContext(): Context;
@@ -30,6 +27,5 @@ declare module 'rclnodejs' {
      * Shutdown the default context.
      */
     static shutdownDefaultContext(): void;
-    
   }
 }

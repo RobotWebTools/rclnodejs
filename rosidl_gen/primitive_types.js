@@ -14,8 +14,8 @@
 
 'use strict';
 
-const StructType = require('ref-struct');
-const ref = require('ref');
+const ref = require('ref-napi');
+const StructType = require('ref-struct-di')(ref);
 const rclnodejs = require('bindings')('rclnodejs');
 
 /* eslint-disable camelcase */
@@ -28,13 +28,17 @@ const StringRefStruct = StructType({
 
 function initString(str, own = false) {
   if (own) {
-    if (! str instanceof Buffer) {
-      throw new TypeError('Invalid argument: should provide a Node Buffer to bindingsStringInit()');
+    if (!str instanceof Buffer) {
+      throw new TypeError(
+        'Invalid argument: should provide a Node Buffer to bindingsStringInit()'
+      );
     }
     rclnodejs.initString(str);
   } else {
-    if (! str instanceof StringRefStruct) {
-      throw new TypeError('Invalid argument: should provide a type of StringRefStruct');
+    if (!str instanceof StringRefStruct) {
+      throw new TypeError(
+        'Invalid argument: should provide a type of StringRefStruct'
+      );
     }
 
     str.data = Buffer.alloc(1).fill('\u0000');
@@ -59,7 +63,7 @@ module.exports = {
   byte: ref.types.byte,
   string: StringRefStruct,
   wstring: StringRefStruct,
-  initString: initString
+  initString: initString,
 };
 
 /* eslint-enable camelcase */

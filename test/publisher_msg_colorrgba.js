@@ -16,28 +16,31 @@
 
 const rclnodejs = require('../index.js');
 
-rclnodejs.init().then(() => {
-  var node = rclnodejs.createNode('colorrgba_publisher');
-  const ColorRGBA = 'std_msgs/msg/ColorRGBA';
-  const msg = {
-    r: 127,
-    g: 255,
-    b: 255,
-    a: 0.5,
-  };
+rclnodejs
+  .init()
+  .then(() => {
+    var node = rclnodejs.createNode('colorrgba_publisher');
+    const ColorRGBA = 'std_msgs/msg/ColorRGBA';
+    const msg = {
+      r: 127,
+      g: 255,
+      b: 255,
+      a: 0.5,
+    };
 
-  var publisher = node.createPublisher(ColorRGBA, 'ColorRGBA_channel');
-  var timer = node.createTimer(100, () => {
-    publisher.publish(msg);
+    var publisher = node.createPublisher(ColorRGBA, 'ColorRGBA_channel');
+    var timer = node.createTimer(100, () => {
+      publisher.publish(msg);
+    });
+
+    rclnodejs.spin(node);
+    process.on('SIGINT', m => {
+      timer.cancel();
+      node.destroy();
+      rclnodejs.shutdown();
+      process.exit(0);
+    });
+  })
+  .catch(err => {
+    console.log(err);
   });
-
-  rclnodejs.spin(node);
-  process.on('SIGINT', (m) => {
-    timer.cancel();
-    node.destroy();
-    rclnodejs.shutdown();
-    process.exit(0);
-  });  
-}).catch((err) => {
-  console.log(err);
-});

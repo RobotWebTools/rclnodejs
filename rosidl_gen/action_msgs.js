@@ -15,8 +15,7 @@
 /* eslint-disable camelcase */
 const GOAL_ID_FIELD = {
   name: 'goal_id',
-  type:
-  {
+  type: {
     isArray: false,
     arraySize: null,
     isUpperBound: false,
@@ -25,9 +24,9 @@ const GOAL_ID_FIELD = {
     pkgName: 'unique_identifier_msgs',
     type: 'UUID',
     stringUpperBound: null,
-    isPrimitiveType: false
+    isPrimitiveType: false,
   },
-  default_value: null
+  default_value: null,
 };
 
 function createSendGoalRequestSpec(pkgName, interfaceName) {
@@ -37,8 +36,7 @@ function createSendGoalRequestSpec(pkgName, interfaceName) {
       GOAL_ID_FIELD,
       {
         name: 'goal',
-        type:
-        {
+        type: {
           isArray: false,
           arraySize: null,
           isUpperBound: false,
@@ -47,18 +45,18 @@ function createSendGoalRequestSpec(pkgName, interfaceName) {
           pkgName: pkgName,
           type: `${interfaceName}_Goal`,
           stringUpperBound: null,
-          isPrimitiveType: false
+          isPrimitiveType: false,
         },
-        default_value: null
-      }
+        default_value: null,
+      },
     ],
     baseType: {
       pkgName: pkgName,
       type: `${interfaceName}_SendGoal_Request`,
       stringUpperBound: null,
-      isPrimitiveType: false
+      isPrimitiveType: false,
     },
-    msgName: `${interfaceName}_SendGoal_Request`
+    msgName: `${interfaceName}_SendGoal_Request`,
   };
 }
 
@@ -68,8 +66,7 @@ function createSendGoalResponseSpec(pkgName, interfaceName) {
     fields: [
       {
         name: 'accepted',
-        type:
-        {
+        type: {
           isArray: false,
           arraySize: null,
           isUpperBound: false,
@@ -78,14 +75,13 @@ function createSendGoalResponseSpec(pkgName, interfaceName) {
           pkgName: null,
           type: 'bool',
           stringUpperBound: null,
-          isPrimitiveType: true
+          isPrimitiveType: true,
         },
-        default_value: null
+        default_value: null,
       },
       {
         name: 'stamp',
-        type:
-        {
+        type: {
           isArray: false,
           arraySize: null,
           isUpperBound: false,
@@ -94,34 +90,32 @@ function createSendGoalResponseSpec(pkgName, interfaceName) {
           pkgName: 'builtin_interfaces',
           type: 'Time',
           stringUpperBound: null,
-          isPrimitiveType: false
+          isPrimitiveType: false,
         },
-        default_value: null
-      }
+        default_value: null,
+      },
     ],
     baseType: {
       pkgName: pkgName,
       type: `${interfaceName}_SendGoal_Response`,
       stringUpperBound: null,
-      isPrimitiveType: false
+      isPrimitiveType: false,
     },
-    msgName: `${interfaceName}_SendGoal_Response`
+    msgName: `${interfaceName}_SendGoal_Response`,
   };
 }
 
 function createGetResultRequestSpec(pkgName, interfaceName) {
   return {
     constants: [],
-    fields: [
-      GOAL_ID_FIELD
-    ],
+    fields: [GOAL_ID_FIELD],
     baseType: {
       pkgName: pkgName,
       type: `${interfaceName}_GetResult_Request`,
       stringUpperBound: null,
-      isPrimitiveType: false
+      isPrimitiveType: false,
     },
-    msgName: `${interfaceName}_GetResult_Request`
+    msgName: `${interfaceName}_GetResult_Request`,
   };
 }
 
@@ -131,8 +125,7 @@ function createGetResultResponseSpec(pkgName, interfaceName) {
     fields: [
       {
         name: 'status',
-        type:
-        {
+        type: {
           isArray: false,
           arraySize: null,
           isUpperBound: false,
@@ -141,14 +134,13 @@ function createGetResultResponseSpec(pkgName, interfaceName) {
           pkgName: null,
           type: 'int8',
           stringUpperBound: null,
-          isPrimitiveType: true
+          isPrimitiveType: true,
         },
-        default_value: null
+        default_value: null,
       },
       {
         name: 'result',
-        type:
-        {
+        type: {
           isArray: false,
           arraySize: null,
           isUpperBound: false,
@@ -157,18 +149,18 @@ function createGetResultResponseSpec(pkgName, interfaceName) {
           pkgName: pkgName,
           type: `${interfaceName}_Result`,
           stringUpperBound: null,
-          isPrimitiveType: false
+          isPrimitiveType: false,
         },
-        default_value: null
-      }
+        default_value: null,
+      },
     ],
     baseType: {
       pkgName: pkgName,
       type: `${interfaceName}_GetResult_Response`,
       stringUpperBound: null,
-      isPrimitiveType: false
+      isPrimitiveType: false,
     },
-    msgName: `${interfaceName}_GetResult_Response`
+    msgName: `${interfaceName}_GetResult_Response`,
   };
 }
 
@@ -179,8 +171,7 @@ function createFeedbackMessageSpec(pkgName, interfaceName) {
       GOAL_ID_FIELD,
       {
         name: 'feedback',
-        type:
-        {
+        type: {
           isArray: false,
           arraySize: null,
           isUpperBound: false,
@@ -189,18 +180,18 @@ function createFeedbackMessageSpec(pkgName, interfaceName) {
           pkgName: pkgName,
           type: `${interfaceName}_Feedback`,
           stringUpperBound: null,
-          isPrimitiveType: false
+          isPrimitiveType: false,
         },
-        default_value: null
-      }
+        default_value: null,
+      },
     ],
     baseType: {
       pkgName: pkgName,
       type: `${interfaceName}_FeedbackMessage`,
       stringUpperBound: null,
-      isPrimitiveType: false
+      isPrimitiveType: false,
     },
-    msgName: `${interfaceName}_FeedbackMessage`
+    msgName: `${interfaceName}_FeedbackMessage`,
   };
 }
 
@@ -209,5 +200,5 @@ module.exports = {
   createSendGoalResponseSpec,
   createGetResultRequestSpec,
   createGetResultResponseSpec,
-  createFeedbackMessageSpec
+  createFeedbackMessageSpec,
 };

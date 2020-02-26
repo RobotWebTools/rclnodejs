@@ -34,15 +34,22 @@ describe('Test rclnodejs nodes in a single process', function() {
     const RclString = 'std_msgs/msg/String';
     const msg = 'Hello World';
 
-    var subscription = subscriptionNode.createSubscription(RclString, 'single_ps_channel1', (msg) => {
-      timer.cancel();
-      assert.deepStrictEqual(msg.data, 'Hello World');
-      publisherNode.destroy();
-      subscriptionNode.destroy();
-      done();
-    });
+    var subscription = subscriptionNode.createSubscription(
+      RclString,
+      'single_ps_channel1',
+      msg => {
+        timer.cancel();
+        assert.deepStrictEqual(msg.data, 'Hello World');
+        publisherNode.destroy();
+        subscriptionNode.destroy();
+        done();
+      }
+    );
 
-    var publisher = publisherNode.createPublisher(RclString, 'single_ps_channel1');
+    var publisher = publisherNode.createPublisher(
+      RclString,
+      'single_ps_channel1'
+    );
     var timer = publisherNode.createTimer(100, () => {
       publisher.publish(msg);
     });
@@ -56,12 +63,16 @@ describe('Test rclnodejs nodes in a single process', function() {
     let msg = new RclString();
     msg.data = 'Hello World';
 
-    var subscription = node.createSubscription(RclString, 'new_style_require1', (msg) => {
-      timer.cancel();
-      assert.deepStrictEqual(msg.data, 'Hello World');
-      node.destroy();
-      done();
-    }); 
+    var subscription = node.createSubscription(
+      RclString,
+      'new_style_require1',
+      msg => {
+        timer.cancel();
+        assert.deepStrictEqual(msg.data, 'Hello World');
+        node.destroy();
+        done();
+      }
+    );
 
     var publisher = node.createPublisher(RclString, 'new_style_require1');
     var timer = node.createTimer(100, () => {
@@ -76,18 +87,22 @@ describe('Test rclnodejs nodes in a single process', function() {
     var serviceNode = rclnodejs.createNode('single_ps_service');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
-    var service = serviceNode.createService(AddTwoInts, 'single_ps_channel2', (request, response) => {
-      assert.deepStrictEqual(request.a, 1);
-      assert.deepStrictEqual(request.b, 2);
-      let result = response.template;
-      result.sum = request.a + request.b;
-      return result;
-    });
+    var service = serviceNode.createService(
+      AddTwoInts,
+      'single_ps_channel2',
+      (request, response) => {
+        assert.deepStrictEqual(request.a, 1);
+        assert.deepStrictEqual(request.b, 2);
+        let result = response.template;
+        result.sum = request.a + request.b;
+        return result;
+      }
+    );
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
-    const request = {a: 1, b: 2};
+    const request = { a: 1, b: 2 };
 
     var timer = clientNode.createTimer(100, () => {
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
         serviceNode.destroy();
@@ -104,18 +119,22 @@ describe('Test rclnodejs nodes in a single process', function() {
     var serviceNode = rclnodejs.createNode('single_ps_service_2');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
-    var service = serviceNode.createService(AddTwoInts, 'single_ps_channel2_2', (request, response) => {
-      assert.deepStrictEqual(request.a, 1);
-      assert.deepStrictEqual(request.b, 2);
-      let result = response.template;
-      result.sum = request.a + request.b;
-      response.send(result);
-    });
+    var service = serviceNode.createService(
+      AddTwoInts,
+      'single_ps_channel2_2',
+      (request, response) => {
+        assert.deepStrictEqual(request.a, 1);
+        assert.deepStrictEqual(request.b, 2);
+        let result = response.template;
+        result.sum = request.a + request.b;
+        response.send(result);
+      }
+    );
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2_2');
-    const request = {a: 1, b: 2};
+    const request = { a: 1, b: 2 };
 
     var timer = clientNode.createTimer(100, () => {
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
         serviceNode.destroy();
@@ -132,16 +151,20 @@ describe('Test rclnodejs nodes in a single process', function() {
     var serviceNode = rclnodejs.createNode('single_ps_service_3');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
-    var service = serviceNode.createService(AddTwoInts, 'single_ps_channel2_3', (request, response) => {
-      assert.deepStrictEqual(request.a, 1);
-      assert.deepStrictEqual(request.b, 2);
-      response.send({sum: request.a + request.b});
-    });
+    var service = serviceNode.createService(
+      AddTwoInts,
+      'single_ps_channel2_3',
+      (request, response) => {
+        assert.deepStrictEqual(request.a, 1);
+        assert.deepStrictEqual(request.b, 2);
+        response.send({ sum: request.a + request.b });
+      }
+    );
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2_3');
-    const request = {a: 1, b: 2};
+    const request = { a: 1, b: 2 };
 
     var timer = clientNode.createTimer(100, () => {
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
         serviceNode.destroy();
@@ -157,20 +180,24 @@ describe('Test rclnodejs nodes in a single process', function() {
     var node = rclnodejs.createNode('new_style_require_services');
     const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
 
-    var service = node.createService(AddTwoInts, 'new_style_require2', (request, response) => {
-      assert.deepStrictEqual(request.a, 1);
-      assert.deepStrictEqual(request.b, 2);
-      let result = response.template;
-      result.sum = request.a + request.b;
-      return result;
-    });
+    var service = node.createService(
+      AddTwoInts,
+      'new_style_require2',
+      (request, response) => {
+        assert.deepStrictEqual(request.a, 1);
+        assert.deepStrictEqual(request.b, 2);
+        let result = response.template;
+        result.sum = request.a + request.b;
+        return result;
+      }
+    );
     var client = node.createClient(AddTwoInts, 'new_style_require2');
     let request = new AddTwoInts.Request();
     request.a = 1;
     request.b = 2;
 
     var timer = node.createTimer(100, () => {
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
         node.destroy();

@@ -18,19 +18,21 @@
 
 const rclnodejs = require('../index.js');
 
-rclnodejs.init().then(() => {
-  const as = new rclnodejs.ActionLib.ActionServer({
-    type: 'ros1_actions/msg/DoDishes',
-    actionServer: 'dishes',
-    rclnodejs: rclnodejs
-  });
+rclnodejs
+  .init()
+  .then(() => {
+    const as = new rclnodejs.ActionLib.ActionServer({
+      type: 'ros1_actions/msg/DoDishes',
+      actionServer: 'dishes',
+      rclnodejs: rclnodejs,
+    });
 
-  as.on('goal', function(goal) {
-    console.log(`A goal, whose id is ${goal.getGoalId().id}, was received.`);
+    as.on('goal', function(goal) {
+      console.log(`A goal, whose id is ${goal.getGoalId().id}, was received.`);
 
-    goal.setAccepted('goal accepted');
+      goal.setAccepted('goal accepted');
 
-    /*
+      /*
     For the state transitions, please reference http://wiki.ros.org/actionlib/DetailedDescription,
     besides the setAccept operation, others are:
     goal.setCancelRequested();
@@ -40,35 +42,42 @@ rclnodejs.init().then(() => {
     goal.setSucceeded({total_dishes_cleaned: 100}, 'done');
     */
 
-    let feedback = {
-      percent_complete: 70,
-      image: {
-        header: {
-          stamp: {
-            sec: 11223,
-            nanosec: 44556},
-          frame_id: 'f001',
+      let feedback = {
+        percent_complete: 70,
+        image: {
+          header: {
+            stamp: {
+              sec: 11223,
+              nanosec: 44556,
+            },
+            frame_id: 'f001',
+          },
+          height: 240,
+          width: 320,
+          encoding: 'rgba',
+          is_bigendian: false,
+          step: 320 * 16,
+          is_dense: false,
+          data: Uint8Array.from({ length: 320 * 240 }, (v, k) => k),
         },
-        height: 240,
-        width: 320, encoding: 'rgba',
-        is_bigendian: false,
-        step: 320 * 16,
-        is_dense: false,
-        data: Uint8Array.from({length: 320 * 240}, (v, k) => k),
-      }
-    };
+      };
 
-    goal.publishFeedback(feedback);
-    setTimeout(() => {
-      goal.setSucceeded({total_dishes_cleaned: 10}, 'done');
-    }, 500);
+      goal.publishFeedback(feedback);
+      setTimeout(() => {
+        goal.setSucceeded({ total_dishes_cleaned: 10 }, 'done');
+      }, 500);
+    });
+
+    as.on('cancel', goalHandle => {
+      console.log(
+        `The goal, whose id is ${
+          goalHandle.getGoalStatus().goal_id.id
+        }, is canceled. `
+      );
+    });
+
+    as.start();
+  })
+  .catch(err => {
+    console.error(err);
   });
-
-  as.on('cancel', (goalHandle) => {
-    console.log(`The goal, whose id is ${goalHandle.getGoalStatus().goal_id.id}, is canceled. `);
-  });
-
-  as.start();
-}).catch((err) => {
-  console.error(err);
-});

@@ -13,7 +13,7 @@ rules:
   comma-spacing: [2, {before: false, after: true}]
   comma-style: [2, "last"]
   handle-callback-err: [2, "^.*(e|E)rr" ]
-  indent: [2, 2]
+  indent: ["error", 2, {"SwitchCase": 1}]
   key-spacing: [2, { beforeColon: false, afterColon: true }]
   max-depth: [1, 3]
   max-len: ["error", {"code": 120, "tabWidth": 2, "ignoreComments": true}]
@@ -44,6 +44,8 @@ rules:
   strict: [2, "global"]
   valid-jsdoc: 2
   yoda: [2, "never"]
+
+extends: [prettier]
 
 parserOptions:
   ecmaVersion: 2017

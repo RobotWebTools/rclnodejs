@@ -54,17 +54,27 @@ void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
     Nan::MaybeLocal<v8::Value> action_servers =
         Nan::Get(node, Nan::New("_actionServers").ToLocalChecked());
 
-    CollectHandlesByType(timers.ToLocalChecked()->ToObject(), &timers_);
-    CollectHandlesByType(subscriptions.ToLocalChecked()->ToObject(),
-                         &subscriptions_);
-    CollectHandlesByType(clients.ToLocalChecked()->ToObject(), &clients_);
-    CollectHandlesByType(services.ToLocalChecked()->ToObject(), &services_);
-    CollectHandlesByType(guard_conditions.ToLocalChecked()->ToObject(),
-                         &guard_conditions_);
-    CollectHandlesByType(action_clients.ToLocalChecked()->ToObject(),
-                         &action_clients_);
-    CollectHandlesByType(action_servers.ToLocalChecked()->ToObject(),
-                         &action_servers_);
+    CollectHandlesByType(
+        Nan::To<v8::Object>(timers.ToLocalChecked()).ToLocalChecked(),
+        &timers_);
+    CollectHandlesByType(
+        Nan::To<v8::Object>(subscriptions.ToLocalChecked()).ToLocalChecked(),
+        &subscriptions_);
+    CollectHandlesByType(
+        Nan::To<v8::Object>(clients.ToLocalChecked()).ToLocalChecked(),
+        &clients_);
+    CollectHandlesByType(
+        Nan::To<v8::Object>(services.ToLocalChecked()).ToLocalChecked(),
+        &services_);
+    CollectHandlesByType(
+        Nan::To<v8::Object>(guard_conditions.ToLocalChecked()).ToLocalChecked(),
+        &guard_conditions_);
+    CollectHandlesByType(
+        Nan::To<v8::Object>(action_clients.ToLocalChecked()).ToLocalChecked(),
+        &action_clients_);
+    CollectHandlesByType(
+        Nan::To<v8::Object>(action_servers.ToLocalChecked()).ToLocalChecked(),
+        &action_servers_);
   }
 
   is_synchronizing_.store(false);
@@ -236,17 +246,18 @@ void HandleManager::CollectHandlesByType(
   Nan::HandleScope scope;
 
   if (typeObject->IsArray()) {
-    uint32_t length = Nan::Get(typeObject, Nan::New("length").ToLocalChecked())
-                          .ToLocalChecked()
-                          ->Uint32Value();
+    uint32_t length = Nan::To<uint32_t>(
+        Nan::Get(typeObject, Nan::New("length").ToLocalChecked())
+            .ToLocalChecked()).FromJust();
 
     for (uint32_t index = 0; index < length; index++) {
-      v8::Local<v8::Object> obj = typeObject->Get(index)->ToObject();
+      v8::Local<v8::Object> obj =
+          Nan::To<v8::Object>(typeObject->Get(index)).ToLocalChecked();
       Nan::MaybeLocal<v8::Value> handle =
           Nan::Get(obj, Nan::New("_handle").ToLocalChecked());
       rclnodejs::RclHandle* rcl_handle =
           rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
-              handle.ToLocalChecked()->ToObject());
+              Nan::To<v8::Object>(handle.ToLocalChecked()).ToLocalChecked());
       vec->push_back(rcl_handle);
     }
   }

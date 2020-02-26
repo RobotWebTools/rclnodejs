@@ -34,22 +34,26 @@ describe('rclnodejs message communication', function() {
     const JointState = 'sensor_msgs/msg/JointState';
     var publisher = childProcess.fork(`${__dirname}/publisher_array_setup.js`);
     var destroy = false;
-    var subscription = node.createSubscription(JointState, 'JointState', (state) => {
-      assert.deepStrictEqual(state.header.stamp.sec, 123456);
-      assert.deepStrictEqual(state.header.stamp.nanosec, 789);
-      assert.deepStrictEqual(state.header.frame_id, 'main frame');
-      assert.deepStrictEqual(state.name, ['Tom', 'Jerry']);
-      assert.deepStrictEqual(state.position, Float64Array.from([1, 2]));
-      assert.deepStrictEqual(state.velocity, Float64Array.from([2, 3]));
-      assert.deepStrictEqual(state.effort, Float64Array.from([4, 5, 6]));
+    var subscription = node.createSubscription(
+      JointState,
+      'JointState',
+      state => {
+        assert.deepStrictEqual(state.header.stamp.sec, 123456);
+        assert.deepStrictEqual(state.header.stamp.nanosec, 789);
+        assert.deepStrictEqual(state.header.frame_id, 'main frame');
+        assert.deepStrictEqual(state.name, ['Tom', 'Jerry']);
+        assert.deepStrictEqual(state.position, Float64Array.from([1, 2]));
+        assert.deepStrictEqual(state.velocity, Float64Array.from([2, 3]));
+        assert.deepStrictEqual(state.effort, Float64Array.from([4, 5, 6]));
 
-      if (!destroy) {
-        publisher.kill('SIGINT');
-        node.destroy();
-        destroy = true;
-        done();
+        if (!destroy) {
+          publisher.kill('SIGINT');
+          node.destroy();
+          destroy = true;
+          done();
+        }
       }
-    });
+    );
     rclnodejs.spin(node);
   });
 });

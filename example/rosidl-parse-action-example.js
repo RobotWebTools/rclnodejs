@@ -18,24 +18,27 @@ const rosInstallPath = process.env.AMENT_PREFIX_PATH;
 const packageName = 'test_msgs';
 const packagePath = rosInstallPath + '/share/test_msgs/action/Fibonacci.action';
 
-parser.parseActionFile(packageName, packagePath).then((spec) => {
-  console.log(`action name: ${spec.actionName}`);
-  console.log(`pkg name: ${spec.pkgName}`);
+parser
+  .parseActionFile(packageName, packagePath)
+  .then(spec => {
+    console.log(`action name: ${spec.actionName}`);
+    console.log(`pkg name: ${spec.pkgName}`);
 
-  console.log('action goal fields includes:');
-  spec.goal.fields.forEach((field) => {
-    console.log(field);
-  });
+    console.log('action goal fields includes:');
+    spec.goal.fields.forEach(field => {
+      console.log(field);
+    });
 
-  console.log('action result fields includes:');
-  spec.result.fields.forEach((field) => {
-    console.log(field);
-  });
+    console.log('action result fields includes:');
+    spec.result.fields.forEach(field => {
+      console.log(field);
+    });
 
-  console.log('action feedback fields includes:');
-  spec.feedback.fields.forEach((field) => {
-    console.log(field);
+    console.log('action feedback fields includes:');
+    spec.feedback.fields.forEach(field => {
+      console.log(field);
+    });
+  })
+  .catch(e => {
+    console.log(e);
   });
-}).catch((e) => {
-  console.log(e);
-});

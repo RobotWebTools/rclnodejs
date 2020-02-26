@@ -41,7 +41,7 @@ describe('rclnodejs Timer class testing', function() {
         done();
       });
       rclnodejs.spin(node);
-    });   
+    });
   });
 
   describe('Timer class methods', function() {
@@ -57,14 +57,21 @@ describe('rclnodejs Timer class testing', function() {
     it('timer.period should be readonly', function(done) {
       var timer = node.createTimer(TIMER_INTERVAL, function() {
         assert.deepEqual(timer.period, TIMER_INTERVAL);
-        assert.throws(() => {
-          timer.period = TIMER_INTERVAL * 2;
-        }, function(err) {
-          if ((err instanceof TypeError) && /Cannot set property period/.test(err)) {
-            return true;
-          }
-          return false;
-        }, 'timer.period is readonly!');
+        assert.throws(
+          () => {
+            timer.period = TIMER_INTERVAL * 2;
+          },
+          function(err) {
+            if (
+              err instanceof TypeError &&
+              /Cannot set property period/.test(err)
+            ) {
+              return true;
+            }
+            return false;
+          },
+          'timer.period is readonly!'
+        );
         timer.cancel();
         done();
       });
@@ -73,13 +80,13 @@ describe('rclnodejs Timer class testing', function() {
 
     it('timer.cancel', function(done) {
       var timer = node.createTimer(TIMER_INTERVAL, function() {
-        timer.cancel();    
+        timer.cancel();
         assert.ok(timer.isCanceled());
         done();
       });
       rclnodejs.spin(node);
     });
-    
+
     it('timer.isCanceled', function(done) {
       var timer = node.createTimer(TIMER_INTERVAL, function() {
         assert.ok(!timer.isCanceled());

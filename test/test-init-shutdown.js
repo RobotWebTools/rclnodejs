@@ -21,74 +21,93 @@ describe('Node destroy testing', function() {
   this.timeout(60 * 1000);
 
   it('rclnodejs.init()', function(done) {
-    rclnodejs.init().then(function() {
-      assert.ok(true);
-      rclnodejs.shutdown();
-      done();
-    }).catch(function(err) {
-      assert.ok(false);
-      done(err);
-    });
+    rclnodejs
+      .init()
+      .then(function() {
+        assert.ok(true);
+        rclnodejs.shutdown();
+        done();
+      })
+      .catch(function(err) {
+        assert.ok(false);
+        done(err);
+      });
   });
 
   it('rclnodejs.init() & rclnodejs.shutdown()', function(done) {
     assert.deepStrictEqual(rclnodejs.isShutdown(), true);
-    rclnodejs.init().then(function() {
-      assert.deepStrictEqual(rclnodejs.isShutdown(), false);
-      rclnodejs.shutdown();
-      assert.deepStrictEqual(rclnodejs.isShutdown(), true);
-      done();
-    }).catch(function(err) {
-      assert.ok(false);
-      done(err);
-    });
+    rclnodejs
+      .init()
+      .then(function() {
+        assert.deepStrictEqual(rclnodejs.isShutdown(), false);
+        rclnodejs.shutdown();
+        assert.deepStrictEqual(rclnodejs.isShutdown(), true);
+        done();
+      })
+      .catch(function(err) {
+        assert.ok(false);
+        done(err);
+      });
   });
 
   it('rclnodejs init shutdown sequence', function(done) {
-    rclnodejs.init().then(function() {
-      rclnodejs.shutdown();
-      assert.ok(true);
-    }).then(function() {
-      assert.ok(true);
-      return rclnodejs.init();
-    }).then(function() {
-      assert.doesNotThrow(function() {
+    rclnodejs
+      .init()
+      .then(function() {
         rclnodejs.shutdown();
+        assert.ok(true);
+      })
+      .then(function() {
+        assert.ok(true);
+        return rclnodejs.init();
+      })
+      .then(function() {
+        assert.doesNotThrow(function() {
+          rclnodejs.shutdown();
+        });
+        assert.ok(true);
+        done();
+      })
+      .catch(function(err) {
+        assert.ok(false);
+        done(err);
       });
-      assert.ok(true);
-      done();
-    }).catch(function(err) {
-      assert.ok(false);
-      done(err);
-    });
   });
 
   it('rclnodejs double init', function(done) {
-    rclnodejs.init().then(function() {
-      assert.ok(true);
-    }).then(function() {
-      return rclnodejs.init();
-    }).catch(function(err) {
-      assert.notDeepStrictEqual(err, null);
-      rclnodejs.shutdown();
-      done();
-    });
+    rclnodejs
+      .init()
+      .then(function() {
+        assert.ok(true);
+      })
+      .then(function() {
+        return rclnodejs.init();
+      })
+      .catch(function(err) {
+        assert.notDeepStrictEqual(err, null);
+        rclnodejs.shutdown();
+        done();
+      });
   });
 
   it('rclnodejs double shutdown', function(done) {
-    rclnodejs.init().then(function() {
-      rclnodejs.shutdown();
-      assert.ok(true);
-    }).then(function() {
-      assert.throws(function() {
+    rclnodejs
+      .init()
+      .then(function() {
         rclnodejs.shutdown();
+        assert.ok(true);
+      })
+      .then(function() {
+        assert.throws(function() {
+          rclnodejs.shutdown();
+        });
+        assert.ok(true);
+        done();
+      })
+      .catch(function(err) {
+        assert.ok(true);
+        done(err);
       });
-      assert.ok(true);
-      done();
-    }).catch(function(err) {
-      assert.ok(true);
-      done(err);
-    });
   });
 
   it('rclnodejs create node without init', function() {
