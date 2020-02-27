@@ -75,11 +75,11 @@ describe('Node destroy testing', function() {
 
     const int16 = 'std_msgs/msg/Int16';
     var pub1 = node.createPublisher(int16, 'pub1_topic');
-    assert.deepStrictEqual(1, node._publishers.length);
+    assert.deepStrictEqual(2, node._publishers.length);
 
     const float32 = 'std_msgs/msg/Float32';
     var pub2 = node.createPublisher(float32, 'pub2_topic');
-    assert.deepStrictEqual(2, node._publishers.length);
+    assert.deepStrictEqual(3, node._publishers.length);
 
     var RclString = 'std_msgs/msg/String';
     var sub1 = node.createSubscription(RclString, 'sub1_topic', function(msg) {

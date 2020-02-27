@@ -16,6 +16,8 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
+const assertUtils = require('./utils.js');
+const assertThrowsError = assertUtils.assertThrowsError;
 
 describe('Node destroy testing', function() {
   this.timeout(60 * 1000);
@@ -71,6 +73,49 @@ describe('Node destroy testing', function() {
       .catch(function(err) {
         assert.ok(false);
         done(err);
+      });
+  });
+
+  it('rclnodejs.init(argv)', function(done) {
+    rclnodejs
+      .init(rclnodejs.Context.defaultContext(), ['a', 'b'])
+      .then(function() {
+        assert.ok(true);
+        rclnodejs.shutdown();
+        done();
+      })
+      .catch(function(err) {
+        assert.ok(false);
+        done(err);
+      });
+  });
+
+  it('rclnodejs.init(argv) - invalid argv', function(done) {
+    rclnodejs
+      .init(rclnodejs.Context.defaultContext(), 'foobar')
+      .then(function() {
+        assert.ok(false);
+        rclnodejs.shutdown();
+        done();
+      })
+      // eslint-disable-next-line handle-callback-err
+      .catch(function(_err) {
+        assert.ok(true);
+        done();
+      });
+  });
+
+  it('rclnodejs.init(argv) with null argv elements', function(done) {
+    rclnodejs
+      .init(rclnodejs.Context.defaultContext(), ['a', null, 'b'])
+      .then(function() {
+        assert.ok(false);
+        done();
+      })
+      // eslint-disable-next-line handle-callback-err
+      .catch(function(err) {
+        assert.ok(true);
+        done();
       });
   });
 
