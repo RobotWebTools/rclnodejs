@@ -13,6 +13,7 @@
 /// <reference path="parameter.d.ts" />
 /// <reference path="publisher.d.ts" />
 /// <reference path="qos.d.ts" />
+/// <reference path="rate.d.ts" />
 /// <reference path="service.d.ts" />
 /// <reference path="subscription.d.ts" />
 /// <reference path="time_source.d.ts" />
