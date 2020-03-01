@@ -18,6 +18,7 @@
 #include <nan.h>
 #include <rcl/rcl.h>
 
+#include <memory>
 #include <string>
 
 namespace rclnodejs {
