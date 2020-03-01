@@ -1345,6 +1345,21 @@ NAN_METHOD(GetLoggerEffectiveLevel) {
   info.GetReturnValue().Set(Nan::New(logger_level));
 }
 
+NAN_METHOD(GetNodeLoggerName) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+
+  const char* node_logger_name = rcl_node_get_logger_name(node);
+  if (!node_logger_name) {
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+
+  info.GetReturnValue().Set(
+      Nan::New<v8::String>(node_logger_name).ToLocalChecked());
+}
+
 NAN_METHOD(Log) {
   v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   std::string name(
@@ -1715,6 +1730,7 @@ BindingMethod binding_methods[] = {
     {"createArrayBufferCleaner", CreateArrayBufferCleaner},
     {"setLoggerLevel", setLoggerLevel},
     {"getLoggerEffectiveLevel", GetLoggerEffectiveLevel},
+    {"getNodeLoggerName", GetNodeLoggerName},
     {"log", Log},
     {"isEnableFor", IsEnableFor},
     {"createContext", CreateContext},
