@@ -329,31 +329,27 @@ NAN_METHOD(TriggerGuardCondition) {
 }
 
 NAN_METHOD(CreateTimer) {
-  int64_t period_ms = Nan::To<int64_t>(info[0]).FromJust();
+  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
   RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[1]).ToLocalChecked());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
+  int64_t period_ms = Nan::To<int64_t>(info[2]).FromJust();
+
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
-  rcl_clock_t* clock =
-      reinterpret_cast<rcl_clock_t*>(malloc(sizeof(rcl_clock_t)));
-  rcl_allocator_t allocator = rcl_get_default_allocator();
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_clock_init(RCL_STEADY_TIME, clock, &allocator),
-                           rcl_get_error_string().str);
+
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
       rcl_timer_init(timer, clock, context, RCL_MS_TO_NS(period_ms), nullptr,
                      rcl_get_default_allocator()),
       rcl_get_error_string().str);
 
-  auto js_obj = RclHandle::NewInstance(timer, nullptr, [timer, clock] {
-    rcl_ret_t ret_clock = rcl_clock_fini(clock);
-    free(clock);
-    rcl_ret_t ret_timer = rcl_timer_fini(timer);
-    return ret_clock || ret_timer;
+  auto js_obj = RclHandle::NewInstance(timer, clock_handle, [timer] {
+    return rcl_timer_fini(timer);
   });
   info.GetReturnValue().Set(js_obj);
 }

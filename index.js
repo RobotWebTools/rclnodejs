@@ -31,6 +31,7 @@ const validator = require('./lib/validator.js');
 const Time = require('./lib/time.js');
 const TimeSource = require('./lib/time_source.js');
 const { Clock, ROSClock } = require('./lib/clock.js');
+const ClockType = require('./lib/clock_type.js');
 const Duration = require('./lib/duration.js');
 const Context = require('./lib/context.js');
 
@@ -98,6 +99,9 @@ let rcl = {
 
   /** {@link ROSClock} class */
   ROSClock: ROSClock,
+
+  /** {@link ClockType} enum */
+  ClockType: ClockType,
 
   /** {@link Duration} class */
   Duration: Duration,
