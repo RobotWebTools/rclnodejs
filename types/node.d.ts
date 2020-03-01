@@ -1,5 +1,6 @@
 // eslint camelcase: ["error", {ignoreImports: true}]
 
+import { Logging } from 'rclnodejs';
 import { Parameters } from 'rclnodejs';
 import { rcl_interfaces as rclinterfaces } from 'rclnodejs';
 import { QoS } from 'rclnodejs';
@@ -156,6 +157,13 @@ declare module 'rclnodejs' {
      * @returns The node namespace.
      */
     namespace(): string;
+
+    /**
+     * Get the nodes logger.
+     * 
+     * @returns The logger for the node.
+     */
+    getLogger(): Logging;
 
     /**
      * Get the nodeOptions provided through the constructor.

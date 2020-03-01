@@ -349,6 +349,16 @@ describe('rcl node methods testing', function() {
     });
   });
 
+  it('node.getLogger', function() {
+    var logger = node.getLogger();
+    assert.ok(logger);
+    assert.equal(logger.debug('message debug'), false);
+    assert.equal(logger.info('message info'), true);
+    assert.equal(logger.warn('message warn'), true);
+    assert.equal(logger.error('message error'), true);
+    assert.equal(logger.fatal('message fatal'), true);
+  });
+
   it('node.getNodeNames', function() {
     var nodeNames = node.getNodeNames();
 
