@@ -48,6 +48,9 @@ node.namespace();
 // $ExpectType Logging
 node.getLogger();
 
+// $ExpectType Clock
+node.getClock();
+
 // $ExpectType void
 rclnodejs.spin(node);
 

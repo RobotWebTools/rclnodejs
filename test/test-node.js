@@ -359,6 +359,12 @@ describe('rcl node methods testing', function() {
     assert.equal(logger.fatal('message fatal'), true);
   });
 
+  it('node.getClock', function() {
+    var clock = node.getClock();
+    assert.ok(clock);
+    assert.strictEqual(clock.clockType, rclnodejs.ClockType.ROS_TIME);
+  });
+
   it('node.getNodeNames', function() {
     var nodeNames = node.getNodeNames();
 

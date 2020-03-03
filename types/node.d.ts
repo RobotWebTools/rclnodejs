@@ -1,5 +1,6 @@
 // eslint camelcase: ["error", {ignoreImports: true}]
 
+import { Clock } from 'rclnodejs';
 import { Logging } from 'rclnodejs';
 import { Parameters } from 'rclnodejs';
 import { rcl_interfaces as rclinterfaces } from 'rclnodejs';
@@ -164,6 +165,13 @@ declare module 'rclnodejs' {
      * @returns The logger for the node.
      */
     getLogger(): Logging;
+
+    /**
+     * Get the clock used by the node.
+     * 
+     * @returns The nodes clock.
+     */
+    getClock(): Clock;
 
     /**
      * Get the nodeOptions provided through the constructor.
