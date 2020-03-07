@@ -61,7 +61,7 @@
     "ref-array-di": "^1.2.0",
     "ref-struct-di": "^1.1.0",
     "walk": "^2.3.9",
-    "uuid": "^3.2.1",
+    "uuid": "^7.0.2",
     "int64-napi": "^1.0.1"
   },
   "husky": {
