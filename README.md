@@ -18,7 +18,7 @@ If you want to select a stable release of ROS 2.0 as your platform, please check
 | Dashing Diademata Patch Release [2](https://github.com/ros2/ros2/releases/tag/release-dashing-20190806) |                              [0.10.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.1)                               |
 | Dashing Diademata Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-dashing-20190614) |                                     [0.10.0](https://www.npmjs.com/package/rclnodejs/v/0.10.0)                                      |
 
-- Verify that you are using a compatible version of node between 8.12 - 10.99: run `node -v` for your node version info.
+- Verify that you are using a compatible version of node between 8.12 - 12.99: run `node -v` for your node version info.
 
 - Install from npmjs: run `npm i rclnodejs@<version>` to install a specific version.
 
@@ -39,9 +39,9 @@ Alternatively, you can build ROS 2.0 from scratch. Please select the platform yo
 ### Install `Node.js`
 
 **Notice:**
-`rclnodejs` should only be used with node versions between 8.12 - 10.99. The lowest LTS Node.js we used to verify the unit tests is `8.12.0`. And there is a known issue installing rclnodejs with versions of node >= 11.0.
+`rclnodejs` should only be used with node versions between 8.12 - 12.99. The lowest LTS Node.js we used to verify the unit tests is `8.12.0`. And there is a known issue installing rclnodejs with versions of node >= 13.0.
 
-The `Node.js` version we selected is the LTS [`Carbon`](https://nodejs.org/download/release/latest-carbon/) (8.x). You can install it:
+The `Node.js` version we selected is the LTS [`Erbium`](https://nodejs.org/download/release/latest-erbium/) (12.x). You can install it:
 
 - Download from Node.js offical [website](https://nodejs.org/en/), and install it.
 - Use the Node Version Manager ([nvm](https://github.com/creationix/nvm)) to install it.
