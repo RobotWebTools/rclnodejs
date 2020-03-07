@@ -12,71 +12,73 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* eslint-disable camelcase */
-
 'use strict';
 
 const rclnodejs = require('../index.js');
+const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
+
+class FibonacciActionServer {
+  constructor(node) {
+    this._actionServer = new rclnodejs.ActionServer(
+      node,
+      'test_msgs/action/Fibonacci',
+      'fibonacci',
+      this.executeCallback,
+      null,
+      null,
+      this.cancelCallback
+    );
+  }
+
+  async executeCallback(goalHandle) {
+    console.log('Executing goal...');
+
+    const feedbackMessage = new Fibonacci.Feedback();
+    const sequence = [0, 1];
+
+    // Start executing the action
+    for (let i = 1; i < goalHandle.request.order; i++) {
+      // Check if the goal has been canceled
+      if (goalHandle.isCancelRequested) {
+        goalHandle.canceled();
+        console.log('Goal canceled');
+        return new Fibonacci.Result();
+      }
+
+      sequence.push(sequence[i] + sequence[i - 1]);
+
+      feedbackMessage.sequence = sequence;
+      console.log('Feedback: ', sequence);
+
+      // Publish the feedback
+      goalHandle.publishFeedback(feedbackMessage);
+
+      // Wait for 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    goalHandle.succeed();
+
+    // Populate result message
+    const result = new Fibonacci.Result();
+    result.sequence = sequence;
+    return result;
+  }
+
+  cancelCallback(goalHandle) {
+    console.log('Received cancel request');
+    return rclnodejs.CancelResponse.ACCEPT;
+  }
+}
 
 rclnodejs
   .init()
   .then(() => {
-    const as = new rclnodejs.ActionLib.ActionServer({
-      type: 'ros1_actions/msg/DoDishes',
-      actionServer: 'dishes',
-      rclnodejs: rclnodejs,
-    });
+    const node = rclnodejs.createNode('action_server_example_node');
 
-    as.on('goal', function(goal) {
-      console.log(`A goal, whose id is ${goal.getGoalId().id}, was received.`);
+    new FibonacciActionServer(node);
 
-      goal.setAccepted('goal accepted');
-
-      /*
-    For the state transitions, please reference http://wiki.ros.org/actionlib/DetailedDescription,
-    besides the setAccept operation, others are:
-    goal.setCancelRequested();
-    goal.setCancelled({total_dishes_cleaned: 10}, 'canceled');
-    goal.setRejected({total_dishes_cleaned: 0}, 'rejected');
-    goal.setAborted({total_dishes_cleaned: 0}, 'aborted');
-    goal.setSucceeded({total_dishes_cleaned: 100}, 'done');
-    */
-
-      let feedback = {
-        percent_complete: 70,
-        image: {
-          header: {
-            stamp: {
-              sec: 11223,
-              nanosec: 44556,
-            },
-            frame_id: 'f001',
-          },
-          height: 240,
-          width: 320,
-          encoding: 'rgba',
-          is_bigendian: false,
-          step: 320 * 16,
-          is_dense: false,
-          data: Uint8Array.from({ length: 320 * 240 }, (v, k) => k),
-        },
-      };
-
-      goal.publishFeedback(feedback);
-      setTimeout(() => {
-        goal.setSucceeded({ total_dishes_cleaned: 10 }, 'done');
-      }, 500);
-    });
-
-    as.on('cancel', goalHandle => {
-      console.log(
-        `The goal, whose id is ${
-          goalHandle.getGoalStatus().goal_id.id
-        }, is canceled. `
-      );
-    });
-
-    as.start();
+    rclnodejs.spin(node);
   })
   .catch(err => {
     console.error(err);
