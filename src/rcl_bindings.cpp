@@ -62,8 +62,6 @@ static void Catch(int signo) {
   }
 }
 
-std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos);
-
 NAN_METHOD(Init) {
   rcl_allocator_t allocator = rcl_get_default_allocator();
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();

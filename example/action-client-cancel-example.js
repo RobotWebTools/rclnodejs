@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Intel Corporation. All rights reserved.
+// Copyright (c) 2020 Matt Richard. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
 
 class FibonacciActionClient {
   constructor(node) {
+    this._node = node;
     this._actionClient = new rclnodejs.ActionClient(
       node,
       'test_msgs/action/Fibonacci',
@@ -34,6 +35,10 @@ class FibonacciActionClient {
 
     const goalHandle = await this._actionClient.sendGoal(goal, feedback =>
       this.feedbackCallback(feedback)
+    );
+
+    this._timer = this._node.createTimer(2000, () =>
+      this.timerCallback(goalHandle)
     );
 
     if (!goalHandle.accepted) {
@@ -52,6 +57,18 @@ class FibonacciActionClient {
 
   feedbackCallback(feedbackMessage) {
     console.log('Received feedback: ', feedbackMessage.feedback.sequence);
+  }
+
+  async timerCallback(goalHandle) {
+    this._timer.cancel();
+
+    const response = await goalHandle.cancelGoal();
+
+    if (response.goals_canceling.length > 0) {
+      console.log('Goal successfully canceled');
+    } else {
+      console.log('Goal failed to cancel');
+    }
   }
 }
 

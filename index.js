@@ -34,6 +34,11 @@ const { Clock, ROSClock } = require('./lib/clock.js');
 const ClockType = require('./lib/clock_type.js');
 const Duration = require('./lib/duration.js');
 const Context = require('./lib/context.js');
+const ActionClient = require('./lib/action/client.js');
+const ActionServer = require('./lib/action/server.js');
+const ClientGoalHandle = require('./lib/action/client_goal_handle.js');
+const { CancelResponse, GoalResponse } = require('./lib/action/response.js');
+const ServerGoalHandle = require('./lib/action/server_goal_handle.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -112,6 +117,24 @@ let rcl = {
   /** {@link Parameters} */
   Parameters: Parameters,
 
+  /** {@link ActionClient} class */
+  ActionClient: ActionClient,
+
+  /** {@link ActionServer} class */
+  ActionServer: ActionServer,
+
+  /** {@link ClientGoalHandle} class */
+  ClientGoalHandle: ClientGoalHandle,
+
+  /** {@link ServerGoalHandle} class */
+  ServerGoalHandle: ServerGoalHandle,
+
+  /** {@link ServerGoalHandle} enum */
+  CancelResponse: CancelResponse,
+
+  /** {@link GoalResponse} enum */
+  GoalResponse: GoalResponse,
+
   /**
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
@@ -133,6 +156,7 @@ let rcl = {
     let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
     let node = new rclnodejs.ShadowNode();
     node.handle = handle;
+    node.context = context;
 
     node.init(nodeName, namespace, context, options);
     debug(
@@ -141,7 +165,6 @@ let rcl = {
       namespace
     );
 
-    node.context = context;
     this._nodes.push(node);
     return node;
   },
