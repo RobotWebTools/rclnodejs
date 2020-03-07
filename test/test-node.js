@@ -349,6 +349,22 @@ describe('rcl node methods testing', function() {
     });
   });
 
+  it('node.getLogger', function() {
+    var logger = node.getLogger();
+    assert.ok(logger);
+    assert.equal(logger.debug('message debug'), false);
+    assert.equal(logger.info('message info'), true);
+    assert.equal(logger.warn('message warn'), true);
+    assert.equal(logger.error('message error'), true);
+    assert.equal(logger.fatal('message fatal'), true);
+  });
+
+  it('node.getClock', function() {
+    var clock = node.getClock();
+    assert.ok(clock);
+    assert.strictEqual(clock.clockType, rclnodejs.ClockType.ROS_TIME);
+  });
+
   it('node.getNodeNames', function() {
     var nodeNames = node.getNodeNames();
 
