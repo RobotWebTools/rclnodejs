@@ -18,7 +18,7 @@
     "test": "node ./scripts/compile_tests.js && node ./scripts/run_test.js && dtslint test/types",
     "lint": "eslint --max-warnings=0 index.js types/*.d.ts scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
     "postinstall": "node scripts/generate_messages.js",
-    "format": "prettier --trailing-comma es5 --single-quote --write '{.,lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test}/*.{js,md,ts}'"
+    "format": "prettier --trailing-comma es5 --single-quote --write \"{.,{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test}/**}/*.{js,md,ts}\""
   },
   "authors": [
     "Minggang Wang <minggang.wang@intel.com>",
@@ -53,6 +53,7 @@
     "debug": "^4.0.1",
     "dot": "^1.1.2",
     "fs-extra": "^8.0.1",
+    "is-close": "^1.3.3",
     "mkdirp": "^1.0.3",
     "mz": "^2.6.0",
     "nan": "^2.8.0",
@@ -60,7 +61,7 @@
     "ref-array-di": "^1.2.0",
     "ref-struct-di": "^1.1.0",
     "walk": "^2.3.9",
-    "uuid": "^3.2.1",
+    "uuid": "^7.0.2",
     "int64-napi": "^1.0.1"
   },
   "husky": {
