@@ -66,10 +66,7 @@ function getPkgInfos(generatedRoot) {
 
       if (typeClass.type === 'srv') {
         // skip __srv__<action>
-        if (
-          !typeClass.name.endsWith('Request') &&
-          !typeClass.name.endsWith('Response')
-        ) {
+        if (!typeClass.name.endsWith('_Request') && !typeClass.name.endsWith('_Response')) {
           pkgInfo.services.push(typeClass);
           continue;
         }
@@ -198,10 +195,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
     fs.writeSync(fd, ';\n\n');
   }
 
-  fs.writeSync(
-    fd,
-    '  type TypeClassName = MessageTypeClassName | ServiceTypeClassName;\n'
-  );
+  fs.writeSync(fd, '  type TypeClassName = MessageTypeClassName | ServiceTypeClassName;\n');
 
   // close module declare
   fs.writeSync(fd, '}\n');
@@ -232,13 +226,7 @@ function saveMsgWrapperAsTSD(msgInfo, fd) {
  * non-primitive types
  * @returns {undefined}
  */
-function saveMsgFieldsAsTSD(
-  msgInfo,
-  fd,
-  indent = 0,
-  lineEnd = ',',
-  typePrefix = ''
-) {
+function saveMsgFieldsAsTSD(msgInfo, fd, indent = 0, lineEnd = ',', typePrefix = '') {
   const indentStr = ' '.repeat(indent);
   for (let i = 0; i < msgInfo.def.fields.length; i++) {
     const field = msgInfo.def.fields[i];
