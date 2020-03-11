@@ -193,6 +193,14 @@ declare module 'rclnodejs' {
     ): Timer;
 
     /**
+     * Create a Rate.
+     *
+     * @param hz - The frequency of the rate timer; default is 1 hz.
+     * @returns New instance of Rate.
+     */
+    createRate(hz: number): Rate;
+
+    /**
      * Create a Publisher.
      *
      * @param typeClass - Type of message that will be published.
