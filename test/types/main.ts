@@ -219,10 +219,11 @@ duration1.gte(duration2);
 const time1 = new rclnodejs.Time(100, 100);
 
 // $ExpectType Time
-const time2 = rclnodejs.Time.fromMsg(
-  'helloworld',
-  rclnodejs.ClockType.SYSTEM_TIME
-);
+const time2 = rclnodejs.Time.fromMsg({sec: 0, nanosec: 0});
+
+// $ExpectType Time
+const time3 =
+  rclnodejs.Time.fromMsg({sec: 0, nanosec: 0}, rclnodejs.ClockType.ROS_TIME);
 
 // $ExpectType ClockType
 time1.clockType;
