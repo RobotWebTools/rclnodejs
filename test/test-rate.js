@@ -19,19 +19,14 @@ const isClose = require('is-close');
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
-
 const { performance } = require('perf_hooks');
 
 describe('rclnodejs rate test suite', function() {
   let node;
   this.timeout(60 * 1000);
 
-  before(function() {
-    return rclnodejs.init();
-  });
-
-  after(function() {
-    rclnodejs.shutdown();
+  before(async function() {
+    await rclnodejs.init();
   });
 
   beforeEach(function() {
@@ -40,6 +35,10 @@ describe('rclnodejs rate test suite', function() {
 
   afterEach(function() {
     node.destroy();
+  });
+
+  after(function() {
+    rclnodejs.shutdown();
   });
 
   it('rate constructor tests', function() {

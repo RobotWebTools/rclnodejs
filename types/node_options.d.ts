@@ -1,7 +1,5 @@
 // eslint camelcase: ["error", {ignoreImports: true}]
 
-import { Parameters } from 'rclnodejs';
-
 declare module 'rclnodejs' {
   /**
    * NodeOptions specify configuration choices during the
@@ -26,7 +24,7 @@ declare module 'rclnodejs' {
      * An array of Parameters that serve as overrides for a node's default
      * parameters. Default = empty array [].
      */
-    parameterOverrides: Array<Parameters.Parameter>;
+    parameterOverrides: Array<Parameter>;
 
     /**
      * Instructs a node if it should declare parameters from it's 
