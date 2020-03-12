@@ -174,7 +174,16 @@ declare module 'rclnodejs' {
     getClock(): Clock;
 
     /**
+     * Get the current time using the node's clock.
+     * 
+     * @returns The current time.
+     */
+    now(): Time;
+
+    /**
      * Get the nodeOptions provided through the constructor.
+     * 
+     * @returns The nodeOptions.
      */
     options(): NodeOptions;
 
