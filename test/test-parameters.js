@@ -15,21 +15,18 @@
 'use strict';
 
 const assert = require('assert');
-const IsClose = require('is-close');
-
-const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
+const IsClose = require('is-close');
+const rclnodejs = require('../index.js');
 
-const {
-  ParameterType,
-  Parameter,
-  ParameterDescriptor,
-  FloatingPointRange,
-  IntegerRange,
-  PARAMETER_REL_TOL,
-} = require('../lib/parameter.js');
-
+const ParameterType = rclnodejs.ParameterType;
+const Parameter = rclnodejs.Parameter;
+const ParameterDescriptor = rclnodejs.ParameterDescriptor;
+const FloatingPointRange = rclnodejs.FloatingPointRange;
+const IntegerRange = rclnodejs.IntegerRange;
+const DEFAULT_NUMERIC_RANGE_TOLERANCE =
+  rclnodejs.DEFAULT_NUMERIC_RANGE_TOLERANCE;
 const NodeOptions = rclnodejs.NodeOptions;
 const Context = rclnodejs.Context;
 
@@ -107,8 +104,8 @@ describe('rclnodejs parameters test suite', function() {
 
   describe('range tests', function() {
     it('Math IsClose test', function() {
-      assert.ok(IsClose.isClose(1.0, 1.0, PARAMETER_REL_TOL));
-      assert.ok(!IsClose.isClose(1.0, 1.1, PARAMETER_REL_TOL));
+      assert.ok(IsClose.isClose(1.0, 1.0, DEFAULT_NUMERIC_RANGE_TOLERANCE));
+      assert.ok(!IsClose.isClose(1.0, 1.1, DEFAULT_NUMERIC_RANGE_TOLERANCE));
       assert.ok(IsClose.isClose(1.0, 1.1, 0.11));
     });
 
@@ -457,6 +454,113 @@ describe('rclnodejs parameters test suite', function() {
         2,
         'expected parameterOverride.value == 2'
       );
+    });
+  });
+
+  describe('parameter onSetParameterCallback tests', function() {
+    const NODE_NAME = 'test_node';
+    const PARAM_NAME = 'TEST_PARAM';
+    const PARAM_TYPE = ParameterType.PARAMETER_STRING;
+    const PARAM_VALUE = 'helloworld';
+    let PARAMETER = undefined;
+    const SET_PARAMETER_RESULT_SUCCESS = { successful: true, reason: null };
+    const FAIL_REASON = 'FAIL';
+    const SET_PARAMETER_RESULT_FAIL = {
+      successful: false,
+      reason: FAIL_REASON,
+    };
+
+    let node;
+    this.timeout(60 * 1000);
+
+    /* eslint-disable-next-line space-before-function-paren */
+    before(async () => {
+      await rclnodejs.init();
+    });
+
+    /* eslint-disable-next-line space-before-function-paren */
+    this.beforeEach(async () => {
+      node = rclnodejs.createNode(NODE_NAME);
+      PARAMETER = new Parameter(PARAM_NAME, PARAM_TYPE, PARAM_VALUE);
+      node.declareParameter(PARAMETER);
+    });
+
+    afterEach(function() {
+      if (node) node.destroy();
+    });
+
+    after(() => {
+      rclnodejs.shutdown();
+    });
+
+    it('Add and Remove SetParametersCallback', function() {
+      const initialCallbackCnt = node._setParametersCallbacks.length;
+      const callback1 = () => SET_PARAMETER_RESULT_SUCCESS;
+      const callback2 = () => SET_PARAMETER_RESULT_SUCCESS;
+
+      node.addOnSetParametersCallback(callback1);
+      node.addOnSetParametersCallback(callback2);
+
+      assert.deepStrictEqual(
+        node._setParametersCallbacks.length,
+        initialCallbackCnt + 2
+      );
+      assert.deepStrictEqual(node._setParametersCallbacks[0], callback2);
+      assert.deepStrictEqual(node._setParametersCallbacks[1], callback1);
+
+      node.removeOnSetParametersCallback(callback1);
+      assert.deepStrictEqual(node._setParametersCallbacks[0], callback2);
+
+      node.removeOnSetParametersCallback(callback2);
+      assert.deepStrictEqual(
+        initialCallbackCnt,
+        node._setParametersCallbacks.length
+      );
+    });
+
+    it('SetParametersCallback', function() {
+      let callbackReceived = false;
+      let paramFoundInParamList = false;
+      node.addOnSetParametersCallback(parameters => {
+        for (const parameter of parameters) {
+          if (parameter.name === PARAM_NAME) {
+            paramFoundInParamList = true;
+            break;
+          }
+        }
+        callbackReceived = true;
+        return SET_PARAMETER_RESULT_SUCCESS;
+      });
+
+      const param1 = new Parameter(PARAM_NAME, PARAM_TYPE, 'abc');
+      node.setParameter(param1);
+
+      assert.ok(node.hasParameter(PARAM_NAME));
+      assert.deepStrictEqual(node.getParameter(PARAM_NAME).value, 'abc');
+      assert.ok(callbackReceived);
+    });
+
+    it('SetParametersCallback reject', function() {
+      let callbackReceived = false;
+      let paramFoundInParamList = false;
+      node.addOnSetParametersCallback(parameters => {
+        for (const parameter of parameters) {
+          if (parameter.name === PARAM_NAME) {
+            paramFoundInParamList = true;
+            break;
+          }
+        }
+        callbackReceived = true;
+        return SET_PARAMETER_RESULT_FAIL;
+      });
+
+      const param1 = new Parameter(PARAM_NAME, PARAM_TYPE, 'abc');
+      node.setParameter(param1);
+
+      assert.ok(node.hasParameter(PARAM_NAME));
+      assert.deepStrictEqual(node.getParameter(PARAM_NAME).value, PARAM_VALUE);
+      assert.ok(callbackReceived);
+      assert.ok(paramFoundInParamList);
     });
   });
 });

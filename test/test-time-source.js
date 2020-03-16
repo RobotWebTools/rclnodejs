@@ -16,7 +16,14 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const { Clock, ROSClock, TimeSource, Time } = rclnodejs;
+const {
+  Clock,
+  Parameter,
+  ParameterType,
+  ROSClock,
+  TimeSource,
+  Time,
+} = rclnodejs;
 const int64 = require('int64-napi');
 
 describe('rclnodejs TimeSource testing', function() {
@@ -24,11 +31,18 @@ describe('rclnodejs TimeSource testing', function() {
   let node;
   let timer;
 
-  before(function() {
-    return rclnodejs.init().then(() => {
-      node = rclnodejs.createNode('TestTimeSource');
-      rclnodejs.spin(node);
-    });
+  before(async function() {
+    await rclnodejs.init();
+  });
+
+  this.beforeEach(() => {
+    node = rclnodejs.createNode('TestTimeSource');
+    rclnodejs.spin(node);
+  });
+
+  this.afterEach(() => {
+    node.destroy();
+    node = null;
   });
 
   after(function() {
@@ -36,7 +50,7 @@ describe('rclnodejs TimeSource testing', function() {
     rclnodejs.shutdown();
   });
 
-  function publishClockMessage() {
+  function publishClockMessage(node) {
     let pub = node.createPublisher('builtin_interfaces/msg/Time', 'clock');
     let count = 0;
     timer = setInterval(() => {
@@ -67,7 +81,7 @@ describe('rclnodejs TimeSource testing', function() {
     let sysNow = sysClock.now();
     assert.ok(int64.subtract(sysNow.nanoseconds, now.nanoseconds) < 1e9);
 
-    publishClockMessage();
+    publishClockMessage(node);
     assert.strictEqual(clock.isRosTimeActive, false);
     now = clock.now();
     sysNow = sysClock.now();
@@ -81,14 +95,33 @@ describe('rclnodejs TimeSource testing', function() {
     clearInterval(timer);
   });
 
-  it('Test using sim time', function(done) {
+  it('Test using sim time parameter', function(done) {
+    // can not use default node.
+    node.destroy();
+
+    // create node with use_sim_time parameter true
+    const options = new rclnodejs.NodeOptions();
+    options.parameterOverrides.push(
+      new rclnodejs.Parameter(
+        'use_sim_time',
+        rclnodejs.ParameterType.PARAMETER_BOOL,
+        true
+      )
+    );
+    node = rclnodejs.createNode(
+      'TestNode1',
+      '',
+      rclnodejs.Context.defaultContext(),
+      options
+    );
+    rclnodejs.spin(node);
+
+    assert.ok(node.hasParameter('use_sim_time'));
+    assert.ok(node.getParameter('use_sim_time').value);
     let timeSource = new TimeSource(node);
     let clock = new ROSClock();
     timeSource.attachClock(clock);
 
-    assert.strictEqual(timeSource.isRosTimeActive, false);
-    assert.strictEqual(clock.isRosTimeActive, false);
-    timeSource.isRosTimeActive = true;
     assert.strictEqual(timeSource.isRosTimeActive, true);
     assert.strictEqual(clock.isRosTimeActive, true);
 
@@ -98,7 +131,7 @@ describe('rclnodejs TimeSource testing', function() {
       true
     );
 
-    publishClockMessage();
+    publishClockMessage(node);
     setTimeout(() => {
       assert.ok(clock.now().gt(new Time(0, 0, Clock.ClockType.ROS_TIME)));
       assert.ok(clock.now().lte(new Time(5, 0, Clock.ClockType.ROS_TIME)));
@@ -109,7 +142,12 @@ describe('rclnodejs TimeSource testing', function() {
       assert.ok(clock2.now().lte(new Time(5, 0, Clock.ClockType.ROS_TIME)));
 
       timeSource.detachNode();
-      let node2 = rclnodejs.createNode('TestTimeSource1');
+      let node2 = rclnodejs.createNode(
+        'TestTimeSource1',
+        '',
+        rclnodejs.Context.defaultContext(),
+        options
+      );
       timeSource.attachNode(node2);
       assert.strictEqual(timeSource._node, node2);
       assert.ok(timeSource._clockSubscription);

@@ -1,5 +1,5 @@
+/* eslint-disable camelcase */
 
-// eslint-disable-next-line camelcase
 import { Message, builtin_interfaces } from 'rclnodejs';
 
 declare module 'rclnodejs' {
