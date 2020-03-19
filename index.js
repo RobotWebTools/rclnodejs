@@ -39,6 +39,11 @@ const ActionServer = require('./lib/action/server.js');
 const ClientGoalHandle = require('./lib/action/client_goal_handle.js');
 const { CancelResponse, GoalResponse } = require('./lib/action/response.js');
 const ServerGoalHandle = require('./lib/action/server_goal_handle.js');
+const {
+  getActionClientNamesAndTypesByNode,
+  getActionServerNamesAndTypesByNode,
+  getActionNamesAndTypes,
+} = require('./lib/action/graph.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -134,6 +139,15 @@ let rcl = {
 
   /** {@link GoalResponse} enum */
   GoalResponse: GoalResponse,
+
+  /** {@link getActionClientNamesAndTypesByNode} function */
+  getActionClientNamesAndTypesByNode: getActionClientNamesAndTypesByNode,
+
+  /** {@link getActionServerNamesAndTypesByNode} function */
+  getActionServerNamesAndTypesByNode: getActionServerNamesAndTypesByNode,
+
+  /** {@link getActionNamesAndTypes} function */
+  getActionNamesAndTypes: getActionNamesAndTypes,
 
   /**
    * Create a node.

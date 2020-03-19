@@ -16,6 +16,7 @@
 #define RCLNODEJS_RCL_BINDINGS_HPP_
 
 #include <nan.h>
+#include <rcl/graph.h>
 #include <rcl/rcl.h>
 
 #include <memory>
@@ -31,6 +32,9 @@ typedef struct {
 } BindingMethod;
 
 extern rcl_guard_condition_t* g_sigint_gc;
+
+void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
+                          v8::Local<v8::Array>* result_list);
 
 uint32_t GetBindingMethodsCount(BindingMethod* methods);
 
