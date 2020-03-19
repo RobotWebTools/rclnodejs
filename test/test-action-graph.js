@@ -35,17 +35,35 @@ describe('rclnodejs action graph', function() {
   const ACTION1_NAME = 'action1';
   const ACTION2_NAME = 'action2';
 
-  async function waitForNodes() {
-    let deadline = Date.now() + 2000;
-    let nodeNames = node1.getNodeNames();
+  async function waitForNode(node, targetNodeName) {
+    const timeout = 2000;
+    const start = Date.now();
+    let nodeNames = node.getNodeNames();
+
     while (
-      Date.now() < deadline &&
-      (nodeNames.indexOf(NODE2_NAME) === -1 ||
-        nodeNames.indexOf(NODE3_NAME) === -1)
+      Date.now() - start < timeout &&
+      nodeNames.indexOf(targetNodeName) === -1
     ) {
       await assertUtils.createDelay(100);
-      nodeNames = node1.getNodeNames();
+      nodeNames = node.getNodeNames();
     }
+  }
+
+  async function getNamesAndTypes(getNamesAndTypesFn, count, ...args) {
+    const timeout = 5000;
+    const start = Date.now();
+
+    // It may take time for the ROS graph to update, so try until we timeout
+    while (Date.now() - start < timeout) {
+      const result = getNamesAndTypesFn.apply(undefined, args);
+      if (result.length === count) {
+        return result;
+      }
+
+      await assertUtils.createDelay(100);
+    }
+
+    return [];
   }
 
   before(function() {
@@ -56,7 +74,7 @@ describe('rclnodejs action graph', function() {
     rclnodejs.shutdown();
   });
 
-  beforeEach(function() {
+  beforeEach(async function() {
     node1 = rclnodejs.createNode(NODE1_NAME, NODE1_NS);
     node2 = rclnodejs.createNode(NODE2_NAME, NODE2_NS);
     node3 = rclnodejs.createNode(NODE3_NAME, NODE3_NS);
@@ -69,7 +87,10 @@ describe('rclnodejs action graph', function() {
     new rclnodejs.ActionServer(node3, fibonacci, ACTION2_NAME, () => null);
 
     // Wait for nodes to discover each other
-    return waitForNodes();
+    await waitForNode(node2, NODE1_NAME);
+    await waitForNode(node2, NODE3_NAME);
+    await waitForNode(node3, NODE1_NAME);
+    await waitForNode(node3, NODE2_NAME);
   });
 
   afterEach(function() {
@@ -78,15 +99,19 @@ describe('rclnodejs action graph', function() {
     node3.destroy();
   });
 
-  it('Test getActionClientNamesAndTypesByNode', function() {
-    let result = rclnodejs.getActionClientNamesAndTypesByNode(
+  it('Test getActionClientNamesAndTypesByNode', async function() {
+    let result = await getNamesAndTypes(
+      rclnodejs.getActionClientNamesAndTypesByNode,
+      0,
       node2,
       NODE1_NAME,
       NODE1_NS
     );
     assert.strictEqual(result.length, 0);
 
-    result = rclnodejs.getActionClientNamesAndTypesByNode(
+    result = await getNamesAndTypes(
+      rclnodejs.getActionClientNamesAndTypesByNode,
+      1,
       node1,
       NODE2_NAME,
       NODE2_NS
@@ -99,7 +124,9 @@ describe('rclnodejs action graph', function() {
     assert.strictEqual(types.length, 1);
     assert.strictEqual(types[0], fibonacci);
 
-    result = rclnodejs.getActionClientNamesAndTypesByNode(
+    result = await getNamesAndTypes(
+      rclnodejs.getActionClientNamesAndTypesByNode,
+      2,
       node1,
       NODE3_NAME,
       NODE3_NS
@@ -123,15 +150,19 @@ describe('rclnodejs action graph', function() {
     );
   });
 
-  it('Test getActionServerNamesAndTypesByNode', function() {
-    let result = rclnodejs.getActionServerNamesAndTypesByNode(
+  it('Test getActionServerNamesAndTypesByNode', async function() {
+    let result = await getNamesAndTypes(
+      rclnodejs.getActionServerNamesAndTypesByNode,
+      0,
       node2,
       NODE1_NAME,
       NODE1_NS
     );
     assert.strictEqual(result.length, 0);
 
-    result = rclnodejs.getActionServerNamesAndTypesByNode(
+    result = await getNamesAndTypes(
+      rclnodejs.getActionServerNamesAndTypesByNode,
+      1,
       node1,
       NODE2_NAME,
       NODE2_NS
@@ -144,7 +175,9 @@ describe('rclnodejs action graph', function() {
     assert.strictEqual(types.length, 1);
     assert.strictEqual(types[0], fibonacci);
 
-    result = rclnodejs.getActionServerNamesAndTypesByNode(
+    result = await getNamesAndTypes(
+      rclnodejs.getActionServerNamesAndTypesByNode,
+      2,
       node1,
       NODE3_NAME,
       NODE3_NS
@@ -168,8 +201,12 @@ describe('rclnodejs action graph', function() {
     );
   });
 
-  it('Test getActionNamesAndTypes', function() {
-    let result = rclnodejs.getActionNamesAndTypes(node1);
+  it('Test getActionNamesAndTypes', async function() {
+    let result = await getNamesAndTypes(
+      rclnodejs.getActionNamesAndTypes,
+      3,
+      node1
+    );
     assert.strictEqual(result.length, 3);
 
     let types = result[0].types;
