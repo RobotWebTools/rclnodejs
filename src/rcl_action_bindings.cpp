@@ -15,6 +15,7 @@
 #include "rcl_action_bindings.hpp"
 
 #include <rcl/error_handling.h>
+#include <rcl/graph.h>
 #include <rcl/rcl.h>
 #include <rcl_action/rcl_action.h>
 #include <rmw/error_handling.h>
@@ -688,6 +689,90 @@ NAN_METHOD(ActionExpireGoals) {
   info.GetReturnValue().Set(result);
 }
 
+NAN_METHOD(ActionGetClientNamesAndTypesByNode) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string node_name =
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
+  std::string node_namespace =
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
+
+  rcl_names_and_types_t names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_action_get_client_names_and_types_by_node(
+                               node, &allocator, node_name.c_str(),
+                               node_namespace.c_str(), &names_and_types),
+                           "Failed to action client names and types.");
+
+  v8::Local<v8::Array> result_list =
+      Nan::New<v8::Array>(names_and_types.names.size);
+  ExtractNamesAndTypes(names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&names_and_types),
+                           "Failed to destroy names_and_types");
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(ActionGetServerNamesAndTypesByNode) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string node_name =
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
+  std::string node_namespace =
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
+
+  rcl_names_and_types_t names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_action_get_server_names_and_types_by_node(
+                               node, &allocator, node_name.c_str(),
+                               node_namespace.c_str(), &names_and_types),
+                           "Failed to action server names and types");
+
+  v8::Local<v8::Array> result_list =
+      Nan::New<v8::Array>(names_and_types.names.size);
+  ExtractNamesAndTypes(names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&names_and_types),
+                           "Failed to destroy names_and_types");
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(ActionGetNamesAndTypes) {
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+
+  rcl_names_and_types_t names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_action_get_names_and_types(
+                               node, &allocator, &names_and_types),
+                           "Failed to action server names and types");
+
+  v8::Local<v8::Array> result_list =
+      Nan::New<v8::Array>(names_and_types.names.size);
+  ExtractNamesAndTypes(names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&names_and_types),
+                           "Failed to destroy names_and_types");
+
+  info.GetReturnValue().Set(result_list);
+}
+
 BindingMethod action_binding_methods[] = {
     {"actionCreateClient", ActionCreateClient},
     {"actionCreateServer", ActionCreateServer},
@@ -715,6 +800,9 @@ BindingMethod action_binding_methods[] = {
     {"actionTakeFeedback", ActionTakeFeedback},
     {"actionProcessCancelRequest", ActionProcessCancelRequest},
     {"actionServerGoalExists", ActionServerGoalExists},
-    {"actionExpireGoals", ActionExpireGoals}};
+    {"actionExpireGoals", ActionExpireGoals},
+    {"actionGetClientNamesAndTypesByNode", ActionGetClientNamesAndTypesByNode},
+    {"actionGetServerNamesAndTypesByNode", ActionGetServerNamesAndTypesByNode},
+    {"actionGetNamesAndTypes", ActionGetNamesAndTypes}};
 
 }  // namespace rclnodejs
