@@ -56,6 +56,7 @@ function getPkgInfos(generatedRoot) {
       name: pkg,
       messages: [],
       services: [],
+      actions: [],
     };
 
     const pkgPath = path.join(rootDir, pkg);
@@ -73,23 +74,27 @@ function getPkgInfos(generatedRoot) {
           pkgInfo.services.push(typeClass);
           continue;
         }
-      } else if (typeClass.type === 'action') {
-        // TODO (mattrichard): Enable .d.ts generation of actions
-        continue;
       }
 
       const msg = createMessage(typeClass);
       const type = msg.constructor.type();
       const def = msg.constructor.ROSMessageDef;
+      const name =
+        (def && def.msgName) ||
+        `${typeClass.package}_${typeClass.type}_${typeClass.name}`;
 
       const msgInfo = {
-        name: def.msgName,
+        name: name,
         typeClass: typeClass,
         type: type,
         def: def,
       };
 
-      pkgInfo.messages.push(msgInfo);
+      if (typeClass.type === 'action') {
+        pkgInfo.actions.push(msgInfo);
+      } else {
+        pkgInfo.messages.push(msgInfo);
+      }
     }
 
     pkgInfos.push(pkgInfo);
@@ -102,6 +107,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   let messagesMap = {
     string: 'string',
   };
+  const actionsMap = {};
 
   fs.writeSync(fd, '/* eslint-disable camelcase */\n');
   fs.writeSync(fd, '/* eslint-disable max-len */\n');
@@ -134,7 +140,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
       }
 
       saveMsgInfoAsTSD(msgInfo, fd);
-      saveMsgWrapperAsTSD(msgInfo, fd);
+      saveMsgConstructorAsTSD(msgInfo, fd);
 
       // full path to this msg
       const fullMessageName = `${pkgInfo.name}/${msgInfo.typeClass.type}/${msgInfo.typeClass.name}`;
@@ -145,6 +151,31 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
 
     if (curNS) {
       // close msg level namespace declare
+      fs.writeSync(fd, '    }\n');
+    }
+
+    if (pkgInfo.actions.length > 0) {
+      fs.writeSync(fd, '    namespace action {\n');
+      for (const msgInfo of pkgInfo.actions) {
+        const fullMessageName = `${pkgInfo.name}/${msgInfo.typeClass.type}/${msgInfo.typeClass.name}`;
+        const fullMessagePath = `${pkgInfo.name}.${msgInfo.typeClass.type}.${msgInfo.typeClass.name}`;
+
+        if (isActionMsgInterface(msgInfo.name)) {
+          saveActionMsgInfoAsTSD(msgInfo, fd);
+          saveMsgConstructorAsTSD(msgInfo, fd);
+
+          // full path to this msg
+          messagesMap[fullMessageName] = fullMessagePath;
+        } else if (isActionSrvInterface(msgInfo.name)) {
+          saveActionSrvInfoAsTSD(msgInfo, fd);
+        } else {
+          saveActionInfoAsTSD(msgInfo, fd);
+
+          actionsMap[fullMessageName] = fullMessagePath + 'Constructor';
+        }
+      }
+
+      // close action level namespace declare
       fs.writeSync(fd, '    }\n');
     }
 
@@ -165,19 +196,20 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
     '  type MessageType<T> = T extends MessageTypeClassName ? MessagesMap[T] : object;\n\n'
   );
 
-  // write message wrappers mappings
-  fs.writeSync(fd, '  type MessageTypeClassWrappersMap = {\n');
+  // write message contructor mappings
+  fs.writeSync(fd, '  type MessageTypeClassConstructorMap = {\n');
   for (const key in messagesMap) {
     if (key === 'string') {
       fs.writeSync(fd, "    'string': never,\n");
       continue;
     }
-    fs.writeSync(fd, `    '${key}': ${messagesMap[key]}_WrapperType,\n`);
+    fs.writeSync(fd, `    '${key}': ${messagesMap[key]}Constructor,\n`);
   }
   fs.writeSync(fd, '  };\n');
   fs.writeSync(
     fd,
-    '  type MessageWrapperType<T> = T extends MessageTypeClassName ? MessageTypeClassWrappersMap[T] : object;\n\n'
+    '  type MessageConstructorType<T> = ' +
+      'T extends MessageTypeClassName ? MessageTypeClassConstructorMap[T] : object;\n\n'
   );
 
   // write service type class string
@@ -201,9 +233,27 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
     fs.writeSync(fd, ';\n\n');
   }
 
+  // write actions type mappings
+  fs.writeSync(fd, '  type ActionsMap = {\n');
+  for (const key in actionsMap) {
+    fs.writeSync(fd, `    '${key}': ${actionsMap[key]},\n`);
+  }
+  fs.writeSync(fd, '  };\n');
+  fs.writeSync(fd, '  type ActionTypeClassName = keyof ActionsMap;\n');
+  fs.writeSync(fd, '  type Action = ActionsMap[ActionTypeClassName];\n');
   fs.writeSync(
     fd,
-    '  type TypeClassName = MessageTypeClassName | ServiceTypeClassName;\n'
+    '  type ActionType<T> = T extends ActionTypeClassName ? ActionsMap[T] : object;\n\n'
+  );
+
+  fs.writeSync(
+    fd,
+    '  type TypeClassName = MessageTypeClassName | ServiceTypeClassName | ActionTypeClassName;\n'
+  );
+  fs.writeSync(
+    fd,
+    '  type InterfaceType<T> = T extends MessageTypeClassName | ActionTypeClassName ? ' +
+      '(MessageTypeClassConstructorMap & ActionsMap)[T] : object;\n'
   );
 
   // close module declare
@@ -212,14 +262,14 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.closeSync(fd);
 }
 
-function saveMsgWrapperAsTSD(msgInfo, fd) {
+function saveMsgConstructorAsTSD(msgInfo, fd) {
   const msgName = msgInfo.typeClass.name;
-  fs.writeSync(fd, `      export type ${msgName}_WrapperType = {\n`);
+  fs.writeSync(fd, `      export interface ${msgName}Constructor {\n`);
   for (const constant of msgInfo.def.constants) {
     const constantType = primitiveType2JSName(constant.type);
-    fs.writeSync(fd, `        readonly ${constant.name}: ${constantType},\n`);
+    fs.writeSync(fd, `        readonly ${constant.name}: ${constantType};\n`);
   }
-  fs.writeSync(fd, `        new(other?: ${msgName}): ${msgName},\n`);
+  fs.writeSync(fd, `        new(other?: ${msgName}): ${msgName};\n`);
   fs.writeSync(fd, '      }\n');
 }
 
@@ -233,6 +283,8 @@ function saveMsgWrapperAsTSD(msgInfo, fd) {
  * or ';'
  * @param {string} typePrefix The prefix to put before the type name for
  * non-primitive types
+ * @param {boolean} useSamePackageSubFolder Indicates if the sub folder name should be taken from the message
+ * when the field type comes from the same package. This is needed for action interfaces. Defaults to false.
  * @returns {undefined}
  */
 function saveMsgFieldsAsTSD(
@@ -240,18 +292,27 @@ function saveMsgFieldsAsTSD(
   fd,
   indent = 0,
   lineEnd = ',',
-  typePrefix = ''
+  typePrefix = '',
+  useSamePackageSubFolder = false
 ) {
-  const indentStr = ' '.repeat(indent);
   for (let i = 0; i < msgInfo.def.fields.length; i++) {
     const field = msgInfo.def.fields[i];
-    let fieldType = fieldType2JSName(field);
+
+    let subFolder = 'msg';
+    if (
+      useSamePackageSubFolder &&
+      field.type.pkgName === msgInfo.type.pkgName
+    ) {
+      subFolder = msgInfo.type.subFolder;
+    }
+
+    let fieldType = fieldType2JSName(field, subFolder);
     let tp = field.type.isPrimitiveType ? '' : typePrefix;
     if (typePrefix === 'rclnodejs.') {
       fieldType = 'any';
       tp = '';
     }
-    const tmpl = `${indentStr}${field.name}: ${tp}${fieldType}`;
+    const tmpl = indentString(`${field.name}: ${tp}${fieldType}`, indent);
     fs.writeSync(fd, tmpl);
     if (field.type.isArray) {
       fs.writeSync(fd, '[]');
@@ -262,22 +323,66 @@ function saveMsgFieldsAsTSD(
 }
 
 function saveMsgInfoAsTSD(msgInfo, fd) {
-  // write type = xxxx {
-  const typeTemplate = `      export type ${msgInfo.typeClass.name} = {\n`;
+  // write interface xxxx {
+  const typeTemplate = `      export interface ${msgInfo.typeClass.name} {\n`;
 
   fs.writeSync(fd, typeTemplate);
 
   // write field definitions
-  saveMsgFieldsAsTSD(msgInfo, fd, 8);
+  saveMsgFieldsAsTSD(msgInfo, fd, 8, ';');
 
   // end of def
-  fs.writeSync(fd, '      };\n');
+  fs.writeSync(fd, '      }\n');
 }
 
-function fieldType2JSName(fieldInfo) {
+function saveActionMsgInfoAsTSD(msgInfo, fd) {
+  // write interface xxxx {
+  const typeTemplate = `      export interface ${msgInfo.typeClass.name} {\n`;
+
+  fs.writeSync(fd, typeTemplate);
+
+  const userDefinedMsg = isUserDefinedActionMsgInterface(msgInfo.name);
+
+  // write field definitions
+  saveMsgFieldsAsTSD(msgInfo, fd, 8, ';', '', !userDefinedMsg);
+
+  // end of def
+  fs.writeSync(fd, '      }\n');
+}
+
+function saveActionSrvInfoAsTSD(msgInfo, fd) {
+  const actionSrv = msgInfo.typeClass.name;
+
+  const interfaceTemplate = [
+    `export interface ${actionSrv}Constructor {`,
+    `  readonly Request: ${actionSrv}_RequestConstructor;`,
+    `  readonly Response: ${actionSrv}_ResponseConstructor;`,
+    '}',
+    '',
+  ];
+
+  fs.writeSync(fd, indentLines(interfaceTemplate, 6).join('\n'));
+}
+
+function saveActionInfoAsTSD(msgInfo, fd) {
+  const action = msgInfo.typeClass.name;
+
+  const interfaceTemplate = [
+    `export interface ${action}Constructor {`,
+    `  readonly Goal: ${action}_GoalConstructor;`,
+    `  readonly Result: ${action}_ResultConstructor;`,
+    `  readonly Feedback: ${action}_FeedbackConstructor;`,
+    '}',
+    '',
+  ];
+
+  fs.writeSync(fd, indentLines(interfaceTemplate, 6).join('\n'));
+}
+
+function fieldType2JSName(fieldInfo, subFolder = 'msg') {
   return fieldInfo.type.isPrimitiveType
     ? primitiveType2JSName(fieldInfo.type.type)
-    : fieldInfo.type.pkgName + '.msg.' + fieldInfo.type.type;
+    : `${fieldInfo.type.pkgName}.${subFolder}.${fieldInfo.type.type}`;
 }
 
 function primitiveType2JSName(type) {
@@ -333,6 +438,43 @@ function fileName2Typeclass(filename) {
 function createMessage(type) {
   let typeClass = loader.loadInterface(type);
   return typeClass ? new typeClass() : undefined;
+}
+
+function isActionMsgInterface(name) {
+  return (
+    name.endsWith('_FeedbackMessage') ||
+    name.endsWith('_Request') ||
+    name.endsWith('_Response') ||
+    isUserDefinedActionMsgInterface(name)
+  );
+}
+
+function isUserDefinedActionMsgInterface(name) {
+  return (
+    name.endsWith('_Feedback') ||
+    name.endsWith('_Goal') ||
+    name.endsWith('_Result')
+  );
+}
+
+function isActionSrvInterface(name) {
+  return name.endsWith('_GetResult') || name.endsWith('_SendGoal');
+}
+
+function indentString(string, amount) {
+  if (!string) {
+    return '';
+  }
+
+  return ' '.repeat(amount) + string;
+}
+
+function indentLines(lines, amount) {
+  if (!Array.isArray(lines)) {
+    throw new Error('lines must be an array');
+  }
+
+  return lines.map(line => indentString(line, amount));
 }
 
 const tsdGenerator = {

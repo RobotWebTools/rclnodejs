@@ -79,6 +79,11 @@ declare module 'rclnodejs' {
     export const profileParameterEvents = 'qos_profile_parameter_events';
 
     /**
+     * The action status profileref.
+     */
+    export const profileActionStatusDefault = 'rcl_action_qos_profile_status_default';
+
+    /**
      * A named policy reference.
      */
     export type ProfileRef = string;

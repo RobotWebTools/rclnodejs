@@ -66,9 +66,9 @@ declare module 'rclnodejs' {
    * @param  name - The name of interface to be required.
    * @returns The object of the required package/interface.
    */
-  function require<T extends MessageTypeClassName>(
+  function require<T extends TypeClassName>(
     name: T
-  ): MessageWrapperType<T>;
+  ): InterfaceType<T>;
   function require(name: string): object;
 
   /**
