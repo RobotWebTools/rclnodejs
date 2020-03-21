@@ -97,7 +97,7 @@ publisher.qos;
 // $ExpectType string
 publisher.topic;
 
-// $ExpectType TypeClass
+// $ExpectType TypeClass<TypeClassName>
 publisher.typeClass;
 
 // $ExpectType boolean
@@ -283,3 +283,89 @@ logger.error('test msg');
 
 // $ExpectType boolean
 logger.fatal('test msg');
+
+// $ExpectType FibonacciConstructor
+const Fibonacci = rclnodejs.require('rclnodejs_test_msgs/action/Fibonacci');
+
+// ---- ActionClient -----
+// $ExpectType ActionClient<"rclnodejs_test_msgs/action/Fibonacci">
+const actionClient = new rclnodejs.ActionClient(node, 'rclnodejs_test_msgs/action/Fibonacci', 'fibonnaci');
+
+// $ExpectType boolean
+client.isServiceServerAvailable();
+
+// $ExpectType Promise<boolean>
+actionClient.waitForServer();
+
+// $ExpectType Promise<ClientGoalHandle<"rclnodejs_test_msgs/action/Fibonacci">>
+const goalHandlePromise = actionClient.sendGoal(new Fibonacci.Goal());
+
+goalHandlePromise.then(goalHandle => {
+  // $ExpectType boolean
+  goalHandle.accepted;
+
+  // $ExpectType UUID
+  goalHandle.goalId;
+
+  // $ExpectType Time
+  goalHandle.stamp;
+
+  // $ExpectType string
+  goalHandle.status;
+
+  // $ExpectType Promise<CancelGoal_Response>
+  goalHandle.cancelGoal();
+
+  // $ExpectType Promise<Fibonacci_Result>
+  goalHandle.getResult();
+});
+
+// ---- ActionServer -----
+// $ExpectType ActionServer<"rclnodejs_test_msgs/action/Fibonacci">
+const actionServer = new rclnodejs.ActionServer(node, 'rclnodejs_test_msgs/action/Fibonacci', 'fibonnaci', executeCallback);
+
+// $ExpectType void
+actionServer.registerHandleAcceptedCallback();
+
+// $ExpectType void
+actionServer.registerGoalCallback();
+
+// $ExpectType void
+actionServer.registerCancelCallback();
+
+// $ExpectType void
+actionServer.registerExecuteCallback(() => new Fibonacci.Result());
+
+function executeCallback(goalHandle: rclnodejs.ServerGoalHandle<"rclnodejs_test_msgs/action/Fibonacci">) {
+  // $ExpectType UUID
+  goalHandle.goalId;
+
+  // $ExpectType boolean
+  goalHandle.isActive;
+
+  // $ExpectType boolean
+  goalHandle.isCancelRequested;
+
+  // $ExpectType Fibonacci_Goal
+  goalHandle.request;
+
+  // $ExpectType string
+  goalHandle.status;
+
+  // $ExpectType void
+  goalHandle.abort();
+
+  // $ExpectType void
+  goalHandle.canceled();
+
+  // $ExpectType void
+  goalHandle.execute();
+
+  // $ExpectType void
+  goalHandle.publishFeedback(new Fibonacci.Feedback());
+
+  // $ExpectType void
+  goalHandle.succeed();
+
+  return new Fibonacci.Result();
+}
