@@ -59,8 +59,9 @@ void ShadowNode::Init(v8::Local<v8::Object> exports) {
   v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
 
   constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
-  exports->Set(Nan::New("ShadowNode").ToLocalChecked(),
-               tpl->GetFunction(context).ToLocalChecked());
+  Nan::Set(exports,
+           Nan::New("ShadowNode").ToLocalChecked(),
+           tpl->GetFunction(context).ToLocalChecked());
 }
 
 NAN_GETTER(ShadowNode::HandleGetter) {
