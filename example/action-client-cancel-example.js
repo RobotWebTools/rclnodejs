@@ -20,6 +20,7 @@ const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
 class FibonacciActionClient {
   constructor(node) {
     this._node = node;
+
     this._actionClient = new rclnodejs.ActionClient(
       node,
       'test_msgs/action/Fibonacci',
@@ -27,48 +28,52 @@ class FibonacciActionClient {
     );
   }
 
-  async sendGoal(order) {
+  async sendGoal() {
+    this._node.getLogger().info('Waiting for action server...');
     await this._actionClient.waitForServer();
 
     const goal = new Fibonacci.Goal();
-    goal.order = order;
+    goal.order = 10;
+
+    this._node.getLogger().info('Sending goal request...');
 
     const goalHandle = await this._actionClient.sendGoal(goal, feedback =>
       this.feedbackCallback(feedback)
     );
 
-    this._timer = this._node.createTimer(2000, () =>
-      this.timerCallback(goalHandle)
-    );
-
     if (!goalHandle.accepted) {
-      console.log('Goal rejected');
+      this._node.getLogger().info('Goal rejected');
       return;
     }
 
-    console.log('Goal accepted');
+    this._node.getLogger().info('Goal accepted');
 
-    const result = await goalHandle.getResult();
-
-    console.log('Result: ', result.result.sequence);
-
-    rclnodejs.shutdown();
+    // Start a 2 second timer
+    this._timer = this._node.createTimer(2000, () =>
+      this.timerCallback(goalHandle)
+    );
   }
 
   feedbackCallback(feedbackMessage) {
-    console.log('Received feedback: ', feedbackMessage.feedback.sequence);
+    this._node
+      .getLogger()
+      .info(`Received feedback: ${feedbackMessage.feedback.sequence}`);
   }
 
   async timerCallback(goalHandle) {
+    this._node.getLogger().info('Canceling goal');
+    // Cancel the timer
     this._timer.cancel();
 
     const response = await goalHandle.cancelGoal();
 
     if (response.goals_canceling.length > 0) {
-      console.log('Goal successfully canceled');
+      this._node.getLogger().info('Goal successfully canceled');
     } else {
-      console.log('Goal failed to cancel');
+      this._node.getLogger().info('Goal failed to cancel');
     }
+
+    rclnodejs.shutdown();
   }
 }
 
@@ -78,7 +83,7 @@ rclnodejs
     const node = rclnodejs.createNode('action_client_example_node');
     const client = new FibonacciActionClient(node);
 
-    client.sendGoal(10);
+    client.sendGoal();
 
     rclnodejs.spin(node);
   })
