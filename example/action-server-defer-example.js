@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Intel Corporation. All rights reserved.
+// Copyright (c) 2020 Matt Richard. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
 class FibonacciActionServer {
   constructor(node) {
     this._node = node;
+    this._timer = null;
+    this._goalHandle = null;
 
     this._actionServer = new rclnodejs.ActionServer(
       node,
@@ -27,7 +29,7 @@ class FibonacciActionServer {
       'fibonacci',
       this.executeCallback.bind(this),
       this.goalCallback.bind(this),
-      null,
+      this.handleAcceptedCallback.bind(this),
       this.cancelCallback.bind(this)
     );
   }
@@ -78,9 +80,24 @@ class FibonacciActionServer {
     return rclnodejs.GoalResponse.ACCEPT;
   }
 
+  handleAcceptedCallback(goalHandle) {
+    this._node.getLogger().info('Deferring execution...');
+    this._goalHandle = goalHandle;
+    this._timer = this._node.createTimer(3000, () => this.timerCallback());
+  }
+
   cancelCallback(goalHandle) {
     this._node.getLogger().info('Received cancel request');
     return rclnodejs.CancelResponse.ACCEPT;
+  }
+
+  timerCallback() {
+    // Execute the deferred goal
+    if (this._goalHandle) {
+      this._goalHandle.execute();
+    }
+
+    this._timer.cancel();
   }
 }
 
