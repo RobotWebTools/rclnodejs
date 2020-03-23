@@ -196,4 +196,12 @@ describe('rclnodejs Time/Clock testing', function() {
       left.lte(time);
     }, TypeError);
   });
+
+  it('Conversion to Time message', function() {
+    let time = new Time(100, 200);
+    let msg = time.toMsg();
+
+    assert.strictEqual(msg.sec, 100);
+    assert.strictEqual(msg.nanosec, 200);
+  });
 });
