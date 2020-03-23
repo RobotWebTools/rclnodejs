@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
-
 #ifndef RCLNODEJS_RCL_UTILITIES_HPP_
 #define RCLNODEJS_RCL_UTILITIES_HPP_
+
+#include <string>
 
 struct rosidl_message_type_support_t;
 struct rosidl_service_type_support_t;
@@ -36,7 +36,7 @@ const rosidl_action_type_support_t* GetActionTypeSupport(
     const std::string& package_name,
     const std::string& action_name);
 
-const char* GetErrorMessageAndClear();
+std::string GetErrorMessageAndClear();
 
 }  // namespace rclnodejs
 

@@ -14,16 +14,15 @@
 
 #include "rcl_utilities.hpp"
 
-#if defined(OS_MACOS) || defined(OS_LINUX)
-#include <dlfcn.h>
-#endif
 #include <rcl/rcl.h>
 #include <rcl_action/rcl_action.h>
+#include <uv.h>
+
 #include <string>
 
-#if defined(OS_WINDOWS)
-#include "third_party/dlfcn-win32/dlfcn.h"
-#endif
+namespace {
+uv_lib_t g_lib;
+}  // namespace
 
 namespace rclnodejs {
 
@@ -47,12 +46,13 @@ void* GetTypeSupportFunctionByInterfaceSymbolName(
     const std::string& lib_name) {
   // If the dlopen fails for any reason, it will return nullptr.
   // You can use GetErrorMessageAndClear() to get error diagnostic.
-  void* lib = dlopen(lib_name.c_str(), RTLD_NOW | RTLD_GLOBAL);
-
-  if (lib)
-    return dlsym(lib, symbol_name.c_str());
-  else
-    return nullptr;
+  void* ptr = nullptr;
+  if (uv_dlopen(lib_name.c_str(), &g_lib) == 0 &&
+      uv_dlsym(&g_lib, symbol_name.c_str(), reinterpret_cast<void**>(&ptr)) ==
+          0) {
+    return ptr;
+  }
+  return nullptr;
 }
 
 const rosidl_message_type_support_t* GetMessageTypeSupport(
@@ -95,8 +95,8 @@ const rosidl_action_type_support_t* GetActionTypeSupport(
     return nullptr;
 }
 
-const char* GetErrorMessageAndClear() {
-  return dlerror();
+std::string GetErrorMessageAndClear() {
+  return std::string(uv_dlerror(&g_lib));
 }
 
 }  // namespace rclnodejs
