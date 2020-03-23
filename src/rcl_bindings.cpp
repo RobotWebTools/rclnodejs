@@ -148,7 +148,7 @@ static const int PARAMETER_INTEGER_ARRAY = 7;
 static const int PARAMETER_DOUBLE_ARRAY = 8;
 static const int PARAMETER_STRING_ARRAY = 9;
 
-/* 
+/*
 Convert parsed ros arguments to parameters.
 
 type Parameter = {
@@ -697,7 +697,7 @@ NAN_METHOD(CreateSubscription) {
         });
     info.GetReturnValue().Set(js_obj);
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear());
+    Nan::ThrowError(GetErrorMessageAndClear().c_str());
   }
 }
 
@@ -747,7 +747,7 @@ NAN_METHOD(CreatePublisher) {
     // Everything is done
     info.GetReturnValue().Set(js_obj);
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear());
+    Nan::ThrowError(GetErrorMessageAndClear().c_str());
   }
 }
 
@@ -809,7 +809,7 @@ NAN_METHOD(CreateClient) {
 
     info.GetReturnValue().Set(js_obj);
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear());
+    Nan::ThrowError(GetErrorMessageAndClear().c_str());
   }
 }
 
@@ -886,7 +886,7 @@ NAN_METHOD(CreateService) {
 
     info.GetReturnValue().Set(js_obj);
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear());
+    Nan::ThrowError(GetErrorMessageAndClear().c_str());
   }
 }
 

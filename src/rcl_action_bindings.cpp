@@ -86,7 +86,7 @@ NAN_METHOD(ActionCreateClient) {
 
     info.GetReturnValue().Set(js_obj);
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear());
+    Nan::ThrowError(GetErrorMessageAndClear().c_str());
   }
 }
 
@@ -154,7 +154,7 @@ NAN_METHOD(ActionCreateServer) {
 
     info.GetReturnValue().Set(js_obj);
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear());
+    Nan::ThrowError(GetErrorMessageAndClear().c_str());
   }
 }
 

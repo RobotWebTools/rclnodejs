@@ -75,9 +75,6 @@
               './src/third_party/dlfcn-win32/',
               "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '\\\include ').replace(/\\\/g, '/') + '/include')\")",
             ],
-            'sources': [
-              './src/third_party/dlfcn-win32/dlfcn.c',
-            ],
             'msvs_settings': {
               'VCCLCompilerTool': {
                 'ExceptionHandling': '2', # /EHsc
