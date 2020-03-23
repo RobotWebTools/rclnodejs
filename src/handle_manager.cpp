@@ -251,8 +251,8 @@ void HandleManager::CollectHandlesByType(
             .ToLocalChecked()).FromJust();
 
     for (uint32_t index = 0; index < length; index++) {
-      v8::Local<v8::Object> obj =
-          Nan::To<v8::Object>(typeObject->Get(index)).ToLocalChecked();
+      v8::Local<v8::Object> obj = Nan::To<v8::Object>(
+          Nan::Get(typeObject, index).ToLocalChecked()).ToLocalChecked();
       Nan::MaybeLocal<v8::Value> handle =
           Nan::Get(obj, Nan::New("_handle").ToLocalChecked());
       rclnodejs::RclHandle* rcl_handle =

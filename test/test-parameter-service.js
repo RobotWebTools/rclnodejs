@@ -121,7 +121,7 @@ describe('Parameter_server tests', function() {
     let success = false;
     client.sendRequest(request, response => {
       const result = response.result;
-      assert.equal(result.names.length, 2);
+      assert.equal(result.names.length, 3); // account for use_sim_time parameter
       assert.ok(result.names.includes('p1'));
       assert.ok(result.names.includes('p2'));
       success = true;

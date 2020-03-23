@@ -45,6 +45,10 @@ describe('rclnodejs Time/Clock testing', function() {
     time = new Time(0, '9223372036854775807');
     assert.strictEqual(time.nanoseconds, '9223372036854775807');
 
+    time = Time.fromMsg({ sec: 1, nanosec: 64 });
+    assert.strictEqual(time.nanoseconds, 1000000064);
+    assert.strictEqual(time.clockType, ClockType.ROS_TIME);
+
     assert.throws(() => {
       new Time(1, 1, 'SYSTEM_TIME');
     }, TypeError);

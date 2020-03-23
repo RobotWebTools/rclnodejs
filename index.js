@@ -14,15 +14,26 @@
 
 'use strict';
 
+const { Clock, ROSClock } = require('./lib/clock.js');
+const ClockType = require('./lib/clock_type.js');
 const compareVersions = require('compare-versions');
+const Context = require('./lib/context.js');
 const debug = require('debug')('rclnodejs');
+const Duration = require('./lib/duration.js');
 const fs = require('fs');
 const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
 const Node = require('./lib/node.js');
 const NodeOptions = require('./lib/node_options.js');
-const Parameters = require('./lib/parameter.js');
+const {
+  FloatingPointRange,
+  IntegerRange,
+  Parameter,
+  ParameterDescriptor,
+  ParameterType,
+  DEFAULT_NUMERIC_RANGE_TOLERANCE,
+} = require('./lib/parameter.js');
 const path = require('path');
 const QoS = require('./lib/qos.js');
 const rclnodejs = require('bindings')('rclnodejs');
@@ -30,10 +41,6 @@ const tsdGenerator = require('./rostsd_gen/index.js');
 const validator = require('./lib/validator.js');
 const Time = require('./lib/time.js');
 const TimeSource = require('./lib/time_source.js');
-const { Clock, ROSClock } = require('./lib/clock.js');
-const ClockType = require('./lib/clock_type.js');
-const Duration = require('./lib/duration.js');
-const Context = require('./lib/context.js');
 const ActionClient = require('./lib/action/client.js');
 const ActionServer = require('./lib/action/server.js');
 const ClientGoalHandle = require('./lib/action/client_goal_handle.js');
@@ -86,17 +93,53 @@ let rcl = {
   _initialized: false,
   _nodes: [],
 
+  /** {@link Clock} class */
+  Clock: Clock,
+
+  /** {@link ClockType} enum */
+  ClockType: ClockType,
+
   /** {@link Context} class */
   Context: Context,
 
-  /** {@link QoS} class */
-  QoS: QoS,
+  /**
+   * @constant {number}
+   * The plus/minus tolerance for determining number equivalence.
+   *
+   *  @see [FloatingPointRange]{@link FloatingPointRange}
+   *  @see [IntegerRange]{@link IntegerRange}
+   */
+  DEFAULT_NUMERIC_RANGE_TOLERANCE: DEFAULT_NUMERIC_RANGE_TOLERANCE,
+
+  /** {@link Duration} class */
+  Duration: Duration,
+
+  /** {@link FloatingPointRange} class */
+  FloatingPointRange: FloatingPointRange,
+
+  /** {@link IntegerRange} class */
+  IntegerRange: IntegerRange,
 
   /** {@link Logging} class */
   logging: logging,
 
-  /** {@link module:validator|validator} object */
-  validator: validator,
+  /** {@link NodeOptions} class */
+  NodeOptions: NodeOptions,
+
+  /** {@link Parameter} */
+  Parameter: Parameter,
+
+  /** {@link ParameterDescriptor} */
+  ParameterDescriptor: ParameterDescriptor,
+
+  /** {@link ParameterType} */
+  ParameterType: ParameterType,
+
+  /** {@link QoS} class */
+  QoS: QoS,
+
+  /** {@link ROSClock} class */
+  ROSClock: ROSClock,
 
   /** {@link Time} class */
   Time: Time,
@@ -104,23 +147,8 @@ let rcl = {
   /** {@link TimeSource} class */
   TimeSource: TimeSource,
 
-  /** {@link Clock} class */
-  Clock: Clock,
-
-  /** {@link ROSClock} class */
-  ROSClock: ROSClock,
-
-  /** {@link ClockType} enum */
-  ClockType: ClockType,
-
-  /** {@link Duration} class */
-  Duration: Duration,
-
-  /** {@link NodeOptions} class */
-  NodeOptions: NodeOptions,
-
-  /** {@link Parameters} */
-  Parameters: Parameters,
+  /** {@link module:validator|validator} object */
+  validator: validator,
 
   /** {@link ActionClient} class */
   ActionClient: ActionClient,

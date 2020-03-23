@@ -205,8 +205,9 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
       }
       else if (value.string_value != NULL) {  // NOLINT()
         param_type = PARAMETER_STRING;
-        parameter->Set(Nan::New("value").ToLocalChecked(),
-                       Nan::New(value.string_value).ToLocalChecked());
+        Nan::Set(parameter,
+                 Nan::New("value").ToLocalChecked(),
+                 Nan::New(value.string_value).ToLocalChecked());
       }
       else if (value.bool_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BOOL_ARRAY;
@@ -548,10 +549,10 @@ static void ReturnJSTimeObj(
       static_cast<std::int32_t>(nanoseconds % (1000 * 1000 * 1000));
   const int32_t type = clock_type;
 
-  obj->Set(Nan::New("sec").ToLocalChecked(), Nan::New(sec));
-  obj->Set(Nan::New("nanosec").ToLocalChecked(), Nan::New(nanosec));
+  Nan::Set(obj, Nan::New("sec").ToLocalChecked(), Nan::New(sec));
+  Nan::Set(obj, Nan::New("nanosec").ToLocalChecked(), Nan::New(nanosec));
   if (clock_type != RCL_CLOCK_UNINITIALIZED) {
-    obj->Set(Nan::New("type").ToLocalChecked(), Nan::New(type));
+    Nan::Set(obj, Nan::New("type").ToLocalChecked(), Nan::New(type));
   }
 
   info.GetReturnValue().Set(obj);
@@ -1191,21 +1192,28 @@ std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
   std::unique_ptr<rmw_qos_profile_t> qos_profile =
       std::make_unique<rmw_qos_profile_t>();
 
+  auto history = Nan::Get(object,
+      Nan::New("history").ToLocalChecked()).ToLocalChecked();
+  auto depth = Nan::Get(object,
+      Nan::New("depth").ToLocalChecked()).ToLocalChecked();
+  auto reliability = Nan::Get(object,
+      Nan::New("reliability").ToLocalChecked()).ToLocalChecked();
+  auto durability = Nan::Get(object,
+      Nan::New("durability").ToLocalChecked()).ToLocalChecked();
+  auto avoid_ros_namespace_conventions = Nan::Get(object,
+      Nan::New("avoidRosNameSpaceConventions").ToLocalChecked())
+          .ToLocalChecked();
+
   qos_profile->history = static_cast<rmw_qos_history_policy_t>(
-      Nan::To<uint32_t>(
-          object->Get(Nan::New("history").ToLocalChecked())).FromJust());
+      Nan::To<uint32_t>(history).FromJust());
   qos_profile->depth =
-      Nan::To<uint32_t>(
-          object->Get(Nan::New("depth").ToLocalChecked())).FromJust();
+      Nan::To<uint32_t>(depth).FromJust();
   qos_profile->reliability = static_cast<rmw_qos_reliability_policy_t>(
-      Nan::To<uint32_t>(
-          object->Get(Nan::New("reliability").ToLocalChecked())).FromJust());
+      Nan::To<uint32_t>(reliability).FromJust());
   qos_profile->durability = static_cast<rmw_qos_durability_policy_t>(
-      Nan::To<uint32_t>(
-          object->Get(Nan::New("durability").ToLocalChecked())).FromJust());
-  qos_profile->avoid_ros_namespace_conventions =
-      object->Get(Nan::New("avoidRosNameSpaceConventions").ToLocalChecked())
-          ->BooleanValue(currentContent).FromJust();
+      Nan::To<uint32_t>(durability).FromJust());
+  qos_profile->avoid_ros_namespace_conventions = avoid_ros_namespace_conventions
+      ->BooleanValue(currentContent->GetIsolate());
 
   return qos_profile;
 }
@@ -1413,8 +1421,9 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
   for (int i = 0; i < names_and_types.names.size; ++i) {
     auto item = v8::Object::New(v8::Isolate::GetCurrent());
     std::string topic_name = names_and_types.names.data[i];
-    item->Set(Nan::New("name").ToLocalChecked(),
-              Nan::New(names_and_types.names.data[i]).ToLocalChecked());
+    Nan::Set(item,
+             Nan::New("name").ToLocalChecked(),
+             Nan::New(names_and_types.names.data[i]).ToLocalChecked());
 
     v8::Local<v8::Array> type_list =
         Nan::New<v8::Array>(names_and_types.types[i].size);
@@ -1422,7 +1431,7 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
       Nan::Set(type_list, j,
                Nan::New(names_and_types.types[i].data[j]).ToLocalChecked());
     }
-    item->Set(Nan::New("types").ToLocalChecked(), type_list);
+    Nan::Set(item, Nan::New("types").ToLocalChecked(), type_list);
     Nan::Set(*result_list, i, item);
   }
 }
@@ -1590,10 +1599,12 @@ NAN_METHOD(GetNodeNames) {
   for (int i = 0; i < node_names.size; ++i) {
     auto item = v8::Object::New(v8::Isolate::GetCurrent());
 
-    item->Set(Nan::New("name").ToLocalChecked(),
-              Nan::New(node_names.data[i]).ToLocalChecked());
-    item->Set(Nan::New("namespace").ToLocalChecked(),
-              Nan::New(node_namespaces.data[i]).ToLocalChecked());
+    Nan::Set(item,
+             Nan::New("name").ToLocalChecked(),
+             Nan::New(node_names.data[i]).ToLocalChecked());
+    Nan::Set(item,
+             Nan::New("namespace").ToLocalChecked(),
+             Nan::New(node_namespaces.data[i]).ToLocalChecked());
 
     Nan::Set(result_list, i, item);
   }
