@@ -42,8 +42,9 @@ void RclHandle::Init(v8::Local<v8::Object> exports) {
   v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
 
   constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
-  exports->Set(Nan::New("RclHandle").ToLocalChecked(),
-               tpl->GetFunction(context).ToLocalChecked());
+  Nan::Set(exports,
+           Nan::New("RclHandle").ToLocalChecked(),
+           tpl->GetFunction(context).ToLocalChecked());
 }
 
 void RclHandle::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {

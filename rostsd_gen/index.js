@@ -68,8 +68,8 @@ function getPkgInfos(generatedRoot) {
       if (typeClass.type === 'srv') {
         // skip __srv__<action>
         if (
-          !typeClass.name.endsWith('Request') &&
-          !typeClass.name.endsWith('Response')
+          !typeClass.name.endsWith('_Request') &&
+          !typeClass.name.endsWith('_Response')
         ) {
           pkgInfo.services.push(typeClass);
           continue;

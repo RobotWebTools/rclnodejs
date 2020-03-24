@@ -14,6 +14,7 @@
 
 'use strict';
 
+const IsClose = require('is-close');
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
@@ -363,6 +364,16 @@ describe('rcl node methods testing', function() {
     var clock = node.getClock();
     assert.ok(clock);
     assert.strictEqual(clock.clockType, rclnodejs.ClockType.ROS_TIME);
+  });
+
+  it('node.now', function() {
+    const time = node.now();
+    assert.ok(time);
+    assert.strictEqual(node.getClock().clockType, time.clockType);
+
+    const seconds = time.secondsAndNanoseconds.seconds;
+    const dateSeconds = Date.now() / 1000;
+    assert.ok(IsClose.isClose(seconds, dateSeconds, 1));
   });
 
   it('node.getNodeNames', function() {

@@ -12,9 +12,9 @@
 
 const rclnodejs = require('../index.js');
 
-const ParameterType = rclnodejs.Parameters.ParameterType;
-const Parameter = rclnodejs.Parameters.Parameter;
-const ParameterDescriptor = rclnodejs.Parameters.ParameterDescriptor;
+const ParameterType = rclnodejs.ParameterType;
+const Parameter = rclnodejs.Parameter;
+const ParameterDescriptor = rclnodejs.ParameterDescriptor;
 
 async function main() {
   const NODE_NAME = 'my_node';

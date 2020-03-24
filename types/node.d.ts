@@ -1,10 +1,11 @@
-// eslint camelcase: ["error", {ignoreImports: true}]
+/* eslint-disable camelcase */
 
 import { Clock } from 'rclnodejs';
 import { Logging } from 'rclnodejs';
-import { Parameters } from 'rclnodejs';
-import { rcl_interfaces as rclinterfaces } from 'rclnodejs';
+import { Parameter, ParameterDescriptor, ParameterType } from 'rclnodejs';
 import { QoS } from 'rclnodejs';
+import { rcl_interfaces } from 'rclnodejs';
+
 
 declare module 'rclnodejs' {
   /**
@@ -106,6 +107,22 @@ declare module 'rclnodejs' {
   type TimerRequestCallback = () => void;
 
   /**
+   * Callback indicating parameters are about to be declared or set.
+   * The callback is provided a list of parameters and returns a SetParameterResult
+   * to indicate approval or veto of the operation.
+   * 
+   * @param parameters - The parameters to be declared or set
+   * @returns A successful property value of true indicates approval of the operation;
+   *  otherwise indicates a veto of the operation. 
+   * 
+   * @remarks
+   * See {@link Node.addOnSetParametersCallback | Node.addOnSetParametersCallback}
+   * See {@link Node.removeOnSetParametersCallback | Node.removeOnSetParametersCallback}
+   */
+  type SetParametersCallback = 
+    (parameters: Parameter[]) => rcl_interfaces.msg.SetParametersResult;
+
+  /**
    * Standard result of Node.getXXXNamesAndTypes() queries
    *
    * @example
@@ -174,7 +191,16 @@ declare module 'rclnodejs' {
     getClock(): Clock;
 
     /**
+     * Get the current time using the node's clock.
+     * 
+     * @returns The current time.
+     */
+    now(): Time;
+
+    /**
      * Get the nodeOptions provided through the constructor.
+     * 
+     * @returns The nodeOptions.
      */
     options(): NodeOptions;
 
@@ -191,6 +217,14 @@ declare module 'rclnodejs' {
       callback: TimerRequestCallback,
       context?: Context
     ): Timer;
+
+    /**
+     * Create a Rate.
+     *
+     * @param hz - The frequency of the rate timer; default is 1 hz.
+     * @returns New instance of Rate.
+     */
+    createRate(hz: number): Rate;
 
     /**
      * Create a Publisher.
@@ -256,7 +290,7 @@ declare module 'rclnodejs' {
      * Create a guard condition.
      *
      * @param callback - The callback to be called when the guard condition is triggered.
-     * @return An instance of GuardCondition.
+     * @returns An instance of GuardCondition.
      */
     createGuardCondition(callback: () => any): GuardCondition;
 
@@ -320,10 +354,10 @@ declare module 'rclnodejs' {
      * @returns The newly declared parameter.
      */
     declareParameter(
-      parameter: Parameters.Parameter,
-      descriptor?: Parameters.ParameterDescriptor,
+      parameter: Parameter,
+      descriptor?: ParameterDescriptor,
       ignoreOveride?: boolean
-    ): Parameters.Parameter;
+    ): Parameter;
 
     /**
      * Declare a list of parameters.
@@ -352,10 +386,10 @@ declare module 'rclnodejs' {
      * @returns The declared parameters.
      */
     declareParameters(
-      parameters: Array<Parameters.Parameter>,
-      descriptors?: Array<Parameters.ParameterDescriptor>,
+      parameters: Array<Parameter>,
+      descriptors?: Array<ParameterDescriptor>,
       ignoreOverrides?: boolean
-    ): Array<Parameters.Parameter>;
+    ): Array<Parameter>;
 
     /**
      * Undeclare a parameter.
@@ -383,7 +417,7 @@ declare module 'rclnodejs' {
      * @returns The parameter.
      */
 
-    getParameter(name: string): Parameters.Parameter;
+    getParameter(name: string): Parameter;
 
     /**
      * Get a list of parameters.
@@ -400,12 +434,12 @@ declare module 'rclnodejs' {
      * @returns The parameters.
      */
 
-    getParameters(name?: Array<string>): Array<Parameters.Parameter>;
+    getParameters(name?: Array<string>): Array<Parameter>;
 
     /**
      * Get the names of all declared parameters.
      *
-     * @returna The declared parameter names or empty array if
+     * @returns The declared parameter names or empty array if
      *    no parameters have been declared.
      */
     getParameterNames(): Array<string>;
@@ -414,9 +448,9 @@ declare module 'rclnodejs' {
      * Get the list of parameter-overrides found on the commandline and
      * in the NodeOptions.parameter_overrides property.
      *
-     * @return An array of Parameters
+     * @returns An array of Parameters
      */
-    getParameterOverrides(): Array<Parameters.Parameter>;
+    getParameterOverrides(): Array<Parameter>;
 
     /**
      * Determine if a parameter descriptor exists.
@@ -435,7 +469,7 @@ declare module 'rclnodejs' {
      * @param name - The name of the parameter descriptor to find.
      * @returns The parameter descriptor.
      */
-    getParameterDescriptor(name: string): Parameters.ParameterDescriptor;
+    getParameterDescriptor(name: string): ParameterDescriptor;
 
     /**
      * Find a list of declared ParameterDescriptors.
@@ -448,9 +482,9 @@ declare module 'rclnodejs' {
      *
      * @param names - The names of the declared parameter
      *    descriptors to find or null indicating to return all declared descriptors.
-     * @return The parameter descriptors.
+     * @returns The parameter descriptors.
      */
-    getParameterDescriptors(name?: string[]): Parameters.ParameterDescriptor[];
+    getParameterDescriptors(name?: string[]): ParameterDescriptor[];
 
     /**
      * Replace a declared parameter.
@@ -462,8 +496,8 @@ declare module 'rclnodejs' {
      * @returns The result of the operation.
      */
     setParameter(
-      parameter: Parameters.Parameter
-    ): rclinterfaces.msg.SetParametersResult;
+      parameter: Parameter
+    ): rcl_interfaces.msg.SetParametersResult;
 
     /**
      * Replace a list of declared parameters.
@@ -478,8 +512,8 @@ declare module 'rclnodejs' {
      * @returns An array of SetParameterResult, one for each parameter that was set.
      */
     setParameters(
-      parameters: Array<Parameters.Parameter>
-    ): Array<rclinterfaces.msg.SetParametersResult>;
+      parameters: Array<Parameter>
+    ): Array<rcl_interfaces.msg.SetParametersResult>;
 
     /**
      * Repalce a list of declared parameters atomically.
@@ -492,11 +526,27 @@ declare module 'rclnodejs' {
      * the point of the error are reverted to their previous state.
      *
      * @param parameters - The parameters to set.
-     * @returns Describes the result of setting 1 or more parameters.
+     * @returns Describes the result of setting 1 or more 
      */
     setParametersAtomically(
-      parameters: Array<Parameters.Parameter>
-    ): rclinterfaces.msg.SetParametersResult;
+      parameters: Array<Parameter>
+    ): rcl_interfaces.msg.SetParametersResult;
+
+    /**
+     * Add a callback to the front of the list of callbacks invoked for parameter declaration
+     * and setting. No checks are made for duplicate callbacks.
+     * 
+     * @param callback - The callback to add. 
+     */
+    addOnSetParametersCallback(callback: SetParametersCallback): void; 
+
+    /**
+     * Remove a callback from the list of SetParameterCallbacks.
+     * If the callback is not found the process is a nop.
+     * 
+     * @param callback - The callback to be removed
+     */
+    removeOnSetParametersCallback(call: SetParametersCallback): void;
 
     /**
      * Get a remote node's published topics.
