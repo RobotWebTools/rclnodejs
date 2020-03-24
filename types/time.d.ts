@@ -102,6 +102,14 @@ declare module 'rclnodejs' {
     gte(other: Time): boolean;
 
     /**
+     * Create a builtin_interfaces/msg/Time message
+     *
+     * @returns The new Time message.
+     */
+    // eslint-disable-next-line camelcase
+    toMsg(): builtin_interfaces.msg.Time;
+
+    /**
      * Create a Time object from a message of builtin_interfaces/msg/Time
      *
      * @param msg - The Time message to be created from.
