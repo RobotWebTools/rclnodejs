@@ -22,7 +22,7 @@ jobs:
     - run: brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/9ec55dd6f30fa2a77dfd0367cff671c9c8828f67/Formula/tinyxml2.rb
     - run: brew install wget cmake cppcheck tinyxml eigen pcre poco
     - run: brew install openssl
-    - run: brew install asio console_bridge
+    - run: brew install asio console_bridge log4cxx spdlog
     - run: python3 -m pip install catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools argcomplete colcon-common-extensions numpy
     - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
     - run: wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
