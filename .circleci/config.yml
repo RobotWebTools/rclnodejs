@@ -18,9 +18,7 @@ jobs:
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
     - run: brew update
-    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre
-    # Pin poco to 1.9.4
-    - run: brew install https://raw.githubusercontent.com/alebcay/homebrew-core/055f2f99de581160b142c3ccad392766e7b99d28/Formula/poco.rb
+    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre poco
     - run: brew install openssl
     - run: brew install asio console_bridge
     - run: python3 -m pip install catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools argcomplete colcon-common-extensions numpy
