@@ -18,7 +18,9 @@ jobs:
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
     - run: brew update
-    - run: brew install wget cmake cppcheck tinyxml tinyxml2 eigen pcre poco
+    # Pin tinyxml2 to 7.0.0
+    - run: brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/9ec55dd6f30fa2a77dfd0367cff671c9c8828f67/Formula/tinyxml2.rb
+    - run: brew install wget cmake cppcheck tinyxml eigen pcre poco
     - run: brew install openssl
     - run: brew install asio console_bridge
     - run: python3 -m pip install catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools argcomplete colcon-common-extensions numpy
