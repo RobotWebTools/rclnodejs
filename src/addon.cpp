@@ -37,7 +37,7 @@ void InitModule(v8::Local<v8::Object> exports) {
 
   for (uint32_t i = 0; i < rclnodejs::GetBindingMethodsCount(
       rclnodejs::action_binding_methods); i++) {
-    exports->Set(
+    Nan::Set(exports,
         Nan::New(rclnodejs::action_binding_methods[i].name).ToLocalChecked(),
         Nan::New<v8::FunctionTemplate>(
             rclnodejs::action_binding_methods[i].function)

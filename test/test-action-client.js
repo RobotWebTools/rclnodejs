@@ -99,6 +99,32 @@ describe('rclnodejs action client', function() {
   it('Test defaults', function() {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
 
+    assert.ok(server.options);
+    assert.ok(client.qos);
+    assert.strictEqual(
+      client.qos.goalServiceQosProfile,
+      rclnodejs.QoS.profileServicesDefault
+    );
+    assert.strictEqual(
+      client.qos.resultServiceQosProfile,
+      rclnodejs.QoS.profileServicesDefault
+    );
+    assert.strictEqual(
+      client.qos.cancelServiceQosProfile,
+      rclnodejs.QoS.profileServicesDefault
+    );
+    assert.deepStrictEqual(
+      client.qos.feedbackSubQosProfile,
+      new rclnodejs.QoS(
+        rclnodejs.QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT,
+        10
+      )
+    );
+    assert.strictEqual(
+      client.qos.statusSubQosProfile,
+      rclnodejs.QoS.profileActionStatusDefault
+    );
+
     client.destroy();
   });
 
