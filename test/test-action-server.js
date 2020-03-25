@@ -79,6 +79,33 @@ describe('rclnodejs action server', function() {
       executeCallback
     );
 
+    assert.ok(server.options);
+    assert.strictEqual(server.options.resultTimeout, 900);
+    assert.ok(server.qos);
+    assert.strictEqual(
+      server.qos.goalServiceQosProfile,
+      rclnodejs.QoS.profileServicesDefault
+    );
+    assert.strictEqual(
+      server.qos.resultServiceQosProfile,
+      rclnodejs.QoS.profileServicesDefault
+    );
+    assert.strictEqual(
+      server.qos.cancelServiceQosProfile,
+      rclnodejs.QoS.profileServicesDefault
+    );
+    assert.deepStrictEqual(
+      server.qos.feedbackSubQosProfile,
+      new rclnodejs.QoS(
+        rclnodejs.QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT,
+        10
+      )
+    );
+    assert.strictEqual(
+      server.qos.statusSubQosProfile,
+      rclnodejs.QoS.profileActionStatusDefault
+    );
+
     server.destroy();
   });
 
@@ -288,6 +315,9 @@ describe('rclnodejs action server', function() {
     assert.ok(result);
     assert.strictEqual(result.goals_canceling.length, 1);
 
+    // executeCallback is async, so let it finish
+    await handle.getResult();
+
     server.destroy();
   });
 
@@ -298,6 +328,7 @@ describe('rclnodejs action server', function() {
       await assertUtils.createDelay(50);
 
       assert.ok(!goalHandle.isCancelRequested);
+      // Note that this will log errors to the console, which is expected
       goalHandle.canceled();
 
       return new Fibonacci.Result();
@@ -328,6 +359,9 @@ describe('rclnodejs action server', function() {
     let result = await handle.cancelGoal();
     assert.ok(result);
     assert.strictEqual(result.goals_canceling.length, 0);
+
+    // executeCallback is async, so let it finish
+    await handle.getResult();
 
     server.destroy();
   });
@@ -488,6 +522,7 @@ describe('rclnodejs action server', function() {
 
   it('Test execute throws', async function() {
     function executeErrorCallback() {
+      // Note that this will log errors to the console, which is expected
       throw new Error();
     }
 

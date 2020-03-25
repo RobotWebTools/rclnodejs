@@ -1177,7 +1177,7 @@ const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
     qos_profile = &rmw_qos_profile_parameters;
   } else if (profile == "qos_profile_parameter_events") {
     qos_profile = &rmw_qos_profile_parameter_events;
-  } else if (profile == "rcl_action_qos_profile_status_default") {
+  } else if (profile == "qos_profile_action_status_default") {
     qos_profile = &rcl_action_qos_profile_status_default;
   } else {
     return &rmw_qos_profile_default;
