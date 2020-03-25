@@ -1387,7 +1387,8 @@ NAN_METHOD(Log) {
   if (enabled) {
     rcutils_log_location_t logging_location = {function_name.c_str(),
                                                file_name.c_str(), line_number};
-    rcutils_log(&logging_location, severity, name.c_str(), message.c_str());
+    rcutils_log(&logging_location, severity, name.c_str(), "%s",
+        message.c_str());
   }
 
   info.GetReturnValue().Set(Nan::New(enabled));
