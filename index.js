@@ -41,6 +41,16 @@ const tsdGenerator = require('./rostsd_gen/index.js');
 const validator = require('./lib/validator.js');
 const Time = require('./lib/time.js');
 const TimeSource = require('./lib/time_source.js');
+const ActionClient = require('./lib/action/client.js');
+const ActionServer = require('./lib/action/server.js');
+const ClientGoalHandle = require('./lib/action/client_goal_handle.js');
+const { CancelResponse, GoalResponse } = require('./lib/action/response.js');
+const ServerGoalHandle = require('./lib/action/server_goal_handle.js');
+const {
+  getActionClientNamesAndTypesByNode,
+  getActionServerNamesAndTypesByNode,
+  getActionNamesAndTypes,
+} = require('./lib/action/graph.js');
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
@@ -140,6 +150,33 @@ let rcl = {
   /** {@link module:validator|validator} object */
   validator: validator,
 
+  /** {@link ActionClient} class */
+  ActionClient: ActionClient,
+
+  /** {@link ActionServer} class */
+  ActionServer: ActionServer,
+
+  /** {@link ClientGoalHandle} class */
+  ClientGoalHandle: ClientGoalHandle,
+
+  /** {@link ServerGoalHandle} class */
+  ServerGoalHandle: ServerGoalHandle,
+
+  /** {@link ServerGoalHandle} enum */
+  CancelResponse: CancelResponse,
+
+  /** {@link GoalResponse} enum */
+  GoalResponse: GoalResponse,
+
+  /** {@link getActionClientNamesAndTypesByNode} function */
+  getActionClientNamesAndTypesByNode: getActionClientNamesAndTypesByNode,
+
+  /** {@link getActionServerNamesAndTypesByNode} function */
+  getActionServerNamesAndTypesByNode: getActionServerNamesAndTypesByNode,
+
+  /** {@link getActionNamesAndTypes} function */
+  getActionNamesAndTypes: getActionNamesAndTypes,
+
   /**
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
@@ -161,6 +198,7 @@ let rcl = {
     let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
     let node = new rclnodejs.ShadowNode();
     node.handle = handle;
+    node.context = context;
 
     node.init(nodeName, namespace, context, options);
     debug(
@@ -169,7 +207,6 @@ let rcl = {
       namespace
     );
 
-    node.context = context;
     this._nodes.push(node);
     return node;
   },

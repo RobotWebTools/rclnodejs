@@ -19,6 +19,7 @@
 
 struct rosidl_message_type_support_t;
 struct rosidl_service_type_support_t;
+struct rosidl_action_type_support_t;
 
 namespace rclnodejs {
 
@@ -30,6 +31,10 @@ const rosidl_message_type_support_t* GetMessageTypeSupport(
 const rosidl_service_type_support_t* GetServiceTypeSupport(
     const std::string& package_name,
     const std::string& service_name);
+
+const rosidl_action_type_support_t* GetActionTypeSupport(
+    const std::string& package_name,
+    const std::string& action_name);
 
 const char* GetErrorMessageAndClear();
 

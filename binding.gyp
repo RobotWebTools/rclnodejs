@@ -14,6 +14,7 @@
         './src/addon.cpp',
         './src/executor.cpp',
         './src/handle_manager.cpp',
+        './src/rcl_action_bindings.cpp',
         './src/rcl_bindings.cpp',
         './src/rcl_handle.cpp',
         './src/rcl_utilities.cpp',
@@ -38,6 +39,7 @@
       ],
       'libraries': [
         '-lrcl',
+        '-lrcl_action',
         '-lrcutils',
         '-lrcl_yaml_param_parser',
         '-lrmw',

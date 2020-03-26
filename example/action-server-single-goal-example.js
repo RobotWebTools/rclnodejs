@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Intel Corporation. All rights reserved.
+// Copyright (c) 2020 Matt Richard. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
 class FibonacciActionServer {
   constructor(node) {
     this._node = node;
+    this._goalHandle = null;
 
     this._actionServer = new rclnodejs.ActionServer(
       node,
@@ -27,7 +28,7 @@ class FibonacciActionServer {
       'fibonacci',
       this.executeCallback.bind(this),
       this.goalCallback.bind(this),
-      null,
+      this.handleAcceptedCallback.bind(this),
       this.cancelCallback.bind(this)
     );
   }
@@ -40,6 +41,12 @@ class FibonacciActionServer {
 
     // Start executing the action
     for (let i = 1; i < goalHandle.request.order; i++) {
+      // If goal is flagged as no longer active, then stop executing
+      if (!goalHandle.isActive) {
+        this._node.getLogger().info('Goal aborted');
+        return new Fibonacci.Result();
+      }
+
       // Check if the goal has been canceled
       if (goalHandle.isCancelRequested) {
         goalHandle.canceled();
@@ -76,6 +83,19 @@ class FibonacciActionServer {
   goalCallback(goalHandle) {
     this._node.getLogger().info('Received goal request');
     return rclnodejs.GoalResponse.ACCEPT;
+  }
+
+  handleAcceptedCallback(goalHandle) {
+    // This server only allows one goal at a time
+    if (this._goalHandle && this._goalHandle.isActive) {
+      this._node.getLogger().info('Aborting previous goal');
+      // Abort the existing goal
+      this._goalHandle.abort();
+    }
+
+    this._goalHandle = goalHandle;
+
+    goalHandle.execute();
   }
 
   cancelCallback(goalHandle) {

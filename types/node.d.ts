@@ -11,9 +11,9 @@ declare module 'rclnodejs' {
   /**
    * Identifies type of ROS message such as msg or srv.
    */
-  type TypeClass =
+  type TypeClass<T = TypeClassName> =
     | (() => any)
-    | TypeClassName // a string representing the message class, e.g. 'std_msgs/msg/String',
+    | T // a string representing the message class, e.g. 'std_msgs/msg/String',
     | {
         // object representing a message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}
         package: string;
@@ -27,10 +27,10 @@ declare module 'rclnodejs' {
    *
    * See {@link DEFAULT_OPTIONS}
    */
-  type Options = {
+  interface Options<T = QoS | QoS.ProfileRef> {
     enableTypedArray?: boolean;
-    qos?: QoS | QoS.ProfileRef;
-  };
+    qos?: T;
+  }
 
   /**
    * A service response to a client request.

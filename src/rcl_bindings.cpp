@@ -21,6 +21,7 @@
 #include <rcl/node.h>
 #include <rcl/rcl.h>
 #include <rcl/validate_topic_name.h>
+#include <rcl_action/rcl_action.h>
 #include <rcl_yaml_param_parser/types.h>
 #include <rcl_yaml_param_parser/parser.h>
 #include <rmw/error_handling.h>
@@ -61,8 +62,6 @@ static void Catch(int signo) {
     g_original_signal_handler(signo);
   }
 }
-
-std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos);
 
 NAN_METHOD(Init) {
   rcl_allocator_t allocator = rcl_get_default_allocator();
@@ -1182,6 +1181,8 @@ const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
     qos_profile = &rmw_qos_profile_parameters;
   } else if (profile == "qos_profile_parameter_events") {
     qos_profile = &rmw_qos_profile_parameter_events;
+  } else if (profile == "qos_profile_action_status_default") {
+    qos_profile = &rcl_action_qos_profile_status_default;
   } else {
     return &rmw_qos_profile_default;
   }

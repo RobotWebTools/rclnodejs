@@ -18,6 +18,7 @@
 #include <dlfcn.h>
 #endif
 #include <rcl/rcl.h>
+#include <rcl_action/rcl_action.h>
 #include <string>
 
 #if defined(OS_WINDOWS)
@@ -28,6 +29,7 @@ namespace rclnodejs {
 
 typedef const rosidl_message_type_support_t* (*GetMessageTypeSupportFunction)();
 typedef const rosidl_service_type_support_t* (*GetServiceTypeSupportFunction)();
+typedef const rosidl_action_type_support_t* (*GetActionTypeSupportFunction)();
 
 #if defined(OS_MACOS)
 const char* lib_prefix = "lib";
@@ -76,6 +78,19 @@ const rosidl_service_type_support_t* GetServiceTypeSupport(
       lib_prefix + package_name + "__rosidl_typesupport_c" + lib_ext);
   if (function)
     return reinterpret_cast<GetServiceTypeSupportFunction>(function)();
+  else
+    return nullptr;
+}
+
+const rosidl_action_type_support_t* GetActionTypeSupport(
+    const std::string& package_name,
+    const std::string& action_name) {
+  void* function = GetTypeSupportFunctionByInterfaceSymbolName(
+      "rosidl_typesupport_c__get_action_type_support_handle__" + package_name +
+          "__action__" + action_name,
+      lib_prefix + package_name + "__rosidl_typesupport_c" + lib_ext);
+  if (function)
+    return reinterpret_cast<GetActionTypeSupportFunction>(function)();
   else
     return nullptr;
 }

@@ -19,8 +19,12 @@ find_package(rosidl_default_generators REQUIRED)
 set(msg_files
   "msg/StaticArrayNonPrimitives.msg"
 )
+set(action_files
+  "action/Fibonacci.action"
+)
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
+  ${action_files}
   DEPENDENCIES builtin_interfaces
 )
 

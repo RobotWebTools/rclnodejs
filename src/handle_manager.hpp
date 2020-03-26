@@ -41,9 +41,15 @@ class HandleManager {
 
   void CollectHandles(const v8::Local<v8::Object> node);
   bool AddHandlesToWaitSet(rcl_wait_set_t* wait_set);
-  void CollectReadyHandles(rcl_wait_set_t* wait_set);
+  bool CollectReadyHandles(rcl_wait_set_t* wait_set);
   void ClearHandles();
   void WaitForSynchronizing() { uv_sem_wait(&sem_); }
+  bool GetEntityCounts(
+      size_t *subscriptions_size,
+      size_t *guard_conditions_size,
+      size_t *timers_size,
+      size_t *clients_size,
+      size_t *services_size);
 
   uint32_t subscription_count() const { return subscriptions_.size(); }
   uint32_t service_count() const { return services_.size(); }
@@ -58,7 +64,9 @@ class HandleManager {
       && services_.size() == 0
       && clients_.size() == 0
       && timers_.size() == 0
-      && guard_conditions_.size() == 0; }
+      && guard_conditions_.size() == 0
+      && action_clients_.size() == 0
+      && action_servers_.size() == 0; }
 
  protected:
   void CollectHandlesByType(const v8::Local<v8::Object>& typeObject,
@@ -67,6 +75,7 @@ class HandleManager {
       const T** struct_ptr,
       size_t size,
       const std::vector<rclnodejs::RclHandle*>& handles);
+  bool CollectReadyActionHandles(rcl_wait_set_t* wait_set);
 
  private:
   std::vector<rclnodejs::RclHandle*> timers_;
@@ -74,6 +83,8 @@ class HandleManager {
   std::vector<rclnodejs::RclHandle*> services_;
   std::vector<rclnodejs::RclHandle*> subscriptions_;
   std::vector<rclnodejs::RclHandle*> guard_conditions_;
+  std::vector<rclnodejs::RclHandle*> action_servers_;
+  std::vector<rclnodejs::RclHandle*> action_clients_;
   std::vector<rclnodejs::RclHandle*> ready_handles_;
 
   uv_mutex_t mutex_;

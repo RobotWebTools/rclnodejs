@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Intel Corporation. All rights reserved.
+// Copyright (c) 2020 Matt Richard. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 const rclnodejs = require('../index.js');
 const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
-const GoalStatus = rclnodejs.require('action_msgs/msg/GoalStatus');
 
 class FibonacciActionClient {
   constructor(node) {
@@ -49,24 +48,32 @@ class FibonacciActionClient {
 
     this._node.getLogger().info('Goal accepted');
 
-    const result = await goalHandle.getResult();
-    const status = result.status;
-
-    if (status === GoalStatus.STATUS_SUCCEEDED) {
-      this._node
-        .getLogger()
-        .info(`Goal suceeded with result: ${result.result.sequence}`);
-    } else {
-      this._node.getLogger().info(`Goal failed with status: ${status}`);
-    }
-
-    rclnodejs.shutdown();
+    // Start a 2 second timer
+    this._timer = this._node.createTimer(2000, () =>
+      this.timerCallback(goalHandle)
+    );
   }
 
   feedbackCallback(feedbackMessage) {
     this._node
       .getLogger()
       .info(`Received feedback: ${feedbackMessage.feedback.sequence}`);
+  }
+
+  async timerCallback(goalHandle) {
+    this._node.getLogger().info('Canceling goal');
+    // Cancel the timer
+    this._timer.cancel();
+
+    const response = await goalHandle.cancelGoal();
+
+    if (response.goals_canceling.length > 0) {
+      this._node.getLogger().info('Goal successfully canceled');
+    } else {
+      this._node.getLogger().info('Goal failed to cancel');
+    }
+
+    rclnodejs.shutdown();
   }
 }
 

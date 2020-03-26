@@ -66,9 +66,9 @@ declare module 'rclnodejs' {
    * @param  name - The name of interface to be required.
    * @returns The object of the required package/interface.
    */
-  function require<T extends MessageTypeClassName>(
+  function require<T extends TypeClassName>(
     name: T
-  ): MessageWrapperType<T>;
+  ): InterfaceType<T>;
   function require(name: string): object;
 
   /**
@@ -116,4 +116,37 @@ declare module 'rclnodejs' {
    * @returns A Message object or undefined if type is not recognized.
    */
   function createMessageObject(type: TypeClass): Message;
+
+  /**
+   * Get a list of action names and types for action clients associated with a node.
+   * @param node - The node used for discovery.
+   * @param nodeName - The name of a remote node to get action clients for.
+   * @param namespace - Namespace of the remote node.
+   * @returns An array of the names and types.
+   */
+  function getActionClientNamesAndTypesByNode(
+    node: Node,
+    nodeName: string,
+    namespace: string
+  ): NamesAndTypesQueryResult;
+
+  /**
+   * Get a list of action names and types for action servers associated with a node.
+   * @param node - The node used for discovery.
+   * @param nodeName - The name of a remote node to get action servers for.
+   * @param namespace - Namespace of the remote node.
+   * @returns An array of the names and types.
+   */
+  function getActionServerNamesAndTypesByNode(
+    node: Node,
+    nodeName: string,
+    namespace: string
+  ): NamesAndTypesQueryResult;
+
+  /**
+   * Get a list of action names and types.
+   * @param node - The node used for discovery.
+   * @returns An array of the names and types.
+   */
+  function getActionNamesAndTypes(node: Node): NamesAndTypesQueryResult;
 }

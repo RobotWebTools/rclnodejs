@@ -29,6 +29,10 @@ let rosidlParser = {
     return this._parseFile('parse_service_file', packageName, filePath);
   },
 
+  parseActionFile(packageName, filePath) {
+    return this._parseFile('parse_action_file', packageName, filePath);
+  },
+
   _parseFile(...args) {
     return new Promise((resolve, reject) => {
       exec(this._assembleCommand(args), (err, stdout, stderr) => {
