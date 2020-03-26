@@ -22,6 +22,12 @@
 #include "rcl_bindings.hpp"
 #include "spdlog/spdlog.h"
 
+#ifdef WIN32
+    #define UNUSED
+#else
+    #define UNUSED __attribute__((unused))
+#endif
+
 namespace rclnodejs {
 
 static std::exception_ptr g_exception_ptr = nullptr;
@@ -189,7 +195,8 @@ bool Executor::WaitForReadyCallbacks(
     throw std::runtime_error("Couldn't fill waitset");
   }
 
-  rcl_wait_set_add_guard_condition(wait_set, g_sigint_gc, nullptr);
+  int ignored UNUSED =
+    rcl_wait_set_add_guard_condition(wait_set, g_sigint_gc, nullptr);
 
   time_out = time_out < 0 ? -1 : RCL_MS_TO_NS(time_out);
 

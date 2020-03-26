@@ -66,7 +66,9 @@ static void Catch(int signo) {
 NAN_METHOD(Init) {
   rcl_allocator_t allocator = rcl_get_default_allocator();
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
-  rcl_ret_t ret = rcl_init_options_init(&init_options, allocator);
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_init_options_init(&init_options, allocator),
+                           rcl_get_error_string().str);
 
   // preprocess Context
   RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
@@ -104,7 +106,10 @@ NAN_METHOD(Init) {
   *g_sigint_gc = rcl_get_zero_initialized_guard_condition();
   rcl_guard_condition_options_t sigint_gc_options =
       rcl_guard_condition_get_default_options();
-  rcl_guard_condition_init(g_sigint_gc, context, sigint_gc_options);
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_guard_condition_init(g_sigint_gc, context,
+                              sigint_gc_options),
+                           rcl_get_error_string().str);
 
   g_original_signal_handler = signal(SIGINT, Catch);
 }
@@ -163,7 +168,7 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
   v8::Local<v8::Array> nodes = Nan::New<v8::Array>();
 
   // iterate over nodes
-  for (int i=0; i < parsed_args->num_nodes; i++) {
+  for (size_t i=0; i < parsed_args->num_nodes; i++) {
     v8::Local<v8::Object> node = Nan::New<v8::Object>();
     Nan::Set(node,
              Nan::New("name").ToLocalChecked(),
@@ -173,7 +178,7 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
 
     // iterate over node.parameters
     v8::Local<v8::Array> parameters = Nan::New<v8::Array>();
-    for (int j=0; j < node_parameters.num_params; j++) {
+    for (size_t j=0; j < node_parameters.num_params; j++) {
       v8::Local<v8::Object> parameter = Nan::New<v8::Object>();
 
       Nan::Set(parameter,
@@ -213,7 +218,7 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
         param_type = PARAMETER_BOOL_ARRAY;
         v8::Local<v8::Array> bool_array = Nan::New<v8::Array>();
 
-        for (int k=0; k < value.bool_array_value->size; k++) {
+        for (size_t k=0; k < value.bool_array_value->size; k++) {
           Nan::Set(bool_array, k,
                   (value.bool_array_value->values[k] ?
                     Nan::True() : Nan::False()) );
@@ -223,7 +228,7 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
       else if (value.string_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_STRING_ARRAY;
         v8::Local<v8::Array> string_array = Nan::New<v8::Array>();
-        for (int k=0; k < value.string_array_value->size; k++) {
+        for (size_t k=0; k < value.string_array_value->size; k++) {
           Nan::Set(string_array, k,
                    Nan::New(value.string_array_value->data[k]).
                     ToLocalChecked());  // NOLINT(whitespace/line_length)
@@ -233,7 +238,7 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
       else if (value.byte_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BYTE_ARRAY;
         v8::Local<v8::Array> byte_array = Nan::New<v8::Array>();
-        for (int k=0; k < value.byte_array_value->size; k++) {
+        for (size_t k=0; k < value.byte_array_value->size; k++) {
           Nan::Set(byte_array, k,
                    Nan::New(value.byte_array_value->values[k]));
         }
@@ -242,7 +247,7 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
       else if (value.integer_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_INTEGER_ARRAY;
         v8::Local<v8::Array> int_array = Nan::New<v8::Array>();
-        for (int k=0; k < value.integer_array_value->size; k++) {
+        for (size_t k=0; k < value.integer_array_value->size; k++) {
           Nan::Set(int_array, k,
                    Nan::New<v8::Number>(value.integer_array_value->values[k]));
         }
@@ -251,7 +256,7 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
       else if (value.double_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_DOUBLE_ARRAY;
         v8::Local<v8::Array> dbl_array = Nan::New<v8::Array>();
-        for (int k=0; k < value.double_array_value->size; k++) {
+        for (size_t k=0; k < value.double_array_value->size; k++) {
           Nan::Set(dbl_array, k,
                    Nan::New<v8::Number>(value.double_array_value->values[k]));  // NOLINT(whitespace/line_length)
         }
@@ -323,7 +328,6 @@ NAN_METHOD(TriggerGuardCondition) {
   rcl_guard_condition_t* gc =
       reinterpret_cast<rcl_guard_condition_t*>(gc_handle->ptr());
 
-  rcl_ret_t ret = rcl_trigger_guard_condition(gc);
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_trigger_guard_condition(gc),
                            rcl_get_error_string().str);
 }
@@ -1257,7 +1261,9 @@ NAN_METHOD(Shutdown) {
                            rcl_get_error_string().str);
 
   if (g_sigint_gc) {
-    rcl_guard_condition_fini(g_sigint_gc);
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                             rcl_guard_condition_fini(g_sigint_gc),
+                             rcl_get_error_string().str);
     free(g_sigint_gc);
     g_sigint_gc = nullptr;
   }
@@ -1382,7 +1388,8 @@ NAN_METHOD(Log) {
   if (enabled) {
     rcutils_log_location_t logging_location = {function_name.c_str(),
                                                file_name.c_str(), line_number};
-    rcutils_log(&logging_location, severity, name.c_str(), message.c_str());
+    rcutils_log(&logging_location, severity, name.c_str(), "%s",
+        message.c_str());
   }
 
   info.GetReturnValue().Set(Nan::New(enabled));
@@ -1418,7 +1425,7 @@ NAN_METHOD(IsContextValid) {
 
 void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
                           v8::Local<v8::Array>* result_list) {
-  for (int i = 0; i < names_and_types.names.size; ++i) {
+  for (size_t i = 0; i < names_and_types.names.size; ++i) {
     auto item = v8::Object::New(v8::Isolate::GetCurrent());
     std::string topic_name = names_and_types.names.data[i];
     Nan::Set(item,
@@ -1427,7 +1434,7 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
 
     v8::Local<v8::Array> type_list =
         Nan::New<v8::Array>(names_and_types.types[i].size);
-    for (int j = 0; j < names_and_types.types[i].size; ++j) {
+    for (size_t j = 0; j < names_and_types.types[i].size; ++j) {
       Nan::Set(type_list, j,
                Nan::New(names_and_types.types[i].data[j]).ToLocalChecked());
     }
@@ -1596,7 +1603,7 @@ NAN_METHOD(GetNodeNames) {
 
   v8::Local<v8::Array> result_list = Nan::New<v8::Array>(node_names.size);
 
-  for (int i = 0; i < node_names.size; ++i) {
+  for (size_t i = 0; i < node_names.size; ++i) {
     auto item = v8::Object::New(v8::Isolate::GetCurrent());
 
     Nan::Set(item,

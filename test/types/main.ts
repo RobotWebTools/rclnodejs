@@ -261,6 +261,9 @@ time1.gt(time2);
 // $ExpectType boolean
 time1.gte(time2);
 
+// $ExpectType Time
+time3.toMsg();
+
 // ---- Clock -----
 // $ExpectType Clock
 const clock = new rclnodejs.Clock(rclnodejs.ClockType.SYSTEM_TIME);
