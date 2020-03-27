@@ -4,7 +4,6 @@ branches:
   only:
     - master
     - develop
-    - actions
 
 image: Visual Studio 2017
 

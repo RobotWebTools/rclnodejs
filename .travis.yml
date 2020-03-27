@@ -7,7 +7,6 @@ branches:
   only:
   - develop
   - master
-  - actions
 
 before_install:
   - sudo docker pull ubuntu:bionic
