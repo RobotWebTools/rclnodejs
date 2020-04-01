@@ -18,7 +18,7 @@
     "test": "node ./scripts/compile_tests.js && node ./scripts/run_test.js && node ./scripts/generate_tsd.js && dtslint test/types",
     "lint": "eslint --max-warnings=0 index.js types/*.d.ts scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
     "postinstall": "node scripts/generate_messages.js",
-    "format": "prettier --trailing-comma es5 --single-quote --write \"{.,{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test}/**}/*.{js,md,ts}\""
+    "format": "clang-format -i -style=file ./src/*.cpp ./src/*.hpp && prettier --trailing-comma es5 --single-quote --write \"{.,{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test}/**}/*.{js,md,ts}\""
   },
   "authors": [
     "Minggang Wang <minggang.wang@intel.com>",
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.10.0",
     "@typescript-eslint/parser": "^2.3.1",
+    "clang-format": "^1.4.0",
     "deep-equal": "^1.1.1",
     "dtslint": "^3.0.0",
     "eslint": "^6.8.0",
@@ -72,6 +73,9 @@
   "lint-staged": {
     "*.{js,ds,md}": [
       "prettier --trailing-comma es5 --single-quote --write"
+    ],
+    "*.{hpp,cpp}": [
+      "clang-format -i -style=file"
     ]
   },
   "engines": {
