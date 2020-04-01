@@ -15,6 +15,7 @@
 #include "executor.hpp"
 
 #include <rcl/error_handling.h>
+
 #include <stdexcept>
 #include <string>
 
@@ -23,9 +24,9 @@
 #include "spdlog/spdlog.h"
 
 #ifdef WIN32
-    #define UNUSED
+#define UNUSED
 #else
-    #define UNUSED __attribute__((unused))
+#define UNUSED __attribute__((unused))
 #endif
 
 namespace rclnodejs {
@@ -64,16 +65,14 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
   if (!running_.load()) {
     try {
       rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
-      rcl_ret_t ret =
-          rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, 0, context,
-                            rcl_get_default_allocator());
+      rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, 0, context,
+                                        rcl_get_default_allocator());
       if (ret != RCL_RET_OK) {
         throw std::runtime_error(std::string("Init waitset failed: ") +
                                  rcl_get_error_string().str);
       }
 
-      if (WaitForReadyCallbacks(&wait_set, time_out))
-        ExecuteReadyHandles();
+      if (WaitForReadyCallbacks(&wait_set, time_out)) ExecuteReadyHandles();
 
       if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
         std::string error_message =
@@ -105,8 +104,7 @@ void Executor::Stop() {
                  delete async;
                  handle_closed = true;
                });
-      while (!handle_closed)
-        uv_run(uv_default_loop(), UV_RUN_ONCE);
+      while (!handle_closed) uv_run(uv_default_loop(), UV_RUN_ONCE);
 
       SPDLOG_DEBUG(spdlog::get("rclnodejs"), "Background thread stopped.");
     }
@@ -158,10 +156,9 @@ void Executor::Run(void* arg) {
   }
 }
 
-bool Executor::WaitForReadyCallbacks(
-    rcl_wait_set_t* wait_set, int32_t time_out) {
-  if (handle_manager_->is_empty())
-    return false;
+bool Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
+                                     int32_t time_out) {
+  if (handle_manager_->is_empty()) return false;
 
   size_t num_subscriptions = 0u;
   size_t num_guard_conditions = 0u;
@@ -170,19 +167,15 @@ bool Executor::WaitForReadyCallbacks(
   size_t num_services = 0u;
 
   if (!handle_manager_->GetEntityCounts(&num_subscriptions,
-                                        &num_guard_conditions,
-                                        &num_timers,
-                                        &num_clients,
-                                        &num_services)) {
+                                        &num_guard_conditions, &num_timers,
+                                        &num_clients, &num_services)) {
     std::string error_message = std::string("Failed to get entity counts: ") +
                                 std::string(rcl_get_error_string().str);
     throw std::runtime_error(error_message);
   }
 
   if (rcl_wait_set_resize(wait_set, num_subscriptions,
-                          num_guard_conditions + 1u,
-                          num_timers,
-                          num_clients,
+                          num_guard_conditions + 1u, num_timers, num_clients,
                           num_services,
                           // TODO(minggang): support events.
                           0u) != RCL_RET_OK) {
@@ -196,7 +189,7 @@ bool Executor::WaitForReadyCallbacks(
   }
 
   int ignored UNUSED =
-    rcl_wait_set_add_guard_condition(wait_set, g_sigint_gc, nullptr);
+      rcl_wait_set_add_guard_condition(wait_set, g_sigint_gc, nullptr);
 
   time_out = time_out < 0 ? -1 : RCL_MS_TO_NS(time_out);
 
@@ -204,7 +197,7 @@ bool Executor::WaitForReadyCallbacks(
   if (status == RCL_RET_WAIT_SET_EMPTY) {
   } else if (status != RCL_RET_OK && status != RCL_RET_TIMEOUT) {
     throw std::runtime_error(std::string("rcl_wait() failed: ") +
-                              rcl_get_error_string().str);
+                             rcl_get_error_string().str);
   } else {
     if (wait_set->size_of_guard_conditions == 1 &&
         wait_set->guard_conditions[0]) {
@@ -220,9 +213,8 @@ bool Executor::WaitForReadyCallbacks(
   }
 
   if (rcl_wait_set_clear(wait_set) != RCL_RET_OK) {
-    std::string error_message =
-        std::string("Failed to clear wait set: ") +
-        std::string(rcl_get_error_string().str);
+    std::string error_message = std::string("Failed to clear wait set: ") +
+                                std::string(rcl_get_error_string().str);
     throw std::runtime_error(error_message);
   }
 

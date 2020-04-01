@@ -22,14 +22,15 @@
 #include <rcl/rcl.h>
 #include <rcl/validate_topic_name.h>
 #include <rcl_action/rcl_action.h>
-#include <rcl_yaml_param_parser/types.h>
 #include <rcl_yaml_param_parser/parser.h>
+#include <rcl_yaml_param_parser/types.h>
 #include <rmw/error_handling.h>
 #include <rmw/rmw.h>
 #include <rmw/validate_full_topic_name.h>
 #include <rmw/validate_namespace.h>
 #include <rmw/validate_node_name.h>
 #include <rosidl_generator_c/string_functions.h>
+
 #include <memory>
 #include <string>
 
@@ -41,7 +42,8 @@
 namespace rclnodejs {
 
 rcl_guard_condition_t* g_sigint_gc = nullptr;
-static v8::Local<v8::Object> wrapParameters(rcl_params_t *params);  // NOLINT(whitespace/line_length)
+static v8::Local<v8::Object> wrapParameters(
+    rcl_params_t* params);  // NOLINT(whitespace/line_length)
 
 #ifdef OS_WINDOWS
 _crt_signal_t g_original_signal_handler = NULL;
@@ -79,22 +81,22 @@ NAN_METHOD(Init) {
   // preprocess argc & argv
   v8::Local<v8::Array> jsArgv = v8::Local<v8::Array>::Cast(info[1]);
   int argc = jsArgv->Length();
-  char **argv = nullptr;
+  char** argv = nullptr;
   if (argc > 0) {
-    argv = reinterpret_cast<char **>(malloc(argc * sizeof(char *)));
+    argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
     for (int i = 0; i < argc; i++) {
       Nan::MaybeLocal<v8::Value> jsElement = Nan::Get(jsArgv, i);
-      char *arg = *Nan::Utf8String(jsElement.ToLocalChecked());
+      char* arg = *Nan::Utf8String(jsElement.ToLocalChecked());
       int len = std::strlen(arg) + 1;
-      argv[i] = reinterpret_cast<char *>(malloc(len * sizeof(char *)));
+      argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
       snprintf(argv[i], len, "%s", arg);
     }
   }
 
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_init(argc, argc > 0 ? argv: nullptr,
-                                    &init_options, context),
-                           rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_init(argc, argc > 0 ? argv : nullptr, &init_options, context),
+      rcl_get_error_string().str);
 
   for (int i = 0; i < argc; i++) {
     free(argv[i]);
@@ -106,10 +108,10 @@ NAN_METHOD(Init) {
   *g_sigint_gc = rcl_get_zero_initialized_guard_condition();
   rcl_guard_condition_options_t sigint_gc_options =
       rcl_guard_condition_get_default_options();
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_guard_condition_init(g_sigint_gc, context,
-                              sigint_gc_options),
-                           rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_guard_condition_init(g_sigint_gc, context, sigint_gc_options),
+      rcl_get_error_string().str);
 
   g_original_signal_handler = signal(SIGINT, Catch);
 }
@@ -120,12 +122,11 @@ NAN_METHOD(GetParameterOverrides) {
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
-  rcl_arguments_t *parsed_args = &(context->global_arguments);
-  rcl_params_t * params = NULL;
+  rcl_arguments_t* parsed_args = &(context->global_arguments);
+  rcl_params_t* params = NULL;
   THROW_ERROR_IF_NOT_EQUAL(
-                  RCL_RET_OK,
-                  rcl_arguments_get_param_overrides(parsed_args, &params),
-                  rcl_get_error_string().str);
+      RCL_RET_OK, rcl_arguments_get_param_overrides(parsed_args, &params),
+      rcl_get_error_string().str);
 
   if (params == NULL) {
     info.GetReturnValue().Set(Nan::Undefined());
@@ -142,7 +143,7 @@ static const int PARAMETER_BOOL = 1;
 static const int PARAMETER_INTEGER = 2;
 static const int PARAMETER_DOUBLE = 3;
 static const int PARAMETER_STRING = 4;
-static const int PARAMETER_BYTE_ARRAY  = 5;
+static const int PARAMETER_BYTE_ARRAY = 5;
 static const int PARAMETER_BOOL_ARRAY = 6;
 static const int PARAMETER_INTEGER_ARRAY = 7;
 static const int PARAMETER_DOUBLE_ARRAY = 8;
@@ -164,27 +165,25 @@ type Node = {
 
 parameters = array<Node>;
 */
-static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
+static v8::Local<v8::Object> wrapParameters(rcl_params_t* parsed_args) {
   v8::Local<v8::Array> nodes = Nan::New<v8::Array>();
 
   // iterate over nodes
-  for (size_t i=0; i < parsed_args->num_nodes; i++) {
+  for (size_t i = 0; i < parsed_args->num_nodes; i++) {
     v8::Local<v8::Object> node = Nan::New<v8::Object>();
-    Nan::Set(node,
-             Nan::New("name").ToLocalChecked(),
+    Nan::Set(node, Nan::New("name").ToLocalChecked(),
              Nan::New(parsed_args->node_names[i]).ToLocalChecked());
 
     rcl_node_params_t node_parameters = parsed_args->params[i];
 
     // iterate over node.parameters
     v8::Local<v8::Array> parameters = Nan::New<v8::Array>();
-    for (size_t j=0; j < node_parameters.num_params; j++) {
+    for (size_t j = 0; j < node_parameters.num_params; j++) {
       v8::Local<v8::Object> parameter = Nan::New<v8::Object>();
 
-      Nan::Set(parameter,
-              Nan::New("name").ToLocalChecked(),
-              Nan::New(parsed_args->params[i].parameter_names[j]).
-                ToLocalChecked());
+      Nan::Set(
+          parameter, Nan::New("name").ToLocalChecked(),
+          Nan::New(parsed_args->params[i].parameter_names[j]).ToLocalChecked());
 
       int param_type = PARAMETER_NOT_SET;
 
@@ -192,79 +191,67 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t *parsed_args) {
       rcl_variant_t value = node_parameters.parameter_values[j];
       if (value.bool_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BOOL;
-        Nan::Set(parameter,
-                 Nan::New("value").ToLocalChecked(),
+        Nan::Set(parameter, Nan::New("value").ToLocalChecked(),
                  (*value.bool_value ? Nan::True() : Nan::False()));
-      }
-      else if (value.integer_value != NULL) {  // NOLINT()
+      } else if (value.integer_value != NULL) {  // NOLINT()
         param_type = PARAMETER_INTEGER;
-        Nan::Set(parameter,
-                 Nan::New("value").ToLocalChecked(),
+        Nan::Set(parameter, Nan::New("value").ToLocalChecked(),
                  Nan::New<v8::Number>(*value.integer_value));
-      }
-      else if (value.double_value != NULL) {  // NOLINT()
+      } else if (value.double_value != NULL) {  // NOLINT()
         param_type = PARAMETER_DOUBLE;
-        Nan::Set(parameter,
-                 Nan::New("value").ToLocalChecked(),
+        Nan::Set(parameter, Nan::New("value").ToLocalChecked(),
                  Nan::New<v8::Number>(*value.double_value));
-      }
-      else if (value.string_value != NULL) {  // NOLINT()
+      } else if (value.string_value != NULL) {  // NOLINT()
         param_type = PARAMETER_STRING;
-        Nan::Set(parameter,
-                 Nan::New("value").ToLocalChecked(),
+        Nan::Set(parameter, Nan::New("value").ToLocalChecked(),
                  Nan::New(value.string_value).ToLocalChecked());
-      }
-      else if (value.bool_array_value != NULL) {  // NOLINT()
+      } else if (value.bool_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BOOL_ARRAY;
         v8::Local<v8::Array> bool_array = Nan::New<v8::Array>();
 
-        for (size_t k=0; k < value.bool_array_value->size; k++) {
-          Nan::Set(bool_array, k,
-                  (value.bool_array_value->values[k] ?
-                    Nan::True() : Nan::False()) );
+        for (size_t k = 0; k < value.bool_array_value->size; k++) {
+          Nan::Set(
+              bool_array, k,
+              (value.bool_array_value->values[k] ? Nan::True() : Nan::False()));
         }
         Nan::Set(parameter, Nan::New("value").ToLocalChecked(), bool_array);
-      }
-      else if (value.string_array_value != NULL) {  // NOLINT()
+      } else if (value.string_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_STRING_ARRAY;
         v8::Local<v8::Array> string_array = Nan::New<v8::Array>();
-        for (size_t k=0; k < value.string_array_value->size; k++) {
+        for (size_t k = 0; k < value.string_array_value->size; k++) {
           Nan::Set(string_array, k,
-                   Nan::New(value.string_array_value->data[k]).
-                    ToLocalChecked());  // NOLINT(whitespace/line_length)
+                   Nan::New(value.string_array_value->data[k])
+                       .ToLocalChecked());  // NOLINT(whitespace/line_length)
         }
         Nan::Set(parameter, Nan::New("value").ToLocalChecked(), string_array);
-      }
-      else if (value.byte_array_value != NULL) {  // NOLINT()
+      } else if (value.byte_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BYTE_ARRAY;
         v8::Local<v8::Array> byte_array = Nan::New<v8::Array>();
-        for (size_t k=0; k < value.byte_array_value->size; k++) {
-          Nan::Set(byte_array, k,
-                   Nan::New(value.byte_array_value->values[k]));
+        for (size_t k = 0; k < value.byte_array_value->size; k++) {
+          Nan::Set(byte_array, k, Nan::New(value.byte_array_value->values[k]));
         }
         Nan::Set(parameter, Nan::New("value").ToLocalChecked(), byte_array);
-      }
-      else if (value.integer_array_value != NULL) {  // NOLINT()
+      } else if (value.integer_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_INTEGER_ARRAY;
         v8::Local<v8::Array> int_array = Nan::New<v8::Array>();
-        for (size_t k=0; k < value.integer_array_value->size; k++) {
+        for (size_t k = 0; k < value.integer_array_value->size; k++) {
           Nan::Set(int_array, k,
                    Nan::New<v8::Number>(value.integer_array_value->values[k]));
         }
         Nan::Set(parameter, Nan::New("value").ToLocalChecked(), int_array);
-      }
-      else if (value.double_array_value != NULL) {  // NOLINT()
+      } else if (value.double_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_DOUBLE_ARRAY;
         v8::Local<v8::Array> dbl_array = Nan::New<v8::Array>();
-        for (size_t k=0; k < value.double_array_value->size; k++) {
+        for (size_t k = 0; k < value.double_array_value->size; k++) {
           Nan::Set(dbl_array, k,
-                   Nan::New<v8::Number>(value.double_array_value->values[k]));  // NOLINT(whitespace/line_length)
+                   Nan::New<v8::Number>(
+                       value.double_array_value
+                           ->values[k]));  // NOLINT(whitespace/line_length)
         }
         Nan::Set(parameter, Nan::New("value").ToLocalChecked(), dbl_array);
       }
 
-      Nan::Set(parameter,
-               Nan::New("type").ToLocalChecked(),
+      Nan::Set(parameter, Nan::New("type").ToLocalChecked(),
                Nan::New<v8::Number>(param_type));
       Nan::Set(parameters, j, parameter);
     }
@@ -316,9 +303,8 @@ NAN_METHOD(CreateGuardCondition) {
                            rcl_guard_condition_init(gc, context, gc_options),
                            rcl_get_error_string().str);
 
-  auto handle = RclHandle::NewInstance(gc, nullptr, [gc] {
-    return rcl_guard_condition_fini(gc);
-  });
+  auto handle = RclHandle::NewInstance(
+      gc, nullptr, [gc] { return rcl_guard_condition_fini(gc); });
   info.GetReturnValue().Set(handle);
 }
 
@@ -352,9 +338,8 @@ NAN_METHOD(CreateTimer) {
                      rcl_get_default_allocator()),
       rcl_get_error_string().str);
 
-  auto js_obj = RclHandle::NewInstance(timer, clock_handle, [timer] {
-    return rcl_timer_fini(timer);
-  });
+  auto js_obj = RclHandle::NewInstance(
+      timer, clock_handle, [timer] { return rcl_timer_fini(timer); });
   info.GetReturnValue().Set(js_obj);
 }
 
@@ -543,8 +528,7 @@ NAN_METHOD(CreateClock) {
 }
 
 static void ReturnJSTimeObj(
-    Nan::NAN_METHOD_ARGS_TYPE info,
-    int64_t nanoseconds,
+    Nan::NAN_METHOD_ARGS_TYPE info, int64_t nanoseconds,
     rcl_clock_type_t clock_type = RCL_CLOCK_UNINITIALIZED) {
   auto obj = v8::Object::New(v8::Isolate::GetCurrent());
 
@@ -565,7 +549,8 @@ static void ReturnJSTimeObj(
 NAN_METHOD(ClockGetNow) {
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
       RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
   rcl_time_point_t time_point;
   time_point.clock_type = clock->type;
 
@@ -637,8 +622,8 @@ NAN_METHOD(RclTake) {
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
-  void* msg_taken = node::Buffer::Data(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* msg_taken =
+      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
   rcl_ret_t ret = rcl_take(subscription, msg_taken, nullptr, nullptr);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
@@ -754,10 +739,11 @@ NAN_METHOD(CreatePublisher) {
 NAN_METHOD(Publish) {
   rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
       RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
 
-  void* buffer = node::Buffer::Data(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer =
+      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
   THROW_ERROR_IF_NOT_EQUAL(rcl_publish(publisher, buffer, nullptr), RCL_RET_OK,
                            rcl_get_error_string().str);
 
@@ -767,7 +753,8 @@ NAN_METHOD(Publish) {
 NAN_METHOD(GetTopic) {
   rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
       RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
 
   const char* topic = rcl_publisher_get_topic_name(publisher);
   info.GetReturnValue().Set(Nan::New(topic).ToLocalChecked());
@@ -816,9 +803,10 @@ NAN_METHOD(CreateClient) {
 NAN_METHOD(SendRequest) {
   rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
       RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
-  void* buffer = node::Buffer::Data(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
+  void* buffer =
+      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
   int64_t sequence_number;
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_request(client, buffer, &sequence_number),
@@ -830,15 +818,16 @@ NAN_METHOD(SendRequest) {
 NAN_METHOD(RclTakeResponse) {
   rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
       RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
   int64_t sequence_number = Nan::To<int64_t>(info[1]).FromJust();
 
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
   header->sequence_number = sequence_number;
 
-  void* taken_response = node::Buffer::Data(
-      Nan::To<v8::Object>(info[2]).ToLocalChecked());
+  void* taken_response =
+      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked());
   rcl_ret_t ret = rcl_take_response(client, header, taken_response);
   free(header);
 
@@ -893,12 +882,13 @@ NAN_METHOD(CreateService) {
 NAN_METHOD(RclTakeRequest) {
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
       RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
 
-  void* taken_request = node::Buffer::Data(
-      Nan::To<v8::Object>(info[2]).ToLocalChecked());
+  void* taken_request =
+      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked());
   rcl_ret_t ret = rcl_take_request(service, header, taken_request);
   if (ret != RCL_RET_SERVICE_TAKE_FAILED) {
     auto js_obj = RclHandle::NewInstance(header);
@@ -912,7 +902,8 @@ NAN_METHOD(RclTakeRequest) {
 NAN_METHOD(GetServiceName) {
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
       RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
 
   const char* name = rcl_service_get_service_name(service);
   info.GetReturnValue().Set(Nan::New(name).ToLocalChecked());
@@ -921,13 +912,15 @@ NAN_METHOD(GetServiceName) {
 NAN_METHOD(SendResponse) {
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
       RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())->ptr());
-  void* buffer = node::Buffer::Data(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
+  void* buffer =
+      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
 
   rmw_request_id_t* header = reinterpret_cast<rmw_request_id_t*>(
       RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[2]).ToLocalChecked())->ptr());
+          Nan::To<v8::Object>(info[2]).ToLocalChecked())
+          ->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_response(service, header, buffer),
                            RCL_RET_OK, rcl_get_error_string().str);
@@ -1196,28 +1189,29 @@ std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
   std::unique_ptr<rmw_qos_profile_t> qos_profile =
       std::make_unique<rmw_qos_profile_t>();
 
-  auto history = Nan::Get(object,
-      Nan::New("history").ToLocalChecked()).ToLocalChecked();
-  auto depth = Nan::Get(object,
-      Nan::New("depth").ToLocalChecked()).ToLocalChecked();
-  auto reliability = Nan::Get(object,
-      Nan::New("reliability").ToLocalChecked()).ToLocalChecked();
-  auto durability = Nan::Get(object,
-      Nan::New("durability").ToLocalChecked()).ToLocalChecked();
-  auto avoid_ros_namespace_conventions = Nan::Get(object,
-      Nan::New("avoidRosNameSpaceConventions").ToLocalChecked())
+  auto history =
+      Nan::Get(object, Nan::New("history").ToLocalChecked()).ToLocalChecked();
+  auto depth =
+      Nan::Get(object, Nan::New("depth").ToLocalChecked()).ToLocalChecked();
+  auto reliability = Nan::Get(object, Nan::New("reliability").ToLocalChecked())
+                         .ToLocalChecked();
+  auto durability = Nan::Get(object, Nan::New("durability").ToLocalChecked())
+                        .ToLocalChecked();
+  auto avoid_ros_namespace_conventions =
+      Nan::Get(object,
+               Nan::New("avoidRosNameSpaceConventions").ToLocalChecked())
           .ToLocalChecked();
 
   qos_profile->history = static_cast<rmw_qos_history_policy_t>(
       Nan::To<uint32_t>(history).FromJust());
-  qos_profile->depth =
-      Nan::To<uint32_t>(depth).FromJust();
+  qos_profile->depth = Nan::To<uint32_t>(depth).FromJust();
   qos_profile->reliability = static_cast<rmw_qos_reliability_policy_t>(
       Nan::To<uint32_t>(reliability).FromJust());
   qos_profile->durability = static_cast<rmw_qos_durability_policy_t>(
       Nan::To<uint32_t>(durability).FromJust());
-  qos_profile->avoid_ros_namespace_conventions = avoid_ros_namespace_conventions
-      ->BooleanValue(currentContent->GetIsolate());
+  qos_profile->avoid_ros_namespace_conventions =
+      avoid_ros_namespace_conventions->BooleanValue(
+          currentContent->GetIsolate());
 
   return qos_profile;
 }
@@ -1231,8 +1225,8 @@ std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos) {
     *qos_profile = *GetQoSProfileFromString(std::string(
         *Nan::Utf8String(qos->ToString(currentContent).ToLocalChecked())));
   } else if (qos->IsObject()) {
-    qos_profile = GetQosProfileFromObject(
-        Nan::To<v8::Object>(qos).ToLocalChecked());
+    qos_profile =
+        GetQosProfileFromObject(Nan::To<v8::Object>(qos).ToLocalChecked());
   } else {
     return qos_profile;
   }
@@ -1261,8 +1255,7 @@ NAN_METHOD(Shutdown) {
                            rcl_get_error_string().str);
 
   if (g_sigint_gc) {
-    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                             rcl_guard_condition_fini(g_sigint_gc),
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_guard_condition_fini(g_sigint_gc),
                              rcl_get_error_string().str);
     free(g_sigint_gc);
     g_sigint_gc = nullptr;
@@ -1275,8 +1268,8 @@ NAN_METHOD(Shutdown) {
 }
 
 NAN_METHOD(InitString) {
-  void* buffer = node::Buffer::Data(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  void* buffer =
+      node::Buffer::Data(Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rosidl_generator_c__String* ptr =
       reinterpret_cast<rosidl_generator_c__String*>(buffer);
 
@@ -1389,7 +1382,7 @@ NAN_METHOD(Log) {
     rcutils_log_location_t logging_location = {function_name.c_str(),
                                                file_name.c_str(), line_number};
     rcutils_log(&logging_location, severity, name.c_str(), "%s",
-        message.c_str());
+                message.c_str());
   }
 
   info.GetReturnValue().Set(Nan::New(enabled));
@@ -1428,8 +1421,7 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
   for (size_t i = 0; i < names_and_types.names.size; ++i) {
     auto item = v8::Object::New(v8::Isolate::GetCurrent());
     std::string topic_name = names_and_types.names.data[i];
-    Nan::Set(item,
-             Nan::New("name").ToLocalChecked(),
+    Nan::Set(item, Nan::New("name").ToLocalChecked(),
              Nan::New(names_and_types.names.data[i]).ToLocalChecked());
 
     v8::Local<v8::Array> type_list =
@@ -1591,26 +1583,24 @@ NAN_METHOD(GetNodeNames) {
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   rcutils_string_array_t node_names =
-    rcutils_get_zero_initialized_string_array();
+      rcutils_get_zero_initialized_string_array();
   rcutils_string_array_t node_namespaces =
-    rcutils_get_zero_initialized_string_array();
+      rcutils_get_zero_initialized_string_array();
   rcl_allocator_t allocator = rcl_get_default_allocator();
 
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_get_node_names(
-                               node, allocator, &node_names, &node_namespaces),
-                           "Failed to get_node_names.");
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_get_node_names(node, allocator, &node_names, &node_namespaces),
+      "Failed to get_node_names.");
 
   v8::Local<v8::Array> result_list = Nan::New<v8::Array>(node_names.size);
 
   for (size_t i = 0; i < node_names.size; ++i) {
     auto item = v8::Object::New(v8::Isolate::GetCurrent());
 
-    Nan::Set(item,
-             Nan::New("name").ToLocalChecked(),
+    Nan::Set(item, Nan::New("name").ToLocalChecked(),
              Nan::New(node_names.data[i]).ToLocalChecked());
-    Nan::Set(item,
-             Nan::New("namespace").ToLocalChecked(),
+    Nan::Set(item, Nan::New("namespace").ToLocalChecked(),
              Nan::New(node_namespaces.data[i]).ToLocalChecked());
 
     Nan::Set(result_list, i, item);
@@ -1618,13 +1608,11 @@ NAN_METHOD(GetNodeNames) {
 
   rcutils_ret_t fini_names_ret = rcutils_string_array_fini(&node_names);
   rcutils_ret_t fini_namespaces_ret =
-    rcutils_string_array_fini(&node_namespaces);
+      rcutils_string_array_fini(&node_namespaces);
 
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           fini_names_ret,
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, fini_names_ret,
                            "Failed to destroy node_names");
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           fini_namespaces_ret,
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, fini_namespaces_ret,
                            "Failed to destroy node_namespaces");
 
   info.GetReturnValue().Set(result_list);
@@ -1639,13 +1627,12 @@ NAN_METHOD(CountPublishers) {
       *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
 
   size_t count = 0;
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_count_publishers(
-                               node, topic_name.c_str(), &count),
-                           "Failed to count publishers.");
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_count_publishers(node, topic_name.c_str(), &count),
+      "Failed to count publishers.");
 
-  v8::Local<v8::Integer> result
-    = Nan::New<v8::Integer>(static_cast<int32_t>(count));
+  v8::Local<v8::Integer> result =
+      Nan::New<v8::Integer>(static_cast<int32_t>(count));
   info.GetReturnValue().Set(result);
 }
 
@@ -1658,13 +1645,12 @@ NAN_METHOD(CountSubscribers) {
       *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
 
   size_t count = 0;
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_count_subscribers(
-                               node, topic_name.c_str(), &count),
-                           "Failed to count subscribers.");
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_count_subscribers(node, topic_name.c_str(), &count),
+      "Failed to count subscribers.");
 
-  v8::Local<v8::Integer> result
-    = Nan::New<v8::Integer>(static_cast<int32_t>(count));
+  v8::Local<v8::Integer> result =
+      Nan::New<v8::Integer>(static_cast<int32_t>(count));
   info.GetReturnValue().Set(result);
 }
 
@@ -1677,10 +1663,9 @@ NAN_METHOD(ServiceServerIsAvailable) {
   rcl_client_t* client = reinterpret_cast<rcl_client_t*>(client_handle->ptr());
 
   bool is_available;
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_service_server_is_available(
-                               node, client, &is_available),
-                           "Failed to get service state.");
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_service_server_is_available(node, client, &is_available),
+      "Failed to get service state.");
 
   v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(is_available);
   info.GetReturnValue().Set(result);

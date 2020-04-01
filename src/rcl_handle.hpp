@@ -18,20 +18,18 @@
 #include <nan.h>
 
 #include <functional>
+#include <map>
 #include <set>
 #include <string>
-#include <map>
 
 namespace rclnodejs {
 
 class RclHandle : public Nan::ObjectWrap {
  public:
   static void Init(v8::Local<v8::Object> exports);
-  static v8::Local<v8::Object> NewInstance(void* handle,
-                                           RclHandle* parent = nullptr,
-                                           std::function<int()> deleter = [] {
-                                             return 0;
-                                           });
+  static v8::Local<v8::Object> NewInstance(
+      void* handle, RclHandle* parent = nullptr,
+      std::function<int()> deleter = [] { return 0; });
 
   void set_deleter(std::function<int()> deleter) { deleter_ = deleter; }
 
@@ -45,7 +43,8 @@ class RclHandle : public Nan::ObjectWrap {
   void AddChild(RclHandle* child) { children_.insert(child); }
   void RemoveChild(RclHandle* child) { children_.erase(child); }
   void SetBoolProperty(const std::string& name, bool value) {
-      properties_[name] = value; }
+    properties_[name] = value;
+  }
   void SyncProperties();
 
  private:

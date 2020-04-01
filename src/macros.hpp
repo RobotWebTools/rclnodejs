@@ -16,14 +16,14 @@
 #define RCLNODEJS_MARCOS_HPP_
 
 #define CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE(op, lhs, rhs, message) \
-  { \
-    if (lhs op rhs) { \
-      Nan::ThrowError(message); \
-      rcl_reset_error(); \
-      info.GetReturnValue().Set(Nan::Undefined()); \
-      return; \
-    } \
-  } \
+  {                                                                 \
+    if (lhs op rhs) {                                               \
+      Nan::ThrowError(message);                                     \
+      rcl_reset_error();                                            \
+      info.GetReturnValue().Set(Nan::Undefined());                  \
+      return;                                                       \
+    }                                                               \
+  }
 
 #define THROW_ERROR_IF_NOT_EQUAL(lhs, rhs, message) \
   CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE(!=, lhs, rhs, message)

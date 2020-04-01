@@ -44,36 +44,33 @@ class HandleManager {
   bool CollectReadyHandles(rcl_wait_set_t* wait_set);
   void ClearHandles();
   void WaitForSynchronizing() { uv_sem_wait(&sem_); }
-  bool GetEntityCounts(
-      size_t *subscriptions_size,
-      size_t *guard_conditions_size,
-      size_t *timers_size,
-      size_t *clients_size,
-      size_t *services_size);
+  bool GetEntityCounts(size_t* subscriptions_size,
+                       size_t* guard_conditions_size, size_t* timers_size,
+                       size_t* clients_size, size_t* services_size);
 
   uint32_t subscription_count() const { return subscriptions_.size(); }
   uint32_t service_count() const { return services_.size(); }
   uint32_t client_count() const { return clients_.size(); }
-  uint32_t timer_count() const { return  timers_.size(); }
+  uint32_t timer_count() const { return timers_.size(); }
   uint32_t guard_condition_count() const { return guard_conditions_.size(); }
-  std::vector<rclnodejs::RclHandle*>
-      get_ready_handles() const { return ready_handles_; }
+  std::vector<rclnodejs::RclHandle*> get_ready_handles() const {
+    return ready_handles_;
+  }
   uv_mutex_t* mutex() { return &mutex_; }
   bool is_synchronizing() const { return is_synchronizing_.load(); }
-  bool is_empty() const { return subscriptions_.size() == 0
-      && services_.size() == 0
-      && clients_.size() == 0
-      && timers_.size() == 0
-      && guard_conditions_.size() == 0
-      && action_clients_.size() == 0
-      && action_servers_.size() == 0; }
+  bool is_empty() const {
+    return subscriptions_.size() == 0 && services_.size() == 0 &&
+           clients_.size() == 0 && timers_.size() == 0 &&
+           guard_conditions_.size() == 0 && action_clients_.size() == 0 &&
+           action_servers_.size() == 0;
+  }
 
  protected:
   void CollectHandlesByType(const v8::Local<v8::Object>& typeObject,
                             std::vector<rclnodejs::RclHandle*>* vec);
-  template<typename T> void CollectReadyHandlesByType(
-      const T** struct_ptr,
-      size_t size,
+  template <typename T>
+  void CollectReadyHandlesByType(
+      const T** struct_ptr, size_t size,
       const std::vector<rclnodejs::RclHandle*>& handles);
   bool CollectReadyActionHandles(rcl_wait_set_t* wait_set);
 

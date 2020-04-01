@@ -28,8 +28,7 @@ namespace rclnodejs {
 class HandleManager;
 class Executor;
 
-class ShadowNode : public Nan::ObjectWrap,
-                   public Executor::Delegate {
+class ShadowNode : public Nan::ObjectWrap, public Executor::Delegate {
  public:
   static void Init(v8::Local<v8::Object> exports);
   void StartRunning(rcl_context_t* context, int32_t timeout);

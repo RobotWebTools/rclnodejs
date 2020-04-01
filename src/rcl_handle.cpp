@@ -24,8 +24,7 @@ Nan::Persistent<v8::Function> RclHandle::constructor;
 RclHandle::RclHandle() : pointer_(nullptr), parent_(nullptr) {}
 
 RclHandle::~RclHandle() {
-  if (pointer_)
-    Reset();
+  if (pointer_) Reset();
 }
 
 void RclHandle::Init(v8::Local<v8::Object> exports) {
@@ -34,16 +33,14 @@ void RclHandle::Init(v8::Local<v8::Object> exports) {
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
   Nan::SetAccessor(tpl->InstanceTemplate(),
-                   Nan::New("properties").ToLocalChecked(),
-                   PropertiesGetter);
+                   Nan::New("properties").ToLocalChecked(), PropertiesGetter);
   Nan::SetPrototypeMethod(tpl, "release", Release);
   Nan::SetPrototypeMethod(tpl, "dismiss", Dismiss);
 
   v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
 
   constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
-  Nan::Set(exports,
-           Nan::New("RclHandle").ToLocalChecked(),
+  Nan::Set(exports, Nan::New("RclHandle").ToLocalChecked(),
            tpl->GetFunction(context).ToLocalChecked());
 }
 
@@ -76,22 +73,19 @@ NAN_GETTER(RclHandle::PropertiesGetter) {
 
 NAN_METHOD(RclHandle::Release) {
   auto* me = Nan::ObjectWrap::Unwrap<RclHandle>(info.Holder());
-  if (me->ptr())
-    me->Reset();
+  if (me->ptr()) me->Reset();
 
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(RclHandle::Dismiss) {
   auto* me = Nan::ObjectWrap::Unwrap<RclHandle>(info.Holder());
-  if (me)
-    me->set_ptr(nullptr);
+  if (me) me->set_ptr(nullptr);
 
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
-v8::Local<v8::Object> RclHandle::NewInstance(void* handle,
-                                             RclHandle* parent,
+v8::Local<v8::Object> RclHandle::NewInstance(void* handle, RclHandle* parent,
                                              std::function<int()> deleter) {
   Nan::EscapableHandleScope scope;
 
@@ -114,8 +108,7 @@ v8::Local<v8::Object> RclHandle::NewInstance(void* handle,
 }
 
 void RclHandle::Reset() {
-  if (!pointer_)
-    return;
+  if (!pointer_) return;
 
   if (parent_) {
     parent_->RemoveChild(this);

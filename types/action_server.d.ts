@@ -31,14 +31,14 @@ declare module 'rclnodejs' {
 
     /**
      * Updates the goal handle with the execute status and begins exection.
-     * 
+     *
      * @param callback - An optional callback to use instead of the one provided to the action server.
      */
     execute(callback?: ExecuteCallback<T>): void;
 
     /**
      * Sends feedback back to the client.
-     * 
+     *
      * @param feedback - The feedback to send back.
      */
     publishFeedback(feedback: ActionFeedback<T>): void;
@@ -75,9 +75,13 @@ declare module 'rclnodejs' {
     ACCEPT = 2,
   }
 
-  type ExecuteCallback<T extends TypeClass<ActionTypeClassName>> = (goalHandle: ServerGoalHandle<T>) => ActionResult<T>;
+  type ExecuteCallback<T extends TypeClass<ActionTypeClassName>> = (
+    goalHandle: ServerGoalHandle<T>
+  ) => ActionResult<T>;
   type GoalCallback = () => GoalResponse;
-  type HandleAcceptedCallback<T extends TypeClass<ActionTypeClassName>> = (goalHandle: ServerGoalHandle<T>) => void;
+  type HandleAcceptedCallback<T extends TypeClass<ActionTypeClassName>> = (
+    goalHandle: ServerGoalHandle<T>
+  ) => void;
   type CancelCallback = () => CancelResponse;
 
   interface ActionServerOptions extends Options<ActionQoS> {
@@ -128,7 +132,9 @@ declare module 'rclnodejs' {
      *
      * @param handleAcceptedCallback - Callback function, if not provided, then unregisters any previously registered callback.
      */
-    registerHandleAcceptedCallback(handleAcceptedCallback?: HandleAcceptedCallback<T>): void;
+    registerHandleAcceptedCallback(
+      handleAcceptedCallback?: HandleAcceptedCallback<T>
+    ): void;
 
     /**
      * Register a callback for handling new goal requests.

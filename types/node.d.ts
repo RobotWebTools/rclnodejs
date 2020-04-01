@@ -6,7 +6,6 @@ import { Parameter, ParameterDescriptor, ParameterType } from 'rclnodejs';
 import { QoS } from 'rclnodejs';
 import { rcl_interfaces } from 'rclnodejs';
 
-
 declare module 'rclnodejs' {
   /**
    * Identifies type of ROS message such as msg or srv.
@@ -110,17 +109,18 @@ declare module 'rclnodejs' {
    * Callback indicating parameters are about to be declared or set.
    * The callback is provided a list of parameters and returns a SetParameterResult
    * to indicate approval or veto of the operation.
-   * 
+   *
    * @param parameters - The parameters to be declared or set
    * @returns A successful property value of true indicates approval of the operation;
-   *  otherwise indicates a veto of the operation. 
-   * 
+   *  otherwise indicates a veto of the operation.
+   *
    * @remarks
    * See {@link Node.addOnSetParametersCallback | Node.addOnSetParametersCallback}
    * See {@link Node.removeOnSetParametersCallback | Node.removeOnSetParametersCallback}
    */
-  type SetParametersCallback = 
-    (parameters: Parameter[]) => rcl_interfaces.msg.SetParametersResult;
+  type SetParametersCallback = (
+    parameters: Parameter[]
+  ) => rcl_interfaces.msg.SetParametersResult;
 
   /**
    * Standard result of Node.getXXXNamesAndTypes() queries
@@ -178,28 +178,28 @@ declare module 'rclnodejs' {
 
     /**
      * Get the nodes logger.
-     * 
+     *
      * @returns The logger for the node.
      */
     getLogger(): Logging;
 
     /**
      * Get the clock used by the node.
-     * 
+     *
      * @returns The nodes clock.
      */
     getClock(): Clock;
 
     /**
      * Get the current time using the node's clock.
-     * 
+     *
      * @returns The current time.
      */
     now(): Time;
 
     /**
      * Get the nodeOptions provided through the constructor.
-     * 
+     *
      * @returns The nodeOptions.
      */
     options(): NodeOptions;
@@ -495,9 +495,7 @@ declare module 'rclnodejs' {
      * @param parameter - The new parameter.
      * @returns The result of the operation.
      */
-    setParameter(
-      parameter: Parameter
-    ): rcl_interfaces.msg.SetParametersResult;
+    setParameter(parameter: Parameter): rcl_interfaces.msg.SetParametersResult;
 
     /**
      * Replace a list of declared parameters.
@@ -526,7 +524,7 @@ declare module 'rclnodejs' {
      * the point of the error are reverted to their previous state.
      *
      * @param parameters - The parameters to set.
-     * @returns Describes the result of setting 1 or more 
+     * @returns Describes the result of setting 1 or more
      */
     setParametersAtomically(
       parameters: Array<Parameter>
@@ -535,15 +533,15 @@ declare module 'rclnodejs' {
     /**
      * Add a callback to the front of the list of callbacks invoked for parameter declaration
      * and setting. No checks are made for duplicate callbacks.
-     * 
-     * @param callback - The callback to add. 
+     *
+     * @param callback - The callback to add.
      */
-    addOnSetParametersCallback(callback: SetParametersCallback): void; 
+    addOnSetParametersCallback(callback: SetParametersCallback): void;
 
     /**
      * Remove a callback from the list of SetParameterCallbacks.
      * If the callback is not found the process is a nop.
-     * 
+     *
      * @param callback - The callback to be removed
      */
     removeOnSetParametersCallback(call: SetParametersCallback): void;

@@ -15,6 +15,7 @@
 #include "handle_manager.hpp"
 
 #include <rcl_action/rcl_action.h>
+
 #include <vector>
 
 #include "spdlog/spdlog.h"
@@ -80,15 +81,11 @@ void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
   is_synchronizing_.store(false);
   uv_sem_post(&sem_);
 
-  SPDLOG_DEBUG(
-      spdlog::get("rclnodejs"),
-      "Add {0:d} timers, {1:d} subscriptions, {2:d} clients, " +
-          "{3:d} services, {4:d} guards.",
-      timers_.size(),
-      subscriptions_.size(),
-      clients_.size(),
-      services_.size(),
-      guard_conditions_.size());
+  SPDLOG_DEBUG(spdlog::get("rclnodejs"),
+               "Add {0:d} timers, {1:d} subscriptions, {2:d} clients, " +
+                   "{3:d} services, {4:d} guards.",
+               timers_.size(), subscriptions_.size(), clients_.size(),
+               services_.size(), guard_conditions_.size());
 }
 
 bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
@@ -98,7 +95,7 @@ bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
       return false;
   }
   for (auto& subscription : subscriptions_) {
-    rcl_subscription_t* rcl_subscription  =
+    rcl_subscription_t* rcl_subscription =
         reinterpret_cast<rcl_subscription_t*>(subscription->ptr());
     if (rcl_wait_set_add_subscription(wait_set, rcl_subscription, nullptr) !=
         RCL_RET_OK)
@@ -118,22 +115,22 @@ bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
   for (auto& guard_condition : guard_conditions_) {
     rcl_guard_condition_t* rcl_guard_condition =
         reinterpret_cast<rcl_guard_condition_t*>(guard_condition->ptr());
-    if (rcl_wait_set_add_guard_condition(wait_set, rcl_guard_condition, nullptr)
-        !=  RCL_RET_OK)
+    if (rcl_wait_set_add_guard_condition(wait_set, rcl_guard_condition,
+                                         nullptr) != RCL_RET_OK)
       return false;
   }
   for (auto& action_client : action_clients_) {
     rcl_action_client_t* rcl_action_client =
         reinterpret_cast<rcl_action_client_t*>(action_client->ptr());
     if (rcl_action_wait_set_add_action_client(wait_set, rcl_action_client,
-        nullptr, nullptr) !=  RCL_RET_OK)
+                                              nullptr, nullptr) != RCL_RET_OK)
       return false;
   }
   for (auto& action_server : action_servers_) {
     rcl_action_server_t* rcl_action_server =
         reinterpret_cast<rcl_action_server_t*>(action_server->ptr());
     if (rcl_action_wait_set_add_action_server(wait_set, rcl_action_server,
-        nullptr) != RCL_RET_OK)
+                                              nullptr) != RCL_RET_OK)
       return false;
   }
 
@@ -143,36 +140,25 @@ bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
 bool HandleManager::CollectReadyHandles(rcl_wait_set_t* wait_set) {
   ready_handles_.clear();
 
-  CollectReadyHandlesByType(
-    wait_set->subscriptions,
-    wait_set->size_of_subscriptions,
-    subscriptions_);
-  CollectReadyHandlesByType(
-    wait_set->clients,
-    wait_set->size_of_clients,
-    clients_);
-  CollectReadyHandlesByType(
-    wait_set->services,
-    wait_set->size_of_services,
-    services_);
-  CollectReadyHandlesByType(
-    wait_set->timers,
-    wait_set->size_of_timers,
-    timers_);
-  CollectReadyHandlesByType(
-    wait_set->guard_conditions,
-    wait_set->size_of_guard_conditions,
-    guard_conditions_);
+  CollectReadyHandlesByType(wait_set->subscriptions,
+                            wait_set->size_of_subscriptions, subscriptions_);
+  CollectReadyHandlesByType(wait_set->clients, wait_set->size_of_clients,
+                            clients_);
+  CollectReadyHandlesByType(wait_set->services, wait_set->size_of_services,
+                            services_);
+  CollectReadyHandlesByType(wait_set->timers, wait_set->size_of_timers,
+                            timers_);
+  CollectReadyHandlesByType(wait_set->guard_conditions,
+                            wait_set->size_of_guard_conditions,
+                            guard_conditions_);
 
   return CollectReadyActionHandles(wait_set);
 }
 
-bool HandleManager::GetEntityCounts(
-    size_t *subscriptions_size,
-    size_t *guard_conditions_size,
-    size_t *timers_size,
-    size_t *clients_size,
-    size_t *services_size) {
+bool HandleManager::GetEntityCounts(size_t* subscriptions_size,
+                                    size_t* guard_conditions_size,
+                                    size_t* timers_size, size_t* clients_size,
+                                    size_t* services_size) {
   size_t num_subscriptions = 0u;
   size_t num_guard_conditions = 0u;
   size_t num_timers = 0u;
@@ -183,12 +169,8 @@ bool HandleManager::GetEntityCounts(
     rcl_action_client_t* rcl_action_client =
         reinterpret_cast<rcl_action_client_t*>(action_client->ptr());
     rcl_ret_t ret = rcl_action_client_wait_set_get_num_entities(
-        rcl_action_client,
-        &num_subscriptions,
-        &num_guard_conditions,
-        &num_timers,
-        &num_clients,
-        &num_services);
+        rcl_action_client, &num_subscriptions, &num_guard_conditions,
+        &num_timers, &num_clients, &num_services);
     if (ret != RCL_RET_OK) {
       return false;
     }
@@ -204,12 +186,8 @@ bool HandleManager::GetEntityCounts(
     rcl_action_server_t* rcl_action_server =
         reinterpret_cast<rcl_action_server_t*>(action_server->ptr());
     rcl_ret_t ret = rcl_action_server_wait_set_get_num_entities(
-        rcl_action_server,
-        &num_subscriptions,
-        &num_guard_conditions,
-        &num_timers,
-        &num_clients,
-        &num_services);
+        rcl_action_server, &num_subscriptions, &num_guard_conditions,
+        &num_timers, &num_clients, &num_services);
     if (ret != RCL_RET_OK) {
       return false;
     }
@@ -246,13 +224,16 @@ void HandleManager::CollectHandlesByType(
   Nan::HandleScope scope;
 
   if (typeObject->IsArray()) {
-    uint32_t length = Nan::To<uint32_t>(
-        Nan::Get(typeObject, Nan::New("length").ToLocalChecked())
-            .ToLocalChecked()).FromJust();
+    uint32_t length =
+        Nan::To<uint32_t>(
+            Nan::Get(typeObject, Nan::New("length").ToLocalChecked())
+                .ToLocalChecked())
+            .FromJust();
 
     for (uint32_t index = 0; index < length; index++) {
-      v8::Local<v8::Object> obj = Nan::To<v8::Object>(
-          Nan::Get(typeObject, index).ToLocalChecked()).ToLocalChecked();
+      v8::Local<v8::Object> obj =
+          Nan::To<v8::Object>(Nan::Get(typeObject, index).ToLocalChecked())
+              .ToLocalChecked();
       Nan::MaybeLocal<v8::Value> handle =
           Nan::Get(obj, Nan::New("_handle").ToLocalChecked());
       rclnodejs::RclHandle* rcl_handle =
@@ -263,10 +244,9 @@ void HandleManager::CollectHandlesByType(
   }
 }
 
-template<typename T>
+template <typename T>
 void HandleManager::CollectReadyHandlesByType(
-    const T** struct_ptr,
-    size_t size,
+    const T** struct_ptr, size_t size,
     const std::vector<rclnodejs::RclHandle*>& handles) {
   for (size_t idx = 0; idx < size; ++idx) {
     if (struct_ptr[idx]) {
@@ -290,12 +270,8 @@ bool HandleManager::CollectReadyActionHandles(rcl_wait_set_t* wait_set) {
     rcl_action_client_t* rcl_action_client =
         reinterpret_cast<rcl_action_client_t*>(action_client->ptr());
     rcl_ret_t ret = rcl_action_client_wait_set_get_entities_ready(
-        wait_set,
-        rcl_action_client,
-        &is_feedback_ready,
-        &is_status_ready,
-        &is_goal_response_ready,
-        &is_cancel_response_ready,
+        wait_set, rcl_action_client, &is_feedback_ready, &is_status_ready,
+        &is_goal_response_ready, &is_cancel_response_ready,
         &is_result_response_ready);
     if (ret != RCL_RET_OK) {
       return false;
@@ -325,12 +301,8 @@ bool HandleManager::CollectReadyActionHandles(rcl_wait_set_t* wait_set) {
     rcl_action_server_t* rcl_action_server =
         reinterpret_cast<rcl_action_server_t*>(action_server->ptr());
     rcl_ret_t ret = rcl_action_server_wait_set_get_entities_ready(
-        wait_set,
-        rcl_action_server,
-        &is_goal_request_ready,
-        &is_cancel_request_ready,
-        &is_result_request_ready,
-        &is_goal_expired);
+        wait_set, rcl_action_server, &is_goal_request_ready,
+        &is_cancel_request_ready, &is_result_request_ready, &is_goal_expired);
     if (ret != RCL_RET_OK) {
       return false;
     }

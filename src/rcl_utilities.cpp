@@ -42,8 +42,7 @@ const char* lib_ext = ".dll";
 #endif
 
 void* GetTypeSupportFunctionByInterfaceSymbolName(
-    const std::string& symbol_name,
-    const std::string& lib_name) {
+    const std::string& symbol_name, const std::string& lib_name) {
   // If the dlopen fails for any reason, it will return nullptr.
   // You can use GetErrorMessageAndClear() to get error diagnostic.
   void* ptr = nullptr;
@@ -56,8 +55,7 @@ void* GetTypeSupportFunctionByInterfaceSymbolName(
 }
 
 const rosidl_message_type_support_t* GetMessageTypeSupport(
-    const std::string& package_name,
-    const std::string& sub_folder,
+    const std::string& package_name, const std::string& sub_folder,
     const std::string& msg_name) {
   void* function = GetTypeSupportFunctionByInterfaceSymbolName(
       "rosidl_typesupport_c__get_message_type_support_handle__" + package_name +
@@ -70,8 +68,7 @@ const rosidl_message_type_support_t* GetMessageTypeSupport(
 }
 
 const rosidl_service_type_support_t* GetServiceTypeSupport(
-    const std::string& package_name,
-    const std::string& service_name) {
+    const std::string& package_name, const std::string& service_name) {
   void* function = GetTypeSupportFunctionByInterfaceSymbolName(
       "rosidl_typesupport_c__get_service_type_support_handle__" + package_name +
           "__srv__" + service_name,
@@ -83,8 +80,7 @@ const rosidl_service_type_support_t* GetServiceTypeSupport(
 }
 
 const rosidl_action_type_support_t* GetActionTypeSupport(
-    const std::string& package_name,
-    const std::string& action_name) {
+    const std::string& package_name, const std::string& action_name) {
   void* function = GetTypeSupportFunctionByInterfaceSymbolName(
       "rosidl_typesupport_c__get_action_type_support_handle__" + package_name +
           "__action__" + action_name,

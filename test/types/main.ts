@@ -219,11 +219,13 @@ duration1.gte(duration2);
 const time1 = new rclnodejs.Time(100, 100);
 
 // $ExpectType Time
-const time2 = rclnodejs.Time.fromMsg({sec: 0, nanosec: 0});
+const time2 = rclnodejs.Time.fromMsg({ sec: 0, nanosec: 0 });
 
 // $ExpectType Time
-const time3 =
-  rclnodejs.Time.fromMsg({sec: 0, nanosec: 0}, rclnodejs.ClockType.ROS_TIME);
+const time3 = rclnodejs.Time.fromMsg(
+  { sec: 0, nanosec: 0 },
+  rclnodejs.ClockType.ROS_TIME
+);
 
 // $ExpectType ClockType
 time1.clockType;
@@ -309,7 +311,11 @@ const Fibonacci = rclnodejs.require('rclnodejs_test_msgs/action/Fibonacci');
 
 // ---- ActionClient -----
 // $ExpectType ActionClient<"rclnodejs_test_msgs/action/Fibonacci">
-const actionClient = new rclnodejs.ActionClient(node, 'rclnodejs_test_msgs/action/Fibonacci', 'fibonnaci');
+const actionClient = new rclnodejs.ActionClient(
+  node,
+  'rclnodejs_test_msgs/action/Fibonacci',
+  'fibonnaci'
+);
 
 // $ExpectType boolean
 client.isServiceServerAvailable();
@@ -342,7 +348,12 @@ goalHandlePromise.then(goalHandle => {
 
 // ---- ActionServer -----
 // $ExpectType ActionServer<"rclnodejs_test_msgs/action/Fibonacci">
-const actionServer = new rclnodejs.ActionServer(node, 'rclnodejs_test_msgs/action/Fibonacci', 'fibonnaci', executeCallback);
+const actionServer = new rclnodejs.ActionServer(
+  node,
+  'rclnodejs_test_msgs/action/Fibonacci',
+  'fibonnaci',
+  executeCallback
+);
 
 // $ExpectType void
 actionServer.registerHandleAcceptedCallback();
@@ -356,7 +367,9 @@ actionServer.registerCancelCallback();
 // $ExpectType void
 actionServer.registerExecuteCallback(() => new Fibonacci.Result());
 
-function executeCallback(goalHandle: rclnodejs.ServerGoalHandle<"rclnodejs_test_msgs/action/Fibonacci">) {
+function executeCallback(
+  goalHandle: rclnodejs.ServerGoalHandle<'rclnodejs_test_msgs/action/Fibonacci'>
+) {
   // $ExpectType UUID
   goalHandle.goalId;
 

@@ -15,12 +15,12 @@
 #ifndef RCLNODEJS_RCL_ACTION_BINDINGS_HPP_
 #define RCLNODEJS_RCL_ACTION_BINDINGS_HPP_
 
-#include "rcl_bindings.hpp"
-
 #include <nan.h>
 #include <rcl/rcl.h>
 
 #include <string>
+
+#include "rcl_bindings.hpp"
 
 namespace rclnodejs {
 

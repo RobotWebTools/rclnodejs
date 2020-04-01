@@ -15,8 +15,8 @@
 #ifndef RCLNODEJS_EXECUTOR_HPP_
 #define RCLNODEJS_EXECUTOR_HPP_
 
-#include <uv.h>
 #include <rcl/wait.h>
+#include <uv.h>
 
 #include <atomic>
 #include <exception>
@@ -34,8 +34,7 @@ class Executor {
  public:
   class Delegate {
    public:
-    virtual void Execute(
-        const std::vector<rclnodejs::RclHandle *>& handles) = 0;
+    virtual void Execute(const std::vector<rclnodejs::RclHandle*>& handles) = 0;
     virtual void CatchException(std::exception_ptr e_ptr) = 0;
   };
 

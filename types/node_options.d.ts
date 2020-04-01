@@ -27,7 +27,7 @@ declare module 'rclnodejs' {
     parameterOverrides: Array<Parameter>;
 
     /**
-     * Instructs a node if it should declare parameters from it's 
+     * Instructs a node if it should declare parameters from it's
      * parameter-overrides.
      */
     automaticallyDeclareParametersFromOverrides: boolean;

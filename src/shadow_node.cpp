@@ -59,8 +59,7 @@ void ShadowNode::Init(v8::Local<v8::Object> exports) {
   v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
 
   constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
-  Nan::Set(exports,
-           Nan::New("ShadowNode").ToLocalChecked(),
+  Nan::Set(exports, Nan::New("ShadowNode").ToLocalChecked(),
            tpl->GetFunction(context).ToLocalChecked());
 }
 
@@ -76,8 +75,7 @@ NAN_GETTER(ShadowNode::HandleGetter) {
 NAN_SETTER(ShadowNode::HandleSetter) {
   auto* me = ShadowNode::Unwrap<ShadowNode>(info.Holder());
   auto obj = Nan::To<v8::Object>(value).ToLocalChecked();
-  if (obj->InternalFieldCount() > 0)
-    me->rcl_handle()->Reset(obj);
+  if (obj->InternalFieldCount() > 0) me->rcl_handle()->Reset(obj);
 }
 
 void ShadowNode::StopRunning() {
@@ -102,16 +100,14 @@ NAN_METHOD(ShadowNode::Start) {
   auto timeout = Nan::To<int32_t>(info[1]).FromJust();
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
-  if (me)
-    me->StartRunning(context, timeout);
+  if (me) me->StartRunning(context, timeout);
 
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(ShadowNode::Stop) {
   auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
-  if (me)
-    me->StopRunning();
+  if (me) me->StopRunning();
 
   info.GetReturnValue().Set(Nan::Undefined());
 }
@@ -123,8 +119,7 @@ NAN_METHOD(ShadowNode::SpinOnce) {
   auto timeout = Nan::To<int32_t>(info[1]).FromJust();
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
-  if (me)
-    me->RunOnce(context, timeout);
+  if (me) me->RunOnce(context, timeout);
 
   info.GetReturnValue().Set(Nan::Undefined());
 }
@@ -146,7 +141,7 @@ void ShadowNode::Execute(const std::vector<rclnodejs::RclHandle*>& handles) {
     Nan::Set(results, i, handles[i]->handle());
   }
 
-  v8::Local<v8::Value> argv[] = { results };
+  v8::Local<v8::Value> argv[] = {results};
 
   res.runInAsyncScope(Nan::New(this->persistent()), "execute", 1, argv);
 }

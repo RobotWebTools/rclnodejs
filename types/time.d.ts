@@ -117,6 +117,9 @@ declare module 'rclnodejs' {
      * @returns The new Time.
      */
     // eslint-disable-next-line camelcase
-    static fromMsg(msg: builtin_interfaces.msg.Time, clockType?: ClockType): Time;
+    static fromMsg(
+      msg: builtin_interfaces.msg.Time,
+      clockType?: ClockType
+    ): Time;
   }
 }

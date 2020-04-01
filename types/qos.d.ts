@@ -81,7 +81,8 @@ declare module 'rclnodejs' {
     /**
      * The action status profileref.
      */
-    export const profileActionStatusDefault = 'qos_profile_action_status_default';
+    export const profileActionStatusDefault =
+      'qos_profile_action_status_default';
 
     /**
      * A named policy reference.
