@@ -21,7 +21,7 @@ RAWMODULEDIR="rclnodejs/"
 MODULEDIR="$WORKDIR/$RAWMODULEDIR"
 
 mkdir -p $MODULEDIR
-rsync -a . $MODULEDIR --exclude build --exclude dist --exclude node_modules --exclude generated --exclude Dockerfile --exclude appveyor.yml --exclude .travis.yml --exclude .coveralls.yml --exclude .istanbul.yml --exclude .gitmodules --exclude .circleci --exclude log --exclude install
+rsync -a . $MODULEDIR
 
 cp -f scripts/npmjs-readme.md $MODULEDIR/README.md
 
