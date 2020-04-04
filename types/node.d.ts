@@ -32,6 +32,18 @@ declare module 'rclnodejs' {
   }
 
   /**
+   * Default options when creating a Node, Publisher, Subscription, Client or Service
+   *
+   * ```ts
+   * {
+   *   enableTypedArray: true,
+   *   qos: QoS.profileDefault
+   * }
+   * ```
+   */
+  const DEFAULT_OPTIONS: Options;
+
+  /**
    * A service response to a client request.
    *
    * @remarks
@@ -657,18 +669,4 @@ declare module 'rclnodejs' {
     countSubscribers(topic: string): number;
   }
 
-  namespace rclnodejs {
-    /**
-     * Default options when creating a Node, Publisher, Subscription, Client or Service
-     *
-     * ```ts
-     * {
-     *   enableTypedArray: true,
-     *   qos: QoS.profileDefault
-     * }
-     *
-     * ```
-     */
-    export const DEFAULT_OPTIONS: Options;
-  }
 }
