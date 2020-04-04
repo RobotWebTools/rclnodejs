@@ -18,7 +18,7 @@
 
 #include <vector>
 
-#include "spdlog/spdlog.h"
+#include "macros.hpp"
 
 namespace rclnodejs {
 
@@ -81,11 +81,11 @@ void HandleManager::CollectHandles(const v8::Local<v8::Object> node) {
   is_synchronizing_.store(false);
   uv_sem_post(&sem_);
 
-  SPDLOG_DEBUG(spdlog::get("rclnodejs"),
-               "Add {0:d} timers, {1:d} subscriptions, {2:d} clients, " +
-                   "{3:d} services, {4:d} guards.",
-               timers_.size(), subscriptions_.size(), clients_.size(),
-               services_.size(), guard_conditions_.size());
+  RCLNODEJS_DEBUG(
+      "Add %lu timers, %lu subscriptions, %lu clients, %lu services, %lu "
+      "guards.",
+      timers_.size(), subscriptions_.size(), clients_.size(), services_.size(),
+      guard_conditions_.size());
 }
 
 bool HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {

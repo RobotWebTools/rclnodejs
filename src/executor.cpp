@@ -20,8 +20,8 @@
 #include <string>
 
 #include "handle_manager.hpp"
+#include "macros.hpp"
 #include "rcl_bindings.hpp"
-#include "spdlog/spdlog.h"
 
 #ifdef WIN32
 #define UNUSED
@@ -106,7 +106,7 @@ void Executor::Stop() {
                });
       while (!handle_closed) uv_run(uv_default_loop(), UV_RUN_ONCE);
 
-      SPDLOG_DEBUG(spdlog::get("rclnodejs"), "Background thread stopped.");
+      RCLNODEJS_DEBUG("Background thread stopped.");
     }
   }
 }
@@ -117,7 +117,7 @@ void Executor::DoWork(uv_async_t* handle) {
 }
 
 void Executor::Run(void* arg) {
-  SPDLOG_DEBUG(spdlog::get("rclnodejs"), "Background thread started.");
+  RCLNODEJS_DEBUG("Background thread started.");
   Executor* executor = reinterpret_cast<Executor*>(arg);
   HandleManager* handle_manager = executor->handle_manager_;
 
