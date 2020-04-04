@@ -3,7 +3,7 @@
     'default_configuration': 'Release',
     'configurations': {
       'Debug': {
-        'defines': ['SPDLOG_DEBUG_ON'],
+        'defines': ['DEBUG_ON'],
       },
     }
   },
@@ -22,7 +22,6 @@
       ],
       'include_dirs': [
         '.',
-        'src/third_party/spdlog/include/',
         "<!(node -e \"require('nan')\")",
       ],
       'cflags!': [

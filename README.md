@@ -54,12 +54,6 @@ Open a terminal, and input:
 git clone https://github.com/RobotWebTools/rclnodejs.git
 ```
 
-then enter the folder `rclnodejs`, and get the submodule:
-
-```bash
-git submodule update --init --recursive
-```
-
 ### Build Module
 
 Before you build the module, you should make sure the ROS2 environments were loaded. You can check if the `AMENT_PREFIX_PATH` environment variable was set:

@@ -15,6 +15,8 @@
 #ifndef RCLNODEJS_MARCOS_HPP_
 #define RCLNODEJS_MARCOS_HPP_
 
+#include "rcutils/logging_macros.h"
+
 #define CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE(op, lhs, rhs, message) \
   {                                                                 \
     if (lhs op rhs) {                                               \
@@ -30,5 +32,16 @@
 
 #define THROW_ERROR_IF_EQUAL(lhs, rhs, message) \
   CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE(==, lhs, rhs, message)
+
+#define PACKAGE_NAME "rclnodejs"
+
+#ifdef DEBUG_ON
+#define RCLNODEJS_DEBUG(...)                                   \
+  RCUTILS_LOG_COND_NAMED(                                      \
+      RCUTILS_LOG_SEVERITY_DEBUG, RCUTILS_LOG_CONDITION_EMPTY, \
+      RCUTILS_LOG_CONDITION_EMPTY, PACKAGE_NAME, __VA_ARGS__)
+#else
+#define RCLNODEJS_DEBUG(...)
+#endif
 
 #endif

@@ -14,15 +14,13 @@
 
 #include <nan.h>
 
+#include "macros.hpp"
 #include "rcl_action_bindings.hpp"
 #include "rcl_bindings.hpp"
 #include "rcl_handle.hpp"
+#include "rcutils/logging.h"
+#include "rcutils/macros.h"
 #include "shadow_node.hpp"
-#include "spdlog/spdlog.h"
-
-#ifdef SPDLOG_DEBUG_ON
-#include "spdlog/sinks/stdout_color_sinks.h"
-#endif
 
 void InitModule(v8::Local<v8::Object> exports) {
   v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
@@ -51,9 +49,10 @@ void InitModule(v8::Local<v8::Object> exports) {
   rclnodejs::ShadowNode::Init(exports);
   rclnodejs::RclHandle::Init(exports);
 
-#ifdef SPDLOG_DEBUG_ON
-  auto console = spdlog::stdout_color_mt("rclnodejs");
-  console->set_level(spdlog::level::debug);
+#ifdef DEBUG_ON
+  int result = rcutils_logging_set_logger_level(PACKAGE_NAME,
+                                                RCUTILS_LOG_SEVERITY_DEBUG);
+  RCUTILS_UNUSED(result);
 #endif
 }
 
