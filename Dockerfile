@@ -19,7 +19,10 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt update && apt install -y \
   python3-pip \
   python-rosdep \
   libpython3-dev \
-  cppcheck
+  cppcheck \
+  libpcre3-dev \
+  zlib1g-dev \
+  sed
 
 RUN rosdep init
 RUN rosdep update
@@ -27,6 +30,8 @@ RUN rosdep update
 # Configure git
 RUN git config --global user.name $GIT_USER_NAME \
     && git config --global user.email $GIT_USER_EMAIL
+
+RUN git clone https://github.com/ros2/poco_vendor.git && cd poco_vendor && sed -i 's/poco-1.8.0.1-release/poco-1.9.2-release/g' CMakeLists.txt && sed -i 's/07aa03d7976d0dbc141d95821c104c10/80dab5f45b35ff653f30ecd4632a75d7/g' CMakeLists.txt && cmake . && make && make install && cd ..
 
 # Get ROS2 latest package
 ENV ROS2_WS=/root
