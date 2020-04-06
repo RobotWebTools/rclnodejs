@@ -11,7 +11,7 @@ If you want to select a stable release of ROS 2.0 as your platform, please check
 
 |                                             ROS 2.0 release                                             |                                                             NPM version                                                             |
 | :-----------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------: |
-| Eloquent Elusor Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124)  | [0.12.0](https://github.com/RobotWebTools/rclnodejs/tree/0.12.0) ([doc](http://robotwebtools.org/rclnodejs/docs/0.12.0/index.html)) |
+| Eloquent Elusor Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124)  | [0.13.0](https://github.com/RobotWebTools/rclnodejs/tree/0.13.0) ([doc](http://robotwebtools.org/rclnodejs/docs/0.13.0/index.html)) |
 |         [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20191122)          |                              [0.11.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.11.1)                               |
 | Dashing Diademata Patch Release [4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018) |                              [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                               |
 | Dashing Diademata Patch Release [3](https://github.com/ros2/ros2/releases/tag/release-dashing-20190910) |                              [0.10.2](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.2)                               |
@@ -175,10 +175,6 @@ The benefits of using TypeScript become evident when working with more complex m
 ```
 
 Smart TypeScript tools such as Visual Studio Code and the CodeMix plugin for Eclipse will help you learn the rclnodejs api and identify issues while coding rather than at runtime.
-
-## Experimental - Deprecated
-
-- [actionlib](https://github.com/RobotWebTools/rclnodejs/blob/develop/tutorials/actionlib.md) - as the [rcl](https://github.com/ros2/rcl) library has implemented the action related functions, we are going to drop this one and we don't guarantee the current actionlib can work with [rclcpp](https://github.com/ros2/rclcpp).
 
 ## Troubleshooting
 
