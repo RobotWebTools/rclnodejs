@@ -78,6 +78,7 @@ describe('rclnodejs rate test suite', function() {
 
   it('rate server node naming test', async function() {
     const rate = node.createRate();
+    await assertUtils.createDelay(1000);
     const rateTimerServerName = `_${node.name()}_rate_timer_server`;
     assert.ok(node.getNodeNames().includes(rateTimerServerName));
   });

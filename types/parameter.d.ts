@@ -1,7 +1,5 @@
 /* eslint-disable camelcase */
 
-import { rcl_interfaces, rclnodejs } from 'rclnodejs';
-
 declare module 'rclnodejs' {
   /** 
    * The plus/minus tolerance for determining number equivalence.
