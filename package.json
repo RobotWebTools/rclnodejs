@@ -42,7 +42,7 @@
     "husky": "^4.2.3",
     "lint-staged": "^10.0.7",
     "mocha": "^7.0.1",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.5",
     "sinon": "^9.0.0",
     "tree-kill": "^1.2.1",
     "typescript": "^3.7.2"
@@ -58,11 +58,11 @@
     "mkdirp": "^1.0.3",
     "mz": "^2.6.0",
     "nan": "^2.8.0",
-    "ref-napi": "^1.4.3",
+    "ref-napi": "^2.0.0",
     "ref-array-di": "^1.2.0",
     "ref-struct-di": "^1.1.0",
     "walk": "^2.3.9",
-    "uuid": "^7.0.2",
+    "uuid": "^8.0.0",
     "int64-napi": "^1.0.1"
   },
   "husky": {
