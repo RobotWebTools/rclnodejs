@@ -42,7 +42,7 @@
         '-lrcutils',
         '-lrcl_yaml_param_parser',
         '-lrmw',
-        '-lrosidl_generator_c',
+        '-lrosidl_runtime_c',
       ],
       'conditions': [
         [

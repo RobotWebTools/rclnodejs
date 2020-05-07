@@ -29,7 +29,7 @@
 #include <rmw/validate_full_topic_name.h>
 #include <rmw/validate_namespace.h>
 #include <rmw/validate_node_name.h>
-#include <rosidl_generator_c/string_functions.h>
+#include <rosidl_runtime_c/string_functions.h>
 
 #include <memory>
 #include <string>
@@ -1270,10 +1270,10 @@ NAN_METHOD(Shutdown) {
 NAN_METHOD(InitString) {
   void* buffer =
       node::Buffer::Data(Nan::To<v8::Object>(info[0]).ToLocalChecked());
-  rosidl_generator_c__String* ptr =
-      reinterpret_cast<rosidl_generator_c__String*>(buffer);
+  rosidl_runtime_c__String* ptr =
+      reinterpret_cast<rosidl_runtime_c__String*>(buffer);
 
-  rosidl_generator_c__String__init(ptr);
+  rosidl_runtime_c__String__init(ptr);
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
