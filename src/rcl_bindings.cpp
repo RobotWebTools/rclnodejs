@@ -18,6 +18,7 @@
 #include <rcl/error_handling.h>
 #include <rcl/expand_topic_name.h>
 #include <rcl/graph.h>
+#include <rcl/logging.h>
 #include <rcl/node.h>
 #include <rcl/rcl.h>
 #include <rcl/validate_topic_name.h>
@@ -96,6 +97,10 @@ NAN_METHOD(Init) {
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
       rcl_init(argc, argc > 0 ? argv : nullptr, &init_options, context),
+      rcl_get_error_string().str);
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_logging_configure(&context->global_arguments, &allocator),
       rcl_get_error_string().str);
 
   for (int i = 0; i < argc; i++) {
@@ -1252,6 +1257,8 @@ NAN_METHOD(Shutdown) {
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   THROW_ERROR_IF_NOT_EQUAL(rcl_shutdown(context), RCL_RET_OK,
+                           rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(rcl_logging_fini(), RCL_RET_OK,
                            rcl_get_error_string().str);
 
   if (g_sigint_gc) {
