@@ -5,8 +5,7 @@ sudo: required
 
 branches:
   only:
-  - develop
-  - master
+  - eloquent-elusor
 
 before_install:
   - sudo docker pull ubuntu:bionic
