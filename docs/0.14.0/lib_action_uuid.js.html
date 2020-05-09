@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: lib/client.js</title>
+    <title>JSDoc: Source: lib/action/uuid.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: lib/client.js</h1>
+    <h1 class="page-title">Source: lib/action/uuid.js</h1>
 
     
 
@@ -26,7 +26,7 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>// Copyright (c) 2017 Intel Corporation. All rights reserved.
+            <pre class="prettyprint source linenums"><code>// Copyright (c) 2020 Matt Richard. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,120 +42,68 @@
 
 'use strict';
 
-const rclnodejs = require('bindings')('rclnodejs');
-const Entity = require('./entity.js');
-const debug = require('debug')('rclnodejs:client');
+const { v4: uuidv4 } = require('uuid');
 
 /**
- * @class - Class representing a Client in ROS
- * @hideconstructor
+ * @class - Represents a unique identifier used by actions.
+ * @ignore
  */
 
-class Client extends Entity {
-  constructor(handle, nodeHandle, serviceName, typeClass, options) {
-    super(handle, typeClass, options);
-    this._nodeHandle = nodeHandle;
-    this._serviceName = serviceName;
-    this._sequenceNumber = 0;
-  }
-
+class ActionUuid {
   /**
-   * This callback is called when a resopnse is sent back from service
-   * @callback ResponseCallback
-   * @param {Object} response - The response sent from the service
-   * @see [Client.sendRequest]{@link Client#sendRequest}
-   * @see [Node.createService]{@link Node#createService}
-   * @see {@link Client}
-   * @see {@link Service}
+   * Creates a new instance of ActionUuid.
+   * @constructor
+   *
+   * @param {Uint8Array} bytes - The bytes to create the UUID from. A new random UUID will be created, if not provided.
    */
-
-  /**
-   * Send the request and will be notified asynchronously if receiving the repsonse.
-   * @param {object} request - The request to be submitted.
-   * @param {ResponseCallback} callback - Thc callback function for receiving the server response.
-   * @return {undefined}
-   * @see {@link ResponseCallback}
-   */
-  sendRequest(request, callback) {
-    let requestToSend =
-      request instanceof this._typeClass.Request
-        ? request
-        : new this._typeClass.Request(request);
-    if (typeof callback !== 'function') {
-      throw new TypeError('Invalid argument');
-    }
-
-    let rawRequest = requestToSend.serialize();
-    this._sequenceNumber = rclnodejs.sendRequest(this._handle, rawRequest);
-    debug(`Client has sent a ${this._serviceName} request.`);
-    this._callback = callback;
-  }
-
-  get sequenceNumber() {
-    return this._sequenceNumber;
-  }
-
-  processResponse(response) {
-    debug(`Client has received ${this._serviceName} response from service.`);
-    this._callback(response.toPlainObject(this.typedArrayEnabled));
-  }
-
-  /**
-   * Checks if the service is available.
-   * @return {boolean} true if the service is available.
-   */
-  isServiceServerAvailable() {
-    return rclnodejs.serviceServerIsAvailable(this._nodeHandle, this.handle);
-  }
-
-  /**
-   * Wait until the service server is available or a timeout is reached. This
-   * function polls for the service state so it may not return as soon as the
-   * service is available.
-   * @param {number} timeout The maximum amount of time to wait for, if timeout
-   * is `undefined` or `&lt; 0`, this will wait indefinitely.
-   * @return {Promise&lt;boolean>} true if the service is available.
-   */
-  async waitForService(timeout = undefined) {
-    let deadline = Infinity;
-    if (timeout !== undefined &amp;&amp; timeout >= 0) {
-      deadline = Date.now() + timeout;
-    }
-    let waitMs = 5;
-    let serviceAvailable = this.isServiceServerAvailable();
-    while (!serviceAvailable &amp;&amp; Date.now() &lt; deadline) {
-      waitMs *= 2;
-      waitMs = Math.min(waitMs, 1000);
-      if (timeout !== undefined &amp;&amp; timeout >= -1) {
-        waitMs = Math.min(waitMs, deadline - Date.now());
+  constructor(bytes) {
+    if (bytes) {
+      if (!(bytes instanceof Uint8Array)) {
+        throw new Error('Invalid parameter');
       }
-      await new Promise(resolve => setTimeout(resolve, waitMs));
-      serviceAvailable = this.isServiceServerAvailable();
-    }
-    return serviceAvailable;
-  }
 
-  static createClient(nodeHandle, serviceName, typeClass, options) {
-    let type = typeClass.type();
-    let handle = rclnodejs.createClient(
-      nodeHandle,
-      serviceName,
-      type.interfaceName,
-      type.pkgName,
-      options.qos
-    );
-    return new Client(handle, nodeHandle, serviceName, typeClass, options);
+      this._bytes = bytes;
+    } else {
+      // Generate random UUID.
+      let uuid = uuidv4().replace(/-/g, '');
+      this._bytes = Uint8Array.from(Buffer.from(uuid, 'hex'));
+    }
   }
 
   /**
-   * @type {string}
+   * Creates a new {@link ActionUuid} from the given bytes.
+   * @param {Uint8Array} bytes - The bytes to create the UUID from.
+   * @returns {ActionUuid} - The new UUID.
    */
-  get serviceName() {
-    return this._serviceName;
+  static fromBytes(bytes) {
+    return new ActionUuid(bytes);
+  }
+
+  /**
+   * Creates a new random {@link ActionUuid}.
+   * @returns {ActionUuid} - The new UUID.
+   */
+  static random() {
+    return new ActionUuid();
+  }
+
+  /**
+   * Gets the bytes forming the UUID.
+   */
+  get bytes() {
+    return this._bytes;
+  }
+
+  /**
+   * Returns the UUID as a string.
+   * @returns {string} - String representation of the UUID.
+   */
+  toString() {
+    return [].slice.call(this._bytes).join(',');
   }
 }
 
-module.exports = Client;
+module.exports = ActionUuid;
 </code></pre>
         </article>
     </section>
