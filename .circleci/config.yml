@@ -8,7 +8,7 @@ jobs:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
     macos:
-      xcode: 11.1.0
+      xcode: 11.5.0
     steps:
     - checkout
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
@@ -18,18 +18,16 @@ jobs:
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
     - run: brew update
-    # Pin tinyxml2 to 7.0.0
-    - run: brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/9ec55dd6f30fa2a77dfd0367cff671c9c8828f67/Formula/tinyxml2.rb
-    - run: brew install wget cmake cppcheck tinyxml eigen pcre poco
+    - run: brew install wget cmake cppcheck tinyxml eigen pcre poco tinyxml2
     - run: brew install openssl
     - run: brew install asio console_bridge log4cxx spdlog
-    - run: python3 -m pip install catkin_pkg empy git+https://github.com/lark-parser/lark.git@0.7d pyparsing pyyaml setuptools argcomplete colcon-common-extensions numpy
-    - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
-    - run: wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
+    - run: python3 -m pip install catkin_pkg empy ifcfg lark-parser lxml netifaces numpy pyparsing pyyaml setuptools argcomplete colcon-common-extensions
+    - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://github.com/ros2/ros2/releases/download/release-foxy-20200605/ros2-foxy-20200605-macos-amd64.tar.bz2 && tar xf ros2-foxy-20200605-macos-amd64.tar.bz2
+    - run: wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
     - run: echo "source $HOME/.bashrc" >> ~/.bash_profile
     - run: cat ~/.bash_profile
-    - run: nvm install v12.16.1
-    - run: nvm alias default v12.16.1
+    - run: nvm install v12.18.0
+    - run: nvm alias default v12.18.0
     - run: node --version && npm --version && rm -rf ./node_modules/
     - run: source ~/ros2_install/ros2-osx/local_setup.bash && git submodule init && git submodule update && npm install --python=python2.7
     - run: export PATH="/usr/local/opt/python@2/libexec/bin:$PATH" && npm run lint
