@@ -33,6 +33,14 @@ namespace rclnodejs {
 
 static std::exception_ptr g_exception_ptr = nullptr;
 
+struct RclResult {
+  RclResult(rcl_ret_t rcl_ret, const std::string& msg)
+      : ret(rcl_ret), error_msg(msg) {}
+
+  rcl_ret_t ret;
+  std::string error_msg;
+};
+
 Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
     : async_(nullptr),
       handle_manager_(handle_manager),
@@ -62,28 +70,23 @@ void Executor::Start(rcl_context_t* context, int32_t time_out) {
 }
 
 void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
-  if (!running_.load()) {
-    try {
-      rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
-      rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, 0, context,
-                                        rcl_get_default_allocator());
-      if (ret != RCL_RET_OK) {
-        throw std::runtime_error(std::string("Init waitset failed: ") +
-                                 rcl_get_error_string().str);
-      }
+  rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
+  rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, 0, context,
+                                    rcl_get_default_allocator());
+  if (ret != RCL_RET_OK) Nan::ThrowError(rcl_get_error_string().str);
 
-      if (WaitForReadyCallbacks(&wait_set, time_out)) ExecuteReadyHandles();
+  RclResult wait_result = WaitForReadyCallbacks(&wait_set, time_out);
 
-      if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
-        std::string error_message =
-            std::string("Failed to destroy guard waitset:") +
-            std::string(rcl_get_error_string().str);
-        throw std::runtime_error(error_message);
-      }
-    } catch (...) {
-      g_exception_ptr = std::current_exception();
-      ExecuteReadyHandles();
-    }
+  if (wait_result.ret != RCL_RET_OK)
+    Nan::ThrowError(wait_result.error_msg.c_str());
+
+  if (handle_manager_->ready_handles_count() > 0) ExecuteReadyHandles();
+
+  if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
+    std::string error_message =
+        std::string("Failed to destroy guard waitset:") +
+        std::string(rcl_get_error_string().str);
+    Nan::ThrowError(error_message.c_str());
   }
 }
 
@@ -132,17 +135,14 @@ void Executor::Run(void* arg) {
     }
 
     while (executor->running_.load()) {
-      if (handle_manager->is_synchronizing())
-        handle_manager->WaitForSynchronizing();
+      RclResult wait_result =
+          executor->WaitForReadyCallbacks(&wait_set, executor->time_out());
+      if (wait_result.ret != RCL_RET_OK)
+        throw std::runtime_error(wait_result.error_msg);
 
-      {
-        ScopedMutex mutex(handle_manager->mutex());
-        if (executor->WaitForReadyCallbacks(&wait_set, executor->time_out())) {
-          if (!uv_is_closing(
-                  reinterpret_cast<uv_handle_t*>(executor->async_))) {
-            uv_async_send(executor->async_);
-          }
-        }
+      if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(executor->async_)) &&
+          handle_manager->ready_handles_count() > 0) {
+        uv_async_send(executor->async_);
       }
     }
 
@@ -156,69 +156,91 @@ void Executor::Run(void* arg) {
   }
 }
 
-bool Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
-                                     int32_t time_out) {
-  if (handle_manager_->is_empty()) return false;
+RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
+                                          int32_t time_out) {
+  if (handle_manager_->is_synchronizing())
+    handle_manager_->WaitForSynchronizing();
+  {
+    ScopedReadWriteLock read_lock(handle_manager_->handle_rwlock(),
+                                  ScopedReadWriteLock::LockType::kRead);
+    if (handle_manager_->is_empty()) return RclResult(RCL_RET_OK, "" /* msg */);
 
-  size_t num_subscriptions = 0u;
-  size_t num_guard_conditions = 0u;
-  size_t num_timers = 0u;
-  size_t num_clients = 0u;
-  size_t num_services = 0u;
+    size_t num_subscriptions = 0u;
+    size_t num_guard_conditions = 0u;
+    size_t num_timers = 0u;
+    size_t num_clients = 0u;
+    size_t num_services = 0u;
 
-  if (!handle_manager_->GetEntityCounts(&num_subscriptions,
-                                        &num_guard_conditions, &num_timers,
-                                        &num_clients, &num_services)) {
-    std::string error_message = std::string("Failed to get entity counts: ") +
-                                std::string(rcl_get_error_string().str);
-    throw std::runtime_error(error_message);
-  }
-
-  if (rcl_wait_set_resize(wait_set, num_subscriptions,
-                          num_guard_conditions + 1u, num_timers, num_clients,
-                          num_services,
-                          // TODO(minggang): support events.
-                          0u) != RCL_RET_OK) {
-    std::string error_message = std::string("Failed to resize: ") +
-                                std::string(rcl_get_error_string().str);
-    throw std::runtime_error(error_message);
-  }
-
-  if (!handle_manager_->AddHandlesToWaitSet(wait_set)) {
-    throw std::runtime_error("Couldn't fill waitset");
-  }
-
-  int ignored UNUSED =
-      rcl_wait_set_add_guard_condition(wait_set, g_sigint_gc, nullptr);
-
-  time_out = time_out < 0 ? -1 : RCL_MS_TO_NS(time_out);
-
-  rcl_ret_t status = rcl_wait(wait_set, time_out);
-  if (status == RCL_RET_WAIT_SET_EMPTY) {
-  } else if (status != RCL_RET_OK && status != RCL_RET_TIMEOUT) {
-    throw std::runtime_error(std::string("rcl_wait() failed: ") +
-                             rcl_get_error_string().str);
-  } else {
-    if (wait_set->size_of_guard_conditions == 1 &&
-        wait_set->guard_conditions[0]) {
-      running_.store(false);
+    rcl_ret_t get_entity_ret = handle_manager_->GetEntityCounts(
+        &num_subscriptions, &num_guard_conditions, &num_timers, &num_clients,
+        &num_services);
+    if (get_entity_ret != RCL_RET_OK) {
+      std::string error_message = std::string("Failed to get entity counts: ") +
+                                  std::string(rcl_get_error_string().str);
+      return RclResult(get_entity_ret, error_message);
     }
 
-    if (!handle_manager_->CollectReadyHandles(wait_set)) {
+    rcl_ret_t resize_ret = rcl_wait_set_resize(
+        wait_set, num_subscriptions, num_guard_conditions + 1u, num_timers,
+        num_clients, num_services,
+        // TODO(minggang): support events.
+        0u);
+    if (resize_ret != RCL_RET_OK) {
+      std::string error_message = std::string("Failed to resize: ") +
+                                  std::string(rcl_get_error_string().str);
+      return RclResult(resize_ret, error_message);
+    }
+
+    rcl_ret_t add_wait_set_ret = handle_manager_->AddHandlesToWaitSet(wait_set);
+    if (add_wait_set_ret != RCL_RET_OK) {
       std::string error_message =
-          std::string("Failed to collect ready handles: ") +
-          std::string(rcl_get_error_string().str);
-      throw std::runtime_error(error_message);
+          std::string("Couldn't fill waitset") + rcl_get_error_string().str;
+      return RclResult(add_wait_set_ret, error_message);
+    }
+
+    int ignored UNUSED =
+        rcl_wait_set_add_guard_condition(wait_set, g_sigint_gc, nullptr);
+
+    time_out = time_out < 0 ? -1 : RCL_MS_TO_NS(time_out);
+
+    rcl_ret_t wait_ret = rcl_wait(wait_set, time_out);
+
+    if (wait_ret == RCL_RET_WAIT_SET_EMPTY) {
+    } else if (wait_ret != RCL_RET_OK && wait_ret != RCL_RET_TIMEOUT) {
+      std::string error_message =
+          std::string("rcl_wait() failed: ") + rcl_get_error_string().str;
+      return RclResult(wait_ret, error_message);
+    } else {
+      if (wait_set->size_of_guard_conditions == 1 &&
+          wait_set->guard_conditions[0]) {
+        running_.store(false);
+      }
+
+      // If ready_handles_count() returns a value which is greater than 0, it
+      // means that the previous ready handles haven't been taken. So stop here
+      // and return.
+      if (handle_manager_->ready_handles_count() > 0)
+        return RclResult(RCL_RET_OK, "" /* msg */);
+
+      rcl_ret_t collect_handles_ret =
+          handle_manager_->CollectReadyHandles(wait_set);
+      if (collect_handles_ret != RCL_RET_OK) {
+        std::string error_message =
+            std::string("Failed to collect ready handles: ") +
+            std::string(rcl_get_error_string().str);
+        return RclResult(wait_ret, error_message);
+      }
     }
   }
 
-  if (rcl_wait_set_clear(wait_set) != RCL_RET_OK) {
+  rcl_ret_t set_clear_ret = rcl_wait_set_clear(wait_set);
+  if (set_clear_ret != RCL_RET_OK) {
     std::string error_message = std::string("Failed to clear wait set: ") +
                                 std::string(rcl_get_error_string().str);
-    throw std::runtime_error(error_message);
+    return RclResult(set_clear_ret, error_message);
   }
 
-  return status != RCL_RET_WAIT_SET_EMPTY;
+  return RclResult(RCL_RET_OK, "" /* msg */);
 }
 
 void Executor::ExecuteReadyHandles() {
@@ -227,8 +249,10 @@ void Executor::ExecuteReadyHandles() {
       delegate_->CatchException(g_exception_ptr);
       rcl_reset_error();
       g_exception_ptr = nullptr;
+      return;
     }
-    delegate_->Execute(handle_manager_->get_ready_handles());
+
+    delegate_->Execute(handle_manager_->TakeReadyHandles());
   }
 }
 

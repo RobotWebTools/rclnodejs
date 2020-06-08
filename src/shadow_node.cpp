@@ -84,12 +84,12 @@ void ShadowNode::StopRunning() {
 }
 
 void ShadowNode::StartRunning(rcl_context_t* context, int32_t timeout) {
-  handle_manager_->CollectHandles(this->handle());
+  handle_manager_->SynchronizeHandles(this->handle());
   executor_->Start(context, timeout);
 }
 
 void ShadowNode::RunOnce(rcl_context_t* context, int32_t timeout) {
-  handle_manager_->CollectHandles(this->handle());
+  handle_manager_->SynchronizeHandles(this->handle());
   executor_->SpinOnce(context, timeout);
 }
 
@@ -127,7 +127,7 @@ NAN_METHOD(ShadowNode::SpinOnce) {
 NAN_METHOD(ShadowNode::SyncHandles) {
   auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
   if (me) {
-    me->handle_manager()->CollectHandles(me->handle());
+    me->handle_manager()->SynchronizeHandles(me->handle());
   }
 }
 
