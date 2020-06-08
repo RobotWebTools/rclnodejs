@@ -25,13 +25,27 @@
 
 namespace rclnodejs {
 
-class ScopedMutex {
+class ScopedReadWriteLock {
  public:
-  explicit ScopedMutex(uv_mutex_t* mutex) : mutex_(mutex) {
-    uv_mutex_lock(mutex_);
+  enum class LockType { kWrite, kRead };
+
+  ScopedReadWriteLock(uv_rwlock_t* rwlock, LockType type)
+      : rwlock_(rwlock), type_(type) {
+    if (type_ == LockType::kWrite)
+      uv_rwlock_wrlock(rwlock_);
+    else
+      uv_rwlock_rdlock(rwlock_);
   }
-  ~ScopedMutex() { uv_mutex_unlock(mutex_); }
-  uv_mutex_t* mutex_;
+
+  ~ScopedReadWriteLock() {
+    if (type_ == LockType::kWrite)
+      uv_rwlock_wrunlock(rwlock_);
+    else
+      uv_rwlock_rdunlock(rwlock_);
+  }
+
+  uv_rwlock_t* rwlock_;
+  LockType type_;
 };
 
 class HandleManager {
@@ -39,24 +53,27 @@ class HandleManager {
   HandleManager();
   ~HandleManager();
 
-  void CollectHandles(const v8::Local<v8::Object> node);
-  bool AddHandlesToWaitSet(rcl_wait_set_t* wait_set);
-  bool CollectReadyHandles(rcl_wait_set_t* wait_set);
-  void ClearHandles();
+  void SynchronizeHandles(const v8::Local<v8::Object> node);
   void WaitForSynchronizing() { uv_sem_wait(&sem_); }
-  bool GetEntityCounts(size_t* subscriptions_size,
-                       size_t* guard_conditions_size, size_t* timers_size,
-                       size_t* clients_size, size_t* services_size);
+  void ClearHandles();
+
+  rcl_ret_t AddHandlesToWaitSet(rcl_wait_set_t* wait_set);
+  rcl_ret_t CollectReadyHandles(rcl_wait_set_t* wait_set);
+  rcl_ret_t GetEntityCounts(size_t* subscriptions_size,
+                            size_t* guard_conditions_size, size_t* timers_size,
+                            size_t* clients_size, size_t* services_size);
 
   uint32_t subscription_count() const { return subscriptions_.size(); }
   uint32_t service_count() const { return services_.size(); }
   uint32_t client_count() const { return clients_.size(); }
   uint32_t timer_count() const { return timers_.size(); }
   uint32_t guard_condition_count() const { return guard_conditions_.size(); }
-  std::vector<rclnodejs::RclHandle*> get_ready_handles() const {
-    return ready_handles_;
-  }
-  uv_mutex_t* mutex() { return &mutex_; }
+  uv_rwlock_t* handle_rwlock() { return &sync_handles_rwlock_; }
+
+  std::vector<rclnodejs::RclHandle*> TakeReadyHandles();
+
+  uint32_t ready_handles_count();
+
   bool is_synchronizing() const { return is_synchronizing_.load(); }
   bool is_empty() const {
     return subscriptions_.size() == 0 && services_.size() == 0 &&
@@ -66,13 +83,16 @@ class HandleManager {
   }
 
  protected:
-  void CollectHandlesByType(const v8::Local<v8::Object>& typeObject,
-                            std::vector<rclnodejs::RclHandle*>* vec);
+  void SynchronizeHandlesByType(const v8::Local<v8::Object>& typeObject,
+                                std::vector<rclnodejs::RclHandle*>* vec);
   template <typename T>
   void CollectReadyHandlesByType(
       const T** struct_ptr, size_t size,
-      const std::vector<rclnodejs::RclHandle*>& handles);
-  bool CollectReadyActionHandles(rcl_wait_set_t* wait_set);
+      const std::vector<rclnodejs::RclHandle*>& handles,
+      std::vector<rclnodejs::RclHandle*>* ready_handles);
+  rcl_ret_t CollectReadyActionHandles(
+      rcl_wait_set_t* wait_set,
+      std::vector<rclnodejs::RclHandle*>* ready_handles);
 
  private:
   std::vector<rclnodejs::RclHandle*> timers_;
@@ -85,6 +105,8 @@ class HandleManager {
   std::vector<rclnodejs::RclHandle*> ready_handles_;
 
   uv_mutex_t mutex_;
+  uv_rwlock_t sync_handles_rwlock_;
+  uv_rwlock_t ready_handles_rwlock_;
   uv_sem_t sem_;
   std::atomic_bool is_synchronizing_;
 };

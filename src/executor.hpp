@@ -29,6 +29,7 @@ struct rcl_context_t;
 namespace rclnodejs {
 
 class HandleManager;
+struct RclResult;
 
 class Executor {
  public:
@@ -50,7 +51,10 @@ class Executor {
   static void Run(void* arg);
 
  private:
-  bool WaitForReadyCallbacks(rcl_wait_set_t* wait_set, int32_t time_out);
+  // Returns RclResult object which indicates the final result.
+  RclResult WaitForReadyCallbacks(rcl_wait_set_t* wait_set, int32_t time_out);
+
+  // Calls the callback of the ready handle.
   void ExecuteReadyHandles();
 
   uv_async_t* async_;
