@@ -11,6 +11,7 @@ If you want to select a stable release of ROS 2.0 as your platform, please check
 
 |                                             ROS 2.0 release                                             |                                                             NPM version                                                             |
 | :-----------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------: |
+| [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200605)  | [0.14.1](https://www.npmjs.com/package/rclnodejs/v/0.14.1) ([doc](http://robotwebtools.org/rclnodejs/docs/0.14.1/index.html)) |
 | Eloquent Elusor Patch Release [1](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124)  | [0.14.0](https://www.npmjs.com/package/rclnodejs/v/0.14.0) ([doc](http://robotwebtools.org/rclnodejs/docs/0.14.0/index.html)) |
 |         [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20191122)          |                              [0.11.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.11.1)                               |
 | Dashing Diademata Patch Release [4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018) |                              [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                               |
