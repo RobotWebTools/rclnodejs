@@ -34,8 +34,8 @@ fs.remove(path.join(path.dirname(__dirname), 'generated'), (err)=> {
       return file.substr(0, 5) === 'test-';});
 
     // eslint-disable-next-line
-    let blacklist = JSON.parse(fs.readFileSync(path.join(__dirname, '../test/blacklist.json'), 'utf8'));
-    let ignoredCases = blacklist[os.type()];
+    let blocklist = JSON.parse(fs.readFileSync(path.join(__dirname, '../test/blocklist.json'), 'utf8'));
+    let ignoredCases = blocklist[os.type()];
 
     tests.forEach(test => {
       if (ignoredCases.indexOf(test) === -1) {

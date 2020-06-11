@@ -6,10 +6,9 @@ sudo: required
 branches:
   only:
   - develop
-  - master
 
 before_install:
-  - sudo docker pull ubuntu:bionic
+  - sudo docker pull ubuntu:focal
   - sudo docker build -t rcldocker .
 
 script:
