@@ -312,11 +312,23 @@ function saveMsgFieldsAsTSD(
       fieldType = 'any';
       tp = '';
     }
+    
     const tmpl = indentString(`${field.name}: ${tp}${fieldType}`, indent);
     fs.writeSync(fd, tmpl);
     if (field.type.isArray) {
       fs.writeSync(fd, '[]');
+     
+      if (fieldType === 'number') {
+        // for number[] include alternate typed-array types, e.g., number[] | uint8[]
+        let jsTypedArrayName = 
+          fieldTypeArray2JSTypedArrayName(field.type.type);
+
+        if (jsTypedArrayName) {
+          fs.writeSync(fd, ` | ${jsTypedArrayName}`);
+        }
+      }
     }
+
     fs.writeSync(fd, lineEnd);
     fs.writeSync(fd, '\n');
   }
@@ -385,31 +397,103 @@ function fieldType2JSName(fieldInfo, subFolder = 'msg') {
     : `${fieldInfo.type.pkgName}.${subFolder}.${fieldInfo.type.type}`;
 }
 
+// https://design.ros2.org/articles/idl_interface_definition.html
+// https://github.com/ros2/rosidl/blob/master/rosidl_parser/rosidl_parser/definition.py
 function primitiveType2JSName(type) {
   let jsName;
 
   switch (type) {
     case 'char':
     case 'byte':
-    case 'uint8':
+    case 'octet':
+    
+    // signed explicit integer types
+    case 'short':
+    case 'long':
+    case 'long long':
+
+    // unsigned nonexplicit integer types
+    case 'unsigned short':
+    case 'unsigned long':
+    case 'unsigned long long':
+
+    // float point types
+    case 'float':
+    case 'double':
+    case 'long double':
+
+    // signed explicit integer types
     case 'int8':
     case 'int16':
-    case 'uint16':
     case 'int32':
-    case 'uint32':
     case 'int64':
-    case 'uint64':
+    
+    // signed explicit float types
     case 'float32':
     case 'float64':
-    case 'double':
+
+    // unsigned explicit integer types
+    case 'uint8':
+    case 'uint16':
+    case 'uint32':
+    case 'uint64':
       jsName = 'number';
       break;
-    case 'bool':
+    case 'bool': 
+    case 'boolean':
       jsName = 'boolean';
       break;
     case 'string':
     case 'wstring':
       jsName = 'string';
+      break;
+  }
+
+  return jsName;
+}
+
+function fieldTypeArray2JSTypedArrayName(type) {
+  let jsName;
+
+  switch (type) {
+    case 'byte':
+    case 'octet':
+    case 'uint8':
+      jsName = 'Uint8Array';
+      break;
+    case 'int8':
+      jsName = 'Int8Array';
+      break;
+    case 'int16':
+    case 'short':
+      jsName = 'Int16Array';
+      break;
+    case 'uint16':
+    case 'unsigned short':
+      jsName = 'Uint16Array';
+      break;
+    case 'int32':
+    case 'long':
+      jsName = 'Int32Array';
+      break;
+    case 'uint32':
+    case 'unsigned long':
+      jsName = 'Uint32Array';
+      break;
+    case 'float':
+    case 'float32':
+      jsName = 'Float32Array';
+      break;
+    case 'double':
+    case 'float64':
+      jsName = 'Float64Array';
+      break;
+    
+    case 'long long':
+    case 'unsigned long long':
+    case 'int64':
+    case 'uint64':
+      // number 
       break;
   }
 
