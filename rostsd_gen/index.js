@@ -406,7 +406,7 @@ function primitiveType2JSName(type) {
     case 'char':
     case 'byte':
     case 'octet':
-    
+
     // signed explicit integer types
     case 'short':
     case 'long':
@@ -461,6 +461,7 @@ function fieldTypeArray2JSTypedArrayName(type) {
     case 'uint8':
       jsName = 'Uint8Array';
       break;
+    case 'char':
     case 'int8':
       jsName = 'Int8Array';
       break;
