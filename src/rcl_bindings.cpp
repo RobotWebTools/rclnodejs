@@ -30,7 +30,11 @@
 #include <rmw/validate_full_topic_name.h>
 #include <rmw/validate_namespace.h>
 #include <rmw/validate_node_name.h>
+#if ROS_VERSION >= 2006
 #include <rosidl_runtime_c/string_functions.h>
+#else
+#include <rosidl_generator_c/string_functions.h>
+#endif
 
 #include <memory>
 #include <string>
@@ -1277,10 +1281,17 @@ NAN_METHOD(Shutdown) {
 NAN_METHOD(InitString) {
   void* buffer =
       node::Buffer::Data(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+#if ROS_VERSION >= 2006
   rosidl_runtime_c__String* ptr =
       reinterpret_cast<rosidl_runtime_c__String*>(buffer);
 
   rosidl_runtime_c__String__init(ptr);
+#else
+  rosidl_generator_c__String* ptr =
+      reinterpret_cast<rosidl_generator_c__String*>(buffer);
+
+  rosidl_generator_c__String__init(ptr);
+#endif
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
