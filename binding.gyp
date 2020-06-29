@@ -7,6 +7,9 @@
       },
     }
   },
+  'variables': {
+    'ros_version': '<!(node scripts/ros_distro.js)'
+  },
   'targets': [
     {
       'target_name': 'rclnodejs',
@@ -43,6 +46,9 @@
         '-lrcl_yaml_param_parser',
         '-lrmw',
         '-lrosidl_runtime_c',
+      ],
+      'defines': [
+        'ROS_VERSION=<(ros_version)'
       ],
       'conditions': [
         [
@@ -103,6 +109,17 @@
               'MACOS_DEPLOYMENT_TARGET': '10.12',
               'CLANG_CXX_LANGUAGE_STANDARD': 'c++14'
             }
+          }
+        ],
+        [
+          'ros_version<=1911',
+          {
+            'libraries': [
+              '-lrosidl_generator_c'
+            ],
+            'libraries!': [
+              '-lrosidl_runtime_c'
+            ]
           }
         ]
       ]
