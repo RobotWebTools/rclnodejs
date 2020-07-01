@@ -24,7 +24,7 @@ const fs = require('fs');
 const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
-const Node = require('./lib/node.js');
+// const Node = require('./lib/node.js');
 const NodeOptions = require('./lib/node_options.js');
 const {
   FloatingPointRange,
@@ -40,7 +40,6 @@ const rclnodejs = require('bindings')('rclnodejs');
 const tsdGenerator = require('./rostsd_gen/index.js');
 const validator = require('./lib/validator.js');
 const Time = require('./lib/time.js');
-const TimeSource = require('./lib/time_source.js');
 const ActionClient = require('./lib/action/client.js');
 const ActionServer = require('./lib/action/server.js');
 const ClientGoalHandle = require('./lib/action/client_goal_handle.js');
@@ -59,7 +58,7 @@ function inherits(target, source) {
   });
 }
 
-inherits(rclnodejs.ShadowNode, Node);
+// inherits(rclnodejs.ShadowNode, Node);
 
 function getCurrentGeneratorVersion() {
   let jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
@@ -90,8 +89,12 @@ function getCurrentGeneratorVersion() {
  * @exports rclnodejs
  */
 let rcl = {
-  _initialized: false,
-  _nodes: [],
+  
+  // flag identifies when module has been init'ed
+  initialized: false,
+  
+  // Map<Context,Array<Node>
+  _nodes: new Map(),
 
   /** {@link Clock} class */
   Clock: Clock,
@@ -144,9 +147,6 @@ let rcl = {
   /** {@link Time} class */
   Time: Time,
 
-  /** {@link TimeSource} class */
-  TimeSource: TimeSource,
-
   /** {@link module:validator|validator} object */
   validator: validator,
 
@@ -195,11 +195,14 @@ let rcl = {
       throw new TypeError('Invalid argument.');
     }
 
+    if (!this._nodes.has(context)) {
+      throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
+    }
+
     let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
     let node = new rclnodejs.ShadowNode();
     node.handle = handle;
     node.context = context;
-
     node.init(nodeName, namespace, context, options);
     debug(
       'Finish initializing node, name = %s and namespace = %s.',
@@ -207,7 +210,7 @@ let rcl = {
       namespace
     );
 
-    this._nodes.push(node);
+    this._nodes.get(context).push(node);
     return node;
   },
 
@@ -218,7 +221,13 @@ let rcl = {
    * @return {Promise<undefined>} A Promise.
    */
   init(context = Context.defaultContext(), argv = process.argv) {
+    
     return new Promise((resolve, reject) => {
+      // check if context has already been initialized
+      if (this._nodes.has(context)) {
+        throw new Error('The module rclnodejs has been initialized.');
+      };
+
       // check argv for correct value and state
       if (!Array.isArray(argv)) {
         throw new TypeError('argv must be an array.');
@@ -226,6 +235,10 @@ let rcl = {
       if (argv.reduce((hasNull, arg) => typeof arg !== 'string', false)) {
         throw new TypeError('argv elements must not be null');
       }
+
+      // setup internal state for context outside promise. 
+      rclnodejs.init(context.handle(), argv);
+      this._nodes.set(context, []);
 
       let that = this;
       if (!this._initialized) {
@@ -245,8 +258,6 @@ let rcl = {
             generator
               .generateAll(forced)
               .then(() => {
-                this._context = context;
-                rclnodejs.init(context.handle(), argv);
                 this._initialized = true;
                 resolve();
               })
@@ -258,7 +269,7 @@ let rcl = {
             reject(e);
           });
       } else {
-        throw new Error('The module rclnodejs has been initialized.');
+        resolve();
       }
     });
   },
@@ -276,7 +287,7 @@ let rcl = {
     if (node.spinning) {
       throw new Error('The node is already spinning.');
     }
-    node.startSpinning(this._context.handle(), timeout);
+    node.startSpinning(timeout);
   },
 
   /**
@@ -292,37 +303,47 @@ let rcl = {
     if (node.spinning) {
       throw new Error('The node is already spinning.');
     }
-    node.spinOnce(this._context.handle(), timeout);
+    node.spinOnce(node.context.handle(), timeout);
   },
 
   /**
    * @param {Context} context - The context to be shutdown.
    * @return {undefined}
    */
-  shutdown(context) {
-    if (!this._initialized) {
-      throw new Error('The module rclnodejs has been shut.');
+  shutdown(context = Context.defaultContext()) {
+    if (this.isShutdown(context)) {
+      throw new Error('The module rclnodejs has been shutdown.');
+      return;
     }
 
-    this._nodes.forEach(node => {
+    // check for non-existant or deleted context
+    // if (context === Context.defaultContext()) {
+    //   console.log('default ctx', this._nodes.has(Context.defaultContext()));
+    // }
+    if (!this._nodes.has(context)) {console.log('xxx'); return;}
+
+    // shutdown and remove all nodes assigned to context
+    this._nodes.get(context).forEach(node => {
       node.stopSpinning();
       node.destroy();
     });
-    if (!context) {
+    this._nodes.delete(context);
+    
+    // shutdown context
+    if (context === Context.defaultContext()) {
       Context.shutdownDefaultContext();
     } else {
       context.shutdown();
     }
-    this._nodes = [];
-    this._initialized = false;
-    this._context = undefined;
   },
+  
   /**
-   * Return status that whether the module is shut down.
+   * A predictate for testing if a context has been shutdown.
+   * @param {Context} [context=defaultContext] - The context to inspect
    * @return {boolean} Return true if the module is shut down, otherwise return false.
    */
-  isShutdown() {
-    return !this._initialized;
+  isShutdown(context = Context.defaultContext()) {
+    return !this._nodes.has(context);
   },
 
   /**
@@ -414,3 +435,13 @@ process.on('SIGINT', () => {
 });
 
 module.exports = rcl;
+
+// The following statements are located here to work around a 
+// circular dependency issue occuring in rate.js
+const Node = require('./lib/node.js');
+const TimeSource = require('./lib/time_source.js');
+
+/** {@link TimeSource} class */
+rcl.TimeSource = TimeSource;
+
+inherits(rclnodejs.ShadowNode, Node);
