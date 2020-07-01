@@ -160,4 +160,39 @@ describe('Node destroy testing', function() {
       rclnodejs.createNode('my_node');
     });
   });
+
+  it('rclnodejs multiple contexts init shutdown sequence', async function() {
+    await rclnodejs.init();
+    assert.ok(!rclnodejs.isShutdown());
+
+    let ctx = new rclnodejs.Context();
+    await rclnodejs.init(ctx);
+    assert.ok(!rclnodejs.isShutdown(ctx));
+    assert.ok(!rclnodejs.isShutdown());
+
+    assert.doesNotThrow(() => rclnodejs.shutdown());
+    assert.ok(rclnodejs.isShutdown());
+    assert.ok(!rclnodejs.isShutdown(ctx));
+
+    assert.doesNotThrow(() => rclnodejs.shutdown(ctx));
+    assert.ok(rclnodejs.isShutdown());
+    assert.ok(rclnodejs.isShutdown(ctx));
+
+    // repeat
+    await rclnodejs.init();
+    assert.ok(!rclnodejs.isShutdown());
+
+    ctx = new rclnodejs.Context();
+    await rclnodejs.init(ctx);
+    assert.ok(!rclnodejs.isShutdown(ctx));
+    assert.ok(!rclnodejs.isShutdown());
+
+    assert.doesNotThrow(() => rclnodejs.shutdown());
+    assert.ok(rclnodejs.isShutdown());
+    assert.ok(!rclnodejs.isShutdown(ctx));
+
+    assert.doesNotThrow(() => rclnodejs.shutdown(ctx));
+    assert.ok(rclnodejs.isShutdown());
+    assert.ok(rclnodejs.isShutdown(ctx));
+  });
 });

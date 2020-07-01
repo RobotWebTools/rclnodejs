@@ -35,7 +35,7 @@ async function main() {
     undefined,
     msg => console.log(`Received(${Date.now()}): ${msg.data}`)
   );
-  const rate = node.createRate(0.5);
+  const rate = await node.createRate(0.5);
 
   setInterval(() => publisher.publish(`hello ${Date.now()}`), 10);
 
