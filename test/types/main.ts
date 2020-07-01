@@ -171,21 +171,23 @@ timer.isCanceled();
 // $ExpectType void
 timer.cancel();
 
-// ---- Rate ----
-// $ExpectType Rate
-const rate = node.createRate(1);
+(async () => {
+  // ---- Rate ----
+  // $ExpectType Rate
+  const rate = await node.createRate(1);
 
-// $ExpectType number
-rate.frequency;
+  // $ExpectType number
+  rate.frequency;
 
-// $ExpectType boolean
-rate.isCanceled();
+  // $ExpectType boolean
+  rate.isCanceled();
 
-// $ExpectType Promise<void>
-rate.sleep();
+  // $ExpectType Promise<void>
+  rate.sleep();
 
-// $ExpectType void
-rate.cancel();
+  // $ExpectType void
+  rate.cancel();
+})();
 
 // ---- Duration ----
 // $ExpectType Duration

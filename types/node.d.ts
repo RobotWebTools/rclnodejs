@@ -221,22 +221,22 @@ declare module 'rclnodejs' {
      *
      * @param period - Elapsed time between interrupt events (milliseconds).
      * @param callback - Called on timeout interrupt.
-     * @param context - Context, default is Context.defaultContext().
+     * @param clock - Optional clock to use for the timer.
      * @returns New instance of Timer.
      */
     createTimer(
       period: number,
       callback: TimerRequestCallback,
-      context?: Context
+      clock?: Clock
     ): Timer;
 
     /**
      * Create a Rate.
      *
      * @param hz - The frequency of the rate timer; default is 1 hz.
-     * @returns New instance of Rate.
+     * @returns Promise resolving to new instance of Rate.
      */
-    createRate(hz: number): Rate;
+    createRate(hz: number): Promise<Rate>;
 
     /**
      * Create a Publisher.
