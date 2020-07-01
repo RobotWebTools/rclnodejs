@@ -41,33 +41,39 @@ describe('rclnodejs rate test suite', function() {
     rclnodejs.shutdown();
   });
 
-  it('rate constructor tests', function() {
-    const rate1 = node.createRate();
+  it('rate constructor tests', async function() {
+    const rate1 = await node.createRate();
     assert.equal(rate1.frequency, 1);
 
-    const rate2 = node.createRate(1000);
+    const rate2 = await node.createRate(1000);
     assert.equal(rate2.frequency, 1000);
 
-    const rate3 = node.createRate(0.001);
+    const rate3 = await node.createRate(0.001);
     assert.equal(rate3.frequency, 0.001);
 
-    assertThrowsError(() => {
-      node.createRate(1001);
-    }, RangeError);
+    try {
+      await node.createRate(1001);
+      assert.fail(false);
+    } catch (err) {
+      assert.ok(err instanceof RangeError);
+    }
 
-    assertThrowsError(() => {
-      node.createRate(0);
-    }, RangeError);
+    try {
+      await node.createRate(0);
+      assert.fail(false);
+    } catch (err) {
+      assert.ok(err instanceof RangeError);
+    }
   });
 
-  it('rate api tests', function() {
-    const rate = node.createRate();
+  it('rate api tests', async function() {
+    const rate = await node.createRate();
     assert.equal(rate.frequency, 1);
     assert.equal(rate.isCanceled(), false);
   });
 
   it('rate sleep cancel tests', async function() {
-    const rate = node.createRate();
+    const rate = await node.createRate();
     assert.equal(rate.isCanceled(), false);
 
     rate.cancel();
@@ -77,7 +83,7 @@ describe('rclnodejs rate test suite', function() {
   });
 
   it('rate server node naming test', async function() {
-    const rate = node.createRate();
+    const rate = await node.createRate();
     await assertUtils.createDelay(1000);
     const rateTimerServerName = `_${node.name()}_rate_timer_server`;
     assert.ok(node.getNodeNames().includes(rateTimerServerName));
@@ -88,7 +94,7 @@ describe('rclnodejs rate test suite', function() {
     //   collect and average the sleep intervals
     //   compare average sleep interval with the period of the timer
     const hz = 1000;
-    const rate = node.createRate(hz);
+    const rate = await node.createRate(hz);
 
     const dataSize = hz * 3;
     const arr = new Array(dataSize).fill(0);
