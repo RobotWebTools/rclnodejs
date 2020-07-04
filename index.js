@@ -24,7 +24,6 @@ const fs = require('fs');
 const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
-// const Node = require('./lib/node.js');
 const NodeOptions = require('./lib/node_options.js');
 const {
   FloatingPointRange,
@@ -58,8 +57,6 @@ function inherits(target, source) {
   });
 }
 
-// inherits(rclnodejs.ShadowNode, Node);
-
 function getCurrentGeneratorVersion() {
   let jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
 
@@ -90,11 +87,10 @@ function getCurrentGeneratorVersion() {
  */
 let rcl = {
   
-  // flag identifies when module has been init'ed
-  initialized: false,
-  
+  _rosVersionChecked: false,
+
   // Map<Context,Array<Node>
-  _nodes: new Map(),
+  _contextToNodeArrayMap: new Map(),
 
   /** {@link Clock} class */
   Clock: Clock,
@@ -195,7 +191,7 @@ let rcl = {
       throw new TypeError('Invalid argument.');
     }
 
-    if (!this._nodes.has(context)) {
+    if (!this._contextToNodeArrayMap.has(context)) {
       throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
     }
 
@@ -210,7 +206,7 @@ let rcl = {
       namespace
     );
 
-    this._nodes.get(context).push(node);
+    this._contextToNodeArrayMap.get(context).push(node);
     return node;
   },
 
@@ -224,53 +220,51 @@ let rcl = {
     
     return new Promise((resolve, reject) => {
       // check if context has already been initialized
-      if (this._nodes.has(context)) {
-        throw new Error('The module rclnodejs has been initialized.');
+      if (this._contextToNodeArrayMap.has(context)) {
+        throw new Error('The context has already been initialized.');
       };
 
       // check argv for correct value and state
       if (!Array.isArray(argv)) {
         throw new TypeError('argv must be an array.');
       }
-      if (argv.reduce((hasNull, arg) => typeof arg !== 'string', false)) {
+      if (argv.reduce((hasNull, arg) => hasNull || typeof arg !== 'string', false)) {
         throw new TypeError('argv elements must not be null');
       }
 
-      // setup internal state for context outside promise. 
+      // initialize context
       rclnodejs.init(context.handle(), argv);
-      this._nodes.set(context, []);
+      this._contextToNodeArrayMap.set(context, []);
 
-      let that = this;
-      if (!this._initialized) {
-        getCurrentGeneratorVersion()
-          .then(version => {
-            let forced =
-              version === null ||
-              compareVersions(version, generator.version()) === -1
-                ? true
-                : false;
-            if (forced) {
-              debug(
-                'The generator will begin to create JavaScript code from ROS IDL files...'
-              );
-            }
-
-            generator
-              .generateAll(forced)
-              .then(() => {
-                this._initialized = true;
-                resolve();
-              })
-              .catch(e => {
-                reject(e);
-              });
-          })
-          .catch(e => {
-            reject(e);
-          });
-      } else {
+      if (this._rosVersionChecked) {
+        // no further processing required
         resolve();
       }
+
+      getCurrentGeneratorVersion()
+        .then(version => {
+          let forced =
+            version === null || 
+            compareVersions(version, generator.version()) === -1;
+          if (forced) {
+            debug(
+              'The generator will begin to create JavaScript code from ROS IDL files...'
+            );
+          }
+
+          generator
+            .generateAll(forced)
+            .then(() => {
+              this._rosVersionChecked = true;
+              resolve();
+            })
+            .catch(e => {
+              reject(e);
+            });
+        })
+        .catch(e => {
+          reject(e);
+        });
     });
   },
 
@@ -316,18 +310,12 @@ let rcl = {
       return;
     }
 
-    // check for non-existant or deleted context
-    // if (context === Context.defaultContext()) {
-    //   console.log('default ctx', this._nodes.has(Context.defaultContext()));
-    // }
-    if (!this._nodes.has(context)) {console.log('xxx'); return;}
-
     // shutdown and remove all nodes assigned to context
-    this._nodes.get(context).forEach(node => {
+    this._contextToNodeArrayMap.get(context).forEach(node => {
       node.stopSpinning();
       node.destroy();
     });
-    this._nodes.delete(context);
+    this._contextToNodeArrayMap.delete(context);
     
     // shutdown context
     if (context === Context.defaultContext()) {
@@ -343,7 +331,7 @@ let rcl = {
    * @return {boolean} Return true if the module is shut down, otherwise return false.
    */
   isShutdown(context = Context.defaultContext()) {
-    return !this._nodes.has(context);
+    return !this._contextToNodeArrayMap.has(context);
   },
 
   /**
