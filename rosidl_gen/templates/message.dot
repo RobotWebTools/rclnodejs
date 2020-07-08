@@ -69,29 +69,47 @@ function getPrimitiveNameByType(type) {
 
 function getTypedArrayName(type) {
   const t = type.type.toLowerCase();
-  if (t === 'int8') {
-    return 'Int8Array';
-  } else if (t === 'uint8') {
-    return 'Uint8Array';
-  } else if (t === 'int16') {
-    return 'Int16Array';
-  } else if (t === 'uint16') {
-    return 'Uint16Array';
-  } else if (t === 'int32') {
-    return 'Int32Array';
-  } else if (t === 'uint32') {
-    return 'Uint32Array';
-  } else if (t === 'float64') {
-    return 'Float64Array';
-  } else if (t === 'float32') {
-    return 'Float32Array';
-  } else if (t === 'char') {
-    return 'Int8Array';
-  } else if (t === 'byte') {
-    return 'Uint8Array';
-  } else {
-    return '';
+  let typedArrayName;
+
+  switch (t) {
+    case 'byte':
+    case 'octet':
+    case 'uint8':
+      typedArrayName = 'Uint8Array';
+      break;
+    case 'char':
+    case 'int8':
+      typedArrayName = 'Int8Array';
+      break;
+    case 'int16':
+    case 'short':
+      typedArrayName = 'Int16Array';
+      break;
+    case 'uint16':
+    case 'unsigned short':
+      typedArrayName = 'Uint16Array';
+      break;
+    case 'int32':
+    case 'long':
+      typedArrayName = 'Int32Array';
+      break;
+    case 'uint32':
+    case 'unsigned long':
+      typedArrayName = 'Uint32Array';
+      break;
+    case 'float':
+    case 'float32':
+      typedArrayName = 'Float32Array';
+      break;
+    case 'double':
+    case 'float64':
+      typedArrayName = 'Float64Array';
+      break;
+    default:
+      typedArrayName = '';
   }
+
+  return typedArrayName;
 }
 
 function getTypedArrayElementName(type) {
