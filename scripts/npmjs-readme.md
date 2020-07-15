@@ -1,40 +1,60 @@
 # rclnodejs [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://travis-ci.org/RobotWebTools/rclnodejs)
 
-`rclnodejs` is a Node.js client for the Robot Operating System (ROS) v2.0. It provides a simple and easy JavaScript API for ROS 2.0 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects. 
+`rclnodejs` is a Node.js client for the Robot Operating System (ROS 2). It provides a simple and easy JavaScript API for ROS 2 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects. 
 
-The following JavaScript example demonstrates how to create a ROS 2.0 node and then publish a string message in only 6 lines of code. 
+Here's an example for how to create a ROS 2 node that publishes a string message in a few lines of JavaScript. 
 
 ``` JavaScript
 const rclnodejs = require('rclnodejs');
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
   const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
-  publisher.publish(`Hello ROS 2.0 from rclnodejs`);
+  publisher.publish(`Hello ROS 2 from rclnodejs`);
   rclnodejs.spin(node);
 });
 ```
 
-## Install ROS 2.0
+## Prerequisites
 
-Before install rclnodejs, make sure ROS 2.0 is installed first. Read and follow the [Installation Guide](https://index.ros.org/doc/ros2/Installation/) to install ROS 2.0
+**Node.js**  
+* [Node.js](https://nodejs.org/en/) version between 8.12 - 12.x.
+
+**ROS 2 SDK**  
+* See the ROS 2 SDK [Installation Guide](https://index.ros.org/doc/ros2/Installation/) for details.
+* *** DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://index.ros.org/doc/ros2/Tutorials/Configuring-ROS2-Environment/#source-the-setup-files) ***
 
 ## Install rclnodejs
 
-After ROS 2.0 is installed, run the following command
+Install the rclnodejs version that is compatible with your  installed version of ROS 2 (see table below). 
+ 
+Run the following command for the most current version of rclnodejs
 
 ``` bash
-npm i --save rclnodejs
+npm i rclnodejs
 ```
+or to install a specific version of rclnodejs use
+``` bash
+npm i rclnodejs@x.y.z
+```
+#### RCLNODEJS - ROS 2 Version Compatibility 
 
-## Match with ROS 2.0 Stable Releases
+| RCLNODEJS Version | Compatible ROS 2 Release |
+| :---------------: | :-----------: |
+| [0.14.1 (current)](https://www.npmjs.com/package/rclnodejs/v/0.14.1) ([API](http://robotwebtools.org/rclnodejs/docs/0.14.1/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200605) | 
+| [0.14.0](https://www.npmjs.com/package/rclnodejs/v/0.14.0) [(API)](http://robotwebtools.org/rclnodejs/docs/0.14.0/index.html) | [Eloquent Elusor - Patch 1](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) | 
+| [0.11.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.11.1)                               | [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20191122)          
+|                               [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                               | [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018) |
+|                               [0.10.2](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.2)                              | [Dashing Diademata - Patch 3](https://github.com/ros2/ros2/releases/tag/release-dashing-20190910) |
+|                               [0.10.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.1)                              | [Dashing Diademata - Patch 2](https://github.com/ros2/ros2/releases/tag/release-dashing-20190806) |
+|                                      [0.10.0](https://www.npmjs.com/package/rclnodejs/v/0.10.0)                                      | [Dashing Diademata - Patch 1](https://github.com/ros2/ros2/releases/tag/release-dashing-20190614) |
 
-Please check the [table](https://github.com/RobotWebTools/rclnodejs#match-with-ros-20-stable-releases) to select a specific version you want.
 
-## Document
+## Documentation
 
 API [documentation](http://robotwebtools.org/rclnodejs/docs/index.html) is available online.
 
 ## JavaScript Examples
+The source for the following examples and many others can be found [here](https://github.com/RobotWebTools/rclnodejs/tree/develop/example).
 
 Use complex message
 
@@ -108,7 +128,7 @@ In your node project install the rclnodejs package as described above. You will 
   npm install typescript @types/node -D
 ```
 
-In your tsconfig.json file include the following compiler options:
+In your project's tsconfig.json file include the following compiler options:
 ```json
 {
   "compilerOptions": {
@@ -126,22 +146,18 @@ import * as rclnodejs from 'rclnodejs';
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
   const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
-  publisher.publish(`Hello ROS 2.0 from rclnodejs`);
+  publisher.publish(`Hello ROS 2 from rclnodejs`);
   rclnodejs.spin(node);
 });
 ```
 
-In this example you may notice that other than the `import` statement the code is virtually identical to the JavaScript version. Where the benefits of using TypeScript kick in is when using smart coding tools such as Visual Studio Code or the CodeMix plugin for Eclipse. These productivity tools use the rclnodejs type declaration files to help you learn the api and code with it more accurately and quickly.
-
-Type aliases are provided for the ROS2 messages in the types/interfaces.d.ts file. To use a message type alias follow the naming pattern <pkg_name>.[msg|srv].<type>, e.g., sensor_msgs.msg.LaserScan or the std_msgs.msg.String as shown below. 
+Type-aliases for the ROS2 messages can be found in the `types/interfaces.d.ts` file. To use a message type-alias follow the naming pattern <pkg_name>.[msg|srv].<type>, e.g., sensor_msgs.msg.LaserScan or the std_msgs.msg.String as shown below. 
 ```
    const msg: rclnodejs.std_msgs.msg.String = {
      data: 'hello ROS2 from rclnodejs'
    }
 ```
 **Note** that the interface.d.ts file is updated each time the generate_messages.js script is run.
-
-While the code snippet above is a trivial message example, when working with more complex message types such as sensor data, developers can benefit from typing information to help detect issues earlier in the develpment cycle.
 
 ## License
 
