@@ -460,7 +460,7 @@ class {{=objectWrapper}} {
     if (refObject.{{=field.name}}.size != 0) {
       {{=getWrapperNameByType(field.type)}}.ArrayType.freeArray(refObject.{{=field.name}});
       if ({{=getWrapperNameByType(field.type)}}.ArrayType.useTypedArray) {
-        deallocator.delayFreeStructMember(refObject.{{=field.name}}, {{=getWrapperNameByType(field.type)}}.refObjectArrayType, 'data');
+        // Do nothing, the v8 will take the ownership of the ArrayBuffer used by the typed array.
       } else {
         deallocator.freeStructMember(refObject.{{=field.name}}, {{=getWrapperNameByType(field.type)}}.refObjectArrayType, 'data');
       }
