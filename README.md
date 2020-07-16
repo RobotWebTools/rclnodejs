@@ -182,31 +182,6 @@ npm run test
   set PATH=<path\to\python 3.x>;%PATH%
 ```
 
-## How To Use
-
-After building this module, you just need to follow the normal way to use it as a `Node.js` module.
-
-```javascript
-const rclnodejs = require('../index.js');
-
-rclnodejs.init().then(() => {
-  let String = rclnodejs.require('std_msgs').msg.String;
-  const node = rclnodejs.createNode('publisher_example_node');
-  const publisher = node.createPublisher(String, 'topic');
-  let msg = new String();
-
-  setInterval(function() {
-    const str = 'Hello ROS 2;
-    msg.data = str;
-    publisher.publish(msg);
-  }, 1000);
-
-  rclnodejs.spin(node);
-});
-```
-
-Browse the JavaScript programs in the `example` folder to learn how to create and work with `timers, subscriptions, publishers, clients, services, timers,` and `nodes`.
-
 ## Troubleshooting
 
 ### Maximum call stack size exceeded error when running in Jest
