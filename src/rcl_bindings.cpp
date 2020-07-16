@@ -1319,12 +1319,15 @@ NAN_METHOD(FreeMemeoryAtOffset) {
 }
 
 NAN_METHOD(CreateArrayBufferFromAddress) {
-  auto address = GetBufAddr(info[0]);
+  char* addr = GetBufAddr(info[0]);
   int32_t length = Nan::To<int32_t>(info[1]).FromJust();
 
-  auto array_buffer =
-      v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), address, length,
-                           v8::ArrayBufferCreationMode::kExternalized);
+  // We will create an ArrayBuffer with mode of
+  // ArrayBufferCreationMode::kInternalized and copy data starting from |addr|,
+  // thus the memory block will be collected by the garbage collector.
+  v8::Local<v8::ArrayBuffer> array_buffer =
+      v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), addr, length,
+                           v8::ArrayBufferCreationMode::kInternalized);
 
   info.GetReturnValue().Set(array_buffer);
 }
