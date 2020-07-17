@@ -1219,8 +1219,7 @@ std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
   qos_profile->durability = static_cast<rmw_qos_durability_policy_t>(
       Nan::To<uint32_t>(durability).FromJust());
   qos_profile->avoid_ros_namespace_conventions =
-      avoid_ros_namespace_conventions->BooleanValue(
-          currentContent->GetIsolate());
+      Nan::To<bool>(avoid_ros_namespace_conventions).FromJust();
 
   return qos_profile;
 }
