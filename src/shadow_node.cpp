@@ -25,20 +25,14 @@ namespace rclnodejs {
 
 Nan::Persistent<v8::Function> ShadowNode::constructor;
 
-ShadowNode::ShadowNode()
-    : handle_manager_(std::make_unique<HandleManager>()), rcl_handle_(nullptr) {
+ShadowNode::ShadowNode() : handle_manager_(std::make_unique<HandleManager>()) {
   executor_ = std::make_unique<Executor>(handle_manager_.get(), this);
-  rcl_handle_.reset(new Nan::Persistent<v8::Object>());
 }
 
 ShadowNode::~ShadowNode() {
   Nan::HandleScope scope;
 
   StopRunning();
-  if (!rcl_handle_->IsEmpty()) {
-    RclHandle* handle = RclHandle::Unwrap<RclHandle>(Nan::New(*rcl_handle_));
-    handle->Reset();
-  }
 }
 
 void ShadowNode::Init(v8::Local<v8::Object> exports) {
@@ -49,8 +43,6 @@ void ShadowNode::Init(v8::Local<v8::Object> exports) {
   tpl->SetClassName(Nan::New("ShadowNode").ToLocalChecked());
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  Nan::SetAccessor(tpl->InstanceTemplate(), Nan::New("handle").ToLocalChecked(),
-                   HandleGetter, HandleSetter);
   Nan::SetPrototypeMethod(tpl, "start", Start);
   Nan::SetPrototypeMethod(tpl, "stop", Stop);
   Nan::SetPrototypeMethod(tpl, "syncHandles", SyncHandles);
@@ -61,21 +53,6 @@ void ShadowNode::Init(v8::Local<v8::Object> exports) {
   constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
   Nan::Set(exports, Nan::New("ShadowNode").ToLocalChecked(),
            tpl->GetFunction(context).ToLocalChecked());
-}
-
-NAN_GETTER(ShadowNode::HandleGetter) {
-  auto* me = ShadowNode::Unwrap<ShadowNode>(info.Holder());
-
-  if (!me->rcl_handle()->IsEmpty())
-    info.GetReturnValue().Set(Nan::New(*(me->rcl_handle())));
-  else
-    info.GetReturnValue().Set(Nan::Undefined());
-}
-
-NAN_SETTER(ShadowNode::HandleSetter) {
-  auto* me = ShadowNode::Unwrap<ShadowNode>(info.Holder());
-  auto obj = Nan::To<v8::Object>(value).ToLocalChecked();
-  if (obj->InternalFieldCount() > 0) me->rcl_handle()->Reset(obj);
 }
 
 void ShadowNode::StopRunning() {
