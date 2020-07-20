@@ -91,10 +91,10 @@ NAN_METHOD(Init) {
     argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
     for (int i = 0; i < argc; i++) {
       Nan::MaybeLocal<v8::Value> jsElement = Nan::Get(jsArgv, i);
-      char* arg = *Nan::Utf8String(jsElement.ToLocalChecked());
-      int len = std::strlen(arg) + 1;
+      Nan::Utf8String utf8_arg(jsElement.ToLocalChecked());
+      int len = utf8_arg.length() + 1;
       argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
-      snprintf(argv[i], len, "%s", arg);
+      snprintf(argv[i], len, "%s", *utf8_arg);
     }
   }
 
@@ -1691,15 +1691,7 @@ NAN_METHOD(ServiceServerIsAvailable) {
   info.GetReturnValue().Set(result);
 }
 
-uint32_t GetBindingMethodsCount(BindingMethod* methods) {
-  uint32_t count = 0;
-  while (methods[count].function) {
-    count++;
-  }
-  return count;
-}
-
-BindingMethod binding_methods[] = {
+std::vector<BindingMethod> binding_methods = {
     {"init", Init},
     {"createNode", CreateNode},
     {"getParameterOverrides", GetParameterOverrides},

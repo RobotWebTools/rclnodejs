@@ -24,7 +24,7 @@
 
 namespace rclnodejs {
 
-extern BindingMethod action_binding_methods[];
+extern std::vector<BindingMethod> action_binding_methods;
 
 }  // namespace rclnodejs
 

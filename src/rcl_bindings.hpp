@@ -36,11 +36,9 @@ extern rcl_guard_condition_t* g_sigint_gc;
 void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
                           v8::Local<v8::Array>* result_list);
 
-uint32_t GetBindingMethodsCount(BindingMethod* methods);
-
 std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos);
 
-extern BindingMethod binding_methods[];
+extern std::vector<BindingMethod> binding_methods;
 
 }  // namespace rclnodejs
 

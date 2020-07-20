@@ -761,7 +761,7 @@ NAN_METHOD(ActionGetNamesAndTypes) {
   info.GetReturnValue().Set(result_list);
 }
 
-BindingMethod action_binding_methods[] = {
+std::vector<BindingMethod> action_binding_methods = {
     {"actionCreateClient", ActionCreateClient},
     {"actionCreateServer", ActionCreateServer},
     {"actionServerIsAvailable", ActionServerIsAvailable},
