@@ -5,11 +5,11 @@
 | develop | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://travis-ci.org/RobotWebTools/rclnodejs) | [![macOS Build Status](https://circleci.com/gh/RobotWebTools/rclnodejs/tree/develop.svg?style=shield)](https://circleci.com/gh/RobotWebTools/rclnodejs) | [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/develop?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/develop) |
 | master  | [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=master)](https://travis-ci.org/RobotWebTools/rclnodejs)  | [![macOS Build Status](https://circleci.com/gh/RobotWebTools/rclnodejs/tree/master.svg?style=shield)](https://circleci.com/gh/RobotWebTools/rclnodejs)  |  [![Build status](https://ci.appveyor.com/api/projects/status/upbc7tavdag1aa5e/branch/master?svg=true)](https://ci.appveyor.com/project/minggangw/rclnodejs/branch/master)  |
 
-`rclnodejs` is a Node.js client for the Robot Operating System (ROS 2). It provides a simple and easy JavaScript API for ROS 2 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects. 
+`rclnodejs` is a Node.js client for the Robot Operating System (ROS 2). It provides a simple and easy JavaScript API for ROS 2 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects.
 
-Here's an example for how to create a ROS 2 node that publishes a string message in a few lines of JavaScript. 
+Here's an example for how to create a ROS 2 node that publishes a string message in a few lines of JavaScript.
 
-``` JavaScript
+```JavaScript
 const rclnodejs = require('rclnodejs');
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
@@ -21,27 +21,30 @@ rclnodejs.init().then(() => {
 
 ## Prerequisites
 
-**Node.js**  
-* [Node.js](https://nodejs.org/en/) version between 8.12 - 12.x.
+**Node.js**
 
-**ROS 2 SDK**  
-* See the ROS 2 SDK [Installation Guide](https://index.ros.org/doc/ros2/Installation/) for details.
-* *** DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://index.ros.org/doc/ros2/Tutorials/Configuring-ROS2-Environment/#source-the-setup-files) ***
+- [Node.js](https://nodejs.org/en/) version between 8.12 - 12.x.
+
+**ROS 2 SDK**
+
+- See the ROS 2 SDK [Installation Guide](https://index.ros.org/doc/ros2/Installation/) for details.
+- **_ DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://index.ros.org/doc/ros2/Tutorials/Configuring-ROS2-Environment/#source-the-setup-files) _**
 
 ## Install rclnodejs
 
-Install the rclnodejs version that is compatible with your version of ROS 2 (see table below). 
- 
+Install the rclnodejs version that is compatible with your version of ROS 2 (see table below).
+
 Run the following command for the most current version of rclnodejs
 
-``` bash
+```bash
 npm i rclnodejs
 ```
+
 or to install a specific version of rclnodejs use
-``` bash
+
+```bash
 npm i rclnodejs@x.y.z
 ```
-#### RCLNODEJS - ROS 2 Version Compatibility 
 
 | RCLNODEJS Version | Compatible ROS 2 Release |
 | :---------------: | :-----------: |
@@ -96,7 +99,6 @@ The benefits of using TypeScript become evident when working with more complex u
      data: 'hello ROS2 from rclnodejs'
    }
 ```
-
 
 ## Build from Scratch
 
@@ -200,6 +202,36 @@ RangeError: Maximum call stack size exceeded
 This is caused by a bug in `ref` which happens when you `require` it multiple times. There is a fix available for `ref` but it's no longer being maintained and the author has not published it.
 
 If it is required to use Jest, a solution would be to fork `ref` and use npm shrinkwrap to installed a patched version.
+
+### Running with ASAN
+
+#### Linux
+
+To run with google's AddressSanitizer tool, build with `-fsanitize=address` flag,
+
+```sh
+CXXFLAGS=-fsanitize=address node-gyp build --debug
+```
+
+ASAN needs to be loaded at the start of the process, since rclnodejs is a dynamically loaded library, it will not do so by default. To workaround this, run node with `LD_PRELOAD` to force ASAN to be loaded.
+
+```sh
+LD_PRELOAD=$(g++ -print-file-name=libasan.so) node node_modules/.bin/mocha test/test-publisher.js
+```
+
+Due to v8's garbage collector, there may be false positives in the leak test, to remove them as much as possible, there is a simple helper script to run gc on exit. To use it, the `--expose-gc` flag needs to be set in node, then run mocha with `-r test/gc-on-exit.js` e.g.
+
+```sh
+LD_PRELOAD=$(g++ -print-file-name=libasan.so) node --expose-gc node_modules/.bin/mocha -r test/gc-on-exit.js test/test-publisher.js
+```
+
+**Note**: Tests that forks the current process like `test-array.js` will not run gc when they exit. They may report many false positive leaks.
+
+ASAN may report leaks in ref-napi and other modules, there is a suppression file you can use to hide them
+
+```sh
+LSAN_OPTIONS=suppressions=suppr.txt node --expose-gc node_modules/.bin/mocha -r test/gc-on-exit.js test/test-publisher.js
+```
 
 ## Get Involved
 
