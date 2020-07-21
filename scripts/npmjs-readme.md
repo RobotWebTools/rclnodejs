@@ -40,14 +40,8 @@ npm i rclnodejs@x.y.z
 
 | RCLNODEJS Version | Compatible ROS 2 Release |
 | :---------------: | :-----------: |
-| [0.14.1 (current)](https://www.npmjs.com/package/rclnodejs/v/0.14.1) ([API](http://robotwebtools.org/rclnodejs/docs/0.14.1/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200605) | 
-| [0.14.0](https://www.npmjs.com/package/rclnodejs/v/0.14.0) [(API)](http://robotwebtools.org/rclnodejs/docs/0.14.0/index.html) | [Eloquent Elusor - Patch 1](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) | 
-| [0.11.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.11.1)                               | [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20191122)          
-|                               [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                               | [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018) |
-|                               [0.10.2](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.2)                              | [Dashing Diademata - Patch 3](https://github.com/ros2/ros2/releases/tag/release-dashing-20190910) |
-|                               [0.10.1](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.1)                              | [Dashing Diademata - Patch 2](https://github.com/ros2/ros2/releases/tag/release-dashing-20190806) |
-|                                      [0.10.0](https://www.npmjs.com/package/rclnodejs/v/0.10.0)                                      | [Dashing Diademata - Patch 1](https://github.com/ros2/ros2/releases/tag/release-dashing-20190614) |
-
+| [0.15.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.15.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.15.0/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200710) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
+| [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3) | [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018) |
 
 ## Documentation
 
