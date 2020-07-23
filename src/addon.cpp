@@ -22,7 +22,32 @@
 #include "rcutils/macros.h"
 #include "shadow_node.hpp"
 
+bool IsRunningInElectronRenderer() {
+  auto global = Nan::GetCurrentContext()->Global();
+  auto process =
+      Nan::To<v8::Object>(Nan::Get(global, Nan::New("process").ToLocalChecked())
+                              .ToLocalChecked())
+          .ToLocalChecked();
+  auto process_type =
+      Nan::Get(process, Nan::New("type").ToLocalChecked()).ToLocalChecked();
+  return process_type->StrictEquals(Nan::New("renderer").ToLocalChecked());
+}
+
 void InitModule(v8::Local<v8::Object> exports) {
+  // workaround process name mangling by chromium
+  //
+  // rcl logging uses `program_invocation_name` to determine the log file,
+  // chromium mangles the program name to include all args, this causes a
+  // ENAMETOOLONG error when starting ros. Workaround is to replace the first
+  // occurence of ' -' with the null terminator. see:
+  // https://unix.stackexchange.com/questions/432419/unexpected-non-null-encoding-of-proc-pid-cmdline
+  if (IsRunningInElectronRenderer()) {
+    auto prog_name = program_invocation_name;
+    auto end = strstr(prog_name, " -");
+    assert(end);
+    prog_name[end - prog_name] = NULL;
+  }
+
   v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
 
   for (uint32_t i = 0; i < rclnodejs::binding_methods.size(); i++) {
