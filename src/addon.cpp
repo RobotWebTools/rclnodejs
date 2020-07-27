@@ -45,7 +45,7 @@ void InitModule(v8::Local<v8::Object> exports) {
     auto prog_name = program_invocation_name;
     auto end = strstr(prog_name, " -");
     assert(end);
-    prog_name[end - prog_name] = NULL;
+    prog_name[end - prog_name] = 0;
   }
 
   v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
