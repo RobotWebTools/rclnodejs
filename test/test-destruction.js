@@ -17,47 +17,43 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe('Node destroy testing', function() {
+describe('Node destroy testing', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  it('node.destroy()', function() {
+  it('node.destroy()', function () {
     var node = rclnodejs.createNode('my_node1');
     node.destroy();
   });
 
-  it('node.destroy() twice', function() {
+  it('node.destroy() twice', function () {
     var node = rclnodejs.createNode('my_node1');
     node.destroy();
 
-    assert.doesNotThrow(function() {
+    assert.doesNotThrow(function () {
       node.destroy();
     }, Error);
   });
 
-  it('node.destroy() corrupted', function() {
-    var node = rclnodejs.createNode('my_node3');
-    node.destroy();
-
-    var orgHandle = node.handle;
-    node.handle = 'garbage';
+  it('node handle readonly', function () {
+    var node = rclnodejs.createNode('my_node6');
     try {
-      node.destroy();
-    } catch (TypeError) {
+      node.handle = 'gargage';
+      assert.fail('node.handle should be read-only');
+    } catch (Error) {
       assert.ok(true);
-      node.handle = orgHandle;
       node.destroy();
     }
   });
 
-  it('node.destory timers', function() {
+  it('node.destory timers', function () {
     var node = rclnodejs.createNode('my_node4');
     var timer1 = node.createTimer(0.1, () => {}),
       timer2 = node.createTimer(1, () => {});
@@ -67,7 +63,7 @@ describe('Node destroy testing', function() {
     assert.deepStrictEqual(0, node._timers.length);
   });
 
-  it('node destory entities', function() {
+  it('node destory entities', function () {
     var node = rclnodejs.createNode('my_node5');
 
     var timer = node.createTimer(0.1, () => {});
@@ -82,13 +78,13 @@ describe('Node destroy testing', function() {
     assert.deepStrictEqual(3, node._publishers.length);
 
     var RclString = 'std_msgs/msg/String';
-    var sub1 = node.createSubscription(RclString, 'sub1_topic', function(msg) {
+    var sub1 = node.createSubscription(RclString, 'sub1_topic', function (msg) {
       console.log(`Received ${msg}`);
     });
     assert.deepStrictEqual(1, node._subscriptions.length);
 
     const uint8 = 'std_msgs/msg/UInt8';
-    var sub2 = node.createSubscription(uint8, 'sub2_topic', function(msg) {
+    var sub2 = node.createSubscription(uint8, 'sub2_topic', function (msg) {
       console.log(`Received ${msg}`);
     });
     assert.deepStrictEqual(2, node._subscriptions.length);
@@ -97,15 +93,5 @@ describe('Node destroy testing', function() {
     assert.deepStrictEqual(0, node._timers.length);
     assert.deepStrictEqual(0, node._publishers.length);
     assert.deepStrictEqual(0, node._subscriptions.length);
-  });
-
-  it('node currupted node handle', function() {
-    var node = rclnodejs.createNode('my_node6');
-    try {
-      node.handle = 'gargage';
-    } catch (Error) {
-      assert.ok(true);
-      node.destroy();
-    }
   });
 });

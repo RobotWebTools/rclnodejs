@@ -35,7 +35,6 @@ class ShadowNode : public Nan::ObjectWrap, public Executor::Delegate {
   void StopRunning();
   void RunOnce(rcl_context_t* context, int32_t timeout);
 
-  Nan::Persistent<v8::Object>* rcl_handle() { return rcl_handle_.get(); }
   HandleManager* handle_manager() { return handle_manager_.get(); }
 
   // Executor::Delegate overrides:
@@ -57,7 +56,6 @@ class ShadowNode : public Nan::ObjectWrap, public Executor::Delegate {
 
   std::unique_ptr<HandleManager> handle_manager_;
   std::unique_ptr<Executor> executor_;
-  std::unique_ptr<Nan::Persistent<v8::Object>> rcl_handle_;
 };
 
 }  // namespace rclnodejs

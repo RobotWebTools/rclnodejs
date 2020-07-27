@@ -25,8 +25,7 @@
 void InitModule(v8::Local<v8::Object> exports) {
   v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
 
-  for (uint32_t i = 0;
-       i < rclnodejs::GetBindingMethodsCount(rclnodejs::binding_methods); i++) {
+  for (uint32_t i = 0; i < rclnodejs::binding_methods.size(); i++) {
     Nan::Set(
         exports, Nan::New(rclnodejs::binding_methods[i].name).ToLocalChecked(),
         Nan::New<v8::FunctionTemplate>(rclnodejs::binding_methods[i].function)
@@ -34,9 +33,7 @@ void InitModule(v8::Local<v8::Object> exports) {
             .ToLocalChecked());
   }
 
-  for (uint32_t i = 0;
-       i < rclnodejs::GetBindingMethodsCount(rclnodejs::action_binding_methods);
-       i++) {
+  for (uint32_t i = 0; i < rclnodejs::action_binding_methods.size(); i++) {
     Nan::Set(
         exports,
         Nan::New(rclnodejs::action_binding_methods[i].name).ToLocalChecked(),

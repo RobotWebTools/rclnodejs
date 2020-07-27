@@ -18,13 +18,13 @@
 #include <nan.h>
 #include <rcl/rcl.h>
 
-#include <string>
+#include <vector>
 
 #include "rcl_bindings.hpp"
 
 namespace rclnodejs {
 
-extern BindingMethod action_binding_methods[];
+extern std::vector<BindingMethod> action_binding_methods;
 
 }  // namespace rclnodejs
 
