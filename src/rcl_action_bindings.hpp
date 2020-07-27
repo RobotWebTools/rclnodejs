@@ -18,7 +18,7 @@
 #include <nan.h>
 #include <rcl/rcl.h>
 
-#include <string>
+#include <vector>
 
 #include "rcl_bindings.hpp"
 

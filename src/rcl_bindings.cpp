@@ -38,6 +38,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "handle_manager.hpp"
 #include "macros.hpp"
