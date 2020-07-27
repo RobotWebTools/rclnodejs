@@ -21,3 +21,7 @@ install
 log
 .vscode
 .project
+
+# test build artifacts
+/test/cpp/add_two_ints_client
+/test/cpp/listener

@@ -52,7 +52,7 @@ const {
 
 function inherits(target, source) {
   let properties = Object.getOwnPropertyNames(source.prototype);
-  properties.forEach(property => {
+  properties.forEach((property) => {
     target.prototype[property] = source.prototype[property];
   });
 }
@@ -86,7 +86,6 @@ function getCurrentGeneratorVersion() {
  * @exports rclnodejs
  */
 let rcl = {
-  
   _rosVersionChecked: false,
 
   // Map<Context,Array<Node>
@@ -198,13 +197,10 @@ let rcl = {
     let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
     let node = new rclnodejs.ShadowNode();
     node.handle = handle;
+    Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
     node.context = context;
     node.init(nodeName, namespace, context, options);
-    debug(
-      'Finish initializing node, name = %s and namespace = %s.',
-      nodeName,
-      namespace
-    );
+    debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
 
     this._contextToNodeArrayMap.get(context).push(node);
     return node;
@@ -217,12 +213,11 @@ let rcl = {
    * @return {Promise<undefined>} A Promise.
    */
   init(context = Context.defaultContext(), argv = process.argv) {
-    
     return new Promise((resolve, reject) => {
       // check if context has already been initialized
       if (this._contextToNodeArrayMap.has(context)) {
         throw new Error('The context has already been initialized.');
-      };
+      }
 
       // check argv for correct value and state
       if (!Array.isArray(argv)) {
@@ -242,14 +237,10 @@ let rcl = {
       }
 
       getCurrentGeneratorVersion()
-        .then(version => {
-          let forced =
-            version === null || 
-            compareVersions(version, generator.version()) === -1;
+        .then((version) => {
+          let forced = version === null || compareVersions(version, generator.version()) === -1;
           if (forced) {
-            debug(
-              'The generator will begin to create JavaScript code from ROS IDL files...'
-            );
+            debug('The generator will begin to create JavaScript code from ROS IDL files...');
           }
 
           generator
@@ -258,11 +249,11 @@ let rcl = {
               this._rosVersionChecked = true;
               resolve();
             })
-            .catch(e => {
+            .catch((e) => {
               reject(e);
             });
         })
-        .catch(e => {
+        .catch((e) => {
           reject(e);
         });
     });
@@ -311,12 +302,12 @@ let rcl = {
     }
 
     // shutdown and remove all nodes assigned to context
-    this._contextToNodeArrayMap.get(context).forEach(node => {
+    this._contextToNodeArrayMap.get(context).forEach((node) => {
       node.stopSpinning();
       node.destroy();
     });
     this._contextToNodeArrayMap.delete(context);
-    
+
     // shutdown context
     if (context === Context.defaultContext()) {
       Context.shutdownDefaultContext();
@@ -324,7 +315,7 @@ let rcl = {
       context.shutdown();
     }
   },
-  
+
   /**
    * A predictate for testing if a context has been shutdown.
    * @param {Context} [context=defaultContext] - The context to inspect
@@ -361,7 +352,7 @@ let rcl = {
           debug('Finish regeneration.');
           resolve();
         })
-        .catch(e => {
+        .catch((e) => {
           reject(e);
         });
     });
@@ -424,7 +415,7 @@ process.on('SIGINT', () => {
 
 module.exports = rcl;
 
-// The following statements are located here to work around a 
+// The following statements are located here to work around a
 // circular dependency issue occuring in rate.js
 const Node = require('./lib/node.js');
 const TimeSource = require('./lib/time_source.js');
