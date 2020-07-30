@@ -28,7 +28,7 @@ rclnodejs.init().then(() => {
 **ROS 2 SDK**
 
 - See the ROS 2 SDK [Installation Guide](https://index.ros.org/doc/ros2/Installation/) for details.
-- **_ DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://index.ros.org/doc/ros2/Tutorials/Configuring-ROS2-Environment/#source-the-setup-files) _**
+- **DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://index.ros.org/doc/ros2/Tutorials/Configuring-ROS2-Environment/#source-the-setup-files)**
 
 ## Install rclnodejs
 
@@ -48,7 +48,7 @@ npm i rclnodejs@x.y.z
 
 | RCLNODEJS Version | Compatible ROS 2 Release |
 | :---------------: | :-----------: |
-| [0.15.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.15.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.15.0/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200710) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
+| [0.15.1 (current)](https://www.npmjs.com/package/rclnodejs/v/0.15.1) ([API](http://robotwebtools.org/rclnodejs/docs/0.15.0/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200710) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
 | [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3) | [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018) |
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` depdendency section.
