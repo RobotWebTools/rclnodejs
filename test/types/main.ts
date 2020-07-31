@@ -367,6 +367,9 @@ client.isServiceServerAvailable();
 // $ExpectType Promise<boolean>
 actionClient.waitForServer();
 
+// $ExpectType void
+actionClient.destroy();
+
 // $ExpectType Promise<ClientGoalHandle<"rclnodejs_test_msgs/action/Fibonacci">>
 const goalHandlePromise = actionClient.sendGoal(new Fibonacci.Goal());
 
@@ -410,6 +413,9 @@ actionServer.registerCancelCallback();
 
 // $ExpectType void
 actionServer.registerExecuteCallback(() => new Fibonacci.Result());
+
+// $ExpectType void
+actionServer.destroy();
 
 function executeCallback(
   goalHandle: rclnodejs.ServerGoalHandle<'rclnodejs_test_msgs/action/Fibonacci'>

@@ -173,5 +173,10 @@ declare module 'rclnodejs' {
      * @param executeCallback - Callback function.
      */
     registerExecuteCallback(executeCallback: ExecuteCallback<T>): void;
+
+    /**
+     * Destroy the action server and all goals.
+     */
+    destroy(): void;
   }
 }
