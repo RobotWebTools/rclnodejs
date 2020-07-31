@@ -132,5 +132,10 @@ declare module 'rclnodejs' {
      * @returns True if the service is available.
      */
     waitForServer(timeout?: number): Promise<boolean>;
+
+    /**
+     * Destroy the underlying action client handle.
+     */
+    destroy(): void;
   }
 }
