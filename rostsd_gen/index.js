@@ -65,7 +65,7 @@ function getPkgInfos(generatedRoot) {
     for (let filename of files) {
       const typeClass = fileName2Typeclass(filename);
 
-      if (typeClass.type === 'srv') {
+      if (typeClass.type && typeClass.type.startsWith('srv')) {
         // skip __srv__<action>
         if (
           !typeClass.name.endsWith('_Request') &&
@@ -90,7 +90,7 @@ function getPkgInfos(generatedRoot) {
         def: def,
       };
 
-      if (typeClass.type === 'action') {
+      if (typeClass.type && typeClass.type.startsWith('action')) {
         pkgInfo.actions.push(msgInfo);
       } else {
         pkgInfo.messages.push(msgInfo);
