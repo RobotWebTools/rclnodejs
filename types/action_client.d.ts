@@ -99,10 +99,10 @@ declare module 'rclnodejs' {
     );
 
     /**
-     * Send a goal and asynchronously get the result.
+     * Send a goal and wait for the goal ACK asynchronously.
      *
-     * The result of the returned Promise is set to a ClientGoalHandle when receipt of the goal
-     * is acknowledged by an action server.
+     * Return a Promise object that is resolved with a ClientGoalHandle when receipt of the goal
+     * is acknowledged by an action server, see client state transition https://index.ros.org/doc/ros2/Tutorials/Understanding-ROS2-Actions/
      *
      * @param goal - The goal request.
      * @param feedbackCallback - Callback function for feedback associated with the goal.
