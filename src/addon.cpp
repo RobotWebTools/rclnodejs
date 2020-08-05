@@ -34,19 +34,21 @@ bool IsRunningInElectronRenderer() {
 }
 
 void InitModule(v8::Local<v8::Object> exports) {
-  // workaround process name mangling by chromium
-  //
-  // rcl logging uses `program_invocation_name` to determine the log file,
-  // chromium mangles the program name to include all args, this causes a
-  // ENAMETOOLONG error when starting ros. Workaround is to replace the first
-  // occurence of ' -' with the null terminator. see:
-  // https://unix.stackexchange.com/questions/432419/unexpected-non-null-encoding-of-proc-pid-cmdline
+// workaround process name mangling by chromium
+//
+// rcl logging uses `program_invocation_name` to determine the log file,
+// chromium mangles the program name to include all args, this causes a
+// ENAMETOOLONG error when starting ros. Workaround is to replace the first
+// occurence of ' -' with the null terminator. see:
+// https://unix.stackexchange.com/questions/432419/unexpected-non-null-encoding-of-proc-pid-cmdline
+#if defined(__linux__) && defined(__GLIBC__)
   if (IsRunningInElectronRenderer()) {
     auto prog_name = program_invocation_name;
     auto end = strstr(prog_name, " -");
     assert(end);
     prog_name[end - prog_name] = 0;
   }
+#endif
 
   v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
 
