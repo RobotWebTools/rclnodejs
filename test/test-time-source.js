@@ -51,7 +51,7 @@ describe('rclnodejs TimeSource testing', function() {
   });
 
   function publishClockMessage(node) {
-    let pub = node.createPublisher('builtin_interfaces/msg/Time', 'clock');
+    let pub = node.createPublisher('builtin_interfaces/msg/Time', '/clock');
     let count = 0;
     timer = setInterval(() => {
       pub.publish({ sec: count, nanosec: 0 });
