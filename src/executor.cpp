@@ -113,8 +113,10 @@ void Executor::Run(void* arg) {
 
       {
         ScopedMutex mutex(handle_manager->mutex());
-        if (handle_manager->is_empty())
+        if (handle_manager->is_empty()) {
+          std::this_thread::sleep_for(std::chrono::milliseconds(1));
           continue;
+        }
 
         if (rcl_wait_set_resize(&wait_set, handle_manager->subscription_count(),
                                 // TODO(minggang): support guard conditions
