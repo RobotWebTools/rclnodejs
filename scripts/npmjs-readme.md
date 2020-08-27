@@ -45,7 +45,7 @@ npm i rclnodejs@x.y.z
 
 |                                                            RCLNODEJS Version                                                            |                                                                         Compatible ROS 2 Release                                                                         |
 | :-------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [0.15.2 (current)](https://www.npmjs.com/package/rclnodejs/v/0.15.2) ([API](http://robotwebtools.org/rclnodejs/docs/0.15.2/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200710) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
+| [0.15.3 (current)](https://www.npmjs.com/package/rclnodejs/v/0.15.3) ([API](http://robotwebtools.org/rclnodejs/docs/0.15.2/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200807) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
 |                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                    [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                     |
 
 ## Documentation
