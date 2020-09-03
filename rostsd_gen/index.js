@@ -32,7 +32,7 @@ const path = require('path');
 const fs = require('fs');
 const loader = require('../lib/interface_loader.js');
 
-function generateAll() {
+async function generateAll() {
   // load pkg and interface info (msgs and srvs)
   const generatedPath = path.join(__dirname, '../generated/');
   const pkgInfos = getPkgInfos(generatedPath);
@@ -41,6 +41,8 @@ function generateAll() {
   const messagesFilePath = path.join(__dirname, '../types/interfaces.d.ts');
   const fd = fs.openSync(messagesFilePath, 'w');
   savePkgInfoAsTSD(pkgInfos, fd);
+  await wait(500); // hack to avoid random segfault
+  fs.closeSync(fd);
 }
 
 // scan generated files, collect pkg and msg info
@@ -257,9 +259,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   );
 
   // close module declare
-  fs.writeSync(fd, '}\n');
-
-  fs.closeSync(fd);
+  fs.writeSync(fd, '}\n'); 
 }
 
 function saveMsgConstructorAsTSD(msgInfo, fd) {
@@ -560,6 +560,12 @@ function indentLines(lines, amount) {
   }
 
   return lines.map(line => indentString(line, amount));
+}
+
+async function wait(ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
 }
 
 const tsdGenerator = {

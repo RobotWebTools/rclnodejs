@@ -18,10 +18,16 @@
 const generator = require('../rosidl_gen/index.js');
 const tsdGenerator = require('../rostsd_gen/index.js');
 
-console.log('Start JavaScript message generation...');
-generator.generateAll(true).then(() => {
-  tsdGenerator.generateAll(); // create interfaces.d.ts
-  console.log('Generation complete.');
-}).catch((e) => {
-  console.log(`Caught error: ${e}`);
-});
+async function main() {
+  console.log('Start JavaScript message generation...');
+
+  try {
+    await generator.generateAll(true);
+    await tsdGenerator.generateAll(); // create interfaces.d.ts
+    console.log('Generation complete.');
+  } catch (e) {
+    console.log(`Caught error: ${e}`);
+  }
+}
+
+main();
