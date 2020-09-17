@@ -69,7 +69,7 @@ In your node project, in addition to installing the rclnodejs package, you will 
 
 Your tsconfig.json file should include the following compiler options:
 
-```json
+```jsonc
 {
   "compilerOptions": {
     "module": "commonjs",
@@ -82,7 +82,7 @@ Your tsconfig.json file should include the following compiler options:
 
 Here's a simple example implemented in TypeScript.
 
-```
+```typescript
 import * as rclnodejs from 'rclnodejs';
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
@@ -94,7 +94,7 @@ rclnodejs.init().then(() => {
 
 The benefits of using TypeScript become evident when working with more complex use-cases. The ROS 2 messages are defined in the `types/interfaces.d.ts` module. This module is updated as part of the `generate_messages` process. Here's a trivial example of working with a String msg.
 
-```
+```typescript
    const msg: rclnodejs.std_msgs.msg.String = {
      data: 'hello ROS2 from rclnodejs'
    }
