@@ -1692,6 +1692,27 @@ NAN_METHOD(ServiceServerIsAvailable) {
   info.GetReturnValue().Set(result);
 }
 
+NAN_METHOD(PublishRawMessage) {
+  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
+
+  auto object = Nan::To<v8::Object>(info[1]).ToLocalChecked();
+  rcl_serialized_message_t serialized_msg =
+      rmw_get_zero_initialized_serialized_message();
+  serialized_msg.buffer_capacity = node::Buffer::Length(object);
+  serialized_msg.buffer_length = serialized_msg.buffer_capacity;
+  serialized_msg.buffer =
+      reinterpret_cast<uint8_t*>(node::Buffer::Data(object));
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_publish_serialized_message(publisher, &serialized_msg, nullptr),
+      RCL_RET_OK, rcl_get_error_string().str);
+
+  info.GetReturnValue().Set(Nan::Undefined());
+}
+
 std::vector<BindingMethod> binding_methods = {
     {"init", Init},
     {"createNode", CreateNode},
@@ -1757,6 +1778,7 @@ std::vector<BindingMethod> binding_methods = {
     {"countPublishers", CountPublishers},
     {"countSubscribers", CountSubscribers},
     {"serviceServerIsAvailable", ServiceServerIsAvailable},
+    {"publishRawMessage", PublishRawMessage},
     {"", nullptr}};
 
 }  // namespace rclnodejs
