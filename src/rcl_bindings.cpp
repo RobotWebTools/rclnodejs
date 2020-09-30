@@ -1713,6 +1713,44 @@ NAN_METHOD(PublishRawMessage) {
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
+NAN_METHOD(RclTakeRaw) {
+  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
+
+  rcl_serialized_message_t msg = rmw_get_zero_initialized_serialized_message();
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+  rcl_ret_t ret = rmw_serialized_message_init(&msg, 0u, &allocator);
+  if (ret != RCL_RET_OK) {
+    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                             "Failed to deallocate message buffer.");
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+  ret = rcl_take_serialized_message(subscription, &msg, nullptr, nullptr);
+  if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    rcl_reset_error();
+    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                             "Failed to deallocate message buffer.");
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+
+  if (ret == RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                             "Failed to deallocate message buffer.");
+    info.GetReturnValue().Set(Nan::Undefined());
+    return;
+  }
+
+  info.GetReturnValue().Set(
+      Nan::CopyBuffer(reinterpret_cast<char*>(msg.buffer), msg.buffer_length)
+          .ToLocalChecked());
+  THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                           "Failed to deallocate message buffer");
+}
+
 std::vector<BindingMethod> binding_methods = {
     {"init", Init},
     {"createNode", CreateNode},
@@ -1779,6 +1817,7 @@ std::vector<BindingMethod> binding_methods = {
     {"countSubscribers", CountSubscribers},
     {"serviceServerIsAvailable", ServiceServerIsAvailable},
     {"publishRawMessage", PublishRawMessage},
+    {"rclTakeRaw", RclTakeRaw},
     {"", nullptr}};
 
 }  // namespace rclnodejs
