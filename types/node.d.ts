@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 
-import { Clock } from 'rclnodejs';
+import { Clock, TypeClassName, MessageTypeClassName } from 'rclnodejs';
 import { Logging } from 'rclnodejs';
 import { Parameter, ParameterDescriptor, ParameterType } from 'rclnodejs';
 import { QoS } from 'rclnodejs';
@@ -27,7 +27,23 @@ declare module 'rclnodejs' {
    * See {@link DEFAULT_OPTIONS}
    */
   interface Options<T = QoS | QoS.ProfileRef> {
-    enableTypedArray?: boolean;
+	
+	/**  
+	 * A messages will use TypedArray if necessary, default: true. 
+	 */
+	enableTypedArray?: boolean;
+
+	/**
+	 * Indicates messages are serialized, default: false. 
+	 *
+	 * @remarks
+	 * See {@link Node#createSubscription | Node.createSubscription}
+	 */
+	isRaw?: boolean;
+
+	/**
+	 * ROS Middleware "quality of service" setting, default: QoS.profileDefault.
+	 */
     qos?: T;
   }
 
@@ -37,7 +53,8 @@ declare module 'rclnodejs' {
    * ```ts
    * {
    *   enableTypedArray: true,
-   *   qos: QoS.profileDefault
+   *   qos: QoS.profileDefault,
+   *   isRaw: false
    * }
    * ```
    */
@@ -84,9 +101,9 @@ declare module 'rclnodejs' {
    * See {@link Publisher}
    * See {@link Subscription}
    */
-  type SubscriptionCallback =
+  type SubscriptionCallback<T extends TypeClass<MessageTypeClassName>> =
     // * @param message - The published message
-    (message: Message) => void;
+    (message: MessageType<T> | Buffer) => void;
 
   /**
    * Callback for receiving service requests from a client.
@@ -246,11 +263,11 @@ declare module 'rclnodejs' {
      * @param options - Configuration options, see DEFAULT_OPTIONS
      * @returns New instance of Publisher.
      */
-    createPublisher(
-      typeClass: TypeClass,
+    createPublisher<T extends TypeClass<MessageTypeClassName>>(
+      typeClass: T,
       topic: string,
       options?: Options
-    ): Publisher;
+    ): Publisher<T>;
 
     /**
      * Create a Subscription.
@@ -261,11 +278,11 @@ declare module 'rclnodejs' {
      * @param callback - Called when a new message is received.
      * @returns New instance of Subscription.
      */
-    createSubscription(
-      typeClass: TypeClass,
+    createSubscription<T extends TypeClass<MessageTypeClassName>>(
+      typeClass: T,
       topic: string,
       options: Options,
-      callback: SubscriptionCallback
+      callback: SubscriptionCallback<T>
     ): Subscription;
 
     /**
@@ -318,7 +335,7 @@ declare module 'rclnodejs' {
      *
      * @param publisher - Publisher to be destroyed.
      */
-    destroyPublisher(publisher: Publisher): void;
+    destroyPublisher<T extends MessageTypeClassName>(publisher: Publisher<T>): void;
 
     /**
      * Destroy a Subscription.
