@@ -1,8 +1,10 @@
+import { MessageTypeClassName } from 'rclnodejs';
+
 declare module 'rclnodejs' {
   /**
    * A ROS Publisher that publishes messages on a topic.
    */
-  class Publisher extends Entity {
+  class Publisher<T extends TypeClass<MessageTypeClassName>> extends Entity {
     /**
      * Topic on which messages are published.
      */
@@ -13,6 +15,6 @@ declare module 'rclnodejs' {
      *
      * @param message - The message to be sent.
      */
-    publish(message: Message): void;
+    publish(message: MessageType<T> | Buffer): void;
   }
 }
