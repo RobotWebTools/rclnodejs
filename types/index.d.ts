@@ -113,7 +113,7 @@ declare module 'rclnodejs' {
    *                                or {package: 'std_msgs', type: 'msg', name: 'String'}
    * @returns A Message object or undefined if type is not recognized.
    */
-  function createMessageObject(type: TypeClass): Message;
+  function createMessageObject<T extends TypeClass<MessageTypeClassName>>(type: T): MessageType<T>;
 
   /**
    * Get a list of action names and types for action clients associated with a node.

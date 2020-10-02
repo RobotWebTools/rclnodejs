@@ -4,6 +4,8 @@ import * as rclnodejs from 'rclnodejs';
 const NODE_NAME = 'test_node';
 const TYPE_CLASS = 'std_msgs/msg/String';
 const TOPIC = 'topic';
+const MSG = rclnodejs.createMessageObject(TYPE_CLASS);
+MSG.data = '';
 
 // ---- rclnodejs -----
 // $ExpectType Promise<void>
@@ -85,7 +87,7 @@ node.countPublishers(TOPIC);
 node.countSubscribers(TOPIC);
 
 // ---- Publisher ----
-// $ExpectType Publisher
+// $ExpectType Publisher<"std_msgs/msg/String">
 const publisher = node.createPublisher(TYPE_CLASS, TOPIC);
 
 // $ExpectType object
@@ -104,7 +106,14 @@ publisher.typeClass;
 publisher.typedArrayEnabled;
 
 // $ExpectType void
-publisher.publish('');
+publisher.publish(MSG);
+
+// $ExpectType void
+publisher.publish(Buffer.from('Hello ROS World'));
+
+// $ExpectType void
+node.destroyPublisher(publisher);
+
 
 // ---- Subscription ----
 // $ExpectType Subscription
@@ -112,7 +121,7 @@ const subscription = node.createSubscription(
   TYPE_CLASS,
   TOPIC,
   {},
-  (msg: rclnodejs.Message) => {}
+  (msg) => {}
 );
 
 // $ExpectType string
