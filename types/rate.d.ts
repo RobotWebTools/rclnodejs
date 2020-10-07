@@ -28,7 +28,7 @@ declare module 'rclnodejs' {
    *   }
    * }
    */
-  export class Rate {
+  export interface Rate {
     /**
      * Get the frequency in hertz (hz) of this timer.
      *

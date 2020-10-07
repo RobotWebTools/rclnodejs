@@ -1,11 +1,4 @@
 /* eslint-disable camelcase */
-
-import { Clock, TypeClassName, MessageTypeClassName } from 'rclnodejs';
-import { Logging } from 'rclnodejs';
-import { Parameter, ParameterDescriptor, ParameterType } from 'rclnodejs';
-import { QoS } from 'rclnodejs';
-import { rcl_interfaces } from 'rclnodejs';
-
 declare module 'rclnodejs' {
   /**
    * Identifies type of ROS message such as msg or srv.
@@ -59,71 +52,6 @@ declare module 'rclnodejs' {
    * ```
    */
   const DEFAULT_OPTIONS: Options;
-
-  /**
-   * A service response to a client request.
-   *
-   * @remarks
-   * You can use {@link response.template | response.template} to get an empty result message.
-   */
-  class ServiceResponse {
-    /**
-     * Get an empty response message object.
-     * The template will be a message of type: <pkg>.srv.<serviceTypeClass>_Response.
-     * e.g., example_interface/srv/AddTwoInts_Response
-     */
-    readonly template: Message;
-
-    /**
-     * The service that this response object is attaching to.
-     */
-    readonly service: Service;
-
-    /**
-     * Send this response to client (the service caller)
-     *
-     * @param  response - Response message.
-     *
-     * @remarks
-     * see {@link Response.template}
-     */
-    send(response: Message): void;
-  }
-
-  /**
-   * A callback for receiving published messages.
-   *
-   * @param message - The published message.
-   *
-   * @remarks
-   * See {@link Node#createSubscription | Node.createSubscription}
-   * See {@link Node#createPublisher | Node.createPublisher}
-   * See {@link Publisher}
-   * See {@link Subscription}
-   */
-  type SubscriptionCallback<T extends TypeClass<MessageTypeClassName>> =
-    // * @param message - The published message
-    (message: MessageType<T> | Buffer) => void;
-
-  /**
-   * Callback for receiving service requests from a client.
-   *
-   * @param request - The request sent to the service
-   * @param response - The response to the client.
-   *
-   * @remarks
-   * Use {@link Response.send | response.send()} to send response object to client
-   *
-   * See {@link Node.createService | Node.createService}
-   * See {@link Client.sendRequest | Client.sendRequest}
-   * See {@link Client}
-   * See {@link Service}
-   * See {@link Response.send | Response.send}
-   */
-  type ServiceRequestCallback = (
-    request: Message,
-    response: ServiceResponse
-  ) => void;
 
   /**
    * Callback for receiving periodic interrupts from a Timer.
@@ -283,7 +211,7 @@ declare module 'rclnodejs' {
       topic: string,
       options: Options,
       callback: SubscriptionCallback<T>
-    ): Subscription;
+    ): Subscription
 
     /**
      * Create a Client for making server requests.
@@ -293,11 +221,11 @@ declare module 'rclnodejs' {
      * @param options - The options argument used to parameterize the client.
      * @returns New instance of Client.
      */
-    createClient(
-      typeClass: TypeClass,
+    createClient<T extends TypeClass<ServiceTypeClassName>>(
+      typeClass: T,
       serviceName: string,
       options?: Options
-    ): Client;
+    ): Client<T>;
 
     /**
      * Create a Service.
@@ -308,12 +236,12 @@ declare module 'rclnodejs' {
      * @param callback - Notified for receiving incoming requests.
      * @returns An instance of Service.
      */
-    createService(
-      typeClass: TypeClass,
+    createService<T extends TypeClass<ServiceTypeClassName>>(
+      typeClass: T,
       serviceName: string,
       options: Options,
-      callback: ServiceRequestCallback
-    ): Service;
+      callback: ServiceRequestHandler<T>
+    ): ServiceType<T>;
 
     /**
      * Create a guard condition.
@@ -335,7 +263,7 @@ declare module 'rclnodejs' {
      *
      * @param publisher - Publisher to be destroyed.
      */
-    destroyPublisher<T extends MessageTypeClassName>(publisher: Publisher<T>): void;
+    destroyPublisher<T extends TypeClass<MessageTypeClassName>>(publisher: Publisher<T>): void;
 
     /**
      * Destroy a Subscription.
@@ -349,7 +277,7 @@ declare module 'rclnodejs' {
      *
      * @param client - Client to be destroyed.
      */
-    destroyClient(client: Client): void;
+    destroyClient<T extends TypeClass<ServiceTypeClassName>>(client: Client<T>): void;
 
     /**
      * Destroy a Service.

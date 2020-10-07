@@ -1,5 +1,3 @@
-import { MessageTypeClassName } from "rclnodejs";
-
 // eslint-disable-next-line spaced-comment
 /// <reference path="base.d.ts" />
 
