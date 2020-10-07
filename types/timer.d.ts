@@ -2,7 +2,7 @@ declare module 'rclnodejs' {
   /**
    * A ROS Timer that periodically executes a callback.
    */
-  class Timer {
+  interface Timer {
     /**
      * Time between callbacks in milliseconds.
      */
