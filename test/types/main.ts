@@ -128,12 +128,12 @@ const subscription = node.createSubscription(
 subscription.topic;
 
 // ---- Service ----
-// $ExpectType Service
+// $ExpectType AddTwoIntsConstructor
 const service = node.createService(
-  TYPE_CLASS,
-  'abc',
+  'example_interfaces/srv/AddTwoInts',
+  'add_two_ints',
   {},
-  (request: rclnodejs.Message, response: rclnodejs.ServiceResponse) => {}
+  (request, response) => {}
 );
 
 // $ExpectType string
@@ -143,8 +143,8 @@ service.serviceName;
 service.options;
 
 // ---- Client ----
-// $ExpectType Client
-const client = node.createClient(TYPE_CLASS, 'abc');
+// $ExpectType Client<"example_interfaces/srv/AddTwoInts">
+const client = node.createClient('example_interfaces/srv/AddTwoInts', 'add_two_ints');
 
 // $ExpectType string
 client.serviceName;
