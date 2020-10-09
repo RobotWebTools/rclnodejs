@@ -48,7 +48,7 @@ npm i rclnodejs@x.y.z
 
 |                                                            RCLNODEJS Version                                                            |                                                                         Compatible ROS 2 Release                                                                         |
 | :-------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [0.15.3 (current)](https://www.npmjs.com/package/rclnodejs/v/0.15.3) ([API](http://robotwebtools.org/rclnodejs/docs/0.15.2/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200807) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
+| [0.16.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.16.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.16.0/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200807) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
 |                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                    [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                     |
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` depdendency section.
@@ -95,9 +95,9 @@ rclnodejs.init().then(() => {
 The benefits of using TypeScript become evident when working with more complex use-cases. The ROS 2 messages are defined in the `types/interfaces.d.ts` module. This module is updated as part of the `generate_messages` process. Here's a trivial example of working with a String msg.
 
 ```typescript
-   const msg: rclnodejs.std_msgs.msg.String = {
-     data: 'hello ROS2 from rclnodejs'
-   }
+const msg: rclnodejs.std_msgs.msg.String = {
+  data: 'hello ROS2 from rclnodejs',
+};
 ```
 
 ## Build from Scratch
