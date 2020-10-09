@@ -45,7 +45,7 @@ npm i rclnodejs@x.y.z
 
 |                                                            RCLNODEJS Version                                                            |                                                                         Compatible ROS 2 Release                                                                         |
 | :-------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [0.15.3 (current)](https://www.npmjs.com/package/rclnodejs/v/0.15.3) ([API](http://robotwebtools.org/rclnodejs/docs/0.15.2/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200807) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
+| [0.16.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.16.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.16.0/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20200807) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
 |                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                    [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                     |
 
 ## Documentation
@@ -132,7 +132,7 @@ In your node project install the rclnodejs package as described above. You will 
 
 In your project's tsconfig.json file include the following compiler options:
 
-```json
+```jsonc
 {
   "compilerOptions": {
     "module": "commonjs",
@@ -145,7 +145,7 @@ In your project's tsconfig.json file include the following compiler options:
 
 Here's an earlier JavaScript example reimplemented in TypeScript.
 
-```
+```typescript
 import * as rclnodejs from 'rclnodejs';
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_example_node');
@@ -157,10 +157,10 @@ rclnodejs.init().then(() => {
 
 Type-aliases for the ROS2 messages can be found in the `types/interfaces.d.ts` file. To use a message type-alias follow the naming pattern <pkg_name>.[msg|srv].<type>, e.g., sensor_msgs.msg.LaserScan or the std_msgs.msg.String as shown below.
 
-```
-   const msg: rclnodejs.std_msgs.msg.String = {
-     data: 'hello ROS2 from rclnodejs'
-   }
+```typescript
+const msg: rclnodejs.std_msgs.msg.String = {
+  data: 'hello ROS2 from rclnodejs',
+};
 ```
 
 **Note** that the interface.d.ts file is updated each time the generate_messages.js script is run.
