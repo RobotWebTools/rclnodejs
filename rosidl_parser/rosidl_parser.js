@@ -22,15 +22,27 @@ const pythonExe = pyUtils.getPython('python3');
 
 let rosidlParser = {
   parseMessageFile(packageName, filePath) {
-    return this._parseFile('parse_message_file', packageName, filePath);
+    return this._parseFile(
+      'parse_message_file',
+      packageName,
+      filePath.replace(/\s/g, '\\ ')
+    );
   },
 
   parseServiceFile(packageName, filePath) {
-    return this._parseFile('parse_service_file', packageName, filePath);
+    return this._parseFile(
+      'parse_service_file',
+      packageName,
+      filePath.replace(/\s/g, '\\ ')
+    );
   },
 
   parseActionFile(packageName, filePath) {
-    return this._parseFile('parse_action_file', packageName, filePath);
+    return this._parseFile(
+      'parse_action_file',
+      packageName,
+      filePath.replace(/\s/g, '\\ ')
+    );
   },
 
   _parseFile(...args) {
@@ -47,7 +59,7 @@ let rosidlParser = {
 
   _assembleCommand(args) {
     let command = `${pythonExe} ${__dirname}/parser.py`;
-    args.forEach(arg => {
+    args.forEach((arg) => {
       command += ' ' + arg;
     });
     return command;
