@@ -175,9 +175,9 @@ let rcl = {
   /**
    * Create a node.
    * @param {string} nodeName - The name used to register in ROS.
-   * @param {string} namespace - The namespace used in ROS, default is an empty string.
-   * @param {Context} context - The context, default is Context.defaultContext().
-   * @param {NodeOptions} options - The options to configure the new node behavior.
+   * @param {string} [namespace=''] - The namespace used in ROS.
+   * @param {Context} [context=Context.defaultContext()] - The context to create the node in.
+   * @param {NodeOptions} [options=NodeOptions.defaultOptions] - The options to configure the new node behavior.
    * @return {Node} A new instance of the specified node.
    * @throws {Error} If the given context is not registered.
    */
@@ -209,8 +209,8 @@ let rcl = {
 
   /**
    * Init the module.
-   * @param {Context} context - The context, default is Context.defaultContext().
-   * @param {string[]} argv - Process commandline arguments.
+   * @param {Context} [context=Context.defaultContext()] - The context to initialize.
+   * @param {string[]} argv - Process command line arguments.
    * @return {Promise<undefined>} A Promise.
    * @throws {Error} If the given context has already been initialized.
    */
@@ -264,7 +264,7 @@ let rcl = {
   /**
    * Start to spin the node, which triggers the event loop to start to check the incoming events.
    * @param {Node} node - The node to be spun.
-   * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
+   * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
    * @throws {Error} If the node is already spinning.
    * @return {undefined}
    */
@@ -280,8 +280,8 @@ let rcl = {
 
   /**
    * Execute one item of work or wait until a timeout expires.
-   * @param {Node} node - The node to be spun.
-   * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
+   * @param {Node} node - The node to be spun once.
+   * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
    * @throws {Error} If the node is already spinning.
    * @return {undefined}
    */
@@ -325,7 +325,7 @@ let rcl = {
    * Shuts down the given context by shutting down and destroying all nodes contained within.
    * Does not perform any checks.
    *
-   * @param {Context} context - The context to be shutdown.
+   * @param {Context} context - The context to be shut down.
    * @return {undefined}
    * @private
    */
@@ -347,7 +347,7 @@ let rcl = {
 
   /**
    * A predicate for testing if a context has been shutdown.
-   * @param {Context} [context=Context.defaultContext()] - The context to inspect
+   * @param {Context} [context=Context.defaultContext()] - The context to inspect.
    * @return {boolean} Return true if the module is shut down, otherwise return false.
    */
   isShutdown(context = Context.defaultContext()) {
