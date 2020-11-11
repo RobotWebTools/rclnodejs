@@ -178,7 +178,8 @@ let rcl = {
    * @param {string} namespace - The namespace used in ROS, default is an empty string.
    * @param {Context} context - The context, default is Context.defaultContext().
    * @param {NodeOptions} options - The options to configure the new node behavior.
-   * @return {Node} The instance of Node.
+   * @return {Node} A new instance of the specified node.
+   * @throws {Error} If the given context is not registered.
    */
   createNode(
     nodeName,
@@ -211,6 +212,7 @@ let rcl = {
    * @param {Context} context - The context, default is Context.defaultContext().
    * @param {string[]} argv - Process commandline arguments.
    * @return {Promise<undefined>} A Promise.
+   * @throws {Error} If the given context has already been initialized.
    */
   init(context = Context.defaultContext(), argv = process.argv) {
     return new Promise((resolve, reject) => {
@@ -263,6 +265,7 @@ let rcl = {
    * Start to spin the node, which triggers the event loop to start to check the incoming events.
    * @param {Node} node - The node to be spun.
    * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
+   * @throws {Error} If the node is already spinning.
    * @return {undefined}
    */
   spin(node, timeout = 10) {
@@ -279,6 +282,7 @@ let rcl = {
    * Execute one item of work or wait until a timeout expires.
    * @param {Node} node - The node to be spun.
    * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
+   * @throws {Error} If the node is already spinning.
    * @return {undefined}
    */
   spinOnce(node, timeout = 10) {
@@ -292,15 +296,40 @@ let rcl = {
   },
 
   /**
-   * @param {Context} context - The context to be shutdown.
+   * Shuts down the given context by shutting down and destroying all nodes contained within.
+   * @param {Context} [context=Context.defaultContext()] - The context to be shutdown.
    * @return {undefined}
+   * @throws {Error} If the context is already shut down.
    */
   shutdown(context = Context.defaultContext()) {
     if (this.isShutdown(context)) {
       throw new Error('The module rclnodejs has been shutdown.');
-      return;
+    } else {
+      this._shutdown(context)
     }
+  },
 
+  /**
+   * Shuts down the given context by shutting down and destroying all nodes contained within.
+   * Does nothing is the context si already shut down.
+   * @param {Context} [context=Context.defaultContext()] - The context to be shutdown.
+   * @return {undefined}
+   */
+  tryShutdown(context = Context.defaultContext()) {
+    if (!this.isShutdown(context)) {
+      this._shutdown(context)
+    }
+  },
+
+  /**
+   * Shuts down the given context by shutting down and destroying all nodes contained within.
+   * Does not perform any checks.
+   *
+   * @param {Context} context - The context to be shutdown.
+   * @return {undefined}
+   * @private
+   */
+  _shutdown(context) {
     // shutdown and remove all nodes assigned to context
     this._contextToNodeArrayMap.get(context).forEach((node) => {
       node.stopSpinning();
@@ -317,8 +346,8 @@ let rcl = {
   },
 
   /**
-   * A predictate for testing if a context has been shutdown.
-   * @param {Context} [context=defaultContext] - The context to inspect
+   * A predicate for testing if a context has been shutdown.
+   * @param {Context} [context=Context.defaultContext()] - The context to inspect
    * @return {boolean} Return true if the module is shut down, otherwise return false.
    */
   isShutdown(context = Context.defaultContext()) {
@@ -335,13 +364,13 @@ let rcl = {
   },
 
   /**
-   * Search packgaes which locate under path $AMENT_PREFIX_PATH, regenerate all JavaScript structs files from the IDL of
+   * Search packages which locate under path $AMENT_PREFIX_PATH, regenerate all JavaScript structs files from the IDL of
    * messages(.msg) and services(.srv) and put these files under folder 'generated'. Any existing files under
    * this folder will be overwritten after the execution.
    * @return {Promise<undefined>} A Promise.
    */
   regenerateAll() {
-    // This will trigger to regererate all the JS structs used for messages and services,
+    // This will trigger to regenerate all the JS structs used for messages and services,
     // to overwrite the existing ones although they have been created.
     debug('Begin regeneration of JavaScript code from ROS IDL files.');
     return new Promise((resolve, reject) => {
@@ -359,7 +388,7 @@ let rcl = {
   },
 
   /**
-   * Judge if the topic/service is hidden, see http://design.ros2.org/articles/topic_and_service_names.html#hidden-topic-or-service-names
+   * Judge if the topic/service is hidden (see [the ROS2 design documentation]{@link http://design.ros2.org/articles/topic_and_service_names.html#hidden-topic-or-service-names}).
    * @param {string} name - Name of topic/service.
    * @return {boolean} - True if a given topic or service name is hidden, otherwise False.
    */
@@ -397,10 +426,10 @@ let rcl = {
   },
 
   /**
-   * Create a plain JavaScript by specified type identifier
+   * Create a plain JavaScript from the specified type identifier.
    * @param {string|Object} type -- the type identifier, acceptable formats could be 'std_msgs/std/String'
    *                                or {package: 'std_msgs', type: 'msg', name: 'String'}
-   * @return {Object|undefined} A plain JavaScript of that type
+   * @return {Object|undefined} A plain JavaScript of that type or undefined if the object could not be created
    */
   createMessageObject(type) {
     return this.createMessage(type).toPlainObject();
@@ -409,14 +438,14 @@ let rcl = {
 
 process.on('SIGINT', () => {
   debug('Catch ctrl+c event and will cleanup and terminate.');
-  rcl.shutdown();
+  rcl.tryShutdown();
   process.exit(0);
 });
 
 module.exports = rcl;
 
 // The following statements are located here to work around a
-// circular dependency issue occuring in rate.js
+// circular dependency issue occurring in rate.js
 const Node = require('./lib/node.js');
 const TimeSource = require('./lib/time_source.js');
 
