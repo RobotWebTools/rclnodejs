@@ -311,7 +311,7 @@ let rcl = {
 
   /**
    * Shuts down the given context by shutting down and destroying all nodes contained within.
-   * Does nothing is the context si already shut down.
+   * Does nothing if the context is already shut down.
    * @param {Context} [context=Context.defaultContext()] - The context to be shutdown.
    * @return {undefined}
    */
