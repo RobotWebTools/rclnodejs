@@ -305,7 +305,7 @@ let rcl = {
     if (this.isShutdown(context)) {
       throw new Error('The module rclnodejs has been shutdown.');
     } else {
-      this._shutdown(context)
+      this._shutdown(context);
     }
   },
 
@@ -317,7 +317,7 @@ let rcl = {
    */
   tryShutdown(context = Context.defaultContext()) {
     if (!this.isShutdown(context)) {
-      this._shutdown(context)
+      this._shutdown(context);
     }
   },
 
