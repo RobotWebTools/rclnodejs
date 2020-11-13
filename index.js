@@ -297,50 +297,25 @@ let rcl = {
 
   /**
    * Shuts down the given context by shutting down and destroying all nodes contained within.
+   *
+   * If no context is explicitly given, only the default context will be shut down, and not all of them.
+   * This follows the semantics of [`rclpy.shutdown()`](http://docs.ros2.org/latest/api/rclpy/api/init_shutdown.html#rclpy.shutdown).
+   *
    * @param {Context} [context=Context.defaultContext()] - The context to be shutdown.
    * @return {undefined}
-   * @throws {Error} If the context is already shut down.
+   * @throws {Error} If there is a problem shutting down the context or while destroying or shutting down a node within it.
    */
   shutdown(context = Context.defaultContext()) {
     if (this.isShutdown(context)) {
-      throw new Error('The module rclnodejs has been shutdown.');
+      debug(`The module rclnodejs (with context handle ${context.handle}) has been shutdown.`);
     } else {
-      this._shutdown(context);
-    }
-  },
+      // shutdown and remove all nodes assigned to context
+      this._contextToNodeArrayMap[context].forEach((node) => {
+        node.stopSpinning();
+        node.destroy();
+      });
+      this._contextToNodeArrayMap.delete(context);
 
-  /**
-   * Shuts down the given context by shutting down and destroying all nodes contained within.
-   * Does nothing if the context is already shut down.
-   * @param {Context} [context=Context.defaultContext()] - The context to be shutdown.
-   * @return {undefined}
-   */
-  tryShutdown(context = Context.defaultContext()) {
-    if (!this.isShutdown(context)) {
-      this._shutdown(context);
-    }
-  },
-
-  /**
-   * Shuts down the given context by shutting down and destroying all nodes contained within.
-   * Does not perform any checks.
-   *
-   * @param {Context} context - The context to be shut down.
-   * @return {undefined}
-   * @private
-   */
-  _shutdown(context) {
-    // shutdown and remove all nodes assigned to context
-    this._contextToNodeArrayMap.get(context).forEach((node) => {
-      node.stopSpinning();
-      node.destroy();
-    });
-    this._contextToNodeArrayMap.delete(context);
-
-    // shutdown context
-    if (context === Context.defaultContext()) {
-      Context.shutdownDefaultContext();
-    } else {
       context.shutdown();
     }
   },
