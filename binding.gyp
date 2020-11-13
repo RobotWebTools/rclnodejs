@@ -20,6 +20,7 @@
         './src/rcl_action_bindings.cpp',
         './src/rcl_bindings.cpp',
         './src/rcl_handle.cpp',
+        './src/rcl_lifecycle_bindings.cpp',
         './src/rcl_utilities.cpp',
         './src/shadow_node.cpp',
       ],
@@ -42,6 +43,7 @@
       'libraries': [
         '-lrcl',
         '-lrcl_action',
+        '-lrcl_lifecycle',
         '-lrcutils',
         '-lrcl_yaml_param_parser',
         '-lrmw',
