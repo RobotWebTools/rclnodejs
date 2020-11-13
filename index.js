@@ -173,7 +173,7 @@ let rcl = {
   getActionNamesAndTypes: getActionNamesAndTypes,
 
   /**
-   * Create a node.
+   * Create and initialize a node.
    * @param {string} nodeName - The name used to register in ROS.
    * @param {string} [namespace=''] - The namespace used in ROS.
    * @param {Context} [context=Context.defaultContext()] - The context to create the node in.
@@ -208,7 +208,7 @@ let rcl = {
   },
 
   /**
-   * Init the module.
+   * Initialize the module.
    * @param {Context} [context=Context.defaultContext()] - The context to initialize.
    * @param {string[]} argv - Process command line arguments.
    * @return {Promise<undefined>} A Promise.
@@ -299,7 +299,7 @@ let rcl = {
    * Shuts down the given context by shutting down and destroying all nodes contained within.
    *
    * If no context is explicitly given, only the default context will be shut down, and not all of them.
-   * This follows the semantics of [`rclpy.shutdown()`](http://docs.ros2.org/latest/api/rclpy/api/init_shutdown.html#rclpy.shutdown).
+   * This follows the semantics of [rclpy.shutdown()]{@link http://docs.ros2.org/latest/api/rclpy/api/init_shutdown.html#rclpy.shutdown}.
    *
    * @param {Context} [context=Context.defaultContext()] - The context to be shutdown.
    * @return {undefined}
@@ -412,8 +412,8 @@ let rcl = {
 };
 
 process.on('SIGINT', () => {
-  debug('Catch ctrl+c event and will cleanup and terminate.');
-  rcl.tryShutdown();
+  debug('Caught SIGINT/ctrl+c event and will cleanup and terminate.');
+  rcl.shutdown();
   process.exit(0);
 });
 
