@@ -143,7 +143,7 @@ describe('Node destroy testing', function() {
         assert.ok(true);
       })
       .then(function() {
-        assert.throws(function() {
+        assert.doesNotThrow(function() {
           rclnodejs.shutdown();
         });
         assert.ok(true);
