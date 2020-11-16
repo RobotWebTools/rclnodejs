@@ -195,7 +195,7 @@ let rcl = {
       throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
     }
 
-    let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
+    let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
     let node = new rclnodejs.ShadowNode();
     node.handle = handle;
     Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
@@ -230,7 +230,7 @@ let rcl = {
       }
 
       // initialize context
-      rclnodejs.init(context.handle(), argv);
+      rclnodejs.init(context.handle, argv);
       this._contextToNodeArrayMap.set(context, []);
 
       if (this._rosVersionChecked) {
@@ -292,7 +292,7 @@ let rcl = {
     if (node.spinning) {
       throw new Error('The node is already spinning.');
     }
-    node.spinOnce(node.context.handle(), timeout);
+    node.spinOnce(node.context.handle, timeout);
   },
 
   /**
