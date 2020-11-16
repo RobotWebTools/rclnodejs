@@ -162,37 +162,40 @@ describe('Node destroy testing', function() {
   });
 
   it('rclnodejs multiple contexts init shutdown sequence', async function() {
-    await rclnodejs.init();
-    assert.ok(!rclnodejs.isShutdown());
+    async function initShutdownSequence() {
+      await rclnodejs.init();
+      assert.ok(!rclnodejs.isShutdown());
+      const defaultContext = rclnodejs.Context.defaultContext()
+      assert.ok(defaultContext.isOk)
+      assert.ok(defaultContext.isDefaultContext)
 
-    let ctx = new rclnodejs.Context();
-    await rclnodejs.init(ctx);
-    assert.ok(!rclnodejs.isShutdown(ctx));
-    assert.ok(!rclnodejs.isShutdown());
+      const ctx = new rclnodejs.Context();
+      await rclnodejs.init(ctx);
+      assert.ok(!rclnodejs.isShutdown(ctx));
+      assert.ok(!rclnodejs.isShutdown());
+      assert.ok(ctx.isOk)
+      assert.ok(!ctx.isDefaultContext)
+      assert.ok(defaultContext.isOk)
+      assert.ok(defaultContext.isDefaultContext)
 
-    assert.doesNotThrow(() => rclnodejs.shutdown());
-    assert.ok(rclnodejs.isShutdown());
-    assert.ok(!rclnodejs.isShutdown(ctx));
+      assert.doesNotThrow(() => rclnodejs.shutdown());
+      assert.ok(rclnodejs.isShutdown());
+      assert.ok(!rclnodejs.isShutdown(ctx));
+      assert.ok(rclnodejs.Context.defaultContext() === null);
+      assert.ok(ctx.isOk)
+      assert.ok(!defaultContext.isOk)
 
-    assert.doesNotThrow(() => rclnodejs.shutdown(ctx));
-    assert.ok(rclnodejs.isShutdown());
-    assert.ok(rclnodejs.isShutdown(ctx));
+      assert.doesNotThrow(() => rclnodejs.shutdown(ctx));
+      assert.ok(rclnodejs.isShutdown());
+      assert.ok(rclnodejs.isShutdown(ctx));
+      assert.ok(rclnodejs.Context.defaultContext() === null);
+      assert.ok(!ctx.isOk)
+      assert.ok(!defaultContext.isOk)
+    }
 
-    // repeat
-    await rclnodejs.init();
-    assert.ok(!rclnodejs.isShutdown());
-
-    ctx = new rclnodejs.Context();
-    await rclnodejs.init(ctx);
-    assert.ok(!rclnodejs.isShutdown(ctx));
-    assert.ok(!rclnodejs.isShutdown());
-
-    assert.doesNotThrow(() => rclnodejs.shutdown());
-    assert.ok(rclnodejs.isShutdown());
-    assert.ok(!rclnodejs.isShutdown(ctx));
-
-    assert.doesNotThrow(() => rclnodejs.shutdown(ctx));
-    assert.ok(rclnodejs.isShutdown());
-    assert.ok(rclnodejs.isShutdown(ctx));
+    // execute it twice
+    await initShutdownSequence()
+    await initShutdownSequence()
   });
+
 });
