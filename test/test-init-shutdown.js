@@ -166,6 +166,7 @@ describe('Node destroy testing', function() {
       await rclnodejs.init();
       assert.ok(!rclnodejs.isShutdown());
       const defaultContext = rclnodejs.Context.defaultContext();
+      assert.ok(defaultContext !== null);
       assert.ok(defaultContext.isOk);
       assert.ok(defaultContext.isDefaultContext);
 
@@ -181,14 +182,12 @@ describe('Node destroy testing', function() {
       assert.doesNotThrow(() => rclnodejs.shutdown());
       assert.ok(rclnodejs.isShutdown());
       assert.ok(!rclnodejs.isShutdown(ctx));
-      assert.ok(rclnodejs.Context.defaultContext() === null);
       assert.ok(ctx.isOk);
       assert.ok(!defaultContext.isOk);
 
       assert.doesNotThrow(() => rclnodejs.shutdown(ctx));
       assert.ok(rclnodejs.isShutdown());
       assert.ok(rclnodejs.isShutdown(ctx));
-      assert.ok(rclnodejs.Context.defaultContext() === null);
       assert.ok(!ctx.isOk);
       assert.ok(!defaultContext.isOk);
     }
