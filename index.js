@@ -404,7 +404,7 @@ let rcl = {
    * Create a plain JavaScript from the specified type identifier.
    * @param {string|Object} type -- the type identifier, acceptable formats could be 'std_msgs/std/String'
    *                                or {package: 'std_msgs', type: 'msg', name: 'String'}
-   * @return {Object|undefined} A plain JavaScript of that type or undefined if the object could not be created
+   * @return {Object|undefined} A plain JavaScript of that type, or undefined if the object could not be created
    */
   createMessageObject(type) {
     return this.createMessage(type).toPlainObject();
