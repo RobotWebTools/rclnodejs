@@ -750,8 +750,7 @@ class {{=arrayWrapper}} {
     {{? usePlainTypedArray}}
     const byteLen = refObject.size * ref.types.{{=currentTypedArrayElementType}}.size;
     // An ArrayBuffer object that doesn't hold the ownership of the address
-    const arrayBuffer = rclnodejs.createArrayBufferFromAddress(refObject.data, byteLen);
-    this._wrappers = new {{=currentTypedArray}}(arrayBuffer);
+    this._wrappers = new {{=currentTypedArray}}(refObject.data.buffer, refObject.data.byteOffset, refObject.size);
     {{?? true}}
     let refObjectArray = this._refObject.data;
     refObjectArray.length = this._refObject.size;
