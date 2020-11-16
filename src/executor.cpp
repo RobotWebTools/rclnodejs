@@ -71,7 +71,7 @@ void Executor::Start(rcl_context_t* context, int32_t time_out) {
 
 void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
   rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
-  rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, 0, context,
+  rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 0, 0, 0, 0, 0, context,
                                     rcl_get_default_allocator());
   if (ret != RCL_RET_OK) Nan::ThrowError(rcl_get_error_string().str);
 
@@ -181,7 +181,7 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
     }
 
     rcl_ret_t resize_ret = rcl_wait_set_resize(
-        wait_set, num_subscriptions, num_guard_conditions + 1u, num_timers,
+        wait_set, num_subscriptions, num_guard_conditions, num_timers,
         num_clients, num_services,
         // TODO(minggang): support events.
         0u);
@@ -198,9 +198,6 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
       return RclResult(add_wait_set_ret, error_message);
     }
 
-    int ignored UNUSED =
-        rcl_wait_set_add_guard_condition(wait_set, g_sigint_gc, nullptr);
-
     time_out = time_out < 0 ? -1 : RCL_MS_TO_NS(time_out);
 
     rcl_ret_t wait_ret = rcl_wait(wait_set, time_out);
@@ -211,11 +208,6 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
           std::string("rcl_wait() failed: ") + rcl_get_error_string().str;
       return RclResult(wait_ret, error_message);
     } else {
-      if (wait_set->size_of_guard_conditions == 1 &&
-          wait_set->guard_conditions[0]) {
-        running_.store(false);
-      }
-
       // If ready_handles_count() returns a value which is greater than 0, it
       // means that the previous ready handles haven't been taken. So stop here
       // and return.

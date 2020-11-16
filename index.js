@@ -184,7 +184,7 @@ let rcl = {
     nodeName,
     namespace = '',
     context = Context.defaultContext(),
-    options = NodeOptions.defaultOptions
+    options = NodeOptions.defaultOptions,
   ) {
     if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
       throw new TypeError('Invalid argument.');
@@ -407,11 +407,16 @@ let rcl = {
   },
 };
 
-process.on('SIGINT', () => {
+const _sigHandler = () => {
   debug('Catch ctrl+c event and will cleanup and terminate.');
-  rcl.shutdown();
-  process.exit(0);
-});
+  // only run when no other signal handlers are installed
+  if (process.listenerCount('SIGINT') === 1 && process.listeners('SIGINT')[0] === _sigHandler) {
+    for (let ctx of rcl._contextToNodeArrayMap.keys()) {
+      rcl.shutdown(ctx);
+    }
+  }
+};
+process.on('SIGINT', _sigHandler);
 
 module.exports = rcl;
 

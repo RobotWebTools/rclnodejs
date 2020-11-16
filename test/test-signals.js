@@ -51,7 +51,7 @@ if (process.env['RCLNODEJS_TEST_FORK']) {
     });
   });
 
-  it.only('gracefully shuts downs on SIGINT when running non-default context', async () => {
+  it('gracefully shuts downs on SIGINT when running non-default context', async () => {
     child = childProcess.fork(__filename, ['--non-default-context'], {
       env: { ...process.env, RCLNODEJS_TEST_FORK: true },
     });
