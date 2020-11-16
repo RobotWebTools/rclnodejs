@@ -310,7 +310,7 @@ let rcl = {
       debug(`The module rclnodejs (with context handle ${context.handle}) has been shutdown.`);
     } else {
       // shutdown and remove all nodes assigned to context
-      this._contextToNodeArrayMap[context].forEach((node) => {
+      this._contextToNodeArrayMap.get(context).forEach((node) => {
         node.stopSpinning();
         node.destroy();
       });
