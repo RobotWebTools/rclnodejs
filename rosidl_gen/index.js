@@ -15,7 +15,12 @@
 'use strict';
 
 const fse = require('fs-extra');
-const generateJSStructFromIDL = require('./idl_generator.js');
+const {
+  RosIdlDb,
+  generateJSStructFromIDL,
+  generateCppDefinitions,
+  generateTypesupportGypi,
+} = require('./idl_generator.js');
 const packages = require('./packages.js');
 const path = require('path');
 
@@ -25,11 +30,43 @@ const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
 );
 
 async function generateInPath(path) {
-  const pkgs = await packages.findPackagesInDirectory(path);
+  const results = [];
+  // const pkgs = await packages.findPackagesInDirectory(path);
+  const pkgs = new Map();
+  pkgs.set('test_msgs', {
+    pkgName: 'test_msgs',
+    messages: [
+      {
+        interfaceName: 'Nested',
+        subFolder: 'msg',
+        filePath: '/opt/ros/foxy/share/test_msgs/msg/Nested.msg',
+      },
+      {
+        interfaceName: 'BasicTypes',
+        subFolder: 'msg',
+        filePath: '/opt/ros/foxy/share/test_msgs/msg/BasicTypes.msg',
+      },
+    ],
+    services: [],
+    actions: [],
+  });
+
+  const rosIdlDb = new RosIdlDb(pkgs);
+
   const pkgsInfo = Array.from(pkgs.values());
+  const pkgsEntries = Array.from(pkgs.entries());
+
   await Promise.all(
-    pkgsInfo.map((pkgInfo) => generateJSStructFromIDL(pkgInfo, generatedRoot))
+    pkgsInfo.map((pkgInfo) =>
+      generateJSStructFromIDL(pkgInfo, generatedRoot, rosIdlDb)
+    )
   );
+  await Promise.all(
+    pkgsEntries.map(([pkgName, pkgInfo]) =>
+      generateCppDefinitions(pkgName, pkgInfo, rosIdlDb)
+    )
+  );
+  await generateTypesupportGypi(pkgsInfo);
 }
 
 async function generateAll(forcedGenerating) {

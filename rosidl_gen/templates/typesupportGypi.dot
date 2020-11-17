@@ -1,0 +1,12 @@
+{
+  'targets': [
+{{~ it.pkgs : pkg}}
+    {
+      'target_name': '{{=pkg.pkgName}}',
+      'sources': [
+        '{{=pkg.pkgName}}/definitions.cpp',
+      ],
+    },
+{{~}}
+  ],
+}

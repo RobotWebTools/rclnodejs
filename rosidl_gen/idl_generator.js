@@ -15,16 +15,77 @@
 'use strict';
 
 const dot = require('dot');
+const fs = require('fs').promises;
 const fse = require('fs-extra');
 const path = require('path');
 const parser = require('../rosidl_parser/rosidl_parser.js');
 const actionMsgs = require('./action_msgs.js');
+
+class RosIdlDb {
+  constructor(pkgs) {
+    this.specDb = {};
+    this.messageInfoIndex = {};
+    for (let pkg of pkgs.values()) {
+      pkg.messages.forEach((messageInfo) => {
+        this.messageInfoIndex[
+          `${messageInfo.pkgName}__${messageInfo.interfaceName}`
+        ] = messageInfo;
+      });
+    }
+  }
+
+  getMessageInfoFromType(type) {
+    return this.messageInfoIndex[`${type.pkgName}__${type.type}`];
+  }
+
+  _messageInfoHash(messageInfo) {
+    return `${messageInfo.pkgName}__${messageInfo.interfaceName}`;
+  }
+
+  async getMessageSpec(messageInfo) {
+    let spec = this.specDb[this._messageInfoHash(messageInfo)];
+    if (spec) {
+      return spec;
+    }
+    const promise = new Promise(async (res) => {
+      const spec = await parser.parseMessageFile(
+        messageInfo.pkgName,
+        messageInfo.filePath
+      );
+      this.specDb[this._messageInfoHash(messageInfo)] = spec;
+      res(spec);
+    });
+    this.specDb[this._messageInfoHash(messageInfo)] = promise;
+    return promise;
+  }
+
+  // _getDependentPackagesImpl(pkg)
+
+  // getDependentPackages(pkg) {
+  //   pkg.messages.forEach((messageInfo) => {
+
+  //   })
+  // }
+}
 
 dot.templateSettings.strip = false;
 dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
 const dots = dot.process({
   path: path.join(__dirname, '../rosidl_gen/templates'),
 });
+
+function pascalToSnakeCase(s) {
+  return s
+    .split(/(?=[A-Z])/)
+    .join('_')
+    .toLowerCase();
+}
+
+function getRosHeaderField(messageInfo) {
+  return `${messageInfo.pkgName}/${messageInfo.subFolder}/${pascalToSnakeCase(
+    messageInfo.interfaceName
+  )}.h`;
+}
 
 function removeEmptyLines(str) {
   return str.replace(/^\s*\n/gm, '');
@@ -50,11 +111,8 @@ function generateServiceJSStruct(serviceInfo, dir) {
   return writeGeneratedCode(dir, fileName, generatedCode);
 }
 
-async function generateMessageJSStruct(messageInfo, dir) {
-  const spec = await parser.parseMessageFile(
-    messageInfo.pkgName,
-    messageInfo.filePath
-  );
+async function generateMessageJSStruct(messageInfo, dir, rosIdlDb) {
+  const spec = await rosIdlDb.getMessageSpec(messageInfo);
   await generateMessageJSStructFromSpec(messageInfo, dir, spec);
 }
 
@@ -76,6 +134,86 @@ function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
     })
   );
   return writeGeneratedCode(dir, fileName, generatedCode);
+}
+
+function getCppSourcePath(pkgName) {
+  return path.join('src', 'generated', pkgName, 'definitions.cpp');
+}
+
+function getCppHeaderPath(pkgName) {
+  return path.join('src', 'generated', pkgName, 'definitions.hpp');
+}
+
+function getJsType(rosType) {
+  if (rosType.isArray) {
+    return 'object';
+  }
+  if (rosType.type === 'int64' || rosType.type === 'uint64') {
+    return 'bigint';
+  } else if (
+    rosType.type.startsWith('int') ||
+    rosType.type.startsWith('uint') ||
+    rosType.type.startsWith('float') ||
+    rosType.type === 'double' ||
+    rosType.type === 'byte' ||
+    rosType.type === 'char'
+  ) {
+    return 'number';
+  } else if (rosType.type === 'string') {
+    return 'string';
+  } else if (rosType.type === 'bool') {
+    return 'boolean';
+  }
+  return 'object';
+}
+
+// All messages are combined in one cpp file to improve compile time.
+async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb) {
+  // console.log(messageInfo);
+  // console.log(spec);
+  // console.log(spec.fields);
+
+  const getStructType = (messageInfo) => {
+    return `${messageInfo.pkgName}__${messageInfo.subFolder}__${messageInfo.interfaceName}`;
+  };
+
+  const getStructTypeFromRosType = (type) => {
+    const messageInfo = rosIdlDb.getMessageInfoFromType(type);
+    return getStructType(messageInfo);
+  };
+
+  const messages = [];
+
+  // this is slower but doing it sequentially maintains ordering
+  for (let messageInfo of pkgInfo.messages) {
+    messages.push({
+      info: messageInfo,
+      spec: await rosIdlDb.getMessageSpec(messageInfo),
+      structType: getStructType(messageInfo),
+    });
+  }
+
+  const source = removeEmptyLines(
+    dots.cppDefinitions({
+      messages,
+      rosIdlDb,
+      getRosHeaderField,
+      getStructTypeFromRosType,
+      getJsType,
+    })
+  );
+
+  const header = removeEmptyLines(
+    dots.cppDefinitionsHeader({
+      messages,
+      rosIdlDb,
+      getRosHeaderField,
+      getStructTypeFromRosType,
+    })
+  );
+
+  await fs.writeFile(getCppSourcePath(pkgName), source);
+  await fs.writeFile(getCppHeaderPath(pkgName), header);
 }
 
 async function generateActionJSStruct(actionInfo, dir) {
@@ -230,10 +368,10 @@ async function generateActionJSStruct(actionInfo, dir) {
   ]);
 }
 
-async function generateJSStructFromIDL(pkg, dir) {
+async function generateJSStructFromIDL(pkg, dir, rosIdlDb) {
   await Promise.all([
     ...pkg.messages.map((messageInfo) =>
-      generateMessageJSStruct(messageInfo, dir)
+      generateMessageJSStruct(messageInfo, dir, rosIdlDb)
     ),
     ...pkg.services.map((serviceInfo) =>
       generateServiceJSStruct(serviceInfo, dir)
@@ -242,4 +380,17 @@ async function generateJSStructFromIDL(pkg, dir) {
   ]);
 }
 
-module.exports = generateJSStructFromIDL;
+async function generateTypesupportGypi(pkgs) {
+  const rendered = removeEmptyLines(dots.typesupportGypi({ pkgs }));
+  await fs.writeFile(
+    path.join('src', 'generated', 'typesupport.gypi'),
+    rendered
+  );
+}
+
+module.exports = {
+  RosIdlDb,
+  generateJSStructFromIDL,
+  generateCppDefinitions,
+  generateTypesupportGypi,
+};

@@ -1275,6 +1275,29 @@ NAN_METHOD(FreeMemeoryAtOffset) {
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
+NAN_METHOD(CreateArrayBufferFromAddress) {
+  char* addr = GetBufAddr(info[0]);
+  int32_t length = Nan::To<int32_t>(info[1]).FromJust();
+
+  // We will create an ArrayBuffer with mode of
+  // ArrayBufferCreationMode::kInternalized and copy data starting from |addr|,
+  // thus the memory block will be collected by the garbage collector.
+  v8::Local<v8::ArrayBuffer> array_buffer =
+      v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), addr, length,
+                           v8::ArrayBufferCreationMode::kInternalized);
+
+  info.GetReturnValue().Set(array_buffer);
+}
+
+NAN_METHOD(CreateArrayBufferCleaner) {
+  auto address = GetBufAddr(info[0]);
+  int32_t offset = Nan::To<int32_t>(info[1]).FromJust();
+
+  char* target = *reinterpret_cast<char**>(address + offset);
+  info.GetReturnValue().Set(
+      RclHandle::NewInstance(target, nullptr, [] { return RCL_RET_OK; }));
+}
+
 NAN_METHOD(setLoggerLevel) {
   v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   std::string name(
@@ -1732,6 +1755,8 @@ std::vector<BindingMethod> binding_methods = {
     {"getNamespace", GetNamespace},
     {"initString", InitString},
     {"freeMemeoryAtOffset", FreeMemeoryAtOffset},
+    {"createArrayBufferFromAddress", CreateArrayBufferFromAddress},
+    {"createArrayBufferCleaner", CreateArrayBufferCleaner},
     {"setLoggerLevel", setLoggerLevel},
     {"getLoggerEffectiveLevel", GetLoggerEffectiveLevel},
     {"getNodeLoggerName", GetNodeLoggerName},

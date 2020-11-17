@@ -23,7 +23,7 @@ async function main() {
 
   try {
     await generator.generateAll(true);
-    await tsdGenerator.generateAll(); // create interfaces.d.ts
+    // await tsdGenerator.generateAll(); // create interfaces.d.ts
     console.log('Generation complete.');
   } catch (e) {
     console.log(`Caught error: ${e}`);
