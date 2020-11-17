@@ -40,26 +40,26 @@ describe('rclnodejs init and shutdown test suite', function() {
     // and the second round: do it again!
     assert.doesNotThrow(async () => {
       await rclnodejs.init();
-    }, "re-initializing after a shutdown should work");
+    }, 're-initializing after a shutdown should work');
     rclnodejs.shutdown();
   });
 
   it('rclnodejs.init(argv)', async function() {
-    await rclnodejs.init(rclnodejs.Context.defaultContext(), ['a', 'b'])
+    await rclnodejs.init(rclnodejs.Context.defaultContext(), ['a', 'b']);
     rclnodejs.shutdown();
   });
 
   it('rclnodejs.init(argv) - invalid argv', async function() {
     assert.throws(async () => {
-      await rclnodejs.init(rclnodejs.Context.defaultContext(), 'foobar')
-    }, Error, "an invalid argument should be rejected")
+      await rclnodejs.init(rclnodejs.Context.defaultContext(), 'foobar');
+    }, Error, 'an invalid argument should be rejected');
     rclnodejs.shutdown();
   });
 
   it('rclnodejs.init(argv) with null argv elements', async function() {
     assert.throws(async () => {
-      await rclnodejs.init(rclnodejs.Context.defaultContext(), ['a', null, 'b'])
-    }, Error, "an invalid argument should be rejected")
+      await rclnodejs.init(rclnodejs.Context.defaultContext(), ['a', null, 'b']);
+    }, Error, 'an invalid argument should be rejected');
     rclnodejs.shutdown();
   });
 
@@ -67,7 +67,7 @@ describe('rclnodejs init and shutdown test suite', function() {
     await rclnodejs.init();
     assert.throws(async () => {
       await rclnodejs.init();
-    }, Error, "initializing it twice shall cause an error to be thrown")
+    }, Error, 'initializing it twice shall cause an error to be thrown');
   });
 
   it('rclnodejs double shutdown should work', async function() {
@@ -76,13 +76,13 @@ describe('rclnodejs init and shutdown test suite', function() {
 
     assert.doesNotThrow(() => {
       rclnodejs.shutdown();
-    }, "shutting rclnodejs down twice should not cause an error to be thrown")
+    }, 'shutting rclnodejs down twice should not cause an error to be thrown');
   });
 
   it('rclnodejs create node without init should fail', async function() {
     assert.throws(() => {
       rclnodejs.createNode('my_node');
-    }, Error, "creating a node on an uninitialized context should cause an error to be thrown");
+    }, Error, 'creating a node on an uninitialized context should cause an error to be thrown');
   });
 
   it('rclnodejs multiple contexts init shutdown sequence', async function() {

@@ -59,19 +59,19 @@ describe('Rclnodejs - Test logging util', function() {
   for (const level of ['debug', 'info', 'warn', 'error', 'fatal']) {
     it(`Test commandline parameter configuration of log level '${level}'`, async function() {
       // test the specific log level
-      await testLoglevel(level)
+      await testLoglevel(level);
     });
   }
 
   it ('Test commandline parameter configuration resets correctly', async  function () {
     // reset the default log level to 'info'
-    await testLoglevel('info')
+    await testLoglevel('info');
 
     // check that it was reset to 'info' when creating a node
     await rclnodejs.init();
     const node = rclnodejs.createNode('test_node');
     const logger = node.getLogger();
-    assert.deepStrictEqual(logger.loggerEffectiveLevel,logger.LoggingSeverity.INFO);
+    assert.deepStrictEqual(logger.loggerEffectiveLevel, logger.LoggingSeverity.INFO);
     rclnodejs.shutdown();
   });
 
