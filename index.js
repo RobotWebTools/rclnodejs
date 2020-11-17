@@ -213,6 +213,7 @@ let rcl = {
    * @param {string[]} argv - Process command line arguments.
    * @return {Promise<undefined>} A Promise.
    * @throws {Error} If the given context has already been initialized.
+   * @throws {Error} If the command line arguments argv could not be parsed.
    */
   init(context = Context.defaultContext(), argv = process.argv) {
     return new Promise((resolve, reject) => {
