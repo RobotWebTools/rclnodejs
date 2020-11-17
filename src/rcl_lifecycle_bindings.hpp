@@ -15,9 +15,6 @@
 #ifndef RCLNODEJS_RCL_LIFECYCLE_BINDINGS_HPP_
 #define RCLNODEJS_RCL_LIFECYCLE_BINDINGS_HPP_
 
-#include <nan.h>
-#include <rcl/rcl.h>
-
 #include <vector>
 
 #include "rcl_bindings.hpp"

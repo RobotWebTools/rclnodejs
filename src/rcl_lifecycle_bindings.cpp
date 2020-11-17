@@ -15,23 +15,21 @@
 #include "rcl_lifecycle_bindings.hpp"
 
 #include <rcl/error_handling.h>
-#include <rcl/rcl.h>
+#include <rcl_lifecycle/rcl_lifecycle.h>
 
-#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "handle_manager.hpp"
+#include "macros.hpp"
+#include "rcl_handle.hpp"
+#include "rcl_utilities.hpp"
 #include "lifecycle_msgs/msg/transition_event.h"
 #include "lifecycle_msgs/srv/change_state.h"
 #include "lifecycle_msgs/srv/get_available_states.h"
 #include "lifecycle_msgs/srv/get_available_transitions.h"
 #include "lifecycle_msgs/srv/get_state.h"
-#include "macros.hpp"
-#include "rcl_handle.hpp"
-#include "rcl_lifecycle/rcl_lifecycle.h"
-#include "rcl_utilities.hpp"
+
 
 namespace rclnodejs {
 
@@ -235,32 +233,16 @@ NAN_METHOD(GetLifecycleSrvNameAndHandle) {
   Nan::Set(named_srv_obj, Nan::New("name").ToLocalChecked(),
            Nan::New(service_name).ToLocalChecked());
 
-  // Note: the following hack is to avoid a 'double free()' error that arises
-  // when overlapping RclHandles are created for a rcl_lifecycle_state_model and
-  // for each of the state-model's 4 services. The deleter for the state-model
-  // RclHandle calls rcl_lifecycle_state_machine_fini(state-model) which frees
-  // each of the state-model services. Then the RclHandle deleter for each
-  // state-model service is invoked resulting in a call to free() on the already
-  // freed service ptr.
-  // *** Boom - double free error ***.
-  //
-  // The work-around (hack) is to prevent the RclHandlers wrapping each of the
-  // state-machine services from calling free() on their service ptr. This is
-  // accomplished by setting each of the service RclHandlers' pointer field to
-  // nullptr causing their Reset() method to return immediately when invoked.
-  //
-  // The implementation of this approach replaces the nop deleter function on
-  // each service RclHandler with a new function that is passed a pointer to the
-  // service RclHandler. The deleter function then sets the service RclHandler
-  // parameter's pointer to nullptr. All joy - no double free()!
-  auto srv_handle =
-      RclHandle::NewInstance(service, nullptr, [] { return RCL_RET_OK; });
-  RclHandle* rclHandle = RclHandle::Unwrap<RclHandle>(srv_handle);
-  RclHandle::Unwrap<RclHandle>(srv_handle)->set_deleter([rclHandle] {
-      rclHandle->set_ptr(nullptr);
-      return RCL_RET_OK;
-    });
-
+  // Note: lifecycle Services are created and managed by their
+  // rcl_lifecycle_state_machine. Thus we must not manually
+  // free the lifecycle_state_machine's service pointers.
+  // To accomplish this we create srv_handle instances with
+  // the free_ptr parameter of false. Failing to do this results
+  // in a double free() error.
+  auto srv_handle = RclHandle::NewInstance(service,
+                                          nullptr,
+                                          [] { return RCL_RET_OK; },
+                                          false);
   Nan::Set(named_srv_obj, Nan::New("handle").ToLocalChecked(), srv_handle);
 
   info.GetReturnValue().Set(named_srv_obj);
@@ -357,6 +339,13 @@ NAN_METHOD(GetLifecycleTransitionIdToLabel) {
   info.GetReturnValue().Set(Nan::New(transition_label).ToLocalChecked());
 }
 
+NAN_METHOD(GetLifecycleShutdownTransitionLabel) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  int callback_ret = Nan::To<int64_t>(info[0]).FromJust();
+  info.GetReturnValue().Set(
+    Nan::New(rcl_lifecycle_shutdown_label).ToLocalChecked());
+}
+
 std::vector<BindingMethod> lifecycle_binding_methods = {
     {"createLifecycleStateMachine", CreateLifecycleStateMachine},
     {"getCurrentLifecycleState", GetCurrentLifecycleState},
@@ -367,6 +356,8 @@ std::vector<BindingMethod> lifecycle_binding_methods = {
     {"triggerLifecycleTransitionById", TriggerLifecycleTransitionById},
     {"triggerLifecycleTransitionByLabel", TriggerLifecycleTransitionByLabel},
     {"getLifecycleSrvNameAndHandle", GetLifecycleSrvNameAndHandle},
-    {"getLifecycleTransitionIdToLabel", GetLifecycleTransitionIdToLabel}};
+    {"getLifecycleTransitionIdToLabel", GetLifecycleTransitionIdToLabel},
+    {"getLifecycleShutdownTransitionLabel",
+        GetLifecycleShutdownTransitionLabel}};
 
 }  // namespace rclnodejs

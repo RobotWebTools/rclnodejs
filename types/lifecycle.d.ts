@@ -70,10 +70,10 @@ declare module 'rclnodejs' {
     /**
      * The values returned by TransitionCallback.
      */
-    enum CallbackReturnCode {
-      SUCCESS = 97, // TransitionInterface.TRANSITION_CALLBACK_SUCCESS,
-      FAILURE = 98, // TransitionInterface.TRANSITION_CALLBACK_FAILURE,
-      ERROR = 99    // TransitionInterface.TRANSITION_CALLBACK_ERROR
+    const enum CallbackReturnCode {
+      SUCCESS = 97, // rclnodejs.lifecycle_msgs.msg.TransitionConstructor.TRANSITION_CALLBACK_SUCCESS,
+      FAILURE = 98, // rclnodejs.lifecycle_msgs.msg.TransitionConstructor.TRANSITION_CALLBACK_FAILURE,
+      ERROR = 99    // rclnodejs.lifecycle_msgs.msg.TransitionConstructor.TRANSITION_CALLBACK_ERROR
     }
 
     /**

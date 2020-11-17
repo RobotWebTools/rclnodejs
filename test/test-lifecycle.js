@@ -56,10 +56,9 @@ describe('LifecycleNode test suite', function () {
   beforeEach(function () {
     node = rclnodejs.createLifecycleNode(NODE_NAME);
     rclnodejs.spin(node);
-  });
+  }); 
 
   afterEach(function () {
-    node.shutdown();
     node.destroy();
   });
 

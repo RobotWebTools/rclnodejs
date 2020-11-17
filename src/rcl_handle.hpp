@@ -29,7 +29,8 @@ class RclHandle : public Nan::ObjectWrap {
   static void Init(v8::Local<v8::Object> exports);
   static v8::Local<v8::Object> NewInstance(
       void* handle, RclHandle* parent = nullptr,
-      std::function<int()> deleter = [] { return 0; });
+      std::function<int()> deleter = [] { return 0; },
+      bool free_ptr = true);
 
   void set_deleter(std::function<int()> deleter) { deleter_ = deleter; }
 
@@ -38,6 +39,7 @@ class RclHandle : public Nan::ObjectWrap {
 
   void* ptr() { return pointer_; }
   void set_ptr(void* ptr) { pointer_ = ptr; }
+  void set_free_ptr(bool free_ptr) { free_ptr_ = free_ptr; }
 
   void Reset();
   void AddChild(RclHandle* child) { children_.insert(child); }
@@ -65,6 +67,7 @@ class RclHandle : public Nan::ObjectWrap {
 
   std::function<int()> deleter_;
   std::set<RclHandle*> children_;
+  bool free_ptr_;
 };
 
 }  // namespace rclnodejs
