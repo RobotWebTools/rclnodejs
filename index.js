@@ -173,12 +173,13 @@ let rcl = {
   getActionNamesAndTypes: getActionNamesAndTypes,
 
   /**
-   * Create a node.
+   * Create and initialize a node.
    * @param {string} nodeName - The name used to register in ROS.
-   * @param {string} namespace - The namespace used in ROS, default is an empty string.
-   * @param {Context} context - The context, default is Context.defaultContext().
-   * @param {NodeOptions} options - The options to configure the new node behavior.
-   * @return {Node} The instance of Node.
+   * @param {string} [namespace=''] - The namespace used in ROS.
+   * @param {Context} [context=Context.defaultContext()] - The context to create the node in.
+   * @param {NodeOptions} [options=NodeOptions.defaultOptions] - The options to configure the new node behavior.
+   * @return {Node} A new instance of the specified node.
+   * @throws {Error} If the given context is not registered.
    */
   createNode(
     nodeName,
@@ -194,7 +195,7 @@ let rcl = {
       throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
     }
 
-    let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
+    let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
     let node = new rclnodejs.ShadowNode();
     node.handle = handle;
     Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
@@ -207,11 +208,11 @@ let rcl = {
   },
 
   /**
-   * Init the module.
-   *
-   * @param {Context} context - The context, default is Context.defaultContext().
-   * @param {string[]} argv - Process commandline arguments.
+   * Initialize the module.
+   * @param {Context} [context=Context.defaultContext()] - The context to initialize.
+   * @param {string[]} argv - Process command line arguments.
    * @return {Promise<undefined>} A Promise.
+   * @throws {Error} If the given context has already been initialized.
    */
   init(context = Context.defaultContext(), argv = process.argv) {
     return new Promise((resolve, reject) => {
@@ -229,7 +230,7 @@ let rcl = {
       }
 
       // initialize context
-      rclnodejs.init(context.handle(), argv);
+      rclnodejs.init(context.handle, argv);
       this._contextToNodeArrayMap.set(context, []);
 
       if (this._rosVersionChecked) {
@@ -263,7 +264,8 @@ let rcl = {
   /**
    * Start to spin the node, which triggers the event loop to start to check the incoming events.
    * @param {Node} node - The node to be spun.
-   * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
+   * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
+   * @throws {Error} If the node is already spinning.
    * @return {undefined}
    */
   spin(node, timeout = 10) {
@@ -278,8 +280,9 @@ let rcl = {
 
   /**
    * Execute one item of work or wait until a timeout expires.
-   * @param {Node} node - The node to be spun.
-   * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
+   * @param {Node} node - The node to be spun once.
+   * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
+   * @throws {Error} If the node is already spinning.
    * @return {undefined}
    */
   spinOnce(node, timeout = 10) {
@@ -289,37 +292,37 @@ let rcl = {
     if (node.spinning) {
       throw new Error('The node is already spinning.');
     }
-    node.spinOnce(node.context.handle(), timeout);
+    node.spinOnce(node.context.handle, timeout);
   },
 
   /**
-   * @param {Context} context - The context to be shutdown.
+   * Shuts down the given context by shutting down and destroying all nodes contained within.
+   *
+   * If no context is explicitly given, only the default context will be shut down, and not all of them.
+   * This follows the semantics of [rclpy.shutdown()]{@link http://docs.ros2.org/latest/api/rclpy/api/init_shutdown.html#rclpy.shutdown}.
+   *
+   * @param {Context} [context=Context.defaultContext()] - The context to be shutdown.
    * @return {undefined}
+   * @throws {Error} If there is a problem shutting down the context or while destroying or shutting down a node within it.
    */
   shutdown(context = Context.defaultContext()) {
     if (this.isShutdown(context)) {
-      throw new Error('The module rclnodejs has been shutdown.');
-      return;
-    }
-
-    // shutdown and remove all nodes assigned to context
-    this._contextToNodeArrayMap.get(context).forEach((node) => {
-      node.stopSpinning();
-      node.destroy();
-    });
-    this._contextToNodeArrayMap.delete(context);
-
-    // shutdown context
-    if (context === Context.defaultContext()) {
-      Context.shutdownDefaultContext();
+      debug(`The module rclnodejs (with context handle ${context.handle}) has been shutdown.`);
     } else {
+      // shutdown and remove all nodes assigned to context
+      this._contextToNodeArrayMap.get(context).forEach((node) => {
+        node.stopSpinning();
+        node.destroy();
+      });
+      this._contextToNodeArrayMap.delete(context);
+
       context.shutdown();
     }
   },
 
   /**
-   * A predictate for testing if a context has been shutdown.
-   * @param {Context} [context=defaultContext] - The context to inspect
+   * A predicate for testing if a context has been shutdown.
+   * @param {Context} [context=Context.defaultContext()] - The context to inspect.
    * @return {boolean} Return true if the module is shut down, otherwise return false.
    */
   isShutdown(context = Context.defaultContext()) {
@@ -336,13 +339,13 @@ let rcl = {
   },
 
   /**
-   * Search packgaes which locate under path $AMENT_PREFIX_PATH, regenerate all JavaScript structs files from the IDL of
+   * Search packages which locate under path $AMENT_PREFIX_PATH, regenerate all JavaScript structs files from the IDL of
    * messages(.msg) and services(.srv) and put these files under folder 'generated'. Any existing files under
    * this folder will be overwritten after the execution.
    * @return {Promise<undefined>} A Promise.
    */
   regenerateAll() {
-    // This will trigger to regererate all the JS structs used for messages and services,
+    // This will trigger to regenerate all the JS structs used for messages and services,
     // to overwrite the existing ones although they have been created.
     debug('Begin regeneration of JavaScript code from ROS IDL files.');
     return new Promise((resolve, reject) => {
@@ -360,7 +363,7 @@ let rcl = {
   },
 
   /**
-   * Judge if the topic/service is hidden, see http://design.ros2.org/articles/topic_and_service_names.html#hidden-topic-or-service-names
+   * Judge if the topic/service is hidden (see [the ROS2 design documentation]{@link http://design.ros2.org/articles/topic_and_service_names.html#hidden-topic-or-service-names}).
    * @param {string} name - Name of topic/service.
    * @return {boolean} - True if a given topic or service name is hidden, otherwise False.
    */
@@ -398,10 +401,10 @@ let rcl = {
   },
 
   /**
-   * Create a plain JavaScript by specified type identifier
+   * Create a plain JavaScript from the specified type identifier.
    * @param {string|Object} type -- the type identifier, acceptable formats could be 'std_msgs/std/String'
    *                                or {package: 'std_msgs', type: 'msg', name: 'String'}
-   * @return {Object|undefined} A plain JavaScript of that type
+   * @return {Object|undefined} A plain JavaScript of that type, or undefined if the object could not be created
    */
   createMessageObject(type) {
     return this.createMessage(type).toPlainObject();
@@ -433,7 +436,7 @@ process.on('SIGINT', _sigHandler);
 module.exports = rcl;
 
 // The following statements are located here to work around a
-// circular dependency issue occuring in rate.js
+// circular dependency issue occurring in rate.js
 const Node = require('./lib/node.js');
 const TimeSource = require('./lib/time_source.js');
 
