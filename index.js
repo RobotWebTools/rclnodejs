@@ -428,7 +428,9 @@ const _sigHandler = () => {
   // should call `rclnodejs.removeSignalHandlers`.
   debug('Catch ctrl+c event and will cleanup and terminate.');
   for (let ctx of rcl._contextToNodeArrayMap.keys()) {
-    rcl.shutdown(ctx);
+    if (!rcl.isShutdown(ctx)) {
+      rcl.shutdown(ctx);
+    }
   }
 };
 process.on('SIGINT', _sigHandler);
