@@ -17,7 +17,9 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe('rclnodejs init and shutdown test suite', function () {
+describe.only('rclnodejs init and shutdown test suite', function () {
+  this.timeout(60 * 1000);
+
   it('basic rclnodejs.init() & rclnodejs.shutdown()', async function () {
     await rclnodejs.init();
     rclnodejs.shutdown();
@@ -83,6 +85,9 @@ describe('rclnodejs init and shutdown test suite', function () {
       Error,
       'initializing it twice shall cause an error to be thrown'
     );
+
+    // and now clean up
+    rclnodejs.shutdown();
   });
 
   it('rclnodejs double shutdown should work', async function () {
