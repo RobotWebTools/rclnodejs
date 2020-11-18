@@ -419,12 +419,13 @@ let rcl = {
    * @returns {undefined}
    */
   removeSignalHandlers() {
+    // this will not throw even if the handler is already removed
     process.removeListener('SIGINT', _sigHandler);
   },
 };
 
 const _sigHandler = () => {
-  // shuts down all live contexts. Applications which wishes to use their own signal handlers
+  // shuts down all live contexts. Applications that wishes to use their own signal handlers
   // should call `rclnodejs.removeSignalHandlers`.
   debug('Catch ctrl+c event and will cleanup and terminate.');
   for (let ctx of rcl._contextToNodeArrayMap.keys()) {
