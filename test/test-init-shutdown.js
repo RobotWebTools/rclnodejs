@@ -89,13 +89,13 @@ describe('rclnodejs init and shutdown test suite', function () {
     await rclnodejs.init();
     rclnodejs.shutdown();
 
-    assert.doesNotReject(() => {
+    assert.doesNotThrow(() => {
       rclnodejs.shutdown();
     }, 'shutting rclnodejs down twice should not cause an error to be thrown');
   });
 
   it('rclnodejs create node without init should fail', async function () {
-    assert.rejects(
+    assert.throws(
       () => {
         rclnodejs.createNode('my_node');
       },
