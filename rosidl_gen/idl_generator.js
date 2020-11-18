@@ -26,7 +26,7 @@ const dots = dot.process({
   path: path.join(__dirname, '../rosidl_gen/templates'),
 });
 
-function removeExtraSpaceLines(str) {
+function removeEmptyLines(str) {
   return str.replace(/^\s*\n/gm, '');
 }
 
@@ -44,7 +44,7 @@ function generateServiceJSStruct(serviceInfo, dir) {
     '__' +
     serviceInfo.interfaceName +
     '.js';
-  const generatedCode = removeExtraSpaceLines(
+  const generatedCode = removeEmptyLines(
     dots.service({ serviceInfo: serviceInfo })
   );
   return writeGeneratedCode(dir, fileName, generatedCode);
@@ -68,7 +68,7 @@ function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
     spec.msgName +
     '.js';
 
-  const generatedCode = removeExtraSpaceLines(
+  const generatedCode = removeEmptyLines(
     dots.message({
       messageInfo: messageInfo,
       spec: spec,
@@ -207,12 +207,13 @@ async function generateActionJSStruct(actionInfo, dir) {
     '__' +
     actionInfo.subFolder +
     '__' +
-    actionInfo.interfaceName;
-  const generatedCode = removeExtraSpaceLines(
+    actionInfo.interfaceName +
+    '.js';
+  const generatedCode = removeEmptyLines(
     dots.action({ actionInfo: actionInfo })
   );
-  dir = path.join(dir, `${actionInfo.pkgName}`);
-  const action = writeGeneratedCode(dir, fileName + '.js', generatedCode);
+  dir = path.join(dir, actionInfo.pkgName);
+  const action = writeGeneratedCode(dir, fileName, generatedCode);
 
   await Promise.all([
     goalMsg,
@@ -230,17 +231,15 @@ async function generateActionJSStruct(actionInfo, dir) {
 }
 
 async function generateJSStructFromIDL(pkg, dir) {
-  const results = [];
-  pkg.messages.forEach(messageInfo => {
-    results.push(generateMessageJSStruct(messageInfo, dir));
-  });
-  pkg.services.forEach(serviceInfo => {
-    results.push(generateServiceJSStruct(serviceInfo, dir));
-  });
-  pkg.actions.forEach(actionInfo => {
-    results.push(generateActionJSStruct(actionInfo, dir));
-  });
-  await Promise.all(results);
+  await Promise.all([
+    ...pkg.messages.map((messageInfo) =>
+      generateMessageJSStruct(messageInfo, dir)
+    ),
+    ...pkg.services.map((serviceInfo) =>
+      generateServiceJSStruct(serviceInfo, dir)
+    ),
+    ...pkg.actions.map((actionInfo) => generateActionJSStruct(actionInfo, dir)),
+  ]);
 }
 
 module.exports = generateJSStructFromIDL;
