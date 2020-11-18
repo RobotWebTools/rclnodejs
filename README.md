@@ -249,6 +249,7 @@ Special thanks to the people who contribute.
 - [Alex Mikhalev](https://github.com/amikhalev)
 - [Wayne Parrott](https://github.com/wayneparrott)
 - [Matt Richard](https://github.com/mattrichard)
+- [Felix Divo](https://github.com/felixdivo)
 
 ## License
 
