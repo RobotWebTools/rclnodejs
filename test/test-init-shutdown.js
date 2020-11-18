@@ -17,14 +17,13 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe('rclnodejs init and shutdown test suite', function() {
-
+describe('rclnodejs init and shutdown test suite', function () {
   it('basic rclnodejs.init() & rclnodejs.shutdown()', async function () {
     await rclnodejs.init();
     rclnodejs.shutdown();
   });
 
-  it('rclnodejs.isShutdown() values', async function() {
+  it('rclnodejs.isShutdown() values', async function () {
     assert.deepStrictEqual(rclnodejs.isShutdown(), true);
     await rclnodejs.init();
     assert.deepStrictEqual(rclnodejs.isShutdown(), false);
@@ -32,60 +31,80 @@ describe('rclnodejs init and shutdown test suite', function() {
     assert.deepStrictEqual(rclnodejs.isShutdown(), true);
   });
 
-  it('rclnodejs init shutdown sequence', async function() {
+  it('rclnodejs init shutdown sequence', async function () {
     // the first round
     await rclnodejs.init();
     rclnodejs.shutdown();
 
     // and the second round: do it again!
-    assert.doesNotThrow(async () => {
+    assert.doesNotReject(async () => {
       await rclnodejs.init();
     }, 're-initializing after a shutdown should work');
     rclnodejs.shutdown();
   });
 
-  it('rclnodejs.init(argv)', async function() {
+  it('rclnodejs.init(argv)', async function () {
     await rclnodejs.init(rclnodejs.Context.defaultContext(), ['a', 'b']);
     rclnodejs.shutdown();
   });
 
-  it('rclnodejs.init(argv) - invalid argv', async function() {
-    assert.throws(async () => {
-      await rclnodejs.init(rclnodejs.Context.defaultContext(), 'foobar');
-    }, Error, 'an invalid argument should be rejected');
+  it('rclnodejs.init(argv) - invalid argv', async function () {
+    assert.rejects(
+      async () => {
+        await rclnodejs.init(rclnodejs.Context.defaultContext(), 'foobar');
+      },
+      Error,
+      'an invalid argument should be rejected'
+    );
     rclnodejs.shutdown();
   });
 
-  it('rclnodejs.init(argv) with null argv elements', async function() {
-    assert.throws(async () => {
-      await rclnodejs.init(rclnodejs.Context.defaultContext(), ['a', null, 'b']);
-    }, Error, 'an invalid argument should be rejected');
+  it('rclnodejs.init(argv) with null argv elements', async function () {
+    assert.rejects(
+      async () => {
+        await rclnodejs.init(rclnodejs.Context.defaultContext(), [
+          'a',
+          null,
+          'b',
+        ]);
+      },
+      Error,
+      'an invalid argument should be rejected'
+    );
     rclnodejs.shutdown();
   });
 
-  it('rclnodejs double init should throw', async function() {
+  it('rclnodejs double init should throw', async function () {
     await rclnodejs.init();
-    assert.throws(async () => {
-      await rclnodejs.init();
-    }, Error, 'initializing it twice shall cause an error to be thrown');
+    assert.rejects(
+      async () => {
+        await rclnodejs.init();
+      },
+      Error,
+      'initializing it twice shall cause an error to be thrown'
+    );
   });
 
-  it('rclnodejs double shutdown should work', async function() {
+  it('rclnodejs double shutdown should work', async function () {
     await rclnodejs.init();
     rclnodejs.shutdown();
 
-    assert.doesNotThrow(() => {
+    assert.doesNotReject(() => {
       rclnodejs.shutdown();
     }, 'shutting rclnodejs down twice should not cause an error to be thrown');
   });
 
-  it('rclnodejs create node without init should fail', async function() {
-    assert.throws(() => {
-      rclnodejs.createNode('my_node');
-    }, Error, 'creating a node on an uninitialized context should cause an error to be thrown');
+  it('rclnodejs create node without init should fail', async function () {
+    assert.rejects(
+      () => {
+        rclnodejs.createNode('my_node');
+      },
+      Error,
+      'creating a node on an uninitialized context should cause an error to be thrown'
+    );
   });
 
-  it('rclnodejs multiple contexts init shutdown sequence', async function() {
+  it('rclnodejs multiple contexts init shutdown sequence', async function () {
     async function initShutdownSequence() {
       // init the default context
       assert.ok(rclnodejs.isShutdown());
@@ -125,5 +144,4 @@ describe('rclnodejs init and shutdown test suite', function() {
     await initShutdownSequence();
     await initShutdownSequence();
   });
-
 });
