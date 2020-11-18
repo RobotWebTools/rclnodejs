@@ -185,7 +185,7 @@ let rcl = {
     nodeName,
     namespace = '',
     context = Context.defaultContext(),
-    options = NodeOptions.defaultOptions
+    options = NodeOptions.defaultOptions,
   ) {
     if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
       throw new TypeError('Invalid argument.');
@@ -428,9 +428,7 @@ const _sigHandler = () => {
   // should call `rclnodejs.removeSignalHandlers`.
   debug('Catch ctrl+c event and will cleanup and terminate.');
   for (let ctx of rcl._contextToNodeArrayMap.keys()) {
-    if (!rcl.isShutdown(ctx)) {
-      rcl.shutdown(ctx);
-    }
+    rcl.shutdown(ctx);
   }
 };
 process.on('SIGINT', _sigHandler);
