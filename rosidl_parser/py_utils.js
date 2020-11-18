@@ -16,7 +16,7 @@
 
 const os = require('os');
 
-let pyUtils = {
+const pyUtils = {
   getPython(py) {
     if (os.type() === 'Windows_NT') {
       py = py === 'python' ? 'py -2' : 'py -3';
