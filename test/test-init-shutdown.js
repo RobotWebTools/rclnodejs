@@ -17,7 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe.only('rclnodejs init and shutdown test suite', function () {
+describe('rclnodejs init and shutdown test suite', function () {
   this.timeout(60 * 1000);
 
   it('basic rclnodejs.init() & rclnodejs.shutdown()', async function () {
