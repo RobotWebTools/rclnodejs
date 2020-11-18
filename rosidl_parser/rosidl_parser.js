@@ -14,40 +14,33 @@
 
 'use strict';
 
-const os = require('os');
-const exec = require('child_process').exec;
-const pyUtils = require('./py_utils');
+const path = require('path');
+const execFile = require('child_process').execFile;
 
-const pythonExe = pyUtils.getPython('python3');
+const pythonExecutable = require('./py_utils').getPython('python3');
 
-let rosidlParser = {
+const rosidlParser = {
   parseMessageFile(packageName, filePath) {
-    return this._parseFile(
-      'parse_message_file',
-      packageName,
-      filePath.replace(/\s/g, '\\ ')
-    );
+    return this._parseFile('parse_message_file', packageName, filePath);
   },
 
   parseServiceFile(packageName, filePath) {
-    return this._parseFile(
-      'parse_service_file',
-      packageName,
-      filePath.replace(/\s/g, '\\ ')
-    );
+    return this._parseFile('parse_service_file', packageName, filePath);
   },
 
   parseActionFile(packageName, filePath) {
-    return this._parseFile(
-      'parse_action_file',
-      packageName,
-      filePath.replace(/\s/g, '\\ ')
-    );
+    return this._parseFile('parse_action_file', packageName, filePath);
   },
 
-  _parseFile(...args) {
+  _parseFile(command, packageName, filePath) {
     return new Promise((resolve, reject) => {
-      exec(this._assembleCommand(args), (err, stdout, stderr) => {
+      const args = [
+        path.join(__dirname, 'parser.py'),
+        command,
+        packageName,
+        filePath,
+      ];
+      execFile(pythonExecutable, args, (err, stdout, stderr) => {
         if (err) {
           reject(new Error(stderr));
         } else {
@@ -55,14 +48,6 @@ let rosidlParser = {
         }
       });
     });
-  },
-
-  _assembleCommand(args) {
-    let command = `${pythonExe} ${__dirname}/parser.py`;
-    args.forEach((arg) => {
-      command += ' ' + arg;
-    });
-    return command;
   },
 };
 
