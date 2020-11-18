@@ -25,17 +25,13 @@ const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
 );
 
 async function generateInPath(path) {
-  const results = [];
   const pkgs = await packages.findPackagesInDirectory(path);
-  pkgs.forEach(pkg => {
-    results.push(generateJSStructFromIDL(pkg, generatedRoot));
-  });
-  await Promise.all(results);
+  await Promise.all(
+    pkgs.map((pkg) => generateJSStructFromIDL(pkg, generatedRoot))
+  );
 }
 
 async function generateAll(forcedGenerating) {
-  const results = [];
-
   // If we want to create the JavaScript files compulsively (|forcedGenerating| equals to true)
   // or the JavaScript files have not been created (|exist| equals to false),
   // all the JavaScript files will be created.
@@ -45,10 +41,9 @@ async function generateAll(forcedGenerating) {
       path.join(__dirname, 'generator.json'),
       path.join(generatedRoot, 'generator.json')
     );
-    installedPackagePaths.forEach(path => {
-      results.push(generateInPath(path));
-    });
-    await Promise.all(results);
+    await Promise.all(
+      installedPackagePaths.map((path) => generateInPath(path))
+    );
   }
 }
 
