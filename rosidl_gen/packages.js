@@ -70,13 +70,18 @@ function addInterfaceInfo(info, type, pkgMap) {
   pkg[type].push(info);
 }
 
-function findPackagesInDirectory(dir) {
+/**
+ * Collects all packages in a directory.
+ * @param dir the directory to search in
+ * @return {Promise<Map<string, object>>} A mapping from the package name to some info about it.
+ */
+async function findPackagesInDirectory(dir) {
   return new Promise((resolve, reject) => {
     let amentExecuted = true;
 
     // If there is a folder named 'share' under the root path, we consider that
     // the ament build tool has been executed and |amentExecuted| will be true.
-    fs.access(path.join(dir, 'share'), err => {
+    fs.access(path.join(dir, 'share'), (err) => {
       if (err) {
         amentExecuted = false;
       }
@@ -88,12 +93,7 @@ function findPackagesInDirectory(dir) {
         if (path.extname(file.name) === '.msg') {
           // Some .msg files were generated prior to 0.3.2 for .action files,
           // which has been disabled. So these files should be ignored here.
-          if (
-            path
-              .dirname(root)
-              .split(path.sep)
-              .pop() !== 'action'
-          ) {
+          if (path.dirname(root).split(path.sep).pop() !== 'action') {
             addInterfaceInfo(
               grabInterfaceInfo(path.join(root, file.name), amentExecuted),
               'messages',
@@ -112,6 +112,8 @@ function findPackagesInDirectory(dir) {
             'actions',
             pkgMap
           );
+        } else {
+          // we ignore all other files
         }
         next();
       });

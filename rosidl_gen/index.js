@@ -26,8 +26,9 @@ const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
 
 async function generateInPath(path) {
   const pkgs = await packages.findPackagesInDirectory(path);
+  const pkgsInfo = Array.from(pkgs.values());
   await Promise.all(
-    pkgs.map((pkg) => generateJSStructFromIDL(pkg, generatedRoot))
+    pkgsInfo.map((pkgInfo) => generateJSStructFromIDL(pkgInfo, generatedRoot))
   );
 }
 
