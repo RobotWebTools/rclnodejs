@@ -72,7 +72,7 @@ function addInterfaceInfo(info, type, pkgMap) {
 
 /**
  * Collects all packages in a directory.
- * @param dir the directory to search in
+ * @param {string} dir - the directory to search in
  * @return {Promise<Map<string, object>>} A mapping from the package name to some info about it.
  */
 async function findPackagesInDirectory(dir) {
