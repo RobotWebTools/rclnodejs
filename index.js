@@ -185,7 +185,7 @@ let rcl = {
     nodeName,
     namespace = '',
     context = Context.defaultContext(),
-    options = NodeOptions.defaultOptions
+    options = NodeOptions.defaultOptions,
   ) {
     if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
       throw new TypeError('Invalid argument.');
@@ -409,13 +409,30 @@ let rcl = {
   createMessageObject(type) {
     return this.createMessage(type).toPlainObject();
   },
+
+  /**
+   * Removes the default signal handler installed by rclnodejs. After calling this, rclnodejs
+   * will no longer clean itself up when a SIGINT is received, it is the application's
+   * responsibility to properly shut down all nodes and contexts.
+   *
+   * Application which wishes to implement its own signal handler logic should call this.
+   * @returns {undefined}
+   */
+  removeSignalHandlers() {
+    // this will not throw even if the handler is already removed
+    process.removeListener('SIGINT', _sigHandler);
+  },
 };
 
-process.on('SIGINT', () => {
-  debug('Caught SIGINT/ctrl+c event and will cleanup and terminate.');
-  rcl.shutdown();
-  process.exit(0);
-});
+const _sigHandler = () => {
+  // shuts down all live contexts. Applications that wishes to use their own signal handlers
+  // should call `rclnodejs.removeSignalHandlers`.
+  debug('Catch ctrl+c event and will cleanup and terminate.');
+  for (let ctx of rcl._contextToNodeArrayMap.keys()) {
+    rcl.shutdown(ctx);
+  }
+};
+process.on('SIGINT', _sigHandler);
 
 module.exports = rcl;
 
