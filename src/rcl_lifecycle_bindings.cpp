@@ -210,23 +210,24 @@ NAN_METHOD(GetLifecycleSrvNameAndHandle) {
 
   std::string lifecycle_srv_field_name(*Nan::Utf8String(info[2]));
 
-  std::string service_name;
-  rcl_service_t* service;
+  rcl_service_t* service = nullptr;
   if (lifecycle_srv_field_name.compare("srv_get_state") == 0) {
-    service_name = "~/get_state";
     service = &state_machine->com_interface.srv_get_state;
-  } else if (lifecycle_srv_field_name.compare("srv_get_available_states") ==
-             0) {
-    service_name = "~/get_available_states";
+  } else if (lifecycle_srv_field_name.compare("srv_get_available_states")
+              == 0) {
     service = &state_machine->com_interface.srv_get_available_states;
   } else if (lifecycle_srv_field_name.compare(
                  "srv_get_available_transitions") == 0) {
-    service_name = "~/get_available_transitions";
     service = &state_machine->com_interface.srv_get_available_transitions;
   } else if (lifecycle_srv_field_name.compare("srv_change_state") == 0) {
-    service_name = "~/change_state";
     service = &state_machine->com_interface.srv_change_state;
   }
+
+  THROW_ERROR_IF_EQUAL(nullptr,
+                       service,
+                       "Service not found.");
+
+  std::string service_name = rcl_service_get_service_name(service);
 
   // build result object {name: <srv_name>, handle: <rcl handle of service_t>}
   v8::Local<v8::Object> named_srv_obj = Nan::New<v8::Object>();
@@ -239,10 +240,18 @@ NAN_METHOD(GetLifecycleSrvNameAndHandle) {
   // To accomplish this we create srv_handle instances with
   // the free_ptr parameter of false. Failing to do this results
   // in a double free() error.
-  auto srv_handle = RclHandle::NewInstance(service,
-                                          nullptr,
-                                          [] { return RCL_RET_OK; },
-                                          false);
+  auto srv_handle =
+      RclHandle::NewInstance(service, nullptr, [] { return RCL_RET_OK; });
+  RclHandle* rclHandle = RclHandle::Unwrap<RclHandle>(srv_handle);
+  RclHandle::Unwrap<RclHandle>(srv_handle)->set_deleter([rclHandle] {
+      rclHandle->set_ptr(nullptr);
+      return RCL_RET_OK;
+    });
+
+  // auto srv_handle = RclHandle::NewInstance(service,
+  //                                         nullptr,
+  //                                         [] { return RCL_RET_OK; },
+  //                                         false);
   Nan::Set(named_srv_obj, Nan::New("handle").ToLocalChecked(), srv_handle);
 
   info.GetReturnValue().Set(named_srv_obj);
@@ -259,13 +268,14 @@ NAN_METHOD(TriggerLifecycleTransitionById) {
   int transition_id = Nan::To<int64_t>(info[1]).FromJust();
 
   bool publish = true;
-  rcl_ret_t ret = rcl_lifecycle_trigger_transition_by_id(
-      state_machine, transition_id, publish);
 
-  if (ret == RCL_RET_OK) {
-    const rcl_lifecycle_state_t* current_state = state_machine->current_state;
-    info.GetReturnValue().Set(wrapState(current_state));
-  }
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_lifecycle_trigger_transition_by_id(
+                              state_machine, transition_id, publish),
+                           rcl_get_error_string().str);
+
+  const rcl_lifecycle_state_t* current_state = state_machine->current_state;
+  info.GetReturnValue().Set(wrapState(current_state));
 }
 
 // return null if transition exists from current state
@@ -279,13 +289,14 @@ NAN_METHOD(TriggerLifecycleTransitionByLabel) {
   std::string transition_label(*Nan::Utf8String(info[1]));
 
   bool publish = true;
-  rcl_ret_t ret = rcl_lifecycle_trigger_transition_by_label(
-      state_machine, transition_label.c_str(), publish);
 
-  if (ret == RCL_RET_OK) {
-    const rcl_lifecycle_state_t* current_state = state_machine->current_state;
-    info.GetReturnValue().Set(wrapState(current_state));
-  }
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_lifecycle_trigger_transition_by_label(
+                              state_machine, transition_label.c_str(), publish),
+                           rcl_get_error_string().str);
+
+  const rcl_lifecycle_state_t* current_state = state_machine->current_state;
+  info.GetReturnValue().Set(wrapState(current_state));
 }
 
 static const char* transitionId2Label(int callback_ret) {

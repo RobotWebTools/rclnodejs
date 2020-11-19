@@ -445,7 +445,7 @@ function _createNode(
   namespace = '',
   context = Context.defaultContext(),
   options = NodeOptions.defaultOptions,
-  nodeClazz
+  nodeClass
 ) {
   if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
     throw new TypeError('Invalid argument.');
@@ -456,7 +456,7 @@ function _createNode(
   }
 
   let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
-  let node = new nodeClazz();
+  let node = new nodeClass();
   node.handle = handle;
   Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
   node.context = context;

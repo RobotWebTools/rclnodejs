@@ -86,8 +86,7 @@ NAN_METHOD(RclHandle::Dismiss) {
 }
 
 v8::Local<v8::Object> RclHandle::NewInstance(void* handle, RclHandle* parent,
-                                             std::function<int()> deleter,
-                                             bool free_ptr) {
+                                             std::function<int()> deleter) {
   Nan::EscapableHandleScope scope;
 
   v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
@@ -100,7 +99,6 @@ v8::Local<v8::Object> RclHandle::NewInstance(void* handle, RclHandle* parent,
   auto* rcl_handle = Nan::ObjectWrap::Unwrap<RclHandle>(instance);
   rcl_handle->set_ptr(handle);
   rcl_handle->set_deleter(deleter);
-  rcl_handle->set_free_ptr(free_ptr);
   if (parent) {
     rcl_handle->set_parent(parent);
     parent->AddChild(rcl_handle);
@@ -130,9 +128,7 @@ void RclHandle::Reset() {
     rcl_reset_error();
   }
 
-  if (free_ptr_) {
-    free(pointer_);
-  }
+  free(pointer_);
 
   pointer_ = nullptr;
   children_.clear();
