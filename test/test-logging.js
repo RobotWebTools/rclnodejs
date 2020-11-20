@@ -17,20 +17,22 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe('Rclnodejs - Test logging util', function() {
-
-  it('Test setting severity level', function() {
+describe('Test logging util', function () {
+  it('Test setting severity level', function () {
     const logger = rclnodejs.logging.getLogger('severity_logger');
     logger.setLoggerLevel(logger.LoggingSeverity.DEBUG);
-    assert.deepStrictEqual(logger.loggerEffectiveLevel, logger.LoggingSeverity.DEBUG);
+    assert.deepStrictEqual(
+      logger.loggerEffectiveLevel,
+      logger.LoggingSeverity.DEBUG
+    );
   });
 
-  it('Test logger name', function() {
+  it('Test logger name', function () {
     const logger = rclnodejs.logging.getLogger('logger');
     assert.strictEqual(logger.name, 'logger');
   });
 
-  it('Test severity level threshold', function() {
+  it('Test severity level threshold', function () {
     const logger = rclnodejs.logging.getLogger('threshold_logger');
     logger.setLoggerLevel(logger.LoggingSeverity.INFO);
 
@@ -43,13 +45,17 @@ describe('Rclnodejs - Test logging util', function() {
     assert.strictEqual(logger.fatal('message fatal'), true);
   });
 
-  it('Test logger name', function() {
+  it('Test logger name', function () {
     const logger = rclnodejs.logging.getLogger('logger');
     assert.strictEqual(logger.name, 'logger');
   });
 
   async function testLoglevel(level) {
-    await rclnodejs.init(['--ros-args', '--log-level', level]);
+    await rclnodejs.init(rclnodejs.Context.defaultContext(), [
+      '--ros-args',
+      '--log-level',
+      level,
+    ]);
     const logger = rclnodejs.logging.getLogger(`test_logger_${level}`);
     const expected = logger.LoggingSeverity[level.toUpperCase()];
     assert.deepStrictEqual(logger.loggerEffectiveLevel, expected);
@@ -57,13 +63,13 @@ describe('Rclnodejs - Test logging util', function() {
   }
 
   for (const level of ['debug', 'info', 'warn', 'error', 'fatal']) {
-    it(`Test commandline parameter configuration of log level '${level}'`, async function() {
+    it(`Test commandline parameter configuration of log level '${level}'`, async function () {
       // test the specific log level
       await testLoglevel(level);
     });
   }
 
-  it ('Test commandline parameter configuration resets correctly', async  function () {
+  it('Test commandline parameter configuration resets correctly', async function () {
     // reset the default log level to 'info'
     await testLoglevel('info');
 
@@ -71,8 +77,10 @@ describe('Rclnodejs - Test logging util', function() {
     await rclnodejs.init();
     const node = rclnodejs.createNode('test_node');
     const logger = node.getLogger();
-    assert.deepStrictEqual(logger.loggerEffectiveLevel, logger.LoggingSeverity.INFO);
+    assert.deepStrictEqual(
+      logger.loggerEffectiveLevel,
+      logger.LoggingSeverity.INFO
+    );
     rclnodejs.shutdown();
   });
-
 });
