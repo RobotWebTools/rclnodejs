@@ -25,3 +25,6 @@ log
 # test build artifacts
 /test/cpp/add_two_ints_client
 /test/cpp/listener
+
+# controversial ignore, see https://dev.to/gajus/stop-using-package-lock-json-or-yarn-lock-3ddi
+package-lock.json
