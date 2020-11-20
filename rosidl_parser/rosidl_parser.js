@@ -42,7 +42,13 @@ const rosidlParser = {
       ];
       execFile(pythonExecutable, args, (err, stdout, stderr) => {
         if (err) {
-          reject(new Error(stderr));
+          reject(
+            new Error(
+              `There was an error executing python with arguments "${JSON.stringify(
+                args
+              )}": "${err}"; stderr was: ${stderr}`
+            )
+          );
         } else {
           resolve(JSON.parse(stdout));
         }
