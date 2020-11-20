@@ -46,7 +46,7 @@ const rosidlParser = {
             new Error(
               `There was an error executing python with arguments "${JSON.stringify(
                 args
-              )}": ` + `"${err}"; stderr was: ${stderr}`
+              )}": "${err}"; stderr was: ${stderr}`
             )
           );
         } else {
