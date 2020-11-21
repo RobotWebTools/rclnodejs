@@ -62,17 +62,17 @@ function inherits(target, source) {
  * @return {Promise<string | null>} The current version or null if the *generator.json* file was not found
  * @throws {Error} if there was an error reading the *generator.json* file (except for it being absent)
  */
-function getCurrentGeneratorVersion() {
+async function getCurrentGeneratorVersion() {
   const jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
 
   return new Promise((resolve, reject) => {
-    fs.open(jsonFilePath, 'r', (err, fd) => {
+    fs.open(jsonFilePath, 'r', (err) => {
       if (err) {
         if (err.code === 'ENOENT') {
           resolve(null);
-          return;
+        } else {
+          reject(err);
         }
-        reject(err);
       } else {
         fs.readFile(jsonFilePath, 'utf8', (err, data) => {
           if (err) {
