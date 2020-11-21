@@ -15,9 +15,9 @@
 'use strict';
 
 const path = require('path');
-const exec = require('child_process').exec;
+const execFile = require('child_process').execFile;
 
-const pythonExecutable = require('./py_utils').getPython('python3');
+const pythonExecutable = require('./py_utils').getPythonExecutable('python3');
 
 const rosidlParser = {
   parseMessageFile(packageName, filePath) {
@@ -40,19 +40,24 @@ const rosidlParser = {
         packageName,
         filePath,
       ];
-      exec(pythonExecutable, args, (err, stdout, stderr) => {
-        if (err) {
-          reject(
-            new Error(
-              `There was an error executing python with arguments "${JSON.stringify(
-                args
-              )}": "${err}"; stderr was: ${stderr}`
-            )
-          );
-        } else {
-          resolve(JSON.parse(stdout));
+      const [pythonExecutableFile, pythonExecutableArgs] = pythonExecutable;
+      execFile(
+        pythonExecutableFile,
+        pythonExecutableArgs.concat(args),
+        (err, stdout, stderr) => {
+          if (err) {
+            reject(
+              new Error(
+                `There was an error executing python with arguments "${JSON.stringify(
+                  args
+                )}": "${err}"; stderr was: ${stderr}`
+              )
+            );
+          } else {
+            resolve(JSON.parse(stdout));
+          }
         }
-      });
+      );
     });
   },
 };

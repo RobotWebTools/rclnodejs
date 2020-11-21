@@ -16,13 +16,17 @@
 
 const os = require('os');
 
-const pyUtils = {
-  getPython(py) {
+module.exports = {
+  /**
+   * Get the python executable on any platform as a command to execute directly and additional arguments as an array.
+   * @param {string} py either "python2" or "python3"
+   * @return {[string, string[]]}
+   */
+  getPythonExecutable(py) {
     if (os.type() === 'Windows_NT') {
-      py = py === 'python' ? 'py -2' : 'py -3';
+      return [py, [py === 'python' ? '-2' : '-3']];
+    } else {
+      return [py, []];
     }
-    return py;
   },
 };
-
-module.exports = pyUtils;
