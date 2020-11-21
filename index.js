@@ -347,22 +347,15 @@ let rcl = {
    * this folder will be overwritten after the execution.
    * @return {Promise<undefined>} A Promise.
    */
-  regenerateAll() {
+  async regenerateAll() {
     // This will trigger to regenerate all the JS structs used for messages and services,
     // to overwrite the existing ones although they have been created.
-    debug('Begin regeneration of JavaScript code from ROS IDL files.');
-    return new Promise((resolve, reject) => {
-      generator
-        .generateAll(true)
-        .then(() => {
-          tsdGenerator.generateAll(); // create interfaces.d.ts
-          debug('Finish regeneration.');
-          resolve();
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+    debug('Begin regeneration of JavaScript code from ROS IDL files...');
+
+    await generator.generateAll(true);
+    await tsdGenerator.generateAll(); // create interfaces.d.ts
+
+    debug('Finished regeneration.');
   },
 
   /**
