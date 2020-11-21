@@ -24,7 +24,7 @@ module.exports = {
    */
   getPythonExecutable(py) {
     if (os.type() === 'Windows_NT') {
-      return [py, [py === 'python' ? '-2' : '-3']];
+      return ['py', [py === 'python' ? '-2' : '-3']];
     }
     return [py, []];
   },
