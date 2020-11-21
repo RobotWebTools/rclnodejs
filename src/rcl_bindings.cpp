@@ -1162,7 +1162,6 @@ const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
 
 std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
     v8::Local<v8::Object> object) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   std::unique_ptr<rmw_qos_profile_t> qos_profile =
       std::make_unique<rmw_qos_profile_t>();
 
