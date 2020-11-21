@@ -185,23 +185,32 @@ let rcl = {
     nodeName,
     namespace = '',
     context = Context.defaultContext(),
-    options = NodeOptions.defaultOptions,
+    options = NodeOptions.defaultOptions
   ) {
     if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
       throw new TypeError('Invalid argument.');
     }
 
     if (!this._contextToNodeArrayMap.has(context)) {
-      throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
+      throw new Error(
+        'Invalid context. Must call rclnodejs(context) before using the context'
+      );
     }
 
     let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
     let node = new rclnodejs.ShadowNode();
     node.handle = handle;
-    Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
+    Object.defineProperty(node, 'handle', {
+      configurable: false,
+      writable: false,
+    }); // make read-only
     node.context = context;
     node.init(nodeName, namespace, context, options);
-    debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
+    debug(
+      'Finish initializing node, name = %s and namespace = %s.',
+      nodeName,
+      namespace
+    );
 
     this._contextToNodeArrayMap.get(context).push(node);
     return node;
@@ -214,51 +223,43 @@ let rcl = {
    * @return {Promise<undefined>} A Promise.
    * @throws {Error} If the given context has already been initialized.
    */
-  init(context = Context.defaultContext(), argv = process.argv) {
-    return new Promise((resolve, reject) => {
-      // check if context has already been initialized
-      if (this._contextToNodeArrayMap.has(context)) {
-        throw new Error('The context has already been initialized.');
-      }
+  async init(context = Context.defaultContext(), argv = process.argv) {
+    // check if context has already been initialized
+    if (this._contextToNodeArrayMap.has(context)) {
+      throw new Error('The context has already been initialized.');
+    }
 
-      // check argv for correct value and state
-      if (!Array.isArray(argv)) {
-        throw new TypeError('argv must be an array.');
-      }
-      if (argv.reduce((hasNull, arg) => hasNull || typeof arg !== 'string', false)) {
-        throw new TypeError('argv elements must not be null');
-      }
+    // check argv for correct value and state
+    if (!Array.isArray(argv)) {
+      throw new TypeError('argv must be an array.');
+    }
+    if (
+      argv.reduce((hasNull, arg) => hasNull || typeof arg !== 'string', false)
+    ) {
+      throw new TypeError('argv elements must not be null');
+    }
 
-      // initialize context
-      rclnodejs.init(context.handle, argv);
-      this._contextToNodeArrayMap.set(context, []);
+    // initialize context
+    rclnodejs.init(context.handle, argv);
+    this._contextToNodeArrayMap.set(context, []);
 
-      if (this._rosVersionChecked) {
-        // no further processing required
-        resolve();
-      }
+    if (this._rosVersionChecked) {
+      // no further processing required
+      return;
+    }
 
-      getCurrentGeneratorVersion()
-        .then((version) => {
-          let forced = version === null || compareVersions(version, generator.version()) === -1;
-          if (forced) {
-            debug('The generator will begin to create JavaScript code from ROS IDL files...');
-          }
+    const version = await getCurrentGeneratorVersion();
 
-          generator
-            .generateAll(forced)
-            .then(() => {
-              this._rosVersionChecked = true;
-              resolve();
-            })
-            .catch((e) => {
-              reject(e);
-            });
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+    let forced =
+      version === null || compareVersions(version, generator.version()) === -1;
+    if (forced) {
+      debug(
+        'The generator will begin to create JavaScript code from ROS IDL files...'
+      );
+    }
+
+    await generator.generateAll(forced);
+    this._rosVersionChecked = true;
   },
 
   /**
@@ -307,7 +308,9 @@ let rcl = {
    */
   shutdown(context = Context.defaultContext()) {
     if (this.isShutdown(context)) {
-      debug(`The module rclnodejs (with context handle ${context.handle}) has been shutdown.`);
+      debug(
+        `The module rclnodejs (with context handle ${context.handle}) has been shutdown.`
+      );
     } else {
       // shutdown and remove all nodes assigned to context
       this._contextToNodeArrayMap.get(context).forEach((node) => {
