@@ -197,8 +197,8 @@ let rcl = {
       );
     }
 
-    let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
-    let node = new rclnodejs.ShadowNode();
+    const handle = rclnodejs.createNode(nodeName, namespace, context.handle);
+    const node = new rclnodejs.ShadowNode();
     node.handle = handle;
     Object.defineProperty(node, 'handle', {
       configurable: false,
@@ -250,7 +250,7 @@ let rcl = {
 
     const version = await getCurrentGeneratorVersion();
 
-    let forced =
+    const forced =
       version === null || compareVersions(version, generator.version()) === -1;
     if (forced) {
       debug(
@@ -383,7 +383,7 @@ let rcl = {
   },
 
   createMessage(type) {
-    let typeClass = loader.loadInterface(type);
+    const typeClass = loader.loadInterface(type);
 
     if (typeClass) {
       return new typeClass();
@@ -420,7 +420,7 @@ const _sigHandler = () => {
   // shuts down all live contexts. Applications that wishes to use their own signal handlers
   // should call `rclnodejs.removeSignalHandlers`.
   debug('Catch ctrl+c event and will cleanup and terminate.');
-  for (let ctx of rcl._contextToNodeArrayMap.keys()) {
+  for (const ctx of rcl._contextToNodeArrayMap.keys()) {
     rcl.shutdown(ctx);
   }
 };
