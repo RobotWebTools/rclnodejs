@@ -49,7 +49,7 @@ def get_json_object_from_msg_spec_object(msg_spec_object):
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print ('Wrong number of argments')
+        print('Wrong number of argments')
         sys.exit(1)
     try:
         parser_method = getattr(parser, sys.argv[1])
@@ -69,9 +69,9 @@ if __name__ == '__main__':
         else:
             assert False, "unknown method '%s'" % sys.argv[1]
 
-        print (json.dumps(json_obj))
+        print(json.dumps(json_obj))
         sys.exit(0)
 
     except Exception as e:
-        print (str(e), file=sys.stderr)
+        print(str(e), file=sys.stderr)
         sys.exit(1)
