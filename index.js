@@ -368,11 +368,7 @@ let rcl = {
       throw new TypeError('Invalid argument');
     }
 
-    let arr = name.split('/');
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i].startsWith('_')) return true;
-    }
-    return false;
+    return name.split('/').some((slice) => slice.startsWith('_'));
   },
 
   /**
