@@ -16,180 +16,133 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const assertUtils = require('./utils.js');
-const assertThrowsError = assertUtils.assertThrowsError;
 
-describe('Node destroy testing', function () {
+describe('rclnodejs init and shutdown test suite', function () {
   this.timeout(60 * 1000);
 
-  it('rclnodejs.init()', function (done) {
-    rclnodejs
-      .init()
-      .then(function () {
-        assert.ok(true);
-        rclnodejs.shutdown();
-        done();
-      })
-      .catch(function (err) {
-        assert.ok(false);
-        done(err);
-      });
+  it('basic rclnodejs.init() & rclnodejs.shutdown()', async function () {
+    await rclnodejs.init();
+    rclnodejs.shutdown();
   });
 
-  it('rclnodejs.init() & rclnodejs.shutdown()', function (done) {
+  it('rclnodejs.isShutdown() values', async function () {
     assert.deepStrictEqual(rclnodejs.isShutdown(), true);
-    rclnodejs
-      .init()
-      .then(function () {
-        assert.deepStrictEqual(rclnodejs.isShutdown(), false);
-        rclnodejs.shutdown();
-        assert.deepStrictEqual(rclnodejs.isShutdown(), true);
-        done();
-      })
-      .catch(function (err) {
-        assert.ok(false);
-        done(err);
-      });
+    await rclnodejs.init();
+    assert.deepStrictEqual(rclnodejs.isShutdown(), false);
+    rclnodejs.shutdown();
+    assert.deepStrictEqual(rclnodejs.isShutdown(), true);
   });
 
-  it('rclnodejs init shutdown sequence', function (done) {
-    rclnodejs
-      .init()
-      .then(function () {
-        rclnodejs.shutdown();
-        assert.ok(true);
-      })
-      .then(function () {
-        assert.ok(true);
-        return rclnodejs.init();
-      })
-      .then(function () {
-        assert.doesNotThrow(function () {
-          rclnodejs.shutdown();
-        });
-        assert.ok(true);
-        done();
-      })
-      .catch(function (err) {
-        assert.ok(false);
-        done(err);
-      });
+  it('rclnodejs init shutdown sequence', async function () {
+    // the first round
+    await rclnodejs.init();
+    rclnodejs.shutdown();
+
+    // and the second round: do it again!
+    assert.doesNotReject(async () => {
+      await rclnodejs.init();
+    }, 're-initializing after a shutdown should work');
+    rclnodejs.shutdown();
   });
 
-  it('rclnodejs.init(argv)', function (done) {
-    rclnodejs
-      .init(rclnodejs.Context.defaultContext(), ['a', 'b'])
-      .then(function () {
-        assert.ok(true);
-        rclnodejs.shutdown();
-        done();
-      })
-      .catch(function (err) {
-        assert.ok(false);
-        done(err);
-      });
+  it('rclnodejs.init(argv)', async function () {
+    await rclnodejs.init(rclnodejs.Context.defaultContext(), ['a', 'b']);
+    rclnodejs.shutdown();
   });
 
-  it('rclnodejs.init(argv) - invalid argv', function (done) {
-    rclnodejs
-      .init(rclnodejs.Context.defaultContext(), 'foobar')
-      .then(function () {
-        assert.ok(false);
-        rclnodejs.shutdown();
-        done();
-      })
-      // eslint-disable-next-line handle-callback-err
-      .catch(function (_err) {
-        assert.ok(true);
-        done();
-      });
+  it('rclnodejs.init(argv) - invalid argv', async function () {
+    assert.rejects(
+      async () => {
+        await rclnodejs.init(rclnodejs.Context.defaultContext(), 'foobar');
+      },
+      Error,
+      'an invalid argument should be rejected'
+    );
+    rclnodejs.shutdown();
   });
 
-  it('rclnodejs.init(argv) with null argv elements', function (done) {
-    rclnodejs
-      .init(rclnodejs.Context.defaultContext(), ['a', null, 'b'])
-      .then(function () {
-        assert.ok(false);
-        done();
-      })
-      // eslint-disable-next-line handle-callback-err
-      .catch(function (err) {
-        assert.ok(true);
-        done();
-      });
+  it('rclnodejs.init(argv) with null argv elements', async function () {
+    assert.rejects(
+      async () => {
+        await rclnodejs.init(rclnodejs.Context.defaultContext(), [
+          'a',
+          null,
+          'b',
+        ]);
+      },
+      Error,
+      'an invalid argument should be rejected'
+    );
+    rclnodejs.shutdown();
   });
 
-  it('rclnodejs double init', function (done) {
-    rclnodejs
-      .init()
-      .then(function () {
-        assert.ok(true);
-      })
-      .then(function () {
-        return rclnodejs.init();
-      })
-      .catch(function (err) {
-        assert.notDeepStrictEqual(err, null);
-        rclnodejs.shutdown();
-        done();
-      });
+  it('rclnodejs double init should throw', async function () {
+    await rclnodejs.init();
+    assert.rejects(
+      async () => {
+        await rclnodejs.init();
+      },
+      Error,
+      'initializing it twice shall cause an error to be thrown'
+    );
+
+    // and now clean up
+    rclnodejs.shutdown();
   });
 
-  it('rclnodejs double shutdown', function (done) {
-    rclnodejs
-      .init()
-      .then(function () {
-        rclnodejs.shutdown();
-        assert.ok(true);
-      })
-      .then(function () {
-        assert.doesNotThrow(function () {
-          rclnodejs.shutdown();
-        });
-        assert.ok(true);
-        done();
-      })
-      .catch(function (err) {
-        assert.ok(true);
-        done(err);
-      });
+  it('rclnodejs double shutdown should work', async function () {
+    await rclnodejs.init();
+    rclnodejs.shutdown();
+
+    assert.doesNotThrow(() => {
+      rclnodejs.shutdown();
+    }, 'shutting rclnodejs down twice should not cause an error to be thrown');
   });
 
-  it('rclnodejs create node without init', function () {
-    assert.throws(function () {
-      rclnodejs.createNode('my_node');
-    });
+  it('rclnodejs create node without init should fail', async function () {
+    assert.throws(
+      () => {
+        rclnodejs.createNode('my_node');
+      },
+      Error,
+      'creating a node on an uninitialized context should cause an error to be thrown'
+    );
   });
 
   it('rclnodejs multiple contexts init shutdown sequence', async function () {
     async function initShutdownSequence() {
+      // init the default context
+      assert.ok(rclnodejs.isShutdown());
       await rclnodejs.init();
       assert.ok(!rclnodejs.isShutdown());
-      const defaultContext = rclnodejs.Context.defaultContext();
-      assert.ok(defaultContext !== null);
-      assert.ok(defaultContext.isOk);
-      assert.ok(defaultContext.isDefaultContext);
+      const defaultCtx = rclnodejs.Context.defaultContext();
+      assert.ok(defaultCtx !== null);
+      assert.ok(defaultCtx.isOk);
+      assert.ok(defaultCtx.isDefaultContext);
 
+      // init another one
       const ctx = new rclnodejs.Context();
       await rclnodejs.init(ctx);
       assert.ok(!rclnodejs.isShutdown(ctx));
       assert.ok(!rclnodejs.isShutdown());
       assert.ok(ctx.isOk);
       assert.ok(!ctx.isDefaultContext);
-      assert.ok(defaultContext.isOk);
-      assert.ok(defaultContext.isDefaultContext);
+      assert.ok(defaultCtx.isOk);
+      assert.ok(defaultCtx.isDefaultContext);
 
-      assert.doesNotThrow(() => rclnodejs.shutdown());
+      // shut down the default context
+      rclnodejs.shutdown();
       assert.ok(rclnodejs.isShutdown());
       assert.ok(!rclnodejs.isShutdown(ctx));
       assert.ok(ctx.isOk);
-      assert.ok(!defaultContext.isOk);
+      assert.ok(!defaultCtx.isOk);
 
-      assert.doesNotThrow(() => rclnodejs.shutdown(ctx));
+      // shut down the other context
+      rclnodejs.shutdown(ctx);
       assert.ok(rclnodejs.isShutdown());
       assert.ok(rclnodejs.isShutdown(ctx));
       assert.ok(!ctx.isOk);
-      assert.ok(!defaultContext.isOk);
+      assert.ok(!defaultCtx.isOk);
     }
 
     // execute it twice
