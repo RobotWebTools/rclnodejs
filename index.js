@@ -51,14 +51,19 @@ const {
 } = require('./lib/action/graph.js');
 
 function inherits(target, source) {
-  let properties = Object.getOwnPropertyNames(source.prototype);
+  const properties = Object.getOwnPropertyNames(source.prototype);
   properties.forEach((property) => {
     target.prototype[property] = source.prototype[property];
   });
 }
 
+/**
+ * Get the version of the generator that was used for the currently present interfaces.
+ * @return {Promise<string | null>} The current version or null if the *generator.json* file was not found
+ * @throws {Error} if there was an error reading the *generator.json* file (except for it being absent)
+ */
 function getCurrentGeneratorVersion() {
-  let jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
+  const jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
 
   return new Promise((resolve, reject) => {
     fs.open(jsonFilePath, 'r', (err, fd) => {
@@ -233,10 +238,8 @@ let rcl = {
     if (!Array.isArray(argv)) {
       throw new TypeError('argv must be an array.');
     }
-    if (
-      argv.reduce((hasNull, arg) => hasNull || typeof arg !== 'string', false)
-    ) {
-      throw new TypeError('argv elements must not be null');
+    if (!argv.every((argument) => typeof argument === 'string')) {
+      throw new TypeError('argv elements must be strings (and not null).');
     }
 
     // initialize context
@@ -249,9 +252,9 @@ let rcl = {
     }
 
     const version = await getCurrentGeneratorVersion();
-
     const forced =
-      version === null || compareVersions(version, generator.version()) === -1;
+      version === null ||
+      compareVersions.compare(version, generator.version(), '<');
     if (forced) {
       debug(
         'The generator will begin to create JavaScript code from ROS IDL files...'
