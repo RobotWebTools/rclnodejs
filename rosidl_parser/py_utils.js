@@ -18,15 +18,14 @@ const os = require('os');
 
 module.exports = {
   /**
-   * Get the python executable on any platform as a command to execute directly and additional arguments as an array.
+   * Get the python executable on any platform suitable to be handed to *child_process.execFile*.
    * @param {string} py either "python2" or "python3"
-   * @return {[string, string[]]}
+   * @return {[string, string[]]} A command to execute directly and additional arguments as an array.
    */
   getPythonExecutable(py) {
     if (os.type() === 'Windows_NT') {
       return [py, [py === 'python' ? '-2' : '-3']];
-    } else {
-      return [py, []];
     }
+    return [py, []];
   },
 };
