@@ -51,23 +51,28 @@ const {
 } = require('./lib/action/graph.js');
 
 function inherits(target, source) {
-  let properties = Object.getOwnPropertyNames(source.prototype);
+  const properties = Object.getOwnPropertyNames(source.prototype);
   properties.forEach((property) => {
     target.prototype[property] = source.prototype[property];
   });
 }
 
-function getCurrentGeneratorVersion() {
-  let jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
+/**
+ * Get the version of the generator that was used for the currently present interfaces.
+ * @return {Promise<string | null>} The current version or null if the *generator.json* file was not found
+ * @throws {Error} if there was an error reading the *generator.json* file (except for it being absent)
+ */
+async function getCurrentGeneratorVersion() {
+  const jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
 
   return new Promise((resolve, reject) => {
-    fs.open(jsonFilePath, 'r', (err, fd) => {
+    fs.open(jsonFilePath, 'r', (err) => {
       if (err) {
         if (err.code === 'ENOENT') {
           resolve(null);
-          return;
+        } else {
+          reject(err);
         }
-        reject(err);
       } else {
         fs.readFile(jsonFilePath, 'utf8', (err, data) => {
           if (err) {
@@ -185,23 +190,32 @@ let rcl = {
     nodeName,
     namespace = '',
     context = Context.defaultContext(),
-    options = NodeOptions.defaultOptions,
+    options = NodeOptions.defaultOptions
   ) {
     if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
       throw new TypeError('Invalid argument.');
     }
 
     if (!this._contextToNodeArrayMap.has(context)) {
-      throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
+      throw new Error(
+        'Invalid context. Must call rclnodejs(context) before using the context'
+      );
     }
 
-    let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
-    let node = new rclnodejs.ShadowNode();
+    const handle = rclnodejs.createNode(nodeName, namespace, context.handle);
+    const node = new rclnodejs.ShadowNode();
     node.handle = handle;
-    Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
+    Object.defineProperty(node, 'handle', {
+      configurable: false,
+      writable: false,
+    }); // make read-only
     node.context = context;
     node.init(nodeName, namespace, context, options);
-    debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
+    debug(
+      'Finish initializing node, name = %s and namespace = %s.',
+      nodeName,
+      namespace
+    );
 
     this._contextToNodeArrayMap.get(context).push(node);
     return node;
@@ -215,51 +229,41 @@ let rcl = {
    * @throws {Error} If the given context has already been initialized or the command
    *                 line arguments argv could not be parsed.
    */
-  init(context = Context.defaultContext(), argv = process.argv) {
-    return new Promise((resolve, reject) => {
-      // check if context has already been initialized
-      if (this._contextToNodeArrayMap.has(context)) {
-        throw new Error('The context has already been initialized.');
-      }
+  async init(context = Context.defaultContext(), argv = process.argv) {
+    // check if context has already been initialized
+    if (this._contextToNodeArrayMap.has(context)) {
+      throw new Error('The context has already been initialized.');
+    }
 
-      // check argv for correct value and state
-      if (!Array.isArray(argv)) {
-        throw new TypeError('argv must be an array.');
-      }
-      if (argv.reduce((hasNull, arg) => hasNull || typeof arg !== 'string', false)) {
-        throw new TypeError('argv elements must not be null');
-      }
+    // check argv for correct value and state
+    if (!Array.isArray(argv)) {
+      throw new TypeError('argv must be an array.');
+    }
+    if (!argv.every((argument) => typeof argument === 'string')) {
+      throw new TypeError('argv elements must be strings (and not null).');
+    }
 
-      // initialize context
-      rclnodejs.init(context.handle, argv);
-      this._contextToNodeArrayMap.set(context, []);
+    // initialize context
+    rclnodejs.init(context.handle, argv);
+    this._contextToNodeArrayMap.set(context, []);
 
-      if (this._rosVersionChecked) {
-        // no further processing required
-        resolve();
-      }
+    if (this._rosVersionChecked) {
+      // no further processing required
+      return;
+    }
 
-      getCurrentGeneratorVersion()
-        .then((version) => {
-          let forced = version === null || compareVersions(version, generator.version()) === -1;
-          if (forced) {
-            debug('The generator will begin to create JavaScript code from ROS IDL files...');
-          }
+    const version = await getCurrentGeneratorVersion();
+    const forced =
+      version === null ||
+      compareVersions.compare(version, generator.version(), '<');
+    if (forced) {
+      debug(
+        'The generator will begin to create JavaScript code from ROS IDL files...'
+      );
+    }
 
-          generator
-            .generateAll(forced)
-            .then(() => {
-              this._rosVersionChecked = true;
-              resolve();
-            })
-            .catch((e) => {
-              reject(e);
-            });
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+    await generator.generateAll(forced);
+    this._rosVersionChecked = true;
   },
 
   /**
@@ -308,7 +312,9 @@ let rcl = {
    */
   shutdown(context = Context.defaultContext()) {
     if (this.isShutdown(context)) {
-      debug(`The module rclnodejs (with context handle ${context.handle}) has been shutdown.`);
+      debug(
+        `The module rclnodejs (with context handle ${context.handle}) has been shutdown.`
+      );
     } else {
       // shutdown and remove all nodes assigned to context
       this._contextToNodeArrayMap.get(context).forEach((node) => {
@@ -345,22 +351,16 @@ let rcl = {
    * this folder will be overwritten after the execution.
    * @return {Promise<undefined>} A Promise.
    */
-  regenerateAll() {
+  async regenerateAll() {
     // This will trigger to regenerate all the JS structs used for messages and services,
     // to overwrite the existing ones although they have been created.
-    debug('Begin regeneration of JavaScript code from ROS IDL files.');
-    return new Promise((resolve, reject) => {
-      generator
-        .generateAll(true)
-        .then(() => {
-          tsdGenerator.generateAll(); // create interfaces.d.ts
-          debug('Finish regeneration.');
-          resolve();
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+    debug('Begin regeneration of JavaScript code from ROS IDL files...');
+
+    // generate the messages and type declarations, which must be done in sequence
+    await generator.generateAll(true);
+    await tsdGenerator.generateAll(); // create interfaces.d.ts
+
+    debug('Finished regeneration.');
   },
 
   /**
@@ -373,11 +373,7 @@ let rcl = {
       throw new TypeError('Invalid argument');
     }
 
-    let arr = name.split('/');
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i].startsWith('_')) return true;
-    }
-    return false;
+    return name.split('/').some((slice) => slice.startsWith('_'));
   },
 
   /**
@@ -392,7 +388,7 @@ let rcl = {
   },
 
   createMessage(type) {
-    let typeClass = loader.loadInterface(type);
+    const typeClass = loader.loadInterface(type);
 
     if (typeClass) {
       return new typeClass();
@@ -429,7 +425,7 @@ const _sigHandler = () => {
   // shuts down all live contexts. Applications that wishes to use their own signal handlers
   // should call `rclnodejs.removeSignalHandlers`.
   debug('Catch ctrl+c event and will cleanup and terminate.');
-  for (let ctx of rcl._contextToNodeArrayMap.keys()) {
+  for (const ctx of rcl._contextToNodeArrayMap.keys()) {
     rcl.shutdown(ctx);
   }
 };
