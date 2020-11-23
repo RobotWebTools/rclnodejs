@@ -2,6 +2,7 @@
 import * as rclnodejs from 'rclnodejs';
 
 const NODE_NAME = 'test_node';
+const LIFECYCLE_NODE_NAME = 'lifecycle_test_node';
 const TYPE_CLASS = 'std_msgs/msg/String';
 const TOPIC = 'topic';
 const MSG = rclnodejs.createMessageObject(TYPE_CLASS);
@@ -86,6 +87,43 @@ node.countPublishers(TOPIC);
 // $ExpectType number
 node.countSubscribers(TOPIC);
 
+// ---- LifecycleNode ----
+// $ExpectType LifecycleNode
+const lifecycleNode = rclnodejs.createLifecycleNode(LIFECYCLE_NODE_NAME);
+
+// $ExpectType State
+lifecycleNode.currentState;
+
+// $ExpectType State[]
+lifecycleNode.availableStates;
+
+// $ExpectType TransitionDescription[]
+lifecycleNode.transitions;
+
+// $ExpectType TransitionDescription[]
+lifecycleNode.availableTransitions;
+
+//// $ExpectType TransitionCallback
+// const lifecycleCB: TransitionCallback = (prevState: State) => CallbackReturnCode.SUCCESS;
+
+// $ExpectType CallbackReturnValue
+const ReturnValue = new rclnodejs.lifecycle.CallbackReturnValue();
+
+// $ExpectType State
+lifecycleNode.configure(ReturnValue);
+
+// $ExpectType State
+lifecycleNode.activate();
+
+// $ExpectType State
+lifecycleNode.deactivate();
+
+// $ExpectType State
+lifecycleNode.cleanup();
+
+// $ExpectType State
+lifecycleNode.shutdown();
+
 // ---- Publisher ----
 // $ExpectType Publisher<"std_msgs/msg/String">
 const publisher = node.createPublisher(TYPE_CLASS, TOPIC);
@@ -114,6 +152,12 @@ publisher.publish(Buffer.from('Hello ROS World'));
 // $ExpectType void
 node.destroyPublisher(publisher);
 
+// ---- LifecyclePublisher ----
+// $ExpectType LifecyclePublisher<"std_msgs/msg/String">
+const lifecyclePublisher = lifecycleNode.createLifecyclePublisher(TYPE_CLASS, TOPIC);
+
+// $ExpectType boolean
+lifecyclePublisher.isActivated();
 
 // ---- Subscription ----
 // $ExpectType Subscription
@@ -144,7 +188,10 @@ service.options;
 
 // ---- Client ----
 // $ExpectType Client<"example_interfaces/srv/AddTwoInts">
-const client = node.createClient('example_interfaces/srv/AddTwoInts', 'add_two_ints');
+const client = node.createClient(
+  'example_interfaces/srv/AddTwoInts',
+  'add_two_ints'
+);
 
 // $ExpectType string
 client.serviceName;
@@ -319,45 +366,60 @@ logger.fatal('test msg');
 
 // FOXY-ONLY, example_interfaces introduced with foxy release
 // ---- Int8Array ----
-const i8arr = rclnodejs.require('example_interfaces.msg.Int8MultiArray') as rclnodejs.example_interfaces.msg.Int8MultiArray;
+const i8arr = rclnodejs.require(
+  'example_interfaces.msg.Int8MultiArray'
+) as rclnodejs.example_interfaces.msg.Int8MultiArray;
 // $ExpectType number[] | Int8Array
 i8arr.data;
 
 // ---- Uint8Array ----
-const u8arr = rclnodejs.require('example_interfaces.msg.UInt8MultiArray') as rclnodejs.example_interfaces.msg.UInt8MultiArray;
+const u8arr = rclnodejs.require(
+  'example_interfaces.msg.UInt8MultiArray'
+) as rclnodejs.example_interfaces.msg.UInt8MultiArray;
 // $ExpectType number[] | Uint8Array
 u8arr.data;
 
 // ---- Int16Array ----
-const i16arr = rclnodejs.require('example_interfaces.msg.Int16MultiArray') as rclnodejs.example_interfaces.msg.Int16MultiArray;
+const i16arr = rclnodejs.require(
+  'example_interfaces.msg.Int16MultiArray'
+) as rclnodejs.example_interfaces.msg.Int16MultiArray;
 // $ExpectType number[] | Int16Array
 i16arr.data;
 
 // ---- Uint16Array ----
-const u16arr = rclnodejs.require('example_interfaces.msg.UInt16MultiArray') as rclnodejs.example_interfaces.msg.UInt16MultiArray;
+const u16arr = rclnodejs.require(
+  'example_interfaces.msg.UInt16MultiArray'
+) as rclnodejs.example_interfaces.msg.UInt16MultiArray;
 // $ExpectType number[] | Uint16Array
 u16arr.data;
 
 // ---- Int32Array ----
-const i32arr = rclnodejs.require('example_interfaces.msg.Int32MultiArray') as rclnodejs.example_interfaces.msg.Int32MultiArray;
+const i32arr = rclnodejs.require(
+  'example_interfaces.msg.Int32MultiArray'
+) as rclnodejs.example_interfaces.msg.Int32MultiArray;
 // $ExpectType number[] | Int32Array
 i32arr.data;
 
 // ---- Uint16Array ----
-const u32arr = rclnodejs.require('example_interfaces.msg.UInt32MultiArray') as rclnodejs.example_interfaces.msg.UInt32MultiArray;
+const u32arr = rclnodejs.require(
+  'example_interfaces.msg.UInt32MultiArray'
+) as rclnodejs.example_interfaces.msg.UInt32MultiArray;
 // $ExpectType number[] | Uint32Array
 u32arr.data;
 
 // ---- Float32Array ----
-const f32arr = rclnodejs.require('example_interfaces.msg.Float32MultiArray') as rclnodejs.example_interfaces.msg.Float32MultiArray;
+const f32arr = rclnodejs.require(
+  'example_interfaces.msg.Float32MultiArray'
+) as rclnodejs.example_interfaces.msg.Float32MultiArray;
 // $ExpectType number[] | Float32Array
 f32arr.data;
 
 // ---- Float64Array ----
-const f64arr = rclnodejs.require('example_interfaces.msg.Float64MultiArray') as rclnodejs.example_interfaces.msg.Float64MultiArray;
+const f64arr = rclnodejs.require(
+  'example_interfaces.msg.Float64MultiArray'
+) as rclnodejs.example_interfaces.msg.Float64MultiArray;
 // $ExpectType number[] | Float64Array
 f64arr.data;
-
 
 // $ExpectType FibonacciConstructor
 const Fibonacci = rclnodejs.require('rclnodejs_test_msgs/action/Fibonacci');
@@ -382,7 +444,7 @@ actionClient.destroy();
 // $ExpectType Promise<ClientGoalHandle<"rclnodejs_test_msgs/action/Fibonacci">>
 const goalHandlePromise = actionClient.sendGoal(new Fibonacci.Goal());
 
-goalHandlePromise.then(goalHandle => {
+goalHandlePromise.then((goalHandle) => {
   // $ExpectType boolean
   goalHandle.accepted;
 
@@ -461,5 +523,3 @@ function executeCallback(
 
   return new Fibonacci.Result();
 }
-
-

@@ -49,6 +49,7 @@ const {
   getActionServerNamesAndTypesByNode,
   getActionNamesAndTypes,
 } = require('./lib/action/graph.js');
+const Lifecycle = require('./lib/lifecycle.js');
 
 function inherits(target, source) {
   const properties = Object.getOwnPropertyNames(source.prototype);
@@ -123,6 +124,9 @@ let rcl = {
   /** {@link IntegerRange} class */
   IntegerRange: IntegerRange,
 
+  /** Lifecycle namespace */
+  lifecycle: Lifecycle,
+
   /** {@link Logging} class */
   logging: logging,
 
@@ -192,33 +196,26 @@ let rcl = {
     context = Context.defaultContext(),
     options = NodeOptions.defaultOptions
   ) {
-    if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
-      throw new TypeError('Invalid argument.');
-    }
+    return _createNode(nodeName, namespace, context, options, rclnodejs.ShadowNode);
+  },
 
-    if (!this._contextToNodeArrayMap.has(context)) {
-      throw new Error(
-        'Invalid context. Must call rclnodejs(context) before using the context'
-      );
-    }
-
-    const handle = rclnodejs.createNode(nodeName, namespace, context.handle);
-    const node = new rclnodejs.ShadowNode();
-    node.handle = handle;
-    Object.defineProperty(node, 'handle', {
-      configurable: false,
-      writable: false,
-    }); // make read-only
-    node.context = context;
-    node.init(nodeName, namespace, context, options);
-    debug(
-      'Finish initializing node, name = %s and namespace = %s.',
-      nodeName,
-      namespace
-    );
-
-    this._contextToNodeArrayMap.get(context).push(node);
-    return node;
+  /**
+   * Create a managed Node that implements a well-defined life-cycle state 
+   * model using the {@link https://github.com/ros2/rcl/tree/master/rcl_lifecycle|ros2 client library (rcl) lifecyle api}.
+   * @param {string} nodeName - The name used to register in ROS.
+   * @param {string} [namespace=''] - The namespace used in ROS.
+   * @param {Context} [context=Context.defaultContext()] - The context to create the node in.
+   * @param {NodeOptions} [options=NodeOptions.defaultOptions] - The options to configure the new node behavior.
+   * @return {LifecycleNode} A new instance of the specified node.
+   * @throws {Error} If the given context is not registered.
+   */
+  createLifecycleNode(
+    nodeName,
+    namespace = '',
+    context = Context.defaultContext(),
+    options = NodeOptions.defaultOptions
+  ) {
+    return _createNode(nodeName, namespace, context, options, Lifecycle.LifecycleNode);
   },
 
   /**
@@ -442,3 +439,30 @@ const TimeSource = require('./lib/time_source.js');
 rcl.TimeSource = TimeSource;
 
 inherits(rclnodejs.ShadowNode, Node);
+
+function _createNode(
+  nodeName,
+  namespace = '',
+  context = Context.defaultContext(),
+  options = NodeOptions.defaultOptions,
+  nodeClass
+) {
+  if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
+    throw new TypeError('Invalid argument.');
+  }
+
+  if (!rcl._contextToNodeArrayMap.has(context)) {
+    throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
+  }
+
+  let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
+  let node = new nodeClass();
+  node.handle = handle;
+  Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
+  node.context = context;
+  node.init(nodeName, namespace, context, options);
+  debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
+
+  rcl._contextToNodeArrayMap.get(context).push(node);
+  return node;
+}

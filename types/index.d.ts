@@ -22,6 +22,22 @@ declare module 'rclnodejs' {
   ): Node;
 
   /**
+   * Create a managed Node that implements a well-defined life-cycle state 
+   * model using the {@link https://github.com/ros2/rcl/tree/master/rcl_lifecycle|ros2 client library (rcl) lifecyle api}.
+   * @param nodeName - The name used to register in ROS.
+   * @param namespace - The namespace used in ROS, default is an empty string.
+   * @param context - The context, default is Context.defaultContext().
+   * @param options - The options to configure the new node behavior.
+   * @returns The instance of LifecycleNode.
+   */
+  function createLifecycleNode(
+    nodeName: string,
+    namespace?: string,
+    context?: Context,
+    options?: NodeOptions
+  ): lifecycle.LifecycleNode;
+
+  /**
    * Init the module.
    *
    * @param context - The context, default is Context.defaultContext().

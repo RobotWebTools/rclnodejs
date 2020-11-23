@@ -127,7 +127,9 @@ void RclHandle::Reset() {
     Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
   }
+
   free(pointer_);
+
   pointer_ = nullptr;
   children_.clear();
 }
