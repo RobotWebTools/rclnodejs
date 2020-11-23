@@ -355,7 +355,7 @@ let rcl = {
     // to overwrite the existing ones although they have been created.
     debug('Begin regeneration of JavaScript code from ROS IDL files...');
 
-    # generate the messages and type declarations, which must be done in sequence
+    // generate the messages and type declarations, which must be done in sequence
     await generator.generateAll(true);
     await tsdGenerator.generateAll(); // create interfaces.d.ts
 
