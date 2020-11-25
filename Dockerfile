@@ -39,7 +39,12 @@ RUN rosdep install --from-paths $ROS2_WS/ros2-linux/share --ignore-src --rosdist
 RUN echo "source $ROS2_WS/ros2-linux/local_setup.bash" >> $HOME/.bashrc
 
 # Install nvm, Node.js and node-gyp
+<<<<<<< HEAD
 ENV NODE_VERSION v12.18.4
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.36.0/install.sh | bash
+=======
+ENV NODE_VERSION v12.20.0
+RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.0/install.sh | bash
+>>>>>>> Update Node.js to v12.20.0
 
 ENV PATH /bin/versions/node/$NODE_VERSION/bin:$PATH
