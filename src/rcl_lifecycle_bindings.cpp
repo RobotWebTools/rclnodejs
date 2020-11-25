@@ -52,7 +52,6 @@ static v8::Local<v8::Object> wrapTransition(
 }
 
 NAN_METHOD(CreateLifecycleStateMachine) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
@@ -93,7 +92,6 @@ NAN_METHOD(CreateLifecycleStateMachine) {
 }
 
 NAN_METHOD(GetCurrentLifecycleState) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_lifecycle_state_machine_t* state_machine =
@@ -105,7 +103,6 @@ NAN_METHOD(GetCurrentLifecycleState) {
 }
 
 NAN_METHOD(GetLifecycleTransitionByLabel) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_lifecycle_state_machine_t* state_machine =
@@ -123,7 +120,6 @@ NAN_METHOD(GetLifecycleTransitionByLabel) {
 
 // return all registered states
 NAN_METHOD(GetLifecycleStates) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_lifecycle_state_machine_t* state_machine =
@@ -143,7 +139,6 @@ NAN_METHOD(GetLifecycleStates) {
 
 // return all registered transitions
 NAN_METHOD(GetLifecycleTransitions) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_lifecycle_state_machine_t* state_machine =
@@ -170,7 +165,6 @@ NAN_METHOD(GetLifecycleTransitions) {
 
 // return the transitions available from the current state
 NAN_METHOD(GetAvailableLifecycleTransitions) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_lifecycle_state_machine_t* state_machine =
@@ -197,18 +191,13 @@ NAN_METHOD(GetAvailableLifecycleTransitions) {
 }
 
 NAN_METHOD(GetLifecycleSrvNameAndHandle) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
-  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-
   RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
           state_machine_handle->ptr());
 
-  std::string lifecycle_srv_field_name(*Nan::Utf8String(info[2]));
+  std::string lifecycle_srv_field_name(*Nan::Utf8String(info[1]));
 
   rcl_service_t* service = nullptr;
   if (lifecycle_srv_field_name.compare("srv_get_state") == 0) {
@@ -259,7 +248,6 @@ NAN_METHOD(GetLifecycleSrvNameAndHandle) {
 
 // return null if transition exists from current state
 NAN_METHOD(TriggerLifecycleTransitionById) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_lifecycle_state_machine_t* state_machine =
@@ -280,7 +268,6 @@ NAN_METHOD(TriggerLifecycleTransitionById) {
 
 // return null if transition exists from current state
 NAN_METHOD(TriggerLifecycleTransitionByLabel) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_lifecycle_state_machine_t* state_machine =
@@ -344,15 +331,12 @@ static const char* transitionId2Label(int callback_ret) {
 }
 
 NAN_METHOD(GetLifecycleTransitionIdToLabel) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   int callback_ret = Nan::To<int64_t>(info[0]).FromJust();
   const char* transition_label = transitionId2Label(callback_ret);
   info.GetReturnValue().Set(Nan::New(transition_label).ToLocalChecked());
 }
 
 NAN_METHOD(GetLifecycleShutdownTransitionLabel) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  int callback_ret = Nan::To<int64_t>(info[0]).FromJust();
   info.GetReturnValue().Set(
     Nan::New(rcl_lifecycle_shutdown_label).ToLocalChecked());
 }
