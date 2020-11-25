@@ -23,11 +23,11 @@ jobs:
     - run: brew install asio console_bridge log4cxx spdlog
     - run: python3 -m pip install catkin_pkg empy ifcfg lark-parser lxml netifaces numpy pyparsing pyyaml setuptools argcomplete colcon-common-extensions
     - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://ci.ros2.org/view/packaging/job/packaging_osx/lastSuccessfulBuild/artifact/ws/ros2-package-osx-x86_64.tar.bz2 && tar xf ros2-package-osx-x86_64.tar.bz2
-    - run: wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+    - run: wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.0/install.sh | bash
     - run: echo "source $HOME/.bashrc" >> ~/.bash_profile
     - run: cat ~/.bash_profile
-    - run: nvm install v12.18.0
-    - run: nvm alias default v12.18.0
+    - run: nvm install v12.20.0
+    - run: nvm alias default v12.20.0
     - run: node --version && npm --version && rm -rf ./node_modules/
     - run: source ~/ros2_install/ros2-osx/local_setup.bash && git submodule init && git submodule update && npm install --python=python2.7
     - run: export PATH="/usr/local/opt/python@2/libexec/bin:$PATH" && npm run lint
