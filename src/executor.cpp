@@ -180,11 +180,11 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
       return RclResult(get_entity_ret, error_message);
     }
 
-    rcl_ret_t resize_ret = rcl_wait_set_resize(
-        wait_set, num_subscriptions, num_guard_conditions, num_timers,
-        num_clients, num_services,
-        // TODO(minggang): support events.
-        0u);
+    rcl_ret_t resize_ret =
+        rcl_wait_set_resize(wait_set, num_subscriptions, num_guard_conditions,
+                            num_timers, num_clients, num_services,
+                            // TODO(minggang): support events.
+                            0u);
     if (resize_ret != RCL_RET_OK) {
       std::string error_message = std::string("Failed to resize: ") +
                                   std::string(rcl_get_error_string().str);
