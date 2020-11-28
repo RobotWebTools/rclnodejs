@@ -22,7 +22,6 @@
     if (lhs op rhs) {                                               \
       Nan::ThrowError(message);                                     \
       rcl_reset_error();                                            \
-      info.GetReturnValue().Set(Nan::Undefined());                  \
       return;                                                       \
     }                                                               \
   }
