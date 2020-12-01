@@ -73,7 +73,7 @@
   },
   "lint-staged": {
     "*.{js,ds,md}": [
-      "prettier --trailing-comma es5 --single-quote --write"
+      "prettier --write"
     ],
     "*.{hpp,cpp}": [
       "clang-format -i -style=file"
