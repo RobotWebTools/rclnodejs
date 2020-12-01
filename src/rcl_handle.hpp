@@ -29,7 +29,7 @@ class RclHandle : public Nan::ObjectWrap {
   static void Init(v8::Local<v8::Object> exports);
   static v8::Local<v8::Object> NewInstance(
       void* handle, RclHandle* parent = nullptr,
-      std::function<int()> deleter = [] { return 0; } );
+      std::function<int()> deleter = [] { return 0; });
 
   void set_deleter(std::function<int()> deleter) { deleter_ = deleter; }
 

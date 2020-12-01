@@ -21,15 +21,14 @@
 #include <string>
 #include <vector>
 
-#include "macros.hpp"
-#include "rcl_handle.hpp"
-#include "rcl_utilities.hpp"
 #include "lifecycle_msgs/msg/transition_event.h"
 #include "lifecycle_msgs/srv/change_state.h"
 #include "lifecycle_msgs/srv/get_available_states.h"
 #include "lifecycle_msgs/srv/get_available_transitions.h"
 #include "lifecycle_msgs/srv/get_state.h"
-
+#include "macros.hpp"
+#include "rcl_handle.hpp"
+#include "rcl_utilities.hpp"
 
 namespace rclnodejs {
 
@@ -202,8 +201,8 @@ NAN_METHOD(GetLifecycleSrvNameAndHandle) {
   rcl_service_t* service = nullptr;
   if (lifecycle_srv_field_name.compare("srv_get_state") == 0) {
     service = &state_machine->com_interface.srv_get_state;
-  } else if (lifecycle_srv_field_name.compare("srv_get_available_states")
-              == 0) {
+  } else if (lifecycle_srv_field_name.compare("srv_get_available_states") ==
+             0) {
     service = &state_machine->com_interface.srv_get_available_states;
   } else if (lifecycle_srv_field_name.compare(
                  "srv_get_available_transitions") == 0) {
@@ -212,9 +211,7 @@ NAN_METHOD(GetLifecycleSrvNameAndHandle) {
     service = &state_machine->com_interface.srv_change_state;
   }
 
-  THROW_ERROR_IF_EQUAL(nullptr,
-                       service,
-                       "Service not found.");
+  THROW_ERROR_IF_EQUAL(nullptr, service, "Service not found.");
 
   std::string service_name = rcl_service_get_service_name(service);
 
@@ -233,9 +230,9 @@ NAN_METHOD(GetLifecycleSrvNameAndHandle) {
       RclHandle::NewInstance(service, nullptr, [] { return RCL_RET_OK; });
   RclHandle* rclHandle = RclHandle::Unwrap<RclHandle>(srv_handle);
   RclHandle::Unwrap<RclHandle>(srv_handle)->set_deleter([rclHandle] {
-      rclHandle->set_ptr(nullptr);
-      return RCL_RET_OK;
-    });
+    rclHandle->set_ptr(nullptr);
+    return RCL_RET_OK;
+  });
 
   // auto srv_handle = RclHandle::NewInstance(service,
   //                                         nullptr,
@@ -259,7 +256,7 @@ NAN_METHOD(TriggerLifecycleTransitionById) {
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_lifecycle_trigger_transition_by_id(
-                              state_machine, transition_id, publish),
+                               state_machine, transition_id, publish),
                            rcl_get_error_string().str);
 
   const rcl_lifecycle_state_t* current_state = state_machine->current_state;
@@ -277,10 +274,11 @@ NAN_METHOD(TriggerLifecycleTransitionByLabel) {
 
   bool publish = true;
 
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_lifecycle_trigger_transition_by_label(
-                              state_machine, transition_label.c_str(), publish),
-                           rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_lifecycle_trigger_transition_by_label(
+          state_machine, transition_label.c_str(), publish),
+      rcl_get_error_string().str);
 
   const rcl_lifecycle_state_t* current_state = state_machine->current_state;
   info.GetReturnValue().Set(wrapState(current_state));
@@ -338,7 +336,7 @@ NAN_METHOD(GetLifecycleTransitionIdToLabel) {
 
 NAN_METHOD(GetLifecycleShutdownTransitionLabel) {
   info.GetReturnValue().Set(
-    Nan::New(rcl_lifecycle_shutdown_label).ToLocalChecked());
+      Nan::New(rcl_lifecycle_shutdown_label).ToLocalChecked());
 }
 
 std::vector<BindingMethod> lifecycle_binding_methods = {
@@ -353,6 +351,6 @@ std::vector<BindingMethod> lifecycle_binding_methods = {
     {"getLifecycleSrvNameAndHandle", GetLifecycleSrvNameAndHandle},
     {"getLifecycleTransitionIdToLabel", GetLifecycleTransitionIdToLabel},
     {"getLifecycleShutdownTransitionLabel",
-        GetLifecycleShutdownTransitionLabel}};
+     GetLifecycleShutdownTransitionLabel}};
 
 }  // namespace rclnodejs
