@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Intel Corporation. All rights reserved.
+// Copyright (c) 2020 Wayne Parrott. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+#ifndef RCLNODEJS_RCL_LIFECYCLE_BINDINGS_HPP_
+#define RCLNODEJS_RCL_LIFECYCLE_BINDINGS_HPP_
 
-const os = require('os');
+#include <vector>
 
-module.exports = {
-  /**
-   * Get the python executable on any platform suitable to be handed to *child_process.execFile*.
-   * @param {string} py either "python2" or "python3"
-   * @return {[string, string[]]} A command to execute directly and additional arguments as an array.
-   */
-  getPythonExecutable(py) {
-    if (os.type() === 'Windows_NT') {
-      return ['py', [py === 'python' ? '-2' : '-3']];
-    }
-    return [py, []];
-  },
-};
+#include "rcl_bindings.hpp"
+
+namespace rclnodejs {
+
+extern std::vector<BindingMethod> lifecycle_binding_methods;
+
+}  // namespace rclnodejs
+
+#endif

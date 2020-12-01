@@ -57,6 +57,41 @@ describe('Rclnodejs createMessage() testing', function() {
     return Promise.all(promises);
   });
 
+
+  it('require() and create instance of every message in package', function() {
+  
+    // load every message in nav2_msg package
+    let pkg = rclnodejs.require('tf2_msgs');
+    assert.ok(pkg);
+
+    // create instance of every msg class
+    let msgProperties = Object.getOwnPropertyNames(pkg.msg);
+    assert(msgProperties.length > 0);
+    msgProperties.forEach((msgName) => {
+      let msgClass = pkg.msg[msgName];
+      assert.ok(msgClass);
+      assert.ok(new msgClass());
+    });
+
+    // create instance of every srv message class
+    let srvProperties = Object.getOwnPropertyNames(pkg.srv);
+    assert(srvProperties.length > 0);
+    srvProperties.forEach((srvName) => {
+      let srvClass = pkg.srv[srvName];
+      assert.ok(srvClass);
+      assert.ok(new srvClass());
+    });
+
+    // create instance of every action message class
+    let actionProperties = Object.getOwnPropertyNames(pkg.action);
+    assert(actionProperties.length > 0);
+    actionProperties.forEach((actionName) => {
+      let actionClass = pkg.action[actionName];
+      assert.ok(actionClass);
+      assert.ok(new actionClass());
+    });
+  });
+
   it('create by string', function() {
     const s = rclnodejs.createMessage('std_msgs/msg/String');
 
@@ -176,7 +211,7 @@ describe('Rclnodejs createMessageObject() testing', function() {
   });
 
   it('create by object', function() {
-    const s = rclnodejs.createMessage({
+    const s = rclnodejs.createMessageObject({
       package: 'std_msgs',
       type: 'msg',
       name: 'String',
@@ -214,4 +249,5 @@ describe('Rclnodejs createMessageObject() testing', function() {
       );
     });
   });
+
 });

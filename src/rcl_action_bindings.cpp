@@ -629,9 +629,18 @@ NAN_METHOD(ActionProcessCancelRequest) {
   rcl_ret_t ret = rcl_action_process_cancel_request(
       action_server, cancel_request, cancel_response_ptr);
   if (ret != RCL_RET_OK) {
-    rcl_action_cancel_response_fini(cancel_response_ptr);
-    Nan::ThrowError(rcl_get_error_string().str);
+    // fetch the error triggered by rcl_action_process_cancel_request
+    rcutils_error_string_t cancel_error = rcl_get_error_string();
     rcl_reset_error();
+    rcl_ret_t ret_fini = rcl_action_cancel_response_fini(cancel_response_ptr);
+    if (ret_fini != RCL_RET_OK) {
+      RCUTILS_LOG_WARN_NAMED(
+          PACKAGE_NAME,
+          "There was an error finalizing the action cancel response: %s",
+          rcl_get_error_string().str);
+      rcl_reset_error();
+    }
+    Nan::ThrowError(cancel_error.str);
     info.GetReturnValue().Set(Nan::Undefined());
     return;
   }

@@ -47,29 +47,8 @@
 
 namespace rclnodejs {
 
-rcl_guard_condition_t* g_sigint_gc = nullptr;
 static v8::Local<v8::Object> wrapParameters(
     rcl_params_t* params);  // NOLINT(whitespace/line_length)
-
-#ifdef OS_WINDOWS
-_crt_signal_t g_original_signal_handler = NULL;
-#else
-sig_t g_original_signal_handler = NULL;
-#endif  // OS_WINDOWS
-
-static void Catch(int signo) {
-  if (g_sigint_gc) {
-    rcl_ret_t ret = rcl_trigger_guard_condition(g_sigint_gc);
-    if (ret != RCL_RET_OK) {
-      Nan::ThrowError(rcl_get_error_string().str);
-      rcl_reset_error();
-    }
-  }
-
-  if (g_original_signal_handler != nullptr) {
-    g_original_signal_handler(signo);
-  }
-}
 
 NAN_METHOD(Init) {
   rcl_allocator_t allocator = rcl_get_default_allocator();
@@ -112,18 +91,6 @@ NAN_METHOD(Init) {
     free(argv[i]);
   }
   free(argv);
-
-  g_sigint_gc = reinterpret_cast<rcl_guard_condition_t*>(
-      malloc(sizeof(rcl_guard_condition_t)));
-  *g_sigint_gc = rcl_get_zero_initialized_guard_condition();
-  rcl_guard_condition_options_t sigint_gc_options =
-      rcl_guard_condition_get_default_options();
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_guard_condition_init(g_sigint_gc, context, sigint_gc_options),
-      rcl_get_error_string().str);
-
-  g_original_signal_handler = signal(SIGINT, Catch);
 }
 
 NAN_METHOD(GetParameterOverrides) {
@@ -1196,7 +1163,6 @@ const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
 
 std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
     v8::Local<v8::Object> object) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   std::unique_ptr<rmw_qos_profile_t> qos_profile =
       std::make_unique<rmw_qos_profile_t>();
 
@@ -1265,16 +1231,6 @@ NAN_METHOD(Shutdown) {
                            rcl_get_error_string().str);
   THROW_ERROR_IF_NOT_EQUAL(rcl_logging_fini(), RCL_RET_OK,
                            rcl_get_error_string().str);
-
-  if (g_sigint_gc) {
-    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_guard_condition_fini(g_sigint_gc),
-                             rcl_get_error_string().str);
-    free(g_sigint_gc);
-    g_sigint_gc = nullptr;
-  }
-
-  signal(SIGINT, g_original_signal_handler);
-  g_original_signal_handler = nullptr;
 
   info.GetReturnValue().Set(Nan::Undefined());
 }

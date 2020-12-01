@@ -49,25 +49,31 @@ const {
   getActionServerNamesAndTypesByNode,
   getActionNamesAndTypes,
 } = require('./lib/action/graph.js');
+const Lifecycle = require('./lib/lifecycle.js');
 
 function inherits(target, source) {
-  let properties = Object.getOwnPropertyNames(source.prototype);
+  const properties = Object.getOwnPropertyNames(source.prototype);
   properties.forEach((property) => {
     target.prototype[property] = source.prototype[property];
   });
 }
 
-function getCurrentGeneratorVersion() {
-  let jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
+/**
+ * Get the version of the generator that was used for the currently present interfaces.
+ * @return {Promise<string | null>} The current version or null if the *generator.json* file was not found
+ * @throws {Error} if there was an error reading the *generator.json* file (except for it being absent)
+ */
+async function getCurrentGeneratorVersion() {
+  const jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
 
   return new Promise((resolve, reject) => {
-    fs.open(jsonFilePath, 'r', (err, fd) => {
+    fs.open(jsonFilePath, 'r', (err) => {
       if (err) {
         if (err.code === 'ENOENT') {
           resolve(null);
-          return;
+        } else {
+          reject(err);
         }
-        reject(err);
       } else {
         fs.readFile(jsonFilePath, 'utf8', (err, data) => {
           if (err) {
@@ -117,6 +123,9 @@ let rcl = {
 
   /** {@link IntegerRange} class */
   IntegerRange: IntegerRange,
+
+  /** Lifecycle namespace */
+  lifecycle: Lifecycle,
 
   /** {@link Logging} class */
   logging: logging,
@@ -173,12 +182,13 @@ let rcl = {
   getActionNamesAndTypes: getActionNamesAndTypes,
 
   /**
-   * Create a node.
+   * Create and initialize a node.
    * @param {string} nodeName - The name used to register in ROS.
-   * @param {string} namespace - The namespace used in ROS, default is an empty string.
-   * @param {Context} context - The context, default is Context.defaultContext().
-   * @param {NodeOptions} options - The options to configure the new node behavior.
-   * @return {Node} The instance of Node.
+   * @param {string} [namespace=''] - The namespace used in ROS.
+   * @param {Context} [context=Context.defaultContext()] - The context to create the node in.
+   * @param {NodeOptions} [options=NodeOptions.defaultOptions] - The options to configure the new node behavior.
+   * @return {Node} A new instance of the specified node.
+   * @throws {Error} If the given context is not registered.
    */
   createNode(
     nodeName,
@@ -186,83 +196,78 @@ let rcl = {
     context = Context.defaultContext(),
     options = NodeOptions.defaultOptions
   ) {
-    if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
-      throw new TypeError('Invalid argument.');
-    }
-
-    if (!this._contextToNodeArrayMap.has(context)) {
-      throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
-    }
-
-    let handle = rclnodejs.createNode(nodeName, namespace, context.handle());
-    let node = new rclnodejs.ShadowNode();
-    node.handle = handle;
-    Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
-    node.context = context;
-    node.init(nodeName, namespace, context, options);
-    debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
-
-    this._contextToNodeArrayMap.get(context).push(node);
-    return node;
+    return _createNode(nodeName, namespace, context, options, rclnodejs.ShadowNode);
   },
 
   /**
-   * Init the module.
-   * @param {Context} context - The context, default is Context.defaultContext().
-   * @param {string[]} argv - Process commandline arguments.
-   * @return {Promise<undefined>} A Promise.
+   * Create a managed Node that implements a well-defined life-cycle state 
+   * model using the {@link https://github.com/ros2/rcl/tree/master/rcl_lifecycle|ros2 client library (rcl) lifecyle api}.
+   * @param {string} nodeName - The name used to register in ROS.
+   * @param {string} [namespace=''] - The namespace used in ROS.
+   * @param {Context} [context=Context.defaultContext()] - The context to create the node in.
+   * @param {NodeOptions} [options=NodeOptions.defaultOptions] - The options to configure the new node behavior.
+   * @return {LifecycleNode} A new instance of the specified node.
+   * @throws {Error} If the given context is not registered.
    */
-  init(context = Context.defaultContext(), argv = process.argv) {
-    return new Promise((resolve, reject) => {
-      // check if context has already been initialized
-      if (this._contextToNodeArrayMap.has(context)) {
-        throw new Error('The context has already been initialized.');
-      }
+  createLifecycleNode(
+    nodeName,
+    namespace = '',
+    context = Context.defaultContext(),
+    options = NodeOptions.defaultOptions
+  ) {
+    return _createNode(nodeName, namespace, context, options, Lifecycle.LifecycleNode);
+  },
 
-      // check argv for correct value and state
-      if (!Array.isArray(argv)) {
-        throw new TypeError('argv must be an array.');
-      }
-      if (argv.reduce((hasNull, arg) => hasNull || typeof arg !== 'string', false)) {
-        throw new TypeError('argv elements must not be null');
-      }
+  /**
+   * Initialize the module.
+   * @param {Context} [context=Context.defaultContext()] - The context to initialize.
+   * @param {string[]} argv - Process command line arguments.
+   * @return {Promise<undefined>} A Promise.
+   * @throws {Error} If the given context has already been initialized or the command
+   *                 line arguments argv could not be parsed.
+   */
+  async init(context = Context.defaultContext(), argv = process.argv) {
+    // check if context has already been initialized
+    if (this._contextToNodeArrayMap.has(context)) {
+      throw new Error('The context has already been initialized.');
+    }
 
-      // initialize context
-      rclnodejs.init(context.handle(), argv);
-      this._contextToNodeArrayMap.set(context, []);
+    // check argv for correct value and state
+    if (!Array.isArray(argv)) {
+      throw new TypeError('argv must be an array.');
+    }
+    if (!argv.every((argument) => typeof argument === 'string')) {
+      throw new TypeError('argv elements must be strings (and not null).');
+    }
 
-      if (this._rosVersionChecked) {
-        // no further processing required
-        resolve();
-      }
+    // initialize context
+    rclnodejs.init(context.handle, argv);
+    this._contextToNodeArrayMap.set(context, []);
 
-      getCurrentGeneratorVersion()
-        .then((version) => {
-          let forced = version === null || compareVersions(version, generator.version()) === -1;
-          if (forced) {
-            debug('The generator will begin to create JavaScript code from ROS IDL files...');
-          }
+    if (this._rosVersionChecked) {
+      // no further processing required
+      return;
+    }
 
-          generator
-            .generateAll(forced)
-            .then(() => {
-              this._rosVersionChecked = true;
-              resolve();
-            })
-            .catch((e) => {
-              reject(e);
-            });
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+    const version = await getCurrentGeneratorVersion();
+    const forced =
+      version === null ||
+      compareVersions.compare(version, generator.version(), '<');
+    if (forced) {
+      debug(
+        'The generator will begin to create JavaScript code from ROS IDL files...'
+      );
+    }
+
+    await generator.generateAll(forced);
+    this._rosVersionChecked = true;
   },
 
   /**
    * Start to spin the node, which triggers the event loop to start to check the incoming events.
    * @param {Node} node - The node to be spun.
-   * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
+   * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
+   * @throws {Error} If the node is already spinning.
    * @return {undefined}
    */
   spin(node, timeout = 10) {
@@ -277,8 +282,9 @@ let rcl = {
 
   /**
    * Execute one item of work or wait until a timeout expires.
-   * @param {Node} node - The node to be spun.
-   * @param {number} [timeout=10] - ms to wait, block forever if negative, don't wait if 0, default is 10.
+   * @param {Node} node - The node to be spun once.
+   * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
+   * @throws {Error} If the node is already spinning.
    * @return {undefined}
    */
   spinOnce(node, timeout = 10) {
@@ -288,37 +294,39 @@ let rcl = {
     if (node.spinning) {
       throw new Error('The node is already spinning.');
     }
-    node.spinOnce(node.context.handle(), timeout);
+    node.spinOnce(node.context.handle, timeout);
   },
 
   /**
-   * @param {Context} context - The context to be shutdown.
+   * Shuts down the given context by shutting down and destroying all nodes contained within.
+   *
+   * If no context is explicitly given, only the default context will be shut down, and not all of them.
+   * This follows the semantics of [rclpy.shutdown()]{@link http://docs.ros2.org/latest/api/rclpy/api/init_shutdown.html#rclpy.shutdown}.
+   *
+   * @param {Context} [context=Context.defaultContext()] - The context to be shutdown.
    * @return {undefined}
+   * @throws {Error} If there is a problem shutting down the context or while destroying or shutting down a node within it.
    */
   shutdown(context = Context.defaultContext()) {
     if (this.isShutdown(context)) {
-      throw new Error('The module rclnodejs has been shutdown.');
-      return;
-    }
-
-    // shutdown and remove all nodes assigned to context
-    this._contextToNodeArrayMap.get(context).forEach((node) => {
-      node.stopSpinning();
-      node.destroy();
-    });
-    this._contextToNodeArrayMap.delete(context);
-
-    // shutdown context
-    if (context === Context.defaultContext()) {
-      Context.shutdownDefaultContext();
+      debug(
+        `The module rclnodejs (with context handle ${context.handle}) has been shutdown.`
+      );
     } else {
+      // shutdown and remove all nodes assigned to context
+      this._contextToNodeArrayMap.get(context).forEach((node) => {
+        node.stopSpinning();
+        node.destroy();
+      });
+      this._contextToNodeArrayMap.delete(context);
+
       context.shutdown();
     }
   },
 
   /**
-   * A predictate for testing if a context has been shutdown.
-   * @param {Context} [context=defaultContext] - The context to inspect
+   * A predicate for testing if a context has been shutdown.
+   * @param {Context} [context=Context.defaultContext()] - The context to inspect.
    * @return {boolean} Return true if the module is shut down, otherwise return false.
    */
   isShutdown(context = Context.defaultContext()) {
@@ -335,31 +343,25 @@ let rcl = {
   },
 
   /**
-   * Search packgaes which locate under path $AMENT_PREFIX_PATH, regenerate all JavaScript structs files from the IDL of
+   * Search packages which locate under path $AMENT_PREFIX_PATH, regenerate all JavaScript structs files from the IDL of
    * messages(.msg) and services(.srv) and put these files under folder 'generated'. Any existing files under
    * this folder will be overwritten after the execution.
    * @return {Promise<undefined>} A Promise.
    */
-  regenerateAll() {
-    // This will trigger to regererate all the JS structs used for messages and services,
+  async regenerateAll() {
+    // This will trigger to regenerate all the JS structs used for messages and services,
     // to overwrite the existing ones although they have been created.
-    debug('Begin regeneration of JavaScript code from ROS IDL files.');
-    return new Promise((resolve, reject) => {
-      generator
-        .generateAll(true)
-        .then(() => {
-          tsdGenerator.generateAll(); // create interfaces.d.ts
-          debug('Finish regeneration.');
-          resolve();
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+    debug('Begin regeneration of JavaScript code from ROS IDL files...');
+
+    // generate the messages and type declarations, which must be done in sequence
+    await generator.generateAll(true);
+    await tsdGenerator.generateAll(); // create interfaces.d.ts
+
+    debug('Finished regeneration.');
   },
 
   /**
-   * Judge if the topic/service is hidden, see http://design.ros2.org/articles/topic_and_service_names.html#hidden-topic-or-service-names
+   * Judge if the topic/service is hidden (see [the ROS2 design documentation]{@link http://design.ros2.org/articles/topic_and_service_names.html#hidden-topic-or-service-names}).
    * @param {string} name - Name of topic/service.
    * @return {boolean} - True if a given topic or service name is hidden, otherwise False.
    */
@@ -368,11 +370,7 @@ let rcl = {
       throw new TypeError('Invalid argument');
     }
 
-    let arr = name.split('/');
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i].startsWith('_')) return true;
-    }
-    return false;
+    return name.split('/').some((slice) => slice.startsWith('_'));
   },
 
   /**
@@ -387,7 +385,7 @@ let rcl = {
   },
 
   createMessage(type) {
-    let typeClass = loader.loadInterface(type);
+    const typeClass = loader.loadInterface(type);
 
     if (typeClass) {
       return new typeClass();
@@ -397,26 +395,43 @@ let rcl = {
   },
 
   /**
-   * Create a plain JavaScript by specified type identifier
+   * Create a plain JavaScript from the specified type identifier.
    * @param {string|Object} type -- the type identifier, acceptable formats could be 'std_msgs/std/String'
    *                                or {package: 'std_msgs', type: 'msg', name: 'String'}
-   * @return {Object|undefined} A plain JavaScript of that type
+   * @return {Object|undefined} A plain JavaScript of that type, or undefined if the object could not be created
    */
   createMessageObject(type) {
     return this.createMessage(type).toPlainObject();
   },
+
+  /**
+   * Removes the default signal handler installed by rclnodejs. After calling this, rclnodejs
+   * will no longer clean itself up when a SIGINT is received, it is the application's
+   * responsibility to properly shut down all nodes and contexts.
+   *
+   * Application which wishes to implement its own signal handler logic should call this.
+   * @returns {undefined}
+   */
+  removeSignalHandlers() {
+    // this will not throw even if the handler is already removed
+    process.removeListener('SIGINT', _sigHandler);
+  },
 };
 
-process.on('SIGINT', () => {
+const _sigHandler = () => {
+  // shuts down all live contexts. Applications that wishes to use their own signal handlers
+  // should call `rclnodejs.removeSignalHandlers`.
   debug('Catch ctrl+c event and will cleanup and terminate.');
-  rcl.shutdown();
-  process.exit(0);
-});
+  for (const ctx of rcl._contextToNodeArrayMap.keys()) {
+    rcl.shutdown(ctx);
+  }
+};
+process.on('SIGINT', _sigHandler);
 
 module.exports = rcl;
 
 // The following statements are located here to work around a
-// circular dependency issue occuring in rate.js
+// circular dependency issue occurring in rate.js
 const Node = require('./lib/node.js');
 const TimeSource = require('./lib/time_source.js');
 
@@ -424,3 +439,30 @@ const TimeSource = require('./lib/time_source.js');
 rcl.TimeSource = TimeSource;
 
 inherits(rclnodejs.ShadowNode, Node);
+
+function _createNode(
+  nodeName,
+  namespace = '',
+  context = Context.defaultContext(),
+  options = NodeOptions.defaultOptions,
+  nodeClass
+) {
+  if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
+    throw new TypeError('Invalid argument.');
+  }
+
+  if (!rcl._contextToNodeArrayMap.has(context)) {
+    throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
+  }
+
+  let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
+  let node = new nodeClass();
+  node.handle = handle;
+  Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
+  node.context = context;
+  node.init(nodeName, namespace, context, options);
+  debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
+
+  rcl._contextToNodeArrayMap.get(context).push(node);
+  return node;
+}
