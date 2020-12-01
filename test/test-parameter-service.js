@@ -37,7 +37,7 @@ const PARAMETER_EVENT_TOPIC = 'parameter_events';
 
 const STD_WAIT = 500; // ms to delay/wait
 
-describe('Parameter_server tests', function() {
+describe('Parameter_server tests', function () {
   const argv = [
     '--ros-args',
     '-p',
@@ -56,7 +56,7 @@ describe('Parameter_server tests', function() {
   let clientNode;
   this.timeout(60 * 1000);
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     await rclnodejs.init();
 
     node = rclnodejs.createNode(NODE_NAME);
@@ -99,13 +99,13 @@ describe('Parameter_server tests', function() {
     rclnodejs.spin(clientNode);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     clientNode.destroy();
     node.destroy();
     rclnodejs.shutdown();
   });
 
-  it('List parameters', async function() {
+  it('List parameters', async function () {
     const client = clientNode.createClient(
       'rcl_interfaces/srv/ListParameters',
       'test_node/list_parameters'
@@ -119,7 +119,7 @@ describe('Parameter_server tests', function() {
     request.prefixes = [];
 
     let success = false;
-    client.sendRequest(request, response => {
+    client.sendRequest(request, (response) => {
       const result = response.result;
       assert.equal(result.names.length, 3); // account for use_sim_time parameter
       assert.ok(result.names.includes('p1'));
@@ -131,7 +131,7 @@ describe('Parameter_server tests', function() {
     assert.ok(success);
   });
 
-  it('List parameters with prefixes, depth=2', async function() {
+  it('List parameters with prefixes, depth=2', async function () {
     const client = clientNode.createClient(
       'rcl_interfaces/srv/ListParameters',
       'test_node/list_parameters'
@@ -145,7 +145,7 @@ describe('Parameter_server tests', function() {
     request.prefixes = ['A'];
 
     let success = false;
-    client.sendRequest(request, response => {
+    client.sendRequest(request, (response) => {
       const result = response.result;
 
       assert.equal(result.names.length, 1);
@@ -158,7 +158,7 @@ describe('Parameter_server tests', function() {
     assert.ok(success);
   });
 
-  it('List parameters with prefixes, depth=3', async function() {
+  it('List parameters with prefixes, depth=3', async function () {
     const client = clientNode.createClient(
       'rcl_interfaces/srv/ListParameters',
       'test_node/list_parameters'
@@ -172,7 +172,7 @@ describe('Parameter_server tests', function() {
     request.prefixes = ['A'];
 
     let success = false;
-    client.sendRequest(request, response => {
+    client.sendRequest(request, (response) => {
       const result = response.result;
 
       assert.equal(result.names.length, 2);
@@ -187,7 +187,7 @@ describe('Parameter_server tests', function() {
     assert.ok(success);
   });
 
-  it('Describe parameters', async function() {
+  it('Describe parameters', async function () {
     const client = clientNode.createClient(
       'rcl_interfaces/srv/DescribeParameters',
       'test_node/describe_parameters'
@@ -200,7 +200,7 @@ describe('Parameter_server tests', function() {
     request.names = ['p1', 'p2'];
 
     let success = false;
-    client.sendRequest(request, response => {
+    client.sendRequest(request, (response) => {
       // process service response
       assert.equal(response.descriptors.length, 2);
 
@@ -222,7 +222,7 @@ describe('Parameter_server tests', function() {
     assert.ok(success);
   });
 
-  it('Get_parameters', async function() {
+  it('Get_parameters', async function () {
     const client = clientNode.createClient(
       'rcl_interfaces/srv/GetParameters',
       'test_node/get_parameters'
@@ -235,7 +235,7 @@ describe('Parameter_server tests', function() {
     request.names = ['p1', 'A.p3'];
 
     let success = false;
-    client.sendRequest(request, response => {
+    client.sendRequest(request, (response) => {
       assert.equal(response.values.length, 2);
 
       // p1 value
@@ -261,7 +261,7 @@ describe('Parameter_server tests', function() {
     assert.ok(success);
   });
 
-  it('Set parameters message', async function() {
+  it('Set parameters message', async function () {
     let completed = false;
 
     const client = clientNode.createClient(
@@ -277,7 +277,7 @@ describe('Parameter_server tests', function() {
     ).Request)();
     request.parameters = [p1a.toParameterMessage()];
 
-    client.sendRequest(request, response => {
+    client.sendRequest(request, (response) => {
       assert.equal(node.getParameter('p1').value, 'abcdef');
       completed = true;
     });
@@ -286,7 +286,7 @@ describe('Parameter_server tests', function() {
     assert.ok(completed, 'Waiting on service response.');
   });
 
-  it('Set_parameters_atomically', async function() {
+  it('Set_parameters_atomically', async function () {
     let completed = false;
 
     const client = clientNode.createClient(
@@ -302,7 +302,7 @@ describe('Parameter_server tests', function() {
     ).Request)();
     request.parameters = [p1a.toParameterMessage()];
 
-    client.sendRequest(request, response => {
+    client.sendRequest(request, (response) => {
       assert.equal(node.getParameter('p1').value, 'abcdef');
       completed = true;
     });
@@ -311,14 +311,14 @@ describe('Parameter_server tests', function() {
     assert.ok(completed, 'Waiting on service response.');
   });
 
-  it('Parameter events', async function() {
+  it('Parameter events', async function () {
     let eventCount = 0;
 
     const subscription = clientNode.createSubscription(
       PARAMETER_EVENT_MSG_TYPE,
       PARAMETER_EVENT_TOPIC,
 
-      parameterEvent => {
+      (parameterEvent) => {
         eventCount++;
 
         if (parameterEvent.new_parameters.length > 0) {

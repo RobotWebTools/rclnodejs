@@ -27,7 +27,6 @@ const COUNTD_DOWN = 5;
  * time it will deactivate and shutdown the node.
  */
 class App {
-
   constructor() {
     this._node = null;
     this._publisher = null;
@@ -41,11 +40,15 @@ class App {
 
     this._count = COUNTD_DOWN;
     this._node = rclnodejs.createLifecycleNode(NODE_NAME);
-    this._node.registerOnConfigure((prevState)=>this.onConfigure(prevState));
-    this._node.registerOnActivate((prevState)=>this.onActivate(prevState));
-    this._node.registerOnDeactivate((prevState)=>this.onDeactivate(prevState));
-    this._node.registerOnShutdown((prevState)=>this.onShutdown(prevState));
-    this._StateInterface = rclnodejs.createMessage('lifecycle_msgs/msg/State').constructor;
+    this._node.registerOnConfigure((prevState) => this.onConfigure(prevState));
+    this._node.registerOnActivate((prevState) => this.onActivate(prevState));
+    this._node.registerOnDeactivate((prevState) =>
+      this.onDeactivate(prevState)
+    );
+    this._node.registerOnShutdown((prevState) => this.onShutdown(prevState));
+    this._StateInterface = rclnodejs.createMessage(
+      'lifecycle_msgs/msg/State'
+    ).constructor;
 
     rclnodejs.spin(this._node);
   }
@@ -64,17 +67,21 @@ class App {
 
   onConfigure() {
     console.log('Lifecycle: CONFIGURE');
-    this._publisher =
-      this._node.createLifecyclePublisher('std_msgs/msg/String', TOPIC);
-    this._subscriber =
-      this._node.createSubscription('std_msgs/msg/String', TOPIC,
-        (msg) => {
-          let cnt = parseInt(msg.data, 10);
-          console.log(`countdown msg: ${cnt}`);
-          if (cnt < 1) {
-            this.stop();
-          }
-        });
+    this._publisher = this._node.createLifecyclePublisher(
+      'std_msgs/msg/String',
+      TOPIC
+    );
+    this._subscriber = this._node.createSubscription(
+      'std_msgs/msg/String',
+      TOPIC,
+      (msg) => {
+        let cnt = parseInt(msg.data, 10);
+        console.log(`countdown msg: ${cnt}`);
+        if (cnt < 1) {
+          this.stop();
+        }
+      }
+    );
     return rclnodejs.lifecycle.CallbackReturnCode.SUCCESS;
   }
 
@@ -105,7 +112,7 @@ class App {
       this._publisher = null;
       this._subscriber = null;
     }
-    
+
     return result;
   }
 }
@@ -117,5 +124,3 @@ async function main() {
 }
 
 main();
-
-

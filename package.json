@@ -72,7 +72,7 @@
     }
   },
   "lint-staged": {
-    "*.{js,ds,md}": [
+    "*.{js,ts,ds,md}": [
       "prettier --write"
     ],
     "*.{hpp,cpp}": [

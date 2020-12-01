@@ -1,5 +1,20 @@
 {
-  "Linux": ["test-multi-nodes.js", "test-msg-type-py-node.js", "test-msg-type-cpp-node.js", "test-cross-lang.js"],
-  "Darwin": ["test-multi-nodes.js", "test-msg-type-py-node.js", "test-msg-type-cpp-node.js", "test-cross-lang.js"],
-  "Windows_NT": ["test-multi-nodes.js", "test-msg-type-py-node.js", "test-msg-type-cpp-node.js", "test-cross-lang.js"]
+  "Linux": [
+    "test-multi-nodes.js",
+    "test-msg-type-py-node.js",
+    "test-msg-type-cpp-node.js",
+    "test-cross-lang.js"
+  ],
+  "Darwin": [
+    "test-multi-nodes.js",
+    "test-msg-type-py-node.js",
+    "test-msg-type-cpp-node.js",
+    "test-cross-lang.js"
+  ],
+  "Windows_NT": [
+    "test-multi-nodes.js",
+    "test-msg-type-py-node.js",
+    "test-msg-type-cpp-node.js",
+    "test-cross-lang.js"
+  ]
 }

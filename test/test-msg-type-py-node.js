@@ -22,21 +22,21 @@ const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 
-describe('Rclnodejs - Python message type testing', function() {
+describe('Rclnodejs - Python message type testing', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  describe('Primitive msg types', function(done) {
+  describe('Primitive msg types', function (done) {
     this.timeout(60 * 1000);
 
-    it('Bool', function(done) {
+    it('Bool', function (done) {
       var node = rclnodejs.createNode('bool_js_publisher');
       const Bool = 'std_msgs/msg/Bool';
       const msg = true;
@@ -50,7 +50,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Bool,
         'Bool_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -64,7 +64,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Byte', function(done) {
+    it('Byte', function (done) {
       var node = rclnodejs.createNode('byte_js_publisher');
       const Byte = 'std_msgs/msg/Byte';
       const msg = 'A';
@@ -78,7 +78,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Byte,
         'Byte_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg.charCodeAt(0), backMsg.data);
           timer.cancel();
           node.destroy();
@@ -92,7 +92,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Char', function(done) {
+    it('Char', function (done) {
       var node = rclnodejs.createNode('char_js_publisher');
       const Char = 'std_msgs/msg/Char';
       const msg = 0x61;
@@ -106,7 +106,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Char,
         'Char_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -120,7 +120,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('String', function(done) {
+    it('String', function (done) {
       var node = rclnodejs.createNode('string_js_publisher');
       const String = 'std_msgs/msg/String';
       const msg = 'Hello World';
@@ -134,7 +134,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         String,
         'String_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -148,7 +148,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Int8', function(done) {
+    it('Int8', function (done) {
       var node = rclnodejs.createNode('int8_js_publisher');
       const Int8 = 'std_msgs/msg/Int8';
       const msg = 0x7f;
@@ -162,7 +162,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Int8,
         'Int8_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -176,7 +176,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('UInt8', function(done) {
+    it('UInt8', function (done) {
       var node = rclnodejs.createNode('uint8_js_publisher');
       const UInt8 = 'std_msgs/msg/UInt8';
       const msg = 0xff;
@@ -190,7 +190,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         UInt8,
         'UInt8_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -204,7 +204,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Int16', function(done) {
+    it('Int16', function (done) {
       var node = rclnodejs.createNode('int16_js_publisher');
       const Int16 = 'std_msgs/msg/Int16';
       const msg = 0x7fff;
@@ -218,7 +218,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Int16,
         'Int16_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -232,7 +232,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('UInt16', function(done) {
+    it('UInt16', function (done) {
       var node = rclnodejs.createNode('uint16_js_publisher');
       const UInt16 = 'std_msgs/msg/UInt16';
       const msg = 0xffff;
@@ -246,7 +246,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         UInt16,
         'UInt16_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -260,7 +260,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Int32', function(done) {
+    it('Int32', function (done) {
       var node = rclnodejs.createNode('int32_js_publisher');
       const Int32 = 'std_msgs/msg/Int32';
       const msg = 0x7fffffff;
@@ -274,7 +274,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Int32,
         'Int32_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -288,7 +288,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('UInt32', function(done) {
+    it('UInt32', function (done) {
       var node = rclnodejs.createNode('uint32_js_publisher');
       const UInt32 = 'std_msgs/msg/UInt32';
       const msg = 0xffffffff;
@@ -302,7 +302,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         UInt32,
         'UInt32_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -316,7 +316,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Int64', function(done) {
+    it('Int64', function (done) {
       var node = rclnodejs.createNode('int64_js_publisher');
       const Int64 = 'std_msgs/msg/Int64';
       const msg = Number.MAX_SAFE_INTEGER;
@@ -330,7 +330,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Int64,
         'Int64_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -344,7 +344,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('UInt64', function(done) {
+    it('UInt64', function (done) {
       var node = rclnodejs.createNode('uint64_js_publisher');
       const UInt64 = 'std_msgs/msg/UInt64';
       const msg = Number.MAX_SAFE_INTEGER;
@@ -358,7 +358,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         UInt64,
         'UInt64_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
           timer.cancel();
           node.destroy();
@@ -372,7 +372,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Float32', function(done) {
+    it('Float32', function (done) {
       var node = rclnodejs.createNode('float32_js_publisher');
       const Float32 = 'std_msgs/msg/Float32';
       const msg = 3.14;
@@ -386,7 +386,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Float32,
         'Float32_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(Math.abs(msg - backMsg.data) < 0.01);
           timer.cancel();
           node.destroy();
@@ -400,7 +400,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Float64', function(done) {
+    it('Float64', function (done) {
       var node = rclnodejs.createNode('float64_js_publisher');
       const Float64 = 'std_msgs/msg/Float64';
       const msg = 3.1415926;
@@ -414,7 +414,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Float64,
         'Float64_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(Math.abs(msg - backMsg.data) < 0.0000001);
           timer.cancel();
           node.destroy();
@@ -429,10 +429,10 @@ describe('Rclnodejs - Python message type testing', function() {
     });
   });
 
-  describe('Compound msg types', function() {
+  describe('Compound msg types', function () {
     this.timeout(60 * 1000);
 
-    it('Array', function(done) {
+    it('Array', function (done) {
       var node = rclnodejs.createNode('multiarray_js_publisher');
       const ByteMultiArray = 'std_msgs/msg/ByteMultiArray';
 
@@ -462,7 +462,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         ByteMultiArray,
         'Array_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(deepEqual(msg, backMsg));
           timer.cancel();
           node.destroy();
@@ -476,7 +476,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('ColorRGBA', function(done) {
+    it('ColorRGBA', function (done) {
       var node = rclnodejs.createNode('colorrgba_js_publisher');
       const ColorRGBA = 'std_msgs/msg/ColorRGBA';
       const msg = {
@@ -498,7 +498,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         ColorRGBA,
         'ColorRGBA_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(deepEqual(msg, backMsg));
           timer.cancel();
           node.destroy();
@@ -512,7 +512,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Header', function(done) {
+    it('Header', function (done) {
       var node = rclnodejs.createNode('header_js_publisher');
       const Header = 'std_msgs/msg/Header';
 
@@ -533,7 +533,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         Header,
         'Header_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg);
           timer.cancel();
           node.destroy();
@@ -547,7 +547,7 @@ describe('Rclnodejs - Python message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Complex object', function(done) {
+    it('Complex object', function (done) {
       var node = rclnodejs.createNode('jointstate_js_publisher');
       const JointState = 'sensor_msgs/msg/JointState';
 
@@ -577,7 +577,7 @@ describe('Rclnodejs - Python message type testing', function() {
       var subscription = node.createSubscription(
         JointState,
         'JointState_js_py_back_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(deepEqual(msg, backMsg));
           timer.cancel();
           node.destroy();

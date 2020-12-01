@@ -21,7 +21,7 @@ const rclnodejs = require('../index.js');
 /* eslint-disable key-spacing */
 /* eslint-disable comma-spacing */
 
-describe('Test message which has a static non-primitive array', function() {
+describe('Test message which has a static non-primitive array', function () {
   this.timeout(60 * 1000);
 
   let time = {
@@ -32,15 +32,15 @@ describe('Test message which has a static non-primitive array', function() {
   time_value.push(time);
   time_value.push(time);
 
-  beforeEach(function() {
+  beforeEach(function () {
     return rclnodejs.init();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     rclnodejs.shutdown();
   });
 
-  it('Assigned with an array whose length is 2', function(done) {
+  it('Assigned with an array whose length is 2', function (done) {
     const node = rclnodejs.createNode('publish_time');
     let publisher = node.createPublisher(
       'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
@@ -56,7 +56,7 @@ describe('Test message which has a static non-primitive array', function() {
     node.createSubscription(
       'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
       'time',
-      msg => {
+      (msg) => {
         clearInterval(timer);
         assert.deepStrictEqual(msg.time_value, time_value);
         node.destroy();
@@ -67,7 +67,7 @@ describe('Test message which has a static non-primitive array', function() {
     rclnodejs.spin(node);
   });
 
-  it('Assigned with an array whose length is greater than 2', function(done) {
+  it('Assigned with an array whose length is greater than 2', function (done) {
     time_value.push(time);
     const node = rclnodejs.createNode('publish_time');
     let publisher = node.createPublisher(
@@ -81,7 +81,7 @@ describe('Test message which has a static non-primitive array', function() {
     done();
   });
 
-  it('Assigned with an array whose length is less than 2', function(done) {
+  it('Assigned with an array whose length is less than 2', function (done) {
     const node = rclnodejs.createNode('publish_time');
     let publisher = node.createPublisher(
       'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',

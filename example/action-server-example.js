@@ -59,7 +59,7 @@ class FibonacciActionServer {
       goalHandle.publishFeedback(feedbackMessage);
 
       // Wait for 1 second
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     goalHandle.succeed();
@@ -93,6 +93,6 @@ rclnodejs
 
     rclnodejs.spin(node);
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err);
   });
