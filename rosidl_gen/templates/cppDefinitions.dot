@@ -6,54 +6,68 @@
 #include "definitions.hpp"
 #include "../../type_conversion.hpp"
 
-{{~ it.messages : message }}
+{{~ it.dependentMessages : messageInfo}}
+#include "../{{=messageInfo.pkgName}}/definitions.hpp"
+{{~}}
+
+{{~ it.messages : message}}
 #include <{{=it.getRosHeaderField(message.info)}}>
+{{~}}
+{{~ it.dependentMessages : messageInfo}}
+struct {{=it.getStructType(messageInfo)}};
 {{~}}
 
 namespace rclnodejs {
 
-{{~ it.messages : message }}
+{{~ it.messages : message}}
 NAN_MODULE_INIT(rclnodejs__{{=message.structType}}::Init) {
   auto obj = Nan::New<v8::Object>();
-  obj->Set(Nan::New("create").ToLocalChecked(), Nan::New(rclnodejs__{{=message.structType}}::Create));
-  obj->Set(Nan::New("from").ToLocalChecked(), Nan::New(rclnodejs__{{=message.structType}}::FromJsObject));
-  obj->Set(Nan::New("to").ToLocalChecked(), Nan::New(rclnodejs__{{=message.structType}}::ToJsObject));
-  Nan::Set(target, Nan::New("{{=message.structType}}").ToLocalChecked(), obj);
+  obj->Set(Nan::New("create").ToLocalChecked(), Nan::New<v8::Function>(rclnodejs__{{=message.structType}}::Create));
+  obj->Set(Nan::New("from").ToLocalChecked(), Nan::New<v8::Function>(rclnodejs__{{=message.structType}}::FromJsObject));
+  obj->Set(Nan::New("to").ToLocalChecked(), Nan::New<v8::Function>(rclnodejs__{{=message.structType}}::ToJsObject));
+  Nan::Set(target, Nan::New("{{=message.info.interfaceName}}").ToLocalChecked(), obj);
 }
 
 void rclnodejs__{{=message.structType}}::WriteMessage(v8::Local<v8::Object> jsObj, {{=message.structType}}* msg) {
 {{~ message.spec.fields : field}}
-  auto {{=field.name}} = jsObj->Get(Nan::New("{{=field.name}}").ToLocalChecked());
+{{? !it.isInternalField(field)}}
+  {
+    // end with underscore so it doesn't conflicts with field names
+    auto js_value_ = jsObj->Get(Nan::New("{{=field.name}}").ToLocalChecked());
 {{
-  const jsType = it.getJsType(field.type);
+    const jsType = it.getJsType(field.type);
 }}
 {{? jsType === 'number'}}
-  if (!{{=field.name}}->IsNumber()) {
-    throw new std::runtime_error("expected {{=field.name}} to be number");
-  }
+    if (!js_value_->IsNumber()) {
+      throw new std::runtime_error("expected {{=field.name}} to be number");
+    }
 {{?? jsType === 'string'}}
-  if (!{{=field.name}}->IsString()) {
-    throw new std::runtime_error("expected {{=field.name}} to be string");
-  }
+    if (!js_value_->IsString()) {
+      throw new std::runtime_error("expected {{=field.name}} to be string");
+    }
 {{?? jsType === 'boolean'}}
-  if (!{{=field.name}}->IsBoolean()) {
-    throw new std::runtime_error("expected {{=field.name}} to be boolean");
-  }
+    if (!js_value_->IsBoolean()) {
+      throw new std::runtime_error("expected {{=field.name}} to be boolean");
+    }
 {{?? jsType === 'bigint'}}
-  if (!{{=field.name}}->IsBigInt()) {
-    throw new std::runtime_error("expected {{=field.name}} to be bigint");
-  }
+    if (!js_value_->IsBigInt()) {
+      throw new std::runtime_error("expected {{=field.name}} to be bigint");
+    }
 {{??}}
-  if (!{{=field.name}}->IsObject()) {
-    throw new std::runtime_error("expected {{=field.name}} to be {{=field.type.type}} object");
-  }
+    if (!js_value_->IsObject()) {
+      throw new std::runtime_error("expected {{=field.name}} to be {{=field.type.type}} object");
+    }
 {{?}}
-{{? field.type.isPrimitiveType && !field.type.isArray}}
-  msg->{{=field.name}} = ToNativeChecked<decltype(msg->{{=field.name}})>({{=field.name}});
-{{?? !field.type.isPrimitiveType}}
-  rclnodejs__{{=it.getStructTypeFromRosType(field.type)}}::WriteMessage(Nan::To<v8::Object>({{=field.name}}).ToLocalChecked(), &msg->{{=field.name}});
+{{? !field.type.isArray}}
+{{? field.type.isPrimitiveType}}
+    msg->{{=field.name}} = ToNativeChecked<decltype(msg->{{=field.name}})>(js_value_);
 {{??}}
-  // TODO: handle array types
+    rclnodejs__{{=it.getStructTypeFromRosType(field.type)}}::WriteMessage(Nan::To<v8::Object>(js_value_).ToLocalChecked(), &msg->{{=field.name}});
+{{?}}
+{{??}}
+    // TODO: handle array types
+{{?}}
+  }
 {{?}}
 {{~}}
 }
@@ -61,6 +75,7 @@ void rclnodejs__{{=message.structType}}::WriteMessage(v8::Local<v8::Object> jsOb
 v8::Local<v8::Object> rclnodejs__{{=message.structType}}::MakeJsObject({{=message.structType}}* msg) {
   auto jsObj = Nan::New<v8::Object>();
 {{~ message.spec.fields : field}}
+{{? !it.isInternalField(field)}}
 {{? !field.type.isArray}}
 {{? field.type.isPrimitiveType}}
   jsObj->Set(Nan::New("{{=field.name}}").ToLocalChecked(), ToJsChecked(msg->{{=field.name}}));
@@ -69,6 +84,7 @@ v8::Local<v8::Object> rclnodejs__{{=message.structType}}::MakeJsObject({{=messag
 {{?}}
 {{??}}
   // TODO: handle array
+{{?}}
 {{?}}
 {{~}}
   return jsObj;
@@ -107,5 +123,11 @@ NAN_METHOD(rclnodejs__{{=message.structType}}::ToJsObject) {
 }
 
 {{~}}
+
+NAN_MODULE_WORKER_ENABLED({{=it.pkgName}}, [](auto target) {
+{{~ it.messages : message}}
+  rclnodejs__{{=message.structType}}::Init(target);
+{{~}}
+});
 
 } // namespace rclnodejs

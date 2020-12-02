@@ -6,6 +6,9 @@
       'sources': [
         '{{=pkg.pkgName}}/definitions.cpp',
       ],
+      'libraries': [
+        '-l{{=pkg.pkgName}}__rosidl_typesupport_c',
+      ],
     },
 {{~}}
   ],

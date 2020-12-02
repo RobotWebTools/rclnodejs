@@ -30,26 +30,26 @@ const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
 );
 
 async function generateInPath(path) {
-  const results = [];
-  // const pkgs = await packages.findPackagesInDirectory(path);
-  const pkgs = new Map();
-  pkgs.set('test_msgs', {
-    pkgName: 'test_msgs',
-    messages: [
-      {
-        interfaceName: 'Nested',
-        subFolder: 'msg',
-        filePath: '/opt/ros/foxy/share/test_msgs/msg/Nested.msg',
-      },
-      {
-        interfaceName: 'BasicTypes',
-        subFolder: 'msg',
-        filePath: '/opt/ros/foxy/share/test_msgs/msg/BasicTypes.msg',
-      },
-    ],
-    services: [],
-    actions: [],
-  });
+  const pkgs = await packages.findPackagesInDirectory(path);
+  // const pkgs = new Map();
+  // pkgs.set('test_msgs', {
+  //   messages: [
+  //     {
+  //       pkgName: 'test_msgs',
+  //       interfaceName: 'Nested',
+  //       subFolder: 'msg',
+  //       filePath: '/opt/ros/foxy/share/test_msgs/msg/Nested.msg',
+  //     },
+  //     {
+  //       pkgName: 'test_msgs',
+  //       interfaceName: 'BasicTypes',
+  //       subFolder: 'msg',
+  //       filePath: '/opt/ros/foxy/share/test_msgs/msg/BasicTypes.msg',
+  //     },
+  //   ],
+  //   services: [],
+  //   actions: [],
+  // });
 
   const rosIdlDb = new RosIdlDb(pkgs);
 
@@ -66,7 +66,7 @@ async function generateInPath(path) {
       generateCppDefinitions(pkgName, pkgInfo, rosIdlDb)
     )
   );
-  await generateTypesupportGypi(pkgsInfo);
+  await generateTypesupportGypi(pkgsEntries);
 }
 
 async function generateAll(forcedGenerating) {

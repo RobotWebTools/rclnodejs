@@ -3,6 +3,9 @@
 // *** DO NOT EDIT directly
 //
 
+#ifndef RCLNODEJS_{{=it.pkgName.toUpperCase()}}_DEFINITIONS_HPP_
+#define RCLNODEJS_{{=it.pkgName.toUpperCase()}}_DEFINITIONS_HPP_
+
 #include <nan.h>
 
 {{~ it.messages : message}}
@@ -33,3 +36,5 @@ class rclnodejs__{{=message.structType}} {
 {{~}}
 
 } // namespace rclnodejs
+
+#endif

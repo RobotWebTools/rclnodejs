@@ -23,8 +23,10 @@ const actionMsgs = require('./action_msgs.js');
 
 class RosIdlDb {
   constructor(pkgs) {
-    this.specDb = {};
+    this.pkgIndex = pkgs;
+    this.specIndex = {};
     this.messageInfoIndex = {};
+    this.dependentPackagesIndex = {};
     for (let pkg of pkgs.values()) {
       pkg.messages.forEach((messageInfo) => {
         this.messageInfoIndex[
@@ -38,12 +40,35 @@ class RosIdlDb {
     return this.messageInfoIndex[`${type.pkgName}__${type.type}`];
   }
 
+  async getDependentMessages(pkgName) {
+    let dependentPackages = this.dependentPackagesIndex[pkgName];
+    if (dependentPackages === undefined) {
+      this.dependentPackagesIndex[pkgName] = new Promise(async (res) => {
+        const set = new Set();
+        const pkgInfo = this.pkgIndex.get(pkgName);
+        for (let messageInfo of pkgInfo.messages) {
+          const spec = await this.getMessageSpec(messageInfo);
+          spec.fields.forEach((field) => {
+            if (field.type.pkgName && field.type.pkgName !== pkgName) {
+              // `this.getMessageInfoFromType` must always return the
+              // same object for the same type for this to work
+              set.add(this.getMessageInfoFromType(field.type));
+            }
+          });
+        }
+        res(Array.from(set.values()));
+      });
+      return this.dependentPackagesIndex[pkgName];
+    }
+    return dependentPackages;
+  }
+
   _messageInfoHash(messageInfo) {
     return `${messageInfo.pkgName}__${messageInfo.interfaceName}`;
   }
 
   async getMessageSpec(messageInfo) {
-    let spec = this.specDb[this._messageInfoHash(messageInfo)];
+    let spec = this.specIndex[this._messageInfoHash(messageInfo)];
     if (spec) {
       return spec;
     }
@@ -52,10 +77,10 @@ class RosIdlDb {
         messageInfo.pkgName,
         messageInfo.filePath
       );
-      this.specDb[this._messageInfoHash(messageInfo)] = spec;
+      this.specIndex[this._messageInfoHash(messageInfo)] = spec;
       res(spec);
     });
-    this.specDb[this._messageInfoHash(messageInfo)] = promise;
+    this.specIndex[this._messageInfoHash(messageInfo)] = promise;
     return promise;
   }
 
@@ -75,10 +100,9 @@ const dots = dot.process({
 });
 
 function pascalToSnakeCase(s) {
-  return s
-    .split(/(?=[A-Z])/)
-    .join('_')
-    .toLowerCase();
+  let result = s.replace(/(.)([A-Z][a-z]+)/g, '$1_$2');
+  result = result.replace(/([a-z0-9])([A-Z])/g, '$1_$2');
+  return result.toLowerCase();
 }
 
 function getRosHeaderField(messageInfo) {
@@ -136,12 +160,8 @@ function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
   return writeGeneratedCode(dir, fileName, generatedCode);
 }
 
-function getCppSourcePath(pkgName) {
-  return path.join('src', 'generated', pkgName, 'definitions.cpp');
-}
-
-function getCppHeaderPath(pkgName) {
-  return path.join('src', 'generated', pkgName, 'definitions.hpp');
+function getCppOutputDir(pkgName) {
+  return path.join('src', 'generated', pkgName);
 }
 
 function getJsType(rosType) {
@@ -167,12 +187,19 @@ function getJsType(rosType) {
   return 'object';
 }
 
+function isServiceMessage(messageInfo) {
+  return (
+    messageInfo.interfaceName.endsWith('_Request') ||
+    messageInfo.interfaceName.endsWith('_Response')
+  );
+}
+
+function isInternalField(field) {
+  return field.name.startsWith('_');
+}
+
 // All messages are combined in one cpp file to improve compile time.
 async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb) {
-  // console.log(messageInfo);
-  // console.log(spec);
-  // console.log(spec.fields);
-
   const getStructType = (messageInfo) => {
     return `${messageInfo.pkgName}__${messageInfo.subFolder}__${messageInfo.interfaceName}`;
   };
@@ -186,34 +213,51 @@ async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb) {
 
   // this is slower but doing it sequentially maintains ordering
   for (let messageInfo of pkgInfo.messages) {
-    messages.push({
-      info: messageInfo,
-      spec: await rosIdlDb.getMessageSpec(messageInfo),
-      structType: getStructType(messageInfo),
-    });
+    if (!isServiceMessage(messageInfo)) {
+      messages.push({
+        info: messageInfo,
+        spec: await rosIdlDb.getMessageSpec(messageInfo),
+        structType: getStructType(messageInfo),
+      });
+    }
   }
+
+  const dependentMessages = await rosIdlDb.getDependentMessages(pkgName);
 
   const source = removeEmptyLines(
     dots.cppDefinitions({
+      pkgName,
+      pkgInfo,
       messages,
+      dependentMessages,
       rosIdlDb,
+      getStructType,
       getRosHeaderField,
       getStructTypeFromRosType,
       getJsType,
+      isInternalField,
     })
   );
 
   const header = removeEmptyLines(
     dots.cppDefinitionsHeader({
+      pkgName,
+      pkgInfo,
       messages,
+      dependentMessages,
       rosIdlDb,
+      getStructType,
       getRosHeaderField,
       getStructTypeFromRosType,
+      getJsType,
+      isInternalField,
     })
   );
 
-  await fs.writeFile(getCppSourcePath(pkgName), source);
-  await fs.writeFile(getCppHeaderPath(pkgName), header);
+  const outputDir = getCppOutputDir(pkgName);
+  await fs.mkdir(outputDir, { recursive: true });
+  await fs.writeFile(path.join(outputDir, 'definitions.cpp'), source);
+  await fs.writeFile(path.join(outputDir, 'definitions.hpp'), header);
 }
 
 async function generateActionJSStruct(actionInfo, dir) {
@@ -380,8 +424,19 @@ async function generateJSStructFromIDL(pkg, dir, rosIdlDb) {
   ]);
 }
 
-async function generateTypesupportGypi(pkgs) {
-  const rendered = removeEmptyLines(dots.typesupportGypi({ pkgs }));
+async function generateTypesupportGypi(pkgsEntries) {
+  const pkgs = [];
+  for (let [pkgName, pkgInfo] of pkgsEntries) {
+    if (await fs.stat())
+  }
+  const rendered = removeEmptyLines(
+    dots.typesupportGypi({
+      pkgs: pkgsEntries.map(([pkgName, pkgInfo]) => ({
+        pkgName,
+        pkgInfo,
+      })),
+    })
+  );
   await fs.writeFile(
     path.join('src', 'generated', 'typesupport.gypi'),
     rendered
