@@ -25,8 +25,8 @@
 void ShowUsage(const std::string name) {
     std::cerr << "Usage: " << name << " [options]\n"
               << "\nOptions:\n"
-              << "\n--size [size_kb]\tThe block size\n"
-              << "--run <n>         \tHow many times to run\n"
+              << "\n--size=[size_kb]\tThe block size\n"
+              << "--run=<n>         \tHow many times to run\n"
               << "--help            \toutput usage information"
               << std::endl;
 }
@@ -68,9 +68,9 @@ int main(int argc, char* argv[]) {
       *height_dim, *width_dim, *channel_dim};
   layout->data_offset = 0;
 
-  auto msg = std::make_shared<std_msgs::msg::UInt8MultiArray>();
-  msg->layout = *layout;
-  msg->data = std::vector<uint8_t>(1024 * amount, 255);
+  auto msg = std_msgs::msg::UInt8MultiArray();
+  msg.layout = *layout;
+  msg.data = std::vector<uint8_t>(1024 * amount, 255);
 
   printf(
       "The publisher will publish a UInt8MultiArray topic(contains a size of "
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
   auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("stress_publisher_rclcpp");
   auto publisher =
-      node->create_publisher<std_msgs::msg::UInt8MultiArray>("stress_topic");
+      node->create_publisher<std_msgs::msg::UInt8MultiArray>("stress_topic", 10);
   auto sent_times = 0;
 
   while (rclcpp::ok()) {

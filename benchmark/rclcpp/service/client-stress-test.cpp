@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
       auto result_future = client->async_send_request(request);
       if (rclcpp::spin_until_future_complete(node, result_future) !=
           rclcpp::executor::FutureReturnCode::SUCCESS) {
-        RCLCPP_ERROR(node->get_logger(), "service call failed.")
+        RCLCPP_ERROR(node->get_logger(), "service call failed.");
         return 1;
       }
       auto result = result_future.get();
