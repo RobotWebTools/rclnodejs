@@ -82,9 +82,13 @@ NAN_METHOD(CreateLifecycleStateMachine) {
                            rcl_get_error_string().str);
 
   auto js_obj = RclHandle::NewInstance(
-      state_machine, node_handle, [state_machine, node, node_options] {
-        return rcl_lifecycle_state_machine_fini(state_machine, node,
-                                                &node_options->allocator);
+      state_machine, node_handle, [node, node_options](void* ptr) {
+        rcl_lifecycle_state_machine_t* state_machine =
+            reinterpret_cast<rcl_lifecycle_state_machine_t*>(ptr);
+        rcl_ret_t ret = rcl_lifecycle_state_machine_fini(
+            state_machine, node, &node_options->allocator);
+        free(ptr);
+        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
       });
 
   info.GetReturnValue().Set(js_obj);
@@ -223,23 +227,9 @@ NAN_METHOD(GetLifecycleSrvNameAndHandle) {
   // Note: lifecycle Services are created and managed by their
   // rcl_lifecycle_state_machine. Thus we must not manually
   // free the lifecycle_state_machine's service pointers.
-  // To accomplish this we create srv_handle instances with
-  // the free_ptr parameter of false. Failing to do this results
-  // in a double free() error.
-  auto srv_handle =
-      RclHandle::NewInstance(service, nullptr, [] { return RCL_RET_OK; });
-  RclHandle* rclHandle = RclHandle::Unwrap<RclHandle>(srv_handle);
-  RclHandle::Unwrap<RclHandle>(srv_handle)->set_deleter([rclHandle] {
-    rclHandle->set_ptr(nullptr);
-    return RCL_RET_OK;
-  });
+  auto srv_handle = RclHandle::NewInstance(service, nullptr, nullptr);
 
-  // auto srv_handle = RclHandle::NewInstance(service,
-  //                                         nullptr,
-  //                                         [] { return RCL_RET_OK; },
-  //                                         false);
   Nan::Set(named_srv_obj, Nan::New("handle").ToLocalChecked(), srv_handle);
-
   info.GetReturnValue().Set(named_srv_obj);
 }
 

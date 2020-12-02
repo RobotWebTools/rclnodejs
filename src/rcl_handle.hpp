@@ -27,11 +27,10 @@ namespace rclnodejs {
 class RclHandle : public Nan::ObjectWrap {
  public:
   static void Init(v8::Local<v8::Object> exports);
-  static v8::Local<v8::Object> NewInstance(
-      void* handle, RclHandle* parent = nullptr,
-      std::function<int()> deleter = [] { return 0; });
+  static v8::Local<v8::Object> NewInstance(void* handle, RclHandle* parent,
+                                           std::function<void(void*)> deleter);
 
-  void set_deleter(std::function<int()> deleter) { deleter_ = deleter; }
+  void set_deleter(std::function<void(void*)> deleter) { deleter_ = deleter; }
 
   RclHandle* parent() { return parent_; }
   void set_parent(RclHandle* parent) { parent_ = parent; }
@@ -63,7 +62,7 @@ class RclHandle : public Nan::ObjectWrap {
   std::map<std::string, bool> properties_;
   v8::Local<v8::Object> properties_obj_;
 
-  std::function<int()> deleter_;
+  std::function<void(void*)> deleter_;
   std::set<RclHandle*> children_;
 };
 

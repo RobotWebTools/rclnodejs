@@ -80,9 +80,13 @@ NAN_METHOD(ActionCreateClient) {
         rcl_action_client_init(action_client, node, ts, action_name.c_str(),
                                &action_client_ops),
         RCL_RET_OK, rcl_get_error_string().str);
-    auto js_obj = RclHandle::NewInstance(
-        action_client, node_handle, [action_client, node] {
-          return rcl_action_client_fini(action_client, node);
+    auto js_obj =
+        RclHandle::NewInstance(action_client, node_handle, [node](void* ptr) {
+          rcl_action_client_t* action_client =
+              reinterpret_cast<rcl_action_client_t*>(ptr);
+          rcl_ret_t ret = rcl_action_client_fini(action_client, node);
+          free(ptr);
+          THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
 
     info.GetReturnValue().Set(js_obj);
@@ -147,9 +151,13 @@ NAN_METHOD(ActionCreateServer) {
         rcl_action_server_init(action_server, node, clock, ts,
                                action_name.c_str(), &action_server_ops),
         RCL_RET_OK, rcl_get_error_string().str);
-    auto js_obj = RclHandle::NewInstance(
-        action_server, node_handle, [action_server, node] {
-          return rcl_action_server_fini(action_server, node);
+    auto js_obj =
+        RclHandle::NewInstance(action_server, node_handle, [node](void* ptr) {
+          rcl_action_server_t* action_server =
+              reinterpret_cast<rcl_action_server_t*>(ptr);
+          rcl_ret_t ret = rcl_action_server_fini(action_server, node);
+          free(ptr);
+          THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
 
     info.GetReturnValue().Set(js_obj);
@@ -208,7 +216,8 @@ NAN_METHOD(ActionTakeGoalRequest) {
   rcl_ret_t ret =
       rcl_action_take_goal_request(action_server, header, taken_request);
   if (ret != RCL_RET_ACTION_SERVER_TAKE_FAILED) {
-    auto js_obj = RclHandle::NewInstance(header);
+    auto js_obj =
+        RclHandle::NewInstance(header, nullptr, [](void* ptr) { free(ptr); });
     info.GetReturnValue().Set(js_obj);
     return;
   }
@@ -296,7 +305,8 @@ NAN_METHOD(ActionTakeCancelRequest) {
   rcl_ret_t ret =
       rcl_action_take_cancel_request(action_server, header, taken_request);
   if (ret != RCL_RET_ACTION_SERVER_TAKE_FAILED) {
-    auto js_obj = RclHandle::NewInstance(header);
+    auto js_obj =
+        RclHandle::NewInstance(header, nullptr, [](void* ptr) { free(ptr); });
     info.GetReturnValue().Set(js_obj);
     return;
   }
@@ -386,7 +396,8 @@ NAN_METHOD(ActionTakeResultRequest) {
   rcl_ret_t ret =
       rcl_action_take_result_request(action_server, header, taken_request);
   if (ret != RCL_RET_ACTION_SERVER_TAKE_FAILED) {
-    auto js_obj = RclHandle::NewInstance(header);
+    auto js_obj =
+        RclHandle::NewInstance(header, nullptr, [](void* ptr) { free(ptr); });
     info.GetReturnValue().Set(js_obj);
     return;
   }
@@ -464,8 +475,12 @@ NAN_METHOD(ActionAcceptNewGoal) {
     return;
   }
 
-  auto js_obj = RclHandle::NewInstance(goal_handle, nullptr, [goal_handle] {
-    return rcl_action_goal_handle_fini(goal_handle);
+  auto js_obj = RclHandle::NewInstance(goal_handle, nullptr, [](void* ptr) {
+    rcl_action_goal_handle_t* goal_handle =
+        reinterpret_cast<rcl_action_goal_handle_t*>(ptr);
+    rcl_ret_t ret = rcl_action_goal_handle_fini(goal_handle);
+    free(ptr);
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
   });
 
   info.GetReturnValue().Set(js_obj);
@@ -646,9 +661,13 @@ NAN_METHOD(ActionProcessCancelRequest) {
   }
 
   *response = cancel_response_ptr->msg;
-  auto js_obj = RclHandle::NewInstance(
-      cancel_response_ptr, nullptr, [cancel_response_ptr] {
-        return rcl_action_cancel_response_fini(cancel_response_ptr);
+  auto js_obj =
+      RclHandle::NewInstance(cancel_response_ptr, nullptr, [](void* ptr) {
+        rcl_action_cancel_response_t* cancel_response_ptr =
+            reinterpret_cast<rcl_action_cancel_response_t*>(ptr);
+        rcl_ret_t ret = rcl_action_cancel_response_fini(cancel_response_ptr);
+        free(ptr);
+        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
       });
   info.GetReturnValue().Set(js_obj);
 }
