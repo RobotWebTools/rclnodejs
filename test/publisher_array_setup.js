@@ -20,7 +20,7 @@ const rclnodejs = require('../index.js');
 
 rclnodejs
   .init()
-  .then(function () {
+  .then(function() {
     var node = rclnodejs.createNode('array_message_publisher');
     const JointState = 'sensor_msgs/msg/JointState';
     var publisher = node.createPublisher(JointState, 'JointState');
@@ -44,13 +44,13 @@ rclnodejs
     });
     rclnodejs.spin(node);
 
-    process.on('SIGINT', function () {
+    process.on('SIGINT', function() {
       timer.cancel();
       node.destroy();
       rclnodejs.shutdown();
       process.exit(0);
     });
   })
-  .catch(function (err) {
+  .catch(function(err) {
     console.log(err);
   });

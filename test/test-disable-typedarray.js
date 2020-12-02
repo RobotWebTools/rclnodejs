@@ -20,18 +20,18 @@ const rclnodejs = require('../index.js');
 /* eslint-disable camelcase */
 /* eslint-disable key-spacing */
 /* eslint-disable comma-spacing */
-describe('rclnodejs message communication', function () {
+describe('rclnodejs message communication', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('disable TypedArray in topic', function (done) {
+  it('disable TypedArray in topic', function(done) {
     const msg = {
       header: {
         stamp: {
@@ -61,7 +61,7 @@ describe('rclnodejs message communication', function () {
       'sensor_msgs/msg/JointState',
       'JointState',
       { enableTypedArray: false },
-      (response) => {
+      response => {
         clearInterval(timer);
         assert.deepStrictEqual(response, msg);
         node.destroy();
@@ -71,7 +71,7 @@ describe('rclnodejs message communication', function () {
     rclnodejs.spin(node);
   });
 
-  it('disable TypedArray in response', function (done) {
+  it('disable TypedArray in response', function(done) {
     const mapData = {
       map: {
         header: {
@@ -116,14 +116,14 @@ describe('rclnodejs message communication', function () {
     const client = node.createClient('nav_msgs/srv/GetMap', 'get_map', {
       enableTypedArray: false,
     });
-    client.sendRequest({}, (response) => {
+    client.sendRequest({}, response => {
       assert.deepStrictEqual(response, mapData);
       node.destroy();
       done();
     });
   });
 
-  it('disable TypedArray in request', function (done) {
+  it('disable TypedArray in request', function(done) {
     const mapData = {
       map: {
         header: {
@@ -190,7 +190,7 @@ describe('rclnodejs message communication', function () {
 
     rclnodejs.spin(node);
     const client = node.createClient('nav_msgs/srv/SetMap', 'set_map');
-    client.sendRequest(mapData, (response) => {
+    client.sendRequest(mapData, response => {
       assert.deepStrictEqual(response.success, true);
       node.destroy();
       done();

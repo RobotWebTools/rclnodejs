@@ -73,9 +73,9 @@ const DOUBLE_ARRAY_DESCRIPTOR = new ParameterDescriptor(
   ParameterType.PARAMETER_DOUBLE_ARRAY
 );
 
-describe('rclnodejs parameters test suite', function () {
-  describe('parameter api tests', function () {
-    it('Parameter constructor', function () {
+describe('rclnodejs parameters test suite', function() {
+  describe('parameter api tests', function() {
+    it('Parameter constructor', function() {
       let param = new Parameter(
         'str_param',
         ParameterType.PARAMETER_STRING,
@@ -87,7 +87,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.equal(param.value, 'foobar');
     });
 
-    it('Parameter update', function () {
+    it('Parameter update', function() {
       let param = new Parameter(
         'int_param',
         ParameterType.PARAMETER_INTEGER,
@@ -102,14 +102,14 @@ describe('rclnodejs parameters test suite', function () {
     });
   });
 
-  describe('range tests', function () {
-    it('Math IsClose test', function () {
+  describe('range tests', function() {
+    it('Math IsClose test', function() {
       assert.ok(IsClose.isClose(1.0, 1.0, DEFAULT_NUMERIC_RANGE_TOLERANCE));
       assert.ok(!IsClose.isClose(1.0, 1.1, DEFAULT_NUMERIC_RANGE_TOLERANCE));
       assert.ok(IsClose.isClose(1.0, 1.1, 0.11));
     });
 
-    it('IntegerRange test', function () {
+    it('IntegerRange test', function() {
       const range = new IntegerRange(0, 100, 1);
 
       // test property accessors
@@ -131,7 +131,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.ok(!range.inRange(101));
     });
 
-    it('FloatingPointRange test', function () {
+    it('FloatingPointRange test', function() {
       const range = new FloatingPointRange(-10.0, 10.0, 0.25);
 
       // test property accessors
@@ -156,8 +156,8 @@ describe('rclnodejs parameters test suite', function () {
     });
   });
 
-  describe('parameter-descriptor tests', function () {
-    it('String descriptor test', function () {
+  describe('parameter-descriptor tests', function() {
+    it('String descriptor test', function() {
       assert.equal('strD', STRING_DESCRIPTOR.name);
       assert.equal(ParameterType.PARAMETER_STRING, STRING_DESCRIPTOR.type);
       assert.equal('no description', STRING_DESCRIPTOR.description);
@@ -168,7 +168,7 @@ describe('rclnodejs parameters test suite', function () {
       assert.ok(STRING_READONLY_DESCRIPTOR.readOnly);
     });
 
-    it('Integer descriptor with [0-255] range test', function () {
+    it('Integer descriptor with [0-255] range test', function() {
       const descriptor = new ParameterDescriptor(
         'int_param',
         ParameterType.PARAMETER_INTEGER
@@ -192,7 +192,7 @@ describe('rclnodejs parameters test suite', function () {
       assertThrowsError(() => descriptor.validateParameter(param), RangeError);
     });
 
-    it('Integer descriptor with [0-255], step=5 range test', function () {
+    it('Integer descriptor with [0-255], step=5 range test', function() {
       const descriptor = new ParameterDescriptor(
         'int_param',
         ParameterType.PARAMETER_INTEGER
@@ -217,18 +217,18 @@ describe('rclnodejs parameters test suite', function () {
     });
   });
 
-  describe('rcl parameter-overrides test', function () {
+  describe('rcl parameter-overrides test', function() {
     const NODE_NAME = 'test_node';
 
     let node;
     this.timeout(60 * 1000);
 
-    afterEach(function () {
+    afterEach(function() {
       if (node) node.destroy();
       rclnodejs.shutdown();
     });
 
-    it('cli parameter-override: 1 global param', async function () {
+    it('cli parameter-override: 1 global param', async function() {
       await rclnodejs.init(Context.defaultContext(), [
         '--ros-args',
         '-p',
@@ -250,7 +250,7 @@ describe('rclnodejs parameters test suite', function () {
       );
     });
 
-    it('cli parameter-override: 1 global param redefined', async function () {
+    it('cli parameter-override: 1 global param redefined', async function() {
       await rclnodejs.init(Context.defaultContext(), [
         '--ros-args',
         '-p',
@@ -274,7 +274,7 @@ describe('rclnodejs parameters test suite', function () {
       );
     });
 
-    it('cli parameter override, global & node:param', async function () {
+    it('cli parameter override, global & node:param', async function() {
       await rclnodejs.init(Context.defaultContext(), [
         '--ros-args',
         '-p',
@@ -309,7 +309,7 @@ describe('rclnodejs parameters test suite', function () {
       );
     });
 
-    it('cli parameter override, filter out other node parameters', async function () {
+    it('cli parameter override, filter out other node parameters', async function() {
       await rclnodejs.init(Context.defaultContext(), [
         '--ros-args',
         '-p',
@@ -333,7 +333,7 @@ describe('rclnodejs parameters test suite', function () {
       );
     });
 
-    it('cli + constructor parameter overrides', async function () {
+    it('cli + constructor parameter overrides', async function() {
       await rclnodejs.init(Context.defaultContext(), [
         '--ros-args',
         '-p',
@@ -364,7 +364,7 @@ describe('rclnodejs parameters test suite', function () {
       );
     });
 
-    it('cli load parameter.yaml file ', async function () {
+    it('cli load parameter.yaml file ', async function() {
       await rclnodejs.init(Context.defaultContext(), [
         '--ros-args',
         '--params-file',
@@ -397,7 +397,7 @@ describe('rclnodejs parameters test suite', function () {
       );
     });
 
-    it('cli load from parameter.yaml file with global /** param group ', async function () {
+    it('cli load from parameter.yaml file with global /** param group ', async function() {
       await rclnodejs.init(Context.defaultContext(), [
         '--ros-args',
         '--params-file',
@@ -431,7 +431,7 @@ describe('rclnodejs parameters test suite', function () {
       );
     });
 
-    it('override param from parameter.yaml file ', async function () {
+    it('override param from parameter.yaml file ', async function() {
       await rclnodejs.init(Context.defaultContext(), [
         '--ros-args',
         '--params-file',
@@ -457,7 +457,7 @@ describe('rclnodejs parameters test suite', function () {
     });
   });
 
-  describe('parameter onSetParameterCallback tests', function () {
+  describe('parameter onSetParameterCallback tests', function() {
     const NODE_NAME = 'test_node';
     const PARAM_NAME = 'TEST_PARAM';
     const PARAM_TYPE = ParameterType.PARAMETER_STRING;
@@ -485,7 +485,7 @@ describe('rclnodejs parameters test suite', function () {
       node.declareParameter(PARAMETER);
     });
 
-    afterEach(function () {
+    afterEach(function() {
       if (node) node.destroy();
     });
 
@@ -493,7 +493,7 @@ describe('rclnodejs parameters test suite', function () {
       rclnodejs.shutdown();
     });
 
-    it('Add and Remove SetParametersCallback', function () {
+    it('Add and Remove SetParametersCallback', function() {
       const initialCallbackCnt = node._setParametersCallbacks.length;
       const callback1 = () => SET_PARAMETER_RESULT_SUCCESS;
       const callback2 = () => SET_PARAMETER_RESULT_SUCCESS;
@@ -518,10 +518,10 @@ describe('rclnodejs parameters test suite', function () {
       );
     });
 
-    it('SetParametersCallback', function () {
+    it('SetParametersCallback', function() {
       let callbackReceived = false;
       let paramFoundInParamList = false;
-      node.addOnSetParametersCallback((parameters) => {
+      node.addOnSetParametersCallback(parameters => {
         for (const parameter of parameters) {
           if (parameter.name === PARAM_NAME) {
             paramFoundInParamList = true;
@@ -540,10 +540,10 @@ describe('rclnodejs parameters test suite', function () {
       assert.ok(callbackReceived);
     });
 
-    it('SetParametersCallback reject', function () {
+    it('SetParametersCallback reject', function() {
       let callbackReceived = false;
       let paramFoundInParamList = false;
-      node.addOnSetParametersCallback((parameters) => {
+      node.addOnSetParametersCallback(parameters => {
         for (const parameter of parameters) {
           if (parameter.name === PARAM_NAME) {
             paramFoundInParamList = true;

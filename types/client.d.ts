@@ -10,9 +10,8 @@ declare module 'rclnodejs' {
      * @param callback - Callback for receiving the server response.
      */
     sendRequest(
-      request: ServiceRequestMessage<T>,
-      callback: Client.ResponseCallback<T>
-    ): void;
+      request: ServiceRequestMessage<T>, 
+      callback: Client.ResponseCallback<T>): void;
 
     /**
      * Checks if the service is ready.
@@ -43,6 +42,7 @@ declare module 'rclnodejs' {
   }
 
   namespace Client {
+
     /**
      * A callback for receiving a response from the service
      *
@@ -54,8 +54,7 @@ declare module 'rclnodejs' {
      * See {@link Client}
      * See {@link Service}
      */
-    export type ResponseCallback<T extends TypeClass<ServiceTypeClassName>> = (
-      response: ServiceResponseMessage<T>
-    ) => void;
+    export type ResponseCallback<T extends TypeClass<ServiceTypeClassName>> = 
+      (response: ServiceResponseMessage<T>) => void;
   }
 }

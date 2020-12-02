@@ -18,7 +18,9 @@
 const app = require('commander');
 const rclnodejs = require('../../../index.js');
 
-app.option('-s, --size [size_kb]', 'The block size').parse(process.argv);
+app
+  .option('-s, --size [size_kb]', 'The block size')
+  .parse(process.argv);
 
 let size = app.size || 1;
 const mapData = {
@@ -28,7 +30,7 @@ const mapData = {
         sec: 123456,
         nanosec: 789,
       },
-      frame_id: 'main_frame',
+      frame_id: 'main_frame'
     },
     info: {
       map_load_time: {
@@ -42,33 +44,26 @@ const mapData = {
         position: {
           x: 0.0,
           y: 0.0,
-          z: 0.0,
+          z: 0.0
         },
         orientation: {
           x: 0.0,
           y: 0.0,
           z: 0.0,
-          w: 0.0,
-        },
-      },
+          w: 0.0
+        }
+      }
     },
-    data: Int8Array.from({ length: 1024 * size }, (v, k) => k),
-  },
+    data: Int8Array.from({length: 1024 * size}, (v, k) => k)
+  }
 };
 
-rclnodejs
-  .init()
-  .then(() => {
-    let node = rclnodejs.createNode('stress_service_rclnodejs');
-    node.createService(
-      'nav_msgs/srv/GetMap',
-      'get_map',
-      (request, response) => {
-        return mapData;
-      }
-    );
-    rclnodejs.spin(node);
-  })
-  .catch((e) => {
-    console.log(`Error: ${e}`);
+rclnodejs.init().then(() => {
+  let node = rclnodejs.createNode('stress_service_rclnodejs');
+  node.createService('nav_msgs/srv/GetMap', 'get_map', (request, response) => {
+    return mapData;
   });
+  rclnodejs.spin(node);
+}).catch((e) => {
+  console.log(`Error: ${e}`);
+});

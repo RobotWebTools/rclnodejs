@@ -49,17 +49,14 @@ describe('LifecycleNode test suite', function () {
 
   before(async function () {
     await rclnodejs.init();
-    StateInterface = rclnodejs.createMessage('lifecycle_msgs/msg/State')
-      .constructor;
-    TransitionInterface = rclnodejs.createMessage(
-      'lifecycle_msgs/msg/Transition'
-    ).constructor;
+    StateInterface = rclnodejs.createMessage('lifecycle_msgs/msg/State').constructor;
+    TransitionInterface = rclnodejs.createMessage('lifecycle_msgs/msg/Transition').constructor;
   });
 
   beforeEach(function () {
     node = rclnodejs.createLifecycleNode(NODE_NAME);
     rclnodejs.spin(node);
-  });
+  }); 
 
   afterEach(function () {
     node.destroy();
@@ -75,10 +72,7 @@ describe('LifecycleNode test suite', function () {
   });
 
   it('lifecycleNode transitions', function () {
-    assert.equal(
-      node.currentState.id,
-      StateInterface.PRIMARY_STATE_UNCONFIGURED
-    );
+    assert.equal(node.currentState.id, StateInterface.PRIMARY_STATE_UNCONFIGURED);
 
     let state = node.configure();
     assert.equal(node.currentState.id, StateInterface.PRIMARY_STATE_INACTIVE);
@@ -93,10 +87,7 @@ describe('LifecycleNode test suite', function () {
     assert.equal(state.id, StateInterface.PRIMARY_STATE_INACTIVE);
 
     state = node.cleanup();
-    assert.equal(
-      node.currentState.id,
-      StateInterface.PRIMARY_STATE_UNCONFIGURED
-    );
+    assert.equal(node.currentState.id, StateInterface.PRIMARY_STATE_UNCONFIGURED);
     assert.equal(state.id, StateInterface.PRIMARY_STATE_UNCONFIGURED);
 
     state = node.shutdown();
@@ -138,6 +129,7 @@ describe('LifecycleNode test suite', function () {
   });
 
   it('lifecycleNode onError callback', function () {
+
     let failCb = (prevState) => {
       return rclnodejs.lifecycle.CallbackReturnCode.ERROR;
     };
@@ -154,34 +146,34 @@ describe('LifecycleNode test suite', function () {
   it('lifecycle event publisher', async function () {
     let eventCnt = 0;
 
-    let subscription = node.createSubscription(
-      'lifecycle_msgs/msg/TransitionEvent',
-      '~/transition_event',
-      (msg) => {
-        eventCnt++;
-      }
-    );
+    let subscription = 
+      node.createSubscription(
+        'lifecycle_msgs/msg/TransitionEvent',
+        '~/transition_event',
+        (msg) => {
+          eventCnt++;
+        });
 
     node.configure();
     await assertUtils.createDelay(1000);
-
+    
     assert.equal(eventCnt, 2);
   });
 
   it('LifecycleNode srv/GetState', async function () {
     node.configure();
 
-    let client = node.createClient(
-      'lifecycle_msgs/srv/GetState',
-      '~/get_state'
-    );
+    let client = 
+      node.createClient(
+        'lifecycle_msgs/srv/GetState',
+        '~/get_state');
 
     let currentState;
-    client.waitForService(1000).then((result) => {
+    client.waitForService(1000).then(result => {
       if (!result) {
         assert.fail('Error: GetState service not available');
       }
-      client.sendRequest({}, (response) => {
+      client.sendRequest({}, response => {
         currentState = response.current_state;
       });
     });
@@ -193,17 +185,17 @@ describe('LifecycleNode test suite', function () {
   });
 
   it('LifecycleNode srv/GetAvailableStates', async function () {
-    let client = node.createClient(
-      'lifecycle_msgs/srv/GetAvailableStates',
-      '~/get_available_states'
-    );
+    let client = 
+      node.createClient(
+        'lifecycle_msgs/srv/GetAvailableStates',
+        '~/get_available_states');
 
     let states;
-    client.waitForService(1000).then((result) => {
+    client.waitForService(1000).then(result => {
       if (!result) {
         assert.fail('Error: GetAvailableStates service not available');
       }
-      client.sendRequest({}, (response) => {
+      client.sendRequest({}, response => {
         states = response.available_states;
       });
     });
@@ -215,17 +207,17 @@ describe('LifecycleNode test suite', function () {
   });
 
   it('LifecycleNode srv/GetAvailableTransitions', async function () {
-    let client = node.createClient(
-      'lifecycle_msgs/srv/GetAvailableTransitions',
-      '~/get_available_transitions'
-    );
+    let client = 
+      node.createClient(
+        'lifecycle_msgs/srv/GetAvailableTransitions',
+        '~/get_available_transitions');
 
     let transitions;
-    client.waitForService(1000).then((result) => {
+    client.waitForService(1000).then(result => {
       if (!result) {
         assert.fail('Error: GetAvailableTransitions service not available');
       }
-      client.sendRequest({}, (response) => {
+      client.sendRequest({}, response => {
         transitions = response.available_transitions;
       });
     });
@@ -236,13 +228,11 @@ describe('LifecycleNode test suite', function () {
     assert.strictEqual(transitions.length, 2);
     assert.ok(
       transitions[0].transition.id === 1 || // configure
-        transitions[0].transition.id === 5
-    ); // shutdown
+      transitions[0].transition.id === 5);  // shutdown
     assert.ok(
       transitions[1].transition.id === 1 || // configure
-        transitions[1].transition.id === 5
-    ); // shutdown
-
+      transitions[1].transition.id === 5);  // shutdown
+    
     node.configure();
 
     transitions = node.availableTransitions;
@@ -250,39 +240,31 @@ describe('LifecycleNode test suite', function () {
     assert.strictEqual(transitions.length, 3);
     assert.ok(
       transitions[0].transition.id === 2 || // cleanup
-        transitions[0].transition.id === 3 || // activate
-        transitions[0].transition.id === 6
-    ); // shutdown
+      transitions[0].transition.id === 3 || // activate
+      transitions[0].transition.id === 6);  // shutdown
     assert.ok(
       transitions[1].transition.id === 2 || // cleanup
-        transitions[1].transition.id === 3 || // activate
-        transitions[1].transition.id === 6
-    ); // shutdown
+      transitions[1].transition.id === 3 || // activate
+      transitions[1].transition.id === 6);  // shutdown
     assert.ok(
       transitions[1].transition.id === 2 || // cleanup
-        transitions[1].transition.id === 3 || // activate
-        transitions[1].transition.id === 6
-    ); // shutdown
+      transitions[1].transition.id === 3 || // activate
+      transitions[1].transition.id === 6);  // shutdown
   });
 
   it('LifecycleNode srv/ChangeState', async function () {
-    let client = node.createClient(
-      'lifecycle_msgs/srv/ChangeState',
-      '~/change_state'
-    );
+    let client = 
+      node.createClient(
+        'lifecycle_msgs/srv/ChangeState',
+        '~/change_state');
 
     let isSuccess = false;
-    client.waitForService(1000).then((result) => {
+    client.waitForService(1000).then(result => {
       if (!result) {
         assert.fail('Error: ChangeState service not available');
       }
-      let request = {
-        transition: {
-          id: TransitionInterface.TRANSITION_CONFIGURE,
-          label: 'configure',
-        },
-      };
-      client.sendRequest(request, (response) => {
+      let request = {transition: {id: TransitionInterface.TRANSITION_CONFIGURE, label: 'configure'}};
+      client.sendRequest(request, response => {
         isSuccess = response.success;
       });
     });
@@ -291,4 +273,5 @@ describe('LifecycleNode test suite', function () {
 
     assert.ok(isSuccess);
   });
+
 });

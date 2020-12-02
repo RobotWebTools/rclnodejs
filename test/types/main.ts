@@ -154,10 +154,7 @@ node.destroyPublisher(publisher);
 
 // ---- LifecyclePublisher ----
 // $ExpectType LifecyclePublisher<"std_msgs/msg/String">
-const lifecyclePublisher = lifecycleNode.createLifecyclePublisher(
-  TYPE_CLASS,
-  TOPIC
-);
+const lifecyclePublisher = lifecycleNode.createLifecyclePublisher(TYPE_CLASS, TOPIC);
 
 // $ExpectType boolean
 lifecyclePublisher.isActivated();

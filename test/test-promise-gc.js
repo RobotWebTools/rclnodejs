@@ -45,10 +45,7 @@ describe('Test promise wrapper with garbage collection', function () {
     {
       typeClass: 'std_msgs/msg/UInt8MultiArray',
       msg: {
-        layout: {
-          dim: [{ label: 'test', size: 10, stride: 10 }],
-          data_offset: 0,
-        },
+        layout: { dim: [{ label: 'test', size: 10, stride: 10 }], data_offset: 0 },
         data: Uint8Array.from([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
       },
     },

@@ -20,7 +20,7 @@ const { v4: uuidv4 } = require('uuid');
 const assertUtils = require('./utils.js');
 const rclnodejs = require('../index.js');
 
-describe('rclnodejs action server', function () {
+describe('rclnodejs action server', function() {
   let node;
   let client;
   this.timeout(60 * 1000);
@@ -48,15 +48,15 @@ describe('rclnodejs action server', function () {
     return [].slice.call(uuid).join(',');
   }
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  beforeEach(function () {
+  beforeEach(function() {
     Fibonacci = rclnodejs.require(fibonacci);
     GoalStatus = rclnodejs.require('action_msgs/msg/GoalStatus');
 
@@ -66,12 +66,12 @@ describe('rclnodejs action server', function () {
     rclnodejs.spin(node);
   });
 
-  afterEach(function () {
+  afterEach(function() {
     client.destroy();
     node.destroy();
   });
 
-  it('Test constructor defaults', function () {
+  it('Test constructor defaults', function() {
     let server = new rclnodejs.ActionServer(
       node,
       fibonacci,
@@ -109,7 +109,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test constructor no defaults', function () {
+  it('Test constructor no defaults', function() {
     let server = new rclnodejs.ActionServer(
       node,
       fibonacci,
@@ -124,7 +124,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test single goal accept', async function () {
+  it('Test single goal accept', async function() {
     let goalUuid = createUuid();
     let goalOrder = 10;
 
@@ -166,7 +166,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test single goal reject', async function () {
+  it('Test single goal reject', async function() {
     let goalUuid = createUuid();
     let goalOrder = 10;
 
@@ -200,7 +200,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test invalid goal callback return type', async function () {
+  it('Test invalid goal callback return type', async function() {
     let goalUuid = createUuid();
     let goalOrder = 10;
 
@@ -228,7 +228,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test multi goal accept', async function () {
+  it('Test multi goal accept', async function() {
     let server = new rclnodejs.ActionServer(
       node,
       fibonacci,
@@ -253,7 +253,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test duplicate goal', async function () {
+  it('Test duplicate goal', async function() {
     let goalUuid = createUuid();
     let server = new rclnodejs.ActionServer(
       node,
@@ -277,7 +277,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test cancel goal accept', async function () {
+  it('Test cancel goal accept', async function() {
     let goalOrder = 10;
 
     async function executeCancelCallback(goalHandle) {
@@ -321,7 +321,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test cancel goal reject', async function () {
+  it('Test cancel goal reject', async function() {
     let goalOrder = 10;
 
     async function executeCancelCallback(goalHandle) {
@@ -366,7 +366,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test cancel deferred goal', async function () {
+  it('Test cancel deferred goal', async function() {
     let goalOrder = 10;
     let serverGoalHandle;
 
@@ -417,7 +417,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test execute succeed', async function () {
+  it('Test execute succeed', async function() {
     const testSequence = [1, 1, 2, 3, 5];
 
     function executeSuceedCallback(goalHandle) {
@@ -451,7 +451,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test execute abort', async function () {
+  it('Test execute abort', async function() {
     const testSequence = [1, 1, 2, 3, 5];
 
     function executeSuceedCallback(goalHandle) {
@@ -485,7 +485,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test execute no terminal state', async function () {
+  it('Test execute no terminal state', async function() {
     const testSequence = [1, 1, 2, 3, 5];
 
     function executeSuceedCallback(goalHandle) {
@@ -520,7 +520,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test execute throws', async function () {
+  it('Test execute throws', async function() {
     function executeErrorCallback() {
       // Note that this will log errors to the console, which is expected
       throw new Error();
@@ -548,7 +548,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test expire goals none', async function () {
+  it('Test expire goals none', async function() {
     let server = new rclnodejs.ActionServer(
       node,
       fibonacci,
@@ -571,7 +571,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test expire goals single', async function () {
+  it('Test expire goals single', async function() {
     let server = new rclnodejs.ActionServer(
       node,
       fibonacci,
@@ -597,7 +597,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test expire goals multi', async function () {
+  it('Test expire goals multi', async function() {
     let server = new rclnodejs.ActionServer(
       node,
       fibonacci,
@@ -627,7 +627,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test feedback', async function () {
+  it('Test feedback', async function() {
     const sequence = [1, 1, 2, 3];
 
     function executeFeedbackCallback(goalHandle) {
@@ -653,7 +653,7 @@ describe('rclnodejs action server', function () {
     let feedbackMessage;
     const handle = await client.sendGoal(
       goal,
-      (feedback) => (feedbackMessage = feedback)
+      feedback => (feedbackMessage = feedback)
     );
     assert.ok(handle.accepted);
 
@@ -665,7 +665,7 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
-  it('Test wrong feedback type throws', async function () {
+  it('Test wrong feedback type throws', async function() {
     const sequence = [1, 1, 2, 3];
 
     function executeFeedbackCallback(goalHandle) {
@@ -697,7 +697,7 @@ describe('rclnodejs action server', function () {
     let feedbackMessage;
     const handle = await client.sendGoal(
       goal,
-      (feedback) => (feedbackMessage = feedback)
+      feedback => (feedbackMessage = feedback)
     );
     assert.ok(handle.accepted);
 

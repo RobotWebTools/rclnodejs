@@ -18,28 +18,28 @@ const assert = require('assert');
 const os = require('os');
 const rclnodejs = require('../index.js');
 
-describe('Rclnodejs createMessage() testing', function () {
+describe('Rclnodejs createMessage() testing', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('Test .createMessage() for every message in system', function () {
+  it('Test .createMessage() for every message in system', function() {
     const packages = require('../rosidl_gen/packages.js');
     const installedPackagesRoot =
       os.type() === 'Windows_NT'
         ? process.env.AMENT_PREFIX_PATH.split(';')
         : process.env.AMENT_PREFIX_PATH.split(':');
     let promises = [];
-    installedPackagesRoot.forEach((path) => {
-      let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
-        pkgs.forEach((pkg) => {
-          pkg.messages.forEach((info) => {
+    installedPackagesRoot.forEach(path => {
+      let promise = packages.findPackagesInDirectory(path).then(pkgs => {
+        pkgs.forEach(pkg => {
+          pkg.messages.forEach(info => {
             const s =
               info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
             rclnodejs.createMessage(s);
@@ -57,7 +57,9 @@ describe('Rclnodejs createMessage() testing', function () {
     return Promise.all(promises);
   });
 
-  it('require() and create instance of every message in package', function () {
+
+  it('require() and create instance of every message in package', function() {
+  
     // load every message in nav2_msg package
     let pkg = rclnodejs.require('tf2_msgs');
     assert.ok(pkg);
@@ -90,7 +92,7 @@ describe('Rclnodejs createMessage() testing', function () {
     });
   });
 
-  it('create by string', function () {
+  it('create by string', function() {
     const s = rclnodejs.createMessage('std_msgs/msg/String');
 
     assert('data' in s);
@@ -109,7 +111,7 @@ describe('Rclnodejs createMessage() testing', function () {
     assert(s.constructor.classType === classType);
   });
 
-  it('create by object', function () {
+  it('create by object', function() {
     const s = rclnodejs.createMessage({
       package: 'std_msgs',
       type: 'msg',
@@ -145,13 +147,13 @@ describe('Rclnodejs createMessage() testing', function () {
     '/msg/String',
     'unknown/msg/Unknown',
     { package: 'std_msgs', type: 'msg', name: 'CString' },
-  ].forEach((testData) => {
-    it('expecting exception when passing ' + testData.toString(), function () {
+  ].forEach(testData => {
+    it('expecting exception when passing ' + testData.toString(), function() {
       assert.throws(
         () => {
           rclnodejs.createMessage(testData);
         },
-        function (e) {
+        function(e) {
           return e instanceof Error;
         }
       );
@@ -159,28 +161,28 @@ describe('Rclnodejs createMessage() testing', function () {
   });
 });
 
-describe('Rclnodejs createMessageObject() testing', function () {
+describe('Rclnodejs createMessageObject() testing', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('Test .createMessageObject() for every message in system', function () {
+  it('Test .createMessageObject() for every message in system', function() {
     const packages = require('../rosidl_gen/packages.js');
     const installedPackagesRoot =
       os.type() === 'Windows_NT'
         ? process.env.AMENT_PREFIX_PATH.split(';')
         : process.env.AMENT_PREFIX_PATH.split(':');
     let promises = [];
-    installedPackagesRoot.forEach((path) => {
-      let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
-        pkgs.forEach((pkg) => {
-          pkg.messages.forEach((info) => {
+    installedPackagesRoot.forEach(path => {
+      let promise = packages.findPackagesInDirectory(path).then(pkgs => {
+        pkgs.forEach(pkg => {
+          pkg.messages.forEach(info => {
             const s =
               info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
             rclnodejs.createMessageObject(s);
@@ -198,7 +200,7 @@ describe('Rclnodejs createMessageObject() testing', function () {
     return Promise.all(promises);
   });
 
-  it('create by string', function () {
+  it('create by string', function() {
     const s = rclnodejs.createMessageObject('std_msgs/msg/String');
 
     assert('data' in s);
@@ -208,7 +210,7 @@ describe('Rclnodejs createMessageObject() testing', function () {
     assert.equal(s.data, 'this is fun');
   });
 
-  it('create by object', function () {
+  it('create by object', function() {
     const s = rclnodejs.createMessageObject({
       package: 'std_msgs',
       type: 'msg',
@@ -235,16 +237,17 @@ describe('Rclnodejs createMessageObject() testing', function () {
     '/msg/String',
     'unknown/msg/Unknown',
     { package: 'std_msgs', type: 'msg', name: 'CString' },
-  ].forEach((testData) => {
-    it('expecting exception when passing ' + testData.toString(), function () {
+  ].forEach(testData => {
+    it('expecting exception when passing ' + testData.toString(), function() {
       assert.throws(
         () => {
           rclnodejs.createMessageObject(testData);
         },
-        function (e) {
+        function(e) {
           return e instanceof Error;
         }
       );
     });
   });
+
 });

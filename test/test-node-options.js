@@ -28,8 +28,8 @@ const {
   ParameterDescriptor,
 } = require('../lib/parameter.js');
 
-describe('rclnodejs NodeOptions test suite', function () {
-  it('constructor test', function () {
+describe('rclnodejs NodeOptions test suite', function() {
+  it('constructor test', function() {
     const nodeOptions = new NodeOptions();
 
     assert.strictEqual(nodeOptions.startParameterServices, true);
@@ -41,7 +41,7 @@ describe('rclnodejs NodeOptions test suite', function () {
     assert.strictEqual(nodeOptions.parameterOverrides.length, 0);
   });
 
-  it('defaultOptions test', function () {
+  it('defaultOptions test', function() {
     const nodeOptions = NodeOptions.defaultOptions;
 
     assert.strictEqual(nodeOptions.startParameterServices, true);
@@ -53,7 +53,7 @@ describe('rclnodejs NodeOptions test suite', function () {
     assert.strictEqual(nodeOptions.parameterOverrides.length, 0);
   });
 
-  it('setters/getters test', function () {
+  it('setters/getters test', function() {
     const nodeOptions = new NodeOptions();
     const param = new Parameter(
       'str_param',

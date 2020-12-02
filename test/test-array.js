@@ -18,18 +18,18 @@ const assert = require('assert');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 
-describe('rclnodejs message communication', function () {
+describe('rclnodejs message communication', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('should support array type', function (done) {
+  it('should support array type', function(done) {
     var node = rclnodejs.createNode('array_message_subscription');
     const JointState = 'sensor_msgs/msg/JointState';
     var publisher = childProcess.fork(`${__dirname}/publisher_array_setup.js`);
@@ -37,7 +37,7 @@ describe('rclnodejs message communication', function () {
     var subscription = node.createSubscription(
       JointState,
       'JointState',
-      (state) => {
+      state => {
         assert.deepStrictEqual(state.header.stamp.sec, 123456);
         assert.deepStrictEqual(state.header.stamp.nanosec, 789);
         assert.deepStrictEqual(state.header.frame_id, 'main frame');

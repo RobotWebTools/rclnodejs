@@ -18,18 +18,18 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertThrowsError = require('./utils.js').assertThrowsError;
 
-describe('Compound types', function () {
+describe('Compound types', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('ColorRGBA', function () {
+  it('ColorRGBA', function() {
     const msgColorRGBA = rclnodejs.require('std_msgs').msg.ColorRGBA;
     let msg = new msgColorRGBA();
 
@@ -40,7 +40,7 @@ describe('Compound types', function () {
     assert.deepStrictEqual(typeof msg.a, 'undefined');
   });
 
-  it('Array', function () {
+  it('Array', function() {
     const Byte = rclnodejs.require('std_msgs').msg.Byte;
     const ByteArray = Byte.ArrayType;
     let msg = new ByteArray(3);
@@ -52,7 +52,7 @@ describe('Compound types', function () {
     assert.deepStrictEqual(msg.data[2], 3);
   });
 
-  it('Object with Header', function () {
+  it('Object with Header', function() {
     const Header = rclnodejs.require('std_msgs').msg.Header;
     let header = new Header();
 
@@ -63,7 +63,7 @@ describe('Compound types', function () {
     assert.deepStrictEqual(typeof header.frame_id, 'undefined');
   });
 
-  it('Complex object', function () {
+  it('Complex object', function() {
     const JointState = rclnodejs.require('sensor_msgs').msg.JointState;
     let state = new JointState();
 

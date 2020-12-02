@@ -18,25 +18,25 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 
-describe('rclnodejs validator testing', function () {
+describe('rclnodejs validator testing', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('validate_full_topic_name', function () {
+  it('validate_full_topic_name', function() {
     var names = ['/chatter', '/node_name/chatter', '/ns/node_name/chatter'];
-    names.forEach((name) => {
+    names.forEach(name => {
       rclnodejs.validator.validateFullTopicName(name);
     });
   });
 
-  it('validate_full_topic_name_failure_invalid_char', function () {
+  it('validate_full_topic_name_failure_invalid_char', function() {
     utils.assertThrowsError(
       () => {
         rclnodejs.validator.validateFullTopicName('/invalid_topic?');
@@ -47,7 +47,7 @@ describe('rclnodejs validator testing', function () {
     );
   });
 
-  it('validate_full_name_failure_not_absolute', function () {
+  it('validate_full_name_failure_not_absolute', function() {
     utils.assertThrowsError(
       () => {
         rclnodejs.validator.validateFullTopicName('invalid_topic');
@@ -58,11 +58,11 @@ describe('rclnodejs validator testing', function () {
     );
   });
 
-  it('validate_node_name', function () {
+  it('validate_node_name', function() {
     rclnodejs.validator.validateNodeName('my_node');
   });
 
-  it('validate_node_name_failures', function () {
+  it('validate_node_name_failures', function() {
     utils.assertThrowsError(
       () => {
         rclnodejs.validator.validateNodeName('');
@@ -91,7 +91,7 @@ describe('rclnodejs validator testing', function () {
     );
   });
 
-  it('topic_or_service_is_hidden', function () {
+  it('topic_or_service_is_hidden', function() {
     var tests = [
       ['/chatter', false],
       ['chatter', false],
@@ -113,7 +113,7 @@ describe('rclnodejs validator testing', function () {
       ['_', true],
     ];
 
-    tests.forEach((test) => {
+    tests.forEach(test => {
       assert.deepStrictEqual(
         rclnodejs.isTopicOrServiceHidden(test[0]),
         test[1]
@@ -121,15 +121,15 @@ describe('rclnodejs validator testing', function () {
     });
   });
 
-  it('validate_topic_name', function () {
+  it('validate_topic_name', function() {
     var names = ['chatter', '{node}/chatter', '~/chatter'];
 
-    names.forEach((name) => {
+    names.forEach(name => {
       rclnodejs.validator.validateTopicName(name);
     });
   });
 
-  it('valid_topic_name_failure_invalid_char', function () {
+  it('valid_topic_name_failure_invalid_char', function() {
     utils.assertThrowsError(
       () => {
         rclnodejs.validator.validateTopicName('/invalid_topic?');
@@ -140,7 +140,7 @@ describe('rclnodejs validator testing', function () {
     );
   });
 
-  it('validate_topic_name_failure_start', function () {
+  it('validate_topic_name_failure_start', function() {
     utils.assertThrowsError(
       () => {
         rclnodejs.validator.validateTopicName('invalid/42topic');
@@ -151,15 +151,15 @@ describe('rclnodejs validator testing', function () {
     );
   });
 
-  it('validate_namespace', function () {
+  it('validate_namespace', function() {
     var names = ['/my_ns', '/'];
 
-    names.forEach((name) => {
+    names.forEach(name => {
       rclnodejs.validator.validateNamespace(name);
     });
   });
 
-  it('validate_namespace_failures', function () {
+  it('validate_namespace_failures', function() {
     utils.assertThrowsError(
       () => {
         rclnodejs.validator.validateNamespace('');

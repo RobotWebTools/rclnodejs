@@ -17,16 +17,16 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe('rcl node remapping', function () {
+describe('rcl node remapping', function() {
   let node;
   this.timeout(60 * 1000);
 
-  afterEach(function () {
+  afterEach(function() {
     if (node) node.destroy();
     rclnodejs.shutdown();
   });
 
-  it('remap node name', async function () {
+  it('remap node name', async function() {
     const ARGV = ['--ros-args', '-r', 'my_node:__node:=foo'];
 
     await rclnodejs.init(rclnodejs.Context.defaultContext(), ARGV);
@@ -36,7 +36,7 @@ describe('rcl node remapping', function () {
     assert.equal(node.name(), 'foo');
   });
 
-  it('remap node namespace', async function () {
+  it('remap node namespace', async function() {
     const ARGV = ['--ros-args', '-r', 'my_node:__ns:=/foo'];
 
     await rclnodejs.init(rclnodejs.Context.defaultContext(), ARGV);
@@ -45,7 +45,7 @@ describe('rcl node remapping', function () {
     assert.equal(node.namespace(), '/foo');
   });
 
-  it('remap publisher topic', async function () {
+  it('remap publisher topic', async function() {
     const ARGV = ['--ros-args', '-r', 'my_node:/my_topic:=/foo_topic'];
 
     await rclnodejs.init(rclnodejs.Context.defaultContext(), ARGV);
@@ -55,7 +55,7 @@ describe('rcl node remapping', function () {
     assert.equal(publisher.topic, 'foo_topic');
   });
 
-  it('remap service name', async function () {
+  it('remap service name', async function() {
     const ARGV = ['--ros-args', '-r', 'my_node:my_service:=foo_service'];
 
     await rclnodejs.init(rclnodejs.Context.defaultContext(), ARGV);
@@ -63,13 +63,13 @@ describe('rcl node remapping', function () {
     let service = node.createService(
       'example_interfaces/srv/AddTwoInts',
       'my_service',
-      (request) => {}
+      request => {}
     );
 
     assert.equal(service.serviceName, 'foo_service');
   });
 
-  it('remap node, namespace, topic and servicename', async function () {
+  it('remap node, namespace, topic and servicename', async function() {
     const ARGV = [
       '--ros-args',
       '-r',
@@ -89,7 +89,7 @@ describe('rcl node remapping', function () {
     let service = node.createService(
       'example_interfaces/srv/AddTwoInts',
       'my_service',
-      (request) => {}
+      request => {}
     );
 
     assert.equal(node.name(), 'foo_node');

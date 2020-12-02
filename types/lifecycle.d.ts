@@ -1,5 +1,8 @@
+
 declare module 'rclnodejs' {
+
   namespace lifecycle {
+
     /**
      * A simple object representation of State.
      */
@@ -12,11 +15,12 @@ declare module 'rclnodejs' {
      * The state of the lifecycle state-model.
      */
     class State {
+
       /**
-       * Create a state.
-       * @param id - The id value.
-       * @param label - The label value.
-       */
+      * Create a state.
+      * @param id - The id value.
+      * @param label - The label value.
+      */
       constructor(id: number, label: string);
 
       /**
@@ -30,15 +34,17 @@ declare module 'rclnodejs' {
      * The intermediate state of the lifecycle state-model during a state
      * transition process.
      */
-    class Transition extends State {}
+    class Transition extends State {
+    }
 
     /**
-     * Describes a state transition.
+     * Describes a state transition. 
      */
     class TransitionDescription {
+      
       /**
        * Create a transition description.
-       *
+       * 
        * @param transition - The transition
        * @param startState - The initial
        * @param goalState - The target state of a transition activity
@@ -47,18 +53,18 @@ declare module 'rclnodejs' {
 
       /**
        * Create an object representation of the transitionDescripton properties.
-       *
+       * 
        * @returns The object representation.
        */
       asMessage(): {
-        transition: SerializedState;
+        transition: SerializedState,
 
         // eslint-disable-next-line camelcase
-        start_state: SerializedState;
+        start_state: SerializedState,
 
         // eslint-disable-next-line camelcase
-        goal_state: SerializedState;
-      };
+        goal_state: SerializedState
+      }
     }
 
     /**
@@ -67,7 +73,7 @@ declare module 'rclnodejs' {
     const enum CallbackReturnCode {
       SUCCESS = 97, // rclnodejs.lifecycle_msgs.msg.TransitionConstructor.TRANSITION_CALLBACK_SUCCESS,
       FAILURE = 98, // rclnodejs.lifecycle_msgs.msg.TransitionConstructor.TRANSITION_CALLBACK_FAILURE,
-      ERROR = 99, // rclnodejs.lifecycle_msgs.msg.TransitionConstructor.TRANSITION_CALLBACK_ERROR
+      ERROR = 99    // rclnodejs.lifecycle_msgs.msg.TransitionConstructor.TRANSITION_CALLBACK_ERROR
     }
 
     /**
@@ -75,10 +81,11 @@ declare module 'rclnodejs' {
      * to a LifecycleNode's transition actions, e.g., configure().
      */
     class CallbackReturnValue {
+
       /**
-       * Creates a new instance.
-       *
-       * @param value - Optional value, default = CallbackReturnCode.SUCCESS
+       * Creates a new instance. 
+       * 
+       * @param value - Optional value, default = CallbackReturnCode.SUCCESS 
        */
       constructor(value?: CallbackReturnCode);
 
@@ -128,7 +135,7 @@ declare module 'rclnodejs' {
        * A predicate to test if the value is ERROR.
        * @returns true if the value is ERROR; otherwise return false.
        */
-      isError(): boolean;
+      isError(): boolean
 
       /**
        * A predicate to test if an error message has been assigned.
@@ -139,49 +146,49 @@ declare module 'rclnodejs' {
 
     /**
      * The callback function invoked during a lifecycle state transition.
-     *
+     * 
      * @param prevState - The state transitioning from.
      * @return The return code.
      */
     type TransitionCallback = (prevState: State) => CallbackReturnCode;
 
     /**
-     * A ROS2 managed Node that implements a well-defined life-cycle state-model using the
+     * A ROS2 managed Node that implements a well-defined life-cycle state-model using the 
      * {@link https://github.com/ros2/rcl/tree/master/rcl_lifecycle|ros2 client library (rcl) lifecyle api}.
-     *
-     * This class implments the ROS2 life-cycle state-machine defined by the
+     * 
+     * This class implments the ROS2 life-cycle state-machine defined by the 
      * {@link https://github.com/ros2/rclcpp/tree/master/rclcpp_lifecycle}|ROS2 Managed Nodes Design}
-     * and parallels the {@link https://github.com/ros2/rclcpp/tree/master/rclcpp_lifecycle|rclcpp lifecycle node }
-     * implementation.
-     *
-     * The design consists of four primary lifecycle states:
+     * and parallels the {@link https://github.com/ros2/rclcpp/tree/master/rclcpp_lifecycle|rclcpp lifecycle node } 
+     * implementation. 
+     * 
+     * The design consists of four primary lifecycle states: 
      *   UNCONFIGURED
      *   INACTIVE
      *   ACTIVE
-     *   FINALIZED.
-     *
-     * Transitioning between states is accomplished using an action api:
+     *   FINALIZED. 
+     * 
+     * Transitioning between states is accomplished using an action api: 
      *   configure()
      *   activate()
      *   deactivate(),
      *   cleanup()
      *   shutdown()
-     *
-     * During a state transition, the state-machine is in one of the
-     * intermediate transitioning states:
+     * 
+     * During a state transition, the state-machine is in one of the 
+     * intermediate transitioning states: 
      *   CONFIGURING
      *   ACTIVATING
      *   DEACTIVATING
      *   CLEANINGUP
      *   SHUTTING_DOWN
      *   ERROR_PROCESSING
-     *
+     * 
      * Messaging:
      * State changes are published on the '<node_name>/transition_event' topic.
-     * Lifecycle service interfaces are also implemented.
-     *
-     * You can introduce your own state specific behaviors in the form of a
-     * {@link TransitionCallback} functions that you register using:
+     * Lifecycle service interfaces are also implemented. 
+     * 
+     * You can introduce your own state specific behaviors in the form of a 
+     * {@link TransitionCallback} functions that you register using: 
      *   registerOnConfigure(cb)
      *   registerOnActivate(cb)
      *   registerOnDeactivate(cb)
@@ -190,6 +197,7 @@ declare module 'rclnodejs' {
      *   registerOnError(cb)
      */
     class LifecycleNode extends Node {
+
       /**
        * Access the current lifecycle state.
        * @returns The current state.
@@ -198,20 +206,20 @@ declare module 'rclnodejs' {
 
       /**
        * Retrieve all states from the current state.
-       * @returns {State[]} All states of the state-machine.
+       * @returns {State[]} All states of the state-machine. 
        */
       get availableStates(): State[];
 
       /**
        * Retrieve all transitions registered with the state-machine.
-       *
+       * 
        * @returns The TransitionDescriptions.
        */
       get transitions(): TransitionDescription[];
 
       /**
        * Retrieve all transitions available from the current state of the state-machine.
-       *
+       * 
        * @returns The available transitions.
        */
       get availableTransitions(): TransitionDescription[];
@@ -254,45 +262,45 @@ declare module 'rclnodejs' {
       registerOnError(cb: TransitionCallback): void;
 
       /**
-       * Initiate a transition from the UNCONFIGURED state to the INACTIVE state.
+       * Initiate a transition from the UNCONFIGURED state to the INACTIVE state. 
        * If an onConfigure callback has been registered, it will be invoked.
-       *
+       * 
        * @param callbackReturnValue - value holder for the CallbackReturnCode returned from the callback.
        * @returns The new state, should be INACTIVE.
        */
       configure(callbackReturnValue?: CallbackReturnValue): State;
 
       /**
-       * Initiate a transition from the INACTIVE state to the ACTIVE state.
+       * Initiate a transition from the INACTIVE state to the ACTIVE state. 
        * If an onActivate callback has been registered it will be invoked.
-       *
+       * 
        * @param callbackReturnValue - value holder for the CallbackReturnCode returned from the callback.
        * @returns The new state, should be ACTIVE.
        */
       activate(callbackReturnValue?: CallbackReturnValue): State;
 
       /**
-       * Initiate a transition from the ACTIVE state to the INACTIVE state.
+       * Initiate a transition from the ACTIVE state to the INACTIVE state. 
        * If an onDeactivate callback has been registered it will be invoked.
-       *
+       * 
        * @param callbackReturnValue - value holder for the CallbackReturnCode returned from the callback.
        * @returns The new state, should be INACTIVE.
        */
       deactivate(callbackReturnValue?: CallbackReturnValue): State;
 
       /**
-       * Initiate a transition from the INACTIVE state to the UNCONFIGURED state.
+       * Initiate a transition from the INACTIVE state to the UNCONFIGURED state. 
        * If an onCleanup callback has been registered it will be invoked.
-       *
+       * 
        * @param callbackReturnValue - value holder for the CallbackReturnCode returned from the callback.
        * @returns The new state, should be INACTIVE.
        */
       cleanup(callbackReturnValue?: CallbackReturnValue): State;
 
       /**
-       * Initiate a transition from the ACTIVE state to the FINALIZED state.
+       * Initiate a transition from the ACTIVE state to the FINALIZED state. 
        * If an onConfigure callback has been registered it will be invoked.
-       *
+       * 
        * @param callbackReturnValue - value holder for the CallbackReturnCode returned from the callback.
        * @returns  The new state, should be FINALIZED.
        */
@@ -312,5 +320,6 @@ declare module 'rclnodejs' {
         options?: Options
       ): LifecyclePublisher<T>;
     }
+
   } // lifecycle namespace
 } // rclnodejs namespace

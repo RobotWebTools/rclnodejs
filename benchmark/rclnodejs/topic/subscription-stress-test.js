@@ -16,17 +16,11 @@
 
 const rclnodejs = require('../../../index.js');
 
-rclnodejs
-  .init()
-  .then(() => {
-    const node = rclnodejs.createNode('stress_subscription_rclnodejs');
-    node.createSubscription(
-      'std_msgs/msg/UInt8MultiArray',
-      'stress_topic',
-      (array) => {}
-    );
-    rclnodejs.spin(node);
-  })
-  .catch((e) => {
-    console.log(e);
+rclnodejs.init().then(() => {
+  const node = rclnodejs.createNode('stress_subscription_rclnodejs');
+  node.createSubscription('std_msgs/msg/UInt8MultiArray', 'stress_topic', (array) => {
   });
+  rclnodejs.spin(node);
+}).catch(e => {
+  console.log(e);
+});

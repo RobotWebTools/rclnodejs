@@ -37,7 +37,7 @@ class FibonacciActionClient {
 
     this._node.getLogger().info('Sending goal request...');
 
-    const goalHandle = await this._actionClient.sendGoal(goal, (feedback) =>
+    const goalHandle = await this._actionClient.sendGoal(goal, feedback =>
       this.feedbackCallback(feedback)
     );
 
@@ -87,6 +87,6 @@ rclnodejs
 
     rclnodejs.spin(node);
   })
-  .catch((err) => {
+  .catch(err => {
     console.error(err);
   });

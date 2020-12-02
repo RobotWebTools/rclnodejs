@@ -18,14 +18,14 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const deepEqual = require('deep-equal');
 
-describe('Rclnodejs message translation: complex types', function () {
+describe('Rclnodejs message translation: complex types', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
@@ -263,17 +263,17 @@ describe('Rclnodejs message translation: complex types', function () {
     /* eslint-enable camelcase */
     /* eslint-enable key-spacing */
     /* eslint-enable comma-spacing */
-  ].forEach((testData) => {
+  ].forEach(testData => {
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {
       it(
         'Test translation of ' + testData.type + ' msg, case ' + i,
-        function () {
+        function() {
           const node = rclnodejs.createNode('test_message_translation_node');
           const MessageType = testData.pkg + '/msg/' + testData.type;
           const publisher = node.createPublisher(MessageType, topic);
           return new Promise((resolve, reject) => {
-            const sub = node.createSubscription(MessageType, topic, (value) => {
+            const sub = node.createSubscription(MessageType, topic, value => {
               if (deepEqual(value, v)) {
                 node.destroy();
                 resolve();

@@ -20,7 +20,7 @@ const rclnodejs = require('../index.js');
 /* eslint-disable camelcase */
 /* eslint-disable key-spacing */
 /* eslint-disable comma-spacing */
-describe('Test bounded sequeces', function () {
+describe('Test bounded sequeces', function() {
   this.timeout(60 * 1000);
 
   const primitives = {
@@ -95,15 +95,15 @@ describe('Test bounded sequeces', function () {
     defaults_values: [],
   };
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('Assigned with bounded sequences', function (done) {
+  it('Assigned with bounded sequences', function(done) {
     const node = rclnodejs.createNode('bounded_sequences');
     let publisher = node.createPublisher(
       'test_msgs/msg/BoundedSequences',
@@ -118,7 +118,7 @@ describe('Test bounded sequeces', function () {
     node.createSubscription(
       'test_msgs/msg/BoundedSequences',
       'bounded_sequences',
-      (response) => {
+      response => {
         clearInterval(timer);
         assert.deepEqual(response, expected);
         node.destroy();

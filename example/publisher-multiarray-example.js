@@ -28,7 +28,7 @@ rclnodejs
     );
 
     let count = 0;
-    setInterval(function () {
+    setInterval(function() {
       // Please reference the usage of multi-array at
       // https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/MultiArrayLayout.msg
       publisher.publish({
@@ -78,6 +78,6 @@ rclnodejs
 
     rclnodejs.spin(node);
   })
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
   });

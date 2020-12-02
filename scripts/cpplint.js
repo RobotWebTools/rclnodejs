@@ -17,9 +17,8 @@
 const exec = require('child_process').exec;
 
 const cmd = 'wget -nc ';
-const cpplintUrl =
-  'https://raw.githubusercontent.com/google/styleguide' +
-  '/gh-pages/cpplint/cpplint.py';
+const cpplintUrl = 'https://raw.githubusercontent.com/google/styleguide' +
+    '/gh-pages/cpplint/cpplint.py';
 const root = `${__dirname}/../src/`;
 const args = `--extensions=cpp,h,hpp,cc ${root}/*`;
 
@@ -29,7 +28,7 @@ exec(cmd + cpplintUrl, (err, stdout, stderr) => {
     console.log(`Downloading failed: ${stderr}`);
   } else {
     console.log('Running the cpplint...');
-    exec('python cpplint.py ' + args, (err, stdout, stderr) => {
+    exec('python cpplint.py ' + args, (err, stdout, stderr) =>{
       console.log(stdout);
       if (err) {
         console.log(stderr);

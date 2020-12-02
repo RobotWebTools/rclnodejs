@@ -21,14 +21,14 @@ const arrayGen = require('./array_generator.js');
 /* eslint-disable camelcase */
 /* eslint-disable indent */
 
-describe('Rclnodejs message translation: primitive types', function () {
+describe('Rclnodejs message translation: primitive types', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
@@ -81,17 +81,17 @@ describe('Rclnodejs message translation: primitive types', function () {
       ],
     },
     { type: 'UInt8', values: [0, 1, 2, 3, 127, 255] },
-  ].forEach((testData) => {
+  ].forEach(testData => {
     const topic = testData.topic || 'topic' + testData.type + 'Shortcut';
     testData.values.forEach((v, i) => {
       it(
         'Test translation of ' + testData.type + ' msg, value ' + v,
-        function () {
+        function() {
           const node = rclnodejs.createNode('test_message_translation_node');
           const MessageType = 'std_msgs/msg/' + testData.type;
           const publisher = node.createPublisher(MessageType, topic);
           return new Promise((resolve, reject) => {
-            const sub = node.createSubscription(MessageType, topic, (value) => {
+            const sub = node.createSubscription(MessageType, topic, value => {
               // For primitive types, msgs are defined as a single `.data` field
               if (value.data === v) {
                 node.destroy();
@@ -111,12 +111,12 @@ describe('Rclnodejs message translation: primitive types', function () {
 
       it(
         'Test translation of ' + testData.type + ' msg, value ' + v + '(.data)',
-        function () {
+        function() {
           const node = rclnodejs.createNode('test_message_translation_node');
           const MessageType = 'std_msgs/msg/' + testData.type;
           const publisher = node.createPublisher(MessageType, topic);
           return new Promise((resolve, reject) => {
-            const sub = node.createSubscription(MessageType, topic, (value) => {
+            const sub = node.createSubscription(MessageType, topic, value => {
               // For primitive types, msgs are defined as a single `.data` field
               if (value.data === v) {
                 node.destroy();
@@ -137,14 +137,14 @@ describe('Rclnodejs message translation: primitive types', function () {
   });
 });
 
-describe('Rclnodejs message translation: primitive types array', function () {
+describe('Rclnodejs message translation: primitive types array', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
@@ -219,16 +219,16 @@ describe('Rclnodejs message translation: primitive types array', function () {
       type: 'UInt64MultiArray',
       values: [0, 1, 2, 3, 32767, 65535, Number.MAX_SAFE_INTEGER],
     },
-  ].forEach((testData) => {
+  ].forEach(testData => {
     const topic = testData.topic || 'topic' + testData.type;
     it(
       'Test translation of ' + testData.type + ' msg, value ' + testData.values,
-      function () {
+      function() {
         const node = rclnodejs.createNode('test_message_translation_node');
         const MessageType = 'std_msgs/msg/' + testData.type;
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
-          const sub = node.createSubscription(MessageType, topic, (value) => {
+          const sub = node.createSubscription(MessageType, topic, value => {
             // For primitive types, msgs are defined as a single `.data` field
             if (deepEqual(value.data, testData.values)) {
               node.destroy();
@@ -359,14 +359,14 @@ describe('Rclnodejs message translation: primitive types array', function () {
 //   });
 // });
 
-describe('Rclnodejs message translation: TypedArray large data', function () {
+describe('Rclnodejs message translation: TypedArray large data', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
@@ -578,19 +578,19 @@ describe('Rclnodejs message translation: TypedArray large data', function () {
       ),
     },
     /* eslint-enable max-len */
-  ].forEach((testData) => {
+  ].forEach(testData => {
     const topic = testData.topic || 'topic' + testData.type;
     it(
       'Test translation of ' +
         testData.type +
         ' msg, number of values ' +
         testData.values.length,
-      function () {
+      function() {
         const node = rclnodejs.createNode('test_message_translation_node');
         const MessageType = 'std_msgs/msg/' + testData.type;
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
-          const sub = node.createSubscription(MessageType, topic, (value) => {
+          const sub = node.createSubscription(MessageType, topic, value => {
             // For primitive types, msgs are defined as a single `.data` field
             if (deepEqual(value.data, testData.values)) {
               node.destroy();

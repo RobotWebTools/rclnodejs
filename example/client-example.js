@@ -30,14 +30,14 @@ rclnodejs
       b: Math.floor(Math.random() * 100),
     };
 
-    client.waitForService(1000).then((result) => {
+    client.waitForService(1000).then(result => {
       if (!result) {
         console.log('Error: service not available');
         rclnodejs.shutdown();
         return;
       }
       console.log(`Sending: ${typeof request}`, request);
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         console.log(`Result: ${typeof response}`, response);
         rclnodejs.shutdown();
       });
@@ -45,6 +45,6 @@ rclnodejs
 
     rclnodejs.spin(node);
   })
-  .catch((e) => {
+  .catch(e => {
     console.log(`Error: ${e}`);
   });

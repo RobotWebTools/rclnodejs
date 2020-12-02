@@ -38,7 +38,7 @@ function copyMsgObject(msg, obj) {
             // 1. Extract the element-type first
             // 2. Build the array by translate every elements
             let msgArray = [];
-            obj[i].forEach((o) => {
+            obj[i].forEach(o => {
               msgArray.push(toROSMessage(msg[i].classType.elementType, o));
             });
             // 3. Assign
@@ -125,7 +125,7 @@ function toPlainObject(message, enableTypedArray = true) {
     // It's a ROS message array
     //  Note: there won't be any JavaScript array in message
     let array = [];
-    message.data.forEach((e) => {
+    message.data.forEach(e => {
       array.push(toPlainObject(e, enableTypedArray)); // Translate every elements
     });
     return array;

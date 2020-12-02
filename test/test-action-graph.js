@@ -18,7 +18,7 @@ const assert = require('assert');
 const assertUtils = require('./utils.js');
 const rclnodejs = require('../index.js');
 
-describe('rclnodejs action graph', function () {
+describe('rclnodejs action graph', function() {
   let node1;
   let node2;
   let node3;
@@ -66,15 +66,15 @@ describe('rclnodejs action graph', function () {
     return [];
   }
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  beforeEach(async function () {
+  beforeEach(async function() {
     node1 = rclnodejs.createNode(NODE1_NAME, NODE1_NS);
     node2 = rclnodejs.createNode(NODE2_NAME, NODE2_NS);
     node3 = rclnodejs.createNode(NODE3_NAME, NODE3_NS);
@@ -93,13 +93,13 @@ describe('rclnodejs action graph', function () {
     await waitForNode(node3, NODE2_NAME);
   });
 
-  afterEach(function () {
+  afterEach(function() {
     node1.destroy();
     node2.destroy();
     node3.destroy();
   });
 
-  it('Test getActionClientNamesAndTypesByNode', async function () {
+  it('Test getActionClientNamesAndTypesByNode', async function() {
     let result = await getNamesAndTypes(
       rclnodejs.getActionClientNamesAndTypesByNode,
       0,
@@ -141,16 +141,16 @@ describe('rclnodejs action graph', function () {
     assert.strictEqual(types[0], fibonacci);
 
     assert.notStrictEqual(
-      result.findIndex((r) => r.name === `${NODE3_NS}/${ACTION1_NAME}`),
+      result.findIndex(r => r.name === `${NODE3_NS}/${ACTION1_NAME}`),
       -1
     );
     assert.notStrictEqual(
-      result.findIndex((r) => r.name === `${NODE3_NS}/${ACTION2_NAME}`),
+      result.findIndex(r => r.name === `${NODE3_NS}/${ACTION2_NAME}`),
       -1
     );
   });
 
-  it('Test getActionServerNamesAndTypesByNode', async function () {
+  it('Test getActionServerNamesAndTypesByNode', async function() {
     let result = await getNamesAndTypes(
       rclnodejs.getActionServerNamesAndTypesByNode,
       0,
@@ -192,16 +192,16 @@ describe('rclnodejs action graph', function () {
     assert.strictEqual(types[0], fibonacci);
 
     assert.notStrictEqual(
-      result.findIndex((r) => r.name === `${NODE3_NS}/${ACTION1_NAME}`),
+      result.findIndex(r => r.name === `${NODE3_NS}/${ACTION1_NAME}`),
       -1
     );
     assert.notStrictEqual(
-      result.findIndex((r) => r.name === `${NODE3_NS}/${ACTION2_NAME}`),
+      result.findIndex(r => r.name === `${NODE3_NS}/${ACTION2_NAME}`),
       -1
     );
   });
 
-  it('Test getActionNamesAndTypes', async function () {
+  it('Test getActionNamesAndTypes', async function() {
     let result = await getNamesAndTypes(
       rclnodejs.getActionNamesAndTypes,
       3,
@@ -220,15 +220,15 @@ describe('rclnodejs action graph', function () {
     assert.strictEqual(types[0], fibonacci);
 
     assert.notStrictEqual(
-      result.findIndex((r) => r.name === `${NODE2_NS}/${ACTION1_NAME}`),
+      result.findIndex(r => r.name === `${NODE2_NS}/${ACTION1_NAME}`),
       -1
     );
     assert.notStrictEqual(
-      result.findIndex((r) => r.name === `${NODE3_NS}/${ACTION1_NAME}`),
+      result.findIndex(r => r.name === `${NODE3_NS}/${ACTION1_NAME}`),
       -1
     );
     assert.notStrictEqual(
-      result.findIndex((r) => r.name === `${NODE3_NS}/${ACTION2_NAME}`),
+      result.findIndex(r => r.name === `${NODE3_NS}/${ACTION2_NAME}`),
       -1
     );
   });

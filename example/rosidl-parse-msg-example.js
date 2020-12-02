@@ -22,14 +22,14 @@ const packagePath = rosInstallPath + '/share/std_msgs/msg/ColorRGBA.msg';
 
 parser
   .parseMessageFile(packageName, packagePath)
-  .then((spec) => {
+  .then(spec => {
     console.log(`msg name: ${spec.msgName}`);
 
     console.log('fields includes:');
-    spec.fields.forEach((field) => {
+    spec.fields.forEach(field => {
       console.log(field);
     });
   })
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
   });

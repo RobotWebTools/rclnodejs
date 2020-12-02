@@ -20,24 +20,24 @@ const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
 
-describe('rclnodejs node test suite', function () {
+describe('rclnodejs node test suite', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  describe('createNode method testing', function () {
-    it('Try creating a node', function () {
+  describe('createNode method testing', function() {
+    it('Try creating a node', function() {
       var node = rclnodejs.createNode('example_node');
       node.destroy();
     });
 
-    it('Try creating a node with a namespace', function () {
+    it('Try creating a node with a namespace', function() {
       let nodeName = 'example_node_with_ns',
         nodeNamespace = '/ns';
 
@@ -45,7 +45,7 @@ describe('rclnodejs node test suite', function () {
       assert.deepStrictEqual(node.namespace(), '/ns');
     });
 
-    it('Try creating a node with the empty namespace', function () {
+    it('Try creating a node with the empty namespace', function() {
       let nodeName = 'example_node_with_empty_ns',
         nodeNamespace = '';
 
@@ -53,7 +53,7 @@ describe('rclnodejs node test suite', function () {
       assert.deepStrictEqual(node.namespace(), '/');
     });
 
-    it('Try creating a node with a relative namespace', function () {
+    it('Try creating a node with a relative namespace', function() {
       let nodeName = 'example_node_with_rel_ns',
         nodeNamespace = 'ns';
 
@@ -61,7 +61,7 @@ describe('rclnodejs node test suite', function () {
       assert.deepStrictEqual(node.namespace(), '/ns');
     });
 
-    it('Try creating a node with an invalid name', function () {
+    it('Try creating a node with an invalid name', function() {
       var nodeName = 'example_node_invalid_name?',
         nodeNamespace = 'ns';
 
@@ -75,7 +75,7 @@ describe('rclnodejs node test suite', function () {
       );
     });
 
-    it('Try creating a node with an invliad relative nampespace', function () {
+    it('Try creating a node with an invliad relative nampespace', function() {
       var nodeName = 'example_node_with_invalid_rel_ns',
         nodeNamespace = 'ns?';
 
@@ -89,7 +89,7 @@ describe('rclnodejs node test suite', function () {
       );
     });
 
-    it('Try creating a node with an invalid absolute namespace', function () {
+    it('Try creating a node with an invalid absolute namespace', function() {
       var nodeName = 'example_node_with_abs_ns',
         nodeNamespace = '/ns?';
 
@@ -103,7 +103,7 @@ describe('rclnodejs node test suite', function () {
       );
     });
 
-    it('Try creating a node with invalid type of parameters', function () {
+    it('Try creating a node with invalid type of parameters', function() {
       var invalidParams = [
         [1, '/ns'],
         [undefined, '/ns'],
@@ -118,7 +118,7 @@ describe('rclnodejs node test suite', function () {
         [undefined, null],
       ];
 
-      invalidParams.forEach(function (param) {
+      invalidParams.forEach(function(param) {
         assertThrowsError(
           () => {
             var node = rclnodejs.createNode(param[0], param[1]);
@@ -132,37 +132,37 @@ describe('rclnodejs node test suite', function () {
   });
 });
 
-describe('rcl node methods testing', function () {
+describe('rcl node methods testing', function() {
   var node;
   var RclString, GetParameters;
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  beforeEach(function () {
+  beforeEach(function() {
     node = rclnodejs.createNode('my_node', '/my_ns');
     RclString = 'std_msgs/msg/String';
     GetParameters = 'rcl_interfaces/srv/GetParameters';
   });
 
-  afterEach(function () {
+  afterEach(function() {
     node.destroy();
   });
 
-  it('node setter/getter', function () {
+  it('node setter/getter', function() {
     assert.notDeepStrictEqual(null, node);
 
     assert.deepStrictEqual(node.name(), 'my_node');
     assert.deepStrictEqual(node.namespace(), '/my_ns');
   });
 
-  it('node.createPublisher', function () {
+  it('node.createPublisher', function() {
     node.createPublisher(RclString, 'chatter');
 
     var invalidParams = [
@@ -171,7 +171,7 @@ describe('rcl node methods testing', function () {
       ['/chatter/{bad_sub}', Error, /unknown substitution/],
     ];
 
-    invalidParams.forEach(function (invalidParam) {
+    invalidParams.forEach(function(invalidParam) {
       assertThrowsError(
         () => {
           node.createPublisher(RclString, invalidParam[0]);
@@ -183,7 +183,7 @@ describe('rcl node methods testing', function () {
     });
   });
 
-  it('node.createPublisher with invalid type parameters', function () {
+  it('node.createPublisher with invalid type parameters', function() {
     var errorRegExp = new RegExp('Invalid argument');
     var invalidParams = [
       [1, 'validServiceName'],
@@ -201,14 +201,14 @@ describe('rcl node methods testing', function () {
       [undefined, null],
     ];
 
-    invalidParams.forEach(function (invalidParam) {
+    invalidParams.forEach(function(invalidParam) {
       assert.throws(() => {
         node.createPublisher(invalidParam[0], invalidParam[1]);
       });
     });
   });
 
-  it('node.createSubscription', function () {
+  it('node.createSubscription', function() {
     node.createSubscription(RclString, 'chatter', () => {});
 
     var invalidParams = [
@@ -217,7 +217,7 @@ describe('rcl node methods testing', function () {
       ['/chatter/{bad_sub}', /unknown substitution/],
     ];
 
-    invalidParams.forEach(function (invalidParam) {
+    invalidParams.forEach(function(invalidParam) {
       assertThrowsError(
         () => {
           node.createSubscription(RclString, invalidParam[0], () => {});
@@ -229,7 +229,7 @@ describe('rcl node methods testing', function () {
     });
   });
 
-  it('node.createSubscription with invalid type parameters', function () {
+  it('node.createSubscription with invalid type parameters', function() {
     var errorRegExp = new RegExp('Invalid argument');
     var invalidParams = [
       [1, 'validTopicName', null],
@@ -247,7 +247,7 @@ describe('rcl node methods testing', function () {
       [undefined, null, null],
     ];
 
-    invalidParams.forEach(function (invalidParam) {
+    invalidParams.forEach(function(invalidParam) {
       assert.throws(() => {
         node.createSubscription(
           invalidParam[0],
@@ -258,7 +258,7 @@ describe('rcl node methods testing', function () {
     });
   });
 
-  it('node.createClient', function () {
+  it('node.createClient', function() {
     node.createClient(GetParameters, 'get/parameters');
 
     var invalidParams = [
@@ -267,7 +267,7 @@ describe('rcl node methods testing', function () {
       ['foo/{bad_sub}', /unknown substitution/],
     ];
 
-    invalidParams.forEach(function (invalidParam) {
+    invalidParams.forEach(function(invalidParam) {
       assertThrowsError(
         () => {
           node.createClient(GetParameters, invalidParam[0]);
@@ -279,7 +279,7 @@ describe('rcl node methods testing', function () {
     });
   });
 
-  it('node.createClient with invalid type parameters', function () {
+  it('node.createClient with invalid type parameters', function() {
     var errorRegExp = new RegExp('Invalid argument');
     var invalidParams = [
       [1, 'validServiceName'],
@@ -297,14 +297,14 @@ describe('rcl node methods testing', function () {
       [undefined, null],
     ];
 
-    invalidParams.forEach(function (invalidParam) {
+    invalidParams.forEach(function(invalidParam) {
       assert.throws(() => {
         node.createClient(invalidParam[0], invalidParam[1]);
       });
     });
   });
 
-  it('node.createService', function () {
+  it('node.createService', function() {
     node.createService(GetParameters, 'get/parameters', () => {});
 
     var invalidParams = [
@@ -313,7 +313,7 @@ describe('rcl node methods testing', function () {
       ['foo/{bad_sub}', /unknown substitution/],
     ];
 
-    invalidParams.forEach(function (invalidParam) {
+    invalidParams.forEach(function(invalidParam) {
       assertThrowsError(
         () => {
           node.createService(GetParameters, invalidParam[0], () => {});
@@ -325,7 +325,7 @@ describe('rcl node methods testing', function () {
     });
   });
 
-  it('node.createService with invalid type parameters', function () {
+  it('node.createService with invalid type parameters', function() {
     var errorRegExp = new RegExp('Invalid argument');
     var invalidParams = [
       [1, 'validTopicName', null],
@@ -343,14 +343,14 @@ describe('rcl node methods testing', function () {
       [undefined, null, null],
     ];
 
-    invalidParams.forEach(function (invalidParam) {
+    invalidParams.forEach(function(invalidParam) {
       assert.throws(() => {
         node.createService(invalidParam[0], invalidParam[1], invalidParam[2]);
       });
     });
   });
 
-  it('node.getLogger', function () {
+  it('node.getLogger', function() {
     var logger = node.getLogger();
     assert.ok(logger);
     assert.equal(logger.debug('message debug'), false);
@@ -360,13 +360,13 @@ describe('rcl node methods testing', function () {
     assert.equal(logger.fatal('message fatal'), true);
   });
 
-  it('node.getClock', function () {
+  it('node.getClock', function() {
     var clock = node.getClock();
     assert.ok(clock);
     assert.strictEqual(clock.clockType, rclnodejs.ClockType.ROS_TIME);
   });
 
-  it('node.now', function () {
+  it('node.now', function() {
     const time = node.now();
     assert.ok(time);
     assert.strictEqual(node.getClock().clockType, time.clockType);
@@ -376,7 +376,7 @@ describe('rcl node methods testing', function () {
     assert.ok(IsClose.isClose(seconds, dateSeconds, 1));
   });
 
-  it('node.getNodeNames', function () {
+  it('node.getNodeNames', function() {
     var nodeNames = node.getNodeNames();
 
     var currentNode = nodeNames.indexOf('my_node');
@@ -384,10 +384,10 @@ describe('rcl node methods testing', function () {
     assert.notStrictEqual(currentNode, -1);
   });
 
-  it('node.getNodeNamesAndNamespaces', function () {
+  it('node.getNodeNamesAndNamespaces', function() {
     var nodeNames = node.getNodeNamesAndNamespaces();
 
-    var currentNode = nodeNames.find(function (nodeName) {
+    var currentNode = nodeNames.find(function(nodeName) {
       return nodeName.name === 'my_node';
     });
 
@@ -395,7 +395,7 @@ describe('rcl node methods testing', function () {
     assert.strictEqual(currentNode.namespace, '/my_ns');
   });
 
-  it('node.countPublishers', function () {
+  it('node.countPublishers', function() {
     assert.strictEqual(node.countPublishers('chatter'), 0);
 
     node.createPublisher(RclString, 'chatter');
@@ -405,7 +405,7 @@ describe('rcl node methods testing', function () {
     assert.strictEqual(node.countPublishers('chatter'), 2);
   });
 
-  it('node.countSubscribers', function () {
+  it('node.countSubscribers', function() {
     assert.strictEqual(node.countSubscribers('chatter'), 0);
 
     node.createSubscription(RclString, 'chatter', () => {});
@@ -416,48 +416,44 @@ describe('rcl node methods testing', function () {
   });
 });
 
-describe('topic & serviceName getter/setter', function () {
+describe('topic & serviceName getter/setter', function() {
   const RclString = 'std_msgs/msg/String';
   const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('publisher: topic property getter', function () {
+  it('publisher: topic property getter', function() {
     var node = rclnodejs.createNode('publisher', '/topic_getter');
     var publisher = node.createPublisher(RclString, 'chatter');
     assert.deepStrictEqual(publisher.topic, 'chatter');
     node.destroy();
   });
 
-  it('subscription: topic property getter', function () {
+  it('subscription: topic property getter', function() {
     var node = rclnodejs.createNode('subscription', '/topic_getter');
-    var subscription = node.createSubscription(
-      RclString,
-      'chatter',
-      (msg) => {}
-    );
+    var subscription = node.createSubscription(RclString, 'chatter', msg => {});
     assert.deepStrictEqual(subscription.topic, 'chatter');
     node.destroy();
   });
 
-  it('client: serviceName property getter', function () {
+  it('client: serviceName property getter', function() {
     var node = rclnodejs.createNode('client', '/servicename_getter');
     var client = node.createClient(AddTwoInts, 'add_two_ints');
     assert.deepStrictEqual(client.serviceName, 'add_two_ints');
     node.destroy();
   });
 
-  it('service: topic property getter', function () {
+  it('service: topic property getter', function() {
     var node = rclnodejs.createNode('service', '/servicename_getter');
-    var service = node.createService(AddTwoInts, 'add_two_ints', (req) => {});
+    var service = node.createService(AddTwoInts, 'add_two_ints', req => {});
     assert.deepStrictEqual(service.serviceName, 'add_two_ints');
     node.destroy();
   });

@@ -18,7 +18,7 @@ const rclnodejs = require('../index.js');
 
 rclnodejs
   .init()
-  .then(function () {
+  .then(function() {
     var node = rclnodejs.createNode('client');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     const Int8 = 'std_msgs/msg/Int8';
@@ -29,20 +29,20 @@ rclnodejs
     };
     var publisher = node.createPublisher(Int8, 'back_add_two_ints');
     client.waitForService().then(() => {
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         publisher.publish(response.sum);
       });
     });
 
     rclnodejs.spin(node);
 
-    process.on('SIGINT', function () {
+    process.on('SIGINT', function() {
       timer.cancel();
       node.destroy();
       rclnodejs.shutdown();
       process.exit(0);
     });
   })
-  .catch(function (err) {
+  .catch(function(err) {
     console.log(err);
   });

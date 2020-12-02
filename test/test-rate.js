@@ -21,27 +21,27 @@ const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
 const { performance } = require('perf_hooks');
 
-describe('rclnodejs rate test suite', function () {
+describe('rclnodejs rate test suite', function() {
   let node;
   this.timeout(60 * 1000);
 
-  before(async function () {
+  before(async function() {
     await rclnodejs.init();
   });
 
-  beforeEach(function () {
+  beforeEach(function() {
     node = rclnodejs.createNode('rate_node');
   });
 
-  afterEach(function () {
+  afterEach(function() {
     node.destroy();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('rate constructor tests', async function () {
+  it('rate constructor tests', async function() {
     const rate1 = await node.createRate();
     assert.equal(rate1.frequency, 1);
 
@@ -66,13 +66,13 @@ describe('rclnodejs rate test suite', function () {
     }
   });
 
-  it('rate api tests', async function () {
+  it('rate api tests', async function() {
     const rate = await node.createRate();
     assert.equal(rate.frequency, 1);
     assert.equal(rate.isCanceled(), false);
   });
 
-  it('rate sleep cancel tests', async function () {
+  it('rate sleep cancel tests', async function() {
     const rate = await node.createRate();
     assert.equal(rate.isCanceled(), false);
 
@@ -82,14 +82,14 @@ describe('rclnodejs rate test suite', function () {
     rate.cancel(); // redundant cancel is a nop
   });
 
-  it('rate server node naming test', async function () {
+  it('rate server node naming test', async function() {
     const rate = await node.createRate();
     await assertUtils.createDelay(1000);
     const rateTimerServerName = `_${node.name()}_rate_timer_server`;
     assert.ok(node.getNodeNames().includes(rateTimerServerName));
   });
 
-  it('rate sleep accuracy test, 1000 hz for 3 seconds', async function () {
+  it('rate sleep accuracy test, 1000 hz for 3 seconds', async function() {
     // run 3 * hz,
     //   collect and average the sleep intervals
     //   compare average sleep interval with the period of the timer

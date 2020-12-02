@@ -49,18 +49,13 @@ describe('LifecyclePublisher test suite', function () {
     const publisher = node.createPublisher('std_msgs/msg/String', 'test');
     assert.ok(publisher);
 
-    const lifecyclePublisher = node.createLifecyclePublisher(
-      'std_msgs/msg/String',
-      'test'
-    );
+    const lifecyclePublisher = node.createLifecyclePublisher('std_msgs/msg/String', 'test');
     assert.ok(lifecyclePublisher);
+
   });
 
   it('LifecyclePublisher activate/deactivate', function () {
-    const lifecyclePublisher = node.createLifecyclePublisher(
-      'std_msgs/msg/String',
-      'test'
-    );
+    const lifecyclePublisher = node.createLifecyclePublisher('std_msgs/msg/String', 'test');
     assert.ok(lifecyclePublisher);
 
     assert.ok(!lifecyclePublisher.isActivated());
@@ -79,24 +74,18 @@ describe('LifecyclePublisher test suite', function () {
   });
 
   it('LifecyclePublisher publish', async function () {
-    const lifecyclePublisher = node.createLifecyclePublisher(
-      'std_msgs/msg/String',
-      'test'
-    );
+    const lifecyclePublisher = node.createLifecyclePublisher('std_msgs/msg/String', 'test');
     assert.ok(lifecyclePublisher);
 
     const TEST_MSG = 'test-msg';
     const waitTime = 1000; // millis
     let cbCnt = 0;
-    let subscriber = node.createSubscription(
-      'std_msgs/msg/String',
-      'test',
+    let subscriber = node.createSubscription('std_msgs/msg/String', 'test', 
       (msg) => {
         cbCnt++;
         assert.equal(msg.data, TEST_MSG);
-      }
-    );
-
+      });
+    
     lifecyclePublisher.publish(TEST_MSG);
     await assertUtils.createDelay(waitTime);
     assert.strictEqual(cbCnt, 0);
@@ -116,4 +105,5 @@ describe('LifecyclePublisher test suite', function () {
     await assertUtils.createDelay(waitTime);
     assert.strictEqual(cbCnt, 2);
   });
+
 });

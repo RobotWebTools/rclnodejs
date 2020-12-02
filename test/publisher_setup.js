@@ -18,7 +18,7 @@ const rclnodejs = require('../index.js');
 
 rclnodejs
   .init()
-  .then(function () {
+  .then(function() {
     var node = rclnodejs.createNode('publisher');
     const RclString = 'std_msgs/msg/String';
 
@@ -30,13 +30,13 @@ rclnodejs
     });
     rclnodejs.spin(node);
 
-    process.on('SIGINT', function () {
+    process.on('SIGINT', function() {
       timer.cancel();
       node.destroy();
       rclnodejs.shutdown();
       process.exit(0);
     });
   })
-  .catch(function (err) {
+  .catch(function(err) {
     console.log(err);
   });

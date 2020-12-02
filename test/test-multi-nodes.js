@@ -21,19 +21,19 @@ const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 const kill = require('tree-kill');
 
-describe('Multiple nodes interation testing', function () {
+describe('Multiple nodes interation testing', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  describe('Publisher/Subscription', function () {
-    it('Node.js publisher - Python and Cpp subscription', function (done) {
+  describe('Publisher/Subscription', function() {
+    it('Node.js publisher - Python and Cpp subscription', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_publisher');
       const RclString = 'std_msgs/msg/String';
 
@@ -55,7 +55,7 @@ describe('Multiple nodes interation testing', function () {
       var jsSubscription1 = node.createSubscription(
         RclString,
         'back_js_pycpp_chatter',
-        (backMsg) => {
+        backMsg => {
           count++;
           assert.deepStrictEqual(backMsg.data, msg);
 
@@ -74,41 +74,37 @@ describe('Multiple nodes interation testing', function () {
       rclnodejs.spin(node);
     });
 
-    it('Node.js subscription - Python publisher and Cpp publisher', function (done) {
+    it('Node.js subscription - Python publisher and Cpp publisher', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_subscription');
       const RclString = 'std_msgs/msg/String';
 
       var receivedFromPy = false,
         receivedFromCpp = false;
-      var subscription = node.createSubscription(
-        RclString,
-        'chatter',
-        (msg) => {
-          if (!receivedFromCpp) {
-            if (new RegExp('Hello World:').test(msg.data)) {
-              receivedFromCpp = true;
-              kill(cppPublisher.pid, 'SIGINT');
+      var subscription = node.createSubscription(RclString, 'chatter', msg => {
+        if (!receivedFromCpp) {
+          if (new RegExp('Hello World:').test(msg.data)) {
+            receivedFromCpp = true;
+            kill(cppPublisher.pid, 'SIGINT');
 
-              if (receivedFromPy) {
-                node.destroy();
-                done();
-              }
-            }
-          }
-
-          if (!receivedFromPy) {
-            if (new RegExp('Hello World').test(msg.data)) {
-              receivedFromPy = true;
-              kill(pyPublisher.pid, 'SIGINT');
-
-              if (receivedFromCpp) {
-                node.destroy();
-                done();
-              }
+            if (receivedFromPy) {
+              node.destroy();
+              done();
             }
           }
         }
-      );
+
+        if (!receivedFromPy) {
+          if (new RegExp('Hello World').test(msg.data)) {
+            receivedFromPy = true;
+            kill(pyPublisher.pid, 'SIGINT');
+
+            if (receivedFromCpp) {
+              node.destroy();
+              done();
+            }
+          }
+        }
+      });
 
       var cppPublisher = childProcess.spawn('ros2', [
         'run',
@@ -122,8 +118,8 @@ describe('Multiple nodes interation testing', function () {
     });
   });
 
-  describe('Client/Service', function () {
-    it('Node.js client - Cpp service and Python service', function (done) {
+  describe('Client/Service', function() {
+    it('Node.js client - Cpp service and Python service', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_client');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       const request1 = { a: 1, b: 2 };
@@ -152,7 +148,7 @@ describe('Multiple nodes interation testing', function () {
       var client = node.createClient(AddTwoInts, 'js_pycpp_add_two_ints');
       var timer = node.createTimer(500, () => {
         if (count % 2) {
-          client.sendRequest(request1, (response) => {
+          client.sendRequest(request1, response => {
             if (!reachToCppService) {
               assert.deepStrictEqual(response.sum, 3);
               cppService.kill('SIGINT');
@@ -160,7 +156,7 @@ describe('Multiple nodes interation testing', function () {
             }
           });
         } else {
-          client.sendRequest(request2, (response) => {
+          client.sendRequest(request2, response => {
             if (!reachToPyService) {
               assert.deepStrictEqual(response.sum, 7);
               pyService.kill('SIGINT');
@@ -179,7 +175,7 @@ describe('Multiple nodes interation testing', function () {
       rclnodejs.spin(node);
     });
 
-    it('Node.js service - Cpp client and Python client', function (done) {
+    it('Node.js service - Cpp client and Python client', function(done) {
       var node = rclnodejs.createNode('multi_nodes_js_service');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       const Int8 = 'std_msgs/msg/Int8';
@@ -200,7 +196,7 @@ describe('Multiple nodes interation testing', function () {
       var cppSubscription = node.createSubscription(
         Int8,
         'back_pycpp_js_add_two_ints',
-        (backMsg) => {
+        backMsg => {
           if (backMsg.data === 5) cppReceived = true;
 
           if (backMsg.data === 3) pyReceived = true;

@@ -18,18 +18,18 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 
 /* eslint-disable camelcase */
-describe('Rclnodejs non primitive message type testing', function () {
+describe('Rclnodejs non primitive message type testing', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('geometry_msgs/msg/Point checking', function () {
+  it('geometry_msgs/msg/Point checking', function() {
     const Point = rclnodejs.require('geometry_msgs/msg/Point');
 
     let point = new Point();
@@ -43,7 +43,7 @@ describe('Rclnodejs non primitive message type testing', function () {
     assert.deepStrictEqual(-0.5, pointClone.z);
   });
 
-  it('sensor_msgs/msg/JointState checking', function () {
+  it('sensor_msgs/msg/JointState checking', function() {
     const JointState = rclnodejs.require('sensor_msgs/msg/JointState');
 
     let jointState = new JointState();
@@ -74,7 +74,7 @@ describe('Rclnodejs non primitive message type testing', function () {
     );
   });
 
-  it('geometry_msgs/msg/Transform checking', function () {
+  it('geometry_msgs/msg/Transform checking', function() {
     const Transform = rclnodejs.require('geometry_msgs/msg/Transform');
 
     let transform = new Transform();
@@ -96,7 +96,7 @@ describe('Rclnodejs non primitive message type testing', function () {
     assert.deepStrictEqual(1.0, transformClone.rotation.w);
   });
 
-  it('std_msgs/msg/Float32MultiArray checking', function () {
+  it('std_msgs/msg/Float32MultiArray checking', function() {
     const Float32MultiArray = rclnodejs.require(
       'std_msgs/msg/Float32MultiArray'
     );

@@ -33,7 +33,7 @@ async function main() {
     'std_msgs/msg/String',
     'topic',
     undefined,
-    (msg) => console.log(`Received(${Date.now()}): ${msg.data}`)
+    msg => console.log(`Received(${Date.now()}): ${msg.data}`)
   );
   const rate = await node.createRate(0.5);
 

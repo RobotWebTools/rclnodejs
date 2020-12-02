@@ -28,12 +28,12 @@ function assertMember(name, obj, member, typeName) {
 function assertThrowsError(operation, errors, errMsg, message) {
   assert.throws(
     operation,
-    function (err) {
+    function(err) {
       var containedMsg = new RegExp(errMsg);
 
       if (errors instanceof Array) {
         var foundError = false;
-        errors.forEach((e) => {
+        errors.forEach(e => {
           if (err instanceof e) foundError = true;
         });
         return foundError;
@@ -62,9 +62,9 @@ function getAvailablePath(amentPrefixPath, otherDirs) {
   var availablePath;
   var prefixPaths = amentPrefixPath.split(path.delimiter);
 
-  prefixPaths.forEach((prefixPath) => {
+  prefixPaths.forEach(prefixPath => {
     var appendedPath = prefixPath;
-    otherDirs.forEach((dir) => {
+    otherDirs.forEach(dir => {
       appendedPath = path.join(appendedPath, dir);
     });
 
@@ -82,7 +82,7 @@ function getAvailablePath(amentPrefixPath, otherDirs) {
 //  await assertUtils.createDelay(500);
 //
 function createDelay(millis) {
-  return new Promise((resolve) => setTimeout(resolve, millis));
+  return new Promise(resolve => setTimeout(resolve, millis));
 }
 
 module.exports = {

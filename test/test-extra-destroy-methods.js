@@ -19,16 +19,16 @@ const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
 
-describe('Node extra destroy methods testing', function () {
-  before(function () {
+describe('Node extra destroy methods testing', function() {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('destroyPublisher()', function () {
+  it('destroyPublisher()', function() {
     var node = rclnodejs.createNode('node1');
     const RclString = 'std_msgs/msg/String';
     // const RclString = rclnodejs.require('std_msgs/msg/String');
@@ -36,7 +36,7 @@ describe('Node extra destroy methods testing', function () {
     assert.deepStrictEqual(node._publishers.length, 2);
 
     assertThrowsError(
-      function () {
+      function() {
         node.destroyPublisher('publisher');
       },
       TypeError,
@@ -48,7 +48,7 @@ describe('Node extra destroy methods testing', function () {
     assert.deepStrictEqual(node._publishers.length, 1);
   });
 
-  it('destroySubscription()', function () {
+  it('destroySubscription()', function() {
     var node = rclnodejs.createNode('node2');
     const RclString = 'std_msgs/msg/String';
     // const RclString = rclnodejs.require('std_msgs/msg/String');
@@ -56,7 +56,7 @@ describe('Node extra destroy methods testing', function () {
     assert.deepStrictEqual(node._subscriptions.length, 1);
 
     assertThrowsError(
-      function () {
+      function() {
         node.destroySubscription('subscription');
       },
       TypeError,
@@ -68,7 +68,7 @@ describe('Node extra destroy methods testing', function () {
     assert.deepStrictEqual(node._subscriptions.length, 0);
   });
 
-  it('destroyClient()', function () {
+  it('destroyClient()', function() {
     var node = rclnodejs.createNode('node3');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     // const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
@@ -76,7 +76,7 @@ describe('Node extra destroy methods testing', function () {
     assert.deepStrictEqual(node._clients.length, 1);
 
     assertThrowsError(
-      function () {
+      function() {
         node.destroyClient('client');
       },
       TypeError,
@@ -88,7 +88,7 @@ describe('Node extra destroy methods testing', function () {
     assert.deepStrictEqual(node._clients.length, 0);
   });
 
-  it('destroyService()', function () {
+  it('destroyService()', function() {
     var node = rclnodejs.createNode('node4');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     // const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
@@ -96,7 +96,7 @@ describe('Node extra destroy methods testing', function () {
     assert.deepStrictEqual(node._services.length, 6);
 
     assertThrowsError(
-      function () {
+      function() {
         node.destroyService('service');
       },
       TypeError,
@@ -108,13 +108,13 @@ describe('Node extra destroy methods testing', function () {
     assert.deepStrictEqual(node._services.length, 5);
   });
 
-  it('destroyTimer()', function () {
+  it('destroyTimer()', function() {
     var node = rclnodejs.createNode('node5');
     var timer = node.createTimer(1000, () => {});
     assert.deepStrictEqual(node._timers.length, 1);
 
     assertThrowsError(
-      function () {
+      function() {
         node.destroyTimer('timer');
       },
       TypeError,

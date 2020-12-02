@@ -17,18 +17,18 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe('Test rclnodejs nodes in a single process', function () {
+describe('Test rclnodejs nodes in a single process', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  it('Publisher/Subscription in one process', function (done) {
+  it('Publisher/Subscription in one process', function(done) {
     var publisherNode = rclnodejs.createNode('single_ps_publisher');
     var subscriptionNode = rclnodejs.createNode('single_ps_subscription');
     const RclString = 'std_msgs/msg/String';
@@ -37,7 +37,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     var subscription = subscriptionNode.createSubscription(
       RclString,
       'single_ps_channel1',
-      (msg) => {
+      msg => {
         timer.cancel();
         assert.deepStrictEqual(msg.data, 'Hello World');
         publisherNode.destroy();
@@ -57,7 +57,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     rclnodejs.spin(publisherNode);
   });
 
-  it('New style requiring for messages', function (done) {
+  it('New style requiring for messages', function(done) {
     var node = rclnodejs.createNode('new_style_require_message');
     const RclString = rclnodejs.require('std_msgs/msg/String');
     let msg = new RclString();
@@ -66,7 +66,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     var subscription = node.createSubscription(
       RclString,
       'new_style_require1',
-      (msg) => {
+      msg => {
         timer.cancel();
         assert.deepStrictEqual(msg.data, 'Hello World');
         node.destroy();
@@ -82,7 +82,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     rclnodejs.spin(node);
   });
 
-  it('Client/Service in one process', function (done) {
+  it('Client/Service in one process', function(done) {
     var clientNode = rclnodejs.createNode('single_ps_client');
     var serviceNode = rclnodejs.createNode('single_ps_service');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
@@ -102,7 +102,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     const request = { a: 1, b: 2 };
 
     var timer = clientNode.createTimer(100, () => {
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
         serviceNode.destroy();
@@ -114,7 +114,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     rclnodejs.spin(clientNode);
   });
 
-  it('Client/Service in one process - service callback syntax #2', function (done) {
+  it('Client/Service in one process - service callback syntax #2', function(done) {
     var clientNode = rclnodejs.createNode('single_ps_client_2');
     var serviceNode = rclnodejs.createNode('single_ps_service_2');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
@@ -134,7 +134,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     const request = { a: 1, b: 2 };
 
     var timer = clientNode.createTimer(100, () => {
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
         serviceNode.destroy();
@@ -146,7 +146,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     rclnodejs.spin(clientNode);
   });
 
-  it('Client/Service in one process - service callback syntax #3', function (done) {
+  it('Client/Service in one process - service callback syntax #3', function(done) {
     var clientNode = rclnodejs.createNode('single_ps_client_3');
     var serviceNode = rclnodejs.createNode('single_ps_service_3');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
@@ -164,7 +164,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     const request = { a: 1, b: 2 };
 
     var timer = clientNode.createTimer(100, () => {
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
         serviceNode.destroy();
@@ -176,7 +176,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     rclnodejs.spin(clientNode);
   });
 
-  it('New style requiring for services', function (done) {
+  it('New style requiring for services', function(done) {
     var node = rclnodejs.createNode('new_style_require_services');
     const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
 
@@ -197,7 +197,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     request.b = 2;
 
     var timer = node.createTimer(100, () => {
-      client.sendRequest(request, (response) => {
+      client.sendRequest(request, response => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3);
         node.destroy();

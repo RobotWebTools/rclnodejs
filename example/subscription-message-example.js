@@ -25,13 +25,13 @@ rclnodejs
     node.createSubscription(
       'sensor_msgs/msg/JointState',
       'JointState',
-      (state) => {
+      state => {
         console.log(`Received message No. ${++count}: `, state);
       }
     );
 
     rclnodejs.spin(node);
   })
-  .catch((e) => {
+  .catch(e => {
     console.log(e);
   });

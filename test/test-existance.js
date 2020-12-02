@@ -20,17 +20,17 @@ const assertUtils = require('./utils.js');
 const assertMember = assertUtils.assertMember;
 const assertThrowsError = assertUtils.assertThrowsError;
 
-describe('rclnodejs module existance testing', function () {
-  describe('rclnodejs module members', function () {
-    it('QoS member should exist', function () {
+describe('rclnodejs module existance testing', function() {
+  describe('rclnodejs module members', function() {
+    it('QoS member should exist', function() {
       assertMember('QoS', rclnodejs, rclnodejs.QoS, 'function');
     });
 
-    it('validator member should exist', function () {
+    it('validator member should exist', function() {
       assertMember('validator', rclnodejs, rclnodejs.validator, 'object');
     });
 
-    it('createMessageObject method should exist', function () {
+    it('createMessageObject method should exist', function() {
       assertMember(
         'createMessageObject',
         rclnodejs,
@@ -39,15 +39,15 @@ describe('rclnodejs module existance testing', function () {
       );
     });
 
-    it('createNode method should exist', function () {
+    it('createNode method should exist', function() {
       assertMember('createNode', rclnodejs, rclnodejs.createNode, 'function');
     });
 
-    it('init method should exist', function () {
+    it('init method should exist', function() {
       assertMember('init', rclnodejs, rclnodejs.init, 'function');
     });
 
-    it('regenerateAll method should exist', function () {
+    it('regenerateAll method should exist', function() {
       assertMember(
         'regenerateAll',
         rclnodejs,
@@ -56,19 +56,19 @@ describe('rclnodejs module existance testing', function () {
       );
     });
 
-    it('require method should exist', function () {
+    it('require method should exist', function() {
       assertMember('require', rclnodejs, rclnodejs.require, 'function');
     });
 
-    it('shutdown method should exist', function () {
+    it('shutdown method should exist', function() {
       assertMember('shutdown', rclnodejs, rclnodejs.shutdown, 'function');
     });
 
-    it('spin method should exist', function () {
+    it('spin method should exist', function() {
       assertMember('shutdown', rclnodejs, rclnodejs.shutdown, 'function');
     });
 
-    it('expandTopicName method should exist', function () {
+    it('expandTopicName method should exist', function() {
       assertMember(
         'expandTopicName',
         rclnodejs,
@@ -77,7 +77,7 @@ describe('rclnodejs module existance testing', function () {
       );
     });
 
-    it('isTopicOrServiceHidden method should exist', function () {
+    it('isTopicOrServiceHidden method should exist', function() {
       assertMember(
         'isTopicOrServiceHidden',
         rclnodejs,
@@ -88,63 +88,63 @@ describe('rclnodejs module existance testing', function () {
   });
 });
 
-describe('rclnodejs class existance testing', function () {
+describe('rclnodejs class existance testing', function() {
   this.timeout(60 * 1000);
 
-  before(function () {
+  before(function() {
     return rclnodejs.init();
   });
 
-  after(function () {
+  after(function() {
     rclnodejs.shutdown();
   });
 
-  describe('Client class', function () {
+  describe('Client class', function() {
     var node, GetParameters, client;
 
-    before(function () {
+    before(function() {
       node = rclnodejs.createNode('Client');
       GetParameters = 'rcl_interfaces/srv/GetParameters';
       client = node.createClient(GetParameters, 'get/parameters');
     });
 
-    after(function () {
+    after(function() {
       node.destroy();
     });
 
-    it('sequenceNumber property should exist', function () {
+    it('sequenceNumber property should exist', function() {
       assertMember('sequenceNumber', client, client.sequenceNumber, 'number');
     });
 
-    it('sendRequest method should exist', function () {
+    it('sendRequest method should exist', function() {
       assertMember('sendRequest', client, client.sendRequest, 'function');
     });
   });
 
-  describe('Node class', function () {
+  describe('Node class', function() {
     var node;
 
-    before(function () {
+    before(function() {
       node = rclnodejs.createNode('Node');
     });
 
-    after(function () {
+    after(function() {
       node.destroy();
     });
 
-    it('createClient method should exist', function () {
+    it('createClient method should exist', function() {
       assertMember('createClient', node, node.createClient, 'function');
     });
 
-    it('createPublisher method should exist', function () {
+    it('createPublisher method should exist', function() {
       assertMember('createPublisher', node, node.createPublisher, 'function');
     });
 
-    it('createService method should exist', function () {
+    it('createService method should exist', function() {
       assertMember('createService', node, node.createService, 'function');
     });
 
-    it('createSubscription method should exist', function () {
+    it('createSubscription method should exist', function() {
       assertMember(
         'createSubscription',
         node,
@@ -153,19 +153,19 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('createTimer method should exist', function () {
+    it('createTimer method should exist', function() {
       assertMember('createTimer', node, node.createTimer, 'function');
     });
 
-    it('destroy method should exist', function () {
+    it('destroy method should exist', function() {
       assertMember('destroy', node, node.destroy, 'function');
     });
 
-    it('destroyPublisher method should exist', function () {
+    it('destroyPublisher method should exist', function() {
       assertMember('destroyPublisher', node, node.destroyPublisher, 'function');
     });
 
-    it('destroySubscription method should exist', function () {
+    it('destroySubscription method should exist', function() {
       assertMember(
         'destroySubscription',
         node,
@@ -174,112 +174,112 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('destroyClient method should exist', function () {
+    it('destroyClient method should exist', function() {
       assertMember('destroyClient', node, node.destroyClient, 'function');
     });
 
-    it('destroyService method should exist', function () {
+    it('destroyService method should exist', function() {
       assertMember('destroyService', node, node.destroyService, 'function');
     });
 
-    it('destroyTimer method should exist', function () {
+    it('destroyTimer method should exist', function() {
       assertMember('destroyTimer', node, node.destroyTimer, 'function');
     });
 
-    it('name method should exist', function () {
+    it('name method should exist', function() {
       assertMember('name', node, node.name, 'function');
     });
 
-    it('namespace method should exist', function () {
+    it('namespace method should exist', function() {
       assertMember('namespace', node, node.namespace, 'function');
     });
   });
 
-  describe('Publisher & Subscription class', function () {
+  describe('Publisher & Subscription class', function() {
     var node, RclString, publisher, subscription;
 
-    before(function () {
+    before(function() {
       node = rclnodejs.createNode('Publisher');
       RclString = 'std_msgs/msg/String';
       publisher = node.createPublisher(RclString, 'chatter');
       subscription = node.createSubscription(RclString, 'chatter', () => {});
     });
 
-    after(function () {
+    after(function() {
       node.destroy();
     });
 
-    it('topic property of a publisher should exist', function () {
+    it('topic property of a publisher should exist', function() {
       assertMember('topic', publisher, publisher.topic, 'string');
     });
 
-    it('publish method of a publisher should exist', function () {
+    it('publish method of a publisher should exist', function() {
       assertMember('publish', publisher, publisher.publish, 'function');
     });
 
-    it('topic member of a subscription should exist', function () {
+    it('topic member of a subscription should exist', function() {
       assertMember('topic', subscription, subscription.topic, 'string');
     });
   });
 
-  describe('Client & Service class', function () {
+  describe('Client & Service class', function() {
     var node, AddTwoInts, client, service;
 
-    before(function () {
+    before(function() {
       node = rclnodejs.createNode('Client');
       AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       client = node.createClient(AddTwoInts, 'add_two_ints');
-      service = node.createService(AddTwoInts, 'add_two_ints', (req) => {});
+      service = node.createService(AddTwoInts, 'add_two_ints', req => {});
     });
 
-    after(function () {
+    after(function() {
       node.destroy();
     });
 
-    it('serviceName member of a client should exist', function () {
+    it('serviceName member of a client should exist', function() {
       assertMember('serviceName', client, client.serviceName, 'string');
     });
 
-    it('serviceName member of a service should exist', function () {
+    it('serviceName member of a service should exist', function() {
       assertMember('serviceName', service, service.serviceName, 'string');
     });
   });
 
-  describe('Timer class', function () {
+  describe('Timer class', function() {
     var node, timer;
 
-    before(function () {
+    before(function() {
       node = rclnodejs.createNode('Timer');
       timer = node.createTimer(10, () => {});
     });
 
-    after(function () {
+    after(function() {
       timer.cancel();
       node.destroy();
     });
 
-    it('period property should exist', function () {
+    it('period property should exist', function() {
       assertMember('period', timer, timer.period, 'number');
       assert.deepStrictEqual(timer.period, 10);
     });
 
-    it('cancel method should exist', function () {
+    it('cancel method should exist', function() {
       assertMember('cancel', timer, timer.cancel, 'function');
     });
 
-    it('isCanceled method should exist', function () {
+    it('isCanceled method should exist', function() {
       assertMember('isCanceled', timer, timer.isCanceled, 'function');
     });
 
-    it('isReady method should exist', function () {
+    it('isReady method should exist', function() {
       assertMember('isReady', timer, timer.isReady, 'function');
     });
 
-    it('reset method should exist', function () {
+    it('reset method should exist', function() {
       assertMember('reset', timer, timer.reset, 'function');
     });
 
-    it('timeSinceLastCall method should exist', function () {
+    it('timeSinceLastCall method should exist', function() {
       assertMember(
         'timeSinceLastCall',
         timer,
@@ -288,7 +288,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('timeUntilNextCall method should exist', function () {
+    it('timeUntilNextCall method should exist', function() {
       assertMember(
         'timeUntilNextCall',
         timer,
@@ -298,14 +298,14 @@ describe('rclnodejs class existance testing', function () {
     });
   });
 
-  describe('QoS class', function () {
+  describe('QoS class', function() {
     var qos;
 
-    before(function () {
+    before(function() {
       qos = new rclnodejs.QoS();
     });
 
-    it('should have getter avoidRosNameSpaceConventions', function () {
+    it('should have getter avoidRosNameSpaceConventions', function() {
       assertMember(
         'avoidRosNameSpaceConventions',
         qos,
@@ -314,15 +314,15 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have getter depth', function () {
+    it('should have getter depth', function() {
       assertMember('depth', qos, qos.depth, 'number');
     });
 
-    it('should have getter durability', function () {
+    it('should have getter durability', function() {
       assertMember('durability', qos, qos.durability, 'number');
     });
 
-    it('should have static getter DurabilityPolicy', function () {
+    it('should have static getter DurabilityPolicy', function() {
       assertMember(
         'DurabilityPolicy',
         rclnodejs.QoS,
@@ -331,11 +331,11 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have getter history', function () {
+    it('should have getter history', function() {
       assertMember('history', qos, qos.history, 'number');
     });
 
-    it('should have static getter HistoryPolicy', function () {
+    it('should have static getter HistoryPolicy', function() {
       assertMember(
         'HistoryPolicy',
         rclnodejs.QoS,
@@ -344,7 +344,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have static getter profileDefault', function () {
+    it('should have static getter profileDefault', function() {
       assertMember(
         'profileDefault',
         rclnodejs.QoS,
@@ -353,7 +353,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have static getter profileParameterEvents', function () {
+    it('should have static getter profileParameterEvents', function() {
       assertMember(
         'profileParameterEvents',
         rclnodejs.QoS,
@@ -362,7 +362,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have static getter profileParameters', function () {
+    it('should have static getter profileParameters', function() {
       assertMember(
         'profileParameters',
         rclnodejs.QoS,
@@ -371,7 +371,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have static getter profileSensorData', function () {
+    it('should have static getter profileSensorData', function() {
       assertMember(
         'profileSensorData',
         rclnodejs.QoS,
@@ -380,7 +380,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have static getter profileServicesDefault', function () {
+    it('should have static getter profileServicesDefault', function() {
       assertMember(
         'profileServicesDefault',
         rclnodejs.QoS,
@@ -389,7 +389,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have static getter profileSystemDefault', function () {
+    it('should have static getter profileSystemDefault', function() {
       assertMember(
         'profileSystemDefault',
         rclnodejs.QoS,
@@ -398,11 +398,11 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have getter reliability', function () {
+    it('should have getter reliability', function() {
       assertMember('reliability', qos, qos.reliability, 'number');
     });
 
-    it('should have static getter ReliabilityPolicy', function () {
+    it('should have static getter ReliabilityPolicy', function() {
       assertMember(
         'ReliabilityPolicy',
         rclnodejs.QoS,
@@ -411,7 +411,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have setter avoidRosNameSpaceConventions', function () {
+    it('should have setter avoidRosNameSpaceConventions', function() {
       qos.avoidRosNameSpaceConventions = true;
       assert.ok(qos.avoidRosNameSpaceConventions);
 
@@ -425,7 +425,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have setter depth', function () {
+    it('should have setter depth', function() {
       qos.depth = 0;
       assert.deepStrictEqual(qos.depth, 0);
 
@@ -439,7 +439,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have setter durability', function () {
+    it('should have setter durability', function() {
       qos.durability = 0;
       assert.deepStrictEqual(qos.durability, 0);
 
@@ -453,7 +453,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have setter history', function () {
+    it('should have setter history', function() {
       qos.history = 0;
       assert.deepStrictEqual(qos.history, 0);
 
@@ -467,7 +467,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have setter reliability', function () {
+    it('should have setter reliability', function() {
       qos.reliability = 0;
       assert.deepStrictEqual(qos.reliability, 0);
 
@@ -482,8 +482,8 @@ describe('rclnodejs class existance testing', function () {
     });
   });
 
-  describe('Validator class', function () {
-    it('should have validateFullTopicName method', function () {
+  describe('Validator class', function() {
+    it('should have validateFullTopicName method', function() {
       assertMember(
         'validateFullTopicName',
         rclnodejs.validator,
@@ -492,7 +492,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have validateNodeName method', function () {
+    it('should have validateNodeName method', function() {
       assertMember(
         'validateNodeName',
         rclnodejs.validator,
@@ -501,7 +501,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have validateTopicName method', function () {
+    it('should have validateTopicName method', function() {
       assertMember(
         'validateTopicName',
         rclnodejs.validator,
@@ -510,7 +510,7 @@ describe('rclnodejs class existance testing', function () {
       );
     });
 
-    it('should have validateNamespace method', function () {
+    it('should have validateNamespace method', function() {
       assertMember(
         'validateNamespace',
         rclnodejs.validator,
