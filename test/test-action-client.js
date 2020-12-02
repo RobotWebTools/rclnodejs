@@ -20,7 +20,7 @@ const { v4: uuidv4 } = require('uuid');
 const assertUtils = require('./utils.js');
 const rclnodejs = require('../index.js');
 
-describe('rclnodejs action client', function() {
+describe('rclnodejs action client', function () {
   let node;
   let server;
   this.timeout(60 * 1000);
@@ -65,15 +65,15 @@ describe('rclnodejs action client', function() {
     return new Fibonacci.Result();
   }
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  beforeEach(function() {
+  beforeEach(function () {
     Fibonacci = rclnodejs.require(fibonacci);
 
     node = rclnodejs.createNode('action_client_node');
@@ -90,13 +90,13 @@ describe('rclnodejs action client', function() {
     rclnodejs.spin(node);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     publishFeedback = null;
     server.destroy();
     node.destroy();
   });
 
-  it('Test defaults', function() {
+  it('Test defaults', function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
 
     assert.ok(server.options);
@@ -128,7 +128,7 @@ describe('rclnodejs action client', function() {
     client.destroy();
   });
 
-  it('Test no wait for server', async function() {
+  it('Test no wait for server', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'not_fibonacci');
 
     let result = await client.waitForServer(0);
@@ -138,7 +138,7 @@ describe('rclnodejs action client', function() {
     client.destroy();
   });
 
-  it('Test wait for server timeout', async function() {
+  it('Test wait for server timeout', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'not_fibonacci');
 
     let result = await client.waitForServer(1000);
@@ -148,7 +148,7 @@ describe('rclnodejs action client', function() {
     client.destroy();
   });
 
-  it('Test wait for server', async function() {
+  it('Test wait for server', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
 
     let result = await client.waitForServer(2000);
@@ -158,7 +158,7 @@ describe('rclnodejs action client', function() {
     client.destroy();
   });
 
-  it('Test send goal', async function() {
+  it('Test send goal', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
 
     let result = await client.waitForServer(2000);
@@ -173,10 +173,10 @@ describe('rclnodejs action client', function() {
     client.destroy();
   });
 
-  it('Test send goal with feedback', async function() {
+  it('Test send goal with feedback', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
 
-    let feedbackCallback = sinon.spy(function(feedback) {
+    let feedbackCallback = sinon.spy(function (feedback) {
       assert.ok(feedback);
     });
 
@@ -202,7 +202,7 @@ describe('rclnodejs action client', function() {
     client.destroy();
   });
 
-  it('Test send goal with feedback for another goal', async function() {
+  it('Test send goal with feedback for another goal', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
 
     let goal1Uuid = createUuid();
@@ -231,7 +231,7 @@ describe('rclnodejs action client', function() {
     client.destroy();
   });
 
-  it('Test send goal multiple', async function() {
+  it('Test send goal multiple', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
 
     let result = await client.waitForServer(2000);
@@ -260,7 +260,7 @@ describe('rclnodejs action client', function() {
     client.destroy();
   });
 
-  it('Test send goal with no server', async function() {
+  it('Test send goal with no server', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'not_fibonacci');
 
     try {
@@ -278,7 +278,7 @@ describe('rclnodejs action client', function() {
     }
   });
 
-  it('Test send cancel', async function() {
+  it('Test send cancel', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
 
     let result = await client.waitForServer(2000);

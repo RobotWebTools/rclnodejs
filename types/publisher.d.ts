@@ -2,7 +2,8 @@ declare module 'rclnodejs' {
   /**
    * A ROS Publisher that publishes messages on a topic.
    */
-  interface Publisher<T extends TypeClass<MessageTypeClassName>> extends Entity {
+  interface Publisher<T extends TypeClass<MessageTypeClassName>>
+    extends Entity {
     /**
      * Topic on which messages are published.
      */

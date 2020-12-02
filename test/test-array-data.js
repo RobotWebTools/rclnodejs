@@ -25,14 +25,14 @@ function isTypedArray(v) {
   return ArrayBuffer.isView(v) && !(v instanceof DataView);
 }
 
-describe('rclnodejs message communication', function() {
+describe('rclnodejs message communication', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
@@ -150,10 +150,10 @@ describe('rclnodejs message communication', function() {
     /* eslint-enable camelcase */
     /* eslint-enable key-spacing */
     /* eslint-enable comma-spacing */
-  ].forEach(testData => {
+  ].forEach((testData) => {
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {
-      it('Test ' + testData.type + '.copy()' + ', case ' + i, function() {
+      it('Test ' + testData.type + '.copy()' + ', case ' + i, function () {
         const MessageType = rclnodejs.require(
           testData.pkg + '/msg/' + testData.type
         );
@@ -360,12 +360,12 @@ describe('rclnodejs message communication', function() {
     /* eslint-enable camelcase */
     /* eslint-enable key-spacing */
     /* eslint-enable comma-spacing */
-  ].forEach(testData => {
+  ].forEach((testData) => {
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {
       it(
         'Make sure ' + testData.type + ' use TypedArray' + ', case ' + i,
-        function() {
+        function () {
           const MessageType = rclnodejs.require(
             testData.pkg + '/msg/' + testData.type
           );
@@ -588,9 +588,9 @@ describe('rclnodejs message communication', function() {
       ),
     },
     /* eslint-enable max-len */
-  ].forEach(testData => {
+  ].forEach((testData) => {
     const topic = testData.topic || 'topic' + testData.type;
-    it('Make sure ' + testData.type + ' use TypedArray', function() {
+    it('Make sure ' + testData.type + ' use TypedArray', function () {
       const MessageType = rclnodejs.require('std_msgs/msg/' + testData.type);
       const msg = translator.toROSMessage(MessageType, {
         layout: {

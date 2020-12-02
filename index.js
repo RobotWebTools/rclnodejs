@@ -196,11 +196,17 @@ let rcl = {
     context = Context.defaultContext(),
     options = NodeOptions.defaultOptions
   ) {
-    return _createNode(nodeName, namespace, context, options, rclnodejs.ShadowNode);
+    return _createNode(
+      nodeName,
+      namespace,
+      context,
+      options,
+      rclnodejs.ShadowNode
+    );
   },
 
   /**
-   * Create a managed Node that implements a well-defined life-cycle state 
+   * Create a managed Node that implements a well-defined life-cycle state
    * model using the {@link https://github.com/ros2/rcl/tree/master/rcl_lifecycle|ros2 client library (rcl) lifecyle api}.
    * @param {string} nodeName - The name used to register in ROS.
    * @param {string} [namespace=''] - The namespace used in ROS.
@@ -215,7 +221,13 @@ let rcl = {
     context = Context.defaultContext(),
     options = NodeOptions.defaultOptions
   ) {
-    return _createNode(nodeName, namespace, context, options, Lifecycle.LifecycleNode);
+    return _createNode(
+      nodeName,
+      namespace,
+      context,
+      options,
+      Lifecycle.LifecycleNode
+    );
   },
 
   /**
@@ -452,16 +464,25 @@ function _createNode(
   }
 
   if (!rcl._contextToNodeArrayMap.has(context)) {
-    throw new Error('Invalid context. Must call rclnodejs(context) before using the context');
+    throw new Error(
+      'Invalid context. Must call rclnodejs(context) before using the context'
+    );
   }
 
   let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
   let node = new nodeClass();
   node.handle = handle;
-  Object.defineProperty(node, 'handle', { configurable: false, writable: false }); // make read-only
+  Object.defineProperty(node, 'handle', {
+    configurable: false,
+    writable: false,
+  }); // make read-only
   node.context = context;
   node.init(nodeName, namespace, context, options);
-  debug('Finish initializing node, name = %s and namespace = %s.', nodeName, namespace);
+  debug(
+    'Finish initializing node, name = %s and namespace = %s.',
+    nodeName,
+    namespace
+  );
 
   rcl._contextToNodeArrayMap.get(context).push(node);
   return node;

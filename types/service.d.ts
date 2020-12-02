@@ -1,5 +1,4 @@
 declare module 'rclnodejs' {
-
   type ServiceRequestMessage<T> = T extends ServiceTypeClassName
     ? InstanceType<ServicesMap[T]['Request']>
     : object;
@@ -23,9 +22,11 @@ declare module 'rclnodejs' {
    * See {@link Service}
    * See {@link Response.send | Response.send}
    */
-  type ServiceRequestHandler<T extends TypeClass<ServiceTypeClassName>> =
-    (request: ServiceRequestMessage<T>, response: ServiceResponse<T>) => void;
-  
+  type ServiceRequestHandler<T extends TypeClass<ServiceTypeClassName>> = (
+    request: ServiceRequestMessage<T>,
+    response: ServiceResponse<T>
+  ) => void;
+
   /**
    * Callback for receiving service requests from a client.
    *
@@ -34,8 +35,9 @@ declare module 'rclnodejs' {
    *
    * @deprecated use {@link ServiceRequestHandler | ServiceRequestHandler}
    */
-  type ServiceRequestCallback<T extends TypeClass<ServiceTypeClassName>> = 
-    ServiceRequestHandler<T>;
+  type ServiceRequestCallback<
+    T extends TypeClass<ServiceTypeClassName>
+  > = ServiceRequestHandler<T>;
 
   /**
    * A service response to a client request.

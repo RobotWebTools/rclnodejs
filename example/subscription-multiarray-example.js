@@ -25,7 +25,7 @@ rclnodejs
     node.createSubscription(
       'std_msgs/msg/Int32MultiArray',
       'Int32MultiArray',
-      multiArray => {
+      (multiArray) => {
         // Please reference the usage of multi-array at
         // https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/MultiArrayLayout.msg
         console.log('Message: ', counter++, multiArray);
@@ -58,6 +58,6 @@ rclnodejs
 
     rclnodejs.spin(node);
   })
-  .catch(e => {
+  .catch((e) => {
     console.log(e);
   });
