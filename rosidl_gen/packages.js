@@ -39,7 +39,9 @@ function getPackageName(filePath, amentExecuted) {
 
   // If |packageName| equals to the file's extension, e.g. msg/srv, one level
   // up directory will be used as the package name.
-  return packageName === path.parse(filePath).ext.substr(1) ? folders.pop() : packageName;
+  return packageName === path.parse(filePath).ext.substr(1)
+    ? folders.pop()
+    : packageName;
 }
 
 function getSubFolder(filePath, amentExecuted) {
@@ -79,7 +81,13 @@ function addInterfaceInfo(info, type, pkgMap) {
 async function getAmentPackages(rootDir) {
   try {
     const files = await fsp.readdir(
-      path.join(rootDir, 'share', 'ament_index', 'resource_index', 'rosidl_interfaces')
+      path.join(
+        rootDir,
+        'share',
+        'ament_index',
+        'resource_index',
+        'rosidl_interfaces'
+      )
     );
     return files;
   } catch (e) {
@@ -137,7 +145,11 @@ async function findAmentPackagesInDirectory(dir) {
         // Some .msg files were generated prior to 0.3.2 for .action files,
         // which has been disabled. So these files should be ignored here.
         if (path.dirname(dir).split(path.sep).pop() !== 'action') {
-          addInterfaceInfo(grabInterfaceInfo(filePath, true), 'messages', pkgMap);
+          addInterfaceInfo(
+            grabInterfaceInfo(filePath, true),
+            'messages',
+            pkgMap
+          );
         }
       } else if (path.extname(filePath) === '.srv') {
         addInterfaceInfo(grabInterfaceInfo(filePath, true), 'services', pkgMap);
