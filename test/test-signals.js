@@ -47,7 +47,9 @@ if (process.env['RCLNODEJS_TEST_FORK']) {
       break;
     default:
       forkDoPublish(
-        process.argv[2] === '--non-default-context' ? new rclnodejs.Context() : undefined,
+        process.argv[2] === '--non-default-context'
+          ? new rclnodejs.Context()
+          : undefined
       );
   }
 } else {
@@ -121,9 +123,13 @@ if (process.env['RCLNODEJS_TEST_FORK']) {
     it('removeSignalHandlers only removes rclnodejs signals', async () => {
       // Because signal handlers is a global event and is installed on import,
       // we need to fork a child process to ensure the current environment is not "tainted".
-      child = childProcess.fork(__filename, ['--only-remove-rclnodejs-handlers'], {
-        env: { ...process.env, RCLNODEJS_TEST_FORK: true },
-      });
+      child = childProcess.fork(
+        __filename,
+        ['--only-remove-rclnodejs-handlers'],
+        {
+          env: { ...process.env, RCLNODEJS_TEST_FORK: true },
+        }
+      );
       await new Promise((res) => {
         child.on('close', (exitCode) => {
           assert.strictEqual(exitCode, 1);

@@ -34,7 +34,7 @@ rclnodejs.init().then(() => {
   });
 
   let counter = 0;
-  setInterval(function() {
+  setInterval(function () {
     console.log(`Publishing message: Hello ROS ${counter}`);
     publisher.publish(`Hello ROS ${counter++}`);
   }, 1000);

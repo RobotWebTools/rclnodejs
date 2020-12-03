@@ -23,24 +23,24 @@ const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 
-describe('Rclnodejs - Cpp message type testing', function() {
+describe('Rclnodejs - Cpp message type testing', function () {
   var cppSubscriptionPath = path.join(__dirname, 'cpp', 'subscription_msg');
   var cppSubscription;
 
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     cppSubscription = childProcess.spawn(cppSubscriptionPath);
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
     cppSubscription.kill('SIGINT');
   });
 
-  describe('Primitive message types', function() {
-    it('Bool', function(done) {
+  describe('Primitive message types', function () {
+    it('Bool', function (done) {
       var node = rclnodejs.createNode('bool_js_publisher');
       const Bool = 'std_msgs/msg/Bool';
       const msg = true;
@@ -49,7 +49,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Bool,
         'back_Bool_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -64,7 +64,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Byte', function(done) {
+    it('Byte', function (done) {
       var node = rclnodejs.createNode('byte_js_publisher');
       const Byte = 'std_msgs/msg/Byte';
       const msg = 0x41;
@@ -73,7 +73,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Byte,
         'back_Byte_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -88,7 +88,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Char', function(done) {
+    it('Char', function (done) {
       var node = rclnodejs.createNode('char_js_publisher');
       const Char = 'std_msgs/msg/Char';
       const msg = 0x61;
@@ -97,7 +97,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Char,
         'back_Char_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -112,7 +112,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('String', function(done) {
+    it('String', function (done) {
       var node = rclnodejs.createNode('string_js_publisher');
       const RclString = 'std_msgs/msg/String';
       const msg = 'Hello World';
@@ -121,7 +121,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         RclString,
         'back_String_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -136,7 +136,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Int8', function(done) {
+    it('Int8', function (done) {
       var node = rclnodejs.createNode('int8_js_publisher');
       const Int8 = 'std_msgs/msg/Int8';
       const msg = 0x7f;
@@ -146,7 +146,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Int8,
         'back_Int8_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -161,7 +161,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('UInt8', function(done) {
+    it('UInt8', function (done) {
       var node = rclnodejs.createNode('uint8_js_publisher');
       const UInt8 = 'std_msgs/msg/UInt8';
       const msg = 0xff;
@@ -170,7 +170,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         UInt8,
         'back_UInt8_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -185,7 +185,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Int16', function(done) {
+    it('Int16', function (done) {
       var node = rclnodejs.createNode('int16_js_publisher');
       const Int16 = 'std_msgs/msg/Int16';
       const msg = 0x7fff;
@@ -194,7 +194,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Int16,
         'back_Int16_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -209,7 +209,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('UInt16', function(done) {
+    it('UInt16', function (done) {
       var node = rclnodejs.createNode('uint16_js_publisher');
       const UInt16 = 'std_msgs/msg/UInt16';
       const msg = 0xffff;
@@ -219,7 +219,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         UInt16,
         'back_UInt16_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -233,7 +233,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Int32', function(done) {
+    it('Int32', function (done) {
       var node = rclnodejs.createNode('int32_js_publisher');
       const Int32 = 'std_msgs/msg/Int32';
       const msg = 0x7fffffff;
@@ -242,7 +242,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Int32,
         'back_Int32_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -257,7 +257,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('UInt32', function(done) {
+    it('UInt32', function (done) {
       var node = rclnodejs.createNode('uint32_js_publisher');
       const UInt32 = 'std_msgs/msg/UInt32';
       const msg = 0xffffffff;
@@ -266,7 +266,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         UInt32,
         'back_UInt32_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -280,7 +280,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Int64', function(done) {
+    it('Int64', function (done) {
       var node = rclnodejs.createNode('int64_js_publisher');
       const Int64 = 'std_msgs/msg/Int64';
       const msg = Number.MAX_SAFE_INTEGER;
@@ -289,7 +289,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Int64,
         'back_Int64_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -303,7 +303,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('UInt64', function(done) {
+    it('UInt64', function (done) {
       var node = rclnodejs.createNode('uint64_js_publisher');
       const UInt64 = 'std_msgs/msg/UInt64';
       const msg = Number.MAX_SAFE_INTEGER;
@@ -313,7 +313,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         UInt64,
         'back_UInt64_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, msg);
 
           timer.cancel();
@@ -327,7 +327,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Float32', function(done) {
+    it('Float32', function (done) {
       var node = rclnodejs.createNode('float32_js_publisher');
       const Float32 = 'std_msgs/msg/Float32';
       const msg = 3.14;
@@ -336,7 +336,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Float32,
         'back_Float32_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(Math.abs(msg - backMsg.data) < 0.01);
 
           timer.cancel();
@@ -350,7 +350,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Float64', function(done) {
+    it('Float64', function (done) {
       var node = rclnodejs.createNode('float64_js_publisher');
       const Float64 = 'std_msgs/msg/Float64';
       const msg = 3.1415926;
@@ -359,7 +359,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Float64,
         'back_Float64_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(Math.abs(msg - backMsg.data) < 0.0000001);
 
           timer.cancel();
@@ -374,8 +374,8 @@ describe('Rclnodejs - Cpp message type testing', function() {
     });
   });
 
-  describe('Compound message types', function() {
-    it('ColorRGBA', function(done) {
+  describe('Compound message types', function () {
+    it('ColorRGBA', function (done) {
       var node = rclnodejs.createNode('colorrgba_js_publisher');
       const ColorRGBA = 'std_msgs/msg/ColorRGBA';
       const msg = {
@@ -393,7 +393,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         ColorRGBA,
         'back_ColorRGBA_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(deepEqual(msg, backMsg));
 
           timer.cancel();
@@ -408,7 +408,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Array', function(done) {
+    it('Array', function (done) {
       var node = rclnodejs.createNode('multiarray_js_publisher');
       const ByteMultiArray = 'std_msgs/msg/ByteMultiArray';
 
@@ -433,7 +433,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         ByteMultiArray,
         'back_ByteMultiArray_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(deepEqual(msg, backMsg));
 
           timer.cancel();
@@ -447,7 +447,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Header', function(done) {
+    it('Header', function (done) {
       var node = rclnodejs.createNode('header_js_publisher');
       const Header = 'std_msgs/msg/Header';
 
@@ -463,7 +463,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         Header,
         'back_Header_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(deepEqual(msg, backMsg));
 
           timer.cancel();
@@ -478,7 +478,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       rclnodejs.spin(node);
     });
 
-    it('Complex object', function(done) {
+    it('Complex object', function (done) {
       var node = rclnodejs.createNode('jointstate_js_publisher');
       const JointState = 'sensor_msgs/msg/JointState';
 
@@ -504,7 +504,7 @@ describe('Rclnodejs - Cpp message type testing', function() {
       var subscription = node.createSubscription(
         JointState,
         'back_JointState_js_cpp_channel',
-        backMsg => {
+        (backMsg) => {
           assert.ok(deepEqual(msg, backMsg));
 
           timer.cancel();

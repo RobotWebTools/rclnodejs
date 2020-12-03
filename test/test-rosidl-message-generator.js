@@ -18,17 +18,17 @@ const assert = require('assert');
 const os = require('os');
 const rclnodejs = require('../index.js');
 
-describe('ROSIDL Node.js message generator test suite', function() {
-  before(function() {
+describe('ROSIDL Node.js message generator test suite', function () {
+  before(function () {
     this.timeout(60 * 1000);
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  it('Try require all message classes', function() {
+  it('Try require all message classes', function () {
     this.timeout(60 * 1000);
     const packages = require('../rosidl_gen/packages.js');
     const installedPackagesRoot =
@@ -36,10 +36,10 @@ describe('ROSIDL Node.js message generator test suite', function() {
         ? process.env.AMENT_PREFIX_PATH.split(';')
         : process.env.AMENT_PREFIX_PATH.split(':');
     let promises = [];
-    installedPackagesRoot.forEach(path => {
-      let promise = packages.findPackagesInDirectory(path).then(pkgs => {
-        pkgs.forEach(pkg => {
-          pkg.messages.forEach(info => {
+    installedPackagesRoot.forEach((path) => {
+      let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
+        pkgs.forEach((pkg) => {
+          pkg.messages.forEach((info) => {
             const s =
               info.pkgName + '/' + info.subFolder + '/' + info.interfaceName;
             assert(rclnodejs.require(s));
@@ -51,7 +51,7 @@ describe('ROSIDL Node.js message generator test suite', function() {
     return Promise.all(promises);
   });
 
-  it('Try use std_msgs/msg/String.msg', function() {
+  it('Try use std_msgs/msg/String.msg', function () {
     let String = rclnodejs.require('std_msgs').msg.String;
     let msg = new String();
     assert(!msg.data);
@@ -68,7 +68,7 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(msg.data, '123570');
   });
 
-  it('Testing message with all-primitive members - ColorRGBA', function() {
+  it('Testing message with all-primitive members - ColorRGBA', function () {
     let ColorRGBA = rclnodejs.require('std_msgs').msg.ColorRGBA;
     let msg = new ColorRGBA();
     msg.r = 0.5;
@@ -81,7 +81,7 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(msg.a, 0.75);
   });
 
-  it('Testing copy-constructor - Duration', function() {
+  it('Testing copy-constructor - Duration', function () {
     let Duration = rclnodejs.require('builtin_interfaces').msg.Duration;
     let msg = new Duration();
     msg.sec = 1024;
@@ -101,7 +101,7 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(msg2.nanosec, 0xaaaa5555);
   });
 
-  it('Testing assignment of an all-primitive message - Time', function() {
+  it('Testing assignment of an all-primitive message - Time', function () {
     let Time = rclnodejs.require('builtin_interfaces').msg.Time;
     let msg = new Time();
     msg.sec = 120;
@@ -122,7 +122,7 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(msg.nanosec, 777);
   });
 
-  it('Testing a compound message - Pose', function() {
+  it('Testing a compound message - Pose', function () {
     let Pose = rclnodejs.require('geometry_msgs').msg.Pose;
     let Point = rclnodejs.require('geometry_msgs').msg.Point;
     let Quaternion = rclnodejs.require('geometry_msgs').msg.Quaternion;
@@ -182,7 +182,7 @@ describe('ROSIDL Node.js message generator test suite', function() {
     assert.equal(copy.position.z, 78901.125);
   });
 
-  it('Testing array - Int32', function() {
+  it('Testing array - Int32', function () {
     let Int32 = rclnodejs.require('std_msgs').msg.Int32;
     let array = new Int32.ArrayType(5);
 

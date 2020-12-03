@@ -21,29 +21,34 @@ const path = require('path');
 
 let rootDir = path.dirname(__dirname);
 let actionPath = path.join(rootDir, 'test', 'ros1_actions');
-process.env.AMENT_PREFIX_PATH = process.env.AMENT_PREFIX_PATH + path.delimiter + actionPath;
+process.env.AMENT_PREFIX_PATH =
+  process.env.AMENT_PREFIX_PATH + path.delimiter + actionPath;
 let msgPath = path.join(rootDir, 'test', 'rclnodejs_test_msgs');
-process.env.AMENT_PREFIX_PATH = process.env.AMENT_PREFIX_PATH + path.delimiter + msgPath;
+process.env.AMENT_PREFIX_PATH =
+  process.env.AMENT_PREFIX_PATH + path.delimiter + msgPath;
 
-fs.remove(path.join(path.dirname(__dirname), 'generated'), (err)=> {
+fs.remove(path.join(path.dirname(__dirname), 'generated'), (err) => {
   if (!err) {
     let mocha = new Mocha();
     const testDir = path.join(__dirname, '../test/');
     // eslint-disable-next-line
-    const tests = fs.readdirSync(testDir).filter(file => {
-      return file.substr(0, 5) === 'test-';});
+    const tests = fs.readdirSync(testDir).filter((file) => {
+      return file.substr(0, 5) === 'test-';
+    });
 
     // eslint-disable-next-line
-    let blacklist = JSON.parse(fs.readFileSync(path.join(__dirname, '../test/blacklist.json'), 'utf8'));
-    let ignoredCases = blacklist[os.type()];
+    let blocklist = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../test/blocklist.json'), 'utf8')
+    );
+    let ignoredCases = blocklist[os.type()];
 
-    tests.forEach(test => {
+    tests.forEach((test) => {
       if (ignoredCases.indexOf(test) === -1) {
         mocha.addFile(path.join(testDir, test));
       }
     });
 
-    mocha.run(function(failures) {
+    mocha.run(function (failures) {
       process.on('exit', () => {
         process.exit(failures);
       });
