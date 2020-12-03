@@ -16,9 +16,12 @@
 
 const debug = require('debug')('rosidl_gen:packages');
 const fs = require('fs');
+const readline = require('readline');
 const path = require('path');
 const walk = require('walk');
 const os = require('os');
+
+const fsp = fs.promises;
 
 const generatedRoot = path.join(__dirname, '../generated/');
 
@@ -36,9 +39,7 @@ function getPackageName(filePath, amentExecuted) {
 
   // If |packageName| equals to the file's extension, e.g. msg/srv, one level
   // up directory will be used as the package name.
-  return packageName === path.parse(filePath).ext.substr(1)
-    ? folders.pop()
-    : packageName;
+  return packageName === path.parse(filePath).ext.substr(1) ? folders.pop() : packageName;
 }
 
 function getSubFolder(filePath, amentExecuted) {
@@ -71,6 +72,79 @@ function addInterfaceInfo(info, type, pkgMap) {
 }
 
 /**
+ * Gets all ament packages with ros messages in an ament index.
+ * @param {string} rootDir Path to the ament root directory
+ * @returns {string[]} array of package names
+ */
+async function getAmentPackages(rootDir) {
+  const files = await fsp.readdir(
+    path.join(rootDir, 'share', 'ament_index', 'resource_index', 'rosidl_interfaces')
+  );
+  return files;
+}
+
+/**
+ * Get paths to all rosidl resources in an ament package
+ * @param {string} packageName name of the package
+ * @param {string} amentRoot ament root directory
+ * @returns {string[]} array of rosidl ament resources in a package
+ */
+async function getPackageDefinitionsFiles(packageName, amentRoot) {
+  const rosFiles = [];
+  const rl = readline.createInterface(
+    fs.createReadStream(
+      path.join(
+        amentRoot,
+        'share',
+        'ament_index',
+        'resource_index',
+        'rosidl_interfaces',
+        packageName
+      ),
+      { emitClose: true }
+    )
+  );
+  rl.on('line', (line) => {
+    rosFiles.push(path.join(amentRoot, 'share', packageName, line));
+  });
+  await new Promise((res) => {
+    rl.on('close', res);
+  });
+  return rosFiles;
+}
+
+/**
+ * Collects all packages in a directory by using the ament index.
+ * @param {string} dir - the directory to search in
+ * @return {Promise<Map<string, object>>} A mapping from the package name to some info about it.
+ */
+async function findAmentPackagesInDirectory(dir) {
+  const pkgs = await getAmentPackages(dir);
+  const rosFiles = (
+    await Promise.all(pkgs.map((pkg) => getPackageDefinitionsFiles(pkg, dir)))
+  ).flat();
+  const pkgMap = new Map();
+  return new Promise((resolve, reject) => {
+    rosFiles.forEach((filePath) => {
+      if (path.extname(filePath) === '.msg') {
+        // Some .msg files were generated prior to 0.3.2 for .action files,
+        // which has been disabled. So these files should be ignored here.
+        if (path.dirname(dir).split(path.sep).pop() !== 'action') {
+          addInterfaceInfo(grabInterfaceInfo(filePath, true), 'messages', pkgMap);
+        }
+      } else if (path.extname(filePath) === '.srv') {
+        addInterfaceInfo(grabInterfaceInfo(filePath, true), 'services', pkgMap);
+      } else if (path.extname(filePath) === '.action') {
+        addInterfaceInfo(grabInterfaceInfo(filePath, true), 'actions', pkgMap);
+      } else {
+        // we ignore all other files
+      }
+    });
+    resolve(pkgMap);
+  });
+}
+
+/**
  * Collects all packages in a directory.
  * @param {string} dir - the directory to search in
  * @return {Promise<Map<string, object>>} A mapping from the package name to some info about it.
@@ -85,7 +159,10 @@ async function findPackagesInDirectory(dir) {
       if (err) {
         amentExecuted = false;
       }
-      dir = amentExecuted ? path.join(dir, 'share') : dir;
+
+      if (amentExecuted) {
+        return resolve(findAmentPackagesInDirectory(dir));
+      }
 
       let walker = walk.walk(dir, { followLinks: true });
       let pkgMap = new Map();
