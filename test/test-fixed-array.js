@@ -21,7 +21,7 @@ const rclnodejs = require('../index.js');
 /* eslint-disable key-spacing */
 /* eslint-disable comma-spacing */
 
-describe('Test message which has a fixed array of 36', function() {
+describe('Test message which has a fixed array of 36', function () {
   this.timeout(60 * 1000);
 
   const mapData = {
@@ -75,15 +75,15 @@ describe('Test message which has a fixed array of 36', function() {
     },
   };
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  it('Assigned with an array of 36', function(done) {
+  it('Assigned with an array of 36', function (done) {
     const node = rclnodejs.createNode('set_map_client');
     node.createService(
       'nav_msgs/srv/SetMap',
@@ -97,14 +97,14 @@ describe('Test message which has a fixed array of 36', function() {
 
     rclnodejs.spin(node);
     const client = node.createClient('nav_msgs/srv/SetMap', 'set_map');
-    client.sendRequest(mapData, response => {
+    client.sendRequest(mapData, (response) => {
       assert.deepStrictEqual(response.success, true);
       node.destroy();
       done();
     });
   });
 
-  it('Assigned with a longer array', function(done) {
+  it('Assigned with a longer array', function (done) {
     mapData.initial_pose.pose.covariance = Float64Array.from(
       { length: 37 },
       (v, k) => k
@@ -112,13 +112,13 @@ describe('Test message which has a fixed array of 36', function() {
     const node = rclnodejs.createNode('set_map_client');
     const client = node.createClient('nav_msgs/srv/SetMap', 'set_map');
     assert.throws(() => {
-      client.sendRequest(mapData, response => {});
+      client.sendRequest(mapData, (response) => {});
     }, RangeError);
     node.destroy();
     done();
   });
 
-  it('Assigned with a shorter array', function(done) {
+  it('Assigned with a shorter array', function (done) {
     mapData.initial_pose.pose.covariance = Float64Array.from(
       { length: 35 },
       (v, k) => k
@@ -126,7 +126,7 @@ describe('Test message which has a fixed array of 36', function() {
     const node = rclnodejs.createNode('set_map_client');
     const client = node.createClient('nav_msgs/srv/SetMap', 'set_map');
     assert.throws(() => {
-      client.sendRequest(mapData, response => {});
+      client.sendRequest(mapData, (response) => {});
     }, RangeError);
     node.destroy();
     done();
