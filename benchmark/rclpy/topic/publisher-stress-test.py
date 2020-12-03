@@ -59,7 +59,7 @@ def main():
   print('The publisher will publish a UInt8MultiArray topic(contains a size of %dKB array) %s times.' % (amount, args.run))
   start = time()
   node = rclpy.create_node('stress_publisher_rclpy')
-  publisher = node.create_publisher(UInt8MultiArray, 'stress_topic')
+  publisher = node.create_publisher(UInt8MultiArray, 'stress_topic', 10)
   total_times = args.run
   sent_times = 0
 
