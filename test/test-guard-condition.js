@@ -16,27 +16,27 @@ const assert = require('assert');
 const sinon = require('sinon');
 const rclnodejs = require('../index.js');
 
-describe('rclnodejs guard condition test suite', function() {
+describe('rclnodejs guard condition test suite', function () {
   var node;
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  beforeEach(function() {
+  beforeEach(function () {
     node = rclnodejs.createNode('guard_node');
   });
 
-  afterEach(function() {
+  afterEach(function () {
     node.destroy();
   });
 
-  it('Test trigger', function() {
+  it('Test trigger', function () {
     let callback = sinon.spy();
 
     const gc = node.createGuardCondition(callback);
@@ -51,7 +51,7 @@ describe('rclnodejs guard condition test suite', function() {
     node.destroyGuardCondition(gc);
   });
 
-  it('Test double trigger', function() {
+  it('Test double trigger', function () {
     let callback1 = sinon.spy();
     let callback2 = sinon.spy();
 

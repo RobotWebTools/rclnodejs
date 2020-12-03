@@ -18,43 +18,45 @@ const assert = require('assert');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 
-describe('rclnodejs interactive testing', function() {
+describe('rclnodejs interactive testing', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  describe('Publisher/Subscription', function() {
-    it('Publisher/Subscription', function(done) {
+  describe('Publisher/Subscription', function () {
+    it('Publisher/Subscription', function (done) {
       var node = rclnodejs.createNode('publisher_subscription');
       const RclString = 'std_msgs/msg/String';
       var publisher = childProcess.fork(`${__dirname}/publisher_setup.js`);
       var destroy = false;
-      var subscription = node.createSubscription(RclString, 'topic', function(
-        msg
-      ) {
-        assert.deepStrictEqual(typeof msg, 'object');
-        assert.ok('data' in msg);
-        assert.deepStrictEqual(msg.data, 'Greeting from publisher');
+      var subscription = node.createSubscription(
+        RclString,
+        'topic',
+        function (msg) {
+          assert.deepStrictEqual(typeof msg, 'object');
+          assert.ok('data' in msg);
+          assert.deepStrictEqual(msg.data, 'Greeting from publisher');
 
-        if (!destroy) {
-          publisher.kill('SIGINT');
-          node.destroy();
-          destroy = true;
-          done();
+          if (!destroy) {
+            publisher.kill('SIGINT');
+            node.destroy();
+            destroy = true;
+            done();
+          }
         }
-      });
+      );
       rclnodejs.spin(node);
     });
   });
 
-  describe('Client/Service', function() {
-    it('Client/Service', function(done) {
+  describe('Client/Service', function () {
+    it('Client/Service', function (done) {
       var node = rclnodejs.createNode('client_service');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       const Int8 = 'std_msgs/msg/Int8';
@@ -74,7 +76,7 @@ describe('rclnodejs interactive testing', function() {
       var subscription = node.createSubscription(
         Int8,
         'back_add_two_ints',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, 3);
 
           node.destroy();

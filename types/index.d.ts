@@ -22,7 +22,7 @@ declare module 'rclnodejs' {
   ): Node;
 
   /**
-   * Create a managed Node that implements a well-defined life-cycle state 
+   * Create a managed Node that implements a well-defined life-cycle state
    * model using the {@link https://github.com/ros2/rcl/tree/master/rcl_lifecycle|ros2 client library (rcl) lifecyle api}.
    * @param nodeName - The name used to register in ROS.
    * @param namespace - The namespace used in ROS, default is an empty string.
@@ -129,7 +129,9 @@ declare module 'rclnodejs' {
    *                                or {package: 'std_msgs', type: 'msg', name: 'String'}
    * @returns A Message object or undefined if type is not recognized.
    */
-  function createMessageObject<T extends TypeClass<MessageTypeClassName>>(type: T): MessageType<T>;
+  function createMessageObject<T extends TypeClass<MessageTypeClassName>>(
+    type: T
+  ): MessageType<T>;
 
   /**
    * Get a list of action names and types for action clients associated with a node.

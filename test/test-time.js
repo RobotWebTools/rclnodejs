@@ -19,18 +19,18 @@ const rclnodejs = require('../index.js');
 const { Time, Clock, Duration } = rclnodejs;
 const { ClockType } = Clock;
 
-describe('rclnodejs Time/Clock testing', function() {
+describe('rclnodejs Time/Clock testing', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  it('Construct time object', function() {
+  it('Construct time object', function () {
     let time = new Time(1, 64);
     assert.strictEqual(time.nanoseconds, 1000000064);
     assert.strictEqual(time.clockType, ClockType.SYSTEM_TIME);
@@ -70,7 +70,7 @@ describe('rclnodejs Time/Clock testing', function() {
     }, RangeError);
   });
 
-  it('Construct duration object', function() {
+  it('Construct duration object', function () {
     let duration = new Duration();
     assert.strictEqual(duration.nanoseconds, 0);
 
@@ -96,7 +96,7 @@ describe('rclnodejs Time/Clock testing', function() {
     assert.strictEqual(duration.nanoseconds, '9223372036854775807');
   });
 
-  it('Test time functions', function() {
+  it('Test time functions', function () {
     let left = new Time(0, 1);
     let right = new Time(0, 2);
 
@@ -158,7 +158,7 @@ describe('rclnodejs Time/Clock testing', function() {
     assert.strictEqual(time._nanoseconds, nanos);
   });
 
-  it('Test duration functions', function() {
+  it('Test duration functions', function () {
     let left = new Duration(0, 1);
     let right = new Duration(0, 2);
     assert.strictEqual(left.eq(right), false);
@@ -197,7 +197,7 @@ describe('rclnodejs Time/Clock testing', function() {
     }, TypeError);
   });
 
-  it('Conversion to Time message', function() {
+  it('Conversion to Time message', function () {
     let time = new Time(100, 200);
     let msg = time.toMsg();
 
