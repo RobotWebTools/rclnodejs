@@ -77,10 +77,17 @@ function addInterfaceInfo(info, type, pkgMap) {
  * @returns {string[]} array of package names
  */
 async function getAmentPackages(rootDir) {
-  const files = await fsp.readdir(
-    path.join(rootDir, 'share', 'ament_index', 'resource_index', 'rosidl_interfaces')
-  );
-  return files;
+  try {
+    const files = await fsp.readdir(
+      path.join(rootDir, 'share', 'ament_index', 'resource_index', 'rosidl_interfaces')
+    );
+    return files;
+  } catch (e) {
+    if (!e.code === 'ENOENT') {
+      throw e;
+    }
+    return [];
+  }
 }
 
 /**
