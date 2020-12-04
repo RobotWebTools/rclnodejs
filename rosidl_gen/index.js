@@ -29,27 +29,16 @@ const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
   path.delimiter
 );
 
-async function generateInPath(path) {
-  const pkgs = await packages.findPackagesInDirectory(path);
-  // const pkgs = new Map();
-  // pkgs.set('test_msgs', {
-  //   messages: [
-  //     {
-  //       pkgName: 'test_msgs',
-  //       interfaceName: 'Nested',
-  //       subFolder: 'msg',
-  //       filePath: '/opt/ros/foxy/share/test_msgs/msg/Nested.msg',
-  //     },
-  //     {
-  //       pkgName: 'test_msgs',
-  //       interfaceName: 'BasicTypes',
-  //       subFolder: 'msg',
-  //       filePath: '/opt/ros/foxy/share/test_msgs/msg/BasicTypes.msg',
-  //     },
-  //   ],
-  //   services: [],
-  //   actions: [],
-  // });
+async function generateInPaths(paths) {
+  const pkgsInPaths = await Promise.all(
+    paths.map((path) => packages.findPackagesInDirectory(path))
+  );
+  const pkgs = new Map();
+  pkgsInPaths.forEach((m, i) => {
+    for (let [pkgName, pkgInfo] of m.entries()) {
+      pkgs.set(pkgName, { ...pkgInfo, amentRoot: paths[i] });
+    }
+  });
 
   const rosIdlDb = new RosIdlDb(pkgs);
 
@@ -66,7 +55,7 @@ async function generateInPath(path) {
       generateCppDefinitions(pkgName, pkgInfo, rosIdlDb)
     )
   );
-  await generateTypesupportGypi(pkgsEntries, path);
+  await generateTypesupportGypi(pkgsEntries);
 }
 
 async function generateAll(forcedGenerating) {
@@ -79,9 +68,10 @@ async function generateAll(forcedGenerating) {
       path.join(__dirname, 'generator.json'),
       path.join(generatedRoot, 'generator.json')
     );
-    await Promise.all(
-      installedPackagePaths.map((path) => generateInPath(path))
-    );
+    await generateInPaths(installedPackagePaths);
+    // await Promise.all(
+    //   installedPackagePaths.map((path) => generateInPath(path))
+    // );
   }
 }
 
@@ -92,7 +82,7 @@ const generator = {
   },
 
   generateAll,
-  generateInPath,
+  generateInPaths,
   generatedRoot,
 };
 

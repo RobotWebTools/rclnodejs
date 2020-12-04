@@ -467,12 +467,12 @@ async function guessTypesupportCLibs(pkg, amentRoot) {
   return typesupportCLibs;
 }
 
-async function generateTypesupportGypi(pkgsEntries, amentRoot) {
+async function generateTypesupportGypi(pkgsEntries) {
   const pkgs = await Promise.all(
     pkgsEntries.map(async ([pkgName, pkgInfo]) => ({
       pkgName,
       pkgInfo,
-      typesupportLibs: await guessTypesupportCLibs(pkgName, amentRoot),
+      typesupportLibs: await guessTypesupportCLibs(pkgName, pkgInfo.amentRoot),
     }))
   );
   const rendered = removeEmptyLines(dots.typesupportGypi({ pkgs }));
