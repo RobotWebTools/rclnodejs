@@ -66,7 +66,7 @@ async function generateInPath(path) {
       generateCppDefinitions(pkgName, pkgInfo, rosIdlDb)
     )
   );
-  await generateTypesupportGypi(pkgsEntries);
+  await generateTypesupportGypi(pkgsEntries, path);
 }
 
 async function generateAll(forcedGenerating) {

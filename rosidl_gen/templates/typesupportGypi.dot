@@ -7,7 +7,9 @@
         '{{=pkg.pkgName}}/definitions.cpp',
       ],
       'libraries': [
-        '-l{{=pkg.pkgName}}__rosidl_typesupport_c',
+{{~ pkg.typesupportLibs : lib}}
+        '-l{{=lib}}',
+{{~}}
       ],
     },
 {{~}}

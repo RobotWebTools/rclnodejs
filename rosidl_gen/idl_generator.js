@@ -424,19 +424,58 @@ async function generateJSStructFromIDL(pkg, dir, rosIdlDb) {
   ]);
 }
 
-async function generateTypesupportGypi(pkgsEntries) {
-  const pkgs = [];
-  for (let [pkgName, pkgInfo] of pkgsEntries) {
-    if (await fs.stat())
-  }
-  const rendered = removeEmptyLines(
-    dots.typesupportGypi({
-      pkgs: pkgsEntries.map(([pkgName, pkgInfo]) => ({
-        pkgName,
-        pkgInfo,
-      })),
-    })
+/**
+ * Tries to guess the libraries needed to be linked against for typesupport_c.
+ *
+ * Normally, the typesupport libraries are built at compiled time of the message packages. The
+ * libraries that have to be linked against are based on the name of the cmake target. Because
+ *
+ *   1. We are a third party library, so our typesupport cannot be built at the compile time.
+ *   2. We are use node-gyp as the build tool, so we can't use cmake to find the link libraries.
+ *
+ * The stopgap solution is then to use regexp on the cmake config files to try to find the
+ * required link libraries.
+ *
+ * @param {string} pkg name of the package
+ * @param {string} amentRoot ament root directory
+ * @returns {string[]} an array of typesupport_c libraries found
+ */
+async function guessTypesupportCLibs(pkg, amentRoot) {
+  const cmakeExport = await fs.readFile(
+    path.join(
+      amentRoot,
+      'share',
+      pkg,
+      'cmake',
+      'ament_cmake_export_libraries-extras.cmake'
+    ),
+    'utf-8'
   );
+  const match = cmakeExport.match(
+    /set\s*\(\s*(?:_exported_typesupport_libraries|_exported_libraries)\s*"(.*)"/
+  );
+  if (!match || match.length < 2) {
+    throw new Error(`unable to find typesupport library for ${pkg}`);
+  }
+  const libraries = match[1].replace(/:/g, ';');
+  const typesupportCLibs = [];
+  libraries.split(';').forEach((lib) => {
+    if (lib.endsWith('rosidl_typesupport_c')) {
+      typesupportCLibs.push(lib);
+    }
+  });
+  return typesupportCLibs;
+}
+
+async function generateTypesupportGypi(pkgsEntries, amentRoot) {
+  const pkgs = await Promise.all(
+    pkgsEntries.map(async ([pkgName, pkgInfo]) => ({
+      pkgName,
+      pkgInfo,
+      typesupportLibs: await guessTypesupportCLibs(pkgName, amentRoot),
+    }))
+  );
+  const rendered = removeEmptyLines(dots.typesupportGypi({ pkgs }));
   await fs.writeFile(
     path.join('src', 'generated', 'typesupport.gypi'),
     rendered
