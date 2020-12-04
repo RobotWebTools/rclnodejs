@@ -33,13 +33,13 @@ rclnodejs
     });
 
     rclnodejs.spin(node);
-    process.on('SIGINT', m => {
+    process.on('SIGINT', (m) => {
       timer.cancel();
       node.destroy();
       rclnodejs.shutdown();
       process.exit(0);
     });
   })
-  .catch(err => {
+  .catch((err) => {
     console.log(err);
   });

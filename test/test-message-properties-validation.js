@@ -18,14 +18,14 @@ const assert = require('assert');
 const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 
-describe('Rclnodejs message properities validation', function() {
+describe('Rclnodejs message properities validation', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
@@ -167,7 +167,7 @@ describe('Rclnodejs message properities validation', function() {
       },
     },
   ].forEach((testData, index) => {
-    it(`Test properties of ${testData.pkg}/${testData.type}.msg, case ${index}`, function() {
+    it(`Test properties of ${testData.pkg}/${testData.type}.msg, case ${index}`, function () {
       const Message = rclnodejs.require(testData.pkg).msg[testData.type];
       const left = new Message();
       const right = new Message(testData.value);

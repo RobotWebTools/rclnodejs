@@ -258,8 +258,12 @@ NAN_METHOD(CreateNode) {
                                          name_space.c_str(), context, &options),
                            rcl_get_error_string().str);
 
-  auto handle = RclHandle::NewInstance(node, nullptr,
-                                       [node] { return rcl_node_fini(node); });
+  auto handle = RclHandle::NewInstance(node, nullptr, [](void* ptr) {
+    rcl_node_t* node = reinterpret_cast<rcl_node_t*>(ptr);
+    rcl_ret_t ret = rcl_node_fini(node);
+    free(ptr);
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  });
   info.GetReturnValue().Set(handle);
 }
 
@@ -280,8 +284,12 @@ NAN_METHOD(CreateGuardCondition) {
                            rcl_guard_condition_init(gc, context, gc_options),
                            rcl_get_error_string().str);
 
-  auto handle = RclHandle::NewInstance(
-      gc, nullptr, [gc] { return rcl_guard_condition_fini(gc); });
+  auto handle = RclHandle::NewInstance(gc, nullptr, [](void* ptr) {
+    rcl_guard_condition_t* gc = reinterpret_cast<rcl_guard_condition_t*>(ptr);
+    rcl_ret_t ret = rcl_guard_condition_fini(gc);
+    free(ptr);
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  });
   info.GetReturnValue().Set(handle);
 }
 
@@ -315,8 +323,12 @@ NAN_METHOD(CreateTimer) {
                      rcl_get_default_allocator()),
       rcl_get_error_string().str);
 
-  auto js_obj = RclHandle::NewInstance(
-      timer, clock_handle, [timer] { return rcl_timer_fini(timer); });
+  auto js_obj = RclHandle::NewInstance(timer, clock_handle, [](void* ptr) {
+    rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(ptr);
+    rcl_ret_t ret = rcl_timer_fini(timer);
+    free(ptr);
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  });
   info.GetReturnValue().Set(js_obj);
 }
 
@@ -411,7 +423,8 @@ NAN_METHOD(CreateTimePoint) {
   time_point->nanoseconds = std::stoll(str);
   time_point->clock_type = static_cast<rcl_clock_type_t>(clock_type);
 
-  auto js_obj = RclHandle::NewInstance(time_point, nullptr, nullptr);
+  auto js_obj =
+      RclHandle::NewInstance(time_point, nullptr, [](void* ptr) { free(ptr); });
   info.GetReturnValue().Set(js_obj);
 }
 
@@ -431,7 +444,8 @@ NAN_METHOD(CreateDuration) {
       reinterpret_cast<rcl_duration_t*>(malloc(sizeof(rcl_duration_t)));
   duration->nanoseconds = std::stoll(str);
 
-  auto js_obj = RclHandle::NewInstance(duration, nullptr, nullptr);
+  auto js_obj =
+      RclHandle::NewInstance(duration, nullptr, [](void* ptr) { free(ptr); });
   info.GetReturnValue().Set(js_obj);
 }
 
@@ -500,8 +514,13 @@ NAN_METHOD(CreateClock) {
                            rcl_clock_init(clock_type, clock, &allocator),
                            rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(RclHandle::NewInstance(
-      clock, nullptr, [clock]() { return rcl_clock_fini(clock); }));
+  info.GetReturnValue().Set(
+      RclHandle::NewInstance(clock, nullptr, [](void* ptr) {
+        rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(ptr);
+        rcl_ret_t ret = rcl_clock_fini(clock);
+        free(ptr);
+        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+      }));
 }
 
 static void ReturnJSTimeObj(
@@ -654,8 +673,12 @@ NAN_METHOD(CreateSubscription) {
         rcl_get_error_string().str);
 
     auto js_obj =
-        RclHandle::NewInstance(subscription, node_handle, [subscription, node] {
-          return rcl_subscription_fini(subscription, node);
+        RclHandle::NewInstance(subscription, node_handle, [node](void* ptr) {
+          rcl_subscription_t* subscription =
+              reinterpret_cast<rcl_subscription_t*>(ptr);
+          rcl_ret_t ret = rcl_subscription_fini(subscription, node);
+          free(ptr);
+          THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
     info.GetReturnValue().Set(js_obj);
   } else {
@@ -702,9 +725,13 @@ NAN_METHOD(CreatePublisher) {
         RCL_RET_OK, rcl_get_error_string().str);
 
     // Wrap the handle into JS object
-    auto js_obj = RclHandle::NewInstance(
-        publisher, node_handle,
-        [publisher, node]() { return rcl_publisher_fini(publisher, node); });
+    auto js_obj =
+        RclHandle::NewInstance(publisher, node_handle, [node](void* ptr) {
+          rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(ptr);
+          rcl_ret_t ret = rcl_publisher_fini(publisher, node);
+          free(ptr);
+          THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+        });
 
     // Everything is done
     info.GetReturnValue().Set(js_obj);
@@ -767,9 +794,13 @@ NAN_METHOD(CreateClient) {
         rcl_client_init(client, node, ts, service_name.c_str(), &client_ops),
         RCL_RET_OK, rcl_get_error_string().str);
 
-    auto js_obj = RclHandle::NewInstance(client, node_handle, [client, node] {
-      return rcl_client_fini(client, node);
-    });
+    auto js_obj =
+        RclHandle::NewInstance(client, node_handle, [node](void* ptr) {
+          rcl_client_t* client = reinterpret_cast<rcl_client_t*>(ptr);
+          rcl_ret_t ret = rcl_client_fini(client, node);
+          free(ptr);
+          THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+        });
 
     info.GetReturnValue().Set(js_obj);
   } else {
@@ -846,9 +877,13 @@ NAN_METHOD(CreateService) {
     THROW_ERROR_IF_NOT_EQUAL(
         rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
         RCL_RET_OK, rcl_get_error_string().str);
-    auto js_obj = RclHandle::NewInstance(service, node_handle, [service, node] {
-      return rcl_service_fini(service, node);
-    });
+    auto js_obj =
+        RclHandle::NewInstance(service, node_handle, [node](void* ptr) {
+          rcl_service_t* service = reinterpret_cast<rcl_service_t*>(ptr);
+          rcl_ret_t ret = rcl_service_fini(service, node);
+          free(ptr);
+          THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+        });
 
     info.GetReturnValue().Set(js_obj);
   } else {
@@ -868,7 +903,8 @@ NAN_METHOD(RclTakeRequest) {
       node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked());
   rcl_ret_t ret = rcl_take_request(service, header, taken_request);
   if (ret != RCL_RET_SERVICE_TAKE_FAILED) {
-    auto js_obj = RclHandle::NewInstance(header);
+    auto js_obj =
+        RclHandle::NewInstance(header, nullptr, [](void* ptr) { free(ptr); });
     info.GetReturnValue().Set(js_obj);
     return;
   }
@@ -1295,7 +1331,7 @@ NAN_METHOD(CreateArrayBufferCleaner) {
 
   char* target = *reinterpret_cast<char**>(address + offset);
   info.GetReturnValue().Set(
-      RclHandle::NewInstance(target, nullptr, [] { return RCL_RET_OK; }));
+      RclHandle::NewInstance(target, nullptr, [](void* ptr) { free(ptr); }));
 }
 
 NAN_METHOD(setLoggerLevel) {
@@ -1379,8 +1415,12 @@ NAN_METHOD(CreateContext) {
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(malloc(sizeof(rcl_context_t)));
   *context = rcl_get_zero_initialized_context();
-  auto js_obj = RclHandle::NewInstance(context, nullptr,
-                                       std::bind(DestroyContext, context));
+  auto js_obj = RclHandle::NewInstance(context, nullptr, [](void* ptr) {
+    rcl_context_t* context = reinterpret_cast<rcl_context_t*>(ptr);
+    rcl_ret_t ret = DestroyContext(context);
+    free(ptr);
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  });
 
   info.GetReturnValue().Set(js_obj);
 }

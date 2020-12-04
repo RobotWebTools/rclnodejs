@@ -15,37 +15,37 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe('Spin testing', function() {
+describe('Spin testing', function () {
   var node;
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  beforeEach(function() {
+  beforeEach(function () {
     node = rclnodejs.createNode('spin_node');
   });
 
-  afterEach(function() {
+  afterEach(function () {
     node.destroy();
   });
 
-  it('rclnodejs.spin()', function() {
+  it('rclnodejs.spin()', function () {
     rclnodejs.spin(node);
   });
 
-  it('rclnodejs.spinOnce()', function() {
+  it('rclnodejs.spinOnce()', function () {
     rclnodejs.spinOnce(node);
   });
 
-  it('rclnodejs.spinOnce() throws when already spinning', function() {
+  it('rclnodejs.spinOnce() throws when already spinning', function () {
     rclnodejs.spin(node);
-    assert.throws(function() {
+    assert.throws(function () {
       rclnodejs.spinOnce(node);
     });
   });

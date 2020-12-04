@@ -21,19 +21,19 @@ const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 const kill = require('tree-kill');
 
-describe('Cross-language interaction', function() {
+describe('Cross-language interaction', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  describe('Node.js Subcription', function() {
-    it('Node.js subscription should receive msg from C++ publisher', done => {
+  describe('Node.js Subcription', function () {
+    it('Node.js subscription should receive msg from C++ publisher', (done) => {
       var node = rclnodejs.createNode('cpp_pub_js_sub');
       const RclString = 'std_msgs/msg/String';
       var destroy = false;
@@ -42,19 +42,23 @@ describe('Cross-language interaction', function() {
         'demo_nodes_cpp',
         'talker',
       ]);
-      var subscription = node.createSubscription(RclString, 'chatter', msg => {
-        assert.ok(/Hello World:/.test(msg.data));
-        if (!destroy) {
-          node.destroy();
-          kill(cppTalker.pid, 'SIGINT');
-          destroy = true;
-          done();
+      var subscription = node.createSubscription(
+        RclString,
+        'chatter',
+        (msg) => {
+          assert.ok(/Hello World:/.test(msg.data));
+          if (!destroy) {
+            node.destroy();
+            kill(cppTalker.pid, 'SIGINT');
+            destroy = true;
+            done();
+          }
         }
-      });
+      );
       rclnodejs.spin(node);
     });
 
-    it('Node.js subscription should receive msg from Python publisher', done => {
+    it('Node.js subscription should receive msg from Python publisher', (done) => {
       var node = rclnodejs.createNode('cpp_pub_py_sub');
       const RclString = 'std_msgs/msg/String';
       var destroy = false;
@@ -62,7 +66,7 @@ describe('Cross-language interaction', function() {
       var subscription = node.createSubscription(
         RclString,
         'py_js_chatter',
-        msg => {
+        (msg) => {
           assert.ok(/Hello World/.test(msg.data));
           if (!destroy) {
             node.destroy();
@@ -76,8 +80,8 @@ describe('Cross-language interaction', function() {
     });
   });
 
-  describe('Node.js publisher', function() {
-    it('Cpp subscription should receive msg from Node.js publisher', done => {
+  describe('Node.js publisher', function () {
+    it('Cpp subscription should receive msg from Node.js publisher', (done) => {
       var node = rclnodejs.createNode('js_pub_cpp_sub');
       const RclString = 'std_msgs/msg/String';
 
@@ -92,7 +96,7 @@ describe('Cross-language interaction', function() {
       var subscription = node.createSubscription(
         RclString,
         'back_js_cpp_chatter',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(msg, backMsg.data);
 
           timer.cancel();
@@ -107,7 +111,7 @@ describe('Cross-language interaction', function() {
       rclnodejs.spin(node);
     });
 
-    it('Python subscription should receive msg from Node.js publisher', function(done) {
+    it('Python subscription should receive msg from Node.js publisher', function (done) {
       var node = rclnodejs.createNode('js_pub_py_sub');
       const RclString = 'std_msgs/msg/String';
 
@@ -119,7 +123,7 @@ describe('Cross-language interaction', function() {
       var subscription = node.createSubscription(
         RclString,
         'back_js_py_chatter',
-        msg => {
+        (msg) => {
           assert.deepStrictEqual(msg.data, text);
 
           timer.cancel();
@@ -138,8 +142,8 @@ describe('Cross-language interaction', function() {
     });
   });
 
-  describe('Node.js client', function() {
-    it('Node.js client should work with Python service', function(done) {
+  describe('Node.js client', function () {
+    it('Node.js client should work with Python service', function (done) {
       var node = rclnodejs.createNode('js_py_add_client');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var destroy = false;
@@ -149,7 +153,7 @@ describe('Cross-language interaction', function() {
       const request = { a: 1, b: 2 };
 
       var timer = node.createTimer(100, () => {
-        client.sendRequest(request, response => {
+        client.sendRequest(request, (response) => {
           if (!destroy) {
             assert.deepStrictEqual(response.sum, 3);
             timer.cancel();
@@ -164,7 +168,7 @@ describe('Cross-language interaction', function() {
       rclnodejs.spin(node);
     });
 
-    it('Node.js client should work with C++ service', function(done) {
+    it('Node.js client should work with C++ service', function (done) {
       var node = rclnodejs.createNode('js_cpp_add_client');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       var client = node.createClient(AddTwoInts, 'add_two_ints');
@@ -177,7 +181,7 @@ describe('Cross-language interaction', function() {
         'add_two_ints_server',
       ]);
       var timer = node.createTimer(100, () => {
-        client.sendRequest(request, response => {
+        client.sendRequest(request, (response) => {
           if (!destroy) {
             timer.cancel();
             assert.deepStrictEqual(response.sum, 3);
@@ -192,8 +196,8 @@ describe('Cross-language interaction', function() {
     });
   });
 
-  describe('Node.js service', function() {
-    it('Node.js service should work with Python client', function(done) {
+  describe('Node.js service', function () {
+    it('Node.js service should work with Python client', function (done) {
       var node = rclnodejs.createNode('py_js_add_service');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       const Int8 = 'std_msgs/msg/Int8';
@@ -212,7 +216,7 @@ describe('Cross-language interaction', function() {
       var subscription = node.createSubscription(
         Int8,
         'back_py_js_add_two_ints',
-        msg => {
+        (msg) => {
           assert.deepStrictEqual(msg.data, 3);
           node.destroy();
           pyClient.kill('SIGINT');
@@ -224,7 +228,7 @@ describe('Cross-language interaction', function() {
       var pyClient = utils.launchPythonProcess([`${__dirname}/py/client.py`]);
     });
 
-    it('Node.js service should work with C++ client', function(done) {
+    it('Node.js service should work with C++ client', function (done) {
       var node = rclnodejs.createNode('cpp_js_add_service');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
       const Int8 = 'std_msgs/msg/Int8';
@@ -244,7 +248,7 @@ describe('Cross-language interaction', function() {
       var subscription = node.createSubscription(
         Int8,
         'back_cpp_js_add_two_ints',
-        backMsg => {
+        (backMsg) => {
           assert.deepStrictEqual(backMsg.data, 5);
 
           node.destroy();
