@@ -6,11 +6,13 @@
       'sources': [
         '{{=pkg.pkgName}}/definitions.cpp',
       ],
-      'libraries': [
+      'link_settings': {
+        'libraries': [
 {{~ pkg.typesupportLibs : lib}}
-        '-l{{=lib}}',
+          '-l{{=lib}}',
 {{~}}
-      ],
+        ],
+      },
     },
 {{~}}
   ],

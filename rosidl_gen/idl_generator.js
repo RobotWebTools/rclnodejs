@@ -425,7 +425,7 @@ async function generateJSStructFromIDL(pkg, dir, rosIdlDb) {
 }
 
 /**
- * Tries to guess the libraries needed to be linked against for typesupport_c.
+ * Tries to guess the libraries needed to be linked against for generator_c.
  *
  * Normally, the typesupport libraries are built at compiled time of the message packages. The
  * libraries that have to be linked against are based on the name of the cmake target. Because
@@ -438,9 +438,9 @@ async function generateJSStructFromIDL(pkg, dir, rosIdlDb) {
  *
  * @param {string} pkg name of the package
  * @param {string} amentRoot ament root directory
- * @returns {string[]} an array of typesupport_c libraries found
+ * @returns {string[]} an array of generator_c libraries found
  */
-async function guessTypesupportCLibs(pkg, amentRoot) {
+async function guessGeneratorCLibs(pkg, amentRoot) {
   const cmakeExport = await fs.readFile(
     path.join(
       amentRoot,
@@ -455,12 +455,12 @@ async function guessTypesupportCLibs(pkg, amentRoot) {
     /set\s*\(\s*(?:_exported_typesupport_libraries|_exported_libraries)\s*"(.*)"/
   );
   if (!match || match.length < 2) {
-    throw new Error(`unable to find typesupport library for ${pkg}`);
+    throw new Error(`unable to find generator_c library for ${pkg}`);
   }
   const libraries = match[1].replace(/:/g, ';');
   const typesupportCLibs = [];
   libraries.split(';').forEach((lib) => {
-    if (lib.endsWith('rosidl_typesupport_c')) {
+    if (lib.endsWith('rosidl_generator_c')) {
       typesupportCLibs.push(lib);
     }
   });
@@ -472,7 +472,7 @@ async function generateTypesupportGypi(pkgsEntries) {
     pkgsEntries.map(async ([pkgName, pkgInfo]) => ({
       pkgName,
       pkgInfo,
-      typesupportLibs: await guessTypesupportCLibs(pkgName, pkgInfo.amentRoot),
+      typesupportLibs: await guessGeneratorCLibs(pkgName, pkgInfo.amentRoot),
     }))
   );
   const rendered = removeEmptyLines(dots.typesupportGypi({ pkgs }));
