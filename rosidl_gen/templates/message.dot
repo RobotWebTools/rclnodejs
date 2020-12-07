@@ -225,6 +225,7 @@ const ArrayType = require('ref-array-di')(ref);
 const primitiveTypes = require('../../rosidl_gen/primitive_types.js');
 const deallocator = require('../../rosidl_gen/deallocator.js');
 const translator = require('../../rosidl_gen/message_translator.js');
+const typesupport = require('bindings')('{{=it.messageInfo.pkgName}}').{{=it.messageInfo.interfaceName}};
 
 {{~ it.spec.fields :field}}
 {{? shouldRequire(it.spec.baseType, field.type)}}
@@ -354,6 +355,18 @@ class {{=objectWrapper}} {
 
   static get refObjectType() {
     return {{=refObjectType}};
+  }
+
+  static createRosMessage() {
+    return typesupport.create();
+  }
+
+  static rosMessageToObj(rosMsg) {
+    return typesupport.to(rosMsg);
+  }
+
+  static rosMessageFromObj(obj) {
+    return typesupport.from(obj);
   }
 
   toRawROS() {
