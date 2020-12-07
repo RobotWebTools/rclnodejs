@@ -21,11 +21,12 @@ namespace rclnodejs {
 
 {{~ it.messages : message}}
 NAN_MODULE_INIT(rclnodejs__{{=message.structType}}::Init) {
-  auto obj = Nan::New<v8::Object>();
-  obj->Set(Nan::New("create").ToLocalChecked(), Nan::New<v8::Function>(rclnodejs__{{=message.structType}}::Create));
-  obj->Set(Nan::New("from").ToLocalChecked(), Nan::New<v8::Function>(rclnodejs__{{=message.structType}}::FromJsObject));
-  obj->Set(Nan::New("to").ToLocalChecked(), Nan::New<v8::Function>(rclnodejs__{{=message.structType}}::ToJsObject));
-  Nan::Set(target, Nan::New("{{=message.info.interfaceName}}").ToLocalChecked(), obj);
+  auto clazz = Nan::New<v8::FunctionTemplate>();
+  clazz->SetClassName(Nan::New("{{=message.interfaceName}}").ToLocalChecked());
+  clazz->Set(Nan::New("create").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(rclnodejs__{{=message.structType}}::Create));
+  clazz->Set(Nan::New("from").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(rclnodejs__{{=message.structType}}::FromJsObject));
+  clazz->Set(Nan::New("to").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(rclnodejs__{{=message.structType}}::ToJsObject));
+  Nan::Set(target, Nan::New("{{=message.info.interfaceName}}").ToLocalChecked(), Nan::GetFunction(clazz).ToLocalChecked());
 }
 
 void rclnodejs__{{=message.structType}}::WriteMessage(v8::Local<v8::Object> jsObj, {{=message.structType}}* msg) {
