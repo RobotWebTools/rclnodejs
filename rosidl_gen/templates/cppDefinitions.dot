@@ -34,7 +34,7 @@ void rclnodejs__{{=message.structType}}::WriteMessage(v8::Local<v8::Object> jsOb
 {{? !it.isInternalField(field)}}
   {
     // end with underscore so it doesn't conflicts with field names
-    auto js_value_ = jsObj->Get(Nan::New("{{=field.name}}").ToLocalChecked());
+    auto js_value_ = Nan::Get(jsObj, Nan::New("{{=field.name}}").ToLocalChecked()).ToLocalChecked();
 {{
     const jsType = it.getJsType(field.type);
 }}
@@ -79,9 +79,9 @@ v8::Local<v8::Object> rclnodejs__{{=message.structType}}::MakeJsObject({{=messag
 {{? !it.isInternalField(field)}}
 {{? !field.type.isArray}}
 {{? field.type.isPrimitiveType}}
-  jsObj->Set(Nan::New("{{=field.name}}").ToLocalChecked(), ToJsChecked(msg->{{=field.name}}));
+  Nan::Set(jsObj, Nan::New("{{=field.name}}").ToLocalChecked(), ToJsChecked(msg->{{=field.name}}));
 {{??}}
-  jsObj->Set(Nan::New("{{=field.name}}").ToLocalChecked(), rclnodejs__{{=it.getStructTypeFromRosType(field.type)}}::MakeJsObject(&msg->{{=field.name}}));
+  Nan::Set(jsObj,Nan::New("{{=field.name}}").ToLocalChecked(), rclnodejs__{{=it.getStructTypeFromRosType(field.type)}}::MakeJsObject(&msg->{{=field.name}}));
 {{?}}
 {{??}}
   // TODO: handle array
