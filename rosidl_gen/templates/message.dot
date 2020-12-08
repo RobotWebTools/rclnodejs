@@ -376,7 +376,7 @@ class {{=objectWrapper}} {
   }
 
   static writeRosMessage(obj, buffer, offset) {
-    typesupport.writeRosMessage(obj, buffer, 0, typesupportDeps);
+    typesupport.writeRosMessage(obj, buffer, offset, typesupportDeps);
   }
 
   toRawROS() {
