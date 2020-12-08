@@ -23,7 +23,7 @@ const path = require('path');
 
 const rootDir = path.dirname(__dirname);
 
-if (os.platform === 'win32') {
+if (os.platform() === 'win32') {
   childprocess.execSync(
     `. ${rootDir}\\install\\setup.ps1 && node --expose-gc ${rootDir}\\scripts\\run_test.js`,
     { stdio: 'inherit', shell: 'powershell' }
