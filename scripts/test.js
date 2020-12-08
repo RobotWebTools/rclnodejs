@@ -25,7 +25,7 @@ const rootDir = path.dirname(__dirname);
 
 if (os.platform() === 'win32') {
   childprocess.execSync(
-    `dir ${rootDir}\\install && call ${rootDir}\\install\\setup.bat && node --expose-gc ${rootDir}\\scripts\\run_test.js`,
+    `call ${rootDir}\\install\\setup.bat && node --expose-gc ${rootDir}\\scripts\\run_test.js`,
     { stdio: 'inherit' }
   );
 } else {
