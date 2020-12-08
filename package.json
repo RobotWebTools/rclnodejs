@@ -13,7 +13,7 @@
     "typescript"
   ],
   "scripts": {
-    "install": "node scripts/generate_messages.js && node-gyp rebuild",
+    "install": "node scripts/generate_messages.js && node scripts/build.js",
     "docs": "cd docs && make",
     "test": "node ./scripts/compile_tests.js && node --expose-gc ./scripts/run_test.js && npm run dtslint",
     "dtslint": "node ./scripts/generate_tsd.js && dtslint test/types",
