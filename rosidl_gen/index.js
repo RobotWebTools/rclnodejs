@@ -14,6 +14,7 @@
 
 'use strict';
 
+const fsp = require('fs').promises;
 const fse = require('fs-extra');
 const {
   RosIdlDb,
@@ -29,7 +30,7 @@ const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
   path.delimiter
 );
 
-async function generateInPaths(paths) {
+async function generateInPaths(paths, options) {
   const pkgsInPaths = await Promise.all(
     paths.map((path) => packages.findPackagesInDirectory(path))
   );
@@ -47,15 +48,16 @@ async function generateInPaths(paths) {
 
   await Promise.all(
     pkgsInfo.map((pkgInfo) =>
-      generateJSStructFromIDL(pkgInfo, generatedRoot, rosIdlDb)
+      generateJSStructFromIDL(pkgInfo, generatedRoot, rosIdlDb, options)
     )
   );
+
   await Promise.all(
     pkgsEntries.map(([pkgName, pkgInfo]) =>
-      generateCppDefinitions(pkgName, pkgInfo, rosIdlDb)
+      generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options)
     )
   );
-  await generateTypesupportGypi(pkgsEntries, rosIdlDb);
+  await generateTypesupportGypi(pkgsEntries, rosIdlDb, options);
 }
 
 async function generateAll(forcedGenerating) {
@@ -68,10 +70,14 @@ async function generateAll(forcedGenerating) {
       path.join(__dirname, 'generator.json'),
       path.join(generatedRoot, 'generator.json')
     );
-    await generateInPaths(installedPackagePaths);
-    // await Promise.all(
-    //   installedPackagePaths.map((path) => generateInPath(path))
-    // );
+    const options = {
+      idlProvider: process.env.RCLNODEJS_USE_ROSIDL ? 'rosidl' : 'ref',
+    };
+    await generateInPaths(installedPackagePaths, options);
+    await fsp.writeFile(
+      path.join(generatedRoot, 'generator-options.js'),
+      `module.export = ${JSON.stringify(options)}`
+    );
   }
 }
 

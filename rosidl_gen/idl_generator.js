@@ -230,12 +230,17 @@ function generateServiceJSStruct(serviceInfo, dir) {
   return writeGeneratedCode(dir, fileName, generatedCode);
 }
 
-async function generateMessageJSStruct(messageInfo, dir, rosIdlDb) {
+async function generateMessageJSStruct(messageInfo, dir, rosIdlDb, options) {
   const spec = await rosIdlDb.getMessageSpec(messageInfo);
-  await generateMessageJSStructFromSpec(messageInfo, dir, spec);
+  await generateMessageJSStructFromSpec(messageInfo, dir, spec, options);
 }
 
-async function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
+async function generateMessageJSStructFromSpec(
+  messageInfo,
+  dir,
+  spec,
+  options
+) {
   dir = path.join(dir, `${spec.baseType.pkgName}`);
   const fileName =
     spec.baseType.pkgName +
@@ -250,6 +255,7 @@ async function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
       messageInfo: messageInfo,
       spec: spec,
       json: JSON.stringify(spec, null, '  '),
+      options,
     })
   );
   return writeGeneratedCode(dir, fileName, generatedCode);
@@ -294,7 +300,11 @@ function isServiceMessage(messageInfo) {
 }
 
 // All messages are combined in one cpp file to improve compile time.
-async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb) {
+async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options) {
+  if (options.idlProvider !== 'rosidl') {
+    return;
+  }
+
   const getStructType = (messageInfo) => {
     return `${messageInfo.pkgName}__${messageInfo.subFolder}__${messageInfo.interfaceName}`;
   };
@@ -355,7 +365,7 @@ async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb) {
   await fs.writeFile(path.join(outputDir, 'definitions.hpp'), header);
 }
 
-async function generateActionJSStruct(actionInfo, dir) {
+async function generateActionJSStruct(actionInfo, dir, options) {
   const spec = await parser.parseActionFile(
     actionInfo.pkgName,
     actionInfo.filePath
@@ -368,7 +378,8 @@ async function generateActionJSStruct(actionInfo, dir) {
       interfaceName: `${actionInfo.interfaceName}_Goal`,
     },
     dir,
-    spec.goal
+    spec.goal,
+    options
   );
 
   const resultMsg = generateMessageJSStructFromSpec(
@@ -378,7 +389,8 @@ async function generateActionJSStruct(actionInfo, dir) {
       interfaceName: `${actionInfo.interfaceName}_Result`,
     },
     dir,
-    spec.result
+    spec.result,
+    options
   );
 
   const feedbackMsg = generateMessageJSStructFromSpec(
@@ -388,7 +400,8 @@ async function generateActionJSStruct(actionInfo, dir) {
       interfaceName: `${actionInfo.interfaceName}_Feedback`,
     },
     dir,
-    spec.feedback
+    spec.feedback,
+    options
   );
 
   const sendGoalRequestSpec = actionMsgs.createSendGoalRequestSpec(
@@ -402,7 +415,8 @@ async function generateActionJSStruct(actionInfo, dir) {
       interfaceName: `${actionInfo.interfaceName}_SendGoal_Request`,
     },
     dir,
-    sendGoalRequestSpec
+    sendGoalRequestSpec,
+    options
   );
 
   const sendGoalResponseSpec = actionMsgs.createSendGoalResponseSpec(
@@ -416,7 +430,8 @@ async function generateActionJSStruct(actionInfo, dir) {
       interfaceName: `${actionInfo.interfaceName}_SendGoal_Response`,
     },
     dir,
-    sendGoalResponseSpec
+    sendGoalResponseSpec,
+    options
   );
 
   const sendGoalSrv = generateServiceJSStruct(
@@ -439,7 +454,8 @@ async function generateActionJSStruct(actionInfo, dir) {
       interfaceName: `${actionInfo.interfaceName}_GetResult_Request`,
     },
     dir,
-    getResultRequestSpec
+    getResultRequestSpec,
+    options
   );
 
   const getResultResponseSpec = actionMsgs.createGetResultResponseSpec(
@@ -453,7 +469,8 @@ async function generateActionJSStruct(actionInfo, dir) {
       interfaceName: `${actionInfo.interfaceName}_GetResult_Response`,
     },
     dir,
-    getResultResponseSpec
+    getResultResponseSpec,
+    options
   );
 
   const getResultSrv = generateServiceJSStruct(
@@ -476,7 +493,8 @@ async function generateActionJSStruct(actionInfo, dir) {
       interfaceName: `${actionInfo.interfaceName}_FeedbackMessage`,
     },
     dir,
-    feedbackMessageSpec
+    feedbackMessageSpec,
+    options
   );
 
   const fileName =
@@ -507,19 +525,30 @@ async function generateActionJSStruct(actionInfo, dir) {
   ]);
 }
 
-async function generateJSStructFromIDL(pkg, dir, rosIdlDb) {
+async function generateJSStructFromIDL(pkg, dir, rosIdlDb, options) {
   await Promise.all([
     ...pkg.messages.map((messageInfo) =>
-      generateMessageJSStruct(messageInfo, dir, rosIdlDb)
+      generateMessageJSStruct(messageInfo, dir, rosIdlDb, options)
     ),
     ...pkg.services.map((serviceInfo) =>
       generateServiceJSStruct(serviceInfo, dir)
     ),
-    ...pkg.actions.map((actionInfo) => generateActionJSStruct(actionInfo, dir)),
+    ...pkg.actions.map((actionInfo) =>
+      generateActionJSStruct(actionInfo, dir, options)
+    ),
   ]);
 }
 
-async function generateTypesupportGypi(pkgsEntries, rosIdlDb) {
+async function generateTypesupportGypi(pkgsEntries, rosIdlDb, options) {
+  await fs.mkdir(path.join('src', 'generated'), { recursive: true });
+  if (options.idlProvider !== 'rosidl') {
+    await fs.writeFile(
+      path.join('src', 'generated', 'typesupport.gypi'),
+      '# not using rosidl\n{}'
+    );
+    return;
+  }
+
   const pkgs = await Promise.all(
     pkgsEntries.map(async ([pkgName, pkgInfo]) => ({
       pkgName,
