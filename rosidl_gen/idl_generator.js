@@ -26,21 +26,59 @@ class RosIdlDb {
     this.pkgIndex = pkgs;
     this.specIndex = {};
     this.messageInfoIndex = {};
+    this.dependentMessagesIndex = {};
     this.dependentPackagesIndex = {};
+    this.linkLibrariesIndex = {};
     for (let pkg of pkgs.values()) {
       pkg.messages.forEach((messageInfo) => {
-        this.messageInfoIndex[
-          `${messageInfo.pkgName}__${messageInfo.interfaceName}`
-        ] = messageInfo;
+        this.messageInfoIndex[this._messageInfoHash(messageInfo)] = messageInfo;
       });
     }
   }
 
-  getMessageInfoFromType(type) {
-    return this.messageInfoIndex[`${type.pkgName}__${type.type}`];
+  setSpec(messageInfo, spec) {
+    this.specIndex[this._messageInfoHash(messageInfo)] = spec;
   }
 
-  async getDependentMessages(pkgName) {
+  getMessageInfoFromType(type) {
+    return this.messageInfoIndex[`${type.pkgName}/${type.type}`];
+  }
+
+  /**
+   * Gets a list of all messages that a message depends on.
+   * @param {string} messageInfo Base message.
+   * @returns {object[]} An array of message infos.
+   */
+  async getDependentMessages(messageInfo) {
+    const key = this._messageInfoHash(messageInfo);
+    let dependentMessages = this.dependentMessagesIndex[key];
+    if (dependentMessages === undefined) {
+      this.dependentMessagesIndex[key] = new Promise(async (res) => {
+        const set = new Set();
+        const spec = await this.getMessageSpec(messageInfo);
+        spec.fields.forEach((field) => {
+          if (
+            field.type.pkgName &&
+            field.type.pkgName !== messageInfo.pkgName
+          ) {
+            // `this.getMessageInfoFromType` must always return the
+            // same object for the same type for this to work
+            set.add(this.getMessageInfoFromType(field.type));
+          }
+        });
+        res(Array.from(set.values()));
+      });
+      return this.dependentMessagesIndex[key];
+    }
+    return dependentMessages;
+  }
+
+  /**
+   * Gets a list of packages that a given package depends on.
+   * @param {string} pkgName Name of the base package
+   * @returns {Promise<string[]>} An array containing name of all dependent packages.
+   */
+  async getDependentPackages(pkgName) {
     let dependentPackages = this.dependentPackagesIndex[pkgName];
     if (dependentPackages === undefined) {
       this.dependentPackagesIndex[pkgName] = new Promise(async (res) => {
@@ -50,9 +88,7 @@ class RosIdlDb {
           const spec = await this.getMessageSpec(messageInfo);
           spec.fields.forEach((field) => {
             if (field.type.pkgName && field.type.pkgName !== pkgName) {
-              // `this.getMessageInfoFromType` must always return the
-              // same object for the same type for this to work
-              set.add(this.getMessageInfoFromType(field.type));
+              set.add(field.type.pkgName);
             }
           });
         }
@@ -64,7 +100,7 @@ class RosIdlDb {
   }
 
   _messageInfoHash(messageInfo) {
-    return `${messageInfo.pkgName}__${messageInfo.interfaceName}`;
+    return `${messageInfo.pkgName}/${messageInfo.interfaceName}`;
   }
 
   async getMessageSpec(messageInfo) {
@@ -84,13 +120,72 @@ class RosIdlDb {
     return promise;
   }
 
-  // _getDependentPackagesImpl(pkg)
+  async getLinkLibraries(pkgName) {
+    let linkLibraries = this.linkLibrariesIndex[pkgName];
+    if (linkLibraries === undefined) {
+      this.linkLibrariesIndex[pkgName] = new Promise(async (res) => {
+        const set = new Set();
+        const dependentPackages = await this.getDependentPackages(pkgName);
+        const dependentLibraries = (
+          await Promise.all(
+            dependentPackages.map((name) => this.getLinkLibraries(name))
+          )
+        ).flat();
+        dependentLibraries.forEach((lib) => set.add(lib));
 
-  // getDependentPackages(pkg) {
-  //   pkg.messages.forEach((messageInfo) => {
+        const pkg = this.pkgIndex.get(pkgName);
+        const generatorCLibs = await this._guessGeneratorCLibs(pkg);
+        generatorCLibs.forEach((lib) => set.add(lib));
 
-  //   })
-  // }
+        res(Array.from(set.values()));
+      });
+      linkLibraries = this.linkLibrariesIndex[pkgName];
+    }
+    return linkLibraries;
+  }
+
+  /**
+   * Tries to guess the libraries needed to be linked against for generator_c.
+   *
+   * Normally, the typesupport libraries are built at compiled time of the message packages. The
+   * libraries that have to be linked against are based on the name of the cmake target. Because
+   *
+   *   1. We are a third party library, so our typesupport cannot be built at the compile time.
+   *   2. We are use node-gyp as the build tool, so we can't use cmake to find the link libraries.
+   *
+   * The stopgap solution is then to use regexp on the cmake config files to try to find the
+   * required link libraries.
+   *
+   * @param {string} pkg package info
+   * @param {string} amentRoot ament root directory
+   * @returns {Promise<string[]>} an array of generator_c libraries found
+   */
+  async _guessGeneratorCLibs(pkg) {
+    const cmakeExport = await fs.readFile(
+      path.join(
+        pkg.amentRoot,
+        'share',
+        pkg.pkgName,
+        'cmake',
+        'ament_cmake_export_libraries-extras.cmake'
+      ),
+      'utf-8'
+    );
+    const match = cmakeExport.match(
+      /set\s*\(\s*(?:_exported_typesupport_libraries|_exported_libraries)\s*"(.*)"/
+    );
+    if (!match || match.length < 2) {
+      throw new Error(`unable to find generator_c library for ${pkg}`);
+    }
+    const libraries = match[1].replace(/:/g, ';');
+    const generatorCLibs = [];
+    libraries.split(';').forEach((lib) => {
+      if (lib.endsWith('rosidl_generator_c')) {
+        generatorCLibs.push(lib);
+      }
+    });
+    return generatorCLibs;
+  }
 }
 
 dot.templateSettings.strip = false;
@@ -140,7 +235,7 @@ async function generateMessageJSStruct(messageInfo, dir, rosIdlDb) {
   await generateMessageJSStructFromSpec(messageInfo, dir, spec);
 }
 
-function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
+async function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
   dir = path.join(dir, `${spec.baseType.pkgName}`);
   const fileName =
     spec.baseType.pkgName +
@@ -187,15 +282,15 @@ function getJsType(rosType) {
   return 'object';
 }
 
+function isInternalField(field) {
+  return field.name.startsWith('_');
+}
+
 function isServiceMessage(messageInfo) {
   return (
     messageInfo.interfaceName.endsWith('_Request') ||
     messageInfo.interfaceName.endsWith('_Response')
   );
-}
-
-function isInternalField(field) {
-  return field.name.startsWith('_');
 }
 
 // All messages are combined in one cpp file to improve compile time.
@@ -222,14 +317,14 @@ async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb) {
     }
   }
 
-  const dependentMessages = await rosIdlDb.getDependentMessages(pkgName);
+  const dependentPackages = await rosIdlDb.getDependentPackages(pkgName);
 
   const source = removeEmptyLines(
     dots.cppDefinitions({
       pkgName,
       pkgInfo,
       messages,
-      dependentMessages,
+      dependentPackages,
       rosIdlDb,
       getStructType,
       getRosHeaderField,
@@ -244,7 +339,7 @@ async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb) {
       pkgName,
       pkgInfo,
       messages,
-      dependentMessages,
+      dependentPackages,
       rosIdlDb,
       getStructType,
       getRosHeaderField,
@@ -424,55 +519,13 @@ async function generateJSStructFromIDL(pkg, dir, rosIdlDb) {
   ]);
 }
 
-/**
- * Tries to guess the libraries needed to be linked against for generator_c.
- *
- * Normally, the typesupport libraries are built at compiled time of the message packages. The
- * libraries that have to be linked against are based on the name of the cmake target. Because
- *
- *   1. We are a third party library, so our typesupport cannot be built at the compile time.
- *   2. We are use node-gyp as the build tool, so we can't use cmake to find the link libraries.
- *
- * The stopgap solution is then to use regexp on the cmake config files to try to find the
- * required link libraries.
- *
- * @param {string} pkg name of the package
- * @param {string} amentRoot ament root directory
- * @returns {string[]} an array of generator_c libraries found
- */
-async function guessGeneratorCLibs(pkg, amentRoot) {
-  const cmakeExport = await fs.readFile(
-    path.join(
-      amentRoot,
-      'share',
-      pkg,
-      'cmake',
-      'ament_cmake_export_libraries-extras.cmake'
-    ),
-    'utf-8'
-  );
-  const match = cmakeExport.match(
-    /set\s*\(\s*(?:_exported_typesupport_libraries|_exported_libraries)\s*"(.*)"/
-  );
-  if (!match || match.length < 2) {
-    throw new Error(`unable to find generator_c library for ${pkg}`);
-  }
-  const libraries = match[1].replace(/:/g, ';');
-  const typesupportCLibs = [];
-  libraries.split(';').forEach((lib) => {
-    if (lib.endsWith('rosidl_generator_c')) {
-      typesupportCLibs.push(lib);
-    }
-  });
-  return typesupportCLibs;
-}
-
-async function generateTypesupportGypi(pkgsEntries) {
+async function generateTypesupportGypi(pkgsEntries, rosIdlDb) {
   const pkgs = await Promise.all(
     pkgsEntries.map(async ([pkgName, pkgInfo]) => ({
       pkgName,
       pkgInfo,
-      typesupportLibs: await guessGeneratorCLibs(pkgName, pkgInfo.amentRoot),
+      linkLibraries: await rosIdlDb.getLinkLibraries(pkgName),
+      dependencies: await rosIdlDb.getDependentPackages(pkgName),
     }))
   );
   const rendered = removeEmptyLines(dots.typesupportGypi({ pkgs }));
