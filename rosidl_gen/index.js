@@ -71,12 +71,16 @@ async function generateAll(forcedGenerating) {
       path.join(generatedRoot, 'generator.json')
     );
     const options = {
-      idlProvider: process.env.RCLNODEJS_USE_ROSIDL ? 'rosidl' : 'ref',
+      idlProvider:
+        process.env.RCLNODEJS_USE_ROSIDL &&
+        process.env.RCLNODEJS_USE_ROSIDL !== '0'
+          ? 'rosidl'
+          : 'ref',
     };
     await generateInPaths(installedPackagePaths, options);
     await fsp.writeFile(
       path.join(generatedRoot, 'generator-options.js'),
-      `module.export = ${JSON.stringify(options)}`
+      `module.exports = ${JSON.stringify(options)}`
     );
   }
 }

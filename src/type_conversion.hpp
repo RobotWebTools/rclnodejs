@@ -59,6 +59,7 @@ inline rosidl_runtime_c__String ToNativeChecked<rosidl_runtime_c__String>(
     throw std::runtime_error("failed to convert value to string");
   }
   rosidl_runtime_c__String ros_string;
+  rosidl_runtime_c__String__init(&ros_string);
   rosidl_runtime_c__String__assign(&ros_string, *utf8);
   return ros_string;
 }
