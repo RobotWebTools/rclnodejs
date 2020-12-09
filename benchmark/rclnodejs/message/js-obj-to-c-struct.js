@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Benchmarks the performance in converting from native C struct to javascript objects.
+ * Benchmarks the performance in converting from to javascript objects to native C structs.
  * Requires the ros package "test_msgs" to be available.
  */
 const app = require('commander');
@@ -13,7 +13,7 @@ const runs = app.runs || 1;
 const BasicTypes = require('../../../generated/test_msgs/test_msgs__msg__BasicTypes');
 
 if (generatorOptions.idlProvider === 'rosidl') {
-  const rosMessage = BasicTypes.toRosMessage({
+  const jsObj = {
     bool_value: false,
     byte_value: 0,
     char_value: 0,
@@ -27,10 +27,10 @@ if (generatorOptions.idlProvider === 'rosidl') {
     uint32_value: 0,
     int64_value: BigInt(0),
     uint64_value: BigInt(0),
-  });
+  };
   const startTime = process.hrtime();
   for (let i = 0; i < runs; i++) {
-    BasicTypes.toJsObject(rosMessage);
+    BasicTypes.toRosMessage(jsObj);
   }
   const timeTaken = process.hrtime(startTime);
   console.log(
@@ -39,7 +39,7 @@ if (generatorOptions.idlProvider === 'rosidl') {
     )} milliseconds.`
   );
 } else {
-  const msg = new BasicTypes({
+  const jsObj = {
     bool_value: false,
     byte_value: 0,
     char_value: 0,
@@ -53,12 +53,11 @@ if (generatorOptions.idlProvider === 'rosidl') {
     uint32_value: 0,
     int64_value: 0,
     uint64_value: 0,
-  });
-  msg.freeze();
-  const rawMessage = msg._refObject;
+  };
   const startTime = process.hrtime();
   for (let i = 0; i < runs; i++) {
-    msg.deserialize(rawMessage);
+    const msg = new BasicTypes(jsObj);
+    msg.serialize();
   }
   const timeTaken = process.hrtime(startTime);
   console.log(
