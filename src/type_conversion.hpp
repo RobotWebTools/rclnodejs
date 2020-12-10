@@ -352,6 +352,31 @@ inline void WriteNativeArray<double>(v8::Local<v8::Value> val, double* arr,
 }
 
 template <typename T>
+inline void WriteNativeObjectArray(v8::Local<v8::Value> val, T* arr, size_t len,
+                                   v8::Local<v8::Value> node_buffer,
+                                   size_t offset,
+                                   v8::Local<v8::Function> typesupport_func) {
+  if (!val->IsArray()) {
+    throw TypeError({"array"});
+  }
+  auto array = val.As<v8::Array>();
+  if (array->Length() < len) {
+    throw OutOfRangeError(len);
+  }
+  auto msg_base = node::Buffer::Data(node_buffer) + offset;
+  v8::Local<v8::Value> argv[] = {Nan::Undefined(), node_buffer,
+                                 Nan::Undefined()};
+  for (size_t i = 0; i < len; ++i) {
+    auto item = Nan::Get(array, i).ToLocalChecked();
+    argv[0] = item;
+    argv[2] = Nan::New(
+        static_cast<uint32_t>(reinterpret_cast<char*>(&arr[i]) - msg_base));
+    Nan::Call(typesupport_func, Nan::New<v8::Object>(), 3, argv)
+        .ToLocalChecked();
+  }
+}
+
+template <typename T>
 inline v8::Local<v8::Value> ToJsChecked(T val) {
   return Nan::New(val);
 }
