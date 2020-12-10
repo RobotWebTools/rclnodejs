@@ -45,37 +45,6 @@ NAN_METHOD(rclnodejs__{{=message.structType}}::WriteRosMessage) {
     const jsType = it.getJsType(field.type);
       }}
       {{? !field.type.isArray}}
-        {{? jsType === 'number'}}
-    if (!js_value->IsNumber()) {
-      Nan::ThrowError(Nan::New("expected {{=field.name}} to be number").ToLocalChecked());
-      info.GetReturnValue().Set(Nan::Undefined());
-      return;
-    }
-        {{?? jsType === 'string'}}
-    if (!js_value->IsString()) {
-      Nan::ThrowError(Nan::New("expected {{=field.name}} to be string").ToLocalChecked());
-      info.GetReturnValue().Set(Nan::Undefined());
-      return;
-    }
-        {{?? jsType === 'boolean'}}
-    if (!js_value->IsBoolean()) {
-      Nan::ThrowError(Nan::New("expected {{=field.name}} to be boolean").ToLocalChecked());
-      info.GetReturnValue().Set(Nan::Undefined());
-      return;
-    }
-        {{?? jsType === 'bigint'}}
-    if (!js_value->IsBigInt()) {
-      Nan::ThrowError(Nan::New("expected {{=field.name}} to be bigint").ToLocalChecked());
-      info.GetReturnValue().Set(Nan::Undefined());
-      return;
-    }
-        {{??}}
-    if (!js_value->IsObject()) {
-      Nan::ThrowError(Nan::New("expected {{=field.name}} to be {{=field.type.type}} object").ToLocalChecked());
-      info.GetReturnValue().Set(Nan::Undefined());
-      return;
-    }
-        {{?}}
         {{? field.type.isPrimitiveType}}
     msg->{{=field.name}} = ToNativeChecked<decltype(msg->{{=field.name}})>(js_value);
         {{??}}
