@@ -7,8 +7,10 @@
 #include <rosidl_runtime_c/u16string.h>
 #include <rosidl_runtime_c/u16string_functions.h>
 
+#include <codecvt>
 #include <exception>
 #include <limits>
+#include <locale>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -37,6 +39,16 @@ class TypeError : public std::exception {
   std::string _expected_types;
   std::string _what;
 };
+
+std::u16string string_to_u16string(const std::string& input) {
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
+  return converter.from_bytes(input);
+}
+
+std::string u16string_to_string(const std::u16string& input) {
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
+  return converter.to_bytes(input);
+}
 
 template <typename T>
 inline T ToNative(v8::Local<v8::Value> val);
@@ -169,8 +181,19 @@ inline rosidl_runtime_c__String ToNative<rosidl_runtime_c__String>(
 template <>
 inline rosidl_runtime_c__U16String ToNative<rosidl_runtime_c__U16String>(
     v8::Local<v8::Value> val) {
-  // TODO:
-  throw std::runtime_error("not implemented");
+  if (!val->IsString()) {
+    throw TypeError({"string"});
+  };
+  Nan::Utf8String utf8(val);
+  if (*utf8 == nullptr) {
+    throw std::runtime_error("failed to convert value to string");
+  }
+  auto u16s = string_to_u16string(*utf8);
+  rosidl_runtime_c__U16String ros_string;
+  rosidl_runtime_c__U16String__init(&ros_string);
+  rosidl_runtime_c__U16String__assign(
+      &ros_string, reinterpret_cast<const uint16_t*>(u16s.c_str()));
+  return ros_string;
 }
 
 template <typename T>
