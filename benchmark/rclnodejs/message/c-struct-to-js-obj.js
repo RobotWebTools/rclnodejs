@@ -56,9 +56,12 @@ if (generatorOptions.idlProvider === 'rosidl') {
   });
   msg.freeze();
   const rawMessage = msg._refObject;
+  const deserializeFunc = process.env.RCLNODEJS_NO_ZEROCOPY
+    ? (rawMessage) => msg.toPlainObject(msg.deserialize(rawMessage))
+    : (rawMessage) => msg.deserialize(rawMessage);
   const startTime = process.hrtime();
   for (let i = 0; i < runs; i++) {
-    msg.deserialize(rawMessage);
+    deserializeFunc(rawMessage);
   }
   const timeTaken = process.hrtime(startTime);
   console.log(
