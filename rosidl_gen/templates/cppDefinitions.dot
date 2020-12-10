@@ -37,48 +37,48 @@ NAN_METHOD(rclnodejs__{{=message.structType}}::WriteRosMessage) {
   auto* msg = reinterpret_cast<{{=message.structType}}*>(buffer + offset);
   auto typesupport = Nan::To<v8::Object>(info[3]).ToLocalChecked();
 
-{{~ message.spec.fields : field}}
-{{? !it.isInternalField(field)}}
+  {{~ message.spec.fields : field}}
+    {{? !it.isInternalField(field)}}
   {
     auto js_value = Nan::Get(jsObj, Nan::New("{{=field.name}}").ToLocalChecked()).ToLocalChecked();
-{{
+      {{
     const jsType = it.getJsType(field.type);
-}}
-{{? jsType === 'number'}}
+      }}
+      {{? !field.type.isArray}}
+        {{? jsType === 'number'}}
     if (!js_value->IsNumber()) {
       Nan::ThrowError(Nan::New("expected {{=field.name}} to be number").ToLocalChecked());
       info.GetReturnValue().Set(Nan::Undefined());
       return;
     }
-{{?? jsType === 'string'}}
+        {{?? jsType === 'string'}}
     if (!js_value->IsString()) {
       Nan::ThrowError(Nan::New("expected {{=field.name}} to be string").ToLocalChecked());
       info.GetReturnValue().Set(Nan::Undefined());
       return;
     }
-{{?? jsType === 'boolean'}}
+        {{?? jsType === 'boolean'}}
     if (!js_value->IsBoolean()) {
       Nan::ThrowError(Nan::New("expected {{=field.name}} to be boolean").ToLocalChecked());
       info.GetReturnValue().Set(Nan::Undefined());
       return;
     }
-{{?? jsType === 'bigint'}}
+        {{?? jsType === 'bigint'}}
     if (!js_value->IsBigInt()) {
       Nan::ThrowError(Nan::New("expected {{=field.name}} to be bigint").ToLocalChecked());
       info.GetReturnValue().Set(Nan::Undefined());
       return;
     }
-{{??}}
+        {{??}}
     if (!js_value->IsObject()) {
       Nan::ThrowError(Nan::New("expected {{=field.name}} to be {{=field.type.type}} object").ToLocalChecked());
       info.GetReturnValue().Set(Nan::Undefined());
       return;
     }
-{{?}}
-{{? !field.type.isArray}}
-{{? field.type.isPrimitiveType}}
+        {{?}}
+        {{? field.type.isPrimitiveType}}
     msg->{{=field.name}} = ToNativeChecked<decltype(msg->{{=field.name}})>(js_value);
-{{??}}
+        {{??}}
     {
       auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
       auto typesupport_func = Nan::To<v8::Function>(Nan::Get(typesupport_msg, Nan::New("writeRosMessage").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
@@ -90,12 +90,20 @@ NAN_METHOD(rclnodejs__{{=message.structType}}::WriteRosMessage) {
       };
       Nan::Call(typesupport_func, Nan::New<v8::Object>(), 3, argv).ToLocalChecked();
     }
-{{?}}
-{{??}}
-    // TODO: handle array types
-{{?}}
+        {{?}}
+      {{??}}
+        {{? field.type.isFixedSizeArray}}
+          {{? field.type.isPrimitiveType}}
+    WriteNativeArray<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, msg->{{=field.name}}, {{=field.type.arraySize}});
+          {{??}}
+    // TODO: handle non-primitive arrays types
+          {{?}}
+        {{??}}
+    // TODO: handle sequences
+        {{?}}
+    {{?}}
   }
-{{?}}
+  {{?}}
 {{~}}
 
   info.GetReturnValue().Set(Nan::Undefined());
