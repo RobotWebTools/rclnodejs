@@ -71,4 +71,45 @@ describe('rclnodejs message communication', function () {
     rclnodejs.spin(subscriptionNode);
     rclnodejs.spin(publisherNode);
   });
+
+  it.only('overwrites the default values when it is provided', function (done) {
+    const publisherNode = rclnodejs.createNode('defaults_message_publisher');
+    const subscriptionNode = rclnodejs.createNode(
+      'defaults_message_subscriber'
+    );
+
+    const subscription = subscriptionNode.createSubscription(
+      'test_msgs/msg/Defaults',
+      'defaults_message_channel2',
+      (msg) => {
+        timer.cancel();
+        assert.strictEqual(msg.bool_value, true);
+        assert.strictEqual(msg.byte_value, 50);
+        assert.strictEqual(msg.char_value, 100);
+        assert.strictEqual(msg.float32_value, 1.125);
+        assert.strictEqual(msg.float64_value, 1.125);
+        assert.strictEqual(msg.int8_value, -51);
+        assert.strictEqual(msg.uint8_value, 200);
+        assert.strictEqual(msg.int16_value, -1000);
+        assert.strictEqual(msg.uint16_value, 2000);
+        assert.strictEqual(msg.int32_value, -30000);
+        assert.strictEqual(msg.uint32_value, 60000);
+        assert.strictEqual(msg.int64_value, -40000000);
+        assert.strictEqual(msg.uint64_value, 50000000);
+        publisherNode.destroy();
+        subscriptionNode.destroy();
+        done();
+      }
+    );
+
+    const publisher = publisherNode.createPublisher(
+      'test_msgs/msg/Defaults',
+      'defaults_message_channel2'
+    );
+    const timer = publisherNode.createTimer(100, () => {
+      publisher.publish({ int8_value: -51 });
+    });
+    rclnodejs.spin(subscriptionNode);
+    rclnodejs.spin(publisherNode);
+  });
 });
