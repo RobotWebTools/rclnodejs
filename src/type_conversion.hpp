@@ -95,14 +95,13 @@ inline uint16_t ToNativeChecked<uint16_t>(v8::Local<v8::Value> val) {
 
 template <>
 inline int64_t ToNativeChecked<int64_t>(v8::Local<v8::Value> val) {
-  return val->ToBigInt(Nan::GetCurrentContext()).ToLocalChecked()->Int64Value();
+  return val->IntegerValue(Nan::GetCurrentContext()).ToChecked();
 }
 
 template <>
 inline uint64_t ToNativeChecked<uint64_t>(v8::Local<v8::Value> val) {
-  return val->ToBigInt(Nan::GetCurrentContext())
-      .ToLocalChecked()
-      ->Uint64Value();
+  return static_cast<uint64_t>(
+      val->IntegerValue(Nan::GetCurrentContext()).ToChecked());
 }
 
 template <>
@@ -383,13 +382,21 @@ inline v8::Local<v8::Value> ToJsChecked(T val) {
 
 template <>
 inline v8::Local<v8::Value> ToJsChecked<int64_t>(int64_t val) {
-  return v8::BigInt::New(Nan::GetCurrentContext()->GetIsolate(), val);
+  // max/min safe integer
+  if (val > 9007199254740991 || val < -9007199254740991) {
+    return v8::BigInt::New(Nan::GetCurrentContext()->GetIsolate(), val);
+  }
+  return Nan::New<v8::Number>(val);
 }
 
 template <>
 inline v8::Local<v8::Value> ToJsChecked<uint64_t>(uint64_t val) {
-  return v8::BigInt::NewFromUnsigned(Nan::GetCurrentContext()->GetIsolate(),
-                                     val);
+  // max/min safe integer
+  if (val > 9007199254740991) {
+    return v8::BigInt::NewFromUnsigned(Nan::GetCurrentContext()->GetIsolate(),
+                                       val);
+  }
+  return Nan::New<v8::Number>(val);
 }
 
 // can't specialize const ref, probably need to use SFINAE

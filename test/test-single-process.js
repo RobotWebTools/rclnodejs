@@ -51,7 +51,7 @@ describe('Test rclnodejs nodes in a single process', function () {
       'single_ps_channel1'
     );
     var timer = publisherNode.createTimer(100, () => {
-      publisher.publish(msg);
+      publisher.publish({ data: msg });
     });
     rclnodejs.spin(subscriptionNode);
     rclnodejs.spin(publisherNode);

@@ -6,8 +6,8 @@
 #include "definitions.hpp"
 #include "../../type_conversion.hpp"
 
-{{~ it.messages : message}}
-#include <{{=it.getRosHeaderField(message.info)}}>
+{{~ it.includeHeaders : header}}
+#include <{{=header}}>
 {{~}}
 
 namespace rclnodejs {

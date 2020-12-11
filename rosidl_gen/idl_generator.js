@@ -201,6 +201,15 @@ function pascalToSnakeCase(s) {
 }
 
 function getRosHeaderField(messageInfo) {
+  if (isServiceMessage(messageInfo)) {
+    const interfaceName = messageInfo.interfaceName.slice(
+      0,
+      messageInfo.interfaceName.lastIndexOf('_')
+    );
+    return `${messageInfo.pkgName}/${messageInfo.subFolder}/${pascalToSnakeCase(
+      interfaceName
+    )}.h`;
+  }
   return `${messageInfo.pkgName}/${messageInfo.subFolder}/${pascalToSnakeCase(
     messageInfo.interfaceName
   )}.h`;
@@ -326,18 +335,19 @@ async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options) {
     return getStructType(messageInfo);
   };
 
-  const messages = [];
+  const messages = await Promise.all(
+    pkgInfo.messages.map(async (messageInfo) => ({
+      info: messageInfo,
+      spec: await rosIdlDb.getMessageSpec(messageInfo),
+      structType: getStructType(messageInfo),
+    }))
+  );
 
-  // this is slower but doing it sequentially maintains ordering
-  for (let messageInfo of pkgInfo.messages) {
-    if (!isServiceMessage(messageInfo)) {
-      messages.push({
-        info: messageInfo,
-        spec: await rosIdlDb.getMessageSpec(messageInfo),
-        structType: getStructType(messageInfo),
-      });
-    }
-  }
+  const includeHeadersSet = new Set();
+  messages.forEach(({ info }) => {
+    includeHeadersSet.add(getRosHeaderField(info));
+  });
+  const includeHeaders = Array.from(includeHeadersSet.values());
 
   const dependentPackages = await rosIdlDb.getDependentPackages(pkgName);
 
@@ -346,10 +356,10 @@ async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options) {
       pkgName,
       pkgInfo,
       messages,
+      includeHeaders,
       dependentPackages,
       rosIdlDb,
       getStructType,
-      getRosHeaderField,
       getStructTypeFromRosType,
       getJsType,
       isInternalField,
@@ -364,7 +374,6 @@ async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options) {
       dependentPackages,
       rosIdlDb,
       getStructType,
-      getRosHeaderField,
       getStructTypeFromRosType,
       getJsType,
       isInternalField,
