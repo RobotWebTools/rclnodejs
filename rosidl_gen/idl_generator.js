@@ -250,14 +250,26 @@ async function generateMessageJSStructFromSpec(
     spec.msgName +
     '.js';
 
-  const generatedCode = removeEmptyLines(
-    dots.message({
-      messageInfo: messageInfo,
-      spec: spec,
-      json: JSON.stringify(spec, null, '  '),
-      options,
-    })
-  );
+  let generatedCode;
+  if (options.idlProvider === 'rosidl') {
+    generatedCode = removeEmptyLines(
+      dots.messageRosidl({
+        messageInfo: messageInfo,
+        spec: spec,
+        json: JSON.stringify(spec, null, '  '),
+        options,
+      })
+    );
+  } else {
+    generatedCode = removeEmptyLines(
+      dots.message({
+        messageInfo: messageInfo,
+        spec: spec,
+        json: JSON.stringify(spec, null, '  '),
+        options,
+      })
+    );
+  }
   return writeGeneratedCode(dir, fileName, generatedCode);
 }
 

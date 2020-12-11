@@ -49,7 +49,7 @@ NAN_METHOD(rclnodejs__{{=message.structType}}::WriteRosMessage) {
     msg->{{=field.name}} = ToNativeChecked<decltype(msg->{{=field.name}})>(js_value);
         {{??}}
     auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
-    auto typesupport_func = Nan::To<v8::Function>(Nan::Get(typesupport_msg, Nan::New("writeRosMessage").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
+    auto typesupport_func = Nan::To<v8::Function>(Nan::Get(typesupport_msg, Nan::New("_writeRosMessage").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
     auto {{=field.name}}_js_obj = Nan::Get(jsObj, Nan::New("{{=field.name}}").ToLocalChecked()).ToLocalChecked();
     v8::Local<v8::Value> argv[] = {
       {{=field.name}}_js_obj,
@@ -65,7 +65,7 @@ NAN_METHOD(rclnodejs__{{=message.structType}}::WriteRosMessage) {
           {{??}}
     // TODO: handle non-primitive arrays types
     auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
-    auto typesupport_func = Nan::To<v8::Function>(Nan::Get(typesupport_msg, Nan::New("writeRosMessage").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
+    auto typesupport_func = Nan::To<v8::Function>(Nan::Get(typesupport_msg, Nan::New("_writeRosMessage").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
     WriteNativeObjectArray<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, msg->{{=field.name}}, {{=field.type.arraySize}}, info[1], offset, typesupport_func);
           {{?}}
         {{??}}
