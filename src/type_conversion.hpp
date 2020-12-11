@@ -31,7 +31,7 @@ class TypeError : public std::exception {
 
   const char* what() const noexcept override { return _what.c_str(); }
 
-  std::string what_detailed(const std::string& field_name) {
+  std::string what_detailed(const std::string& field_name) const {
     return "expected \"" + field_name + "\" to be " + _expected_types;
   }
 
@@ -48,7 +48,7 @@ class OutOfRangeError : public std::exception {
 
   const char* what() const noexcept override { return _what.c_str(); }
 
-  std::string what_detailed(const std::string& field_name) {
+  std::string what_detailed(const std::string& field_name) const {
     return "expected \"" + field_name + "\" to have length " +
            std::to_string(_len);
   }
