@@ -252,7 +252,19 @@ inline void WriteNativeArrayImpl(v8::Local<v8::Value> val, NativeT* arr,
 }
 
 template <typename T>
-inline void WriteNativeArray(v8::Local<v8::Value> val, T* arr, size_t len);
+inline void WriteNativeArray(v8::Local<v8::Value> val, T* arr, size_t len) {
+  if (!val->IsArray()) {
+    throw TypeError({"array"});
+  }
+  auto array = val.As<v8::Array>();
+  if (array->Length() < len) {
+    throw OutOfRangeError(len);
+  }
+  for (size_t i = 0; i < len; ++i) {
+    auto item = Nan::Get(array, i).ToLocalChecked();
+    arr[i] = ToNativeChecked<T>(std::move(item));
+  }
+}
 
 template <>
 inline void WriteNativeArray<int8_t>(v8::Local<v8::Value> val, int8_t* arr,
@@ -318,43 +330,11 @@ inline void WriteNativeArray<bool>(v8::Local<v8::Value> val, bool* arr,
   }
 }
 
-template <>
-inline void WriteNativeArray<float>(v8::Local<v8::Value> val, float* arr,
-                                    size_t len) {
-  if (!val->IsArray()) {
-    throw TypeError({"array"});
-  }
-  auto array = val.As<v8::Array>();
-  if (array->Length() < len) {
-    throw OutOfRangeError(len);
-  }
-  for (size_t i = 0; i < len; ++i) {
-    auto item = Nan::Get(array, i).ToLocalChecked();
-    arr[i] = static_cast<float>(Nan::To<double>(std::move(item)).ToChecked());
-  }
-}
-
-template <>
-inline void WriteNativeArray<double>(v8::Local<v8::Value> val, double* arr,
-                                     size_t len) {
-  if (!val->IsArray()) {
-    throw TypeError({"array"});
-  }
-  auto array = val.As<v8::Array>();
-  if (array->Length() < len) {
-    throw OutOfRangeError(len);
-  }
-  for (size_t i = 0; i < len; ++i) {
-    auto item = Nan::Get(array, i).ToLocalChecked();
-    arr[i] = Nan::To<double>(std::move(item)).ToChecked();
-  }
-}
-
 template <typename T>
-inline void WriteNativeObjectArray(v8::Local<v8::Value> val, T* arr, size_t len,
-                                   v8::Local<v8::Value> node_buffer,
-                                   size_t offset,
-                                   v8::Local<v8::Function> typesupport_func) {
+inline void WriteNativeObjectArray(
+    const v8::Local<v8::Value>& val, T* arr, size_t len,
+    const v8::Local<v8::Value>& node_buffer, size_t offset,
+    const v8::Local<v8::Object>& typesupport_msg) {
   if (!val->IsArray()) {
     throw TypeError({"array"});
   }
@@ -365,6 +345,12 @@ inline void WriteNativeObjectArray(v8::Local<v8::Value> val, T* arr, size_t len,
   auto msg_base = node::Buffer::Data(node_buffer) + offset;
   v8::Local<v8::Value> argv[] = {Nan::Undefined(), node_buffer,
                                  Nan::Undefined()};
+  auto typesupport_func =
+      Nan::To<v8::Function>(
+          Nan::Get(typesupport_msg,
+                   Nan::New("_writeRosMessage").ToLocalChecked())
+              .ToLocalChecked())
+          .ToLocalChecked();
   for (size_t i = 0; i < len; ++i) {
     auto item = Nan::Get(array, i).ToLocalChecked();
     argv[0] = item;
@@ -399,19 +385,52 @@ inline v8::Local<v8::Value> ToJsChecked<uint64_t>(uint64_t val) {
   return Nan::New<v8::Number>(val);
 }
 
-// can't specialize const ref, probably need to use SFINAE
 template <>
 inline v8::Local<v8::Value> ToJsChecked<rosidl_runtime_c__String>(
     rosidl_runtime_c__String val) {
   return Nan::New(val.data).ToLocalChecked();
 }
 
-// can't specialize const ref, probably need to use SFINAE
 template <>
 inline v8::Local<v8::Value> ToJsChecked<rosidl_runtime_c__U16String>(
     rosidl_runtime_c__U16String val) {
-  // TODO:
-  throw new std::runtime_error("not implemented");
+  return Nan::New(u16string_to_string(reinterpret_cast<char16_t*>(val.data)))
+      .ToLocalChecked();
+}
+
+template <typename T>
+inline v8::Local<v8::Value> ToJsArrayChecked(T* arr, size_t len) {
+  auto js_array = Nan::New<v8::Array>();
+  for (size_t i = 0; i < len; i++) {
+    Nan::Set(js_array, i, ToJsChecked(arr[i]));
+  }
+  return js_array;
+}
+
+template <typename T>
+inline v8::Local<v8::Value> ToJsObjectArrayChecked(
+    T* arr, size_t len, const v8::Local<v8::Value>& node_buffer, size_t offset,
+    const v8::Local<v8::Object>& typesupport_msg) {
+  auto js_array = Nan::New<v8::Array>();
+
+  auto msg_base = node::Buffer::Data(node_buffer) + offset;
+  v8::Local<v8::Value> argv[] = {Nan::Undefined(), node_buffer,
+                                 Nan::Undefined()};
+  auto typesupport_func =
+      Nan::To<v8::Function>(
+          Nan::Get(typesupport_msg, Nan::New("_toJsObject").ToLocalChecked())
+              .ToLocalChecked())
+          .ToLocalChecked();
+
+  for (size_t i = 0; i < len; i++) {
+    argv[0] = node_buffer;
+    argv[1] = Nan::New(
+        static_cast<uint32_t>(reinterpret_cast<char*>(&arr[i]) - msg_base));
+    auto js_obj = Nan::Call(typesupport_func, Nan::New<v8::Object>(), 2, argv)
+                      .ToLocalChecked();
+    Nan::Set(js_array, i, js_obj);
+  }
+  return js_array;
 }
 
 }  // namespace rclnodejs

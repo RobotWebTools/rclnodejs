@@ -61,11 +61,11 @@ describe('rclnodejs message communication', function () {
       }
     );
 
-    var publisher = publisherNode.createPublisher(
+    const publisher = publisherNode.createPublisher(
       'test_msgs/msg/Defaults',
       'defaults_message_channel1'
     );
-    var timer = publisherNode.createTimer(100, () => {
+    const timer = publisherNode.createTimer(100, () => {
       publisher.publish({});
     });
     rclnodejs.spin(subscriptionNode);

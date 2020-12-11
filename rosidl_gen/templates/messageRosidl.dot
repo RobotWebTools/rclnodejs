@@ -267,6 +267,7 @@ class {{=objectWrapper}} {
   freeze(own = false, checkConsistency = false) {
     if (Object.getOwnPropertyNames(this._proxyObj).length === 0) {
       this._rawRos = {{=objectWrapper}}._createRosMessage();
+      return;
     }
     this._rawRos = {{=objectWrapper}}._toRosMessage(this._proxyObj);
   }
