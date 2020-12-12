@@ -24,6 +24,7 @@ const fs = require('fs');
 const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
+const Node = require('./lib/node.js');
 const NodeOptions = require('./lib/node_options.js');
 const {
   FloatingPointRange,
@@ -130,6 +131,9 @@ let rcl = {
   /** {@link Logging} class */
   logging: logging,
 
+  /** {@link Node} class */
+  Node: Node,
+
   /** {@link NodeOptions} class */
   NodeOptions: NodeOptions,
 
@@ -196,13 +200,7 @@ let rcl = {
     context = Context.defaultContext(),
     options = NodeOptions.defaultOptions
   ) {
-    return _createNode(
-      nodeName,
-      namespace,
-      context,
-      options,
-      rclnodejs.ShadowNode
-    );
+    return new Node(nodeName, namespace, context, options);
   },
 
   /**
@@ -221,13 +219,12 @@ let rcl = {
     context = Context.defaultContext(),
     options = NodeOptions.defaultOptions
   ) {
-    return _createNode(
-      nodeName,
-      namespace,
-      context,
-      options,
-      Lifecycle.LifecycleNode
-    );
+    return new this.lifecycle.LifecycleNode(nodeName, namespace, context, options);
+},
+
+  // TODO revisit
+  isActiveContext(context) {
+    return this._contexts.has(context);
   },
 
   /**
@@ -240,7 +237,7 @@ let rcl = {
    */
   async init(context = Context.defaultContext(), argv = process.argv) {
     // check if context has already been initialized
-    if (this._contextToNodeArrayMap.has(context)) {
+    if (this._contexts.has(context)) {
       throw new Error('The context has already been initialized.');
     }
 
@@ -254,7 +251,7 @@ let rcl = {
 
     // initialize context
     rclnodejs.init(context.handle, argv);
-    this._contextToNodeArrayMap.set(context, []);
+    this._contexts.add(context);
 
     if (this._rosVersionChecked) {
       // no further processing required
@@ -444,46 +441,43 @@ module.exports = rcl;
 
 // The following statements are located here to work around a
 // circular dependency issue occurring in rate.js
-const Node = require('./lib/node.js');
 const TimeSource = require('./lib/time_source.js');
 
 /** {@link TimeSource} class */
 rcl.TimeSource = TimeSource;
 
-inherits(rclnodejs.ShadowNode, Node);
+// function _createNode(
+//   nodeName,
+//   namespace = '',
+//   context = Context.defaultContext(),
+//   options = NodeOptions.defaultOptions,
+//   nodeClass
+// ) {
+//   if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
+//     throw new TypeError('Invalid argument.');
+//   }
 
-function _createNode(
-  nodeName,
-  namespace = '',
-  context = Context.defaultContext(),
-  options = NodeOptions.defaultOptions,
-  nodeClass
-) {
-  if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
-    throw new TypeError('Invalid argument.');
-  }
+//   if (!rcl._contextToNodeArrayMap.has(context)) {
+//     throw new Error(
+//       'Invalid context. Must call rclnodejs(context) before using the context'
+//     );
+//   }
 
-  if (!rcl._contextToNodeArrayMap.has(context)) {
-    throw new Error(
-      'Invalid context. Must call rclnodejs(context) before using the context'
-    );
-  }
+//   let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
+//   let node = new nodeClass();
+//   node.handle = handle;
+//   Object.defineProperty(node, 'handle', {
+//     configurable: false,
+//     writable: false,
+//   }); // make read-only
+//   node.context = context;
+//   node.init(nodeName, namespace, context, options);
+//   debug(
+//     'Finish initializing node, name = %s and namespace = %s.',
+//     nodeName,
+//     namespace
+//   );
 
-  let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
-  let node = new nodeClass();
-  node.handle = handle;
-  Object.defineProperty(node, 'handle', {
-    configurable: false,
-    writable: false,
-  }); // make read-only
-  node.context = context;
-  node.init(nodeName, namespace, context, options);
-  debug(
-    'Finish initializing node, name = %s and namespace = %s.',
-    nodeName,
-    namespace
-  );
-
-  rcl._contextToNodeArrayMap.get(context).push(node);
-  return node;
-}
+//   rcl._contextToNodeArrayMap.get(context).push(node);
+//   return node;
+// }
