@@ -161,6 +161,29 @@ declare module 'rclnodejs' {
     options(): NodeOptions;
 
     /**
+     * Trigger the event loop to continuously check for and route.
+     * incoming events.
+     * @param node - The node to be spun up.
+     * @param - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
+     * @throws Error if the node is already spinning.
+     */
+    spin(timeout?: number): void
+
+    /**
+     * Spin the node and trigger the event loop to check for one incoming event. Thereafter the node
+     * will not received additional events until running additional calls to spin() or spinOnce().
+     * @param node - The node to be spun.
+     * @param  - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
+     * @throws An error if the node is already spinning.
+     */
+    spinOnce(timeout?: number): void;
+
+    /**
+     * Terminate spinning - no further events will be received.
+     */
+    stop(): void;
+
+    /**
      * Create a Timer.
      *
      * @param period - Elapsed time between interrupt events (milliseconds).

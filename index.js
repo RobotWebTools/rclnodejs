@@ -24,7 +24,6 @@ const fs = require('fs');
 const generator = require('./rosidl_gen/index.js');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
-const Node = require('./lib/node.js');
 const NodeOptions = require('./lib/node_options.js');
 const {
   FloatingPointRange,
@@ -50,14 +49,6 @@ const {
   getActionServerNamesAndTypesByNode,
   getActionNamesAndTypes,
 } = require('./lib/action/graph.js');
-const Lifecycle = require('./lib/lifecycle.js');
-
-function inherits(target, source) {
-  const properties = Object.getOwnPropertyNames(source.prototype);
-  properties.forEach((property) => {
-    target.prototype[property] = source.prototype[property];
-  });
-}
 
 /**
  * Get the version of the generator that was used for the currently present interfaces.
@@ -95,9 +86,6 @@ async function getCurrentGeneratorVersion() {
 let rcl = {
   _rosVersionChecked: false,
 
-  // Map<Context,Array<Node>
-  _contextToNodeArrayMap: new Map(),
-
   /** {@link Clock} class */
   Clock: Clock,
 
@@ -125,14 +113,8 @@ let rcl = {
   /** {@link IntegerRange} class */
   IntegerRange: IntegerRange,
 
-  /** Lifecycle namespace */
-  lifecycle: Lifecycle,
-
   /** {@link Logging} class */
   logging: logging,
-
-  /** {@link Node} class */
-  Node: Node,
 
   /** {@link NodeOptions} class */
   NodeOptions: NodeOptions,
@@ -193,6 +175,7 @@ let rcl = {
    * @param {NodeOptions} [options=NodeOptions.defaultOptions] - The options to configure the new node behavior.
    * @return {Node} A new instance of the specified node.
    * @throws {Error} If the given context is not registered.
+   * @deprecated since 0.18.0, Use new Node constructor.
    */
   createNode(
     nodeName,
@@ -200,7 +183,7 @@ let rcl = {
     context = Context.defaultContext(),
     options = NodeOptions.defaultOptions
   ) {
-    return new Node(nodeName, namespace, context, options);
+    return new this.Node(nodeName, namespace, context, options);
   },
 
   /**
@@ -212,6 +195,7 @@ let rcl = {
    * @param {NodeOptions} [options=NodeOptions.defaultOptions] - The options to configure the new node behavior.
    * @return {LifecycleNode} A new instance of the specified node.
    * @throws {Error} If the given context is not registered.
+   * @deprecated since 0.18.0, Use new LifecycleNode constructor.
    */
   createLifecycleNode(
     nodeName,
@@ -219,16 +203,19 @@ let rcl = {
     context = Context.defaultContext(),
     options = NodeOptions.defaultOptions
   ) {
-    return new this.lifecycle.LifecycleNode(nodeName, namespace, context, options);
-},
-
-  // TODO revisit
-  isActiveContext(context) {
-    return this._contexts.has(context);
+    return new this.lifecycle.LifecycleNode(
+      nodeName,
+      namespace,
+      context,
+      options
+    );
   },
 
   /**
-   * Initialize the module.
+   * Initialize an RCL environment, i.e., a Context, and regenerate the javascript
+   * message files if the output format of the message-generator tool has changed.
+   * The context serves as a container for nodes, publishers, subscribers, etc. and
+   * must be initialized before use.
    * @param {Context} [context=Context.defaultContext()] - The context to initialize.
    * @param {string[]} argv - Process command line arguments.
    * @return {Promise<undefined>} A Promise.
@@ -237,7 +224,7 @@ let rcl = {
    */
   async init(context = Context.defaultContext(), argv = process.argv) {
     // check if context has already been initialized
-    if (this._contexts.has(context)) {
+    if (!context.isUninitialized()) {
       throw new Error('The context has already been initialized.');
     }
 
@@ -249,9 +236,7 @@ let rcl = {
       throw new TypeError('argv elements must be strings (and not null).');
     }
 
-    // initialize context
     rclnodejs.init(context.handle, argv);
-    this._contexts.add(context);
 
     if (this._rosVersionChecked) {
       // no further processing required
@@ -269,77 +254,69 @@ let rcl = {
     }
 
     await generator.generateAll(forced);
+    // TODO determine if tsd generateAll() should be here
     this._rosVersionChecked = true;
   },
 
   /**
-   * Start to spin the node, which triggers the event loop to start to check the incoming events.
+   * Start detection and processing of units of work.
+   * @param {Node} node - The node to be spun up.
+   * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
+   * @throws {Error} If the node is already spinning.
+   * @return {undefined}
+   * @deprecated since 0.18.0, Use Node.spin(timeout)
+   */
+  spin(node, timeout = 10) {
+    node.spin(timeout);
+  },
+
+  /**
+   * Spin the node and trigger the event loop to check for one incoming event. Thereafter the node
+   * will not received additional events until running additional calls to spin() or spinOnce().
    * @param {Node} node - The node to be spun.
    * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
    * @throws {Error} If the node is already spinning.
    * @return {undefined}
-   */
-  spin(node, timeout = 10) {
-    if (!(node instanceof rclnodejs.ShadowNode)) {
-      throw new TypeError('Invalid argument.');
-    }
-    if (node.spinning) {
-      throw new Error('The node is already spinning.');
-    }
-    node.startSpinning(timeout);
-  },
-
-  /**
-   * Execute one item of work or wait until a timeout expires.
-   * @param {Node} node - The node to be spun once.
-   * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
-   * @throws {Error} If the node is already spinning.
-   * @return {undefined}
+   * @deprecated since 0.18.0, Use Node.spinOnce(timeout)
    */
   spinOnce(node, timeout = 10) {
-    if (!(node instanceof rclnodejs.ShadowNode)) {
-      throw new TypeError('Invalid argument.');
-    }
-    if (node.spinning) {
-      throw new Error('The node is already spinning.');
-    }
-    node.spinOnce(node.context.handle, timeout);
+    node.spinOnce(timeout);
   },
 
   /**
-   * Shuts down the given context by shutting down and destroying all nodes contained within.
+   * Shutdown an RCL environment identified by a context. The shutdown process will
+   * destroy all nodes and related resources in the context. If no context is
+   * explicitly given, the default context will be shut down.
+   * This follows the semantics of
+   * [rclpy.shutdown()]{@link http://docs.ros2.org/latest/api/rclpy/api/init_shutdown.html#rclpy.shutdown}.
    *
-   * If no context is explicitly given, only the default context will be shut down, and not all of them.
-   * This follows the semantics of [rclpy.shutdown()]{@link http://docs.ros2.org/latest/api/rclpy/api/init_shutdown.html#rclpy.shutdown}.
-   *
-   * @param {Context} [context=Context.defaultContext()] - The context to be shutdown.
-   * @return {undefined}
-   * @throws {Error} If there is a problem shutting down the context or while destroying or shutting down a node within it.
+   * @param { Context } [context = Context.defaultContext()] - The context to be shutdown.
+   * @return { undefined }
+   * @throws { Error } If there is a problem shutting down the context or while destroying or shutting down a node within it.
    */
   shutdown(context = Context.defaultContext()) {
-    if (this.isShutdown(context)) {
-      debug(
-        `The module rclnodejs (with context handle ${context.handle}) has been shutdown.`
-      );
-    } else {
-      // shutdown and remove all nodes assigned to context
-      this._contextToNodeArrayMap.get(context).forEach((node) => {
-        node.stopSpinning();
-        node.destroy();
-      });
-      this._contextToNodeArrayMap.delete(context);
+    context.shutdown();
+  },
 
-      context.shutdown();
+  /**
+   * Shutdown all RCL environments via their contexts.
+   * @return { undefined }
+   * @throws { Error } If there is a problem shutting down the context or while destroying or shutting down a node within it.
+   */
+  shutdownAll() {
+    for (const context of Context.instances) {
+      this.shutdown(context);
     }
   },
 
   /**
-   * A predicate for testing if a context has been shutdown.
+   * Determine if an RCL environment identified by a context argument
+   * has been shutdown.
    * @param {Context} [context=Context.defaultContext()] - The context to inspect.
    * @return {boolean} Return true if the module is shut down, otherwise return false.
    */
   isShutdown(context = Context.defaultContext()) {
-    return !this._contextToNodeArrayMap.has(context);
+    return !context.isInitialized();
   },
 
   /**
@@ -431,53 +408,26 @@ const _sigHandler = () => {
   // shuts down all live contexts. Applications that wishes to use their own signal handlers
   // should call `rclnodejs.removeSignalHandlers`.
   debug('Catch ctrl+c event and will cleanup and terminate.');
-  for (const ctx of rcl._contextToNodeArrayMap.keys()) {
-    rcl.shutdown(ctx);
-  }
+  rcl.shutdownAll();
 };
 process.on('SIGINT', _sigHandler);
 
 module.exports = rcl;
 
 // The following statements are located here to work around a
-// circular dependency issue occurring in rate.js
+// circular dependency issue occurring in rate.js.
+// Do not change the order of the following imports.
+const Node = require('./lib/node.js');
+
+/** {@link Node} class */
+rcl.Node = Node;
+
 const TimeSource = require('./lib/time_source.js');
 
 /** {@link TimeSource} class */
 rcl.TimeSource = TimeSource;
 
-// function _createNode(
-//   nodeName,
-//   namespace = '',
-//   context = Context.defaultContext(),
-//   options = NodeOptions.defaultOptions,
-//   nodeClass
-// ) {
-//   if (typeof nodeName !== 'string' || typeof namespace !== 'string') {
-//     throw new TypeError('Invalid argument.');
-//   }
+const Lifecycle = require('./lib/lifecycle.js');
 
-//   if (!rcl._contextToNodeArrayMap.has(context)) {
-//     throw new Error(
-//       'Invalid context. Must call rclnodejs(context) before using the context'
-//     );
-//   }
-
-//   let handle = rclnodejs.createNode(nodeName, namespace, context.handle);
-//   let node = new nodeClass();
-//   node.handle = handle;
-//   Object.defineProperty(node, 'handle', {
-//     configurable: false,
-//     writable: false,
-//   }); // make read-only
-//   node.context = context;
-//   node.init(nodeName, namespace, context, options);
-//   debug(
-//     'Finish initializing node, name = %s and namespace = %s.',
-//     nodeName,
-//     namespace
-//   );
-
-//   rcl._contextToNodeArrayMap.get(context).push(node);
-//   return node;
-// }
+/** Lifecycle namespace */
+rcl.lifecycle = Lifecycle;
