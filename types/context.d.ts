@@ -58,7 +58,7 @@ declare module 'rclnodejs' {
      * Test if this context has been shutdown, i.e., context.shutdown().
      * @returns True if context has been shutdown; otherwise false
      */
-    isShutdown(): boolean
+    isShutdown(): boolean;
 
     /**
      * Access nodes managed by this context.

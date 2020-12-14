@@ -167,7 +167,7 @@ declare module 'rclnodejs' {
      * @param - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
      * @throws Error if the node is already spinning.
      */
-    spin(timeout?: number): void
+    spin(timeout?: number): void;
 
     /**
      * Spin the node and trigger the event loop to check for one incoming event. Thereafter the node
