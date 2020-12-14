@@ -19,47 +19,6 @@
 
 namespace rclnodejs {
 
-class TypeError : public std::exception {
- public:
-  explicit TypeError(const std::vector<std::string>& expected_types) {
-    std::ostringstream oss;
-    for (size_t i = 0; i < expected_types.size() - 1; ++i) {
-      oss << expected_types[i] << " or ";
-    }
-    oss << expected_types[expected_types.size() - 1];
-    _expected_types = oss.str();
-    _what = "expected " + _expected_types;
-  }
-
-  const char* what() const noexcept override { return _what.c_str(); }
-
-  std::string what_detailed(const std::string& field_name) const {
-    return "expected \"" + field_name + "\" to be " + _expected_types;
-  }
-
- private:
-  std::string _expected_types;
-  std::string _what;
-};
-
-class OutOfRangeError : public std::exception {
- public:
-  explicit OutOfRangeError(size_t len) : _len(len) {
-    _what = "expected array to have length " + len;
-  }
-
-  const char* what() const noexcept override { return _what.c_str(); }
-
-  std::string what_detailed(const std::string& field_name) const {
-    return "expected \"" + field_name + "\" to have length " +
-           std::to_string(_len);
-  }
-
- private:
-  std::string _what;
-  size_t _len;
-};
-
 std::u16string string_to_u16string(const std::string& input) {
   std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
   return converter.from_bytes(input);
@@ -144,49 +103,6 @@ inline rosidl_runtime_c__U16String ToNativeChecked<rosidl_runtime_c__U16String>(
       &ros_string, reinterpret_cast<const uint16_t*>(u16s.c_str()));
   return ros_string;
 }
-
-template <typename TypedArrayT>
-struct TypedArrayName {};
-
-template <>
-struct TypedArrayName<v8::Int8Array> {
-  static constexpr const char* Name = "Int8Array";
-};
-
-template <>
-struct TypedArrayName<v8::Uint8Array> {
-  static constexpr const char* Name = "Uint8Array";
-};
-
-template <>
-struct TypedArrayName<v8::Int16Array> {
-  static constexpr const char* Name = "Int16Array";
-};
-
-template <>
-struct TypedArrayName<v8::Uint16Array> {
-  static constexpr const char* Name = "Uint16Array";
-};
-
-template <>
-struct TypedArrayName<v8::Int32Array> {
-  static constexpr const char* Name = "Int32Array";
-};
-
-template <>
-struct TypedArrayName<v8::Uint32Array> {
-  static constexpr const char* Name = "Uint32Array";
-};
-
-template <>
-struct TypedArrayName<v8::BigInt64Array> {
-  static constexpr const char* Name = "BigInt64Array";
-};
-
-template <>
-struct TypedArrayName<v8::BigUint64Array> {
-  static constexpr const char* Name = "BigUint64Array";
-};
 
 template <typename TypedArrayT>
 inline bool IsTypedArray(v8::Local<v8::Value> val);

@@ -49,60 +49,52 @@ NAN_METHOD(rclnodejs__{{=message.structType}}::WriteRosMessage) {
 
 {{~ message.spec.fields : field}}
 {{? !it.isInternalField(field)}}
-  try {
-    [&](){
-      auto js_value = Nan::Get(js_obj, Nan::New("{{=field.name}}").ToLocalChecked()).ToLocalChecked();
+  [&](){
+    auto js_value = Nan::Get(js_obj, Nan::New("{{=field.name}}").ToLocalChecked()).ToLocalChecked();
 {{? field.default_value !== null}}
-      if (js_value->IsUndefined()) {
-        // default value is initialized when message is created.
-        return;
-      }
+    if (js_value->IsUndefined()) {
+      // default value is initialized when message is created.
+      return;
+    }
 {{?}}
       {{
-    const jsType = it.getJsType(field.type);
+const jsType = it.getJsType(field.type);
       }}
 {{? !field.type.isArray}}
 {{? field.type.isPrimitiveType}}
-      msg->{{=field.name}} = ToNativeChecked<decltype(msg->{{=field.name}})>(js_value);
+    msg->{{=field.name}} = ToNativeChecked<decltype(msg->{{=field.name}})>(js_value);
 {{??}}
-      auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
-      auto typesupport_func = Nan::To<v8::Function>(Nan::Get(typesupport_msg, Nan::New("_writeRosMessage").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
-      v8::Local<v8::Value> argv[] = {
-        js_value,
-        Nan::New<v8::External>(&msg->{{=field.name}})
-      };
-      Nan::Call(typesupport_func, Nan::New<v8::Object>(), 2, argv).ToLocalChecked();
+    auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
+    auto typesupport_func = Nan::To<v8::Function>(Nan::Get(typesupport_msg, Nan::New("_writeRosMessage").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
+    v8::Local<v8::Value> argv[] = {
+      js_value,
+      Nan::New<v8::External>(&msg->{{=field.name}})
+    };
+    Nan::Call(typesupport_func, Nan::New<v8::Object>(), 2, argv).ToLocalChecked();
 {{?}}
 {{??}}
 {{? field.type.isFixedSizeArray}}
 {{? field.type.isPrimitiveType}}
-      WriteNativeArray<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, msg->{{=field.name}}, {{=field.type.arraySize}});
+    WriteNativeArray<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, msg->{{=field.name}}, {{=field.type.arraySize}});
 {{??}}
-      auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
-      WriteNativeObjectArray<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, msg->{{=field.name}}, {{=field.type.arraySize}}, typesupport_msg);
+    auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
+    WriteNativeObjectArray<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, msg->{{=field.name}}, {{=field.type.arraySize}}, typesupport_msg);
 {{?}}
 {{??}}
 {{? field.type.arraySize === null}}
-      size_t capacity = 0xffffffffffffffff;
+    size_t capacity = 0xffffffffffffffff;
 {{??}}
-      size_t capacity = {{=field.type.arraySize}};
+    size_t capacity = {{=field.type.arraySize}};
 {{?}}
 {{? field.type.isPrimitiveType}}
-      WriteNativeSequence<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, &msg->{{=field.name}}, capacity);
+    WriteNativeSequence<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, &msg->{{=field.name}}, capacity);
 {{??}}
-      auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
-      WriteNativeObjectSequence<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, &msg->{{=field.name}}, capacity, typesupport_msg);
+    auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
+    WriteNativeObjectSequence<std::remove_pointer_t<std::decay_t<decltype(msg->{{=field.name}})>>>(js_value, &msg->{{=field.name}}, capacity, typesupport_msg);
 {{?}}
 {{?}}
 {{?}}
-    }();
-  } catch (const TypeError& e) {
-    Nan::ThrowTypeError(Nan::New(e.what_detailed("{{=field.name}}")).ToLocalChecked());
-    return;
-  } catch (const OutOfRangeError& e) {
-    Nan::ThrowRangeError(Nan::New(e.what_detailed("{{=field.name}}")).ToLocalChecked());
-    return;
-  }
+  }();
 {{?}}
 {{~}}
 }
