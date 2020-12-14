@@ -2,6 +2,8 @@
 #define RCLNODEJS_TYPE_CONVERSION_HPP_
 
 #include <nan.h>
+#include <rosidl_runtime_c/primitives_sequence.h>
+#include <rosidl_runtime_c/primitives_sequence_functions.h>
 #include <rosidl_runtime_c/string.h>
 #include <rosidl_runtime_c/string_functions.h>
 #include <rosidl_runtime_c/u16string.h>
@@ -112,12 +114,15 @@ inline float ToNativeChecked<float>(v8::Local<v8::Value> val) {
 template <>
 inline rosidl_runtime_c__String ToNativeChecked<rosidl_runtime_c__String>(
     v8::Local<v8::Value> val) {
+  rosidl_runtime_c__String ros_string;
+  rosidl_runtime_c__String__init(&ros_string);
+  if (!val->IsString()) {
+    return ros_string;
+  };
   Nan::Utf8String utf8(val);
   if (*utf8 == nullptr) {
     throw std::runtime_error("failed to convert value to string");
   }
-  rosidl_runtime_c__String ros_string;
-  rosidl_runtime_c__String__init(&ros_string);
   rosidl_runtime_c__String__assign(&ros_string, *utf8);
   return ros_string;
 }
@@ -125,16 +130,16 @@ inline rosidl_runtime_c__String ToNativeChecked<rosidl_runtime_c__String>(
 template <>
 inline rosidl_runtime_c__U16String ToNativeChecked<rosidl_runtime_c__U16String>(
     v8::Local<v8::Value> val) {
+  rosidl_runtime_c__U16String ros_string;
+  rosidl_runtime_c__U16String__init(&ros_string);
   if (!val->IsString()) {
-    throw TypeError({"string"});
+    return ros_string;
   };
   Nan::Utf8String utf8(val);
   if (*utf8 == nullptr) {
     throw std::runtime_error("failed to convert value to string");
   }
   auto u16s = string_to_u16string(*utf8);
-  rosidl_runtime_c__U16String ros_string;
-  rosidl_runtime_c__U16String__init(&ros_string);
   rosidl_runtime_c__U16String__assign(
       &ros_string, reinterpret_cast<const uint16_t*>(u16s.c_str()));
   return ros_string;
@@ -231,11 +236,11 @@ inline void WriteNativeArrayImpl(v8::Local<v8::Value> val, NativeT* arr,
                                  size_t len) {
   if (!IsTypedArray<TypedArrayT>(val)) {
     if (!val->IsArray()) {
-      throw TypeError({"array", TypedArrayName<TypedArrayT>::Name});
+      return;
     }
     auto array = val.As<v8::Array>();
     if (array->Length() < len) {
-      throw OutOfRangeError(len);
+      len = array->Length();
     }
     for (uint32_t i = 0; i < len; ++i) {
       auto native =
@@ -245,7 +250,7 @@ inline void WriteNativeArrayImpl(v8::Local<v8::Value> val, NativeT* arr,
   } else {
     auto typed_array = val.As<TypedArrayT>();
     if (typed_array->Length() < len) {
-      throw OutOfRangeError(len);
+      len = typed_array->Length();
     }
     typed_array->CopyContents(arr, len * sizeof(NativeT));
   }
@@ -254,11 +259,11 @@ inline void WriteNativeArrayImpl(v8::Local<v8::Value> val, NativeT* arr,
 template <typename T>
 inline void WriteNativeArray(v8::Local<v8::Value> val, T* arr, size_t len) {
   if (!val->IsArray()) {
-    throw TypeError({"array"});
+    return;
   }
   auto array = val.As<v8::Array>();
   if (array->Length() < len) {
-    throw OutOfRangeError(len);
+    len = array->Length();
   }
   for (size_t i = 0; i < len; ++i) {
     auto item = Nan::Get(array, i).ToLocalChecked();
@@ -318,11 +323,11 @@ template <>
 inline void WriteNativeArray<bool>(v8::Local<v8::Value> val, bool* arr,
                                    size_t len) {
   if (!val->IsArray()) {
-    throw TypeError({"array"});
+    return;
   }
   auto array = val.As<v8::Array>();
   if (array->Length() < len) {
-    throw OutOfRangeError(len);
+    len = array->Length();
   }
   for (size_t i = 0; i < len; ++i) {
     auto item = Nan::Get(array, i).ToLocalChecked();
@@ -333,18 +338,15 @@ inline void WriteNativeArray<bool>(v8::Local<v8::Value> val, bool* arr,
 template <typename T>
 inline void WriteNativeObjectArray(
     const v8::Local<v8::Value>& val, T* arr, size_t len,
-    const v8::Local<v8::Value>& node_buffer, size_t offset,
     const v8::Local<v8::Object>& typesupport_msg) {
   if (!val->IsArray()) {
-    throw TypeError({"array"});
+    return;
   }
   auto array = val.As<v8::Array>();
   if (array->Length() < len) {
-    throw OutOfRangeError(len);
+    len = array->Length();
   }
-  auto msg_base = node::Buffer::Data(node_buffer) + offset;
-  v8::Local<v8::Value> argv[] = {Nan::Undefined(), node_buffer,
-                                 Nan::Undefined()};
+  v8::Local<v8::Value> argv[2];
   auto typesupport_func =
       Nan::To<v8::Function>(
           Nan::Get(typesupport_msg,
@@ -354,11 +356,147 @@ inline void WriteNativeObjectArray(
   for (size_t i = 0; i < len; ++i) {
     auto item = Nan::Get(array, i).ToLocalChecked();
     argv[0] = item;
-    argv[2] = Nan::New(
-        static_cast<uint32_t>(reinterpret_cast<char*>(&arr[i]) - msg_base));
-    Nan::Call(typesupport_func, Nan::New<v8::Object>(), 3, argv)
+    argv[1] = Nan::New<v8::External>(&arr[i]);
+    Nan::Call(typesupport_func, Nan::New<v8::Object>(), 2, argv)
         .ToLocalChecked();
   }
+}
+
+template <typename SequenceT>
+inline void InitSequence(SequenceT* seq, size_t size);
+
+template <>
+inline void InitSequence<rosidl_runtime_c__bool__Sequence>(
+    rosidl_runtime_c__bool__Sequence* seq, size_t size) {
+  rosidl_runtime_c__bool__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__byte__Sequence>(
+    rosidl_runtime_c__byte__Sequence* seq, size_t size) {
+  rosidl_runtime_c__byte__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__char__Sequence>(
+    rosidl_runtime_c__char__Sequence* seq, size_t size) {
+  rosidl_runtime_c__char__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__float__Sequence>(
+    rosidl_runtime_c__float__Sequence* seq, size_t size) {
+  rosidl_runtime_c__float__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__double__Sequence>(
+    rosidl_runtime_c__double__Sequence* seq, size_t size) {
+  rosidl_runtime_c__double__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__int8__Sequence>(
+    rosidl_runtime_c__int8__Sequence* seq, size_t size) {
+  rosidl_runtime_c__int8__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__uint8__Sequence>(
+    rosidl_runtime_c__uint8__Sequence* seq, size_t size) {
+  rosidl_runtime_c__uint8__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__int16__Sequence>(
+    rosidl_runtime_c__int16__Sequence* seq, size_t size) {
+  rosidl_runtime_c__int16__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__uint16__Sequence>(
+    rosidl_runtime_c__uint16__Sequence* seq, size_t size) {
+  rosidl_runtime_c__uint16__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__int32__Sequence>(
+    rosidl_runtime_c__int32__Sequence* seq, size_t size) {
+  rosidl_runtime_c__int32__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__uint32__Sequence>(
+    rosidl_runtime_c__uint32__Sequence* seq, size_t size) {
+  rosidl_runtime_c__uint32__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__int64__Sequence>(
+    rosidl_runtime_c__int64__Sequence* seq, size_t size) {
+  rosidl_runtime_c__int64__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__uint64__Sequence>(
+    rosidl_runtime_c__uint64__Sequence* seq, size_t size) {
+  rosidl_runtime_c__uint64__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__String__Sequence>(
+    rosidl_runtime_c__String__Sequence* seq, size_t size) {
+  rosidl_runtime_c__String__Sequence__init(seq, size);
+}
+
+template <>
+inline void InitSequence<rosidl_runtime_c__U16String__Sequence>(
+    rosidl_runtime_c__U16String__Sequence* seq, size_t size) {
+  rosidl_runtime_c__U16String__Sequence__init(seq, size);
+}
+
+template <typename SequenceT>
+inline void WriteNativeSequence(v8::Local<v8::Value> val, SequenceT* seq,
+                                size_t capacity) {
+  if (!val->IsTypedArray() && !val->IsArray()) {
+    return;
+  }
+  uint32_t len;
+  if (val->IsTypedArray()) {
+    len = val.As<v8::TypedArray>()->Length();
+  } else {
+    len = val.As<v8::Array>()->Length();
+  }
+  if (capacity < len) {
+    len = capacity;
+  }
+  InitSequence(seq, len);
+  WriteNativeArray(val, seq->data, len);
+}
+
+template <typename SequenceT>
+inline void WriteNativeObjectSequence(
+    const v8::Local<v8::Value>& val, SequenceT* seq, size_t capacity,
+    const v8::Local<v8::Object>& typesupport_msg) {
+  if (!val->IsArray()) {
+    return;
+  }
+  auto array = val.As<v8::Array>();
+
+  auto len = array->Length();
+  if (capacity < len) {
+    len = capacity;
+  }
+
+  auto typesupport_func =
+      Nan::To<v8::Function>(
+          Nan::Get(typesupport_msg, Nan::New("_initSequence").ToLocalChecked())
+              .ToLocalChecked())
+          .ToLocalChecked();
+  v8::Local<v8::Value> argv[] = {Nan::New(len), Nan::New<v8::External>(seq)};
+  Nan::Call(typesupport_func, Nan::New<v8::Object>(), 2, argv).ToLocalChecked();
+
+  WriteNativeObjectArray(val, seq->data, len, typesupport_msg);
 }
 
 template <typename T>

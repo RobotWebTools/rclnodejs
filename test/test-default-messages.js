@@ -72,7 +72,7 @@ describe('rclnodejs message communication', function () {
     rclnodejs.spin(publisherNode);
   });
 
-  it.only('overwrites the default values when it is provided', function (done) {
+  it('overwrites the default values when it is provided', function (done) {
     const publisherNode = rclnodejs.createNode('defaults_message_publisher');
     const subscriptionNode = rclnodejs.createNode(
       'defaults_message_subscriber'

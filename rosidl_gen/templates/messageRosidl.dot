@@ -164,7 +164,7 @@ const currentTypedArrayElementType = getTypedArrayElementName(it.spec.baseType);
 
 function shouldRequire(baseType, fieldType) {
   let requiredModule = '{{=getPackageNameByType(fieldType)}}/{{=getModulePathByType(fieldType)}}';
-  let shouldRequire = !isPrimitivePackage(baseType) && (fieldType.isArray || !fieldType.isPrimitiveType || fieldType.type === 'string');
+  let shouldRequire = !isPrimitivePackage(baseType) && !fieldType.isPrimitiveType;
 
   if (shouldRequire && !isExisted(requiredModule)) {
     existedModules.push(requiredModule);
@@ -256,7 +256,11 @@ class {{=objectWrapper}} {
   }
 
   static _writeRosMessage(obj, buffer, offset) {
-    typesupport.writeRosMessage(obj, buffer, offset, typesupportDeps);
+    typesupport.writeRosMessage(typesupportDeps, obj, buffer, offset);
+  }
+
+  static _initSequence(size, msg) {
+    typesupport.initSequence(size, msg);
   }
 
   toRawROS() {

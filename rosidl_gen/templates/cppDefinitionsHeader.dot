@@ -21,6 +21,8 @@ class rclnodejs__{{=message.structType}} {
   static NAN_METHOD(WriteRosMessage);
 
   static NAN_METHOD(ToJsObject);
+
+  static NAN_METHOD(InitSequence);
 };
 {{~}}
 
