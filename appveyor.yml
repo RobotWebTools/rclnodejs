@@ -4,7 +4,7 @@ branches:
   only:
     - foxy-fitzroy
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 environment:
   nodejs_version: "12"
@@ -30,8 +30,8 @@ before_build:
   - choco install -y -s c:\download\ asio bullet cunit eigen tinyxml-usestl tinyxml2 log4cxx
   - appveyor DownloadFile https://github.com/ros2/ros2/releases/download/release-foxy-20201211/ros2-foxy-20201211-windows-release.amd64.zip
   - 7z x -y "c:\download\ros2-foxy-20201211-windows-release.amd64.zip" -o"c:\" > nul
-  - setx -m OPENSSL_CONF C:\OpenSSL-Win64\bin\openssl.cfg
-  - set PATH=C:\OpenSSL-Win64\bin;%PATH%
+  - setx -m OPENSSL_CONF C:\OpenSSL-v111-Win64\bin\openssl.cfg
+  - set PATH=C:\OpenSSL-v111-Win64\bin;%PATH%
   - setx AMENT_PYTHON_EXECUTABLE "c:\Python37"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
@@ -51,6 +51,6 @@ build_script:
   - npm run lint
 
 test_script:
-  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
+  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;C:\\Program Files\\CMake\\bin;%PATH%"
   - npm test
