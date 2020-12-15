@@ -245,22 +245,22 @@ class {{=objectWrapper}} {
     return typesupport.createRosMessage();
   }
 
-  static _toJsObject(buffer, offset = 0) {
-    return typesupport.toJsObject(buffer, offset, typesupportDeps);
+  static _toJsObject(rawRos) {
+    return typesupport.toJsObject(typesupportDeps, rawRos);
   }
 
   static _toRosMessage(obj) {
     const rosMessage = {{=objectWrapper}}._createRosMessage();
-    {{=objectWrapper}}._writeRosMessage(obj, rosMessage, 0);
+    {{=objectWrapper}}._writeRosMessage(obj, rosMessage);
     return rosMessage;
   }
 
-  static _writeRosMessage(obj, buffer, offset) {
-    typesupport.writeRosMessage(typesupportDeps, obj, buffer, offset);
+  static _writeRosMessage(obj, rawRos) {
+    typesupport.writeRosMessage(typesupportDeps, obj, rawRos);
   }
 
-  static _initSequence(size, msg) {
-    typesupport.initSequence(size, msg);
+  static _initSequence(size, rawRos) {
+    typesupport.initSequence(size, rawRos);
   }
 
   toRawROS() {

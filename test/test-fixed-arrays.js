@@ -60,20 +60,62 @@ describe('rclnodejs message communication', function () {
       'fixed_arrays_channel1',
       (msg) => {
         timer.cancel();
-        assert.deepStrictEqual(msg.bool_values, originalMsg.bool_values);
-        assert.deepStrictEqual(msg.byte_values, originalMsg.byte_values);
-        assert.deepStrictEqual(msg.char_values, originalMsg.char_values);
-        assert.deepStrictEqual(msg.float32_values, originalMsg.float32_values);
-        assert.deepStrictEqual(msg.float64_values, originalMsg.float64_values);
-        assert.deepStrictEqual(msg.int8_values, originalMsg.int8_values);
-        assert.deepStrictEqual(msg.uint8_values, originalMsg.uint8_values);
-        assert.deepStrictEqual(msg.int16_values, originalMsg.int16_values);
-        assert.deepStrictEqual(msg.uint16_values, originalMsg.uint16_values);
-        assert.deepStrictEqual(msg.int32_values, originalMsg.int32_values);
-        assert.deepStrictEqual(msg.uint32_values, originalMsg.uint32_values);
-        assert.deepStrictEqual(msg.int64_values, originalMsg.int64_values);
-        assert.deepStrictEqual(msg.uint64_values, originalMsg.uint64_values);
-        assert.deepStrictEqual(msg.string_values, originalMsg.string_values);
+        assert.deepStrictEqual(
+          Array.from(msg.bool_values),
+          originalMsg.bool_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.byte_values),
+          originalMsg.byte_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.char_values),
+          originalMsg.char_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.float32_values),
+          originalMsg.float32_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.float64_values),
+          originalMsg.float64_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.int8_values),
+          originalMsg.int8_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.uint8_values),
+          originalMsg.uint8_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.int16_values),
+          originalMsg.int16_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.uint16_values),
+          originalMsg.uint16_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.int32_values),
+          originalMsg.int32_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.uint32_values),
+          originalMsg.uint32_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.int64_values).map((i) => Number(i)),
+          originalMsg.int64_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.int64_values).map((i) => Number(i)),
+          originalMsg.uint64_values
+        );
+        assert.deepStrictEqual(
+          Array.from(msg.string_values),
+          originalMsg.string_values
+        );
         assert.strictEqual(msg.alignment_check, 0);
         assert.strictEqual(msg.defaults_values[0].bool_value, true);
         assert.strictEqual(msg.defaults_values[1].bool_value, true);

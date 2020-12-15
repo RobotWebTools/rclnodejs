@@ -452,35 +452,104 @@ inline v8::Local<v8::Value> ToJsChecked<rosidl_runtime_c__U16String>(
       .ToLocalChecked();
 }
 
+inline uint32_t JsArrayMaxLength() {
+  return std::numeric_limits<uint32_t>::max();
+}
+
 template <typename T>
-inline v8::Local<v8::Value> ToJsArrayChecked(T* arr, size_t len) {
+inline v8::Local<v8::Value> ToJsArrayChecked(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
   auto js_array = Nan::New<v8::Array>();
-  for (size_t i = 0; i < len; i++) {
+  auto* data = reinterpret_cast<char*>(buffer->GetContents().Data());
+  auto* arr = reinterpret_cast<T*>(data + offset);
+  uint32_t js_len = len > JsArrayMaxLength() ? JsArrayMaxLength() : len;
+  for (uint32_t i = 0; i < js_len; i++) {
     Nan::Set(js_array, i, ToJsChecked(arr[i]));
   }
   return js_array;
 }
 
+template <typename TypedArrayT>
+inline v8::Local<v8::TypedArray> _ToJsTypedArray(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return TypedArrayT::New(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<int8_t>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::Int8Array>(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<uint8_t>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::Uint8Array>(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<int16_t>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::Int16Array>(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<uint16_t>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::Uint16Array>(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<int32_t>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::Int32Array>(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<uint32_t>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::Uint32Array>(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<int64_t>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::BigInt64Array>(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<uint64_t>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::BigUint64Array>(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<float>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::Float32Array>(buffer, offset, len);
+}
+
+template <>
+inline v8::Local<v8::Value> ToJsArrayChecked<double>(
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len) {
+  return _ToJsTypedArray<v8::Float64Array>(buffer, offset, len);
+}
+
 template <typename T>
 inline v8::Local<v8::Value> ToJsObjectArrayChecked(
-    T* arr, size_t len, const v8::Local<v8::Value>& node_buffer, size_t offset,
+    const v8::Local<v8::ArrayBuffer>& buffer, size_t offset, size_t len,
     const v8::Local<v8::Object>& typesupport_msg) {
   auto js_array = Nan::New<v8::Array>();
-
-  auto msg_base = node::Buffer::Data(node_buffer) + offset;
-  v8::Local<v8::Value> argv[] = {Nan::Undefined(), node_buffer,
-                                 Nan::Undefined()};
+  uint32_t js_len = len > JsArrayMaxLength() ? JsArrayMaxLength() : len;
   auto typesupport_func =
       Nan::To<v8::Function>(
           Nan::Get(typesupport_msg, Nan::New("_toJsObject").ToLocalChecked())
               .ToLocalChecked())
           .ToLocalChecked();
-
-  for (size_t i = 0; i < len; i++) {
-    argv[0] = node_buffer;
-    argv[1] = Nan::New(
-        static_cast<uint32_t>(reinterpret_cast<char*>(&arr[i]) - msg_base));
-    auto js_obj = Nan::Call(typesupport_func, Nan::New<v8::Object>(), 2, argv)
+  v8::Local<v8::Value> argv[1];
+  for (uint32_t i = 0; i < js_len; ++i) {
+    argv[0] = v8::Uint8Array::New(buffer, offset, len * sizeof(T));
+    auto js_obj = Nan::Call(typesupport_func, Nan::New<v8::Object>(), 1, argv)
                       .ToLocalChecked();
     Nan::Set(js_array, i, js_obj);
   }
