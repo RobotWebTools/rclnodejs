@@ -147,9 +147,19 @@ inline bool IsTypedArray<v8::BigUint64Array>(v8::Local<v8::Value> val) {
   return val->IsBigUint64Array();
 }
 
+template <>
+inline bool IsTypedArray<v8::Float32Array>(v8::Local<v8::Value> val) {
+  return val->IsFloat32Array();
+}
+
+template <>
+inline bool IsTypedArray<v8::Float64Array>(v8::Local<v8::Value> val) {
+  return val->IsFloat64Array();
+}
+
 template <typename TypedArrayT, typename NativeT>
-inline void WriteNativeArrayImpl(v8::Local<v8::Value> val, NativeT* arr,
-                                 size_t len) {
+inline void _WriteNativeArrayImpl(v8::Local<v8::Value> val, NativeT* arr,
+                                  size_t len) {
   if (!IsTypedArray<TypedArrayT>(val)) {
     if (!val->IsArray()) {
       return;
@@ -190,65 +200,61 @@ inline void WriteNativeArray(v8::Local<v8::Value> val, T* arr, size_t len) {
 template <>
 inline void WriteNativeArray<int8_t>(v8::Local<v8::Value> val, int8_t* arr,
                                      size_t len) {
-  WriteNativeArrayImpl<v8::Int8Array, int8_t>(val, arr, len);
+  _WriteNativeArrayImpl<v8::Int8Array, int8_t>(val, arr, len);
 }
 
 template <>
 inline void WriteNativeArray<uint8_t>(v8::Local<v8::Value> val, uint8_t* arr,
                                       size_t len) {
-  WriteNativeArrayImpl<v8::Uint8Array, uint8_t>(val, arr, len);
+  _WriteNativeArrayImpl<v8::Uint8Array, uint8_t>(val, arr, len);
 }
 
 template <>
 inline void WriteNativeArray<int16_t>(v8::Local<v8::Value> val, int16_t* arr,
                                       size_t len) {
-  WriteNativeArrayImpl<v8::Int16Array, int16_t>(val, arr, len);
+  _WriteNativeArrayImpl<v8::Int16Array, int16_t>(val, arr, len);
 }
 
 template <>
 inline void WriteNativeArray<uint16_t>(v8::Local<v8::Value> val, uint16_t* arr,
                                        size_t len) {
-  WriteNativeArrayImpl<v8::Uint16Array, uint16_t>(val, arr, len);
+  _WriteNativeArrayImpl<v8::Uint16Array, uint16_t>(val, arr, len);
 }
 
 template <>
 inline void WriteNativeArray<int32_t>(v8::Local<v8::Value> val, int32_t* arr,
                                       size_t len) {
-  WriteNativeArrayImpl<v8::Int32Array, int32_t>(val, arr, len);
+  _WriteNativeArrayImpl<v8::Int32Array, int32_t>(val, arr, len);
 }
 
 template <>
 inline void WriteNativeArray<uint32_t>(v8::Local<v8::Value> val, uint32_t* arr,
                                        size_t len) {
-  WriteNativeArrayImpl<v8::Uint32Array, uint32_t>(val, arr, len);
+  _WriteNativeArrayImpl<v8::Uint32Array, uint32_t>(val, arr, len);
 }
 
 template <>
 inline void WriteNativeArray<int64_t>(v8::Local<v8::Value> val, int64_t* arr,
                                       size_t len) {
-  WriteNativeArrayImpl<v8::BigInt64Array, int64_t>(val, arr, len);
+  _WriteNativeArrayImpl<v8::BigInt64Array, int64_t>(val, arr, len);
 }
 
 template <>
 inline void WriteNativeArray<uint64_t>(v8::Local<v8::Value> val, uint64_t* arr,
                                        size_t len) {
-  WriteNativeArrayImpl<v8::BigUint64Array, uint64_t>(val, arr, len);
+  _WriteNativeArrayImpl<v8::BigUint64Array, uint64_t>(val, arr, len);
 }
 
 template <>
-inline void WriteNativeArray<bool>(v8::Local<v8::Value> val, bool* arr,
-                                   size_t len) {
-  if (!val->IsArray()) {
-    return;
-  }
-  auto array = val.As<v8::Array>();
-  if (array->Length() < len) {
-    len = array->Length();
-  }
-  for (size_t i = 0; i < len; ++i) {
-    auto item = Nan::Get(array, i).ToLocalChecked();
-    arr[i] = Nan::To<bool>(std::move(item)).ToChecked();
-  }
+inline void WriteNativeArray<float>(v8::Local<v8::Value> val, float* arr,
+                                    size_t len) {
+  _WriteNativeArrayImpl<v8::Float32Array, float>(val, arr, len);
+}
+
+template <>
+inline void WriteNativeArray<double>(v8::Local<v8::Value> val, double* arr,
+                                     size_t len) {
+  _WriteNativeArrayImpl<v8::Float64Array, double>(val, arr, len);
 }
 
 template <typename T>

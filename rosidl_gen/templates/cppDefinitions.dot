@@ -85,7 +85,7 @@ const jsType = it.getJsType(field.type);
     size_t capacity = {{=field.type.arraySize}};
 {{?}}
 {{? field.type.isPrimitiveType}}
-    WriteNativeSequence<std::decay_t<decltype(msg->{{=field.name}})>>(js_value, &msg->{{=field.name}}, capacity);
+    WriteNativeSequence<decltype(msg->{{=field.name}})>(js_value, &msg->{{=field.name}}, capacity);
 {{??}}
     auto typesupport_msg = Nan::To<v8::Object>(Nan::Get(typesupport, Nan::New("{{=field.type.pkgName}}/{{=field.type.type}}").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
     WriteNativeObjectSequence<std::decay_t<decltype(msg->{{=field.name}})>>(js_value, &msg->{{=field.name}}, capacity, typesupport_msg);
