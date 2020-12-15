@@ -38,7 +38,6 @@ describe('rclnodejs message communication', function () {
       JointState,
       'JointState',
       (state) => {
-        console.log(state.position);
         assert.deepStrictEqual(state.header.stamp.sec, 123456);
         assert.deepStrictEqual(state.header.stamp.nanosec, 789);
         assert.deepStrictEqual(state.header.frame_id, 'main frame');

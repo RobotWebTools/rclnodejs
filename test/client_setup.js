@@ -30,7 +30,7 @@ rclnodejs
     var publisher = node.createPublisher(Int8, 'back_add_two_ints');
     client.waitForService().then(() => {
       client.sendRequest(request, (response) => {
-        publisher.publish(response.sum);
+        publisher.publish({ data: response.sum });
       });
     });
 

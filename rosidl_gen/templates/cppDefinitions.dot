@@ -51,15 +51,13 @@ NAN_METHOD(rclnodejs__{{=message.structType}}::WriteRosMessage) {
 {{? !it.isInternalField(field)}}
   [&](){
     auto js_value = Nan::Get(js_obj, Nan::New("{{=field.name}}").ToLocalChecked()).ToLocalChecked();
-{{? field.default_value !== null}}
-    if (js_value->IsUndefined()) {
+    if (js_value->IsNullOrUndefined()) {
       // default value is initialized when message is created.
       return;
     }
-{{?}}
-      {{
+{{
 const jsType = it.getJsType(field.type);
-      }}
+}}
 {{? !field.type.isArray}}
 {{? field.type.isPrimitiveType}}
     msg->{{=field.name}} = ToNativeChecked<decltype(msg->{{=field.name}})>(js_value);

@@ -26,7 +26,7 @@ rclnodejs
 
     var publisher = node.createPublisher(RclString, 'topic');
     var timer = node.createTimer(100, () => {
-      publisher.publish(msg);
+      publisher.publish({ data: msg });
     });
     rclnodejs.spin(node);
 
