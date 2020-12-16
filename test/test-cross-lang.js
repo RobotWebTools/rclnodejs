@@ -106,7 +106,7 @@ describe('Cross-language interaction', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        publisher.publish({ data: msg });
       });
       rclnodejs.spin(node);
     });
@@ -135,7 +135,7 @@ describe('Cross-language interaction', function () {
       var msg = text;
 
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        publisher.publish({ data: msg });
       });
 
       rclnodejs.spin(node);
