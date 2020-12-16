@@ -7,11 +7,7 @@
 
 {{
 let objectWrapper = it.spec.msgName + 'Wrapper';
-let arrayWrapper = it.spec.msgName + 'ArrayWrapper';
 
-let refObjectType = it.spec.msgName + 'RefStruct';
-let refObjectArrayType = it.spec.msgName + 'RefStructArray';
-let refArrayType = it.spec.msgName + 'RefArray';
 const compactMsgDefJSON = JSON.stringify(JSON.parse(it.json));
 
 if (it.spec.fields.length === 0) {
@@ -67,82 +63,8 @@ function getPrimitiveNameByType(type) {
   }
 }
 
-function getTypedArrayName(type) {
-  const t = type.type.toLowerCase();
-  let typedArrayName;
-
-  switch (t) {
-    case 'byte':
-    case 'octet':
-    case 'uint8':
-      typedArrayName = 'Uint8Array';
-      break;
-    case 'char':
-    case 'int8':
-      typedArrayName = 'Int8Array';
-      break;
-    case 'int16':
-    case 'short':
-      typedArrayName = 'Int16Array';
-      break;
-    case 'uint16':
-    case 'unsigned short':
-      typedArrayName = 'Uint16Array';
-      break;
-    case 'int32':
-    case 'long':
-      typedArrayName = 'Int32Array';
-      break;
-    case 'uint32':
-    case 'unsigned long':
-      typedArrayName = 'Uint32Array';
-      break;
-    case 'float':
-    case 'float32':
-      typedArrayName = 'Float32Array';
-      break;
-    case 'double':
-    case 'float64':
-      typedArrayName = 'Float64Array';
-      break;
-    default:
-      typedArrayName = '';
-  }
-
-  return typedArrayName;
-}
-
-function getTypedArrayElementName(type) {
-  const t = type.type.toLowerCase();
-  if (t === 'int8') {
-    return 'int8';
-  } else if (t === 'uint8') {
-    return 'uint8';
-  } else if (t === 'int16') {
-    return 'int16';
-  } else if (t === 'uint16') {
-    return 'uint16';
-  } else if (t === 'int32') {
-    return 'int32';
-  } else if (t === 'uint32') {
-    return 'uint32';
-  } else if (t === 'float64') {
-    return 'double';
-  } else if (t === 'float32') {
-    return 'float';
-  } else if (t === 'char') {
-    return 'int8';
-  } else if (t === 'byte') {
-    return 'uint8';
-  } else {
-    return '';
-  }
-}
-
 const primitiveBaseType = ['Bool', 'Int8', 'UInt8', 'Int16', 'UInt16', 'Int32', 'UInt32',
                            'Int64', 'UInt64', 'Float64', 'Float32', 'Char', 'Byte', 'String'];
-const typedArrayType = ['int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32',
-                        'float64', 'float32', 'char', 'byte'];
 
 let existedModules = [];
 
@@ -154,17 +76,9 @@ function isPrimitivePackage(baseType) {
   return primitiveBaseType.indexOf(baseType.type) !== -1;
 }
 
-function isTypedArrayType(type) {
-  return typedArrayType.indexOf(type.type.toLowerCase()) !== -1;
-}
-
-const usePlainTypedArray = isTypedArrayType(it.spec.baseType);
-const currentTypedArray = getTypedArrayName(it.spec.baseType);
-const currentTypedArrayElementType = getTypedArrayElementName(it.spec.baseType);
-
 function shouldRequire(baseType, fieldType) {
   let requiredModule = '{{=getPackageNameByType(fieldType)}}/{{=getModulePathByType(fieldType)}}';
-  let shouldRequire = !isPrimitivePackage(baseType) && !fieldType.isPrimitiveType;
+  let shouldRequire = !fieldType.isPrimitiveType;
 
   if (shouldRequire && !isExisted(requiredModule)) {
     existedModules.push(requiredModule);
