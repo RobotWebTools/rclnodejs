@@ -17,6 +17,7 @@
 const rclnodejs = require('../index.js');
 const deepEqual = require('deep-equal');
 const arrayGen = require('./array_generator.js');
+const generatorOptions = require('../generated/generator-options');
 
 /* eslint-disable camelcase */
 /* eslint-disable indent */
@@ -35,7 +36,7 @@ describe('Rclnodejs message translation: primitive types', function () {
   [
     { type: 'Bool', values: [true, false] },
     { type: 'Byte', values: [0, 1, 2, 3, 255] },
-    { type: 'Char', values: [-128, -127, -2, -1, 0, 1, 2, 3, 127] },
+    { type: 'Char', values: [0, 1, 2, 3, 127, 128, 255] }, // char is unsigned in ROS
     { type: 'Float32', values: [-5, 0, 1.25, 89.75, 72.5, 3.14e5] },
     { type: 'Float64', values: [-5, 0, 1.25, 89.75, 72.5, 3.14159265358e8] },
     { type: 'Int16', values: [-32768, -2, -1, 0, 1, 2, 3, 32767] },
@@ -103,7 +104,11 @@ describe('Rclnodejs message translation: primitive types', function () {
                 );
               }
             });
-            publisher.publish(v); // Short-cut form of publishing primitive types
+            if (generatorOptions.idlProvider === 'rosidl') {
+              publisher.publish({ data: v }); // Short-cut form not supported in rosidl generator
+            } else {
+              publisher.publish(v); // Short-cut form of publishing primitive types
+            }
             rclnodejs.spin(node);
           });
         }

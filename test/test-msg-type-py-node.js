@@ -21,6 +21,7 @@ const childProcess = require('child_process');
 const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
+const generatorOptions = require('../generated/generator-options');
 
 describe('Rclnodejs - Python message type testing', function () {
   this.timeout(60 * 1000);
@@ -59,7 +60,15 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          if (generatorOptions.idlProvider === 'rosidl') {
+            publisher.publish({ data: msg }); // short form not supported by rosidl generator
+          } else {
+            publisher.publish(msg);
+          } // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -87,7 +96,7 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        publisher.publish({ data: msg.charCodeAt(0) });
       });
       rclnodejs.spin(node);
     });
@@ -115,7 +124,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -143,7 +156,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -171,7 +188,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -199,7 +220,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -227,7 +252,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -255,7 +284,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -283,7 +316,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -311,7 +348,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -339,7 +380,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -367,7 +412,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -395,7 +444,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });
@@ -423,7 +476,11 @@ describe('Rclnodejs - Python message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        publisher.publish(msg);
+        if (generatorOptions.idlProvider === 'rosidl') {
+          publisher.publish({ data: msg }); // short form not supported by rosidl generator
+        } else {
+          publisher.publish(msg);
+        }
       });
       rclnodejs.spin(node);
     });

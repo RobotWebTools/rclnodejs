@@ -16,6 +16,7 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
+const generatorOptions = require('../generated/generator-options');
 
 describe('Test rclnodejs nodes in a single process', function () {
   this.timeout(60 * 1000);
@@ -51,7 +52,11 @@ describe('Test rclnodejs nodes in a single process', function () {
       'single_ps_channel1'
     );
     var timer = publisherNode.createTimer(100, () => {
-      publisher.publish({ data: msg });
+      if (generatorOptions.idlProvider === 'rosidl') {
+        publisher.publish({ data: msg }); // short form not supported by rosidl generator
+      } else {
+        publisher.publish(msg);
+      }
     });
     rclnodejs.spin(subscriptionNode);
     rclnodejs.spin(publisherNode);
