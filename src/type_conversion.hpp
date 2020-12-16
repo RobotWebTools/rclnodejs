@@ -104,63 +104,10 @@ inline rosidl_runtime_c__U16String ToNativeChecked<rosidl_runtime_c__U16String>(
   return ros_string;
 }
 
-template <typename TypedArrayT>
-inline bool IsTypedArray(v8::Local<v8::Value> val);
-
-template <>
-inline bool IsTypedArray<v8::Int8Array>(v8::Local<v8::Value> val) {
-  return val->IsInt8Array();
-}
-
-template <>
-inline bool IsTypedArray<v8::Uint8Array>(v8::Local<v8::Value> val) {
-  return val->IsUint8Array();
-}
-
-template <>
-inline bool IsTypedArray<v8::Int16Array>(v8::Local<v8::Value> val) {
-  return val->IsInt16Array();
-}
-
-template <>
-inline bool IsTypedArray<v8::Uint16Array>(v8::Local<v8::Value> val) {
-  return val->IsUint16Array();
-}
-
-template <>
-inline bool IsTypedArray<v8::Int32Array>(v8::Local<v8::Value> val) {
-  return val->IsInt32Array();
-}
-
-template <>
-inline bool IsTypedArray<v8::Uint32Array>(v8::Local<v8::Value> val) {
-  return val->IsUint32Array();
-}
-
-template <>
-inline bool IsTypedArray<v8::BigInt64Array>(v8::Local<v8::Value> val) {
-  return val->IsBigInt64Array();
-}
-
-template <>
-inline bool IsTypedArray<v8::BigUint64Array>(v8::Local<v8::Value> val) {
-  return val->IsBigUint64Array();
-}
-
-template <>
-inline bool IsTypedArray<v8::Float32Array>(v8::Local<v8::Value> val) {
-  return val->IsFloat32Array();
-}
-
-template <>
-inline bool IsTypedArray<v8::Float64Array>(v8::Local<v8::Value> val) {
-  return val->IsFloat64Array();
-}
-
 template <typename TypedArrayT, typename NativeT>
 inline void _WriteNativeArrayImpl(v8::Local<v8::Value> val, NativeT* arr,
                                   size_t len) {
-  if (!IsTypedArray<TypedArrayT>(val)) {
+  if (!val->IsTypedArray()) {
     if (!val->IsArray()) {
       return;
     }
@@ -174,11 +121,11 @@ inline void _WriteNativeArrayImpl(v8::Local<v8::Value> val, NativeT* arr,
       arr[i] = native;
     }
   } else {
-    auto typed_array = val.As<TypedArrayT>();
-    if (typed_array->Length() < len) {
-      len = typed_array->Length();
-    }
-    typed_array->CopyContents(arr, len * sizeof(NativeT));
+    auto typed_array = val.As<v8::TypedArray>();
+    size_t copy_len = typed_array->ByteLength() < len * sizeof(NativeT)
+                          ? typed_array->ByteLength()
+                          : len * sizeof(NativeT);
+    typed_array->CopyContents(arr, copy_len);
   }
 }
 

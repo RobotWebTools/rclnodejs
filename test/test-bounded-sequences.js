@@ -63,7 +63,7 @@ describe('Test bounded sequeces', function () {
   const expected = {
     bool_values: [true, false],
     byte_values: Uint8Array.from([127, 125]),
-    char_values: Int8Array.from([127, 125]),
+    char_values: Int8Array.from([127, 125]), // char[] is uint8_t[] in ROS, the old serialization mistakenly deserialized it as Int8Array
     float32_values: Float32Array.from([1.1, 2.2, 3.3]),
     float64_values: Float64Array.from([1.1, 2.2]),
     int8_values: Int8Array.from([1, 2]),
@@ -120,7 +120,107 @@ describe('Test bounded sequeces', function () {
       'bounded_sequences',
       (response) => {
         clearInterval(timer);
-        assert.deepEqual(response, expected);
+        assert.deepStrictEqual(response.bool_values, expected.bool_values);
+        assert.deepStrictEqual(response.byte_values, expected.byte_values);
+        assert.deepStrictEqual(
+          Array.from(response.char_values),
+          Array.from(expected.char_values)
+        );
+        assert.deepStrictEqual(
+          response.float32_values,
+          expected.float32_values
+        );
+        assert.deepStrictEqual(
+          response.float64_values,
+          expected.float64_values
+        );
+        assert.deepStrictEqual(response.int8_values, expected.int8_values);
+        assert.deepStrictEqual(response.uint8_values, expected.uint8_values);
+        assert.deepStrictEqual(response.int16_values, expected.int16_values);
+        assert.deepStrictEqual(response.uint16_values, expected.uint16_values);
+        assert.deepStrictEqual(response.int32_values, expected.int32_values);
+        assert.deepStrictEqual(response.uint32_values, expected.uint32_values);
+        assert.deepStrictEqual(
+          Array.from(response.int64_values).map((i) => Number(i)),
+          expected.int64_values
+        );
+        assert.deepStrictEqual(
+          Array.from(response.uint64_values).map((i) => Number(i)),
+          expected.uint64_values
+        );
+        assert.deepStrictEqual(
+          Array.from(response.int64_values_default).map((i) => Number(i)),
+          expected.int64_values_default
+        );
+        assert.deepStrictEqual(
+          Array.from(response.uint64_values_default).map((i) => Number(i)),
+          expected.uint64_values_default
+        );
+        assert.deepStrictEqual(response.string_values, expected.string_values);
+        assert.deepStrictEqual(
+          response.basic_types_values,
+          expected.basic_types_values
+        );
+        assert.deepStrictEqual(
+          response.bool_values_default,
+          expected.bool_values_default
+        );
+        assert.deepStrictEqual(
+          response.byte_values_default,
+          expected.byte_values_default
+        );
+        assert.deepStrictEqual(
+          Array.from(response.char_values_default),
+          Array.from(expected.char_values_default)
+        );
+        assert.deepStrictEqual(
+          response.float32_values_default,
+          expected.float32_values_default
+        );
+        assert.deepStrictEqual(
+          response.float64_values_default,
+          expected.float64_values_default
+        );
+        assert.deepStrictEqual(
+          response.int16_values_default,
+          expected.int16_values_default
+        );
+        assert.deepStrictEqual(
+          response.int32_values_default,
+          expected.int32_values_default
+        );
+        assert.deepStrictEqual(
+          response.int8_values_default,
+          expected.int8_values_default
+        );
+        assert.deepStrictEqual(
+          response.string_values_default,
+          expected.string_values_default
+        );
+        assert.deepStrictEqual(
+          response.uint16_values_default,
+          expected.uint16_values_default
+        );
+        assert.deepStrictEqual(
+          response.uint32_values_default,
+          expected.uint32_values_default
+        );
+        assert.deepStrictEqual(
+          response.uint8_values_default,
+          expected.uint8_values_default
+        );
+        assert.deepStrictEqual(
+          response.alignment_check,
+          expected.alignment_check
+        );
+        assert.deepStrictEqual(
+          response.constants_values,
+          expected.constants_values
+        );
+        assert.deepStrictEqual(
+          response.defaults_values,
+          expected.defaults_values
+        );
         node.destroy();
         done();
       }
