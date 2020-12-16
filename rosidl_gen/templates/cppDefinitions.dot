@@ -133,7 +133,7 @@ NAN_METHOD(rclnodejs__{{=message.structType}}::ToJsObject) {
 {{?}}
 {{??}}
     auto sequence_buffer = Nan::NewBuffer(reinterpret_cast<char*>(msg->{{=field.name}}.data), msg->{{=field.name}}.size * sizeof(decltype(*msg->{{=field.name}}.data)), [](char*, void*) {}, nullptr).ToLocalChecked().As<v8::Uint8Array>();
-    Nan::Set(sequence_buffer, Nan::New("_rclnodejs_owner").ToLocalChecked(), info[1]).ToChecked();
+    Nan::Set(sequence_buffer->Buffer(), Nan::New("_rclnodejs_owner").ToLocalChecked(), info[1]).ToChecked();
 {{? field.type.isPrimitiveType}}
     Nan::Set(js_obj, Nan::New("{{=field.name}}").ToLocalChecked(), ToJsArrayChecked<std::decay_t<decltype(*msg->{{=field.name}}.data)>>(sequence_buffer->Buffer(), 0, msg->{{=field.name}}.size));
 {{??}}

@@ -233,7 +233,8 @@ class {{=objectWrapper}} {
   constructor(other) {
     this._rawRos = undefined;
     if (other === undefined) {
-      this._proxyObj = {};
+      this._rawRos = {{=objectWrapper}}._createRosMessage();
+      this._proxyObj = {{=objectWrapper}}._toJsObject(this._rawRos);
     } else if (other instanceof {{=objectWrapper}}) {
       this._proxyObj = other._proxyObj;
     } else {

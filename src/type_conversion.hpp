@@ -11,6 +11,7 @@
 
 #include <codecvt>
 #include <exception>
+#include <iostream>
 #include <limits>
 #include <locale>
 #include <sstream>
@@ -501,7 +502,7 @@ inline v8::Local<v8::Value> ToJsObjectArrayChecked(
           .ToLocalChecked();
   v8::Local<v8::Value> argv[1];
   for (uint32_t i = 0; i < js_len; ++i) {
-    argv[0] = v8::Uint8Array::New(buffer, offset, len * sizeof(T));
+    argv[0] = v8::Uint8Array::New(buffer, offset + i * sizeof(T), sizeof(T));
     auto js_obj = Nan::Call(typesupport_func, Nan::New<v8::Object>(), 1, argv)
                       .ToLocalChecked();
     Nan::Set(js_array, i, js_obj);
