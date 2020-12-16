@@ -69,7 +69,7 @@ describe('Multiple nodes interation testing', function () {
       );
       var jsPublisher = node.createPublisher(RclString, 'js_pycpp_chatter');
       setTimeout(() => {
-        jsPublisher.publish(msg);
+        jsPublisher.publish({ data: msg });
       }, 1000);
       rclnodejs.spin(node);
     });
