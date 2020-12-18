@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /* eslint-disable camelcase */
 // Copyright (c) 2018 Intel Corporation. All rights reserved.
 
