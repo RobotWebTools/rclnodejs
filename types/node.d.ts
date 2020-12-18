@@ -118,6 +118,22 @@ declare module 'rclnodejs' {
    * services, clients and timers.
    */
   class Node {
+
+  /**
+   * Create a node instance.
+   *
+   * @param nodeName - The name used to register in ROS.
+   * @param namespace - The namespace used in ROS, default is an empty string.
+   * @param context - The context, default is Context.defaultContext().
+   * @param options - The node options, default is NodeOptions.defaultOptions.
+   */
+    constructor(
+      nodeName: string,
+      namespace?: string,
+      context?: Context,
+      options?: NodeOptions
+    );
+
     /**
      * Get the name of the node.
      *
@@ -131,6 +147,13 @@ declare module 'rclnodejs' {
      * @returns The node namespace.
      */
     namespace(): string;
+
+    /**
+     * Get the Context that manages this node.
+     *
+     * @returns The context.
+     */
+    get context(): Context;
 
     /**
      * Get the nodes logger.
