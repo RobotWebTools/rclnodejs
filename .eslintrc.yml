@@ -6,6 +6,7 @@ globals:
   after: true
   constantly: true
 ignorePatterns: ['generated/', 'types/interfaces.d.ts']
+parser: 'babel-eslint'
 rules:
   prettier/prettier: 'error'
 extends: ['prettier']
