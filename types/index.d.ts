@@ -47,10 +47,11 @@ declare module 'rclnodejs' {
   function init(context?: Context, argv?: string[]): Promise<void>;
 
   /**
-   * Spin up the node event loop to check for incoming events.
+   * Start detection and processing of units of work.
    *
    * @param node - The node to be spun.
    * @param timeout - ms to wait, block forever if negative, return immediately when 0, default is 10.
+   * @deprecated since 0.18.0, Use Node.spin(timeout)
    */
   function spin(node: Node, timeout?: number): void;
 
@@ -59,7 +60,7 @@ declare module 'rclnodejs' {
    *
    * @param node - The node to be spun.
    * @param timeout - ms to wait, block forever if negative, return immediately when 0, default is 10.
-   */
+   * @deprecated since 0.18.0, Use Node.spinOnce(timeout)*/
   function spinOnce(node: Node, timeout?: number): void;
 
   /**
@@ -68,6 +69,12 @@ declare module 'rclnodejs' {
    * @param context - The context, default is Context.defaultContext()
    */
   function shutdown(context?: Context): void;
+
+  /**
+   * Shutdown all RCL environments via their contexts.
+   * @throws Error if there is a problem shutting down the context or while destroying or shutting down a node within it.
+   */
+  function shutdownAll(): void;
 
   /**
    * Test if the module is shutdown.

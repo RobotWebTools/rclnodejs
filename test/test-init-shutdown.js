@@ -118,7 +118,7 @@ describe('rclnodejs init and shutdown test suite', function () {
       const defaultCtx = rclnodejs.Context.defaultContext();
       assert.ok(defaultCtx !== null);
       assert.ok(defaultCtx.isOk);
-      assert.ok(defaultCtx.isDefaultContext);
+      assert.ok(defaultCtx.isDefaultContext());
 
       // init another one
       const ctx = new rclnodejs.Context();
@@ -126,9 +126,9 @@ describe('rclnodejs init and shutdown test suite', function () {
       assert.ok(!rclnodejs.isShutdown(ctx));
       assert.ok(!rclnodejs.isShutdown());
       assert.ok(ctx.isOk);
-      assert.ok(!ctx.isDefaultContext);
+      assert.ok(!ctx.isDefaultContext());
       assert.ok(defaultCtx.isOk);
-      assert.ok(defaultCtx.isDefaultContext);
+      assert.ok(defaultCtx.isDefaultContext());
 
       // shut down the default context
       rclnodejs.shutdown();
