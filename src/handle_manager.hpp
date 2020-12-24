@@ -54,7 +54,13 @@ class HandleManager {
   ~HandleManager();
 
   void SynchronizeHandles(const v8::Local<v8::Object> node);
-  void WaitForSynchronizing() { uv_sem_wait(&sem_); }
+  void WaitForSynchronizing();
+
+  // Waits the handles to be attached from the background thread.
+  void WaitForHandles();
+  // Signals to stop waiting the handles from the main thread.
+  void StopWaitingHandles();
+
   void ClearHandles();
 
   rcl_ret_t AddHandlesToWaitSet(rcl_wait_set_t* wait_set);
@@ -70,21 +76,21 @@ class HandleManager {
   uint32_t guard_condition_count() const { return guard_conditions_.size(); }
   uv_rwlock_t* handle_rwlock() { return &sync_handles_rwlock_; }
 
-  std::vector<rclnodejs::RclHandle*> TakeReadyHandles();
-
   uint32_t ready_handles_count();
 
+  // Takes the ownership of the handles that are ready to be taken.
+  std::vector<rclnodejs::RclHandle*> TakeReadyHandles();
+
+  // Thread safe function to get if the handles are being synchronized.
   bool is_synchronizing() const { return is_synchronizing_.load(); }
-  bool is_empty() const {
-    return subscriptions_.size() == 0 && services_.size() == 0 &&
-           clients_.size() == 0 && timers_.size() == 0 &&
-           guard_conditions_.size() == 0 && action_clients_.size() == 0 &&
-           action_servers_.size() == 0;
-  }
+
+  // Thread safe function to get the sum of the handles.
+  uint32_t sum() const { return sum_; }
 
  protected:
-  void SynchronizeHandlesByType(const v8::Local<v8::Object>& typeObject,
-                                std::vector<rclnodejs::RclHandle*>* vec);
+  // Synchronize the handles from `typeObject`.
+  uint32_t SynchronizeHandlesByType(const v8::Local<v8::Object>& typeObject,
+                                    std::vector<rclnodejs::RclHandle*>* vec);
   template <typename T>
   void CollectReadyHandlesByType(
       const T** struct_ptr, size_t size,
@@ -104,11 +110,24 @@ class HandleManager {
   std::vector<rclnodejs::RclHandle*> action_clients_;
   std::vector<rclnodejs::RclHandle*> ready_handles_;
 
-  uv_mutex_t mutex_;
+  // Protects the handles.
   uv_rwlock_t sync_handles_rwlock_;
   uv_rwlock_t ready_handles_rwlock_;
-  uv_sem_t sem_;
+
+  // Used to wait for handles added from the background thread.
+  uv_sem_t wait_handle_sem_;
+
+  // Used to wait from the background thread when the handles are being
+  // synchronized on the main thread.
+  uv_sem_t sync_handle_sem_;
+
+  // Atomically written from the main thread only, but read from background
+  // thread.
   std::atomic_bool is_synchronizing_;
+
+  // Sum of the handles attached to the current node, atomically written from
+  // the main thread.
+  std::atomic_uint32_t sum_;
 };
 
 }  // namespace rclnodejs
