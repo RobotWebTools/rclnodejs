@@ -18,7 +18,9 @@ const IsClose = require('is-close');
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
+const { NodeOptions } = require('../index.js');
 const assertThrowsError = assertUtils.assertThrowsError;
+const Context = require('../lib/context.js');
 
 describe('rclnodejs node test suite', function () {
   this.timeout(60 * 1000);
@@ -460,5 +462,47 @@ describe('topic & serviceName getter/setter', function () {
     var service = node.createService(AddTwoInts, 'add_two_ints', (req) => {});
     assert.deepStrictEqual(service.serviceName, 'add_two_ints');
     node.destroy();
+  });
+});
+
+describe('Test the node with no handles attached when initializing', function () {
+  this.timeout(60 * 1000);
+
+  before(function () {
+    return rclnodejs.init();
+  });
+
+  after(function () {
+    rclnodejs.shutdown();
+  });
+
+  it('Publish a topic after initialization', function (done) {
+    // Init the node with no parameter services.
+    const node = rclnodejs.createNode(
+      'publisher',
+      '/topic_getter',
+      Context.defaultContext(),
+      new NodeOptions(false, [], false)
+    );
+    const str = 'hello world';
+    rclnodejs.spin(node);
+
+    setTimeout(() => {
+      const publisher = node.createPublisher('std_msgs/msg/String', 'chatter');
+      publisher.publish(str);
+    }, 200);
+
+    setTimeout(() => {
+      // The backgroud thread should get waken up when the subscription is attached.
+      const subscription = node.createSubscription(
+        'std_msgs/msg/String',
+        'chatter',
+        (msg) => {
+          assert.deepStrictEqual(msg.data, str);
+          node.destroy();
+          done();
+        }
+      );
+    }, 100);
   });
 });

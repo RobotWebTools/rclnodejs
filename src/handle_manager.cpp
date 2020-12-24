@@ -27,15 +27,15 @@ HandleManager::HandleManager() {
   is_synchronizing_.store(false);
   uv_rwlock_init(&sync_handles_rwlock_);
   uv_rwlock_init(&ready_handles_rwlock_);
-  uv_mutex_init(&mutex_);
-  uv_sem_init(&sem_, 0);
+  uv_sem_init(&sync_handle_sem_, 0);
+  uv_sem_init(&wait_handle_sem_, 0);
 }
 
 HandleManager::~HandleManager() {
-  uv_mutex_destroy(&mutex_);
   uv_rwlock_destroy(&sync_handles_rwlock_);
   uv_rwlock_destroy(&ready_handles_rwlock_);
-  uv_sem_destroy(&sem_);
+  uv_sem_destroy(&sync_handle_sem_);
+  uv_sem_destroy(&wait_handle_sem_);
 }
 
 void HandleManager::SynchronizeHandles(const v8::Local<v8::Object> node) {
@@ -54,38 +54,44 @@ void HandleManager::SynchronizeHandles(const v8::Local<v8::Object> node) {
       Nan::Get(node, Nan::New("_actionClients").ToLocalChecked());
   Nan::MaybeLocal<v8::Value> action_servers =
       Nan::Get(node, Nan::New("_actionServers").ToLocalChecked());
-  is_synchronizing_.store(true);
 
+  uint32_t sum = 0;
+  is_synchronizing_.store(true);
   {
     ScopedReadWriteLock scoped_lock(&sync_handles_rwlock_,
                                     ScopedReadWriteLock::LockType::kWrite);
     ClearHandles();
-
-    SynchronizeHandlesByType(
+    sum += SynchronizeHandlesByType(
         Nan::To<v8::Object>(timers.ToLocalChecked()).ToLocalChecked(),
         &timers_);
-    SynchronizeHandlesByType(
+    sum += SynchronizeHandlesByType(
         Nan::To<v8::Object>(subscriptions.ToLocalChecked()).ToLocalChecked(),
         &subscriptions_);
-    SynchronizeHandlesByType(
+    sum += SynchronizeHandlesByType(
         Nan::To<v8::Object>(clients.ToLocalChecked()).ToLocalChecked(),
         &clients_);
-    SynchronizeHandlesByType(
+    sum += SynchronizeHandlesByType(
         Nan::To<v8::Object>(services.ToLocalChecked()).ToLocalChecked(),
         &services_);
-    SynchronizeHandlesByType(
+    sum += SynchronizeHandlesByType(
         Nan::To<v8::Object>(guard_conditions.ToLocalChecked()).ToLocalChecked(),
         &guard_conditions_);
-    SynchronizeHandlesByType(
+    sum += SynchronizeHandlesByType(
         Nan::To<v8::Object>(action_clients.ToLocalChecked()).ToLocalChecked(),
         &action_clients_);
-    SynchronizeHandlesByType(
+    sum += SynchronizeHandlesByType(
         Nan::To<v8::Object>(action_servers.ToLocalChecked()).ToLocalChecked(),
         &action_servers_);
   }
-
   is_synchronizing_.store(false);
-  uv_sem_post(&sem_);
+
+  // Signals that the synchronization has finished.
+  uv_sem_post(&sync_handle_sem_);
+
+  // Wakeup the backgroud thread if the sum was zero, but now it is greater than
+  // zero.
+  uint32_t sum_was = sum_.exchange(sum);
+  if (sum_was == 0 && sum_ > 0) uv_sem_post(&wait_handle_sem_);
 
   RCLNODEJS_DEBUG(
       "Add %lu timers, %lu subscriptions, %lu clients, %lu services, %lu "
@@ -93,6 +99,12 @@ void HandleManager::SynchronizeHandles(const v8::Local<v8::Object> node) {
       timers_.size(), subscriptions_.size(), clients_.size(), services_.size(),
       guard_conditions_.size());
 }
+
+void HandleManager::WaitForSynchronizing() { uv_sem_wait(&sync_handle_sem_); }
+
+void HandleManager::WaitForHandles() { uv_sem_wait(&wait_handle_sem_); }
+
+void HandleManager::StopWaitingHandles() { uv_sem_post(&wait_handle_sem_); }
 
 void HandleManager::ClearHandles() {
   timers_.clear();
@@ -252,7 +264,7 @@ uint32_t HandleManager::ready_handles_count() {
   return ready_handles_.size();
 }
 
-void HandleManager::SynchronizeHandlesByType(
+uint32_t HandleManager::SynchronizeHandlesByType(
     const v8::Local<v8::Object>& typeObject,
     std::vector<rclnodejs::RclHandle*>* vec) {
   Nan::HandleScope scope;
@@ -276,6 +288,7 @@ void HandleManager::SynchronizeHandlesByType(
       vec->push_back(rcl_handle);
     }
   }
+  return vec->size();
 }
 
 template <typename T>
