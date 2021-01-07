@@ -28,8 +28,8 @@ before_build:
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2019-10-24/tinyxml2.6.0.0.nupkg
   - appveyor DownloadFile https://github.com/ros2/choco-packages/releases/download/2019-10-24/log4cxx.0.10.0.nupkg
   - choco install -y -s c:\download\ asio bullet cunit eigen tinyxml-usestl tinyxml2 log4cxx
-  - appveyor DownloadFile https://github.com/ros2/ros2/releases/download/release-foxy-20201009/ros2-foxy-20201009-windows-release-amd64.zip
-  - 7z x -y "c:\download\ros2-foxy-20201009-windows-release-amd64.zip" -o"c:\" > nul
+  - appveyor DownloadFile https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip
+  - 7z x -y "c:\download\ros2-package-windows-AMD64.zip" -o"c:\" > nul
   - setx -m OPENSSL_CONF C:\OpenSSL-Win64\bin\openssl.cfg
   - set PATH=C:\OpenSSL-Win64\bin;%PATH%
   - setx AMENT_PYTHON_EXECUTABLE "c:\Python37"
