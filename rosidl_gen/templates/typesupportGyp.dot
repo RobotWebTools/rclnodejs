@@ -7,9 +7,6 @@
       },
     }
   },
-  'variables': {
-    'ros_version': '<!(node scripts/ros_distro.js)'
-  },
   'target_defaults': {
     'include_dirs': [
       "<!(node -e \"require('nan')\")",
@@ -87,64 +84,20 @@
     ],
   },
   'targets': [
+{{~ it.pkgs : pkg}}
     {
-      'target_name': 'rclnodejs',
+      'target_name': '{{=pkg.pkgName}}__rosidl_node',
       'sources': [
-        './src/addon.cpp',
-        './src/executor.cpp',
-        './src/handle_manager.cpp',
-        './src/rcl_action_bindings.cpp',
-        './src/rcl_bindings.cpp',
-        './src/rcl_handle.cpp',
-        './src/rcl_lifecycle_bindings.cpp',
-        './src/rcl_utilities.cpp',
-        './src/shadow_node.cpp',
-        './src/type_conversion.hpp',
+        '{{=pkg.pkgName}}/definitions.cpp',
       ],
-      'include_dirs': [
-        '.',
-      ],
-      'libraries': [
-        '-lrcl',
-        '-lrcl_action',
-        '-lrcl_lifecycle',
-        '-lrcutils',
-        '-lrcl_yaml_param_parser',
-        '-lrmw',
-        '-lrosidl_runtime_c',
-      ],
-      'defines': [
-        'ROS_VERSION=<(ros_version)'
-      ],
-      'conditions': [
-        [
-          'OS=="win"',
-          {
-            'include_dirs': [
-              './src/third_party/dlfcn-win32/',
-            ],
-          }
+      'link_settings': {
+        'libraries': [
+{{~ pkg.linkLibraries : lib}}
+          '-l{{=lib}}',
+{{~}}
         ],
-        [
-          'OS=="mac"',
-          {
-            'defines': [
-              'OS_MACOS'
-            ],
-          }
-        ],
-        [
-          'ros_version<=1911',
-          {
-            'libraries': [
-              '-lrosidl_generator_c'
-            ],
-            'libraries!': [
-              '-lrosidl_runtime_c'
-            ]
-          }
-        ]
-      ]
-    }
-  ]
+      },
+    },
+{{~}}
+  ],
 }

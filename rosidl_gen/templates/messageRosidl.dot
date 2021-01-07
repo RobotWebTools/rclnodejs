@@ -130,7 +130,7 @@ function extractMemberNames(fields) {
 }
 }}
 
-const typesupport = require('bindings')('{{=it.messageInfo.pkgName}}__rosidl_node').{{=it.messageInfo.interfaceName}};
+const typesupport = require('../../src/generated/build/Release/{{=it.messageInfo.pkgName}}__rosidl_node').{{=it.messageInfo.interfaceName}};
 
 const typesupportDeps = {};
 {{~ it.spec.fields :field}}

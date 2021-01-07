@@ -14,14 +14,16 @@
 
 'use strict';
 
+const child_process = require('child_process');
 const fsp = require('fs').promises;
 const fse = require('fs-extra');
 const {
   RosIdlDb,
   generateJSStructFromIDL,
   generateCppDefinitions,
-  generateTypesupportGypi,
+  generateTypesupportGypi: generateTypesupportGyp,
 } = require('./idl_generator.js');
+const os = require('os');
 const packages = require('./packages.js');
 const path = require('path');
 
@@ -52,12 +54,26 @@ async function generateInPaths(paths, options) {
     )
   );
 
-  await Promise.all(
-    pkgsEntries.map(([pkgName, pkgInfo]) =>
-      generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options)
-    )
-  );
-  await generateTypesupportGypi(pkgsEntries, rosIdlDb, options);
+  if (options.idlProvider === 'rosidl') {
+    await Promise.all(
+      pkgsEntries.map(([pkgName, pkgInfo]) =>
+        generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options)
+      )
+    );
+    await generateTypesupportGyp(pkgsEntries, rosIdlDb, options);
+    await child_process.spawn(
+      'node',
+      [`${__dirname}/../node_modules/.bin/node-gyp`, 'rebuild'],
+      {
+        cwd: `${__dirname}/../src/generated`,
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          JOBS: os.cpus().length,
+        },
+      }
+    );
+  }
 }
 
 async function generateAll(forcedGenerating) {

@@ -578,11 +578,8 @@ async function generateTypesupportGypi(pkgsEntries, rosIdlDb, options) {
       dependencies: await rosIdlDb.getDependentPackages(pkgName),
     }))
   );
-  const rendered = removeEmptyLines(dots.typesupportGypi({ pkgs }));
-  await fs.writeFile(
-    path.join('src', 'generated', 'typesupport.gypi'),
-    rendered
-  );
+  const rendered = removeEmptyLines(dots.typesupportGyp({ pkgs }));
+  await fs.writeFile(path.join('src', 'generated', 'binding.gyp'), rendered);
 }
 
 module.exports = {
