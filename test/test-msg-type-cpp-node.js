@@ -22,7 +22,6 @@ const childProcess = require('child_process');
 const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
-const generatorOptions = require('../generated/generator-options');
 
 describe('Rclnodejs - Cpp message type testing', function () {
   var cppSubscriptionPath = path.join(__dirname, 'cpp', 'subscription_msg');
@@ -60,7 +59,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
       );
 
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -88,7 +87,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
       );
 
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -116,7 +115,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
       );
 
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -144,7 +143,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
       );
 
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -173,7 +172,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
       );
 
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -201,7 +200,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
       );
 
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -229,7 +228,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
       );
 
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -257,7 +256,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -285,7 +284,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
       );
 
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -312,7 +311,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -339,7 +338,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -367,7 +366,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -394,7 +393,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -421,7 +420,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);

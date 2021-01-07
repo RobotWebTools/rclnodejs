@@ -20,7 +20,6 @@ const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 const kill = require('tree-kill');
-const generatorOptions = require('../generated/generator-options');
 
 describe('Cross-language interaction', function () {
   this.timeout(60 * 1000);
@@ -107,7 +106,7 @@ describe('Cross-language interaction', function () {
         }
       );
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);
@@ -140,7 +139,7 @@ describe('Cross-language interaction', function () {
       var msg = text;
 
       var timer = node.createTimer(100, () => {
-        if (generatorOptions.idlProvider === 'rosidl') {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
           publisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           publisher.publish(msg);

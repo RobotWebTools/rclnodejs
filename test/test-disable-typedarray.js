@@ -16,13 +16,12 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const generatorOptions = require('../generated/generator-options');
 
 /* eslint-disable camelcase */
 /* eslint-disable key-spacing */
 /* eslint-disable comma-spacing */
 // rosidl generator only supports typed array
-if (generatorOptions.idlProvider !== 'rosidl') {
+if (process.env.RCLNODEJS_USE_ROSIDL) {
   describe('rclnodejs message communication', function () {
     this.timeout(60 * 1000);
 
