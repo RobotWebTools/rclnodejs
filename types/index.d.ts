@@ -22,7 +22,7 @@ declare module 'rclnodejs' {
   ): Node;
 
   /**
-   * Create a managed Node that implements a well-defined life-cycle state 
+   * Create a managed Node that implements a well-defined life-cycle state
    * model using the {@link https://github.com/ros2/rcl/tree/master/rcl_lifecycle|ros2 client library (rcl) lifecyle api}.
    * @param nodeName - The name used to register in ROS.
    * @param namespace - The namespace used in ROS, default is an empty string.
@@ -47,10 +47,11 @@ declare module 'rclnodejs' {
   function init(context?: Context, argv?: string[]): Promise<void>;
 
   /**
-   * Spin up the node event loop to check for incoming events.
+   * Start detection and processing of units of work.
    *
    * @param node - The node to be spun.
    * @param timeout - ms to wait, block forever if negative, return immediately when 0, default is 10.
+   * @deprecated since 0.18.0, Use Node.spin(timeout)
    */
   function spin(node: Node, timeout?: number): void;
 
@@ -59,7 +60,7 @@ declare module 'rclnodejs' {
    *
    * @param node - The node to be spun.
    * @param timeout - ms to wait, block forever if negative, return immediately when 0, default is 10.
-   */
+   * @deprecated since 0.18.0, Use Node.spinOnce(timeout)*/
   function spinOnce(node: Node, timeout?: number): void;
 
   /**
@@ -68,6 +69,12 @@ declare module 'rclnodejs' {
    * @param context - The context, default is Context.defaultContext()
    */
   function shutdown(context?: Context): void;
+
+  /**
+   * Shutdown all RCL environments via their contexts.
+   * @throws Error if there is a problem shutting down the context or while destroying or shutting down a node within it.
+   */
+  function shutdownAll(): void;
 
   /**
    * Test if the module is shutdown.
@@ -129,7 +136,9 @@ declare module 'rclnodejs' {
    *                                or {package: 'std_msgs', type: 'msg', name: 'String'}
    * @returns A Message object or undefined if type is not recognized.
    */
-  function createMessageObject<T extends TypeClass<MessageTypeClassName>>(type: T): MessageType<T>;
+  function createMessageObject<T extends TypeClass<MessageTypeClassName>>(
+    type: T
+  ): MessageType<T>;
 
   /**
    * Get a list of action names and types for action clients associated with a node.

@@ -55,11 +55,11 @@ function getPkgInfos(rootDir) {
 
     const pkgInfo = {
       name: pkg,
-      subfolders: new Map()
+      subfolders: new Map(),
     };
 
     const pkgPath = path.join(rootDir, pkg);
-    const files = fs.readdirSync(pkgPath).filter(fn => fn.endsWith('.js'));
+    const files = fs.readdirSync(pkgPath).filter((fn) => fn.endsWith('.js'));
 
     for (let filename of files) {
       const typeClass = fileName2Typeclass(filename);
@@ -95,14 +95,12 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(fd, "declare module 'rclnodejs' {\n");
 
   for (const pkgInfo of pkgInfos) {
-
     if (pkgInfo.subfolders.size === 0) continue;
 
     // write namespaces heirarchy for package
     fs.writeSync(fd, `  namespace ${pkgInfo.name} {\n`);
 
     for (const subfolder of pkgInfo.subfolders.keys()) {
-
       fs.writeSync(fd, `    namespace ${subfolder} {\n`);
 
       for (const rosInterface of pkgInfo.subfolders.get(subfolder)) {
@@ -116,12 +114,14 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
           saveMsgAsTSD(rosInterface, fd);
           saveMsgConstructorAsTSD(rosInterface, fd);
           messagesMap[fullInterfaceName] = fullInterfacePath;
-
         } else if (isSrvInterface(rosInterface)) {
-
-          if (!isValidService(rosInterface, pkgInfo.subfolders.get(subfolder))) {
+          if (
+            !isValidService(rosInterface, pkgInfo.subfolders.get(subfolder))
+          ) {
             let type = rosInterface.type();
-            console.log(`Incomplete service: ${type.pkgName}.${type.subFolder}.${type.interfaceName}.`);
+            console.log(
+              `Incomplete service: ${type.pkgName}.${type.subFolder}.${type.interfaceName}.`
+            );
             continue;
           }
 
@@ -130,12 +130,12 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
           if (!isInternalActionSrvInterface(rosInterface)) {
             servicesMap[fullInterfaceName] = fullInterfaceConstructor;
           }
-
         } else if (isActionInterface(rosInterface)) {
-
           if (!isValidAction(rosInterface, pkgInfo.subfolders.get(subfolder))) {
             let type = rosInterface.type();
-            console.log(`Incomplete action: ${type.pkgName}.${type.subFolder}.${type.interfaceName}.`);
+            console.log(
+              `Incomplete action: ${type.pkgName}.${type.subFolder}.${type.interfaceName}.`
+            );
             continue;
           }
 
@@ -179,7 +179,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(
     fd,
     '  type MessageConstructorType<T> = ' +
-    'T extends MessageTypeClassName ? MessageTypeClassConstructorMap[T] : object;\n\n'
+      'T extends MessageTypeClassName ? MessageTypeClassConstructorMap[T] : object;\n\n'
   );
 
   // write services type mappings
@@ -215,7 +215,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(
     fd,
     '  type InterfaceType<T> = T extends TypeClassName ? ' +
-    '(MessageTypeClassConstructorMap & ServicesMap & ActionsMap)[T] : object;\n'
+      '(MessageTypeClassConstructorMap & ServicesMap & ActionsMap)[T] : object;\n'
   );
 
   // close module declare
@@ -223,7 +223,10 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
 }
 
 function saveMsgAsTSD(rosMsgInterface, fd) {
-  fs.writeSync(fd, `      export interface ${rosMsgInterface.type().interfaceName} {\n`);
+  fs.writeSync(
+    fd,
+    `      export interface ${rosMsgInterface.type().interfaceName} {\n`
+  );
   const useSamePkg = isInternalActionMsgInterface(rosMsgInterface);
   saveMsgFieldsAsTSD(rosMsgInterface, fd, 8, ';', '', useSamePkg);
   fs.writeSync(fd, '      }\n');
@@ -255,10 +258,10 @@ function saveMsgFieldsAsTSD(
   let fields = rosMsgInterface.ROSMessageDef.fields;
 
   for (const field of fields) {
-
-    let subFolder = useSamePackageSubFolder && field.type.pkgName === type.pkgName ?
-      type.subFolder :
-      'msg';
+    let subFolder =
+      useSamePackageSubFolder && field.type.pkgName === type.pkgName
+        ? type.subFolder
+        : 'msg';
 
     let fieldType = fieldType2JSName(field, subFolder);
     let tp = field.type.isPrimitiveType ? '' : typePrefix;
@@ -274,8 +277,7 @@ function saveMsgFieldsAsTSD(
 
       if (fieldType === 'number') {
         // for number[] include alternate typed-array types, e.g., number[] | uint8[]
-        let jsTypedArrayName =
-          fieldTypeArray2JSTypedArrayName(field.type.type);
+        let jsTypedArrayName = fieldTypeArray2JSTypedArrayName(field.type.type);
 
         if (jsTypedArrayName) {
           fs.writeSync(fd, ` | ${jsTypedArrayName}`);
@@ -340,10 +342,7 @@ function isServiceMsgInterface(rosMsgInterface) {
   if (!isMsgInterface(rosMsgInterface)) return false;
 
   let name = rosMsgInterface.type().interfaceName;
-  return (
-    name.endsWith('_Request') ||
-    name.endsWith('_Response')
-  );
+  return name.endsWith('_Request') || name.endsWith('_Response');
 }
 
 function isInternalActionMsgInterface(rosMsgInterface) {
@@ -368,10 +367,7 @@ function isInternalActionSrvInterface(rosInterface) {
   if (!isSrvInterface(rosInterface)) return false;
 
   let name = rosInterface.type().interfaceName;
-  return (
-    name.endsWith('_GetResult') ||
-    name.endsWith('_SendGoal')
-  );
+  return name.endsWith('_GetResult') || name.endsWith('_SendGoal');
 }
 
 function isActionInterface(rosInterface, pkgInfos) {
@@ -389,14 +385,16 @@ function isValidService(rosSrvInterface, infos) {
   let requestMsgName = serviceName + '_Request';
   let responseMsgName = serviceName + '_Response';
 
-  let matches =
-    infos.reduce((matchCnt, info) => {
-      let infoInterfaceName = info.type().interfaceName;
-      if (requestMsgName === infoInterfaceName || responseMsgName === infoInterfaceName) {
-        matchCnt++;
-      };
-      return matchCnt;
-    }, 0);
+  let matches = infos.reduce((matchCnt, info) => {
+    let infoInterfaceName = info.type().interfaceName;
+    if (
+      requestMsgName === infoInterfaceName ||
+      responseMsgName === infoInterfaceName
+    ) {
+      matchCnt++;
+    }
+    return matchCnt;
+  }, 0);
 
   return matches === 2;
 }
@@ -404,7 +402,6 @@ function isValidService(rosSrvInterface, infos) {
 function isValidAction(rosActionInterface, infos) {
   if (!isActionInterface(rosActionInterface)) return false;
 
-  
   let actionName = rosActionInterface.type().interfaceName;
   let feedback = actionName + '_Feedback';
   let feedbackMsg = actionName + '_FeedbackMessage';
@@ -413,28 +410,23 @@ function isValidAction(rosActionInterface, infos) {
   let getResultSrv = actionName + '_GetResult';
   let sendGoalSrv = actionName + '_SendGoal';
 
-  let searches = [
-    actionName,
-    feedback,
-    feedbackMsg,
-    goalMsg,
-    resultMsg
-  ];
+  let searches = [actionName, feedback, feedbackMsg, goalMsg, resultMsg];
 
   const SUCCESS_MATCH_COUNT = searches.length + 2;
 
-  let matches =
-    infos.reduce((matchCnt, info) => {
-      let infoInterfaceName = info.type().interfaceName;
+  let matches = infos.reduce((matchCnt, info) => {
+    let infoInterfaceName = info.type().interfaceName;
 
-      if (searches.indexOf(infoInterfaceName) >= 0 ||
-        (getResultSrv === infoInterfaceName && isValidService(info, infos)) ||
-        (sendGoalSrv === infoInterfaceName && isValidService(info, infos))) {
-        matchCnt++;
-      }
+    if (
+      searches.indexOf(infoInterfaceName) >= 0 ||
+      (getResultSrv === infoInterfaceName && isValidService(info, infos)) ||
+      (sendGoalSrv === infoInterfaceName && isValidService(info, infos))
+    ) {
+      matchCnt++;
+    }
 
-      return matchCnt;
-    }, 0);
+    return matchCnt;
+  }, 0);
 
   return matches === SUCCESS_MATCH_COUNT;
 }
@@ -542,7 +534,7 @@ function fieldTypeArray2JSTypedArrayName(type) {
     case 'unsigned long long':
     case 'int64':
     case 'uint64':
-      // number 
+      // number
       break;
   }
 
@@ -581,11 +573,11 @@ function indentLines(lines, amount) {
     throw new Error('lines must be an array');
   }
 
-  return lines.map(line => indentString(line, amount));
+  return lines.map((line) => indentString(line, amount));
 }
 
 async function wait(ms) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }

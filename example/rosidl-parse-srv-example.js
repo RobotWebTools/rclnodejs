@@ -22,20 +22,20 @@ const packagePath = rosInstallPath + '/share/std_srvs/srv/SetBool.srv';
 
 parser
   .parseServiceFile(packageName, packagePath)
-  .then(spec => {
+  .then((spec) => {
     console.log(`srv name: ${spec.srvName}`);
     console.log(`pkg name: ${spec.pkgName}`);
 
     console.log('srv request fields includes:');
-    spec.request.fields.forEach(field => {
+    spec.request.fields.forEach((field) => {
       console.log(field);
     });
 
     console.log('srv response fields includes:');
-    spec.response.fields.forEach(field => {
+    spec.response.fields.forEach((field) => {
       console.log(field);
     });
   })
-  .catch(e => {
+  .catch((e) => {
     console.log(e);
   });

@@ -20,23 +20,22 @@ declare module 'rclnodejs' {
    * See {@link DEFAULT_OPTIONS}
    */
   interface Options<T = QoS | QoS.ProfileRef> {
-	
-	/**  
-	 * A messages will use TypedArray if necessary, default: true. 
-	 */
-	enableTypedArray?: boolean;
+    /**
+     * A messages will use TypedArray if necessary, default: true.
+     */
+    enableTypedArray?: boolean;
 
-	/**
-	 * Indicates messages are serialized, default: false. 
-	 *
-	 * @remarks
-	 * See {@link Node#createSubscription | Node.createSubscription}
-	 */
-	isRaw?: boolean;
+    /**
+     * Indicates messages are serialized, default: false.
+     *
+     * @remarks
+     * See {@link Node#createSubscription | Node.createSubscription}
+     */
+    isRaw?: boolean;
 
-	/**
-	 * ROS Middleware "quality of service" setting, default: QoS.profileDefault.
-	 */
+    /**
+     * ROS Middleware "quality of service" setting, default: QoS.profileDefault.
+     */
     qos?: T;
   }
 
@@ -120,6 +119,21 @@ declare module 'rclnodejs' {
    */
   class Node {
     /**
+     * Create a node instance.
+     *
+     * @param nodeName - The name used to register in ROS.
+     * @param namespace - The namespace used in ROS, default is an empty string.
+     * @param context - The context, default is Context.defaultContext().
+     * @param options - The node options, default is NodeOptions.defaultOptions.
+     */
+    constructor(
+      nodeName: string,
+      namespace?: string,
+      context?: Context,
+      options?: NodeOptions
+    );
+
+    /**
      * Get the name of the node.
      *
      * @returns The node name.
@@ -132,6 +146,13 @@ declare module 'rclnodejs' {
      * @returns The node namespace.
      */
     namespace(): string;
+
+    /**
+     * Get the Context that manages this node.
+     *
+     * @returns The context.
+     */
+    get context(): Context;
 
     /**
      * Get the nodes logger.
@@ -160,6 +181,29 @@ declare module 'rclnodejs' {
      * @returns The nodeOptions.
      */
     options(): NodeOptions;
+
+    /**
+     * Trigger the event loop to continuously check for and route.
+     * incoming events.
+     * @param node - The node to be spun up.
+     * @param - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
+     * @throws Error if the node is already spinning.
+     */
+    spin(timeout?: number): void;
+
+    /**
+     * Spin the node and trigger the event loop to check for one incoming event. Thereafter the node
+     * will not received additional events until running additional calls to spin() or spinOnce().
+     * @param node - The node to be spun.
+     * @param  - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
+     * @throws An error if the node is already spinning.
+     */
+    spinOnce(timeout?: number): void;
+
+    /**
+     * Terminate spinning - no further events will be received.
+     */
+    stop(): void;
 
     /**
      * Create a Timer.
@@ -211,7 +255,7 @@ declare module 'rclnodejs' {
       topic: string,
       options: Options,
       callback: SubscriptionCallback<T>
-    ): Subscription
+    ): Subscription;
 
     /**
      * Create a Client for making server requests.
@@ -263,7 +307,9 @@ declare module 'rclnodejs' {
      *
      * @param publisher - Publisher to be destroyed.
      */
-    destroyPublisher<T extends TypeClass<MessageTypeClassName>>(publisher: Publisher<T>): void;
+    destroyPublisher<T extends TypeClass<MessageTypeClassName>>(
+      publisher: Publisher<T>
+    ): void;
 
     /**
      * Destroy a Subscription.
@@ -277,7 +323,9 @@ declare module 'rclnodejs' {
      *
      * @param client - Client to be destroyed.
      */
-    destroyClient<T extends TypeClass<ServiceTypeClassName>>(client: Client<T>): void;
+    destroyClient<T extends TypeClass<ServiceTypeClassName>>(
+      client: Client<T>
+    ): void;
 
     /**
      * Destroy a Service.
@@ -613,5 +661,4 @@ declare module 'rclnodejs' {
      */
     countSubscribers(topic: string): number;
   }
-
 }

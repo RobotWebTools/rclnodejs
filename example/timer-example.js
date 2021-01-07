@@ -43,6 +43,6 @@ rclnodejs
 
     rclnodejs.spin(node);
   })
-  .catch(e => {
+  .catch((e) => {
     console.log(e);
   });

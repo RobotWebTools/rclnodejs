@@ -28,7 +28,7 @@ rclnodejs
     );
     let count = 0;
 
-    setInterval(function() {
+    setInterval(function () {
       publisher.publish({
         header: {
           stamp: {
@@ -47,6 +47,6 @@ rclnodejs
 
     rclnodejs.spin(node);
   })
-  .catch(e => {
+  .catch((e) => {
     console.log(e);
   });

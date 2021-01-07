@@ -24,7 +24,7 @@ rclnodejs.init().then(() => {
     'std_msgs/msg/String',
     'topic',
     { qos: QoS.profileSystemDefault },
-    msg => {
+    (msg) => {
       console.log(`Received message: ${typeof msg}`, msg);
     }
   );

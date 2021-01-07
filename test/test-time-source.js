@@ -26,12 +26,12 @@ const {
 } = rclnodejs;
 const int64 = require('int64-napi');
 
-describe('rclnodejs TimeSource testing', function() {
+describe('rclnodejs TimeSource testing', function () {
   this.timeout(60 * 1000);
   let node;
   let timer;
 
-  before(async function() {
+  before(async function () {
     await rclnodejs.init();
   });
 
@@ -45,7 +45,7 @@ describe('rclnodejs TimeSource testing', function() {
     node = null;
   });
 
-  after(function() {
+  after(function () {
     clearInterval(timer);
     rclnodejs.shutdown();
   });
@@ -59,7 +59,7 @@ describe('rclnodejs TimeSource testing', function() {
     }, 1000);
   }
 
-  it('Test attach clock to time source', function() {
+  it('Test attach clock to time source', function () {
     let timeSource = new TimeSource(node);
     timeSource.attachClock(new ROSClock());
 
@@ -71,7 +71,7 @@ describe('rclnodejs TimeSource testing', function() {
     }, TypeError);
   });
 
-  it('Test not using sim time', function() {
+  it('Test not using sim time', function () {
     let timeSource = new TimeSource(node);
     let clock = new ROSClock();
     timeSource.attachClock(clock);
@@ -95,7 +95,7 @@ describe('rclnodejs TimeSource testing', function() {
     clearInterval(timer);
   });
 
-  it('Test using sim time parameter', function(done) {
+  it('Test using sim time parameter', function (done) {
     // can not use default node.
     node.destroy();
 

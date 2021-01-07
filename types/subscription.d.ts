@@ -1,5 +1,4 @@
 declare module 'rclnodejs' {
-
   /**
    * A callback for receiving published messages.
    *

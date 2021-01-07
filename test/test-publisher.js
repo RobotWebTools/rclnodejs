@@ -18,25 +18,25 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const { message } = rclnodejs;
 
-describe('rclnodejs publisher test suite', function() {
+describe('rclnodejs publisher test suite', function () {
   this.timeout(60 * 1000);
 
-  beforeEach(function() {
+  beforeEach(function () {
     return rclnodejs.init();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     rclnodejs.shutdown();
   });
 
-  it('Try creating a publisher', function() {
+  it('Try creating a publisher', function () {
     const node = rclnodejs.createNode('publisher_node');
     const String = 'std_msgs/msg/String';
     const publisher = node.createPublisher(String, 'topic');
     rclnodejs.spin(node);
   });
 
-  it('Try publish a message', function() {
+  it('Try publish a message', function () {
     const node = rclnodejs.createNode('publisher_node');
     const String = 'std_msgs/msg/String';
     const publisher = node.createPublisher(String, 'topic');

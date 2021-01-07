@@ -28,25 +28,25 @@ describe('Spin testing', function () {
   });
 
   beforeEach(function () {
-    node = rclnodejs.createNode('spin_node');
+    node = new rclnodejs.Node('spin_node');
   });
 
   afterEach(function () {
     node.destroy();
   });
 
-  it('rclnodejs.spin()', function () {
-    rclnodejs.spin(node);
+  it('node.spin()', function () {
+    node.spin();
   });
 
-  it('rclnodejs.spinOnce()', function () {
-    rclnodejs.spinOnce(node);
+  it('node.spinOnce()', function () {
+    node.spinOnce();
   });
 
-  it('rclnodejs.spinOnce() throws when already spinning', function () {
-    rclnodejs.spin(node);
+  it('node.spinOnce() throws when already spinning', function () {
+    node.spin();
     assert.throws(function () {
-      rclnodejs.spinOnce(node);
+      node.spinOnce();
     });
   });
 });

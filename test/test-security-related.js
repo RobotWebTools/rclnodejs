@@ -20,18 +20,18 @@ const assertThrowsError = require('./utils.js').assertThrowsError;
 const translator = require('../rosidl_gen/message_translator.js');
 const arrayGen = require('./array_generator.js');
 
-describe('Destroying non-existent objects testing', function() {
+describe('Destroying non-existent objects testing', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  it('Destroy a non-existent node', function() {
+  it('Destroy a non-existent node', function () {
     var node = null;
     assertThrowsError(
       () => {
@@ -50,7 +50,7 @@ describe('Destroying non-existent objects testing', function() {
     node.destroy();
   });
 
-  it('Destroy a non-existent publisher', function() {
+  it('Destroy a non-existent publisher', function () {
     var node = rclnodejs.createNode('node2', '/non_existent');
     assertThrowsError(
       () => {
@@ -69,7 +69,7 @@ describe('Destroying non-existent objects testing', function() {
     node.destroyPublisher(publisher);
   });
 
-  it('Destroy a non-existent subscription', function() {
+  it('Destroy a non-existent subscription', function () {
     var node = rclnodejs.createNode('node3', '/non_existent');
     assertThrowsError(
       () => {
@@ -88,7 +88,7 @@ describe('Destroying non-existent objects testing', function() {
     node.destroySubscription(subscription);
   });
 
-  it('Destroy a non-existent client', function() {
+  it('Destroy a non-existent client', function () {
     var node = rclnodejs.createNode('node4', '/non_existent');
     assertThrowsError(
       () => {
@@ -107,7 +107,7 @@ describe('Destroying non-existent objects testing', function() {
     node.destroyClient(client);
   });
 
-  it('Destroy a non-existent service', function() {
+  it('Destroy a non-existent service', function () {
     var node = rclnodejs.createNode('node5', '/non_existent');
     assertThrowsError(
       () => {
@@ -130,7 +130,7 @@ describe('Destroying non-existent objects testing', function() {
     node.destroyService(service);
   });
 
-  it('Destroy a non-existent timer', function() {
+  it('Destroy a non-existent timer', function () {
     var node = rclnodejs.createNode('node6', '/non_existent');
     assertThrowsError(
       () => {
@@ -152,18 +152,18 @@ describe('Destroying non-existent objects testing', function() {
   });
 });
 
-describe('Fuzzing API calls testing', function() {
+describe('Fuzzing API calls testing', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  it('Unregistered message types', function() {
+  it('Unregistered message types', function () {
     var node = rclnodejs.createNode('node1', '/unregistered');
     const UnknownMsgType = 'std_msgs/msg/Foo';
 
@@ -178,7 +178,7 @@ describe('Fuzzing API calls testing', function() {
 
     assertThrowsError(
       () => {
-        node.createSubscription(UnknownMsgType, 'chatter', msg => {});
+        node.createSubscription(UnknownMsgType, 'chatter', (msg) => {});
       },
       Error,
       'does not exist',
@@ -188,7 +188,7 @@ describe('Fuzzing API calls testing', function() {
     node.destroy();
   });
 
-  it('Unregistered service interfaces', function() {
+  it('Unregistered service interfaces', function () {
     var node = rclnodejs.createNode('node2', '/unregistered');
     const UnknownInterface = 'example_interfaces/srv/Bar';
 
@@ -213,7 +213,7 @@ describe('Fuzzing API calls testing', function() {
     node.destroy();
   });
 
-  it('Inconsistent message type for subscription', function() {
+  it('Inconsistent message type for subscription', function () {
     var node = rclnodejs.createNode('node1', '/inconsistent');
     const RclString = 'std_msgs/msg/String';
 
@@ -231,7 +231,7 @@ describe('Fuzzing API calls testing', function() {
     node.destroy();
   });
 
-  it('Inconsistent request data for service', function() {
+  it('Inconsistent request data for service', function () {
     var node = rclnodejs.createNode('node2', '/inconsistent');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
@@ -252,7 +252,7 @@ describe('Fuzzing API calls testing', function() {
 
     assertThrowsError(
       () => {
-        client.sendRequest({ a: 1 }, response => {});
+        client.sendRequest({ a: 1 }, (response) => {});
       },
       TypeError,
       'Invalid argument',
@@ -262,7 +262,7 @@ describe('Fuzzing API calls testing', function() {
     node.destroy();
   });
 
-  it('resources will be freed by shutdown', function() {
+  it('resources will be freed by shutdown', function () {
     var node = rclnodejs.createNode('node1', '/unhandled');
     const RclString = 'std_msgs/msg/String';
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
@@ -277,13 +277,13 @@ describe('Fuzzing API calls testing', function() {
     );
   });
 
-  it('timer Creating with inconsistent type', function() {
+  it('timer Creating with inconsistent type', function () {
     var node = rclnodejs.createNode('node3', '/inconsistent');
     const invalidParams = [
       ['100', () => {}],
       [100, null],
     ];
-    invalidParams.forEach(param => {
+    invalidParams.forEach((param) => {
       assertThrowsError(
         () => {
           node.createTimer(param[0], param[1]);
@@ -297,7 +297,7 @@ describe('Fuzzing API calls testing', function() {
     node.destroy();
   });
 
-  it('Race condition 1', function(done) {
+  it('Race condition 1', function (done) {
     var node = rclnodejs.createNode('node4', '/race1');
     const RclString = 'std_msgs/msg/String';
 
@@ -305,7 +305,7 @@ describe('Fuzzing API calls testing', function() {
     var subscription = node.createSubscription(
       RclString,
       'race_channel',
-      msg => {
+      (msg) => {
         node.destroy();
         done();
       }
@@ -315,7 +315,7 @@ describe('Fuzzing API calls testing', function() {
     rclnodejs.spin(node);
   });
 
-  it('Race condition 2', function(done) {
+  it('Race condition 2', function (done) {
     var node = rclnodejs.createNode('node5', '/race2');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
@@ -326,13 +326,13 @@ describe('Fuzzing API calls testing', function() {
     });
 
     let request = { a: 1, b: 2 };
-    client.sendRequest(request, response => {
+    client.sendRequest(request, (response) => {
       throw new Error('never reached');
     });
     rclnodejs.spin(node);
   });
 
-  it('Performace with big array data', function(done) {
+  it('Performace with big array data', function (done) {
     var node = rclnodejs.createNode('performance');
     const Image = 'sensor_msgs/msg/Image';
 
@@ -357,7 +357,7 @@ describe('Fuzzing API calls testing', function() {
     var subscription = node.createSubscription(
       Image,
       'performance',
-      message => {
+      (message) => {
         assert.deepStrictEqual(message.data.length, dataLength);
         node.destroy();
         done();

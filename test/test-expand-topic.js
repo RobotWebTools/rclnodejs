@@ -18,18 +18,18 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 
-describe('rclnodejs expand topic API testing', function() {
+describe('rclnodejs expand topic API testing', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
-  it('test_expand_topic_name', function() {
+  it('test_expand_topic_name', function () {
     var tests = {
       '/ns/chatter': ['chatter', 'node_name', '/ns'],
       '/chatter': ['chatter', 'node_name', '/'],
@@ -46,7 +46,7 @@ describe('rclnodejs expand topic API testing', function() {
     }
   });
 
-  it('expand_topic_name_invalid_node_name', function() {
+  it('expand_topic_name_invalid_node_name', function () {
     utils.assertThrowsError(
       () => {
         rclnodejs.expandTopicName('topic', 'invalid_node_name?', '/ns');
@@ -57,7 +57,7 @@ describe('rclnodejs expand topic API testing', function() {
     );
   });
 
-  it('expand_topic_name_invalid_namespace_empty', function() {
+  it('expand_topic_name_invalid_namespace_empty', function () {
     utils.assertThrowsError(
       () => {
         rclnodejs.expandTopicName('topic', 'node_name', '');
@@ -68,7 +68,7 @@ describe('rclnodejs expand topic API testing', function() {
     );
   });
 
-  it('expand_topic_name_invalid_namespace_relative', function() {
+  it('expand_topic_name_invalid_namespace_relative', function () {
     utils.assertThrowsError(
       () => {
         rclnodejs.expandTopicName('topic', 'node_name', 'ns');
@@ -79,7 +79,7 @@ describe('rclnodejs expand topic API testing', function() {
     );
   });
 
-  it('expand_topic_name_invalid_topic', function() {
+  it('expand_topic_name_invalid_topic', function () {
     utils.assertThrowsError(
       () => {
         rclnodejs.expandTopicName('invalid/topic?', 'node_name', '/ns');
@@ -91,14 +91,14 @@ describe('rclnodejs expand topic API testing', function() {
   });
 });
 
-describe('rclnodejs topic string type coverage testing', function() {
+describe('rclnodejs topic string type coverage testing', function () {
   this.timeout(60 * 1000);
 
-  before(function() {
+  before(function () {
     return rclnodejs.init();
   });
 
-  after(function() {
+  after(function () {
     rclnodejs.shutdown();
   });
 
@@ -138,7 +138,7 @@ describe('rclnodejs topic string type coverage testing', function() {
   ];
 
   testData.forEach((data, index) => {
-    it('topic' + data.title, function() {
+    it('topic' + data.title, function () {
       var node = rclnodejs.createNode(data.nodeName + 'topic_node');
 
       utils.assertThrowsError(
@@ -157,7 +157,7 @@ describe('rclnodejs topic string type coverage testing', function() {
           var publisher = node.createSubscription(
             'std_msgs/msg/String',
             data.topicName,
-            msg => {}
+            (msg) => {}
           );
         },
         Error,
@@ -166,7 +166,7 @@ describe('rclnodejs topic string type coverage testing', function() {
       );
     });
 
-    it('service' + data.title, function() {
+    it('service' + data.title, function () {
       var node = rclnodejs.createNode(data.nodeName + 'service_node');
 
       utils.assertThrowsError(

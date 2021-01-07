@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("stress_subscription_rclcpp");
   auto sub = node->create_subscription<std_msgs::msg::UInt8MultiArray>(
-      "stress_topic",
+      "stress_topic", 10,
       [](std_msgs::msg::UInt8MultiArray::SharedPtr msg) { (void)msg; });
   rclcpp::spin(node);
 
