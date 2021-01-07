@@ -148,7 +148,7 @@ class {{=objectWrapper}} {
     this._rawRos = undefined;
     if (other === undefined) {
       this._rawRos = {{=objectWrapper}}._createRosMessage();
-      this._proxyObj = {{=objectWrapper}}._toJsObject(this._rawRos);
+      this._proxyObj = {};
     } else if (other instanceof {{=objectWrapper}}) {
       this._proxyObj = other._proxyObj;
     } else {

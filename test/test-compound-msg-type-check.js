@@ -40,17 +40,20 @@ describe('Compound types', function () {
     assert.deepStrictEqual(typeof msg.a, 'undefined');
   });
 
-  it('Array', function () {
-    const Byte = rclnodejs.require('std_msgs').msg.Byte;
-    const ByteArray = Byte.ArrayType;
-    let msg = new ByteArray(3);
-    msg.fill([1, 2, 3]);
+  // there is no special array wrappers in the new bindings
+  if (!process.env.RCLNODEJS_USE_ROSIDL) {
+    it('Array', function () {
+      const Byte = rclnodejs.require('std_msgs').msg.Byte;
+      const ByteArray = Byte.ArrayType;
+      let msg = new ByteArray(3);
+      msg.fill([1, 2, 3]);
 
-    assert.deepStrictEqual(msg.data.length, 3);
-    assert.deepStrictEqual(msg.data[0], 1);
-    assert.deepStrictEqual(msg.data[1], 2);
-    assert.deepStrictEqual(msg.data[2], 3);
-  });
+      assert.deepStrictEqual(msg.data.length, 3);
+      assert.deepStrictEqual(msg.data[0], 1);
+      assert.deepStrictEqual(msg.data[1], 2);
+      assert.deepStrictEqual(msg.data[2], 3);
+    });
+  }
 
   it('Object with Header', function () {
     const Header = rclnodejs.require('std_msgs').msg.Header;
@@ -59,7 +62,12 @@ describe('Compound types', function () {
     assert.ok('stamp' in header);
     assert.ok('frame_id' in header);
 
-    assert.deepStrictEqual(typeof header.stamp, 'object');
+    // the new bindings doesn't populate fields on creation
+    if (process.env.RCLNODEJS_USE_ROSIDL) {
+      assert.deepStrictEqual(typeof header.stamp, 'undefined');
+    } else {
+      assert.deepStrictEqual(typeof header.stamp, 'object');
+    }
     assert.deepStrictEqual(typeof header.frame_id, 'undefined');
   });
 

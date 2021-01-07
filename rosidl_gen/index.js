@@ -42,6 +42,8 @@ async function generateInPaths(paths, options) {
       pkgs.set(pkgName, { ...pkgInfo, amentRoot: paths[i] });
     }
   });
+  // skip this package as it contains message that is invalid
+  pkgs.delete('libstatistics_collector');
 
   const rosIdlDb = new RosIdlDb(pkgs);
 
@@ -56,9 +58,9 @@ async function generateInPaths(paths, options) {
 
   if (options.idlProvider === 'rosidl') {
     await Promise.all(
-      pkgsEntries.map(([pkgName, pkgInfo]) =>
-        generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options)
-      )
+      pkgsEntries.map(([pkgName, pkgInfo]) => {
+        generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options);
+      })
     );
     await generateTypesupportGyp(pkgsEntries, rosIdlDb, options);
     await child_process.spawn(

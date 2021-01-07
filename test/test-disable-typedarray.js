@@ -21,7 +21,7 @@ const rclnodejs = require('../index.js');
 /* eslint-disable key-spacing */
 /* eslint-disable comma-spacing */
 // rosidl generator only supports typed array
-if (process.env.RCLNODEJS_USE_ROSIDL) {
+if (!process.env.RCLNODEJS_USE_ROSIDL) {
   describe('rclnodejs message communication', function () {
     this.timeout(60 * 1000);
 
