@@ -88,12 +88,11 @@ async function generateAll(forcedGenerating) {
       path.join(__dirname, 'generator.json'),
       path.join(generatedRoot, 'generator.json')
     );
+    const useRosidl =
+      process.env.RCLNODEJS_USE_ROSIDL ||
+      process.env.npm_config_rclnodejs_use_rosidl;
     const options = {
-      idlProvider:
-        process.env.RCLNODEJS_USE_ROSIDL &&
-        process.env.RCLNODEJS_USE_ROSIDL !== '0'
-          ? 'rosidl'
-          : 'ref',
+      idlProvider: useRosidl ? 'rosidl' : 'ref',
     };
     await generateInPaths(installedPackagePaths, options);
     await fsp.writeFile(
