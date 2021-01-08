@@ -18,7 +18,7 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertThrowsError = require('./utils.js').assertThrowsError;
 
-// new bindings does not do type checking, invalid types are automatically
+// new bindings does not throw on wrong types, invalid types are automatically
 // converted to the "zero" value.
 if (!process.env.RCLNODEJS_USE_ROSIDL) {
   describe('Rclnodejs message type data testing', function () {
