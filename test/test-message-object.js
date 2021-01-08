@@ -38,6 +38,10 @@ describe('Rclnodejs createMessage() testing', function () {
     let promises = [];
     installedPackagesRoot.forEach((path) => {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
+          // this packages contains invalid messages
+          pkgs.delete('libstatistics_collector');
+        }
         pkgs.forEach((pkg) => {
           pkg.messages.forEach((info) => {
             const s =
@@ -179,6 +183,10 @@ describe('Rclnodejs createMessageObject() testing', function () {
     let promises = [];
     installedPackagesRoot.forEach((path) => {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
+        if (process.env.RCLNODEJS_USE_ROSIDL) {
+          // this packages contains invalid messages
+          pkgs.delete('libstatistics_collector');
+        }
         pkgs.forEach((pkg) => {
           pkg.messages.forEach((info) => {
             const s =
@@ -201,8 +209,11 @@ describe('Rclnodejs createMessageObject() testing', function () {
   it('create by string', function () {
     const s = rclnodejs.createMessageObject('std_msgs/msg/String');
 
-    assert('data' in s);
-    assert(!s.data);
+    // fields are not prepopulated in the new bindings
+    if (!process.env.RCLNODEJS_USE_ROSIDL) {
+      assert('data' in s);
+      assert(!s.data);
+    }
     s.data = 'this is fun';
     assert.equal(typeof s.data, 'string');
     assert.equal(s.data, 'this is fun');
@@ -215,8 +226,11 @@ describe('Rclnodejs createMessageObject() testing', function () {
       name: 'String',
     });
 
-    assert('data' in s);
-    assert(!s.data);
+    // fields are not prepopulated in the new bindings
+    if (!process.env.RCLNODEJS_USE_ROSIDL) {
+      assert('data' in s);
+      assert(!s.data);
+    }
     s.data = 'this is fun';
     assert.equal(typeof s.data, 'string');
     assert.equal(s.data, 'this is fun');

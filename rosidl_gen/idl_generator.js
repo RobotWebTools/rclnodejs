@@ -201,10 +201,10 @@ function pascalToSnakeCase(s) {
 }
 
 function getRosHeaderField(messageInfo) {
-  if (isServiceMessage(messageInfo)) {
+  if (isInternalMessage(messageInfo)) {
     const interfaceName = messageInfo.interfaceName.slice(
       0,
-      messageInfo.interfaceName.lastIndexOf('_')
+      messageInfo.interfaceName.indexOf('_')
     );
     return `${messageInfo.pkgName}/${messageInfo.subFolder}/${pascalToSnakeCase(
       interfaceName
@@ -313,11 +313,8 @@ function isInternalField(field) {
   return field.name.startsWith('_');
 }
 
-function isServiceMessage(messageInfo) {
-  return (
-    messageInfo.interfaceName.endsWith('_Request') ||
-    messageInfo.interfaceName.endsWith('_Response')
-  );
+function isInternalMessage(messageInfo) {
+  return messageInfo.interfaceName.indexOf('_') !== -1;
 }
 
 // All messages are combined in one cpp file to improve compile time.
@@ -335,13 +332,29 @@ async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options) {
     return getStructType(messageInfo);
   };
 
-  const messages = await Promise.all(
-    pkgInfo.messages.map(async (messageInfo) => ({
+  const messages = await Promise.all([
+    ...pkgInfo.messages.map(async (messageInfo) => ({
       info: messageInfo,
       spec: await rosIdlDb.getMessageSpec(messageInfo),
       structType: getStructType(messageInfo),
-    }))
-  );
+    })),
+    ...(
+      await Promise.all(
+        pkgInfo.actions.map(async (actionInfo) => {
+          const msgInfosAndSpecs = await getActionMessageInfosAndSpecs(
+            actionInfo
+          );
+          return Object.values(msgInfosAndSpecs).map(
+            async ({ info, spec }) => ({
+              info: info,
+              spec: spec,
+              structType: getStructType(info),
+            })
+          );
+        })
+      )
+    ).flat(),
+  ]);
 
   const includeHeadersSet = new Set();
   messages.forEach(({ info }) => {
@@ -384,6 +397,95 @@ async function generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options) {
   await fs.mkdir(outputDir, { recursive: true });
   await fs.writeFile(path.join(outputDir, 'definitions.cpp'), source);
   await fs.writeFile(path.join(outputDir, 'definitions.hpp'), header);
+}
+
+async function getActionMessageInfosAndSpecs(actionInfo) {
+  const spec = await parser.parseActionFile(
+    actionInfo.pkgName,
+    actionInfo.filePath
+  );
+
+  return {
+    goal: {
+      info: {
+        pkgName: actionInfo.pkgName,
+        subFolder: actionInfo.subFolder,
+        interfaceName: `${actionInfo.interfaceName}_Goal`,
+      },
+      spec: spec.goal,
+    },
+    result: {
+      info: {
+        pkgName: actionInfo.pkgName,
+        subFolder: actionInfo.subFolder,
+        interfaceName: `${actionInfo.interfaceName}_Result`,
+      },
+      spec: spec.result,
+    },
+    feedback: {
+      info: {
+        pkgName: actionInfo.pkgName,
+        subFolder: actionInfo.subFolder,
+        interfaceName: `${actionInfo.interfaceName}_Feedback`,
+      },
+      spec: spec.feedback,
+    },
+    sendGoalRequest: {
+      info: {
+        pkgName: actionInfo.pkgName,
+        subFolder: actionInfo.subFolder,
+        interfaceName: `${actionInfo.interfaceName}_SendGoal_Request`,
+      },
+      spec: actionMsgs.createSendGoalRequestSpec(
+        actionInfo.pkgName,
+        actionInfo.interfaceName
+      ),
+    },
+    sendGoalResponse: {
+      info: {
+        pkgName: actionInfo.pkgName,
+        subFolder: actionInfo.subFolder,
+        interfaceName: `${actionInfo.interfaceName}_SendGoal_Response`,
+      },
+      spec: actionMsgs.createSendGoalResponseSpec(
+        actionInfo.pkgName,
+        actionInfo.interfaceName
+      ),
+    },
+    getResultRequest: {
+      info: {
+        pkgName: actionInfo.pkgName,
+        subFolder: actionInfo.subFolder,
+        interfaceName: `${actionInfo.interfaceName}_GetResult_Request`,
+      },
+      spec: actionMsgs.createGetResultRequestSpec(
+        actionInfo.pkgName,
+        actionInfo.interfaceName
+      ),
+    },
+    getResultResponse: {
+      info: {
+        pkgName: actionInfo.pkgName,
+        subFolder: actionInfo.subFolder,
+        interfaceName: `${actionInfo.interfaceName}_GetResult_Response`,
+      },
+      spec: actionMsgs.createGetResultResponseSpec(
+        actionInfo.pkgName,
+        actionInfo.interfaceName
+      ),
+    },
+    feedbackMessage: {
+      info: {
+        pkgName: actionInfo.pkgName,
+        subFolder: actionInfo.subFolder,
+        interfaceName: `${actionInfo.interfaceName}_FeedbackMessage`,
+      },
+      spec: actionMsgs.createFeedbackMessageSpec(
+        actionInfo.pkgName,
+        actionInfo.interfaceName
+      ),
+    },
+  };
 }
 
 async function generateActionJSStruct(actionInfo, dir, options) {
