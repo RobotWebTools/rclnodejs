@@ -62,13 +62,13 @@ describe('Compound types', function () {
     assert.ok('stamp' in header);
     assert.ok('frame_id' in header);
 
-    // the new bindings doesn't populate fields on creation
+    assert.deepStrictEqual(typeof header.stamp, 'object');
+    // the new bindings correctly initialize strings as an empty string instead of undefined.
     if (process.env.RCLNODEJS_USE_ROSIDL) {
-      assert.deepStrictEqual(typeof header.stamp, 'undefined');
+      assert.deepStrictEqual(typeof header.frame_id, 'string');
     } else {
-      assert.deepStrictEqual(typeof header.stamp, 'object');
+      assert.deepStrictEqual(typeof header.frame_id, 'undefined');
     }
-    assert.deepStrictEqual(typeof header.frame_id, 'undefined');
   });
 
   it('Complex object', function () {

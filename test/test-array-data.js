@@ -48,12 +48,8 @@ describe('rclnodejs message communication', function () {
     data_offset: 0,
   };
 
-  // Unlike the old bindings, the new rosidl bindings does not use a message translator.
-  // Messages are just plain js objects until serialization, a side effect is that there
-  // is no "zero initialization" at message creation time. It causes this test to fail
-  // because it depends on being able to introspect the message by recursively calling
-  // each fields .hasMember function. This test is also not really needed as there is no
-  // logic in the .copy method in the new bindings.
+  // The new bindings initialize nested message as plain js objects instead of the wrappers.
+  // As a result, they don't contain .hasMember methods that this test needs.
   if (!process.env.RCLNODEJS_USE_ROSIDL) {
     [
       {

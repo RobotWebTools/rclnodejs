@@ -60,18 +60,27 @@ describe('Rclnodejs non primitive message type testing', function () {
     assert.deepStrictEqual(44556, jointStateClone.header.stamp.nanosec);
     assert.deepStrictEqual('1234567x', jointStateClone.header.frame_id);
     assert.deepStrictEqual(['Willy', 'Tacky'], jointStateClone.name);
-    assert.deepStrictEqual(
-      Float64Array.from([1, 7, 3, 4, 2, 2, 8]),
-      jointStateClone.position
-    );
-    assert.deepStrictEqual(
-      Float64Array.from([8, 9, 6, 4]),
-      jointStateClone.velocity
-    );
-    assert.deepStrictEqual(
-      Float64Array.from([1, 0, 2, 6, 7]),
-      jointStateClone.effort
-    );
+
+    // new bindings does not do conversion until serialization so it doesn't automatically
+    // converts number arrays to typed arrays on assignment.
+    if (process.env.RCLNODEJS_USE_ROSIDL) {
+      assert.deepStrictEqual([1, 7, 3, 4, 2, 2, 8], jointStateClone.position);
+      assert.deepStrictEqual([8, 9, 6, 4], jointStateClone.velocity);
+      assert.deepStrictEqual([1, 0, 2, 6, 7], jointStateClone.effort);
+    } else {
+      assert.deepStrictEqual(
+        Float64Array.from([1, 7, 3, 4, 2, 2, 8]),
+        jointStateClone.position
+      );
+      assert.deepStrictEqual(
+        Float64Array.from([8, 9, 6, 4]),
+        jointStateClone.velocity
+      );
+      assert.deepStrictEqual(
+        Float64Array.from([1, 0, 2, 6, 7]),
+        jointStateClone.effort
+      );
+    }
   });
 
   it('geometry_msgs/msg/Transform checking', function () {
