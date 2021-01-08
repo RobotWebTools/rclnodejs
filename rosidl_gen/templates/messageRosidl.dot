@@ -130,6 +130,7 @@ function extractMemberNames(fields) {
 }
 }}
 
+const deepcopy = require('deepcopy');
 const typesupport = require('../../src/generated/build/Release/{{=it.messageInfo.pkgName}}__rosidl_node').{{=it.messageInfo.interfaceName}};
 
 const typesupportDeps = {};
@@ -150,7 +151,7 @@ class {{=objectWrapper}} {
       this._rawRos = {{=objectWrapper}}._createRosMessage();
       this._proxyObj = {{=objectWrapper}}._toJsObject(this._rawRos);
     } else if (other instanceof {{=objectWrapper}}) {
-      this._proxyObj = other._proxyObj;
+      this._proxyObj = deepcopy(other._proxyObj);
     } else {
       this._proxyObj = other;
     }
@@ -234,7 +235,7 @@ class {{=objectWrapper}} {
   {{~}}
 
   copy(other) {
-    this._proxyObj = other._proxyObj;
+    this._proxyObj = deepcopy(other._proxyObj);
   }
 
   static get classType() {
