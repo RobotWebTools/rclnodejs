@@ -48,7 +48,7 @@ npm i rclnodejs@x.y.z
 
 |                                                            RCLNODEJS Version                                                            |                                                                         Compatible ROS 2 Release                                                                         |
 | :-------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [0.17.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.17.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.17.0/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201009) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
+| [0.18.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.18.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.18.0/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201211) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
 |                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                    [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                     |
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` depdendency section.
