@@ -7,9 +7,8 @@ branches:
   only:
   - foxy-fitzroy
 
-before_install:
+script:
+  - 'if [ "$DOCKER_USERNAME" != "" ]; then sudo docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD; fi'
   - sudo docker pull ubuntu:focal
   - sudo docker build -t rcldocker .
-
-script:
   - sudo docker run -v $(pwd):/root/rclnodejs --rm rcldocker bash -i -c 'cd /root/rclnodejs && cppcheck --suppress=syntaxError --enable=all src/*.cpp src/*.hpp && ./scripts/build.sh && npm test'
