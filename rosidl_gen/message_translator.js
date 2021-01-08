@@ -49,7 +49,6 @@ function copyMsgObject(msg, obj) {
           }
         } else {
           // Proceed further of this object
-          console.log(i, msg[i]);
           copyMsgObject(msg[i], obj[i]);
         }
       } else {
