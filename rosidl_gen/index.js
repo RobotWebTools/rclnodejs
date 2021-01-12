@@ -63,18 +63,14 @@ async function generateInPaths(paths, options) {
       })
     );
     await generateTypesupportGyp(pkgsEntries, rosIdlDb, options);
-    await child_process.spawn(
-      'node',
-      [`${__dirname}/../node_modules/.bin/node-gyp`, 'rebuild'],
-      {
-        cwd: `${__dirname}/../src/generated`,
-        stdio: 'inherit',
-        env: {
-          ...process.env,
-          JOBS: os.cpus().length,
-        },
-      }
-    );
+    await child_process.spawn('npx', ['--no-install', 'node-gyp', 'rebuild'], {
+      cwd: `${__dirname}/../src/generated`,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        JOBS: os.cpus().length,
+      },
+    });
   }
 }
 
