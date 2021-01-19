@@ -45,7 +45,10 @@ describe('rclnodejs publisher test suite', function () {
       { isRaw: true },
       (msg) => {
         clearInterval(timer);
-        assert.deepStrictEqual(Buffer.compare(msg, topic), 0);
+
+        // The received Buffer is null-terminated.
+        const buffer = Buffer.concat([topic, Buffer.from([0x00])]);
+        assert.deepStrictEqual(Buffer.compare(msg, buffer), 0);
         done();
       }
     );

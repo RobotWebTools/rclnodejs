@@ -247,7 +247,7 @@ declare module 'rclnodejs' {
      * @param typeClass - Type of ROS messages the subscription will subscribe to
      * @param topic - Name of the topic the subcription will subscribe to.
      * @param options - Configuration options, see DEFAULT_OPTIONS
-     * @param callback - Called when a new message is received.
+     * @param callback - Called when a new message is received. The serialized message will be null-terminated.
      * @returns New instance of Subscription.
      */
     createSubscription<T extends TypeClass<MessageTypeClassName>>(
