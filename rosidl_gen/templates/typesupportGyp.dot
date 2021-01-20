@@ -92,9 +92,7 @@
       ],
       'link_settings': {
         'libraries': [
-{{~ pkg.linkLibraries : lib}}
-          '-l{{=lib}}',
-{{~}}
+          '-l{{=pkg.pkgName}}__rosidl_generator_c',
         ],
       },
     },

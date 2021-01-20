@@ -676,7 +676,6 @@ async function generateTypesupportGypi(pkgsEntries, rosIdlDb, options) {
     pkgsEntries.map(async ([pkgName, pkgInfo]) => ({
       pkgName,
       pkgInfo,
-      linkLibraries: await rosIdlDb.getLinkLibraries(pkgName),
       dependencies: await rosIdlDb.getDependentPackages(pkgName),
     }))
   );
