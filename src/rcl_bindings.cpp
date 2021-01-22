@@ -909,6 +909,7 @@ NAN_METHOD(RclTakeRequest) {
     return;
   }
 
+  free(header);
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
@@ -1794,8 +1795,6 @@ std::vector<BindingMethod> binding_methods = {
     {"getNamespace", GetNamespace},
     {"initString", InitString},
     {"freeMemeoryAtOffset", FreeMemeoryAtOffset},
-    {"createArrayBufferFromAddress", CreateArrayBufferFromAddress},
-    {"createArrayBufferCleaner", CreateArrayBufferCleaner},
     {"setLoggerLevel", setLoggerLevel},
     {"getLoggerEffectiveLevel", GetLoggerEffectiveLevel},
     {"getNodeLoggerName", GetNodeLoggerName},
