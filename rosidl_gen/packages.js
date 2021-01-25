@@ -20,6 +20,7 @@ const readline = require('readline');
 const path = require('path');
 const walk = require('walk');
 const os = require('os');
+const flat = require('array.prototype.flat');
 
 const fsp = fs.promises;
 
@@ -135,9 +136,13 @@ async function getPackageDefinitionsFiles(packageName, amentRoot) {
  */
 async function findAmentPackagesInDirectory(dir) {
   const pkgs = await getAmentPackages(dir);
-  const rosFiles = (
-    await Promise.all(pkgs.map((pkg) => getPackageDefinitionsFiles(pkg, dir)))
-  ).flat();
+  const files = await Promise.all(
+    pkgs.map((pkg) => getPackageDefinitionsFiles(pkg, dir))
+  );
+
+  // Support flat() methond for nodejs < 11.
+  const rosFiles = Array.prototype.flat ? files.flat() : flat(files);
+
   const pkgMap = new Map();
   return new Promise((resolve, reject) => {
     rosFiles.forEach((filePath) => {
