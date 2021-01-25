@@ -15,14 +15,9 @@ ros2 pkg list
 ```
 If the package containing your target message is not listed then install it.
 
-Next, inspect the generated JavaScript message files by viewing the `./node_modules/rclnodejs/generated/` folder of your project for your target message. If you are unable to locate the message file then regenerate messages by either 1) reinstalling rclnodejs which will regenerate all JavaScript and TypeScript files as a post-install step:
-
+Next, inspect the generated JavaScript message files by viewing the `./node_modules/rclnodejs/generated/` folder of your project for your target message. If you are unable to locate the message file then use the `generate-messages` script:
 ```
-npm i rclnodejs
-```
-or use the `rclnodejs cli` to generate JavaScript message files
-```
-rclnodejs generate-ros-messages
+<your_project>/node_modules/.bin/generate-messages
 ```
 
 
