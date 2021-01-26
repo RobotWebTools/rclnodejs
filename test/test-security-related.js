@@ -19,6 +19,7 @@ const rclnodejs = require('../index.js');
 const assertThrowsError = require('./utils.js').assertThrowsError;
 const translator = require('../rosidl_gen/message_translator.js');
 const arrayGen = require('./array_generator.js');
+const { useRosIdl } = require('../options');
 
 describe('Destroying non-existent objects testing', function () {
   this.timeout(60 * 1000);
@@ -215,7 +216,7 @@ describe('Fuzzing API calls testing', function () {
 
   // new bindings does not throw on wrong types, invalid values are defaulted to their
   // "zero" value.
-  if (!process.env.RCLNODEJS_USE_ROSIDL) {
+  if (!useRosIdl) {
     it('Inconsistent message type for subscription', function () {
       var node = rclnodejs.createNode('node1', '/inconsistent');
       const RclString = 'std_msgs/msg/String';
@@ -237,7 +238,7 @@ describe('Fuzzing API calls testing', function () {
 
   // new bindings does not throw on wrong types, invalid values are defaulted to their
   // "zero" value.
-  if (!process.env.RCLNODEJS_USE_ROSIDL) {
+  if (!useRosIdl) {
     it('Inconsistent request data for service', function () {
       var node = rclnodejs.createNode('node2', '/inconsistent');
       const AddTwoInts = 'example_interfaces/srv/AddTwoInts';

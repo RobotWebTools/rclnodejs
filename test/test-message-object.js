@@ -38,7 +38,7 @@ describe('Rclnodejs createMessage() testing', function () {
     let promises = [];
     installedPackagesRoot.forEach((path) => {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
-        if (process.env.RCLNODEJS_USE_ROSIDL) {
+        if (useRosIdl) {
           // this packages contains invalid messages
           pkgs.delete('libstatistics_collector');
         }
@@ -183,7 +183,7 @@ describe('Rclnodejs createMessageObject() testing', function () {
     let promises = [];
     installedPackagesRoot.forEach((path) => {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
-        if (process.env.RCLNODEJS_USE_ROSIDL) {
+        if (useRosIdl) {
           // this packages contains invalid messages
           pkgs.delete('libstatistics_collector');
         }

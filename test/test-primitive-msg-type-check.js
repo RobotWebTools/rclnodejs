@@ -17,10 +17,11 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertThrowsError = require('./utils.js').assertThrowsError;
+const { useRosIdl } = require('../options');
 
 // new bindings does not throw on wrong types, invalid types are automatically
 // converted to the "zero" value.
-if (!process.env.RCLNODEJS_USE_ROSIDL) {
+if (!useRosIdl) {
   describe('Rclnodejs message type data testing', function () {
     this.timeout(60 * 1000);
 

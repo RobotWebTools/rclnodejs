@@ -20,6 +20,7 @@ const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const translator = require('../rosidl_gen/message_translator.js');
 const arrayGen = require('./array_generator.js');
+const { useRosIdl } = require('../options.js');
 
 function isTypedArray(v) {
   return ArrayBuffer.isView(v) && !(v instanceof DataView);
@@ -50,7 +51,7 @@ describe('rclnodejs message communication', function () {
 
   // The new bindings initialize nested message as plain js objects instead of the wrappers.
   // As a result, they don't contain .hasMember methods that this test needs.
-  if (!process.env.RCLNODEJS_USE_ROSIDL) {
+  if (!useRosIdl) {
     [
       {
         pkg: 'std_msgs',
@@ -247,7 +248,7 @@ describe('rclnodejs message communication', function () {
   // similar to the above test, this requires introspection into the message by using the
   // .hasMember method. The new bindings only support typed arrays so these tests are not
   // really needed.
-  if (!process.env.RCLNODEJS_USE_ROSIDL) {
+  if (!useRosIdl) {
     [
       /* eslint-disable camelcase */
       /* eslint-disable key-spacing */

@@ -26,6 +26,7 @@ const {
 const os = require('os');
 const packages = require('./packages.js');
 const path = require('path');
+const { useRosIdl } = require('../options');
 
 const generatedRoot = path.join(__dirname, '../generated/');
 const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
@@ -84,11 +85,8 @@ async function generateAll(forcedGenerating) {
       path.join(__dirname, 'generator.json'),
       path.join(generatedRoot, 'generator.json')
     );
-    const useRosidl =
-      process.env.RCLNODEJS_USE_ROSIDL ||
-      process.env.npm_config_rclnodejs_use_rosidl;
     const options = {
-      idlProvider: useRosidl ? 'rosidl' : 'ref',
+      idlProvider: useRosIdl ? 'rosidl' : 'ref',
     };
     await generateInPaths(installedPackagePaths, options);
     await fsp.writeFile(

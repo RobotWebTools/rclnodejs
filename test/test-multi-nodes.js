@@ -20,6 +20,7 @@ const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 const utils = require('./utils.js');
 const kill = require('tree-kill');
+const { useRosIdl } = require('../options');
 
 describe('Multiple nodes interation testing', function () {
   this.timeout(60 * 1000);
@@ -69,7 +70,7 @@ describe('Multiple nodes interation testing', function () {
       );
       var jsPublisher = node.createPublisher(RclString, 'js_pycpp_chatter');
       setTimeout(() => {
-        if (process.env.RCLNODEJS_USE_ROSIDL) {
+        if (useRosIdl) {
           jsPublisher.publish({ data: msg }); // short form not supported by rosidl generator
         } else {
           jsPublisher.publish(msg);

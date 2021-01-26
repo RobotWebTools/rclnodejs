@@ -16,6 +16,7 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
+const { useRosIdl } = require('../options');
 
 /* eslint-disable camelcase */
 describe('Rclnodejs non primitive message type testing', function () {
@@ -63,7 +64,7 @@ describe('Rclnodejs non primitive message type testing', function () {
 
     // new bindings does not do conversion until serialization so it doesn't automatically
     // converts number arrays to typed arrays on assignment.
-    if (process.env.RCLNODEJS_USE_ROSIDL) {
+    if (useRosIdl) {
       assert.deepStrictEqual([1, 7, 3, 4, 2, 2, 8], jointStateClone.position);
       assert.deepStrictEqual([8, 9, 6, 4], jointStateClone.velocity);
       assert.deepStrictEqual([1, 0, 2, 6, 7], jointStateClone.effort);
@@ -107,7 +108,7 @@ describe('Rclnodejs non primitive message type testing', function () {
 
   // not sure how this test works, `Float32MultiArray.layout.dim.data` is not a valid
   // field, `MultiArrayDimensions` does not have a `data` field.
-  if (!process.env.RCLNODEJS_USE_ROSIDL) {
+  if (!useRosIdl) {
     it('std_msgs/msg/Float32MultiArray checking', function () {
       const Float32MultiArray = rclnodejs.require(
         'std_msgs/msg/Float32MultiArray'

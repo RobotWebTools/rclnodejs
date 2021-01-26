@@ -17,6 +17,7 @@
 const assert = require('assert');
 const os = require('os');
 const rclnodejs = require('../index.js');
+const { useRosIdl } = require('../options');
 
 describe('ROSIDL Node.js message generator test suite', function () {
   before(function () {
@@ -38,7 +39,7 @@ describe('ROSIDL Node.js message generator test suite', function () {
     let promises = [];
     installedPackagesRoot.forEach((path) => {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
-        if (process.env.RCLNODEJS_USE_ROSIDL) {
+        if (useRosIdl) {
           // this packages contains invalid messages
           pkgs.delete('libstatistics_collector');
         }
@@ -133,7 +134,7 @@ describe('ROSIDL Node.js message generator test suite', function () {
     let msg = new Pose();
 
     // new bindings doesn't initialize nested messages with wrappers.
-    if (!process.env.RCLNODEJS_USE_ROSIDL) {
+    if (!useRosIdl) {
       assert(msg.position instanceof Point);
       assert(msg.orientation instanceof Quaternion);
     }
@@ -191,7 +192,7 @@ describe('ROSIDL Node.js message generator test suite', function () {
   });
 
   // new bindings does not have array wrappers.
-  if (!process.env.RCLNODEJS_USE_ROSIDL) {
+  if (!useRosIdl) {
     it('Testing array - Int32', function () {
       let Int32 = rclnodejs.require('std_msgs').msg.Int32;
       let array = new Int32.ArrayType(5);

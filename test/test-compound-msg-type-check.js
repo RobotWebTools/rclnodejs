@@ -17,6 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertThrowsError = require('./utils.js').assertThrowsError;
+const { useRosIdl } = require('../options');
 
 describe('Compound types', function () {
   this.timeout(60 * 1000);
@@ -41,7 +42,7 @@ describe('Compound types', function () {
   });
 
   // there is no special array wrappers in the new bindings
-  if (!process.env.RCLNODEJS_USE_ROSIDL) {
+  if (!useRosIdl) {
     it('Array', function () {
       const Byte = rclnodejs.require('std_msgs').msg.Byte;
       const ByteArray = Byte.ArrayType;
@@ -64,7 +65,7 @@ describe('Compound types', function () {
 
     assert.deepStrictEqual(typeof header.stamp, 'object');
     // the new bindings correctly initialize strings as an empty string instead of undefined.
-    if (process.env.RCLNODEJS_USE_ROSIDL) {
+    if (useRosIdl) {
       assert.deepStrictEqual(typeof header.frame_id, 'string');
     } else {
       assert.deepStrictEqual(typeof header.frame_id, 'undefined');

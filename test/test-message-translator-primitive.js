@@ -17,6 +17,7 @@
 const rclnodejs = require('../index.js');
 const deepEqual = require('deep-equal');
 const arrayGen = require('./array_generator.js');
+const { useRosIdl } = require('../options');
 
 /* eslint-disable camelcase */
 /* eslint-disable indent */
@@ -103,7 +104,7 @@ describe('Rclnodejs message translation: primitive types', function () {
                 );
               }
             });
-            if (process.env.RCLNODEJS_USE_ROSIDL) {
+            if (useRosIdl) {
               publisher.publish({ data: v }); // Short-cut form not supported in rosidl generator
             } else {
               publisher.publish(v); // Short-cut form of publishing primitive types
