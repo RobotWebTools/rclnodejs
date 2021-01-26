@@ -102,7 +102,7 @@ let header = new Header();
 console.log(typeof header.frame_id); // 'string', in the old bindings this would be 'undefined'
 ```
 
-4. Shortform for `std_msg` wrappers are not support.
+4. Shortform for `std_msg` wrappers are not supported.
 
 ```js
 const String = rclnodejs.require('std_msgs').msg.String;
