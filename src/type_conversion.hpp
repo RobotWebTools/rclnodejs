@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2021 Open Source Robotics Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 #ifndef RCLNODEJS_TYPE_CONVERSION_HPP_
 #define RCLNODEJS_TYPE_CONVERSION_HPP_
 
@@ -16,6 +33,7 @@
 #include <locale>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace rclnodejs {
@@ -78,7 +96,7 @@ inline rosidl_runtime_c__String ToNativeChecked<rosidl_runtime_c__String>(
   rosidl_runtime_c__String__init(&ros_string);
   if (!val->IsString()) {
     return ros_string;
-  };
+  }
   Nan::Utf8String utf8(val);
   if (*utf8 == nullptr) {
     throw std::runtime_error("failed to convert value to string");
@@ -94,7 +112,7 @@ inline rosidl_runtime_c__U16String ToNativeChecked<rosidl_runtime_c__U16String>(
   rosidl_runtime_c__U16String__init(&ros_string);
   if (!val->IsString()) {
     return ros_string;
-  };
+  }
   Nan::Utf8String utf8(val);
   if (*utf8 == nullptr) {
     throw std::runtime_error("failed to convert value to string");
