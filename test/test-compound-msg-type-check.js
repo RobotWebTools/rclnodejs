@@ -17,6 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertThrowsError = require('./utils.js').assertThrowsError;
+const { useRosIdl } = require('../options');
 
 describe('Compound types', function () {
   this.timeout(60 * 1000);
@@ -40,17 +41,20 @@ describe('Compound types', function () {
     assert.deepStrictEqual(typeof msg.a, 'undefined');
   });
 
-  it('Array', function () {
-    const Byte = rclnodejs.require('std_msgs').msg.Byte;
-    const ByteArray = Byte.ArrayType;
-    let msg = new ByteArray(3);
-    msg.fill([1, 2, 3]);
+  // there is no special array wrappers in the new bindings
+  if (!useRosIdl) {
+    it('Array', function () {
+      const Byte = rclnodejs.require('std_msgs').msg.Byte;
+      const ByteArray = Byte.ArrayType;
+      let msg = new ByteArray(3);
+      msg.fill([1, 2, 3]);
 
-    assert.deepStrictEqual(msg.data.length, 3);
-    assert.deepStrictEqual(msg.data[0], 1);
-    assert.deepStrictEqual(msg.data[1], 2);
-    assert.deepStrictEqual(msg.data[2], 3);
-  });
+      assert.deepStrictEqual(msg.data.length, 3);
+      assert.deepStrictEqual(msg.data[0], 1);
+      assert.deepStrictEqual(msg.data[1], 2);
+      assert.deepStrictEqual(msg.data[2], 3);
+    });
+  }
 
   it('Object with Header', function () {
     const Header = rclnodejs.require('std_msgs').msg.Header;
@@ -60,7 +64,12 @@ describe('Compound types', function () {
     assert.ok('frame_id' in header);
 
     assert.deepStrictEqual(typeof header.stamp, 'object');
-    assert.deepStrictEqual(typeof header.frame_id, 'undefined');
+    // the new bindings correctly initialize strings as an empty string instead of undefined.
+    if (useRosIdl) {
+      assert.deepStrictEqual(typeof header.frame_id, 'string');
+    } else {
+      assert.deepStrictEqual(typeof header.frame_id, 'undefined');
+    }
   });
 
   it('Complex object', function () {

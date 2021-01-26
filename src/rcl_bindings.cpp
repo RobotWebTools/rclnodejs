@@ -909,6 +909,7 @@ NAN_METHOD(RclTakeRequest) {
     return;
   }
 
+  free(header);
   info.GetReturnValue().Set(Nan::Undefined());
 }
 

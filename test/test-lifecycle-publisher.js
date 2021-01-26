@@ -97,22 +97,22 @@ describe('LifecyclePublisher test suite', function () {
       }
     );
 
-    lifecyclePublisher.publish(TEST_MSG);
+    lifecyclePublisher.publish({ data: TEST_MSG });
     await assertUtils.createDelay(waitTime);
     assert.strictEqual(cbCnt, 0);
 
     lifecyclePublisher.activate();
-    lifecyclePublisher.publish(TEST_MSG);
+    lifecyclePublisher.publish({ data: TEST_MSG });
     await assertUtils.createDelay(waitTime);
     assert.strictEqual(cbCnt, 1);
 
     lifecyclePublisher.deactivate();
-    lifecyclePublisher.publish(TEST_MSG);
+    lifecyclePublisher.publish({ data: TEST_MSG });
     await assertUtils.createDelay(waitTime);
     assert.strictEqual(cbCnt, 1);
 
     lifecyclePublisher.activate();
-    lifecyclePublisher.publish(TEST_MSG);
+    lifecyclePublisher.publish({ data: TEST_MSG });
     await assertUtils.createDelay(waitTime);
     assert.strictEqual(cbCnt, 2);
   });

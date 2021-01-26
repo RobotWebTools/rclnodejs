@@ -14,22 +14,65 @@
 
 'use strict';
 
+const child_process = require('child_process');
+const fsp = require('fs').promises;
 const fse = require('fs-extra');
-const generateJSStructFromIDL = require('./idl_generator.js');
+const {
+  RosIdlDb,
+  generateJSStructFromIDL,
+  generateCppDefinitions,
+  generateTypesupportGypi: generateTypesupportGyp,
+} = require('./idl_generator.js');
+const os = require('os');
 const packages = require('./packages.js');
 const path = require('path');
+const { useRosIdl } = require('../options');
 
 const generatedRoot = path.join(__dirname, '../generated/');
 const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
   path.delimiter
 );
 
-async function generateInPath(path) {
-  const pkgs = await packages.findPackagesInDirectory(path);
-  const pkgsInfo = Array.from(pkgs.values());
-  await Promise.all(
-    pkgsInfo.map((pkgInfo) => generateJSStructFromIDL(pkgInfo, generatedRoot))
+async function generateInPaths(paths, options) {
+  const pkgsInPaths = await Promise.all(
+    paths.map((path) => packages.findPackagesInDirectory(path))
   );
+  const pkgs = new Map();
+  pkgsInPaths.forEach((m, i) => {
+    for (let [pkgName, pkgInfo] of m.entries()) {
+      pkgs.set(pkgName, { ...pkgInfo, amentRoot: paths[i] });
+    }
+  });
+  // skip this package as it contains message that is invalid
+  pkgs.delete('libstatistics_collector');
+
+  const rosIdlDb = new RosIdlDb(pkgs);
+
+  const pkgsInfo = Array.from(pkgs.values());
+  const pkgsEntries = Array.from(pkgs.entries());
+
+  await Promise.all(
+    pkgsInfo.map((pkgInfo) =>
+      generateJSStructFromIDL(pkgInfo, generatedRoot, rosIdlDb, options)
+    )
+  );
+
+  if (options.idlProvider === 'rosidl') {
+    await Promise.all(
+      pkgsEntries.map(([pkgName, pkgInfo]) => {
+        generateCppDefinitions(pkgName, pkgInfo, rosIdlDb, options);
+      })
+    );
+    await generateTypesupportGyp(pkgsEntries, rosIdlDb, options);
+    await child_process.spawn('npx', ['--no-install', 'node-gyp', 'rebuild'], {
+      cwd: `${__dirname}/../src/generated`,
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        JOBS: os.cpus().length,
+      },
+    });
+  }
 }
 
 async function generateAll(forcedGenerating) {
@@ -42,8 +85,13 @@ async function generateAll(forcedGenerating) {
       path.join(__dirname, 'generator.json'),
       path.join(generatedRoot, 'generator.json')
     );
-    await Promise.all(
-      installedPackagePaths.map((path) => generateInPath(path))
+    const options = {
+      idlProvider: useRosIdl ? 'rosidl' : 'ref',
+    };
+    await generateInPaths(installedPackagePaths, options);
+    await fsp.writeFile(
+      path.join(generatedRoot, 'generator-options.js'),
+      `module.exports = ${JSON.stringify(options)}`
     );
   }
 }
@@ -55,7 +103,7 @@ const generator = {
   },
 
   generateAll,
-  generateInPath,
+  generateInPaths,
   generatedRoot,
 };
 

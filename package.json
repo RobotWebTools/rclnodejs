@@ -13,12 +13,11 @@
     "typescript"
   ],
   "scripts": {
-    "install": "node-gyp rebuild",
+    "install": "node scripts/build.js && node scripts/generate_messages.js",
     "docs": "cd docs && make",
     "test": "node ./scripts/compile_tests.js && node --expose-gc ./scripts/run_test.js && npm run dtslint",
     "dtslint": "node ./scripts/generate_tsd.js && dtslint test/types",
     "lint": "eslint --max-warnings=0 --ext js,ts index.js types scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
-    "postinstall": "node scripts/generate_messages.js",
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.hpp && prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark}/**/*.{js,md,ts}\" ./*.{js,md,ts}"
   },
   "bin": {
@@ -59,18 +58,20 @@
     "bindings": "^1.5.0",
     "compare-versions": "^3.6.0",
     "debug": "^4.1.1",
+    "deepcopy": "^2.1.0",
     "dot": "^1.1.3",
     "fs-extra": "^9.0.1",
+    "int64-napi": "^1.0.1",
     "is-close": "^1.3.3",
     "mkdirp": "^1.0.4",
     "mz": "^2.7.0",
     "nan": "^2.14.1",
-    "ref-napi": "^3.0.0",
+    "node-gyp": "^7.1.2",
     "ref-array-di": "^1.2.2",
+    "ref-napi": "^3.0.0",
     "ref-struct-di": "^1.1.1",
-    "walk": "^2.3.14",
     "uuid": "^8.2.0",
-    "int64-napi": "^1.0.1"
+    "walk": "^2.3.14"
   },
   "husky": {
     "hooks": {

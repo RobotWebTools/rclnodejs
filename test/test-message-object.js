@@ -38,6 +38,10 @@ describe('Rclnodejs createMessage() testing', function () {
     let promises = [];
     installedPackagesRoot.forEach((path) => {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
+        if (useRosIdl) {
+          // this packages contains invalid messages
+          pkgs.delete('libstatistics_collector');
+        }
         pkgs.forEach((pkg) => {
           pkg.messages.forEach((info) => {
             const s =
@@ -179,6 +183,10 @@ describe('Rclnodejs createMessageObject() testing', function () {
     let promises = [];
     installedPackagesRoot.forEach((path) => {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
+        if (useRosIdl) {
+          // this packages contains invalid messages
+          pkgs.delete('libstatistics_collector');
+        }
         pkgs.forEach((pkg) => {
           pkg.messages.forEach((info) => {
             const s =

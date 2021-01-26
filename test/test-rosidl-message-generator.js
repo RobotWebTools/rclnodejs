@@ -17,6 +17,7 @@
 const assert = require('assert');
 const os = require('os');
 const rclnodejs = require('../index.js');
+const { useRosIdl } = require('../options');
 
 describe('ROSIDL Node.js message generator test suite', function () {
   before(function () {
@@ -38,6 +39,10 @@ describe('ROSIDL Node.js message generator test suite', function () {
     let promises = [];
     installedPackagesRoot.forEach((path) => {
       let promise = packages.findPackagesInDirectory(path).then((pkgs) => {
+        if (useRosIdl) {
+          // this packages contains invalid messages
+          pkgs.delete('libstatistics_collector');
+        }
         pkgs.forEach((pkg) => {
           pkg.messages.forEach((info) => {
             const s =
@@ -127,8 +132,12 @@ describe('ROSIDL Node.js message generator test suite', function () {
     let Point = rclnodejs.require('geometry_msgs').msg.Point;
     let Quaternion = rclnodejs.require('geometry_msgs').msg.Quaternion;
     let msg = new Pose();
-    assert(msg.position instanceof Point);
-    assert(msg.orientation instanceof Quaternion);
+
+    // new bindings doesn't initialize nested messages with wrappers.
+    if (!useRosIdl) {
+      assert(msg.position instanceof Point);
+      assert(msg.orientation instanceof Quaternion);
+    }
 
     // Setter + getter
     msg.position.x = 123.5;
@@ -182,42 +191,45 @@ describe('ROSIDL Node.js message generator test suite', function () {
     assert.equal(copy.position.z, 78901.125);
   });
 
-  it('Testing array - Int32', function () {
-    let Int32 = rclnodejs.require('std_msgs').msg.Int32;
-    let array = new Int32.ArrayType(5);
+  // new bindings does not have array wrappers.
+  if (!useRosIdl) {
+    it('Testing array - Int32', function () {
+      let Int32 = rclnodejs.require('std_msgs').msg.Int32;
+      let array = new Int32.ArrayType(5);
 
-    assert(array.data instanceof Int32Array);
-    assert(typeof array.data[5] === 'undefined'); // No such index
-    assert.equal(array.size, 5);
-    assert.equal(array.capacity, 5);
+      assert(array.data instanceof Int32Array);
+      assert(typeof array.data[5] === 'undefined'); // No such index
+      assert.equal(array.size, 5);
+      assert.equal(array.capacity, 5);
 
-    // Assignment of message.data
-    const int32Data = [153, 26, 777, 666, 999];
-    for (let i = 0; i < int32Data.length; ++i) {
-      array.data[i] = int32Data[i];
-      assert.equal(array.data[i], int32Data[i]); // Verifying
-    }
+      // Assignment of message.data
+      const int32Data = [153, 26, 777, 666, 999];
+      for (let i = 0; i < int32Data.length; ++i) {
+        array.data[i] = int32Data[i];
+        assert.equal(array.data[i], int32Data[i]); // Verifying
+      }
 
-    // Array deep copy
-    let array2 = new Int32.ArrayType();
-    array2.copy(array);
-    for (let i = 0; i < int32Data.length; ++i) {
-      assert.equal(array2.data[i], int32Data[i]);
-    }
+      // Array deep copy
+      let array2 = new Int32.ArrayType();
+      array2.copy(array);
+      for (let i = 0; i < int32Data.length; ++i) {
+        assert.equal(array2.data[i], int32Data[i]);
+      }
 
-    // Change array2
-    for (let i = 0; i < array2.length; ++i) {
-      array2.data[i] = 0;
-    }
+      // Change array2
+      for (let i = 0; i < array2.length; ++i) {
+        array2.data[i] = 0;
+      }
 
-    // Values in array1 are NOT changed
-    for (let i = 0; i < array.length; ++i) {
-      assert.equal(array.data[i], int32Data[i]); // Verifying
-    }
+      // Values in array1 are NOT changed
+      for (let i = 0; i < array.length; ++i) {
+        assert.equal(array.data[i], int32Data[i]); // Verifying
+      }
 
-    // Resize
-    array.size = 6;
-    assert.equal(array.size, 6);
-    assert.equal(array.capacity, 6);
-  });
+      // Resize
+      array.size = 6;
+      assert.equal(array.size, 6);
+      assert.equal(array.capacity, 6);
+    });
+  }
 });

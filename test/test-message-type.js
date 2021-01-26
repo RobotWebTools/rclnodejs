@@ -71,7 +71,7 @@ describe('Rclnodejs message type testing', function () {
       const msgChar = 'std_msgs/msg/Char';
       var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, [
         'Char',
-        '"A"',
+        '65', // char in uint8 in ROS
       ]);
       var subscription = node.createSubscription(
         msgChar,
