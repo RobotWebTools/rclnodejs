@@ -18,9 +18,7 @@ const IsClose = require('is-close');
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
-const { NodeOptions } = require('../index.js');
 const assertThrowsError = assertUtils.assertThrowsError;
-const Context = require('../lib/context.js');
 
 describe('rclnodejs node test suite', function () {
   this.timeout(60 * 1000);
@@ -33,9 +31,9 @@ describe('rclnodejs node test suite', function () {
     rclnodejs.shutdown();
   });
 
-  describe('createNode method testing', function () {
+  describe('Node constructor testing', function () {
     it('Try creating a node', function () {
-      var node = rclnodejs.createNode('example_node');
+      var node = new rclnodejs.Node('example_node');
       node.destroy();
     });
 
@@ -43,7 +41,7 @@ describe('rclnodejs node test suite', function () {
       let nodeName = 'example_node_with_ns',
         nodeNamespace = '/ns';
 
-      var node = rclnodejs.createNode(nodeName, nodeNamespace);
+      var node = new rclnodejs.Node(nodeName, nodeNamespace);
       assert.deepStrictEqual(node.namespace(), '/ns');
     });
 
@@ -51,7 +49,7 @@ describe('rclnodejs node test suite', function () {
       let nodeName = 'example_node_with_empty_ns',
         nodeNamespace = '';
 
-      var node = rclnodejs.createNode(nodeName, nodeNamespace);
+      var node = new rclnodejs.Node(nodeName, nodeNamespace);
       assert.deepStrictEqual(node.namespace(), '/');
     });
 
@@ -59,7 +57,7 @@ describe('rclnodejs node test suite', function () {
       let nodeName = 'example_node_with_rel_ns',
         nodeNamespace = 'ns';
 
-      var node = rclnodejs.createNode(nodeName, nodeNamespace);
+      var node = new rclnodejs.Node(nodeName, nodeNamespace);
       assert.deepStrictEqual(node.namespace(), '/ns');
     });
 
@@ -69,7 +67,7 @@ describe('rclnodejs node test suite', function () {
 
       assertThrowsError(
         () => {
-          var node = rclnodejs.createNode(nodeName, nodeNamespace);
+          var node = new rclnodejs.Node(nodeName, nodeNamespace);
         },
         Error,
         'must not contain characters other than',
@@ -83,7 +81,7 @@ describe('rclnodejs node test suite', function () {
 
       assertThrowsError(
         () => {
-          var node = rclnodejs.createNode(nodeName, nodeNamespace);
+          var node = new rclnodejs.Node(nodeName, nodeNamespace);
         },
         Error,
         'must not contain characters other than',
@@ -97,7 +95,7 @@ describe('rclnodejs node test suite', function () {
 
       assertThrowsError(
         () => {
-          var node = rclnodejs.createNode(nodeName, nodeNamespace);
+          var node = new rclnodejs.Node(nodeName, nodeNamespace);
         },
         Error,
         'must not contain characters other than',
@@ -123,7 +121,7 @@ describe('rclnodejs node test suite', function () {
       invalidParams.forEach(function (param) {
         assertThrowsError(
           () => {
-            var node = rclnodejs.createNode(param[0], param[1]);
+            var node = new rclnodejs.Node(param[0], param[1]);
           },
           TypeError,
           'Invalid argument',
@@ -148,7 +146,7 @@ describe('rcl node methods testing', function () {
   });
 
   beforeEach(function () {
-    node = rclnodejs.createNode('my_node', '/my_ns');
+    node = new rclnodejs.Node('my_node', '/my_ns');
     RclString = 'std_msgs/msg/String';
     GetParameters = 'rcl_interfaces/srv/GetParameters';
   });
@@ -433,14 +431,14 @@ describe('topic & serviceName getter/setter', function () {
   });
 
   it('publisher: topic property getter', function () {
-    var node = rclnodejs.createNode('publisher', '/topic_getter');
+    var node = new rclnodejs.Node('publisher', '/topic_getter');
     var publisher = node.createPublisher(RclString, 'chatter');
     assert.deepStrictEqual(publisher.topic, 'chatter');
     node.destroy();
   });
 
   it('subscription: topic property getter', function () {
-    var node = rclnodejs.createNode('subscription', '/topic_getter');
+    var node = new rclnodejs.Node('subscription', '/topic_getter');
     var subscription = node.createSubscription(
       RclString,
       'chatter',
@@ -451,58 +449,16 @@ describe('topic & serviceName getter/setter', function () {
   });
 
   it('client: serviceName property getter', function () {
-    var node = rclnodejs.createNode('client', '/servicename_getter');
+    var node = new rclnodejs.Node('client', '/servicename_getter');
     var client = node.createClient(AddTwoInts, 'add_two_ints');
     assert.deepStrictEqual(client.serviceName, 'add_two_ints');
     node.destroy();
   });
 
   it('service: topic property getter', function () {
-    var node = rclnodejs.createNode('service', '/servicename_getter');
+    var node = new rclnodejs.Node('service', '/servicename_getter');
     var service = node.createService(AddTwoInts, 'add_two_ints', (req) => {});
     assert.deepStrictEqual(service.serviceName, 'add_two_ints');
     node.destroy();
-  });
-});
-
-describe('Test the node with no handles attached when initializing', function () {
-  this.timeout(60 * 1000);
-
-  before(function () {
-    return rclnodejs.init();
-  });
-
-  after(function () {
-    rclnodejs.shutdown();
-  });
-
-  it('Publish a topic after initialization', function (done) {
-    // Init the node with no parameter services.
-    const node = rclnodejs.createNode(
-      'publisher',
-      '/topic_getter',
-      Context.defaultContext(),
-      new NodeOptions(false, [], false)
-    );
-    const str = 'hello world';
-    rclnodejs.spin(node);
-
-    setTimeout(() => {
-      const publisher = node.createPublisher('std_msgs/msg/String', 'chatter');
-      publisher.publish(str);
-    }, 200);
-
-    setTimeout(() => {
-      // The backgroud thread should get waken up when the subscription is attached.
-      const subscription = node.createSubscription(
-        'std_msgs/msg/String',
-        'chatter',
-        (msg) => {
-          assert.deepStrictEqual(msg.data, str);
-          node.destroy();
-          done();
-        }
-      );
-    }, 100);
   });
 });

@@ -1803,7 +1803,7 @@ std::vector<BindingMethod> binding_methods = {
     {"log", Log},
     {"isEnableFor", IsEnableFor},
     {"createContext", CreateContext},
-    {"ok", IsContextValid},
+    {"isContextValid", IsContextValid},
     {"getPublisherNamesAndTypesByNode", GetPublisherNamesAndTypesByNode},
     {"getSubscriptionNamesAndTypesByNode", GetSubscriptionNamesAndTypesByNode},
     {"getServiceNamesAndTypesByNode", GetServiceNamesAndTypesByNode},

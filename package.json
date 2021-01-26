@@ -1,6 +1,6 @@
 {
   "name": "rclnodejs",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "ROS2.0 JavaScript client with Node.js",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -20,6 +20,9 @@
     "lint": "eslint --max-warnings=0 --ext js,ts index.js types scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.hpp && prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark}/**/*.{js,md,ts}\" ./*.{js,md,ts}"
   },
+  "bin": {
+    "generate-messages": "./scripts/generate_messages.js"
+  },
   "authors": [
     "Minggang Wang <minggang.wang@intel.com>",
     "Kenny Yuan <kaining.yuan@intel.com>",
@@ -32,8 +35,10 @@
     "url": "git+https://github.com/RobotWebTools/rclnodejs.git"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.12.1",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
+    "babel-eslint": "^10.1.0",
     "clang-format": "^1.4.0",
     "commander": "^6.0.0",
     "deep-equal": "^1.1.1",

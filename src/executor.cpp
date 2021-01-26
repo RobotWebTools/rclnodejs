@@ -45,7 +45,8 @@ Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
     : async_(nullptr),
       handle_manager_(handle_manager),
       delegate_(delegate),
-      context_(nullptr) {
+      context_(nullptr),
+      main_thread_(uv_thread_self()) {
   running_.store(false);
 }
 
@@ -65,7 +66,7 @@ void Executor::Start(rcl_context_t* context, int32_t time_out) {
     // Mark flag before creating thread
     // Make sure thread can run
     running_.store(true);
-    uv_thread_create(&thread_, Executor::Run, this);
+    uv_thread_create(&background_thread_, Executor::Run, this);
   }
 }
 
@@ -95,7 +96,8 @@ void Executor::Stop() {
     // Stop thread first, and then uv_close
     // Make sure async_ is not used anymore
     running_.store(false);
-    uv_thread_join(&thread_);
+    handle_manager_->StopWaitingHandles();
+    uv_thread_join(&background_thread_);
 
     if (uv_is_active(reinterpret_cast<uv_handle_t*>(async_))) {
       static bool handle_closed = false;
@@ -112,6 +114,11 @@ void Executor::Stop() {
       RCLNODEJS_DEBUG("Background thread stopped.");
     }
   }
+}
+
+bool Executor::IsMainThread() {
+  uv_thread_t this_thread = uv_thread_self();
+  return uv_thread_equal(&main_thread_, &this_thread) != 0;
 }
 
 void Executor::DoWork(uv_async_t* handle) {
@@ -158,12 +165,16 @@ void Executor::Run(void* arg) {
 
 RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
                                           int32_t time_out) {
+  // Wait the handles on the background thread if there is none.
+  if (handle_manager_->sum() == 0 && !IsMainThread())
+    handle_manager_->WaitForHandles();
+
   if (handle_manager_->is_synchronizing())
     handle_manager_->WaitForSynchronizing();
+
   {
     ScopedReadWriteLock read_lock(handle_manager_->handle_rwlock(),
                                   ScopedReadWriteLock::LockType::kRead);
-    if (handle_manager_->is_empty()) return RclResult(RCL_RET_OK, "" /* msg */);
 
     size_t num_subscriptions = 0u;
     size_t num_guard_conditions = 0u;

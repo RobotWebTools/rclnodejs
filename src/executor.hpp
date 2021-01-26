@@ -46,6 +46,7 @@ class Executor {
   void Stop();
   void SpinOnce(rcl_context_t* context, int32_t time_out);
   int32_t time_out() { return time_out_; }
+  bool IsMainThread();
 
   static void DoWork(uv_async_t* handle);
   static void Run(void* arg);
@@ -58,7 +59,12 @@ class Executor {
   void ExecuteReadyHandles();
 
   uv_async_t* async_;
-  uv_thread_t thread_;
+
+  // The v8 main thread.
+  uv_thread_t main_thread_;
+
+  // Sub thread used to query the ready handles.
+  uv_thread_t background_thread_;
 
   HandleManager* handle_manager_;
   Delegate* delegate_;
