@@ -22,7 +22,7 @@ const path = require('path');
 const rclnodejs = require('../index.js');
 
 const GEN_FOLDER = 'generated';
-const SCRIPT_NAME = 'generate-messages';
+const SCRIPT_NAME = 'generate-ros-messages';
 
 describe('rclnodejs generate-messages binary-script tests', function () {
   let cwd;
@@ -87,16 +87,35 @@ describe('rclnodejs generate-messages binary-script tests', function () {
     fs.rmdirSync(this.tmpPkg, { recursive: true });
   });
 
-  it('test generate-messages script installation', function (done) {
+  it('test generate-ros-messages script installation', function (done) {
     // confirm script is installed at <pgk>/node_modules/.bin/<script>
     let script = createScriptFolderPath(this.tmpPkg);
     assert.ok(fs.existsSync(script));
     done();
   });
 
-  it('test generate-messages script operation', function (done) {
+  it('test generate-ros-messages script operation', function (done) {
     let script = createScriptFolderPath(this.tmpPkg);
     childProcess.spawnSync(script, [], { stdio: 'inherit', shell: true });
+
+    let generatedFolderPath = createGeneratedFolderPath(this.tmpPkg);
+    assert.ok(
+      fs.existsSync(generatedFolderPath),
+      'No generated message folder found'
+    );
+    assert.ok(
+      fs.existsSync(path.join(generatedFolderPath, 'std_msgs')),
+      'std_msgs folder found'
+    );
+    done();
+  });
+
+  it('test npx generate-ros-messages script operation', function (done) {
+    childProcess.spawnSync('npx', [SCRIPT_NAME], {
+      stdio: 'inherit',
+      shell: true,
+      cwd: this.tmpPkg,
+    });
 
     let generatedFolderPath = createGeneratedFolderPath(this.tmpPkg);
     assert.ok(
