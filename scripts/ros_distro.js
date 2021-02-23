@@ -5,6 +5,7 @@ switch (process.env.ROS_DISTRO) {
     console.log('1911');
     process.exit(0);
   case 'foxy':
+  case 'rolling':
     console.log('2006');
     process.exit(0);
   case undefined:
