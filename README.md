@@ -99,7 +99,7 @@ rclnodejs.init().then(() => {
 });
 ```
 
-The benefits of using TypeScript become evident when working with more complex use-cases. ROS messages are defined in the `types/interfaces.d.ts` module. This module is updated as part of the `generate-messages` process described in the next section.
+The benefits of using TypeScript become evident when working with more complex use-cases. ROS messages are defined in the `types/interfaces.d.ts` module. This module is updated as part of the `generate-ros-messages` process described in the next section.
 
 ## ROS2 Interface Message Generation (important)
 
@@ -107,11 +107,10 @@ ROS components communicate by sending and receiving messages described
 by the interface definition language (IDL). ROS client libraries such as
 rclnodejs are responsible for converting these IDL message descriptions
 into source code of their target language. For this, rclnodejs provides
-the `generate-messages` npm script that reads in the IDL
-messages files of a ROS environment and generates corresponding JavaScript
+the npm binary`generate-ros-messages` script that reads the IDL
+message files of a ROS environment and generates corresponding JavaScript
 message interface files. Additionally, the tool generates the TypeScript
-`interface.d.ts` file containing declarations for every IDL message file
-processed.
+`interface.d.ts` file containing declarations for each IDL message file.
 
 Learn more about ROS interfaces and IDL [here](https://index.ros.org/doc/ros2/Concepts/About-ROS-Interfaces/).
 
@@ -127,25 +126,15 @@ stringMsgObject.data = 'hello world';
 
 Message files are generated as a post-install step of the rclnodejs
 installation process. Thereafter, you will need to manually run the
-message generation script when new ROS message packages are installed
+rclnodejs message generation script when new ROS message packages are installed
 for which your ROS2-nodejs project has a dependency.
 
-### Running `generate-messages` Utility
+### Running `generate-ros-messages` Utility
 
-To use `generate-messages` from your Nodejs package, create an npm
-script entry in your package.json file as shown:
-
-```
-"scripts": {
-  "generate-messages": "generate-messages"
-  // your other scripts here
-}
-```
-
-To run the script use `npm` as follows:
+To run the `generate-ros-messages` script from your Nodejs package, use the `npx` utility included in your Nodejs installation.
 
 ```
-npm run generate-messages
+npx generate-ros-messages
 ```
 
 The newly generated JavaScript files can be found at

@@ -22,7 +22,7 @@
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.hpp && prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark}/**/*.{js,md,ts}\" ./*.{js,md,ts}"
   },
   "bin": {
-    "generate-messages": "./scripts/generate_messages.js"
+    "generate-ros-messages": "./scripts/generate_messages.js"
   },
   "authors": [
     "Minggang Wang <minggang.wang@intel.com>",
