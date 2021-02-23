@@ -35,22 +35,18 @@ describe('rclnodejs interactive testing', function () {
       const RclString = 'std_msgs/msg/String';
       var publisher = childProcess.fork(`${__dirname}/publisher_setup.js`);
       var destroy = false;
-      var subscription = node.createSubscription(
-        RclString,
-        'topic',
-        function (msg) {
-          assert.deepStrictEqual(typeof msg, 'object');
-          assert.ok('data' in msg);
-          assert.deepStrictEqual(msg.data, 'Greeting from publisher');
+      var subscription = node.createSubscription(RclString, 'topic', (msg) => {
+        assert.deepStrictEqual(typeof msg, 'object');
+        assert.ok('data' in msg);
+        assert.deepStrictEqual(msg.data, 'Greeting from publisher');
 
-          if (!destroy) {
-            publisher.kill('SIGINT');
-            node.destroy();
-            destroy = true;
-            done();
-          }
+        if (!destroy) {
+          publisher.kill('SIGINT');
+          node.destroy();
+          destroy = true;
+          done();
         }
-      );
+      });
       rclnodejs.spin(node);
     });
   });

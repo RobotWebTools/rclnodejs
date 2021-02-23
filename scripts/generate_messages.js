@@ -21,7 +21,7 @@ const generator = require('../rosidl_gen/index.js');
 const tsdGenerator = require('../rostsd_gen/index.js');
 
 async function main() {
-  console.log('Start JavaScript message generation...');
+  console.log('Start generation of ROS2 JavaScript messages...');
 
   try {
     await generator.generateAll(true);
