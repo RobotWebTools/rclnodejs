@@ -35,7 +35,7 @@
         '-fstack-protector-strong',
         '-fPIE -fPIC',
         '-O2 -D_FORTIFY_SOURCE=2',
-        '-Wformat -Wformat-security'
+        '-Wformat -Wformat-security -Wextra -Wno-cast-function-type'
       ],
       'cflags_cc!': [
         '-fno-exceptions'
