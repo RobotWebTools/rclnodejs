@@ -43,10 +43,10 @@ struct RclResult {
 
 Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
     : async_(nullptr),
+      main_thread_(uv_thread_self()),
       handle_manager_(handle_manager),
       delegate_(delegate),
-      context_(nullptr),
-      main_thread_(uv_thread_self()) {
+      context_(nullptr) {
   running_.store(false);
 }
 
