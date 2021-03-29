@@ -73,14 +73,14 @@ NAN_METHOD(CreateLifecycleStateMachine) {
   const rosidl_service_type_support_t* gtg =
       GetServiceTypeSupport("lifecycle_msgs", "GetAvailableTransitions");
 
-  rcl_lifecycle_state_machine_options_t* options =
+  rcl_lifecycle_state_machine_options_t options =
       rcl_lifecycle_get_default_state_machine_options();
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_lifecycle_state_machine_init(
                                state_machine, node,
                                pn, cs, gs, gas, gat, gtg,
-                               options),
+                               &options),
                            rcl_get_error_string().str);
 
   auto js_obj = RclHandle::NewInstance(
