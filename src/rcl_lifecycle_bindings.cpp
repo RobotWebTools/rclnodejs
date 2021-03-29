@@ -54,8 +54,6 @@ NAN_METHOD(CreateLifecycleStateMachine) {
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  const rcl_node_options_t* node_options =
-      reinterpret_cast<const rcl_node_options_t*>(rcl_node_get_options(node));
 
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
@@ -75,18 +73,20 @@ NAN_METHOD(CreateLifecycleStateMachine) {
   const rosidl_service_type_support_t* gtg =
       GetServiceTypeSupport("lifecycle_msgs", "GetAvailableTransitions");
 
+  const rcl_lifecycle_state_machine_options_t* smoptions =
+      rcl_lifecycle_get_default_state_machine_options();
+
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_lifecycle_state_machine_init(
                                state_machine, node, pn, cs, gs, gas, gat, gtg,
-                               true, &node_options->allocator),
+                               smoptions),
                            rcl_get_error_string().str);
 
   auto js_obj = RclHandle::NewInstance(
-      state_machine, node_handle, [node, node_options](void* ptr) {
+      state_machine, node_handle, [node](void* ptr) {
         rcl_lifecycle_state_machine_t* state_machine =
             reinterpret_cast<rcl_lifecycle_state_machine_t*>(ptr);
-        rcl_ret_t ret = rcl_lifecycle_state_machine_fini(
-            state_machine, node, &node_options->allocator);
+        rcl_ret_t ret = rcl_lifecycle_state_machine_fini(state_machine, node);
         free(ptr);
         THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
       });
