@@ -25,6 +25,7 @@ rclnodejs.init().then(() => {
 ## Documentation
 
 - [Installation](#installation)
+- [rclnodejs-cli](#rclnodejs-cli)
 - [API Documentation](#api-documentation)
 - [Using TypeScript](#using-typescript)
 - [Examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
@@ -65,6 +66,28 @@ npm i rclnodejs@x.y.z
 |                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                    [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                     |
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` depdendency section.
+
+## rclnodejs-cli
+
+[rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs/) is a companion project we recently launched to provide a commandline interface to a set of developer tools for working with this `rclnodejs`. You may find `rclnodejs-cli` particularly useful if you plan to create ROS 2 node(s) and launch files for working with multiple node orchestrations.
+```
+           _                 _       _
+  _ __ ___| |_ __   ___   __| | ___ (_)___
+ | '__/ __| | '_ \ / _ \ / _` |/ _ \| / __|
+ | | | (__| | | | | (_) | (_| |  __/| \__ \
+ |_|  \___|_|_| |_|\___/ \__,_|\___|/ |___/
+                                  |__/
+Usage: rclnodejs [command] [options]
+
+Options:
+  -h, --help                               display help for command
+
+Commands:
+  create-package [options] <package-name>  Create a ROS2 package for Nodejs development.
+  generate-ros-messages                    Generate JavaScript code from ROS2 IDL interfaces
+  help [command]                           display help for command
+```
+
 
 ## API Documentation
 
