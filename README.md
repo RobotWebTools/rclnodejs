@@ -62,7 +62,7 @@ npm i rclnodejs@x.y.z
 
 |                                                            RCLNODEJS Version                                                            |                                                                         Compatible ROS 2 Release                                                                         |
 | :-------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [0.18.1 (current)](https://www.npmjs.com/package/rclnodejs/v/0.18.1) ([API](http://robotwebtools.org/rclnodejs/docs/0.18.0/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201211) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
+| [0.18.2 (current)](https://www.npmjs.com/package/rclnodejs/v/0.18.2) ([API](http://robotwebtools.org/rclnodejs/docs/0.18.0/index.html)) | [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201211) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
 |                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                    [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                     |
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` depdendency section.
@@ -70,6 +70,7 @@ npm i rclnodejs@x.y.z
 ## rclnodejs-cli
 
 [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs/) is a companion project we recently launched to provide a commandline interface to a set of developer tools for working with this `rclnodejs`. You may find `rclnodejs-cli` particularly useful if you plan to create ROS 2 node(s) and launch files for working with multiple node orchestrations.
+
 ```
            _                 _       _
   _ __ ___| |_ __   ___   __| | ___ (_)___
@@ -87,7 +88,6 @@ Commands:
   generate-ros-messages                    Generate JavaScript code from ROS2 IDL interfaces
   help [command]                           display help for command
 ```
-
 
 ## API Documentation
 
