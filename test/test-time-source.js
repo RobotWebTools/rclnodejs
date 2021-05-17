@@ -16,14 +16,8 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const {
-  Clock,
-  Parameter,
-  ParameterType,
-  ROSClock,
-  TimeSource,
-  Time,
-} = rclnodejs;
+const { Clock, Parameter, ParameterType, ROSClock, TimeSource, Time } =
+  rclnodejs;
 const int64 = require('int64-napi');
 
 describe('rclnodejs TimeSource testing', function () {

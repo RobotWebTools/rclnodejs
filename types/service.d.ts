@@ -35,9 +35,8 @@ declare module 'rclnodejs' {
    *
    * @deprecated use {@link ServiceRequestHandler | ServiceRequestHandler}
    */
-  type ServiceRequestCallback<
-    T extends TypeClass<ServiceTypeClassName>
-  > = ServiceRequestHandler<T>;
+  type ServiceRequestCallback<T extends TypeClass<ServiceTypeClassName>> =
+    ServiceRequestHandler<T>;
 
   /**
    * A service response to a client request.

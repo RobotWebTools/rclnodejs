@@ -49,8 +49,9 @@ describe('LifecycleNode test suite', function () {
 
   before(async function () {
     await rclnodejs.init();
-    StateInterface = rclnodejs.createMessage('lifecycle_msgs/msg/State')
-      .constructor;
+    StateInterface = rclnodejs.createMessage(
+      'lifecycle_msgs/msg/State'
+    ).constructor;
     TransitionInterface = rclnodejs.createMessage(
       'lifecycle_msgs/msg/Transition'
     ).constructor;
