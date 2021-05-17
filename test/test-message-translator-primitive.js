@@ -181,17 +181,7 @@ describe('Rclnodejs message translation: primitive types array', function () {
     {
       type: 'Int32MultiArray',
       values: [
-        -2147483648,
-        -2147483647,
-        -32768,
-        -2,
-        -1,
-        0,
-        1,
-        2,
-        3,
-        32767,
-        2147483647,
+        -2147483648, -2147483647, -32768, -2, -1, 0, 1, 2, 3, 32767, 2147483647,
       ],
     },
     {
