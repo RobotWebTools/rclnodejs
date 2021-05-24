@@ -5,7 +5,7 @@ sudo: required
 
 branches:
   only:
-  - develop
+  - galactic-geochelone
 
 script:
   - 'if [ "$DOCKER_USERNAME" != "" ]; then sudo docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD; fi'
