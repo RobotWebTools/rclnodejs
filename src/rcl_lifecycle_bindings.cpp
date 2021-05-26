@@ -73,6 +73,8 @@ NAN_METHOD(CreateLifecycleStateMachine) {
   const rosidl_service_type_support_t* gtg =
       GetServiceTypeSupport("lifecycle_msgs", "GetAvailableTransitions");
 
+	  
+#if ROS_VERSION >= 2105
   rcl_lifecycle_state_machine_options_t options =
       rcl_lifecycle_get_default_state_machine_options();
 
@@ -91,6 +93,26 @@ NAN_METHOD(CreateLifecycleStateMachine) {
         free(ptr);
         THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
       });
+#else
+  const rcl_node_options_t* node_options =
+      reinterpret_cast<const rcl_node_options_t*>(rcl_node_get_options(node));
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_lifecycle_state_machine_init(
+                               state_machine, node, pn, cs, gs, gas, gat, gtg,
+                               true, &node_options->allocator),
+                           rcl_get_error_string().str);
+
+  auto js_obj = RclHandle::NewInstance(
+      state_machine, node_handle, [node, node_options](void* ptr) {
+        rcl_lifecycle_state_machine_t* state_machine =
+            reinterpret_cast<rcl_lifecycle_state_machine_t*>(ptr);
+        rcl_ret_t ret = rcl_lifecycle_state_machine_fini(
+            state_machine, node, &node_options->allocator);
+        free(ptr);
+        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+      });
+#endif
 
   info.GetReturnValue().Set(js_obj);
 }
