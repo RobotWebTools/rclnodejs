@@ -73,7 +73,6 @@ NAN_METHOD(CreateLifecycleStateMachine) {
   const rosidl_service_type_support_t* gtg =
       GetServiceTypeSupport("lifecycle_msgs", "GetAvailableTransitions");
 
-	  
 #if ROS_VERSION >= 2105
   rcl_lifecycle_state_machine_options_t options =
       rcl_lifecycle_get_default_state_machine_options();
