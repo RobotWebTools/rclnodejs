@@ -14,6 +14,7 @@
 
 'use strict';
 
+const childProcess = require('child_process');
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
@@ -37,7 +38,7 @@ describe('rclnodejs publisher test suite', function () {
     );
     let timer = setInterval(function () {
       publisher.publish(topic);
-    }, 10);
+    }, 100);
 
     node.createSubscription(
       'test_msgs/msg/BasicTypes',
@@ -46,8 +47,20 @@ describe('rclnodejs publisher test suite', function () {
       (msg) => {
         clearInterval(timer);
 
-        // The received Buffer is null-terminated.
-        const buffer = Buffer.concat([topic, Buffer.from([0x00])]);
+        const GALACTIC_VERSION = 2105;
+        const versionInfo = childProcess
+          .execSync('node scripts/ros_distro.js')
+          .toString('utf-8');
+        const version =
+          versionInfo && versionInfo.length > 0
+            ? parseInt(versionInfo)
+            : GALACTIC_VERSION;
+
+        let buffer = topic;
+        if (version >= GALACTIC_VERSION) {
+          // The received Buffer is null-terminated.
+          buffer = Buffer.concat([buffer, Buffer.from([0x00])]);
+        }
         assert.deepStrictEqual(Buffer.compare(msg, buffer), 0);
         done();
       }
