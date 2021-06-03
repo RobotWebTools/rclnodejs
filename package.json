@@ -43,7 +43,7 @@
     "clang-format": "^1.4.0",
     "commander": "^6.0.0",
     "deep-equal": "^1.1.1",
-    "dtslint": "^4.0.4",
+    "dtslint": "^4.1.0",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
