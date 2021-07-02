@@ -53,6 +53,7 @@ static v8::Local<v8::Object> wrapTransition(
 NAN_METHOD(CreateLifecycleStateMachine) {
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  bool enableCommunicationInterface = Nan::To<bool>(info[1]).FromJust();
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
 
   rcl_lifecycle_state_machine_t* state_machine =
@@ -62,20 +63,21 @@ NAN_METHOD(CreateLifecycleStateMachine) {
 
   const rosidl_message_type_support_t* pn =
       GetMessageTypeSupport("lifecycle_msgs", "msg", "TransitionEvent");
-  const rosidl_service_type_support_t* cs =
-      GetServiceTypeSupport("lifecycle_msgs", "ChangeState");
-  const rosidl_service_type_support_t* gs =
-      GetServiceTypeSupport("lifecycle_msgs", "GetState");
   const rosidl_service_type_support_t* gas =
       GetServiceTypeSupport("lifecycle_msgs", "GetAvailableStates");
   const rosidl_service_type_support_t* gat =
       GetServiceTypeSupport("lifecycle_msgs", "GetAvailableTransitions");
   const rosidl_service_type_support_t* gtg =
       GetServiceTypeSupport("lifecycle_msgs", "GetAvailableTransitions");
-
+  const rosidl_service_type_support_t* cs =
+      GetServiceTypeSupport("lifecycle_msgs", "ChangeState");
+  const rosidl_service_type_support_t* gs =
+      GetServiceTypeSupport("lifecycle_msgs", "GetState");
 #if ROS_VERSION >= 2105
+
   rcl_lifecycle_state_machine_options_t options =
       rcl_lifecycle_get_default_state_machine_options();
+  options.enable_com_interface = enableCommunicationInterface;
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_lifecycle_state_machine_init(
