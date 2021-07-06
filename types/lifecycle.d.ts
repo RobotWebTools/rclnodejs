@@ -190,23 +190,22 @@ declare module 'rclnodejs' {
      *   registerOnError(cb)
      */
     class LifecycleNode extends Node {
-
       /**
-     * Create a node instance.
-     *
-     * @param nodeName - The name used to register in ROS.
-     * @param namespace - The namespace used in ROS, default is an empty string.
-     * @param context - The context, default is Context.defaultContext().
-     * @param options - The node options, default is NodeOptions.defaultOptions.
-     * @param enableCommunicationInterface - Enable lifecycle service interfaces, e.g., GetState.
-     */
-    constructor(
-      nodeName: string,
-      namespace?: string,
-      context?: Context,
-      options?: NodeOptions,
-      enableCommunicationInterface?: boolean
-    );
+       * Create a node instance.
+       *
+       * @param nodeName - The name used to register in ROS.
+       * @param namespace - The namespace used in ROS, default is an empty string.
+       * @param context - The context, default is Context.defaultContext().
+       * @param options - The node options, default is NodeOptions.defaultOptions.
+       * @param enableCommunicationInterface - Enable lifecycle service interfaces, e.g., GetState.
+       */
+      constructor(
+        nodeName: string,
+        namespace?: string,
+        context?: Context,
+        options?: NodeOptions,
+        enableCommunicationInterface?: boolean
+      );
 
       /**
        * Access the current lifecycle state.

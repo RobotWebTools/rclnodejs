@@ -362,4 +362,3 @@ describe('LifecycleNode test suite', function () {
     testNode.destroy();
   });
 });
- 
