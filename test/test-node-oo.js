@@ -18,6 +18,7 @@ const IsClose = require('is-close');
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
+const { util } = require('prettier');
 const assertThrowsError = assertUtils.assertThrowsError;
 
 describe('rclnodejs node test suite', function () {
@@ -405,13 +406,15 @@ describe('rcl node methods testing', function () {
     assert.strictEqual(node.countPublishers('chatter'), 2);
   });
 
-  it('node.countSubscribers', function () {
+  it('node.countSubscribers', async () => {
     assert.strictEqual(node.countSubscribers('chatter'), 0);
 
     node.createSubscription(RclString, 'chatter', () => {});
+    await assertUtils.createDelay(500);
     assert.strictEqual(node.countSubscribers('chatter'), 1);
 
     node.createSubscription(RclString, 'chatter', () => {});
+    await assertUtils.createDelay(500);
     assert.strictEqual(node.countSubscribers('chatter'), 2);
   });
 });
