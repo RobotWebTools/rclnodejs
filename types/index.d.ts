@@ -13,6 +13,7 @@ declare module 'rclnodejs' {
    * @param context - The context, default is Context.defaultContext().
    * @param options - The node options, default is NodeOptions.defaultOptions.
    * @returns The new Node instance.
+   * @deprecated since 0.18.0, Use new Node constructor.
    */
   function createNode(
     nodeName: string,
@@ -28,13 +29,16 @@ declare module 'rclnodejs' {
    * @param namespace - The namespace used in ROS, default is an empty string.
    * @param context - The context, default is Context.defaultContext().
    * @param options - The options to configure the new node behavior.
+   * @params enableCommunicationInterface: boolean - Enable lifecycle service interfaces, e.g., GetState.
    * @returns The instance of LifecycleNode.
+   * @deprecated since 0.18.0, Use new LifecycleNode constructor.
    */
   function createLifecycleNode(
     nodeName: string,
     namespace?: string,
     context?: Context,
-    options?: NodeOptions
+    options?: NodeOptions,
+    enableCommunicationInterface?: boolean
   ): lifecycle.LifecycleNode;
 
   /**

@@ -91,6 +91,15 @@ node.countSubscribers(TOPIC);
 // $ExpectType LifecycleNode
 const lifecycleNode = rclnodejs.createLifecycleNode(LIFECYCLE_NODE_NAME);
 
+// $ExpectType LifecycleNode
+const lifecycleNode1 = rclnodejs.createLifecycleNode(
+  LIFECYCLE_NODE_NAME + '1',
+  undefined,
+  undefined,
+  undefined,
+  true
+);
+
 // $ExpectType State
 lifecycleNode.currentState;
 

@@ -409,13 +409,15 @@ describe('rcl node methods testing', function () {
     assert.strictEqual(node.countPublishers('chatter'), 2);
   });
 
-  it('node.countSubscribers', function () {
+  it('node.countSubscribers', async () => {
     assert.strictEqual(node.countSubscribers('chatter'), 0);
 
     node.createSubscription(RclString, 'chatter', () => {});
+    await assertUtils.createDelay(500);
     assert.strictEqual(node.countSubscribers('chatter'), 1);
 
     node.createSubscription(RclString, 'chatter', () => {});
+    await assertUtils.createDelay(500);
     assert.strictEqual(node.countSubscribers('chatter'), 2);
   });
 });
