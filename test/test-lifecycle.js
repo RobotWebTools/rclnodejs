@@ -16,6 +16,7 @@
 const assert = require('assert');
 
 const rclnodejs = require('../index.js');
+const childProcess = require('child_process');
 const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
 
@@ -291,5 +292,73 @@ describe('LifecycleNode test suite', function () {
     await assertUtils.createDelay(1000);
 
     assert.ok(isSuccess);
+  });
+
+  it('LifecycleNode enableCommunicationsInterface', async function () {
+    node.stop();
+
+    node = rclnodejs.createLifecycleNode(NODE_NAME);
+
+    let services = node.getServiceNamesAndTypes();
+    let serviceMsgs = [];
+    services.forEach((service) => {
+      if (
+        service.types.length &&
+        service.types[0].startsWith('lifecycle_msgs')
+      ) {
+        serviceMsgs.push(service.types[0]);
+      }
+    });
+
+    assert.equal(
+      serviceMsgs.length,
+      5,
+      'Incomplete set of lifecycle services found'
+    );
+  });
+
+  it('LifecycleNode disable enableCommunicationsInterface', async function () {
+    // this test is only valid on ROS2 Galactic distro
+    // TODO: refactor the version info to reusable location
+    const GALACTIC_VERSION = 2105;
+    const versionInfo = childProcess
+      .execSync('node scripts/ros_distro.js')
+      .toString('utf-8');
+    const version =
+      versionInfo && versionInfo.length > 0
+        ? parseInt(versionInfo)
+        : GALACTIC_VERSION;
+
+    if (version < GALACTIC_VERSION) return;
+
+    let rosDistro = process.env.ROS_DISTRO;
+    let firstChar = rosDistro.charAt(0);
+    console.log('1st char: ', firstChar);
+    console.log('> ', firstChar > 'g');
+
+    let testNode = new rclnodejs.lifecycle.LifecycleNode(
+      'TEST_NODE',
+      undefined,
+      undefined,
+      undefined,
+      false
+    );
+    testNode.spin();
+
+    let services = testNode.getServiceNamesAndTypes();
+    let serviceMsgs = [];
+    services.forEach((service) => {
+      if (
+        service.name.startsWith('/TEST_NODE') &&
+        service.types &&
+        service.types.length &&
+        service.types[0].startsWith('lifecycle_msgs')
+      ) {
+        serviceMsgs.push(service.types[0]);
+      }
+    });
+
+    assert.equal(serviceMsgs.length, 0, 'Unexpected lifecycle services found');
+    testNode.destroy();
   });
 });

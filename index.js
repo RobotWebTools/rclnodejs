@@ -187,12 +187,13 @@ let rcl = {
   },
 
   /**
-   * Create a managed Node that implements a well-defined life-cycle state
+   * Create a LifecycleNode, a managed Node that implements a well-defined life-cycle state
    * model using the {@link https://github.com/ros2/rcl/tree/master/rcl_lifecycle|ros2 client library (rcl) lifecyle api}.
    * @param {string} nodeName - The name used to register in ROS.
    * @param {string} [namespace=''] - The namespace used in ROS.
    * @param {Context} [context=Context.defaultContext()] - The context to create the node in.
    * @param {NodeOptions} [options=NodeOptions.defaultOptions] - The options to configure the new node behavior.
+   * @param {boolean} [enableCommunicationsInterface=true] - enable lifecycle service interfaces, e.g., GetState.
    * @return {LifecycleNode} A new instance of the specified node.
    * @throws {Error} If the given context is not registered.
    * @deprecated since 0.18.0, Use new LifecycleNode constructor.
@@ -201,13 +202,15 @@ let rcl = {
     nodeName,
     namespace = '',
     context = Context.defaultContext(),
-    options = NodeOptions.defaultOptions
+    options = NodeOptions.defaultOptions,
+    enableCommunicationsInterface = true
   ) {
     return new this.lifecycle.LifecycleNode(
       nodeName,
       namespace,
       context,
-      options
+      options,
+      enableCommunicationsInterface
     );
   },
 
