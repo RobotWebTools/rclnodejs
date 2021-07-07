@@ -53,7 +53,7 @@ static v8::Local<v8::Object> wrapTransition(
 NAN_METHOD(CreateLifecycleStateMachine) {
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
-  bool enableCommunicationInterface = Nan::To<bool>(info[1]).FromJust();
+  bool enable_com_interface = Nan::To<bool>(info[1]).FromJust();
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
 
   rcl_lifecycle_state_machine_t* state_machine =
@@ -77,7 +77,7 @@ NAN_METHOD(CreateLifecycleStateMachine) {
 
   rcl_lifecycle_state_machine_options_t options =
       rcl_lifecycle_get_default_state_machine_options();
-  options.enable_com_interface = enableCommunicationInterface;
+  options.enable_com_interface = enable_com_interface;
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
