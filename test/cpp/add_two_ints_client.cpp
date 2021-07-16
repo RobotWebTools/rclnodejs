@@ -17,47 +17,45 @@
 #include <memory>
 #include <string>
 
+#include "example_interfaces/srv/add_two_ints.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rcutils/cmdline_parser.h"
-
 #include "std_msgs/msg/int8.hpp"
-#include "example_interfaces/srv/add_two_ints.hpp"
 
 using namespace std::chrono_literals;
 
 rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr publisher = nullptr;
 
-void print_usage()
-{
+void print_usage() {
   printf("Usage for add_two_ints_client app:\n");
   printf("add_two_ints_client [-t topic_name] [-h]\n");
   printf("options:\n");
   printf("-h : Print this help function.\n");
-  printf("-s service_name : Specify the service name for this client. Defaults to add_two_ints.\n");
+  printf(
+      "-s service_name : Specify the service name for this client. Defaults to "
+      "add_two_ints.\n");
 }
 
 // TODO(wjwwood): make this into a method of rclcpp::client::Client.
 example_interfaces::srv::AddTwoInts_Response::SharedPtr send_request(
-  rclcpp::Node::SharedPtr node,
-  rclcpp::Client<example_interfaces::srv::AddTwoInts>::SharedPtr client,
-  example_interfaces::srv::AddTwoInts_Request::SharedPtr request)
-{
+    rclcpp::Node::SharedPtr node,
+    rclcpp::Client<example_interfaces::srv::AddTwoInts>::SharedPtr client,
+    example_interfaces::srv::AddTwoInts_Request::SharedPtr request) {
   auto result = client->async_send_request(request);
   // Wait for the result.
   if (rclcpp::spin_until_future_complete(node, result) ==
-    rclcpp::executor::FutureReturnCode::SUCCESS)
-  {
+      rclcpp::FutureReturnCode::SUCCESS) {
     return result.get();
   } else {
     return NULL;
   }
 }
 
-int main(int argc, char ** argv)
-{
+int main(int argc, char** argv) {
   rclcpp::init(argc, argv);
 
-  auto node = rclcpp::Node::make_shared("add_two_ints_client", rclcpp::NodeOptions());
+  auto node =
+      rclcpp::Node::make_shared("add_two_ints_client", rclcpp::NodeOptions());
 
   if (rcutils_cli_option_exist(argv, argv + argc, "-h")) {
     print_usage();
@@ -70,13 +68,16 @@ int main(int argc, char ** argv)
   }
   auto client = node->create_client<example_interfaces::srv::AddTwoInts>(topic);
 
-  auto request = std::make_shared<example_interfaces::srv::AddTwoInts::Request>();
+  auto request =
+      std::make_shared<example_interfaces::srv::AddTwoInts::Request>();
   request->a = 2;
   request->b = 3;
 
   while (!client->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
-      printf("add_two_ints_client was interrupted while waiting for the service. Exiting.\n");
+      printf(
+          "add_two_ints_client was interrupted while waiting for the service. "
+          "Exiting.\n");
       return 0;
     }
     printf("service not available, waiting again...\n");
@@ -84,21 +85,19 @@ int main(int argc, char ** argv)
 
   auto msg = std::make_shared<std_msgs::msg::Int8>();
   publisher = node->create_publisher<std_msgs::msg::Int8>(
-    std::string("back_") + topic, 7);
-
+      std::string("back_") + topic, 7);
 
   auto future_result = client->async_send_request(request);
 
   // Wait for the result.
   if (rclcpp::spin_until_future_complete(node, future_result) ==
-    rclcpp::executor::FutureReturnCode::SUCCESS)
-  {
+      rclcpp::FutureReturnCode::SUCCESS) {
     // printf("Result of add_two_ints: %zd\n", future_result.get()->sum);
     msg->data = future_result.get()->sum;
     publisher->publish(*msg);
   } else {
     printf("add_two_ints_client_async was interrupted. Exiting.\n");
-  }  
+  }
 
   rclcpp::spin(node);
   return 0;
