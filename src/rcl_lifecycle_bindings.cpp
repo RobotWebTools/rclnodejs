@@ -53,7 +53,6 @@ static v8::Local<v8::Object> wrapTransition(
 NAN_METHOD(CreateLifecycleStateMachine) {
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
-  bool enable_com_interface = Nan::To<bool>(info[1]).FromJust();
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
 
   rcl_lifecycle_state_machine_t* state_machine =
@@ -73,11 +72,11 @@ NAN_METHOD(CreateLifecycleStateMachine) {
       GetServiceTypeSupport("lifecycle_msgs", "ChangeState");
   const rosidl_service_type_support_t* gs =
       GetServiceTypeSupport("lifecycle_msgs", "GetState");
-#if ROS_VERSION >= 2105
 
+#if ROS_VERSION >= 2105
   rcl_lifecycle_state_machine_options_t options =
       rcl_lifecycle_get_default_state_machine_options();
-  options.enable_com_interface = enable_com_interface;
+  options.enable_com_interface = Nan::To<bool>(info[1]).FromJust();
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
