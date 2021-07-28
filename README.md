@@ -38,7 +38,7 @@ rclnodejs.init().then(() => {
 
 ### Prerequisites
 
-Before installing `rclnodejs` please ensure the following softare is installed and configured on your systemd:
+Before installing `rclnodejs` please ensure the following software is installed and configured on your system:
 
 - [Nodejs](https://nodejs.org/en/) version between 10.23.1 - 12.x.
 
