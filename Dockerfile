@@ -30,8 +30,8 @@ RUN git config --global user.name $GIT_USER_NAME \
 ENV ROS2_WS=/root
 WORKDIR $ROS2_WS
 
-RUN wget https://github.com/ros2/ros2/releases/download/release-foxy-20201211/ros2-foxy-20201211-linux-focal-amd64.tar.bz2 \
-    && tar xf ros2-foxy-20201211-linux-focal-amd64.tar.bz2
+RUN wget https://github.com/ros2/ros2/releases/download/release-foxy-20210902/ros2-foxy-20210902-linux-focal-amd64.tar.bz2 \
+    && tar xf ros2-foxy-20210902-linux-focal-amd64.tar.bz2
 
 # [Ubuntu 20.04]
 RUN rosdep install --from-paths $ROS2_WS/ros2-linux/share --ignore-src --rosdistro foxy -y --skip-keys "console_bridge fastcdr fastrtps osrf_testing_tools_cpp poco_vendor rmw_connext_cpp rosidl_typesupport_connext_c rosidl_typesupport_connext_cpp rti-connext-dds-5.3.1 tinyxml_vendor tinyxml2_vendor urdfdom urdfdom_headers"

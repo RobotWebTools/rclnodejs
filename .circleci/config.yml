@@ -22,7 +22,7 @@ jobs:
     - run: brew install openssl
     - run: brew install asio console_bridge log4cxx spdlog
     - run: python3 -m pip install catkin_pkg empy ifcfg lark-parser lxml netifaces numpy pyparsing pyyaml setuptools argcomplete colcon-common-extensions
-    - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://github.com/ros2/ros2/releases/download/release-foxy-20201211/ros2-foxy-20201211-macos-amd64.tar.bz2 && tar xf ros2-foxy-20201211-macos-amd64.tar.bz2
+    - run: mkdir -p ~/ros2_install && cd ~/ros2_install && wget https://github.com/ros2/ros2/releases/download/release-foxy-20210902/ros2-foxy-20210902-macos-amd64.tar.bz2 && tar xf ros2-foxy-20210902-macos-amd64.tar.bz2
     - run: wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.0/install.sh | bash
     - run: echo "source $HOME/.bashrc" >> ~/.bash_profile
     - run: cat ~/.bash_profile
