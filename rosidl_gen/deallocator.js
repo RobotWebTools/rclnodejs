@@ -24,7 +24,12 @@ let deallocator = {
     );
   },
   freeStructMember(refObj, type, name) {
-    rclnodejs.freeMemeoryAtOffset(refObj.ref(), type.fields[name].offset);
+    if (refObj.ref().length !== 0) {
+      rclnodejs.freeMemeoryAtOffset(
+        refObj.ref().hexAddress(),
+        type.fields[name].offset
+      );
+    }
   },
 };
 
