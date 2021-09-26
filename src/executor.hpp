@@ -24,8 +24,6 @@
 
 #include "rcl_handle.hpp"
 
-struct rcl_context_t;
-
 namespace rclnodejs {
 
 class HandleManager;
