@@ -70,7 +70,7 @@
     "ref-struct-di": "^1.1.1",
     "walk": "^2.3.14",
     "uuid": "^8.2.0",
-    "int64-napi": "^1.0.1",
+    "int64-napi": "^2.0.9",
     "array.prototype.flat": "^1.2.4"
   },
   "husky": {
