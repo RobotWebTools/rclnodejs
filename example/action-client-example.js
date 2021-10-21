@@ -42,7 +42,7 @@ class FibonacciActionClient {
       this.feedbackCallback(feedback)
     );
 
-    if (!goalHandle.accepted) {
+    if (!goalHandle.isAccepted()) {
       this._node.getLogger().info('Goal rejected');
       return;
     }
@@ -50,12 +50,11 @@ class FibonacciActionClient {
     this._node.getLogger().info('Goal accepted');
 
     const result = await goalHandle.getResult();
-    const status = result.status;
 
-    if (status === GoalStatus.STATUS_SUCCEEDED) {
+    if (goalHandle.isSucceeded()) {
       this._node
         .getLogger()
-        .info(`Goal suceeded with result: ${result.result.sequence}`);
+        .info(`Goal suceeded with result: ${result.sequence}`);
     } else {
       this._node.getLogger().info(`Goal failed with status: ${status}`);
     }
@@ -63,10 +62,8 @@ class FibonacciActionClient {
     rclnodejs.shutdown();
   }
 
-  feedbackCallback(feedbackMessage) {
-    this._node
-      .getLogger()
-      .info(`Received feedback: ${feedbackMessage.feedback.sequence}`);
+  feedbackCallback(feedback) {
+    this._node.getLogger().info(`Received feedback: ${feedback.sequence}`);
   }
 }
 

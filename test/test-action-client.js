@@ -165,7 +165,7 @@ describe('rclnodejs action client', function () {
     assert.ok(result);
 
     let goalHandle = await client.sendGoal(new Fibonacci.Goal());
-    assert.ok(goalHandle.accepted);
+    assert.ok(goalHandle.isAccepted());
 
     result = await goalHandle.getResult();
     assert.ok(result);
@@ -192,9 +192,10 @@ describe('rclnodejs action client', function () {
       feedbackCallback,
       goalUuid
     );
-    assert.ok(goalHandle.accepted);
+    assert.ok(goalHandle.isAccepted());
 
     await goalHandle.getResult();
+    assert.ok(goalHandle.isSucceeded());
     assert.ok(result);
 
     assert.ok(feedbackCallback.calledOnce);
@@ -285,7 +286,7 @@ describe('rclnodejs action client', function () {
     assert.ok(result);
 
     let goalHandle = await client.sendGoal(new Fibonacci.Goal());
-    assert.ok(goalHandle.accepted);
+    assert.ok(goalHandle.isAccepted());
 
     result = await goalHandle.cancelGoal();
     assert.ok(result);

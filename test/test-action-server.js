@@ -411,7 +411,7 @@ describe('rclnodejs action server', function () {
     serverGoalHandle.execute();
 
     result = await handle.getResult();
-    assert.strictEqual(result.status, GoalStatus.STATUS_CANCELED);
+    assert.strictEqual(handle.status, GoalStatus.STATUS_CANCELED);
     assert.strictEqual(serverGoalHandle.status, GoalStatus.STATUS_CANCELED);
 
     server.destroy();
@@ -445,8 +445,8 @@ describe('rclnodejs action server', function () {
 
     let result = await handle.getResult();
     assert.ok(result);
-    assert.ok(result.status, GoalStatus.STATUS_SUCCEEDED);
-    assert.ok(deepEqual(result.result.sequence, testSequence));
+    assert.ok(handle.status, GoalStatus.STATUS_SUCCEEDED);
+    assert.ok(deepEqual(result.sequence, testSequence));
 
     server.destroy();
   });
@@ -479,8 +479,8 @@ describe('rclnodejs action server', function () {
 
     let result = await handle.getResult();
     assert.ok(result);
-    assert.ok(result.status, GoalStatus.STATUS_ABORTED);
-    assert.ok(deepEqual(result.result.sequence, testSequence));
+    assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
+    assert.ok(deepEqual(result.sequence, testSequence));
 
     server.destroy();
   });
@@ -514,8 +514,8 @@ describe('rclnodejs action server', function () {
     let result = await handle.getResult();
     assert.ok(result);
     // Goal status should default to aborted
-    assert.ok(result.status, GoalStatus.STATUS_ABORTED);
-    assert.ok(deepEqual(result.result.sequence, testSequence));
+    assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
+    assert.ok(deepEqual(result.sequence, testSequence));
 
     server.destroy();
   });
@@ -542,8 +542,8 @@ describe('rclnodejs action server', function () {
     let result = await handle.getResult();
     assert.ok(result);
     // Goal status should default to aborted
-    assert.ok(result.status, GoalStatus.STATUS_ABORTED);
-    assert.ok(deepEqual(result.result.sequence, []));
+    assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
+    assert.ok(deepEqual(result.sequence, []));
 
     server.destroy();
   });
@@ -660,7 +660,7 @@ describe('rclnodejs action server', function () {
     await assertUtils.createDelay(50);
 
     assert.ok(feedbackMessage);
-    assert.ok(deepEqual(sequence, feedbackMessage.feedback.sequence));
+    assert.ok(deepEqual(sequence, feedbackMessage.sequence));
 
     server.destroy();
   });
@@ -704,7 +704,7 @@ describe('rclnodejs action server', function () {
     await assertUtils.createDelay(50);
 
     assert.ok(feedbackMessage);
-    assert.ok(deepEqual(sequence, feedbackMessage.feedback.sequence));
+    assert.ok(deepEqual(sequence, feedbackMessage.sequence));
 
     server.destroy();
   });
