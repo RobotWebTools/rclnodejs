@@ -462,7 +462,7 @@ const goalHandlePromise = actionClient.sendGoal(new Fibonacci.Goal());
 
 goalHandlePromise.then((goalHandle) => {
   // $ExpectType boolean
-  goalHandle.accepted;
+  goalHandle.accepted; // deprecated
 
   // $ExpectType UUID
   goalHandle.goalId;
@@ -470,7 +470,7 @@ goalHandlePromise.then((goalHandle) => {
   // $ExpectType Time
   goalHandle.stamp;
 
-  // $ExpectType string
+  // $ExpectType number
   goalHandle.status;
 
   // $ExpectType Promise<CancelGoal_Response>
@@ -478,6 +478,24 @@ goalHandlePromise.then((goalHandle) => {
 
   // $ExpectType Promise<Fibonacci_Result>
   goalHandle.getResult();
+
+  // $ExpectType boolean
+  goalHandle.isAccepted();
+
+  // $ExpectType boolean
+  goalHandle.isExecuting();
+
+  // $ExpectType boolean
+  goalHandle.isSucceeded();
+
+  // $ExpectType boolean
+  goalHandle.isCanceling();
+
+  // $ExpectType boolean
+  goalHandle.isCanceled();
+
+  // $ExpectType boolean
+  goalHandle.isAborted();
 });
 
 // ---- ActionServer -----

@@ -26,13 +26,50 @@ declare module 'rclnodejs' {
 
     /**
      * Gets if the goal response was accepted.
+     * @deprecated Use isAccepted()
      */
     get accepted(): boolean;
 
     /**
+     * Determine if goal is currently executing
+     * @returns {bool} - True if goal is executing; otherwise return false.
+     */
+    isAccepted(): boolean;
+
+    /**
+     * Determine if goal is currently executing
+     * @returns {bool} - True if goal is executing; otherwise return false.
+     */
+    isExecuting(): boolean;
+
+    /**
+     * Determine if goal is in the process of canceling.
+     * @returns True if goal is canceling; otherwise return false.
+     */
+    isCanceling(): boolean;
+
+    /**
+     * Determine if goal completed successfullly.
+     * @returns True if goal completed successfully; otherwise return false.
+     */
+    isSucceeded(): boolean;
+
+    /**
+     * Determine if goal has been canceled.
+     * @returns True if goal has been aborted; otherwise return false.
+     */
+    isCanceled(): boolean;
+
+    /**
+     * Determine if goal has been aborted.
+     * @returns True if goal was aborted; otherwise return false.
+     */
+    isAborted(): boolean;
+
+    /**
      * Gets the goal status.
      */
-    get status(): string;
+    get status(): number;
 
     /**
      * Send a cancel request for the goal.
