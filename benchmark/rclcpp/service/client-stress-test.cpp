@@ -22,11 +22,10 @@
 #include "utilities.hpp"
 
 void ShowUsage(const std::string name) {
-    std::cerr << "Usage: " << name << " [options]\n"
-              << "\nOptions:\n"
-              << "\n--run <n>     \tHow many times to run\n"
-              << "--help          \toutput usage information"
-              << std::endl;
+  std::cerr << "Usage: " << name << " [options]\n"
+            << "\nOptions:\n"
+            << "\n--run <n>     \tHow many times to run\n"
+            << "--help          \toutput usage information" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -36,15 +35,16 @@ int main(int argc, char* argv[]) {
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
     if ((arg == "-h") || (arg == "--help")) {
-        ShowUsage(argv[0]);
-        return 0;
+      ShowUsage(argv[0]);
+      return 0;
     } else if (arg.find("--run=") != std::string::npos) {
-        total_times = std::stoi(arg.substr(arg.find("=") + 1));
+      total_times = std::stoi(arg.substr(arg.find("=") + 1));
     }
   }
   printf(
       "The client will send a GetMap request continuously until receiving "
-      "response %d times.\n", total_times);
+      "response %d times.\n",
+      total_times);
 
   auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("stress_client_rclcpp");
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     } else {
       auto result_future = client->async_send_request(request);
       if (rclcpp::spin_until_future_complete(node, result_future) !=
-          rclcpp::executor::FutureReturnCode::SUCCESS) {
+          rclcpp::FutureReturnCode::SUCCESS) {
         RCLCPP_ERROR(node->get_logger(), "service call failed.");
         return 1;
       }

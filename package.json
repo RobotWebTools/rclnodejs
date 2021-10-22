@@ -15,7 +15,7 @@
   "scripts": {
     "install": "node-gyp rebuild",
     "docs": "cd docs && make",
-    "test": "node ./scripts/compile_tests.js && node --expose-gc ./scripts/run_test.js && npm run dtslint",
+    "test": "node ./scripts/compile_tests.js && node ./scripts/test.js && npm run dtslint",
     "dtslint": "node ./scripts/generate_tsd.js && dtslint test/types",
     "lint": "eslint --max-warnings=0 --ext js,ts index.js types scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
     "postinstall": "node scripts/generate_messages.js",
