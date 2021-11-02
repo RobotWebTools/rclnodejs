@@ -68,3 +68,9 @@ ASAN may report leaks in ref-napi and other modules, there is a suppression file
 ```sh
 LSAN_OPTIONS=suppressions=suppr.txt node --expose-gc node_modules/.bin/mocha -r test/gc-on-exit.js test/test-publisher.js
 ```
+## Fastrtps requirements for multiple process on the same machine
+When running multiple ROS 2 node processes configured to use Fastrtps ROS middleware (rmw), you can experience a communications failure when the ROS nodes are run under different Linux user accounts. The issue has to do with Fastrtps use of shared memory and Linux restrictions on accessing such memory. The workaround is to disable the use of Fastrtps shared memory via a Fastrtps configuration as outlined [here](https://github.com/eProsima/Fast-DDS/issues/1750).
+
+
+
+
