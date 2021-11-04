@@ -68,3 +68,5 @@ ASAN may report leaks in ref-napi and other modules, there is a suppression file
 ```sh
 LSAN_OPTIONS=suppressions=suppr.txt node --expose-gc node_modules/.bin/mocha -r test/gc-on-exit.js test/test-publisher.js
 ```
+## FastDDS requirements for multiple node processes on the same machine running under different users
+When running multiple ROS 2 node processes configured to use FastDDS ROS middleware (rmw), you can experience a communications failure when the ROS nodes are run under different Linux user accounts. The issue has to do with FastDDS use of shared memory and Linux restrictions on accessing such memory. The workaround is to disable the use of FastDDS shared memory via a configuration file as outlined [here](https://github.com/eProsima/Fast-DDS/issues/1750).
