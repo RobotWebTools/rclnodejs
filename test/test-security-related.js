@@ -38,7 +38,7 @@ describe('Destroying non-existent objects testing', function () {
         node.destroy();
       },
       TypeError,
-      'Cannot read property',
+      'Cannot read propert.*',
       'Trying to destroy an empty node!'
     );
 
