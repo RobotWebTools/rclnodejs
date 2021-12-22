@@ -40,7 +40,7 @@ rclnodejs.init().then(() => {
 
 Before installing `rclnodejs` please ensure the following software is installed and configured on your system:
 
-- [Nodejs](https://nodejs.org/en/) version between 10.23.1 - 12.x.
+- [Nodejs](https://nodejs.org/en/) version between 10.23.1 - 16.x.
 
 - [ROS 2 SDK](https://index.ros.org/doc/ros2/Installation/) for details.
   **DON'T FORGET TO [SOURCE THE ROS 2 SETUP FILE](https://index.ros.org/doc/ros2/Tutorials/Configuring-ROS2-Environment/#source-the-setup-files)**
@@ -63,7 +63,7 @@ npm i rclnodejs@x.y.z
 
 |                                                            RCLNODEJS Version                                                            |                                                                                                                       Compatible ROS 2 Release                                                                                                                        |
 | :-------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [0.20.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.20.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.20.0/index.html)) | [Galactic Geochelone](https://github.com/ros2/ros2/releases/tag/release-galactic-20210716) / [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201211) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
+| [0.21.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.21.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.21.0/index.html)) | [Galactic Geochelone](https://github.com/ros2/ros2/releases/tag/release-galactic-20210716) / [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201211) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
 |                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                                                                   [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                                                                   |
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` depdendency section.
