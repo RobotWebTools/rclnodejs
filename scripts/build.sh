@@ -19,7 +19,8 @@ set -e
 pushd $(dirname $0) > /dev/null
 
 git submodule update --init --recursive
-npm config set unsafe-perm true
-npm config set user 0
-npm install --unsafe-perm
+# npm config set unsafe-perm true
+# npm config set user 0
+# npm install --unsafe-perm
+npm install
 npm run lint
