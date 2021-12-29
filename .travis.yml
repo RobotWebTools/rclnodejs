@@ -11,4 +11,4 @@ script:
   - 'if [ "$DOCKER_USERNAME" != "" ]; then sudo docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD; fi'
   - sudo docker pull ubuntu:focal
   - sudo docker build -t rcldocker .
-  - sudo docker run -v $(pwd):/home/rclnodejs/rclnodejs bash -i -c 'cd /home/rclnodejs/rclnodejs && pwd && whoami && ./scripts/build.sh && npm test'
+  - docker run -v $(pwd):/home/rclnodejs/ bash -i -c 'cd /home/rclnodejs && ls -l && whoami && ./scripts/build.sh && npm test'
