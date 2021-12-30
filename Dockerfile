@@ -53,11 +53,14 @@ RUN echo "source $ROS2_WS/ros2-linux/local_setup.bash" >> $HOME/.bashrc
 
 # Install nvm, Node.js and node-gyp
 # v12
-# ENV NODE_VERSION lts/erbium
+ENV NODE_VERSION12 lts/erbium
 # v14
-# ENV NODE_VERSION lts/fermium
+ENV NODE_VERSION14 lts/fermium
 # v16
-ENV NODE_VERSION lts/gallium
+ENV NODE_VERSION16 lts/gallium
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+RUN nvm install $NODE_VERSION12
+RUN nvm install $NODE_VERSION14
+RUN nvm install $NODE_VERSION16
 
-ENV PATH /bin/versions/node/$NODE_VERSION/bin:$PATH
+#ENV PATH /bin/versions/node/$NODE_VERSION/bin:$PATH
