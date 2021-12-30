@@ -52,12 +52,10 @@ WORKDIR /home/rclnodejs-user
 RUN echo "source $ROS2_WS/ros2-linux/local_setup.bash" >> $HOME/.bashrc
 
 # Install nvm, Node.js and node-gyp
-# v12
-# ENV NODE_VERSION lts/erbium
-# v14
-# ENV NODE_VERSION lts/fermium
-# v16
-ENV NODE_VERSION lts/gallium
+# v12 lts/erbium
+# v14 lts/fermium
+# v16 lts/gallium
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-
-ENV PATH /bin/versions/node/$NODE_VERSION/bin:$PATH
+RUN  bash -c "\. .nvm/nvm.sh && nvm install lts/erbium"
+RUN  bash -c "\. .nvm/nvm.sh && nvm install lts/fermium"
+RUN  bash -c "\. .nvm/nvm.sh && nvm install lts/gallium"

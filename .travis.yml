@@ -11,4 +11,6 @@ script:
   - 'if [ "$DOCKER_USERNAME" != "" ]; then sudo docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD; fi'
   - sudo docker pull ubuntu:focal
   - sudo docker build -t rcldocker .
-  - docker run -v $(pwd):/ros2/rclnodejs --rm rcldocker bash -i -c  'cd /ros2/rclnodejs && /usr/bin/cppcheck --suppress=syntaxError --enable=all src/*.cpp src/*.hpp && cp -R /ros2/rclnodejs ~/rclnodejs && chown -R rclnodejs-user ~/rclnodejs && cd ~/rclnodejs && ./scripts/build.sh && npm test'
+  - docker run -v $(pwd):/ros2/rclnodejs --rm rcldocker bash -i -c  '\. $NVM_DIR/nvm.sh && nvm use v16 && cd /ros2/rclnodejs && /usr/bin/cppcheck --suppress=syntaxError --enable=all src/*.cpp src/*.hpp && cp -R /ros2/rclnodejs ~/rclnodejs && chown -R rclnodejs-user ~/rclnodejs && cd ~/rclnodejs && ./scripts/build.sh && npm test'
+  - docker run -v $(pwd):/ros2/rclnodejs --rm rcldocker bash -i -c  '\. $NVM_DIR/nvm.sh && nvm use v14 && cp -R /ros2/rclnodejs ~/rclnodejs && chown -R rclnodejs-user ~/rclnodejs && cd ~/rclnodejs && ./scripts/build.sh && npm test'
+  - docker run -v $(pwd):/ros2/rclnodejs --rm rcldocker bash -i -c  '\. $NVM_DIR/nvm.sh && nvm use v12 && cp -R /ros2/rclnodejs ~/rclnodejs && chown -R rclnodejs-user ~/rclnodejs && cd ~/rclnodejs && ./scripts/build.sh && npm test'
