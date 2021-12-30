@@ -42,9 +42,9 @@ RUN rosdep install --from-paths $ROS2_WS/ros2-linux/share --ignore-src --rosdist
 RUN chmod -R 777 ${ROS2_WS}/ros2-linux
 
 # create normal user
-RUN useradd -ms /bin/bash rclnodejs
-USER rclnodejs
-WORKDIR /home/rclnodejs
+RUN useradd -ms /bin/bash rclnodejs-user
+USER rclnodejs-user
+WORKDIR /home/rclnodejs-user
 
 RUN echo "source $ROS2_WS/ros2-linux/local_setup.bash" >> $HOME/.bashrc
 
