@@ -39,7 +39,10 @@ RUN wget https://ci.ros2.org/view/packaging/job/packaging_linux/lastSuccessfulBu
 RUN rosdep install --from-paths $ROS2_WS/ros2-linux/share --ignore-src --rosdistro foxy -y --skip-keys "console_bridge fastcdr fastrtps osrf_testing_tools_cpp poco_vendor rmw_connext_cpp rosidl_typesupport_connext_c rosidl_typesupport_connext_cpp rti-connext-dds-5.3.1 tinyxml_vendor tinyxml2_vendor urdfdom urdfdom_headers"
 
 # set ros2 mode 777 only to support copy of compiled test msgs and libs into ros2 installation
-RUN chmod -R 777 ${ROS2_WS}/ros2-linux
+RUN chmod 777 ${ROS2_WS}/ros2-linux
+RUN chmod 777 ${ROS2_WS}/ros2-linux/include
+RUN chmod 777 ${ROS2_WS}/ros2-linux/lib
+RUN chmod 777 ${ROS2_WS}/ros2-linux/share
 
 # create normal user
 RUN useradd -ms /bin/bash rclnodejs-user
