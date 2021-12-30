@@ -59,8 +59,8 @@ ENV NODE_VERSION14 lts/fermium
 # v16
 ENV NODE_VERSION16 lts/gallium
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-RUN nvm install $NODE_VERSION12
-RUN nvm install $NODE_VERSION14
-RUN nvm install $NODE_VERSION16
+RUN  bash -c ".nvm/nvm.sh && nvm install lts/erbium"
+RUN  bash -c ".nvm/nvm.sh && nvm install lts/fermium"
+RUN  bash -c ".nvm/nvm.sh && nvm install lts/gallium"
 
 #ENV PATH /bin/versions/node/$NODE_VERSION/bin:$PATH
