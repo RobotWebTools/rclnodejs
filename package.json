@@ -52,6 +52,7 @@
     "lint-staged": "^10.2.11",
     "mocha": "^8.0.1",
     "prettier": "^2.0.5",
+    "rimraf": "^3.0.2",
     "sinon": "^9.0.2",
     "tree-kill": "^1.2.2",
     "typescript": "^4.0.3"
