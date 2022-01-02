@@ -48,7 +48,7 @@ jobs:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
     steps:
-      - run env && whoami && ls -la && ls -la ~/.nvm
+      - run: env && whoami && ls -la && ls -la ~/.nvm
       - run: nvm use lts/fermium
       - run: node --version && npm --version && rm -rf ./node_modules/
       - run: source ~/ros2_install/ros2-osx/local_setup.bash && git submodule init && git submodule update
