@@ -7,14 +7,14 @@ branches:
 image: Visual Studio 2019
 
 environment:
-  PYTHON3: "c:\\Python39-x64"
+  PYTHON3: "c:\\Python310-x64"
   PYTHON2: "c:\\Python27"
   matrix:
-    - nodejs_version: "10"
     - nodejs_version: "12"
-    - nodejs_version: "14"
-    - nodejs_version: "15"
-    - nodejs_version: "16"
+    # - nodejs_version: "10"
+    # - nodejs_version: "14"
+    # - nodejs_version: "15"
+    # - nodejs_version: "16"
 
 clone_folder: c:\proj\rclnodejs
 
