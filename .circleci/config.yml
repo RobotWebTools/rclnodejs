@@ -14,8 +14,6 @@ jobs:
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
-    macos:
-      xcode: 12.1.0
     steps:
     - checkout
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
@@ -45,7 +43,6 @@ jobs:
         key: v1-dependencies-{{ checksum "package.json" }}-{{ arch }}
         paths:
         - ./node_modules
-
   test:
     executor: osx-executor
     steps:
@@ -62,10 +59,9 @@ jobs:
           path: /tmp/circleci-artifacts
 
 workflows:
-  version: 2
-  build_test:
+  build_and_test:
     jobs:
       - build
-      - test
-        requires:
-          - build
+      - test:
+          requires:
+            - build
