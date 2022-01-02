@@ -7,7 +7,6 @@ executors:
 
 commands:
   run_tests:
-    descriptions: "Run test suite with node"
     parameters:
       node_version:
         type: string
@@ -63,14 +62,14 @@ jobs:
     # tear down
     - run: find $HOME/Library/Developer/Xcode/DerivedData -name '*.xcactivitylog' -exec cp {} $CIRCLE_ARTIFACTS/xcactivitylog \; || true
     # save dependency cache
-    - save_cache:
-      key: v1-dependencies-{{ checksum "package.json" }}-{{ arch }}
-      paths:
-        - ./node_modules
+    #- save_cache:
+    #  key: v1-dependencies-{{ checksum "package.json" }}-{{ arch }}
+    #  paths:
+    #    - ./node_modules
     # save test data
-    - store_test_results:
-      path: /tmp/circleci-test-results
-    - store_artifacts:
-      path: /tmp/circleci-artifacts
+    # - store_test_results:
+    #  path: /tmp/circleci-test-results
+    # - store_artifacts:
+    #  path: /tmp/circleci-artifacts
 
 
