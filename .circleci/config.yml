@@ -72,4 +72,8 @@ jobs:
     # - store_artifacts:
     #  path: /tmp/circleci-artifacts
 
+workflows:
+  main:
+    jobs:
+      - build_and_test
 
