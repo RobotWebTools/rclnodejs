@@ -77,8 +77,10 @@ declare module 'rclnodejs' {
 
   type ExecuteCallback<T extends TypeClass<ActionTypeClassName>> = (
     goalHandle: ServerGoalHandle<T>
-  ) => ActionResult<T>;
-  type GoalCallback = () => GoalResponse;
+  ) => Promise<ActionResult<T>>;
+  type GoalCallback<T extends TypeClass<ActionTypeClassName>> = (
+    goalHandle: ServerGoalHandle<T>
+  ) => GoalResponse;
   type HandleAcceptedCallback<T extends TypeClass<ActionTypeClassName>> = (
     goalHandle: ServerGoalHandle<T>
   ) => void;
@@ -112,7 +114,7 @@ declare module 'rclnodejs' {
       typeClass: T,
       actionName: string,
       executeCallback: ExecuteCallback<T>,
-      goalCallback?: GoalCallback,
+      goalCallback?: GoalCallback<T>,
       handleAcceptedCallback?: HandleAcceptedCallback<T>,
       cancelCallback?: CancelCallback,
       options?: ActionServerOptions
@@ -144,7 +146,7 @@ declare module 'rclnodejs' {
      *
      * @param goalCallback - Callback function, if not provided, then unregisters any previously registered callback.
      */
-    registerGoalCallback(goalCallback?: GoalCallback): void;
+    registerGoalCallback(goalCallback?: GoalCallback<T>): void;
 
     /**
      * Register a callback for handling cancel requests.
