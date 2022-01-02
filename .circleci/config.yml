@@ -34,10 +34,6 @@ jobs:
     - run: nvm install lts/gallium
     - run: nvm install lts/fermium
     - run: nvm install lts/erbium
-    - run: nvm use lts/gallium
-    - run: node --version && npm --version && rm -rf ./node_modules/
-    - run: source ~/ros2_install/ros2-osx/local_setup.bash && git submodule init && git submodule update && npm install --python=python2.7
-    - run: export PATH="/usr/local/opt/python@2/libexec/bin:$PATH" && npm run lint
     # Save dependency cache
     - save_cache:
         key: v1-dependencies-{{ checksum "package.json" }}-{{ arch }}
@@ -45,16 +41,24 @@ jobs:
         - ./node_modules
   test:
     executor: osx-executor
+    shell: /bin/bash --login
     steps:
-      - run: nvm use lts/gallium
+      - restore_cache:
+        keys:
+        - v1-dependencies-{{ checksum "package.json" }}-{{ arch }}
+        # fallback to using the latest cache if no exact match is found
+        - v1-dependencies-
+      - run: nvm use lts/fermium
+      - run: node --version && npm --version && rm -rf ./node_modules/
+      - run: source ~/ros2_install/ros2-osx/local_setup.bash && git submodule init && git submodule update
+      - run: npm install --python=python2.7
+      - run: export PATH="/usr/local/opt/python@2/libexec/bin:$PATH" && npm run lint
       - run: npm install istanbul coveralls
       - run: source ~/ros2_install/ros2-osx/local_setup.bash && export OPENSSL_ROOT_DIR="/usr/local/opt/openssl" && node scripts/compile_tests.js && node --expose-gc ./node_modules/.bin/istanbul cover ./scripts/run_test.js --report lcovonly && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
       # Teardown
       - run: find $HOME/Library/Developer/Xcode/DerivedData -name '*.xcactivitylog' -exec cp {} $CIRCLE_ARTIFACTS/xcactivitylog \; || true
-      # Save test results
       - store_test_results:
           path: /tmp/circleci-test-results
-      # Save artifacts
       - store_artifacts:
           path: /tmp/circleci-artifacts
 
