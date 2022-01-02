@@ -59,18 +59,20 @@ jobs:
         node_version: lts/fermium
     - run_tests:
         node_version: lts/erbium
+    - run_tests:
+        node_version: v10.23.1
     # tear down
     - run: find $HOME/Library/Developer/Xcode/DerivedData -name '*.xcactivitylog' -exec cp {} $CIRCLE_ARTIFACTS/xcactivitylog \; || true
     # save dependency cache
-    #- save_cache:
-    #  key: v1-dependencies-{{ checksum "package.json" }}-{{ arch }}
-    #  paths:
-    #    - ./node_modules
+    - save_cache:
+        key: v1-dependencies-{{ checksum "package.json" }}-{{ arch }}
+        paths:
+        - ./node_modules
     # save test data
-    # - store_test_results:
-    #  path: /tmp/circleci-test-results
-    # - store_artifacts:
-    #  path: /tmp/circleci-artifacts
+    - store_test_results:
+        path: /tmp/circleci-test-results
+    - store_artifacts:
+        path: /tmp/circleci-artifacts
 
 workflows:
   main:
