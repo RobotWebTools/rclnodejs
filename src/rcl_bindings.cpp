@@ -39,6 +39,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#if NODE_MAJOR_VERSION > 12
+#include <utility>
+#endif
 
 #include "handle_manager.hpp"
 #include "macros.hpp"
