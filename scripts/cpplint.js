@@ -20,7 +20,7 @@ const cmd = 'wget -nc ';
 const cpplintUrl =
   'https://raw.githubusercontent.com/google/styleguide' +
   '/gh-pages/cpplint/cpplint.py';
-const root = `${__dirname}/../src/`;
+const root = `${__dirname}/../src`;
 const args = `--extensions=cpp,h,hpp,cc ${root}/*`;
 
 console.log('Downloading the cpplint...');

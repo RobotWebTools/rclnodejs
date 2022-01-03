@@ -19,10 +19,19 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const rimraf = require('rimraf');
 const rclnodejs = require('../index.js');
 
 const GEN_FOLDER = 'generated';
 const SCRIPT_NAME = 'generate-ros-messages';
+
+// returns array of version fields [major, minor, maint]
+function getNodeVersionInfo() {
+  return process.version
+    .substring(1)
+    .split('.')
+    .map((x) => parseInt(x));
+}
 
 describe('rclnodejs generate-messages binary-script tests', function () {
   let cwd;
@@ -78,13 +87,21 @@ describe('rclnodejs generate-messages binary-script tests', function () {
 
     let generatedFolderPath = createGeneratedFolderPath(this.tmpPkg);
     if (fs.existsSync(generatedFolderPath)) {
-      fs.rmdirSync(generatedFolderPath, { recursive: true });
+      if (getNodeVersionInfo()[0] === 10) {
+        rimraf.sync(generatedFolderPath);
+      } else {
+        fs.rmdirSync(generatedFolderPath, { recursive: true });
+      }
     }
   });
 
   after(function () {
     // recursively remove test package folder
-    fs.rmdirSync(this.tmpPkg, { recursive: true });
+    if (getNodeVersionInfo()[0] === 10) {
+      rimraf.sync(this.tmpPkg);
+    } else {
+      fs.rmdirSync(this.tmpPkg, { recursive: true });
+    }
   });
 
   it('test generate-ros-messages script installation', function (done) {
