@@ -88,56 +88,56 @@ if (process.env['RCLNODEJS_TEST_FORK']) {
         });
       });
 
-      // it('gracefully shuts downs on SIGINT when running non-default context', async () => {
-      //   child = childProcess.fork(__filename, ['--non-default-context'], {
-      //     env: { ...process.env, RCLNODEJS_TEST_FORK: true },
-      //   });
-      //   const node = rclnodejs.createNode('test_sub');
-      //   node.createSubscription('std_msgs/msg/String', 'test', () => {
-      //     if (!child.killed) {
-      //       child.kill('SIGINT');
-      //     }
-      //   });
-      //   rclnodejs.spin(node);
-      //   await new Promise((res) => {
-      //     child.on('close', (exitCode) => {
-      //       assert.strictEqual(exitCode, 0);
-      //       res();
-      //     });
-      //   });
-      // });
+      it('gracefully shuts downs on SIGINT when running non-default context', async () => {
+        child = childProcess.fork(__filename, ['--non-default-context'], {
+          env: { ...process.env, RCLNODEJS_TEST_FORK: true },
+        });
+        const node = rclnodejs.createNode('test_sub');
+        node.createSubscription('std_msgs/msg/String', 'test', () => {
+          if (!child.killed) {
+            child.kill('SIGINT');
+          }
+        });
+        rclnodejs.spin(node);
+        await new Promise((res) => {
+          child.on('close', (exitCode) => {
+            assert.strictEqual(exitCode, 0);
+            res();
+          });
+        });
+      });
     }
 
-    // it('signal handlers are removed after call removeSignalHandlers', async () => {
-    //   // Because signal handlers is a global event and is installed on import,
-    //   // we need to fork a child process to ensure the current environment is not "tainted".
-    //   child = childProcess.fork(__filename, ['--remove-signal-handlers'], {
-    //     env: { ...process.env, RCLNODEJS_TEST_FORK: true },
-    //   });
-    //   await new Promise((res) => {
-    //     child.on('close', (exitCode) => {
-    //       assert.strictEqual(exitCode, 0);
-    //       res();
-    //     });
-    //   });
-    // });
+    it('signal handlers are removed after call removeSignalHandlers', async () => {
+      // Because signal handlers is a global event and is installed on import,
+      // we need to fork a child process to ensure the current environment is not "tainted".
+      child = childProcess.fork(__filename, ['--remove-signal-handlers'], {
+        env: { ...process.env, RCLNODEJS_TEST_FORK: true },
+      });
+      await new Promise((res) => {
+        child.on('close', (exitCode) => {
+          assert.strictEqual(exitCode, 0);
+          res();
+        });
+      });
+    });
 
-    // it('removeSignalHandlers only removes rclnodejs signals', async () => {
-    //   // Because signal handlers is a global event and is installed on import,
-    //   // we need to fork a child process to ensure the current environment is not "tainted".
-    //   child = childProcess.fork(
-    //     __filename,
-    //     ['--only-remove-rclnodejs-handlers'],
-    //     {
-    //       env: { ...process.env, RCLNODEJS_TEST_FORK: true },
-    //     }
-    //   );
-    //   await new Promise((res) => {
-    //     child.on('close', (exitCode) => {
-    //       assert.strictEqual(exitCode, 1);
-    //       res();
-    //     });
-    //   });
-    // });
+    it('removeSignalHandlers only removes rclnodejs signals', async () => {
+      // Because signal handlers is a global event and is installed on import,
+      // we need to fork a child process to ensure the current environment is not "tainted".
+      child = childProcess.fork(
+        __filename,
+        ['--only-remove-rclnodejs-handlers'],
+        {
+          env: { ...process.env, RCLNODEJS_TEST_FORK: true },
+        }
+      );
+      await new Promise((res) => {
+        child.on('close', (exitCode) => {
+          assert.strictEqual(exitCode, 1);
+          res();
+        });
+      });
+    });
   });
 }
