@@ -219,9 +219,9 @@ function extractMemberNames(fields) {
 {{? usePlainTypedArray}}
 const rclnodejs = require('bindings')('rclnodejs');
 {{?}}
-const ref = require('ref-napi');
-const StructType = require('ref-struct-di')(ref);
-const ArrayType = require('ref-array-di')(ref);
+const ref = require('@rclnodejs/ref-napi');
+const StructType = require('@rclnodejs/ref-struct-di')(ref);
+const ArrayType = require('@rclnodejs/ref-array-di')(ref);
 const primitiveTypes = require('../../rosidl_gen/primitive_types.js');
 const deallocator = require('../../rosidl_gen/deallocator.js');
 const translator = require('../../rosidl_gen/message_translator.js');
@@ -750,7 +750,9 @@ class {{=arrayWrapper}} {
     {{? usePlainTypedArray}}
     const byteLen = refObject.size * ref.types.{{=currentTypedArrayElementType}}.size;
     // An ArrayBuffer object that doesn't hold the ownership of the address
-    const arrayBuffer = rclnodejs.createArrayBufferFromAddress(refObject.data, byteLen);
+    const arrayBuffer = refObject.data.length !== 0 ?
+        rclnodejs.createArrayBufferFromAddress(refObject.data.hexAddress(), byteLen) :
+        Buffer.alloc(0);
     this._wrappers = new {{=currentTypedArray}}(arrayBuffer);
     {{?? true}}
     let refObjectArray = this._refObject.data;

@@ -14,8 +14,8 @@
 
 'use strict';
 
-const ref = require('ref-napi');
-const StructType = require('ref-struct-di')(ref);
+const ref = require('@rclnodejs/ref-napi');
+const StructType = require('@rclnodejs/ref-struct-di')(ref);
 const rclnodejs = require('bindings')('rclnodejs');
 
 /* eslint-disable camelcase */

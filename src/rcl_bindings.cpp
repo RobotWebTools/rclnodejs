@@ -39,6 +39,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#if NODE_MAJOR_VERSION > 12
+#include <utility>
+#endif
 
 #include "handle_manager.hpp"
 #include "macros.hpp"
@@ -1292,18 +1295,14 @@ inline char* GetBufAddr(v8::Local<v8::Value> buf) {
 }
 
 NAN_METHOD(FreeMemeoryAtOffset) {
-  v8::Local<v8::Value> buf = info[0];
-  if (!node::Buffer::HasInstance(buf)) {
-    return Nan::ThrowTypeError("Buffer instance expected as first argument");
-  }
-
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  std::string addr_str(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+  int64_t result = std::stoull(addr_str, 0, 16);
+  char* addr = reinterpret_cast<char*>(result);
   int64_t offset =
       info[1]->IsNumber() ? Nan::To<int64_t>(info[1]).FromJust() : 0;
-  auto ptr = GetBufAddr(buf) + offset;
-
-  if (ptr == nullptr) {
-    return Nan::ThrowError("Cannot read from NULL pointer");
-  }
+  auto ptr = addr + offset;
 
   char* val = *reinterpret_cast<char**>(ptr);
   free(val);
@@ -1311,15 +1310,27 @@ NAN_METHOD(FreeMemeoryAtOffset) {
 }
 
 NAN_METHOD(CreateArrayBufferFromAddress) {
-  char* addr = GetBufAddr(info[0]);
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  std::string addr_str(
+      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+  int64_t result = std::stoull(addr_str, 0, 16);
+  char* addr = reinterpret_cast<char*>(result);
   int32_t length = Nan::To<int32_t>(info[1]).FromJust();
 
   // We will create an ArrayBuffer with mode of
   // ArrayBufferCreationMode::kInternalized and copy data starting from |addr|,
   // thus the memory block will be collected by the garbage collector.
+#if NODE_MAJOR_VERSION <= 12
   v8::Local<v8::ArrayBuffer> array_buffer =
       v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), addr, length,
                            v8::ArrayBufferCreationMode::kInternalized);
+#else
+  std::unique_ptr<v8::BackingStore> backing =
+      v8::ArrayBuffer::NewBackingStore(v8::Isolate::GetCurrent(), length);
+  memcpy(backing->Data(), addr, length);
+  auto array_buffer =
+      v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), std::move(backing));
+#endif
 
   info.GetReturnValue().Set(array_buffer);
 }
