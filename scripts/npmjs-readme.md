@@ -18,7 +18,7 @@ rclnodejs.init().then(() => {
 
 **Node.js**
 
-- [Node.js](https://nodejs.org/en/) version between 8.12 - 17.x.
+- [Node.js](https://nodejs.org/en/) version between 10.23 - 16.x.
 
 **ROS 2 SDK**
 
