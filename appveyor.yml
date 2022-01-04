@@ -37,7 +37,7 @@ before_build:
   - 7z x -y "c:\download\ros2-package-windows-AMD64.zip" -o"c:\" > nul
   - setx -m OPENSSL_CONF C:\OpenSSL-v111-Win64\bin\openssl.cfg
   - set PATH=C:\OpenSSL-v111-Win64\bin;%PATH%
-  - setx AMENT_PYTHON_EXECUTABLE "c:\Python39"
+  - setx AMENT_PYTHON_EXECUTABLE "c:\Python310"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
   - python -m pip install -U wheel catkin_pkg cryptography empy ifcfg lark-parser lxml netifaces numpy opencv-python pyparsing pyyaml setuptools colcon-common-extensions
