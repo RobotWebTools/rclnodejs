@@ -10,7 +10,6 @@ environment:
   PYTHON3: "c:\\Python310-x64"
   PYTHON2: "c:\\Python27"
   matrix:
-    - nodejs_version: "17"
     - nodejs_version: "16"
     - nodejs_version: "14"
     - nodejs_version: "12"
