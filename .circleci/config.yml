@@ -52,9 +52,7 @@ jobs:
     # setup nvm
     - run: wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
     - run: echo "source $HOME/.bashrc" >> ~/.bash_profile
-    # run test suite for node 12, 14, 16, 17
-    - run_tests:
-        node_version: v17
+    # run test suite for node 12, 14, 16
     - run_tests:
         node_version: lts/gallium
     - run_tests:

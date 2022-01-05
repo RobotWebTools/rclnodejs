@@ -396,13 +396,15 @@ describe('rcl node methods testing', function () {
     assert.strictEqual(currentNode.namespace, '/my_ns');
   });
 
-  it('node.countPublishers', function () {
+  it('node.countPublishers', async () => {
     assert.strictEqual(node.countPublishers('chatter'), 0);
 
     node.createPublisher(RclString, 'chatter');
+    await assertUtils.createDelay(500);
     assert.strictEqual(node.countPublishers('chatter'), 1);
 
     node.createPublisher(RclString, 'chatter');
+    await assertUtils.createDelay(500);
     assert.strictEqual(node.countPublishers('chatter'), 2);
   });
 
