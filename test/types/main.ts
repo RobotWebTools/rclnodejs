@@ -555,5 +555,5 @@ function executeCallback(
   // $ExpectType void
   goalHandle.succeed();
 
-  return new Fibonacci.Result();
+  return Promise.resolve(new Fibonacci.Result());
 }
