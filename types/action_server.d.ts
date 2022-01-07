@@ -77,7 +77,7 @@ declare module 'rclnodejs' {
 
   type ExecuteCallback<T extends TypeClass<ActionTypeClassName>> = (
     goalHandle: ServerGoalHandle<T>
-  ) => Promise<ActionResult<T>>;
+  ) => Promise<ActionResult<T>> | ActionResult<T>;
   type GoalCallback<T extends TypeClass<ActionTypeClassName>> = (
     goalHandle: ServerGoalHandle<T>
   ) => GoalResponse;

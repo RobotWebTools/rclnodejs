@@ -517,9 +517,7 @@ actionServer.registerGoalCallback();
 actionServer.registerCancelCallback();
 
 // $ExpectType void
-actionServer.registerExecuteCallback(() =>
-  Promise.resolve(new Fibonacci.Result())
-);
+actionServer.registerExecuteCallback(() => new Fibonacci.Result());
 
 // $ExpectType void
 actionServer.destroy();
@@ -557,5 +555,5 @@ function executeCallback(
   // $ExpectType void
   goalHandle.succeed();
 
-  return Promise.resolve(new Fibonacci.Result());
+  return new Fibonacci.Result();
 }
