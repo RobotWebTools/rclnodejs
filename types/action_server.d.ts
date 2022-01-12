@@ -84,7 +84,7 @@ declare module 'rclnodejs' {
   type HandleAcceptedCallback<T extends TypeClass<ActionTypeClassName>> = (
     goalHandle: ServerGoalHandle<T>
   ) => void;
-  type CancelCallback = () => CancelResponse;
+  type CancelCallback = () => Promise<CancelResponse> | CancelResponse;
 
   interface ActionServerOptions extends Options<ActionQoS> {
     /**
