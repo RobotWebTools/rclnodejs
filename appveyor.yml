@@ -21,7 +21,7 @@ before_build:
   - rmdir /s /q c:\python39-x64
   - rmdir /s /q c:\python39
   - rmdir /s /q c:\python38
-  - ren c:\python38-x64 c:\python38
+  - ren python38-x64 python38
   - md download
   - cd download
   - choco install -y wget cmake
