@@ -58,11 +58,11 @@ build_script:
   # - npm run lint
 
 test_script:
-  # - dir \python310-x64
+  - dir \python310-x64
   - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
-  # - setx PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
-  # - setx COLCON_PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
-  # - setx AMENT_PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
+  - setx PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
+  - setx COLCON_PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
+  - setx AMENT_PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;C:\\Program Files\\CMake\\bin;%PATH%"
   - set
   - dir \
