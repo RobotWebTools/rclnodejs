@@ -7,7 +7,7 @@ branches:
 image: Visual Studio 2019
 
 environment:
-  PYTHON3: "c:\\Python38"
+  PYTHON3: "c:\\Python310-x64"
   PYTHON2: "c:\\Python27"
   matrix:
     - nodejs_version: "12"
@@ -16,12 +16,12 @@ clone_folder: c:\proj\rclnodejs
 
 before_build:
   - cd c:\
-  - rmdir /s /q c:\python310-x64
-  - rmdir /s /q c:\python310
-  - rmdir /s /q c:\python39-x64
-  - rmdir /s /q c:\python39
-  - rmdir /s /q c:\python38
-  - ren python38-x64 python38
+  # - rmdir /s /q c:\python310-x64
+  # - rmdir /s /q c:\python310
+  # - rmdir /s /q c:\python39-x64
+  # - rmdir /s /q c:\python39
+  # - rmdir /s /q c:\python38
+  # - ren python38-x64 python38
   - md download
   - cd download
   - choco install -y wget cmake
@@ -39,7 +39,7 @@ before_build:
   - 7z x -y "c:\download\ros2-package-windows-AMD64.zip" -o"c:\" > nul
   - setx -m OPENSSL_CONF C:\OpenSSL-v111-Win64\bin\openssl.cfg
   - set PATH=C:\OpenSSL-v111-Win64\bin;%PATH%
-  - setx AMENT_PYTHON_EXECUTABLE "c:\Python38\python.exe"
+  - setx AMENT_PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
   - python -m pip install -U wheel catkin_pkg cryptography empy ifcfg lark-parser lxml netifaces numpy opencv-python pyparsing pyyaml setuptools colcon-common-extensions
@@ -67,7 +67,7 @@ test_script:
   - set
   - dir \
   - python --version
-  - cd c:\proj\rclnodejs\test\rclnodejs_test_msgs
-  - colcon build
+  # - cd c:\proj\rclnodejs\test\rclnodejs_test_msgs
+  # - colcon build
   - cd c:\proj\rclnodejs
   - npm test
