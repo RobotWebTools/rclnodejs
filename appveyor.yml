@@ -49,11 +49,15 @@ build_script:
   - npm --version
   - python --version
   - npm install
-  - npm run lint
+  # - npm run lint
 
 test_script:
   - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;C:\\Program Files\\CMake\\bin;%PATH%"
   - set
   - dir \
+  - python --version
+  - cd c:\proj\rclnodejs\test\rclnodejs_test_msgs
+  - colcon build
+  - cd c:\proj\rclnodejs
   - npm test
