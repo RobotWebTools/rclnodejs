@@ -34,6 +34,7 @@ before_build:
   - setx -m OPENSSL_CONF C:\OpenSSL-v111-Win64\bin\openssl.cfg
   - set PATH=C:\OpenSSL-v111-Win64\bin;%PATH%
   - setx AMENT_PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
+  - setx COLCON_PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
   - refreshenv
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;%PATH%"
   - python -m pip install -U wheel catkin_pkg cryptography empy ifcfg lark-parser lxml netifaces numpy opencv-python pyparsing pyyaml setuptools colcon-common-extensions
@@ -56,6 +57,7 @@ test_script:
   - "SET PATH=%PYTHON3%;%PYTHON3%\\bin;%PYTHON3%\\Scripts;C:\\Program Files\\CMake\\bin;%PATH%"
   - set
   - dir \
+  - setx PYTHON_EXECUTABLE "c:\Python310-x64\python.exe"
   - python --version
   - cd c:\proj\rclnodejs\test\rclnodejs_test_msgs
   - colcon build
