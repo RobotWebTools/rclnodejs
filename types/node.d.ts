@@ -183,6 +183,13 @@ declare module 'rclnodejs' {
     options(): NodeOptions;
 
     /**
+     * Determine if this node is spinning.
+     *
+     * @returns true when spinning; otherwise returns false.
+     */
+    get spinning(): boolean;
+
+    /**
      * Trigger the event loop to continuously check for and route.
      * incoming events.
      * @param node - The node to be spun up.
