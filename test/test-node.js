@@ -489,7 +489,10 @@ describe('Test the node with no handles attached when initializing', function ()
       new NodeOptions(false, [], false)
     );
     const str = 'hello world';
+
+    assert.ok(!node.spinning);
     rclnodejs.spin(node);
+    assert.ok(node.spinning);
 
     setTimeout(() => {
       const publisher = node.createPublisher('std_msgs/msg/String', 'chatter');
