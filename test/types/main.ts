@@ -55,7 +55,13 @@ node.getLogger();
 node.getClock();
 
 // $ExpectType void
-rclnodejs.spin(node);
+node.spin();
+
+// $ExpectType void
+node.spinOnce();
+
+// $ExpectType boolean
+node.spinning;
 
 // $ExpectType void
 node.destroy();
