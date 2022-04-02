@@ -1330,6 +1330,7 @@ NAN_METHOD(CreateArrayBufferFromAddress) {
   memcpy(backing->Data(), addr, length);
   auto array_buffer =
       v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), std::move(backing));
+  free(addr);
 #endif
 
   info.GetReturnValue().Set(array_buffer);
