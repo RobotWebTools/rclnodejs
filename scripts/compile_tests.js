@@ -20,8 +20,8 @@ const os = require('os');
 const path = require('path');
 const child = require('child_process');
 
-var rootDir = path.dirname(__dirname);
-var testCppDir = path.join(rootDir, 'test', 'cpp');
+const rootDir = path.dirname(__dirname);
+const testCppDir = path.join(rootDir, 'test', 'cpp');
 
 function getExecutable(input) {
   if (os.platform() === 'win32') return input + '.exe';
@@ -29,22 +29,12 @@ function getExecutable(input) {
   return input;
 }
 
-var publisher = getExecutable('publisher_msg');
-var subscription = getExecutable('subscription_msg');
-var listener = getExecutable('listener');
-var client = getExecutable('add_two_ints_client');
-
 function getExecutablePath(input) {
   var releaseDir = '';
   if (os.platform() === 'win32') releaseDir = 'Release';
 
   return path.join(rootDir, 'build', 'cpp_nodes', releaseDir, input);
 }
-
-var publisherPath = getExecutablePath(publisher);
-var subscriptionPath = getExecutablePath(subscription);
-var listenerPath = getExecutablePath(listener);
-var clientPath = getExecutablePath(client);
 
 function copyFile(platform, srcFile, destFile) {
   if (!fs.existsSync(destFile)) {
@@ -75,7 +65,12 @@ function copyPkgToRos2(pkgName) {
   }
 }
 
-var subProcess = child.spawn('colcon', [
+// main
+
+console.log('COMPILE TEST ENV: ', process.env);
+
+// run colcon to build rclnodejs_test_msgs
+const subProcess = child.spawn('colcon', [
   'build',
   '--event-handlers',
   'console_cohesion+',
@@ -91,6 +86,16 @@ subProcess.stdout.on('data', (data) => {
 subProcess.stderr.on('data', (data) => {
   console.log(`${data}`);
 });
+
+const publisher = getExecutable('publisher_msg');
+const subscription = getExecutable('subscription_msg');
+const listener = getExecutable('listener');
+const client = getExecutable('add_two_ints_client');
+
+const publisherPath = getExecutablePath(publisher);
+const subscriptionPath = getExecutablePath(subscription);
+const listenerPath = getExecutablePath(listener);
+const clientPath = getExecutablePath(client);
 
 if (
   !fs.existsSync(publisherPath) &&
