@@ -315,10 +315,10 @@ time1.secondsAndNanoseconds;
 // $ExpectType Time
 time1.add(duration1);
 
-// $ExpectType Duration | Time
+// $ExpectType Duration | Time || Time | Duration
 time1.sub(duration1);
 
-// $ExpectType Duration | Time
+// $ExpectType Duration | Time || Time | Duration
 time1.sub(time2);
 
 // $ExpectType boolean
