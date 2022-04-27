@@ -27,7 +27,7 @@ jobs:
 
     - name: Install test-msgs on Linux
       run: |
-        sudo apt install ros-rolling-test-msgs
+        sudo apt install ros-galactic-test-msgs
 
     - uses: actions/checkout@v3
       with:
