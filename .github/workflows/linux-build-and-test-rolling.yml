@@ -3,8 +3,7 @@
 
 name:  ROS Rolling - Linux Build and Test
 
-on: workflow_dispatch
-  # [push, pull_request, workflow_dispatch]
+on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
 
