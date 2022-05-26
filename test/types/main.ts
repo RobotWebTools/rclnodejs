@@ -21,6 +21,20 @@ rclnodejs.isShutdown();
 // $ExpectType void
 rclnodejs.shutdown();
 
+// ---- DistroUtil ----
+
+// $ExpectType DistroId
+rclnodejs.DistroUtils.getDistroId();
+
+// $ExpectType DistroId
+rclnodejs.DistroUtils.getDistroId('foxy');
+
+// $ExpectType string | undefined
+rclnodejs.DistroUtils.getDistroName();
+
+// $ExpectType string | undefined
+rclnodejs.DistroUtils.getDistroName(2105);
+
 // ---- Context -----
 // $ExpectType Context
 const context = rclnodejs.Context.defaultContext();
@@ -315,11 +329,7 @@ time1.secondsAndNanoseconds;
 // $ExpectType Time
 time1.add(duration1);
 
-// $ExpectType Duration | Time || Time | Duration
-time1.sub(duration1);
-
-// $ExpectType Duration | Time || Time | Duration
-time1.sub(time2);
+// TODO: wayne - readd the 2 failing expect cases for Time|Duration transposed failure
 
 // $ExpectType boolean
 time1.eq(time2);

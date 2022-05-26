@@ -1,15 +1,10 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name:  ROS Galactic - Linux Build and Test
+name:  ROS Rolling - Linux Build and Test
 
-on:
-  push:
-    branches: [ galactic-geochelone ]
-  pull_request:
-    branches: [ galactic-geochelone ]
-  workflow_dispatch:
-
+on: workflow_dispatch
+  # [push, pull_request, workflow_dispatch]
 jobs:
   build:
 
@@ -21,31 +16,29 @@ jobs:
 
     steps:
     - name: Setup ROS2
-      uses: ros-tooling/setup-ros@v0.3
+      uses: ros-tooling/setup-ros@v0.2
       with:
-        required-ros-distributions: galactic
+        required-ros-distributions: rolling
 
     - name: Install test-msgs on Linux
       run: |
-        sudo apt install ros-galactic-test-msgs
+        sudo apt install ros-rolling-test-msgs
 
-    - uses: actions/checkout@v3
-      with:
-        ref: galactic-geochelone
+    - uses: actions/checkout@v2
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build rclnodejs
+    - name: Run test suite on Linux
       run: |
-        source /opt/ros/galactic/setup.bash
+        source /opt/ros/rolling/setup.bash
         npm i
 
     - name: Run test suite
       shell: bash
       run: |
-        source /opt/ros/galactic/setup.bash
+        source /opt/ros/rolling/setup.bash
         node ./scripts/compile_tests.js
         source install/local_setup.bash
         node --expose-gc ./scripts/run_test.js

@@ -14,6 +14,7 @@
 
 'use strict';
 
+const DistroUtils = require('./lib/distro.js');
 const { Clock, ROSClock } = require('./lib/clock.js');
 const ClockType = require('./lib/clock_type.js');
 const compareVersions = require('compare-versions');
@@ -103,6 +104,9 @@ let rcl = {
    *  @see [IntegerRange]{@link IntegerRange}
    */
   DEFAULT_NUMERIC_RANGE_TOLERANCE: DEFAULT_NUMERIC_RANGE_TOLERANCE,
+
+  /** {@link DistroUtils} */
+  DistroUtils: DistroUtils,
 
   /** {@link Duration} class */
   Duration: Duration,

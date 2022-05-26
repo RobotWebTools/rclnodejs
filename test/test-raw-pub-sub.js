@@ -17,6 +17,7 @@
 const childProcess = require('child_process');
 const assert = require('assert');
 const rclnodejs = require('../index.js');
+const DistroUtils = rclnodejs.DistroUtils;
 
 describe('rclnodejs publisher test suite', function () {
   this.timeout(60 * 1000);
@@ -29,7 +30,7 @@ describe('rclnodejs publisher test suite', function () {
     rclnodejs.shutdown();
   });
 
-  it('Publish serialized messages', function (done) {
+  it('Publish raw serialized messages', function (done) {
     const node = rclnodejs.createNode('serialized_messages_node');
     const topic = Buffer.from('Hello ROS World');
     const publisher = node.createPublisher(
@@ -47,21 +48,21 @@ describe('rclnodejs publisher test suite', function () {
       (msg) => {
         clearInterval(timer);
 
-        const GALACTIC_VERSION = 2105;
-        const versionInfo = childProcess
-          .execSync('node scripts/ros_distro.js')
-          .toString('utf-8');
-        const version =
-          versionInfo && versionInfo.length > 0
-            ? parseInt(versionInfo)
-            : GALACTIC_VERSION;
-
         let buffer = topic;
-        if (version >= GALACTIC_VERSION) {
+        const distroId = DistroUtils.getDistroId();
+
+        if (
+          distroId === DistroUtils.DistroId.GALACTIC ||
+          distroId === DistroUtils.DistroId.ROLLING
+        ) {
           // The received Buffer is null-terminated.
           buffer = Buffer.concat([buffer, Buffer.from([0x00])]);
         }
-        assert.deepStrictEqual(Buffer.compare(msg, buffer), 0);
+        assert.deepStrictEqual(
+          Buffer.compare(msg, buffer),
+          0,
+          `distro: ${DistroUtils.getDistroName()}, buffer: ${buffer}, msg: ${msg}`
+        );
         done();
       }
     );

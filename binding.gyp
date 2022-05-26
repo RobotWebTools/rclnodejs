@@ -8,7 +8,7 @@
     }
   },
   'variables': {
-    'ros_version': '<!(node scripts/ros_distro.js)'
+    'ros_version': '<!(node scripts/ros_distro.js)',
   },
   'targets': [
     {
@@ -61,11 +61,43 @@
             'cflags_cc': [
               '-std=c++14'
             ],
-            'include_dirs': [
+            'include_dirs': 
+            [
               "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/ ') + '/include/')\")",
             ],
             'library_dirs': [
               "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/lib/ ') + '/lib/')\")",
+            ],
+            'conditions': [
+              [
+                'ros_version > 2105', # Humble, Rolling, ...
+                {
+                  'include_dirs': 
+                  [
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/ ') + '/include/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rcl/ ') + '/include/rcl')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rcutils/ ') + '/include/rcutils/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rmw/ ') + '/include/rmw/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rcl_yaml_param_parser/ ') + '/include/rcl_yaml_param_parser/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rosidl_typesupport_interface/ ') + '/include/rosidl_typesupport_interface/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rcl_action/ ') + '/include/rcl_action/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/action_msgs/ ') + '/include/action_msgs/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/unique_identifier_msgs/ ') + '/include/unique_identifier_msgs/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/builtin_interfaces/ ') + '/include/builtin_interfaces/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rcl_lifecycle/ ') + '/include/rcl_lifecycle/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/lifecycle_msgs/ ') + '/include/lifecycle_msgs/')\")",
+                  ],
+                }
+              ],
+              [
+                'ros_version == 2205', # Humble
+                {
+                  'include_dirs': 
+                  [
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rosidl_runtime_c/ ') + '/include/rosidl_runtime_c/')\")",
+                  ],
+                }
+              ],
             ],
           }
         ],
@@ -80,7 +112,7 @@
             ],
             'include_dirs': [
               './src/third_party/dlfcn-win32/',
-              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '\\\include ').replace(/\\\/g, '/') + '/include')\")",
+              "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include ').replace(/\\\/g, '/') + '/include')\")",
             ],
             'msvs_settings': {
               'VCCLCompilerTool': {
@@ -90,11 +122,34 @@
                 'AdditionalDependencies': ['psapi.lib'],
                 'AdditionalLibraryDirectories': ["<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '\\\lib ').replace(/\\\/g, '/') + '/lib')\")",],
               }
-            }
+            },
+            'conditions': [
+              [ 
+                'ros_version > 2105', # Humble, Rolling, ... TODO - not tested due to broken setup_ros v3.3 action on windows 
+                {
+                  'include_dirs': 
+                  [
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rcl ').replace(/\\\/g, '/') + '/include/rcl')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rcutils ').replace(/\\\/g, '/') + '/include/rcutils')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rmw ').replace(/\\\/g, '/') + '/include/rmw')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rcl_yaml_param_parser ').replace(/\\\/g, '/') + '/include/rcl_yaml_param_parser')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rosidl_runtime_c ').replace(/\\\/g, '/') + '/include/rosidl_runtime_c')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rosidl_typesupport_interface ').replace(/\\\/g, '/') + '/include/rosidl_typesupport_interface')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rcl_action ').replace(/\\\/g, '/') + '/include/rcl_action')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/action_msgs ').replace(/\\\/g, '/') + '/include/action_msgs')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/unique_identifier_msgs ').replace(/\\\/g, '/') + '/include/unique_identifier_msgs')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/builtin_interfaces ').replace(/\\\/g, '/') + '/include/builtin_interfaces')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rcl_lifecycle ').replace(/\\\/g, '/') + '/include/rcl_lifecycle')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/lifecycle_msgs ').replace(/\\\/g, '/') + '/include/lifecycle_msgs')\")",
+                  ],
+                }
+              ]
+            ]
           }
         ],
         [
           'OS=="mac"',
+          # TODO - macos is no longer a tier-1 ROS platform and we have no binary ROS builds to test for Humble & Rolling
           {
             'defines': [
               'OS_MACOS'
