@@ -5,6 +5,7 @@
 /// <reference path="clock_type.d.ts" />
 /// <reference path="clock.d.ts" />
 /// <reference path="context.d.ts" />
+/// <reference path="distro.d.ts" />
 /// <reference path="duration.d.ts" />
 /// <reference path="entity.d.ts" />
 /// <reference path="guard_condition.d.ts" />
