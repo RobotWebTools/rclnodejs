@@ -112,10 +112,6 @@ describe('rclnodejs class existance testing', function () {
       node.destroy();
     });
 
-    it('sequenceNumber property should exist', function () {
-      assertMember('sequenceNumber', client, client.sequenceNumber, 'number');
-    });
-
     it('sendRequest method should exist', function () {
       assertMember('sendRequest', client, client.sendRequest, 'function');
     });
