@@ -207,4 +207,67 @@ describe('Test rclnodejs nodes in a single process', function () {
 
     rclnodejs.spin(node);
   });
+
+  it('Multiple requests from single client', function (done) {
+    const logger = rclnodejs.logging.getLogger('client_multi_request_logger');
+    logger.setLoggerLevel(logger.LoggingSeverity.INFO);
+    var node = rclnodejs.createNode('new_style_require_services');
+    const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
+
+    var service = node.createService(
+      AddTwoInts,
+      'multi_request_service',
+      (request, response) => {
+        let result = response.template;
+        result.sum = request.a + request.b;
+        return result;
+      }
+    );
+    var client = node.createClient(AddTwoInts, 'multi_request_service');
+    let request = new AddTwoInts.Request();
+    request.a = 1;
+    request.b = 2;
+    let request2 = new AddTwoInts.Request();
+    request2.a = 3;
+    request2.b = 4;
+
+    let pendingRequests = 2;
+    let request1Succeeded = false;
+    let request2Succeeded = false;
+
+    // Request 1
+    client.sendRequest(request, (response) => {
+      pendingRequests -= 1;
+      logger.info(
+        `[Callback 1] received response: ${response.sum}, pending requests: ${pendingRequests}`
+      );
+      assert.deepStrictEqual(response.sum, 3);
+      request1Succeeded = true;
+      if (pendingRequests == 0 && request1Succeeded && request2Succeeded) {
+        logger.info(
+          `[Callback 1] No more pending requests, all succeeded, calling done.`
+        );
+        node.destroy();
+        done();
+      }
+    });
+    // Request 2
+    client.sendRequest(request2, (response) => {
+      pendingRequests -= 1;
+      logger.info(
+        `[Callback 2] received response: ${response.sum}, pending requests: ${pendingRequests}`
+      );
+      assert.deepStrictEqual(response.sum, 7);
+      request2Succeeded = true;
+      if (pendingRequests == 0 && request1Succeeded && request2Succeeded) {
+        logger.info(
+          `[Callback 2] No more pending requests, all succeeded, calling done.`
+        );
+        node.destroy();
+        done();
+      }
+    });
+
+    rclnodejs.spin(node);
+  });
 });

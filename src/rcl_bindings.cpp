@@ -831,24 +831,21 @@ NAN_METHOD(RclTakeResponse) {
       RclHandle::Unwrap<RclHandle>(
           Nan::To<v8::Object>(info[0]).ToLocalChecked())
           ->ptr());
-  int64_t sequence_number = Nan::To<int64_t>(info[1]).FromJust();
 
-  rmw_request_id_t* header =
-      reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
-  header->sequence_number = sequence_number;
+  rmw_service_info_t header;
 
   void* taken_response =
-      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked());
-  rcl_ret_t ret = rcl_take_response(client, header, taken_response);
-  free(header);
+      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  rcl_ret_t ret = rcl_take_response_with_info(client, &header, taken_response);
+  int64_t sequence_number = header.request_id.sequence_number;
 
   if (ret == RCL_RET_OK) {
-    info.GetReturnValue().Set(Nan::True());
+    info.GetReturnValue().Set(Nan::New((uint32_t)sequence_number));
     return;
   }
 
   rcl_reset_error();
-  info.GetReturnValue().Set(Nan::False());
+  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(CreateService) {
