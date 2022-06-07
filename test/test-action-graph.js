@@ -22,7 +22,7 @@ describe('rclnodejs action graph', function () {
   let node1;
   let node2;
   let node3;
-  let fibonacci = 'rclnodejs_test_msgs/action/Fibonacci';
+  let fibonacci = 'example_interfaces/action/Fibonacci';
   this.timeout(60 * 1000);
 
   const NODE1_NAME = 'node1';

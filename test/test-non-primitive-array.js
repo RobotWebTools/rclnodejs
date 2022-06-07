@@ -21,16 +21,18 @@ const rclnodejs = require('../index.js');
 /* eslint-disable key-spacing */
 /* eslint-disable comma-spacing */
 
-describe('Test message which has a static non-primitive array', function () {
+describe('Test message which has a non-primitive array', function () {
   this.timeout(60 * 1000);
 
-  let time = {
-    sec: 123456,
-    nanosec: 789,
+  let joy_feedback = {
+    type: 2, // TYPE_BUZZER
+    id: 1,
+    intensity: 101,
   };
-  let time_value = [];
-  time_value.push(time);
-  time_value.push(time);
+
+  let joyfeedback_array = [];
+  joyfeedback_array.push(joy_feedback);
+  joyfeedback_array.push(joy_feedback);
 
   beforeEach(function () {
     return rclnodejs.init();
@@ -43,54 +45,26 @@ describe('Test message which has a static non-primitive array', function () {
   it('Assigned with an array whose length is 2', function (done) {
     const node = rclnodejs.createNode('publish_time');
     let publisher = node.createPublisher(
-      'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
-      'time'
+      'sensor_msgs/msg/JoyFeedbackArray',
+      'joyfeedback'
     );
     let timer = setInterval(() => {
       assert.doesNotThrow(() => {
-        console.log('length is ' + time_value.length);
-        publisher.publish({ time_value });
+        publisher.publish({ array: joyfeedback_array });
       }, RangeError);
     }, 100);
 
     node.createSubscription(
-      'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
-      'time',
+      'sensor_msgs/msg/JoyFeedbackArray',
+      'joyfeedback',
       (msg) => {
         clearInterval(timer);
-        assert.deepStrictEqual(msg.time_value, time_value);
+        assert.deepStrictEqual(msg.array, joyfeedback_array);
         node.destroy();
         done();
       }
     );
 
     rclnodejs.spin(node);
-  });
-
-  it('Assigned with an array whose length is greater than 2', function (done) {
-    time_value.push(time);
-    const node = rclnodejs.createNode('publish_time');
-    let publisher = node.createPublisher(
-      'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
-      'time'
-    );
-    assert.throws(() => {
-      publisher.publish({ time_value });
-    }, RangeError);
-    node.destroy();
-    done();
-  });
-
-  it('Assigned with an array whose length is less than 2', function (done) {
-    const node = rclnodejs.createNode('publish_time');
-    let publisher = node.createPublisher(
-      'rclnodejs_test_msgs/msg/StaticArrayNonPrimitives',
-      'time'
-    );
-    assert.throws(() => {
-      publisher.publish({ time_value: time_value.slice(0, 0) });
-    }, RangeError);
-    node.destroy();
-    done();
   });
 });
