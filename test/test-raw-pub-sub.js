@@ -51,7 +51,7 @@ describe('rclnodejs publisher test suite', function () {
         let buffer = topic;
         const distroId = DistroUtils.getDistroId();
 
-        if (distroId === DistroUtils.DistroId.GALACTIC) {
+        if (distroId >= DistroUtils.DistroId.GALACTIC) {
           // The received Buffer is null-terminated.
           buffer = Buffer.concat([buffer, Buffer.from([0x00])]);
         }
