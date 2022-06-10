@@ -37,4 +37,8 @@ jobs:
           elif ${FOXY_VAR} == true; then
             echo "::set-output name=distro::foxy"
             echo "::set-output name=linuxos::ubuntu-20.04"
+          else
+            echo "Unable to map branch name to ROS distro, using ROLLING as default"
+            echo "::set-output name=distro::rolling"
+            echo "::set-output name=linuxos::ubuntu-22.04"
           fi
