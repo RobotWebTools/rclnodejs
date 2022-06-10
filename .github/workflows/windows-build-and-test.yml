@@ -1,5 +1,5 @@
 
-name:  rclnodejs - Linux Build and Test
+name:  rclnodejs - Windows Build & Test
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
 
   build:
     needs: identify-ros-distro
-    runs-on: ${{ needs.identify-ros-distro.outputs.linuxos }}
+    runs-on: windows-2019
     strategy:
       fail-fast: false
       matrix:
@@ -38,14 +38,26 @@ jobs:
       with:
         required-ros-distributions: ${{ needs.identify-ros-distro.outputs.distro }}
 
-    - name: Install test-msgs on Linux
+    - name: Install ROS2 Rolling (Conditional)
+      if: ${{ needs.identify-ros-distro.outputs.distro == 'rolling' }}
+      shell: bash
       run: |
-        sudo apt install ros-${{ needs.identify-ros-distro.outputs.distro }}-test-msgs
+        wget --quiet https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip -O rolling.zip
+        7z x rolling.zip -y -o/c/dev/rolling
+
+    - name: Prebuild - Setup VS Dev Environment
+      uses: seanmiddleditch/gha-setup-vsdevenv@v4
 
     - uses: actions/checkout@v3
 
-    - name: Build and test rclnodejs
+    - name: Build rclnodejs
+      shell: cmd
       run: |
-        source /opt/ros/${{ needs.identify-ros-distro.outputs.distro }}/setup.bash
+        call "c:\dev\${{ needs.identify-ros-distro.outputs.distro }}\ros2-windows\setup.bat"
         npm i
+
+    - name: Test rclnodejs
+      shell: cmd
+      run: |
+        call "c:\dev\${{ needs.identify-ros-distro.outputs.distro }}\ros2-windows\setup.bat"
         npm test

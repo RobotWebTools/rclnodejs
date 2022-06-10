@@ -1,0 +1,52 @@
+
+name:  rclnodejs - Windows Build & Test Compatibility
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [10.X, 12.X, 14.X, 16.11.X, 17.X]
+        ros_distribution:
+          - foxy
+          - galactic
+          - humble
+          - rolling
+    steps:
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Setup ROS2
+      uses: ros-tooling/setup-ros@v0.3
+      with:
+        required-ros-distributions: ${{ matrix.ros_distribution }}
+
+    - name: Install ROS2 Rolling (Conditional)
+      if: ${{ matrix.ros_distribution == 'rolling' }}
+      shell: bash
+      run: |
+        wget --quiet https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip -O rolling.zip
+        7z x rolling.zip -y -o/c/dev/rolling
+
+    - name: Prebuild - Setup VS Dev Environment
+      uses: seanmiddleditch/gha-setup-vsdevenv@v4
+
+    - uses: actions/checkout@v3
+
+    - name: Build rclnodejs
+      shell: cmd
+      run: |
+        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
+        npm i
+
+    - name: Test rclnodejs
+      shell: cmd
+      run: |
+        call "c:\dev\${{ needs.identify-ros-distro.outputs.distro }}\ros2-windows\setup.bat"
+        npm test
