@@ -18,7 +18,7 @@ rclnodejs.init().then(() => {
 
 **Node.js**
 
-- [Node.js](https://nodejs.org/en/) version between 10.23 - 16.x.
+- [Node.js](https://nodejs.org/en/) version between 10.23 - 17.x.
 
 **ROS 2 SDK**
 
@@ -43,10 +43,10 @@ npm i rclnodejs@x.y.z
 
 #### RCLNODEJS - ROS 2 Version Compatibility
 
-|                                                            RCLNODEJS Version                                                            |                                                                                                                       Compatible ROS 2 Release                                                                                                                        |
-| :-------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [0.21.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.21.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.21.0/index.html)) | [Galactic Geochelone](https://github.com/ros2/ros2/releases/tag/release-galactic-20210716) / [Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201211) / [Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
-|                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                                                                   [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                                                                   |
+|                                                            RCLNODEJS Version                                                            |                                                                                                                                                                     Compatible ROS 2 Release                                                                                                                                                                     |
+| :-------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| [0.21.0 (current)](https://www.npmjs.com/package/rclnodejs/v/0.21.0) ([API](http://robotwebtools.org/rclnodejs/docs/0.21.0/index.html)) | [Humble Hawksbill](https://github.com/ros2/ros2/releases/tag/release-humble-20220523)<br>[Galactic Geochelone](https://github.com/ros2/ros2/releases/tag/release-galactic-20210716)<br>[Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201211)<br>[Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
+|                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                                                                                                                [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                                                                                                                 |
 
 ## Documentation
 

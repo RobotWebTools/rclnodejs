@@ -24,7 +24,7 @@ describe('rclnodejs action server', function () {
   let node;
   let client;
   this.timeout(60 * 1000);
-  let fibonacci = 'rclnodejs_test_msgs/action/Fibonacci';
+  let fibonacci = 'example_interfaces/action/Fibonacci';
   let Fibonacci;
   let GoalStatus;
 

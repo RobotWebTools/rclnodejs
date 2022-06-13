@@ -1,0 +1,44 @@
+name:  Identify ROS Distro from GITHUB_REF_NAME
+
+on:
+  workflow_call:
+    outputs:
+      distro:
+        description: "The ROS distribution short name"
+        value: ${{ jobs.identify-ros-distro.outputs.distro }}
+      linuxos:
+        description: "The ROS compatible Linux version"
+        value: ${{ jobs.identify-ros-distro.outputs.linuxos }}
+env:
+  ROLLING_VAR: ${{ contains(github.ref, 'develop') }}
+  HUMBLE_VAR: ${{ contains(github.ref, 'humble') }}
+  GALACTIC_VAR: ${{ contains(github.ref, 'galactic') }}
+  FOXY_VAR: ${{ contains(github.ref, 'foxy') }}
+
+jobs:
+  identify-ros-distro:
+    runs-on: ubuntu-latest
+    outputs:
+      distro: ${{ steps.identify.outputs.distro }}
+      linuxos: ${{ steps.identify.outputs.linuxos }}
+    steps:
+      - name: Identify distro
+        id: identify
+        run: |
+          if ${ROLLING_VAR} == true; then
+            echo "::set-output name=distro::rolling"
+            echo "::set-output name=linuxos::ubuntu-22.04"
+          elif ${HUMBLE_VAR} == true; then
+            echo "::set-output name=distro::humble"
+            echo "::set-output name=linuxos::ubuntu-22.04"
+          elif ${GALACTIC_VAR} == true; then
+            echo "::set-output name=distro::galactic"
+            echo "::set-output name=linuxos::ubuntu-20.04"
+          elif ${FOXY_VAR} == true; then
+            echo "::set-output name=distro::foxy"
+            echo "::set-output name=linuxos::ubuntu-20.04"
+          else
+            echo "Unable to map branch name to ROS distro, using ROLLING as default"
+            echo "::set-output name=distro::rolling"
+            echo "::set-output name=linuxos::ubuntu-22.04"
+          fi

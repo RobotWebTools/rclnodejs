@@ -1,0 +1,67 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  build-humble-and-rolling: # humble and rolling distros
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [10.X, 12.x, 14.X, 16.X, 17.X]
+        ros_distribution:
+          - humble
+          - rolling
+
+    steps:
+    - name: Setup ROS2
+      uses: ros-tooling/setup-ros@v0.3
+      with:
+        required-ros-distributions: ${{ matrix.ros_distribution }}
+
+    - name: Install test-msgs on Linux
+      run: |
+        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Build and test rclnodejs
+      run: |
+        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+        npm i
+        npm test
+
+  build-foxy-and-galactic: # foxy and galactic distros
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [10.X, 12.x, 14.X, 16.X, 17.X]
+        ros_distribution:
+          - foxy
+          - galactic
+
+    steps:
+    - name: Setup ROS2
+      uses: ros-tooling/setup-ros@v0.3
+      with:
+        required-ros-distributions: ${{ matrix.ros_distribution }}
+
+    - name: Install test-msgs on Linux
+      run: |
+        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Build and test rclnodejs
+      run: |
+        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+        npm i
+        npm test
