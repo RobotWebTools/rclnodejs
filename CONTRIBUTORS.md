@@ -1,5 +1,11 @@
 # rclnodejs contributors (sorted alphabetically)
 
+- **[Alaa El Jawad](https://github.com/ejalaa12), [Ian McElroy](https://github.com/imcelroy)**
+
+  - Fix compatibility with ROS2 parameters array types
+  - Unit tests for all parameter types
+  - Handle concurrent ROS2 client calls, with unit tests
+
 - **[Alex Mikhalev](https://github.com/amikhalev)**
 
   - Fix build for AMENT_PREFIX_PATH with multiple entries
@@ -50,14 +56,8 @@
   - Improved code generation smarts and efficiency
 
 - **[Wayne Parrott](https://github.com/wayneparrott)**
-
   - TypeScript support with interface generation
   - ROS2 parameter support
   - ROS2 lifecycle node
   - Rate class
   - Node class hierarchy
-
-- **[Alaa El Jawad](https://github.com/ejalaa12), [Ian McElroy](https://github.com/imcelroy)**
-  - Fix compatibility with ROS2 parameters array types
-  - Unit tests for all parameter types
-  - Handle concurrent ROS2 client calls, with unit tests
