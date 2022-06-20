@@ -1,63 +1,54 @@
-# rclnodejs contributors (sorted alphabetically)
+rclnodejs contributors (sorted alphabetically)
+==============================================
 
-- **[Alaa El Jawad](https://github.com/ejalaa12), [Ian McElroy](https://github.com/imcelroy)**
-
+* **[Alaa El Jawad](https://github.com/ejalaa12), [Ian McElroy](https://github.com/imcelroy)**
   - Fix compatibility with ROS2 parameters array types
   - Unit tests for all parameter types
   - Handle concurrent ROS2 client calls, with unit tests
 
-- **[Alex Mikhalev](https://github.com/amikhalev)**
+* **[Alex Mikhalev](https://github.com/amikhalev)**
+  * Fix build for AMENT_PREFIX_PATH with multiple entries
 
-  - Fix build for AMENT_PREFIX_PATH with multiple entries
+* **[Felix Divo](https://github.com/felixdivo)**
+  * Code cleanup of index.js, tests cases & message generation
+  * Improved shutdown behavior
+  * Fixed compilation warnings
 
-- **[Felix Divo](https://github.com/felixdivo)**
+* **[Hanyia](https://github.com/hanyia)**
+  * Benchmark test script
 
-  - Code cleanup of index.js, tests cases & message generation
-  - Improved shutdown behavior
-  - Fixed compilation warnings
+* **[Kenny Yuan](https://github.com/kenny-y)**
+  * Message features: JS generation, typed arrays, plain JS object, compound msgs, many others...
+  * npm publish scripts
+  * Mac support
 
-- **[Hanyia](https://github.com/hanyia)**
+* **[Matt Richard](https://github.com/mattrichard)**
+  * ROS2 Actions
+  * Guard conditions
+  * Node utility methods (countPublishers/subscribers...)
+  * TypeScript improvements
+  * Node 12 compatibility
 
-  - Benchmark test script
+* **[Minggang Wang](https://github.com/minggangw)**
+  * Author, lead developer, maintainer
+  * Core, CI
 
-- **[Kenny Yuan](https://github.com/kenny-y)**
+* **[Martins Mozeiko](https://github.com/martins-mozeiko)**
+  * QoS new/delete fix
 
-  - Message features: JS generation, typed arrays, plain JS object, compound msgs, many others...
-  - npm publish scripts
-  - Mac support
+* **[Qiuzhong](https://github.com/qiuzhong)**
+  * Test coverage for actions, topics, multi-array messages, cross platform, security
+  * Converted from setTimeout to ROS2 Timer
 
-- **[Matt Richard](https://github.com/mattrichard)**
+* **[Teo Koon Peng](https://github.com/koonpeng)**
+  * TypeScript improvements
+  * Added Client#waitForService
+  * Code style improvements, e.g., Prettier formatting
+  * Improved code generation smarts and efficiency
 
-  - ROS2 Actions
-  - Guard conditions
-  - Node utility methods (countPublishers/subscribers...)
-  - TypeScript improvements
-  - Node 12 compatibility
-
-- **[Minggang Wang](https://github.com/minggangw)**
-
-  - Author, lead developer, maintainer
-  - Core, CI
-
-- **[Martins Mozeiko](https://github.com/martins-mozeiko)**
-
-  - QoS new/delete fix
-
-- **[Qiuzhong](https://github.com/qiuzhong)**
-
-  - Test coverage for actions, topics, multi-array messages, cross platform, security
-  - Converted from setTimeout to ROS2 Timer
-
-- **[Teo Koon Peng](https://github.com/koonpeng)**
-
-  - TypeScript improvements
-  - Added Client#waitForService
-  - Code style improvements, e.g., Prettier formatting
-  - Improved code generation smarts and efficiency
-
-- **[Wayne Parrott](https://github.com/wayneparrott)**
-  - TypeScript support with interface generation
-  - ROS2 parameter support
-  - ROS2 lifecycle node
-  - Rate class
-  - Node class hierarchy
+* **[Wayne Parrott](https://github.com/wayneparrott)**
+  * TypeScript support with interface generation
+  * ROS2 parameter support
+  * ROS2 lifecycle node
+  * Rate class
+  * Node class hierarchy
