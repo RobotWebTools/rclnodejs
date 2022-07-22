@@ -80,13 +80,13 @@ async function getCurrentGeneratorVersion() {
   });
 }
 
+let _rosVersionChecked = false;
+
 /**
  * A module that exposes the rclnodejs interfaces.
  * @exports rclnodejs
  */
 let rcl = {
-  _rosVersionChecked: false,
-
   /** {@link Clock} class */
   Clock: Clock,
 
@@ -245,7 +245,7 @@ let rcl = {
 
     rclnodejs.init(context.handle, argv);
 
-    if (this._rosVersionChecked) {
+    if (_rosVersionChecked) {
       // no further processing required
       return;
     }
@@ -262,7 +262,7 @@ let rcl = {
 
     await generator.generateAll(forced);
     // TODO determine if tsd generateAll() should be here
-    this._rosVersionChecked = true;
+    _rosVersionChecked = true;
   },
 
   /**
