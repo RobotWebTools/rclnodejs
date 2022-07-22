@@ -84,7 +84,9 @@ declare module 'rclnodejs' {
   type HandleAcceptedCallback<T extends TypeClass<ActionTypeClassName>> = (
     goalHandle: ServerGoalHandle<T>
   ) => void;
-  type CancelCallback = () => Promise<CancelResponse> | CancelResponse;
+  type CancelCallback<T extends TypeClass<ActionTypeClassName>> = (
+    goalHandle: ServerGoalHandle<T>
+  ) => Promise<CancelResponse> | CancelResponse;
 
   interface ActionServerOptions extends Options<ActionQoS> {
     /**
@@ -116,7 +118,7 @@ declare module 'rclnodejs' {
       executeCallback: ExecuteCallback<T>,
       goalCallback?: GoalCallback<T>,
       handleAcceptedCallback?: HandleAcceptedCallback<T>,
-      cancelCallback?: CancelCallback,
+      cancelCallback?: CancelCallback<T>,
       options?: ActionServerOptions
     );
 
@@ -153,14 +155,14 @@ declare module 'rclnodejs' {
      *
      * The purpose of the cancel callback is to decide if a request to cancel an on-going
      * (or queued) goal should be accepted or rejected.
-     * The callback should take one parameter containing the cancel request and must return a
+     * The callback should take one parameter containing the cancel request ( a GoalHandle) and must return a
      * {@link CancelResponse} value.
      *
      * There can only be one cancel callback per {@link ActionServer}, therefore calling this
      * function will replace any previously registered callback.
      * @param cancelCallback - Callback function, if not provided, then unregisters any previously registered callback.
      */
-    registerCancelCallback(cancelCallback?: CancelCallback): void;
+    registerCancelCallback(cancelCallback?: CancelCallback<T>): void;
 
     /**
      * Register a callback for executing action goals.

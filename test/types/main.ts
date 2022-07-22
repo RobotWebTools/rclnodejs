@@ -454,13 +454,13 @@ logger.fatal('test msg');
 // f64arr.data;
 
 // $ExpectType FibonacciConstructor
-const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
+const Fibonacci = rclnodejs.require('example_interfaces/action/Fibonacci');
 
 // ---- ActionClient -----
-// $ExpectType ActionClient<"test_msgs/action/Fibonacci">
+// $ExpectType ActionClient<"example_interfaces/action/Fibonacci">
 const actionClient = new rclnodejs.ActionClient(
   node,
-  'test_msgs/action/Fibonacci',
+  'example_interfaces/action/Fibonacci',
   'fibonnaci'
 );
 
@@ -473,7 +473,7 @@ actionClient.waitForServer();
 // $ExpectType void
 actionClient.destroy();
 
-// $ExpectType Promise<ClientGoalHandle<"test_msgs/action/Fibonacci">>
+// $ExpectType Promise<ClientGoalHandle<"example_interfaces/action/Fibonacci">>
 const goalHandlePromise = actionClient.sendGoal(new Fibonacci.Goal());
 
 goalHandlePromise.then((goalHandle) => {
@@ -515,10 +515,10 @@ goalHandlePromise.then((goalHandle) => {
 });
 
 // ---- ActionServer -----
-// $ExpectType ActionServer<"test_msgs/action/Fibonacci">
+// $ExpectType ActionServer<"example_interfaces/action/Fibonacci">
 const actionServer = new rclnodejs.ActionServer(
   node,
-  'test_msgs/action/Fibonacci',
+  'example_interfaces/action/Fibonacci',
   'fibonnaci',
   executeCallback
 );
@@ -539,7 +539,7 @@ actionServer.registerExecuteCallback(() => new Fibonacci.Result());
 actionServer.destroy();
 
 function executeCallback(
-  goalHandle: rclnodejs.ServerGoalHandle<'test_msgs/action/Fibonacci'>
+  goalHandle: rclnodejs.ServerGoalHandle<'example_interfaces/action/Fibonacci'>
 ) {
   // $ExpectType UUID
   goalHandle.goalId;
