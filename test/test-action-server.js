@@ -289,7 +289,7 @@ describe('rclnodejs action server', function () {
       return new Fibonacci.Result();
     }
 
-    function cancelCallback() {
+    function cancelCallback(goalHandle) {
       return rclnodejs.CancelResponse.ACCEPT;
     }
 
@@ -334,7 +334,7 @@ describe('rclnodejs action server', function () {
       return new Fibonacci.Result();
     }
 
-    function cancelCallback() {
+    function cancelCallback(goalHandle) {
       return rclnodejs.CancelResponse.REJECT;
     }
 
@@ -381,7 +381,7 @@ describe('rclnodejs action server', function () {
       serverGoalHandle = goalHandle;
     }
 
-    function cancelCallback() {
+    function cancelCallback(goalHandle) {
       return rclnodejs.CancelResponse.ACCEPT;
     }
 
