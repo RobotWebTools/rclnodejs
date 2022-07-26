@@ -19,6 +19,7 @@ const sinon = require('sinon');
 const { v4: uuidv4 } = require('uuid');
 const assertUtils = require('./utils.js');
 const rclnodejs = require('../index.js');
+const { ActionUuid } = require('../index.js');
 
 describe('rclnodejs action client', function () {
   let node;
@@ -29,26 +30,11 @@ describe('rclnodejs action client', function () {
 
   let publishFeedback = null;
 
-  function createUuid() {
-    let uuid = uuidv4().replace(/-/g, '');
-    let bytes = Uint8Array.from(Buffer.from(uuid, 'hex'));
-
-    let UUID = rclnodejs.require('unique_identifier_msgs/msg/UUID');
-    let goalUuid = new UUID();
-    goalUuid.uuid = bytes;
-
-    return goalUuid;
-  }
-
-  function uuidAsString(uuid) {
-    return [].slice.call(uuid).join(',');
-  }
-
   async function executeCallback(goalHandle) {
     if (
       publishFeedback &&
-      uuidAsString(publishFeedback.uuid) ===
-        uuidAsString(goalHandle.goalId.uuid)
+      ActionUuid.fromMessage(publishFeedback).toString() ===
+        ActionUuid.fromMessage(goalHandle.goalId).toString()
     ) {
       goalHandle.publishFeedback(new Fibonacci.Feedback());
     }
@@ -180,7 +166,7 @@ describe('rclnodejs action client', function () {
       assert.ok(feedback);
     });
 
-    let goalUuid = createUuid();
+    let goalUuid = ActionUuid.randomMessage();
 
     publishFeedback = goalUuid;
 
@@ -206,8 +192,8 @@ describe('rclnodejs action client', function () {
   it('Test send goal with feedback for another goal', async function () {
     let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
 
-    let goal1Uuid = createUuid();
-    let goal2Uuid = createUuid();
+    let goal1Uuid = ActionUuid.randomMessage();
+    let goal2Uuid = ActionUuid.randomMessage();
 
     let feedback1Callback = sinon.spy();
     let feedback2Callback = sinon.spy();
@@ -292,8 +278,8 @@ describe('rclnodejs action client', function () {
     assert.ok(result);
 
     assert.strictEqual(
-      uuidAsString(result.goals_canceling[0].goal_id.uuid),
-      uuidAsString(goalHandle.goalId.uuid)
+      ActionUuid.fromMessage(result.goals_canceling[0].goal_id).toString(),
+      ActionUuid.fromMessage(goalHandle.goalId).toString()
     );
 
     client.destroy();
