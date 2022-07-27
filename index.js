@@ -42,6 +42,7 @@ const validator = require('./lib/validator.js');
 const Time = require('./lib/time.js');
 const ActionClient = require('./lib/action/client.js');
 const ActionServer = require('./lib/action/server.js');
+const ActionUuid = require('./lib/action/uuid.js');
 const ClientGoalHandle = require('./lib/action/client_goal_handle.js');
 const { CancelResponse, GoalResponse } = require('./lib/action/response.js');
 const ServerGoalHandle = require('./lib/action/server_goal_handle.js');
@@ -149,6 +150,9 @@ let rcl = {
 
   /** {@link ActionServer} class */
   ActionServer: ActionServer,
+
+  /** {@link ActionUuid} class */
+  ActionUuid: ActionUuid,
 
   /** {@link ClientGoalHandle} class */
   ClientGoalHandle: ClientGoalHandle,

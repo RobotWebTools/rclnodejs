@@ -56,6 +56,9 @@ nodeOptions.parameterOverrides;
 // $ExpectType Node
 const node = rclnodejs.createNode(NODE_NAME);
 
+// $ExpectType Node
+const node1 = new rclnodejs.Node(NODE_NAME + '1');
+
 // $ExpectType string
 node.name();
 
@@ -114,6 +117,20 @@ const lifecycleNode = rclnodejs.createLifecycleNode(LIFECYCLE_NODE_NAME);
 // $ExpectType LifecycleNode
 const lifecycleNode1 = rclnodejs.createLifecycleNode(
   LIFECYCLE_NODE_NAME + '1',
+  undefined,
+  undefined,
+  undefined,
+  true
+);
+
+// $ExpectType LifecycleNode
+const lifecycleNode2 = new rclnodejs.lifecycle.LifecycleNode(
+  LIFECYCLE_NODE_NAME
+);
+
+// $ExpectType LifecycleNode
+const lifecycleNode3 = new rclnodejs.lifecycle.LifecycleNode(
+  LIFECYCLE_NODE_NAME + '3',
   undefined,
   undefined,
   undefined,
@@ -573,3 +590,25 @@ function executeCallback(
 
   return new Fibonacci.Result();
 }
+
+// ---- ActionUuid -----
+// $ExpectType ActionUuid
+const actionUuid = new rclnodejs.ActionUuid();
+
+// $ExpectType ActionUuid
+const actionUuid1 = rclnodejs.ActionUuid.random();
+
+// $ExpectType ActionUuid
+const actionUuid2 = rclnodejs.ActionUuid.fromBytes(new Uint8Array([21, 31]));
+
+// $ExpectType string
+actionUuid.toString();
+
+// $ExpectType Uint8Array
+actionUuid.bytes;
+
+// $ExpectType UUID
+actionUuid.toMessage();
+
+// $ExpectType UUID
+rclnodejs.ActionUuid.randomMessage();
