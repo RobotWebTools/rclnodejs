@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: ParameterService</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: ParameterService</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>ParameterService<span class="signature">(node)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Implements the ros2 service interfaces for interacting with a node's parameters.
+
+The interfaces implemented are:
+ rcl_interfaces/srv/ListParameters
+ rcl_interfaces/srv/DescribeParameters
+ rcl_interfaces/srv/GetParameters
+ rcl_interfaces/srv/SetParameters
+ rcl_interfaces/srv/SetParametersAtomically
+
+Call start() to begin receiving client request.
+All service requests are forwarded to the node this service works for.</div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="ParameterService"><span class="type-signature"></span>new ParameterService<span class="signature">(node)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Create a new instance.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>node</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Node.html">Node</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The node these services will support.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_parameter_service.js.html">lib/parameter_service.js</a>, <a href="lib_parameter_service.js.html#line35">line 35</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="node"><span class="type-signature"></span>node<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Get the node this
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_parameter_service.js.html">lib/parameter_service.js</a>, <a href="lib_parameter_service.js.html#line50">line 50</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_handleDescribeParameters"><span class="type-signature"></span>_handleDescribeParameters<span class="signature">(request, response)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get a list of ParameterDescriptors.
+
+Request.names identifies the descriptors to get.
+If request.names is empty, get all descriptors.
+The body of the response is a rcl_interfaces.msg.DescribeParametersResult.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DescribeParameters_Request</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The client request</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>response</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">DescribeParameters_Response</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The server response with
+   an array of ParameterDescriptors.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_parameter_service.js.html">lib/parameter_service.js</a>, <a href="lib_parameter_service.js.html#line216">line 216</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    -
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_handleGetParameters"><span class="type-signature"></span>_handleGetParameters<span class="signature">(request, response)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get a list of ParameterValue.
+
+request.names identifies the parameter values to get.
+If request.names is empty return the value of all parameters.
+The body of the response is a rcl_interfaces.msg.ParameterValue[].
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GetParameters_Request</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The client request.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>response</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">GetParameters_Response</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The service response with
+   an array of ParameterValue.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_parameter_service.js.html">lib/parameter_service.js</a>, <a href="lib_parameter_service.js.html#line239">line 239</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    -
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_handleListParameters"><span class="type-signature"></span>_handleListParameters<span class="signature">(request, response)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get a list of parameter names.
+
+The body of the response is a rcl_interfaces.msg.ListParametersResult.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">ListParameters_Request</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The client request.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>response</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">ListParameters_Response</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The service response with
+   a list of parameter names.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_parameter_service.js.html">lib/parameter_service.js</a>, <a href="lib_parameter_service.js.html#line135">line 135</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    -
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_handleSetParameters"><span class="type-signature"></span>_handleSetParameters<span class="signature">(request, response)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Update a list of parameters.
+
+Process each setParameter operation in the order defined by the request.
+The result is an rcl_interfaces.msg.SetParametersResult[], one result
+for each parameter.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">SetParameters_Request</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The client request.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>response</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">SetParameters_Response</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The service response
+   with a SetParametersResult[]</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_parameter_service.js.html">lib/parameter_service.js</a>, <a href="lib_parameter_service.js.html#line259">line 259</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    -
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="_handleSetParametersAtomically"><span class="type-signature"></span>_handleSetParametersAtomically<span class="signature">(request, response)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Update a list of parameters atomically.
+
+The body of the response is a rcl_interfaces.msg.SetParametersResult
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>request</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">SetParameters_Request</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The client request.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>response</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">SetParameters_Response</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The service response
+   with a single SetParametersResult for the entire process.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_parameter_service.js.html">lib/parameter_service.js</a>, <a href="lib_parameter_service.js.html#line279">line 279</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    -
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="isStarted"><span class="type-signature"></span>isStarted<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Check if interface services are configured and accepting requests.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_parameter_service.js.html">lib/parameter_service.js</a>, <a href="lib_parameter_service.js.html#line58">line 58</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - True if services are active; false otherwise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="start"><span class="type-signature"></span>start<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Configure parameter services and begin processing client requests.
+If this service is already started the request is ignored, i.e., a nop.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_parameter_service.js.html">lib/parameter_service.js</a>, <a href="lib_parameter_service.js.html#line68">line 68</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="ActionClient.html">ActionClient</a></li><li><a href="ActionServer.html">ActionServer</a></li><li><a href="CallbackReturnValue.html">CallbackReturnValue</a></li><li><a href="Client.html">Client</a></li><li><a href="ClientGoalHandle.html">ClientGoalHandle</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Context.html">Context</a></li><li><a href="Duration.html">Duration</a></li><li><a href="FloatingPointRange.html">FloatingPointRange</a></li><li><a href="GuardCondition.html">GuardCondition</a></li><li><a href="IntegerRange.html">IntegerRange</a></li><li><a href="LifecycleNode.html">LifecycleNode</a></li><li><a href="LifecyclePublisher.html">LifecyclePublisher</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeOptions.html">NodeOptions</a></li><li><a href="Parameter.html">Parameter</a></li><li><a href="ParameterDescriptor.html">ParameterDescriptor</a></li><li><a href="ParameterService.html">ParameterService</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Range.html">Range</a></li><li><a href="Rate.html">Rate</a></li><li><a href="RateTimerServer.html">RateTimerServer</a></li><li><a href="Response.html">Response</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="ServerGoalHandle.html">ServerGoalHandle</a></li><li><a href="Service.html">Service</a></li><li><a href="State.html">State</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TimeSource.html">TimeSource</a></li><li><a href="Transition.html">Transition</a></li><li><a href="TransitionDescription.html">TransitionDescription</a></li></ul><h3>Global</h3><ul><li><a href="global.html#CallbackReturnCode">CallbackReturnCode</a></li><li><a href="global.html#CancelResponse">CancelResponse</a></li><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DEFAULT_NUMERIC_RANGE_TOLERANCE">DEFAULT_NUMERIC_RANGE_TOLERANCE</a></li><li><a href="global.html#defaultCancelCallback">defaultCancelCallback</a></li><li><a href="global.html#defaultGoalCallback">defaultGoalCallback</a></li><li><a href="global.html#defaultHandleAcceptedCallback">defaultHandleAcceptedCallback</a></li><li><a href="global.html#DistroId">DistroId</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#getActionClientNamesAndTypesByNode">getActionClientNamesAndTypesByNode</a></li><li><a href="global.html#getActionNamesAndTypes">getActionNamesAndTypes</a></li><li><a href="global.html#getActionServerNamesAndTypesByNode">getActionServerNamesAndTypesByNode</a></li><li><a href="global.html#getCurrentGeneratorVersion">getCurrentGeneratorVersion</a></li><li><a href="global.html#GoalResponse">GoalResponse</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ParameterType">ParameterType</a></li><li><a href="global.html#parameterTypeFromValue">parameterTypeFromValue</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li><li><a href="global.html#validType">validType</a></li><li><a href="global.html#validValue">validValue</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Fri Jul 29 2022 16:52:08 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
