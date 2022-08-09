@@ -253,6 +253,21 @@ declare module 'rclnodejs' {
      *
      * @param typeClass - Type of ROS messages the subscription will subscribe to
      * @param topic - Name of the topic the subcription will subscribe to.
+     * @param callback - Called when a new message is received.
+     *                   The serialized message will be null-terminated.
+     * @returns New instance of Subscription.
+     */
+    createSubscription<T extends TypeClass<MessageTypeClassName>>(
+      typeClass: T,
+      topic: string,
+      callback: SubscriptionCallback<T>
+    ): Subscription;
+
+    /**
+     * Create a Subscription.
+     *
+     * @param typeClass - Type of ROS messages the subscription will subscribe to
+     * @param topic - Name of the topic the subcription will subscribe to.
      * @param options - Configuration options, see DEFAULT_OPTIONS
      * @param callback - Called when a new message is received. The serialized message will be null-terminated.
      * @returns New instance of Subscription.
@@ -277,6 +292,20 @@ declare module 'rclnodejs' {
       serviceName: string,
       options?: Options
     ): Client<T>;
+
+    /**
+     * Create a Service.
+     *
+     * @param typeClass - Service type
+     * @param serviceName - Name of the service.
+     * @param callback - Callback function for notification of incoming requests.
+     * @returns An instance of Service.
+     */
+    createService<T extends TypeClass<ServiceTypeClassName>>(
+      typeClass: T,
+      serviceName: string,
+      callback: ServiceRequestHandler<T>
+    ): ServiceType<T>;
 
     /**
      * Create a Service.
