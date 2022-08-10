@@ -210,19 +210,24 @@ lifecyclePublisher.isActivated();
 
 // ---- Subscription ----
 // $ExpectType Subscription
-const subscription = node.createSubscription(
-  TYPE_CLASS,
-  TOPIC,
-  {},
-  (msg) => {}
-);
+let subscription = node.createSubscription(TYPE_CLASS, TOPIC, (msg) => {});
+
+// $ExpectType Subscription
+subscription = node.createSubscription(TYPE_CLASS, TOPIC, {}, (msg) => {});
 
 // $ExpectType string
 subscription.topic;
 
 // ---- Service ----
 // $ExpectType AddTwoIntsConstructor
-const service = node.createService(
+let service = node.createService(
+  'example_interfaces/srv/AddTwoInts',
+  'add_two_ints',
+  (request, response) => {}
+);
+
+// $ExpectType AddTwoIntsConstructor
+service = node.createService(
   'example_interfaces/srv/AddTwoInts',
   'add_two_ints',
   {},
