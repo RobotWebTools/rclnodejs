@@ -1,5 +1,5 @@
 
-name:  rclnodejs - Windows Build & Test Compatibility
+name:  rclnodejs - Windows Build & Compatibility Test
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ jobs:
       matrix:
         node-version: [10.X, 12.X, 14.X, 16.11.X, 17.X]
         ros_distribution:
-          - foxy
+          # - foxy
           - galactic
           - humble
           - rolling
@@ -48,5 +48,5 @@ jobs:
     - name: Test rclnodejs
       shell: cmd
       run: |
-        call "c:\dev\${{ needs.identify-ros-distro.outputs.distro }}\ros2-windows\setup.bat"
+        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
         npm test
