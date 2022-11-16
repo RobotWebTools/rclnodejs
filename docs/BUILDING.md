@@ -13,12 +13,12 @@ Alternatively, you can build ROS 2 from scratch. Please select the platform you 
 ### Install `Node.js`
 
 **Notice:**
-`rclnodejs` should only be used with node versions between 8.12 - 17.x. The lowest LTS Node.js we used to verify the unit tests is `8.12.0`. And there is a known issue installing rclnodejs with versions of node >= 18.0.
+`rclnodejs` should only be used with node versions between 10.23.1 - 19.x. The lowest LTS Node.js we used to verify the unit tests is `10.23.1`.    
 
-The `Node.js` version we selected is the LTS [`Gallium`](https://nodejs.org/download/release/latest-gallium/) (16.x). You can install it:
+I install Nodejs from either:
 
-- Download from Node.js offical [website](https://nodejs.org/en/), and install it.
-- Use the Node Version Manager ([nvm](https://github.com/creationix/nvm)) to install it.
+- Node.js offical [website](https://nodejs.org/en/)
+- Node Version Manager ([nvm](https://github.com/creationix/nvm))
 
 ### Get Code
 
