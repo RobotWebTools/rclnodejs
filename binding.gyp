@@ -59,7 +59,7 @@
               'OS_LINUX'
             ],
             'cflags_cc': [
-              '-std=c++14'
+              '-std=c++17'
             ],
             'include_dirs': 
             [
@@ -100,7 +100,7 @@
               'OS_WINDOWS'
             ],
             'cflags_cc': [
-              '-std=c++14'
+              '-std=c++17'
             ],
             'include_dirs': [
               './src/third_party/dlfcn-win32/',
@@ -156,7 +156,7 @@
               'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
               'CLANG_CXX_LIBRARY': 'libc++',
               'MACOS_DEPLOYMENT_TARGET': '10.12',
-              'CLANG_CXX_LANGUAGE_STANDARD': 'c++14'
+              'CLANG_CXX_LANGUAGE_STANDARD': 'c++17'
             }
           }
         ],
