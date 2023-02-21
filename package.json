@@ -13,12 +13,18 @@
     "typescript"
   ],
   "scripts": {
-    "install": "node-gyp rebuild",
+    "build": "node-gyp -j 16 build",
+    "build:dev": "node-gyp -j 16 build --debug",
+    "rebuild": "npm run clean && node-gyp -j 16 rebuild",
+    "rebuild:dev": "npm run clean && node-gyp -j 16 rebuild --debug",
+    "generate-messages": "node scripts/generate_messages.js",
+    "clean": "node-gyp clean && rimraf ./generated",
+    "install": "npm run rebuild",
+    "postinstall": "npm run generate-messages",
     "docs": "cd docs && make",
     "test": "node --expose-gc ./scripts/run_test.js && npm run dtslint",
     "dtslint": "node scripts/generate_tsd.js && dtslint test/types",
     "lint": "eslint --max-warnings=0 --ext js,ts index.js types scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
-    "postinstall": "node scripts/generate_messages.js",
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.hpp && prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark}/**/*.{js,md,ts}\" ./*.{js,md,ts}"
   },
   "bin": {

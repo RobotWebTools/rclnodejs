@@ -1,5 +1,26 @@
 {
-  "Linux": ["test-raw-pub-sub.js", "test-multi-nodes.js", "test-msg-type-py-node.js", "test-msg-type-cpp-node.js", "test-cross-lang.js"],
-  "Darwin": ["test-raw-pub-sub.js", "test-multi-nodes.js", "test-msg-type-py-node.js", "test-msg-type-cpp-node.js", "test-cross-lang.js"],
-  "Windows_NT": ["test-raw-pub-sub.js", "test-multi-nodes.js", "test-msg-type-py-node.js", "test-msg-type-cpp-node.js", "test-cross-lang.js", "test-generate-messages-bin.js"]
+  "Linux": [
+    "test-raw-pub-sub.js",
+    "test-multi-nodes.js",
+    "test-msg-type-py-node.js",
+    "test-msg-type-cpp-node.js",
+    "test-cross-lang.js"
+  ],
+  "Darwin": [
+    "test-raw-pub-sub.js", 
+    "test-multi-nodes.js", 
+    "test-msg-type-py-node.js",
+    "test-msg-type-cpp-node.js", 
+    "test-cross-lang.js", 
+    "test-subscription-content-filter.js"
+  ],
+  "Windows_NT": [
+    "test-raw-pub-sub.js", 
+    "test-multi-nodes.js", 
+    "test-msg-type-py-node.js", 
+    "test-msg-type-cpp-node.js", 
+    "test-cross-lang.js", 
+    "test-generate-messages-bin.js", 
+    "test-subscription-content-filter.js"
+  ]
 }

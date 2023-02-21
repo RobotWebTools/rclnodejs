@@ -652,6 +652,8 @@ NAN_METHOD(CreateSubscription) {
       *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
   std::string topic(
       *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
+  v8::Local<v8::Object> options =
+      info[5]->ToObject(currentContent).ToLocalChecked();
 
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(malloc(sizeof(rcl_subscription_t)));
@@ -659,11 +661,67 @@ NAN_METHOD(CreateSubscription) {
 
   rcl_subscription_options_t subscription_ops =
       rcl_subscription_get_default_options();
-  auto qos_profile = GetQoSProfile(info[5]);
 
+  v8::Local<v8::Value> qos =
+      Nan::Get(options, Nan::New("qos").ToLocalChecked()).ToLocalChecked();
+  auto qos_profile = GetQoSProfile(qos);
   if (qos_profile) {
     subscription_ops.qos = *qos_profile;
   }
+
+#if ROS_VERSION >= 2205  // 2205 => Humble+
+  if (Nan::Has(options, Nan::New("contentFilter").ToLocalChecked())
+          .FromMaybe(false)) {
+    // configure content-filter
+    v8::MaybeLocal<v8::Value> contentFilterVal =
+        Nan::Get(options, Nan::New("contentFilter").ToLocalChecked());
+
+    if (!Nan::Equals(contentFilterVal.ToLocalChecked(), Nan::Undefined())
+             .ToChecked()) {
+      v8::Local<v8::Object> contentFilter = contentFilterVal.ToLocalChecked()
+                                                ->ToObject(currentContent)
+                                                .ToLocalChecked();
+
+      // expression property is required
+      std::string expression(*Nan::Utf8String(
+          Nan::Get(contentFilter, Nan::New("expression").ToLocalChecked())
+              .ToLocalChecked()
+              ->ToString(currentContent)
+              .ToLocalChecked()));
+
+      // parameters property (string[]) is optional
+      int argc = 0;
+      char** argv = nullptr;
+
+      if (Nan::Has(contentFilter, Nan::New("parameters").ToLocalChecked())
+              .FromMaybe(false)) {
+        v8::Local<v8::Array> jsArgv = v8::Local<v8::Array>::Cast(
+            Nan::Get(contentFilter, Nan::New("parameters").ToLocalChecked())
+                .ToLocalChecked());
+        argc = jsArgv->Length();
+        if (argc > 0) {
+          argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
+          for (int i = 0; i < argc; i++) {
+            Nan::MaybeLocal<v8::Value> jsElement = Nan::Get(jsArgv, i);
+            Nan::Utf8String utf8_arg(jsElement.ToLocalChecked());
+            int len = utf8_arg.length() + 1;
+            argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
+            snprintf(argv[i], len, "%s", *utf8_arg);
+          }
+        }
+      }
+
+      rcl_ret_t ret = rcl_subscription_options_set_content_filter_options(
+          expression.c_str(), argc, (const char**)argv, &subscription_ops);
+
+      if (ret != RCL_RET_OK) {
+        Nan::ThrowError(rcl_get_error_string().str);
+        rcl_reset_error();
+      }
+    }
+  }
+
+#endif
 
   const rosidl_message_type_support_t* ts =
       GetMessageTypeSupport(package_name, message_sub_folder, message_name);
@@ -687,6 +745,83 @@ NAN_METHOD(CreateSubscription) {
   } else {
     Nan::ThrowError(GetErrorMessageAndClear().c_str());
   }
+}
+
+NAN_METHOD(IsContentFilteringEnabled) {
+#if ROS_VERSION < 2205  // 2205 => Humble+
+  info.GetReturnValue().Set(Nan::False());
+  return;
+#else
+
+  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
+
+  bool is_valid = rcl_subscription_is_cft_enabled(subscription);
+  info.GetReturnValue().Set(Nan::New(is_valid));
+#endif
+}
+
+NAN_METHOD(SetContentFilter) {
+#if ROS_VERSION < 2205  // 2205 => Humble+
+  info.GetReturnValue().Set(Nan::False());
+  return;
+#else
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
+
+  v8::Local<v8::Object> contentFilter =
+      info[1]->ToObject(currentContent).ToLocalChecked();
+
+  // expression property is required
+  std::string expression(*Nan::Utf8String(
+      Nan::Get(contentFilter, Nan::New("expression").ToLocalChecked())
+          .ToLocalChecked()
+          ->ToString(currentContent)
+          .ToLocalChecked()));
+
+  // parameters property (string[]) is optional
+  int argc = 0;
+  char** argv = nullptr;
+
+  if (Nan::Has(contentFilter, Nan::New("parameters").ToLocalChecked())
+          .FromMaybe(false)) {
+    v8::Local<v8::Array> jsArgv = v8::Local<v8::Array>::Cast(
+        Nan::Get(contentFilter, Nan::New("parameters").ToLocalChecked())
+            .ToLocalChecked());
+    argc = jsArgv->Length();
+    if (argc > 0) {
+      argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
+      for (int i = 0; i < argc; i++) {
+        Nan::MaybeLocal<v8::Value> jsElement = Nan::Get(jsArgv, i);
+        Nan::Utf8String utf8_arg(jsElement.ToLocalChecked());
+        int len = utf8_arg.length() + 1;
+        argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
+        snprintf(argv[i], len, "%s", *utf8_arg);
+      }
+    }
+  }
+
+  // create ctf options
+  rcl_subscription_content_filter_options_t options =
+      rcl_get_zero_initialized_subscription_content_filter_options();
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_subscription_content_filter_options_init(
+          subscription, expression.c_str(), argc, (const char**)argv, &options),
+      rcl_get_error_string().str);
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_subscription_set_content_filter(subscription, &options),
+      rcl_get_error_string().str);
+
+  info.GetReturnValue().Set(Nan::True());
+#endif
 }
 
 NAN_METHOD(CreatePublisher) {
@@ -1782,6 +1917,8 @@ std::vector<BindingMethod> binding_methods = {
     {"getRosTimeOverrideIsEnabled", GetRosTimeOverrideIsEnabled},
     {"rclTake", RclTake},
     {"createSubscription", CreateSubscription},
+    {"isContentFilteringEnabled", IsContentFilteringEnabled},
+    {"setContentFilter", SetContentFilter},
     {"createPublisher", CreatePublisher},
     {"publish", Publish},
     {"getTopic", GetTopic},
