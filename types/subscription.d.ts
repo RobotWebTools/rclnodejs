@@ -22,5 +22,15 @@ declare module 'rclnodejs' {
      * Topic to listen for messages on.
      */
     readonly topic: string;
+
+    /**
+     * Specifies if messages are in raw (binary) format
+     */
+    readonly isRaw: boolean;
+
+    /**
+     * Specifies if RMW-level content-filtering support is available.
+     */
+    readonly isContentFilteringEnabled: boolean;
   }
 }
