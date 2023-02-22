@@ -198,6 +198,9 @@ publisher.publish(Buffer.from('Hello ROS World'));
 // $ExpectType void
 node.destroyPublisher(publisher);
 
+// $ExpectType boolean
+publisher.isDestroyed();
+
 // ---- LifecyclePublisher ----
 // $ExpectType LifecyclePublisher<"std_msgs/msg/String">
 const lifecyclePublisher = lifecycleNode.createLifecyclePublisher(
@@ -217,6 +220,9 @@ subscription = node.createSubscription(TYPE_CLASS, TOPIC, {}, (msg) => {});
 
 // $ExpectType string
 subscription.topic;
+
+// $ExpectType boolean
+subscription.isDestroyed();
 
 // ---- Service ----
 // $ExpectType AddTwoIntsConstructor
@@ -240,6 +246,9 @@ service.serviceName;
 // $ExpectType object
 service.options;
 
+// $ExpectType boolean
+service.isDestroyed();
+
 // ---- Client ----
 // $ExpectType Client<"example_interfaces/srv/AddTwoInts">
 const client = node.createClient(
@@ -255,6 +264,9 @@ client.isServiceServerAvailable();
 
 // $ExpectType Promise<boolean>
 client.waitForService();
+
+// $ExpectType boolean
+client.isDestroyed();
 
 // ---- Timer ----
 // ExpectType rclnodejs.TimerRequestCallback
