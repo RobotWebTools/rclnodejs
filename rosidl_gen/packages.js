@@ -21,6 +21,7 @@ const path = require('path');
 const walk = require('walk');
 const os = require('os');
 const flat = require('array.prototype.flat');
+const pkgFilters = require('../rosidl_gen/filter.js');
 
 const fsp = fs.promises;
 
@@ -140,28 +141,30 @@ async function findAmentPackagesInDirectory(dir) {
     pkgs.map((pkg) => getPackageDefinitionsFiles(pkg, dir))
   );
 
-  // Support flat() methond for nodejs < 11.
+  // Support flat() method for nodejs < 11.
   const rosFiles = Array.prototype.flat ? files.flat() : flat(files);
 
   const pkgMap = new Map();
   return new Promise((resolve, reject) => {
     rosFiles.forEach((filePath) => {
-      if (path.extname(filePath) === '.msg') {
-        // Some .msg files were generated prior to 0.3.2 for .action files,
-        // which has been disabled. So these files should be ignored here.
-        if (path.dirname(dir).split(path.sep).pop() !== 'action') {
-          addInterfaceInfo(
-            grabInterfaceInfo(filePath, true),
-            'messages',
-            pkgMap
-          );
-        }
-      } else if (path.extname(filePath) === '.srv') {
-        addInterfaceInfo(grabInterfaceInfo(filePath, true), 'services', pkgMap);
-      } else if (path.extname(filePath) === '.action') {
-        addInterfaceInfo(grabInterfaceInfo(filePath, true), 'actions', pkgMap);
+      const interfaceInfo = grabInterfaceInfo(filePath, true);
+      const ignore = pkgFilters.matchesAny(interfaceInfo);
+      if (ignore) {
+        console.log('Omitting filtered interface: ', interfaceInfo);
       } else {
-        // we ignore all other files
+        if (path.extname(filePath) === '.msg') {
+          // Some .msg files were generated prior to 0.3.2 for .action files,
+          // which has been disabled. So these files should be ignored here.
+          if (path.dirname(dir).split(path.sep).pop() !== 'action') {
+            addInterfaceInfo(interfaceInfo, 'messages', pkgMap);
+          }
+        } else if (path.extname(filePath) === '.srv') {
+          addInterfaceInfo(interfaceInfo, 'services', pkgMap);
+        } else if (path.extname(filePath) === '.action') {
+          addInterfaceInfo(interfaceInfo, 'actions', pkgMap);
+        } else {
+          // we ignore all other files
+        }
       }
     });
     resolve(pkgMap);
@@ -191,30 +194,27 @@ async function findPackagesInDirectory(dir) {
       let walker = walk.walk(dir, { followLinks: true });
       let pkgMap = new Map();
       walker.on('file', (root, file, next) => {
-        if (path.extname(file.name) === '.msg') {
-          // Some .msg files were generated prior to 0.3.2 for .action files,
-          // which has been disabled. So these files should be ignored here.
-          if (path.dirname(root).split(path.sep).pop() !== 'action') {
-            addInterfaceInfo(
-              grabInterfaceInfo(path.join(root, file.name), amentExecuted),
-              'messages',
-              pkgMap
-            );
-          }
-        } else if (path.extname(file.name) === '.srv') {
-          addInterfaceInfo(
-            grabInterfaceInfo(path.join(root, file.name), amentExecuted),
-            'services',
-            pkgMap
-          );
-        } else if (path.extname(file.name) === '.action') {
-          addInterfaceInfo(
-            grabInterfaceInfo(path.join(root, file.name), amentExecuted),
-            'actions',
-            pkgMap
-          );
+        const interfaceInfo = grabInterfaceInfo(
+          path.join(root, file.name),
+          amentExecuted
+        );
+        const ignore = pkgFilters.matchesAny(interfaceInfo);
+        if (ignore) {
+          console.log('Omitting filtered interface: ', interfaceInfo);
         } else {
-          // we ignore all other files
+          if (path.extname(file.name) === '.msg') {
+            // Some .msg files were generated prior to 0.3.2 for .action files,
+            // which has been disabled. So these files should be ignored here.
+            if (path.dirname(root).split(path.sep).pop() !== 'action') {
+              addInterfaceInfo(interfaceInfo, 'messages', pkgMap);
+            }
+          } else if (path.extname(file.name) === '.srv') {
+            addInterfaceInfo(interfaceInfo, 'services', pkgMap);
+          } else if (path.extname(file.name) === '.action') {
+            addInterfaceInfo(interfaceInfo, 'actions', pkgMap);
+          } else {
+            // we ignore all other files
+          }
         }
         next();
       });
