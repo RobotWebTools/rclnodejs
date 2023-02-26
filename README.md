@@ -1,18 +1,22 @@
-# rclnodejs - ROS2 Client Library for JavaScript [![npm](https://img.shields.io/npm/v/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs)[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=develop)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=develop)[![npm](https://img.shields.io/npm/dm/rclnodejs)](https://www.npmjs.com/package/rclnodejs)[![GitHub license](https://img.shields.io/github/license/RobotWebTools/rclnodejs.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE)[![node](https://img.shields.io/node/v/rclnodejs.svg)](https://nodejs.org/en/download/releases/)[![npm type definitions](https://img.shields.io/npm/types/rclnodejs)](https://www.npmjs.com/package/rclnodejs)[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+# rclnodejs - The ROS 2 Client Library for JavaScript
 
-|     **BRANCH**      |                                                                          **Linux**                                                                           |                                                                              **Windows**                                                                              |
-| :-----------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|       develop       |         ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/RobotWebTools/rclnodejs/rclnodejs%20-%20Linux%20Build%20and%20Test)          |              ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/RobotWebTools/rclnodejs/rclnodejs%20-%20Windows%20Build%20&%20Test)              |
-|  humble-hawksbill   | ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/RobotWebTools/rclnodejs/rclnodejs%20-%20Linux%20Build%20and%20Test/humble-hawksbill) | ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/RobotWebTools/rclnodejs/rclnodejs%20-%20Windows%20Build%20&%20Test/humble-hawksbill) |
-| galactic-geochelone | ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/RobotWebTools/rclnodejs/rclnodejs%20-%20Linux%20Build%20and%20Compatibility%20Test)  |     ![GitHub Workflow Status ](https://img.shields.io/github/workflow/status/RobotWebTools/rclnodejs/rclnodejs%20-%20Windows%20Build%20&%20Compatibility%20Test)      |
-|    foxy-fitzroy     | ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/RobotWebTools/rclnodejs/rclnodejs%20-%20Linux%20Build%20and%20Compatibility%20Test)  |                                         ![GitHub Workflow Status](https://img.shields.io/badge/Build-Not%20Available-yellow)                                          |
+[![npm](https://img.shields.io/npm/v/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs)[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=develop)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=develop)[![npm](https://img.shields.io/npm/dm/rclnodejs)](https://www.npmjs.com/package/rclnodejs)[![GitHub license](https://img.shields.io/github/license/RobotWebTools/rclnodejs.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE)[![node](https://img.shields.io/node/v/rclnodejs.svg)](https://nodejs.org/en/download/releases/)[![npm type definitions](https://img.shields.io/npm/types/rclnodejs)](https://www.npmjs.com/package/rclnodejs)[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+
+| **ROS Distro\*** |                                                                           **Linux**                                                                            |                                                                           **Windows**                                                                            |
+| :--------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|     Rolling      | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/RobotWebTools/rclnodejs/linux-build-and-test-compatibility.yml?branch=develop) | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/RobotWebTools/rclnodejs/windows-build-and-test-compatibility.yml?branch=develop) |
+| Humble-Hawksbill | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/RobotWebTools/rclnodejs/linux-build-and-test-compatibility.yml?branch=develop) | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/RobotWebTools/rclnodejs/windows-build-and-test-compatibility.yml?branch=develop) |
+|   Foxy-Fitzroy   | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/RobotWebTools/rclnodejs/linux-build-and-test-compatibility.yml?branch=develop) | ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/RobotWebTools/rclnodejs/windows-build-and-test-compatibility.yml?branch=develop) |
+
+\* rclnodejs development and maintenance is limited to the ROS 2 LTS releases and the Rolling development branch
 
 **rclnodejs** is a Node.js client library for the Robot Operating System
-([ROS 2](https://index.ros.org/doc/ros2/)). It provides a JavaScript API
-and tooling for ROS 2 programming. TypeScript declarations, i.e., (\*.d.ts),
-are included to support use in TypeScript projects.
+([ROS 2](https://index.ros.org/doc/ros2/)). It provides tooling and comprehensive
+JavaScript and TypeScript APIs for developing ROS 2 solutions capable of
+interoperating with ROS 2 nodes implemented in other languages such as
+C++ and Python.
 
-Here's an example for how to create a ROS 2 node that publishes a string message in a few lines of JavaScript.
+Here's an example for creating a ROS 2 node that publishes a string message in a few lines of JavaScript.
 
 ```JavaScript
 const rclnodejs = require('rclnodejs');
@@ -62,11 +66,6 @@ To install a specific version of rclnodejs use:
 ```bash
 npm i rclnodejs@x.y.z
 ```
-
-|                                                            RCLNODEJS Version                                                            |                                                                                                                                                                     Compatible ROS 2 Release                                                                                                                                                                     |
-| :-------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [0.21.4 (current)](https://www.npmjs.com/package/rclnodejs/v/0.21.4) ([API](http://robotwebtools.org/rclnodejs/docs/0.21.3/index.html)) | [Humble Hawksbill](https://github.com/ros2/ros2/releases/tag/release-humble-20220523)<br>[Galactic Geochelone](https://github.com/ros2/ros2/releases/tag/release-galactic-20210716)<br>[Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201211)<br>[Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
-|                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                                                                                                                [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                                                                                                                 |
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` depdendency section.
 

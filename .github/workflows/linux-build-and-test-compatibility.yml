@@ -9,14 +9,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [10.X, 12.x, 14.X, 16.X, 17.X]
+        node-version: [14.X, 16.X, 18.X, 19.X]
         ros_distribution:
           - humble
           - rolling
 
     steps:
     - name: Setup ROS2
-      uses: ros-tooling/setup-ros@v0.4
+      uses: ros-tooling/setup-ros@v0.6
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
@@ -26,7 +26,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
 
@@ -36,19 +36,18 @@ jobs:
         npm i
         npm test
 
-  build-foxy-and-galactic: # foxy and galactic distros
+  build-foxy: # foxy distros
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
-        node-version: [10.X, 12.x, 14.X, 16.X, 17.X, 18.X, 19.X]
+        node-version: [14.X, 16.11.X, 18.X, 19.X]
         ros_distribution:
           - foxy
-          - galactic
 
     steps:
     - name: Setup ROS2
-      uses: ros-tooling/setup-ros@v0.4
+      uses: ros-tooling/setup-ros@v0.6
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
@@ -58,7 +57,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
 
