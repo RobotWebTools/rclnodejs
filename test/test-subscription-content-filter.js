@@ -40,7 +40,7 @@ describe('subscription content-filtering', function () {
     );
 
     assert.ok(
-      subscription.isContentFilteringEnabled() === isContentFilteringSupported()
+      subscription.hasContentFilter() === isContentFilteringSupported()
     );
 
     node.destroySubscription(subscription);
@@ -49,7 +49,7 @@ describe('subscription content-filtering', function () {
       'String_channel',
       (msg) => {}
     );
-    assert.ok(!subscription.isContentFilteringEnabled());
+    assert.ok(!subscription.hasContentFilter());
 
     done();
   });
@@ -80,7 +80,7 @@ describe('subscription content-filtering', function () {
       }
     );
 
-    assert.ok(subscription.isContentFilteringEnabled());
+    assert.ok(subscription.hasContentFilter());
 
     let publisher1 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
       'String',
@@ -129,7 +129,7 @@ describe('subscription content-filtering', function () {
       }
     );
 
-    assert.ok(subscription.isContentFilteringEnabled());
+    assert.ok(subscription.hasContentFilter());
 
     let publisher1 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
       'String',
@@ -178,7 +178,7 @@ describe('subscription content-filtering', function () {
       }
     );
 
-    assert.ok(subscription.isContentFilteringEnabled());
+    assert.ok(subscription.hasContentFilter());
 
     let publisher1 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
       'Int32',
@@ -234,7 +234,7 @@ describe('subscription content-filtering', function () {
       }
     );
 
-    assert.ok(subscription.isContentFilteringEnabled());
+    assert.ok(subscription.hasContentFilter());
 
     let publisher1 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
       'Int32',
@@ -257,6 +257,68 @@ describe('subscription content-filtering', function () {
       publisher1.kill('SIGINT');
       publisher2.kill('SIGINT');
       assert.ok(!fail && msgCnt5 && !msgCnt0);
+      done();
+    }, 1000);
+
+    rclnodejs.spin(node);
+  });
+
+  it('setContentFilter(undefined)', function (done) {
+    if (!isContentFilteringSupported()) {
+      this.skip();
+    }
+
+    let node = rclnodejs.createNode('int32_subscription');
+    let msgString = 'std_msgs/msg/Int32';
+    let options = rclnodejs.Node.getDefaultOptions();
+    options.contentFilter = {
+      expression: 'data = %0',
+      parameters: [5],
+    };
+
+    let msgCnt0 = 0;
+    let msgCnt5 = 0;
+    let fail = false;
+    let subscription = node.createSubscription(
+      msgString,
+      'Int32_channel',
+      options,
+      (msg) => {
+        switch (msg.data) {
+          case 0:
+            msgCnt0++;
+            break;
+          case 5:
+            msgCnt5++;
+            break;
+          default:
+            fail = true;
+        }
+      }
+    );
+
+    assert.ok(subscription.hasContentFilter());
+
+    let publisher1 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
+      'Int32',
+      '0',
+    ]);
+
+    let publisher2 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
+      'Int32',
+      '5',
+    ]);
+
+    setTimeout(() => {
+      assert.ok(msgCnt5 && !msgCnt0 && !fail);
+      subscription.setContentFilter();
+    }, 500);
+
+    setTimeout(() => {
+      publisher1.kill('SIGINT');
+      publisher2.kill('SIGINT');
+      assert.ok(!subscription.hasContentFilter());
+      assert.ok(!fail && msgCnt5 && msgCnt0);
       done();
     }, 1000);
 
@@ -297,7 +359,7 @@ describe('subscription content-filtering', function () {
       }
     );
 
-    assert.ok(subscription.isContentFilteringEnabled());
+    assert.ok(subscription.hasContentFilter());
 
     let publisher1 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
       'Int32',
@@ -317,7 +379,7 @@ describe('subscription content-filtering', function () {
     setTimeout(() => {
       publisher1.kill('SIGINT');
       publisher2.kill('SIGINT');
-      assert.ok(!subscription.isContentFilteringEnabled());
+      assert.ok(!subscription.hasContentFilter());
       assert.ok(!fail && msgCnt5 && msgCnt0);
       done();
     }, 1000);
@@ -345,7 +407,7 @@ describe('subscription content-filtering', function () {
       (msg) => {}
     );
 
-    assert.ok(subscription.isContentFilteringEnabled());
+    assert.ok(subscription.hasContentFilter());
     assert.ok(subscription.clearContentFilter());
     assert.ok(subscription.clearContentFilter());
     done();
@@ -368,7 +430,7 @@ describe('subscription content-filtering', function () {
       }
     );
 
-    assert.ok(!subscription.isContentFilteringEnabled());
+    assert.ok(!subscription.hasContentFilter());
 
     let publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, [
       'String',
@@ -406,7 +468,7 @@ describe('subscription content-filtering', function () {
       );
     } catch (e) {}
 
-    assert.ok(!subscription || !subscription.isContentFilteringEnabled());
+    assert.ok(!subscription || !subscription.hasContentFilter());
     done();
   });
 });

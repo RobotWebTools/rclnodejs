@@ -241,7 +241,7 @@ subscription.setContentFilter(contentFilter);
 subscription.clearContentFilter();
 
 // $ExpectType boolean
-subscription.isContentFilteringEnabled();
+subscription.hasContentFilter();
 
 // ---- Service ----
 // $ExpectType AddTwoIntsConstructor

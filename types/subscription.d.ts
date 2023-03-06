@@ -31,10 +31,10 @@ declare module 'rclnodejs' {
 
     /**
      * Test if the RMW supports content-filtered topics and that this subscription
-     * has been configured with a wellformed content-filter.
+     * is configured with a well formed content-filter.
      * @returns {boolean} True if content-filtering will be applied; otherwise false.
      */
-    isContentFilteringEnabled(): boolean;
+    hasContentFilter(): boolean;
 
     /**
      * Set a content-filter if the RMW supports content-filtered topics.

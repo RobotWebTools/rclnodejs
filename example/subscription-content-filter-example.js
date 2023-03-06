@@ -59,7 +59,7 @@ async function main() {
         console.log(`Received temperature message-${++count}: 
 ${temperatureMsg.temperature}C`);
         if (count % 5 === 0) {
-          if (subscription.isContentFilteringEnabled()) {
+          if (subscription.hasContentFilter()) {
             console.log('Clearing filter');
             subscription.clearContentFilter();
           } else {
@@ -73,13 +73,13 @@ ${temperatureMsg.temperature}C`);
           }
           console.log(
             'Content-filtering enabled: ',
-            subscription.isContentFilteringEnabled()
+            subscription.hasContentFilter()
           );
         }
       }
     );
 
-    if (!subscription.isContentFilteringEnabled()) {
+    if (!subscription.hasContentFilter()) {
       console.log('Content-filtering is not enabled on subscription.');
     }
   } catch (error) {

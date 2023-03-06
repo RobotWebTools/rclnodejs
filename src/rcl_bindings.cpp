@@ -718,6 +718,13 @@ NAN_METHOD(CreateSubscription) {
         Nan::ThrowError(rcl_get_error_string().str);
         rcl_reset_error();
       }
+
+      if (argc) {
+        for (int i = 0; i < argc; i++) {
+          free(argv[i]);
+        }
+        free(argv);
+      }
     }
   }
 
@@ -747,7 +754,7 @@ NAN_METHOD(CreateSubscription) {
   }
 }
 
-NAN_METHOD(IsContentFilteringEnabled) {
+NAN_METHOD(HasContentFilter) {
 #if ROS_VERSION < 2205  // 2205 => Humble+
   info.GetReturnValue().Set(Nan::False());
   return;
@@ -819,6 +826,13 @@ NAN_METHOD(SetContentFilter) {
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_subscription_set_content_filter(subscription, &options),
       rcl_get_error_string().str);
+
+  if (argc) {
+    for (int i = 0; i < argc; i++) {
+      free(argv[i]);
+    }
+    free(argv);
+  }
 
   info.GetReturnValue().Set(Nan::True());
 #endif
@@ -1917,7 +1931,7 @@ std::vector<BindingMethod> binding_methods = {
     {"getRosTimeOverrideIsEnabled", GetRosTimeOverrideIsEnabled},
     {"rclTake", RclTake},
     {"createSubscription", CreateSubscription},
-    {"isContentFilteringEnabled", IsContentFilteringEnabled},
+    {"hasContentFilter", HasContentFilter},
     {"setContentFilter", SetContentFilter},
     {"createPublisher", CreatePublisher},
     {"publish", Publish},
