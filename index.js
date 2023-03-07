@@ -15,6 +15,7 @@
 'use strict';
 
 const DistroUtils = require('./lib/distro.js');
+const RMWUtils = require('./lib/rmw.js');
 const { Clock, ROSClock } = require('./lib/clock.js');
 const ClockType = require('./lib/clock_type.js');
 const compareVersions = require('compare-versions');
@@ -135,6 +136,9 @@ let rcl = {
 
   /** {@link QoS} class */
   QoS: QoS,
+
+  /** {@link RMWUtils} */
+  RMWUtils: RMWUtils,
 
   /** {@link ROSClock} class */
   ROSClock: ROSClock,
