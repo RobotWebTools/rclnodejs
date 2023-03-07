@@ -7,5 +7,6 @@ declare module 'rclnodejs' {
     readonly qos: QoS;
     readonly typedArrayEnabled: boolean;
     readonly typeClass: TypeClass;
+    isDestroyed(): boolean;
   }
 }
