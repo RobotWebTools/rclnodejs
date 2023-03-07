@@ -110,6 +110,9 @@ node.countPublishers(TOPIC);
 // $ExpectType number
 node.countSubscribers(TOPIC);
 
+// $ExpectType Options<string | QoS>
+rclnodejs.Node.getDefaultOptions();
+
 // ---- LifecycleNode ----
 // $ExpectType LifecycleNode
 const lifecycleNode = rclnodejs.createLifecycleNode(LIFECYCLE_NODE_NAME);
@@ -218,11 +221,32 @@ let subscription = node.createSubscription(TYPE_CLASS, TOPIC, (msg) => {});
 // $ExpectType Subscription
 subscription = node.createSubscription(TYPE_CLASS, TOPIC, {}, (msg) => {});
 
+const contentFilter: rclnodejs.SubscriptionContentFilter = {
+  expression: 'data < %0',
+  parameters: [5],
+};
+
+// $ExpectType Subscription
+subscription = node.createSubscription(
+  TYPE_CLASS,
+  TOPIC,
+  { contentFilter },
+  (msg) => {}
+);
+
 // $ExpectType string
 subscription.topic;
 
 // $ExpectType boolean
 subscription.isDestroyed();
+
+subscription.setContentFilter(contentFilter);
+
+// $ExpectType boolean
+subscription.clearContentFilter();
+
+// $ExpectType boolean
+subscription.hasContentFilter();
 
 // ---- Service ----
 // $ExpectType AddTwoIntsConstructor

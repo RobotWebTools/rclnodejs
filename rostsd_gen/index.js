@@ -31,6 +31,7 @@ declare module "rclnodejs" {
 const path = require('path');
 const fs = require('fs');
 const loader = require('../lib/interface_loader.js');
+const pkgFilters = require('../rosidl_gen/filter.js');
 
 async function generateAll() {
   // load pkg and interface info (msgs and srvs)
@@ -63,7 +64,14 @@ function getPkgInfos(rootDir) {
 
     for (let filename of files) {
       const typeClass = fileName2Typeclass(filename);
-      if (!typeClass.type) continue;
+      if (
+        !typeClass.type ||
+        pkgFilters.matchesAny({
+          pkgName: typeClass.package,
+          interfaceName: typeClass.name,
+        })
+      )
+        continue;
 
       const rosInterface = loader.loadInterface(typeClass);
 

@@ -10,20 +10,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [10.X, 12.X, 14.X, 16.11.X, 17.X, 18.X, 19.X]
+        node-version: [14.21.2, 16.19.0, 18.14.1, 19.X]
         ros_distribution:
-          # - foxy
-          - galactic
+          - foxy
           - humble
           - rolling
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
 
     - name: Setup ROS2
-      uses: ros-tooling/setup-ros@v0.4
+      uses: ros-tooling/setup-ros@v0.6
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
@@ -45,8 +44,11 @@ jobs:
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
         npm i
 
+    # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround 
+    # an error when loading the default fastrtps ddl
     - name: Test rclnodejs
       shell: cmd
       run: |
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
-        npm test
+        cmd /c "if ${{ matrix.ros_distribution }}==foxy (set RMW_IMPLEMENTATION=rmw_cyclonedds_cpp&&npm test)"
+        cmd /c "if NOT ${{ matrix.ros_distribution }}==foxy (npm test)"
