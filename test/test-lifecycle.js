@@ -333,9 +333,6 @@ describe('LifecycleNode test suite', function () {
 
     let rosDistro = process.env.ROS_DISTRO;
     let firstChar = rosDistro.charAt(0);
-    console.log('1st char: ', firstChar);
-    console.log('> ', firstChar > 'g');
-
     let testNode = new rclnodejs.lifecycle.LifecycleNode(
       'TEST_NODE',
       undefined,

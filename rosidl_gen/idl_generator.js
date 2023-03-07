@@ -30,6 +30,13 @@ function removeEmptyLines(str) {
   return str.replace(/^\s*\n/gm, '');
 }
 
+/**
+ * Output generated code to disk. Do not overwrite
+ * an existing file. If file already exists do nothing.
+ * @param {string} dir
+ * @param {string} fileName
+ * @param {string} code
+ */
 async function writeGeneratedCode(dir, fileName, code) {
   await fse.mkdirs(dir);
   await fse.writeFile(path.join(dir, fileName), code);
@@ -231,6 +238,13 @@ async function generateActionJSStruct(actionInfo, dir) {
 }
 
 async function generateJSStructFromIDL(pkg, dir) {
+  //   for (let messageInfo of pkg.messages)
+  //     await generateMessageJSStruct(messageInfo, dir);
+  //   for (let serviceInfo of pkg.services)
+  //     await generateServiceJSStruct(serviceInfo, dir);
+  //   for (let actionInfo of pkg.actions)
+  //     await generateActionJSStruct(actionInfo, dir);
+
   await Promise.all([
     ...pkg.messages.map((messageInfo) =>
       generateMessageJSStruct(messageInfo, dir)

@@ -56,12 +56,12 @@ describe('rclnodejs generate-messages binary-script tests', function () {
     fs.mkdirSync(this.tmpPkg);
 
     childProcess.spawnSync('npm', ['init', '-y'], {
-      stdio: 'inherit',
+      // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
     });
     childProcess.spawnSync('npm', ['pack', this.cwd], {
-      stdio: 'inherit',
+      // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
     });
@@ -80,7 +80,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
     }
     let tgzPath = path.join(this.tmpPkg, tgz);
     childProcess.spawnSync('npm', ['install', tgzPath], {
-      stdio: 'inherit',
+      // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
     });
@@ -90,7 +90,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
       if (getNodeVersionInfo()[0] === 10) {
         rimraf.sync(generatedFolderPath);
       } else {
-        fs.rmdirSync(generatedFolderPath, { recursive: true });
+        fs.rmSync(generatedFolderPath, { recursive: true });
       }
     }
   });
@@ -100,7 +100,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
     if (getNodeVersionInfo()[0] === 10) {
       rimraf.sync(this.tmpPkg);
     } else {
-      fs.rmdirSync(this.tmpPkg, { recursive: true });
+      fs.rmSync(this.tmpPkg, { recursive: true });
     }
   });
 
@@ -113,7 +113,10 @@ describe('rclnodejs generate-messages binary-script tests', function () {
 
   it('test generate-ros-messages script operation', function (done) {
     let script = createScriptFolderPath(this.tmpPkg);
-    childProcess.spawnSync(script, [], { stdio: 'inherit', shell: true });
+    childProcess.spawnSync(script, [], {
+      // stdio: 'inherit',
+      shell: true,
+    });
 
     let generatedFolderPath = createGeneratedFolderPath(this.tmpPkg);
     assert.ok(
@@ -129,7 +132,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
 
   it('test npx generate-ros-messages script operation', function (done) {
     childProcess.spawnSync('npx', [SCRIPT_NAME], {
-      stdio: 'inherit',
+      // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
     });

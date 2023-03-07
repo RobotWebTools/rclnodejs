@@ -20,9 +20,20 @@ const packages = require('./packages.js');
 const path = require('path');
 
 const generatedRoot = path.join(__dirname, '../generated/');
-const installedPackagePaths = process.env.AMENT_PREFIX_PATH.split(
-  path.delimiter
-);
+
+function getInstalledPackagePaths() {
+  return process.env.AMENT_PREFIX_PATH.split(path.delimiter);
+}
+
+// async function generateInPath(path) {
+//   const pkgs = await packages.findPackagesInDirectory(path);
+//   const pkgsInfo = Array.from(pkgs.values());
+
+//   // overlay support requires msg generation to synchronous, do not Promise.all()
+//   for (let pkgInfo of pkgsInfo) {
+//     await generateJSStructFromIDL(pkgInfo, generatedRoot);
+//   }
+// }
 
 async function generateInPath(path) {
   const pkgs = await packages.findPackagesInDirectory(path);
@@ -40,14 +51,23 @@ async function generateAll(forcedGenerating) {
   // all the JavaScript files will be created.
   const exist = await fse.exists(generatedRoot);
   if (forcedGenerating || !exist) {
+    if (exist) {
+      // recursively clear all previously generated struct files
+      await fse.emptyDir(generatedRoot);
+    }
+
     await fse.copy(
       path.join(__dirname, 'generator.json'),
       path.join(generatedRoot, 'generator.json')
     );
 
-    await Promise.all(
-      installedPackagePaths.map((path) => generateInPath(path))
-    );
+    // Process in AMENT_PREFIX_PATH in reverse order to
+    // such that interfaces defined earlier on the AMENX_PREFIX_PATH
+    // have higher priority over earlier versions and will override
+    // them - occurences of this are expected to be rare.
+    for (let path of getInstalledPackagePaths().reverse()) {
+      await generateInPath(path);
+    }
   }
 }
 
