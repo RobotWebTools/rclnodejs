@@ -14,6 +14,30 @@ declare module 'rclnodejs' {
       };
 
   /**
+   * A filter description similar to a SQL WHERE clause that limits
+   * the data wanted by a Subscription.
+   *
+   * The `expression` grammar is defined in the DDS 1.4 specification, Annex B.
+   * https://www.omg.org/spec/DDS/1.4/PDF
+   */
+  interface SubscriptionContentFilter {
+    /**
+     * Specifies the criteria to select the data samples of
+     * interest. It is similar to the WHERE part of an SQL clause.
+     * Must be a valid query clause.
+     */
+    readonly expression: string;
+
+    /**
+     * The values for the ‘parameters’ (i.e., "%n" tokens) in
+     * the filter_expression string. There must be a 1-1 match
+     * between values and expression parameters. The maximum
+     * number of parameters is 100.
+     */
+    readonly parameters?: Array<any>;
+  }
+
+  /**
    * Configuration options when creating new Publishers, Subscribers,
    * Clients and Services.
    *
@@ -37,16 +61,23 @@ declare module 'rclnodejs' {
      * ROS Middleware "quality of service" setting, default: QoS.profileDefault.
      */
     qos?: T;
+
+    /**
+     * An optional filter descriptions similar to a SQL WHERE clause used by a Subscription to
+     * inspect and limit messages that it accepts.
+     */
+    contentFilter?: SubscriptionContentFilter;
   }
 
   /**
-   * Default options when creating a Node, Publisher, Subscription, Client or Service
+   * Default options when creating a Publisher, Subscription, Client or Service
    *
    * ```ts
    * {
    *   enableTypedArray: true,
    *   qos: QoS.profileDefault,
-   *   isRaw: false
+   *   isRaw: false,
+   *   contentFilter: undefined
    * }
    * ```
    */
@@ -132,6 +163,21 @@ declare module 'rclnodejs' {
       context?: Context,
       options?: NodeOptions
     );
+
+    /**
+     * Create an Options instance initialized with default values.
+     * @returns {Options} - The new initialized instance.
+     * @example
+     * ```
+     * {
+     *   enableTypedArray: true,
+     *   isRaw: false,
+     *   qos: QoS.profileDefault,
+     *   contentFilter: undefined,
+     * }
+     * ```
+     */
+    static getDefaultOptions(): Options;
 
     /**
      * Get the name of the node.
@@ -271,6 +317,8 @@ declare module 'rclnodejs' {
      * @param options - Configuration options, see DEFAULT_OPTIONS
      * @param callback - Called when a new message is received. The serialized message will be null-terminated.
      * @returns New instance of Subscription.
+     * @throws Error - May throw an RMW error if options.content-filter is malformed.
+     * @see {@link https://www.omg.org/spec/DDS/1.4/PDF|Content-filter details at DDS 1.4 specification, Annex B}
      */
     createSubscription<T extends TypeClass<MessageTypeClassName>>(
       typeClass: T,
