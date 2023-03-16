@@ -847,7 +847,6 @@ NAN_METHOD(ClearContentFilter) {
   info.GetReturnValue().Set(Nan::False());
   return;
 #else
-  // v8::Local<v8::Context> currentContext = Nan::GetCurrentContext();
   RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_subscription_t* subscription =
@@ -866,9 +865,6 @@ NAN_METHOD(ClearContentFilter) {
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_subscription_set_content_filter(subscription, &options),
       rcl_get_error_string().str);
-
-  //  rcl_ret_t ret = rcl_subscription_set_content_filter(subscription,
-  //  &options);
 
   info.GetReturnValue().Set(Nan::True());
 #endif

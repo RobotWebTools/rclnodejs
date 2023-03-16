@@ -25,16 +25,6 @@ function getInstalledPackagePaths() {
   return process.env.AMENT_PREFIX_PATH.split(path.delimiter);
 }
 
-// async function generateInPath(path) {
-//   const pkgs = await packages.findPackagesInDirectory(path);
-//   const pkgsInfo = Array.from(pkgs.values());
-
-//   // overlay support requires msg generation to synchronous, do not Promise.all()
-//   for (let pkgInfo of pkgsInfo) {
-//     await generateJSStructFromIDL(pkgInfo, generatedRoot);
-//   }
-// }
-
 async function generateInPath(path) {
   const pkgs = await packages.findPackagesInDirectory(path);
 
