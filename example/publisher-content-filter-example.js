@@ -45,7 +45,7 @@ async function main() {
     console.log(
       `Publish temerature message-${++count}: ${temperature} degrees`
     );
-  }, 750);
+  }, 100);
 
   node.spin();
 }

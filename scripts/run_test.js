@@ -20,12 +20,6 @@ const os = require('os');
 const path = require('path');
 
 let rootDir = path.dirname(__dirname);
-let actionPath = path.join(rootDir, 'test', 'ros1_actions');
-process.env.AMENT_PREFIX_PATH =
-  process.env.AMENT_PREFIX_PATH + path.delimiter + actionPath;
-let msgPath = path.join(rootDir, 'test', 'rclnodejs_test_msgs');
-process.env.AMENT_PREFIX_PATH =
-  process.env.AMENT_PREFIX_PATH + path.delimiter + msgPath;
 
 fs.remove(path.join(path.dirname(__dirname), 'generated'), (err) => {
   if (!err) {

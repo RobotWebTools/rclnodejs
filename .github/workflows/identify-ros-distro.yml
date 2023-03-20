@@ -26,6 +26,7 @@ jobs:
         id: identify
         run: |
           if ${ROLLING_VAR} == true; then
+            # echo "::set-output name=distro::rolling"
             echo "::set-output name=distro::rolling"
             echo "::set-output name=linuxos::ubuntu-22.04"
           elif ${HUMBLE_VAR} == true; then
