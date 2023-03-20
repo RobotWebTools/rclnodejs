@@ -62,7 +62,7 @@ ${temperatureMsg.temperature}C`);
           if (subscription.hasContentFilter()) {
             console.log('Clearing filter');
             subscription.clearContentFilter();
-          } else {
+          } else if (param < 100) {
             param += 10;
             console.log('Update topic content-filter, temperature > ', param);
             const contentFilter = {

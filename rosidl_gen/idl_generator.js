@@ -30,6 +30,13 @@ function removeEmptyLines(str) {
   return str.replace(/^\s*\n/gm, '');
 }
 
+/**
+ * Output generated code to disk. Do not overwrite
+ * an existing file. If file already exists do nothing.
+ * @param {string} dir
+ * @param {string} fileName
+ * @param {string} code
+ */
 async function writeGeneratedCode(dir, fileName, code) {
   await fse.mkdirs(dir);
   await fse.writeFile(path.join(dir, fileName), code);

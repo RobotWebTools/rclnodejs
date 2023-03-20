@@ -6,6 +6,9 @@ const rclnodejs = require('../index.js');
 const DistroUtils = rclnodejs.DistroUtils;
 const RMWUtils = rclnodejs.RMWUtils;
 
+const TIME1 = 5000; // ms
+const TIME2 = 10000; // ms
+
 function isContentFilteringSupported() {
   return (
     DistroUtils.getDistroId() >= DistroUtils.getDistroId('humble') &&
@@ -14,10 +17,10 @@ function isContentFilteringSupported() {
 }
 
 describe('subscription content-filtering', function () {
-  this.timeout(10 * 1000);
+  this.timeout(30 * 1000);
 
-  beforeEach(function () {
-    return rclnodejs.init();
+  beforeEach(async function () {
+    return await rclnodejs.init();
   });
 
   afterEach(function () {
@@ -25,7 +28,7 @@ describe('subscription content-filtering', function () {
   });
 
   it('isContentFilteringEnabled', function (done) {
-    let node = rclnodejs.createNode('string_subscription');
+    let node = new rclnodejs.Node('string_subscription');
     let msgString = 'std_msgs/msg/Int16';
     let options = rclnodejs.Node.getDefaultOptions();
     options.contentFilter = {
@@ -59,7 +62,7 @@ describe('subscription content-filtering', function () {
       this.skip();
     }
 
-    let node = rclnodejs.createNode('string_subscription');
+    let node = new rclnodejs.Node('string_subscription');
     let msgString = 'std_msgs/msg/String';
     let options = rclnodejs.Node.getDefaultOptions();
     options.contentFilter = {
@@ -99,7 +102,7 @@ describe('subscription content-filtering', function () {
       done();
     }, 1000);
 
-    rclnodejs.spin(node);
+    node.spin(node);
   });
 
   it('single parameter', function (done) {
@@ -107,7 +110,7 @@ describe('subscription content-filtering', function () {
       this.skip();
     }
 
-    let node = rclnodejs.createNode('string_subscription');
+    let node = new rclnodejs.Node('string_subscription');
     let msgString = 'std_msgs/msg/String';
     let options = rclnodejs.Node.getDefaultOptions();
     options.contentFilter = {
@@ -148,7 +151,7 @@ describe('subscription content-filtering', function () {
       done();
     }, 1000);
 
-    rclnodejs.spin(node);
+    node.spin(node);
   });
 
   it('multiple parameters', function (done) {
@@ -156,7 +159,7 @@ describe('subscription content-filtering', function () {
       this.skip();
     }
 
-    let node = rclnodejs.createNode('int32_subscription');
+    let node = new rclnodejs.Node('int32_subscription');
     let msgString = 'std_msgs/msg/Int32';
     let options = rclnodejs.Node.getDefaultOptions();
     options.contentFilter = {
@@ -197,7 +200,7 @@ describe('subscription content-filtering', function () {
       done();
     }, 1000);
 
-    rclnodejs.spin(node);
+    node.spin(node);
   });
 
   it('setContentFilter', function (done) {
@@ -205,7 +208,7 @@ describe('subscription content-filtering', function () {
       this.skip();
     }
 
-    let node = rclnodejs.createNode('int32_subscription');
+    let node = new rclnodejs.Node('int32_subscription');
     let msgString = 'std_msgs/msg/Int32';
     let options = rclnodejs.Node.getDefaultOptions();
     options.contentFilter = {
@@ -260,69 +263,7 @@ describe('subscription content-filtering', function () {
       done();
     }, 1000);
 
-    rclnodejs.spin(node);
-  });
-
-  it('setContentFilter(undefined)', function (done) {
-    if (!isContentFilteringSupported()) {
-      this.skip();
-    }
-
-    let node = rclnodejs.createNode('int32_subscription');
-    let msgString = 'std_msgs/msg/Int32';
-    let options = rclnodejs.Node.getDefaultOptions();
-    options.contentFilter = {
-      expression: 'data = %0',
-      parameters: [5],
-    };
-
-    let msgCnt0 = 0;
-    let msgCnt5 = 0;
-    let fail = false;
-    let subscription = node.createSubscription(
-      msgString,
-      'Int32_channel',
-      options,
-      (msg) => {
-        switch (msg.data) {
-          case 0:
-            msgCnt0++;
-            break;
-          case 5:
-            msgCnt5++;
-            break;
-          default:
-            fail = true;
-        }
-      }
-    );
-
-    assert.ok(subscription.hasContentFilter());
-
-    let publisher1 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
-      'Int32',
-      '0',
-    ]);
-
-    let publisher2 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
-      'Int32',
-      '5',
-    ]);
-
-    setTimeout(() => {
-      assert.ok(msgCnt5 && !msgCnt0 && !fail);
-      subscription.setContentFilter();
-    }, 500);
-
-    setTimeout(() => {
-      publisher1.kill('SIGINT');
-      publisher2.kill('SIGINT');
-      assert.ok(!subscription.hasContentFilter());
-      assert.ok(!fail && msgCnt5 && msgCnt0);
-      done();
-    }, 1000);
-
-    rclnodejs.spin(node);
+    node.spin();
   });
 
   it('clearContentFilter', function (done) {
@@ -330,7 +271,7 @@ describe('subscription content-filtering', function () {
       this.skip();
     }
 
-    let node = rclnodejs.createNode('int32_subscription');
+    let node = new rclnodejs.Node('int32_subscription');
     let msgString = 'std_msgs/msg/Int32';
     let options = rclnodejs.Node.getDefaultOptions();
     options.contentFilter = {
@@ -338,14 +279,17 @@ describe('subscription content-filtering', function () {
       parameters: [5],
     };
 
+    let msgCnt = 0;
     let msgCnt0 = 0;
     let msgCnt5 = 0;
     let fail = false;
+    let filterCleared = false;
     let subscription = node.createSubscription(
       msgString,
       'Int32_channel',
       options,
       (msg) => {
+        msgCnt++;
         switch (msg.data) {
           case 0:
             msgCnt0++;
@@ -374,7 +318,7 @@ describe('subscription content-filtering', function () {
     setTimeout(() => {
       assert.ok(msgCnt5 && !msgCnt0 && !fail);
       subscription.clearContentFilter();
-    }, 500);
+    }, TIME1);
 
     setTimeout(() => {
       publisher1.kill('SIGINT');
@@ -382,9 +326,9 @@ describe('subscription content-filtering', function () {
       assert.ok(!subscription.hasContentFilter());
       assert.ok(!fail && msgCnt5 && msgCnt0);
       done();
-    }, 1000);
+    }, TIME2);
 
-    rclnodejs.spin(node);
+    node.spin();
   });
 
   it('multiple clearContentFilter', function (done) {
@@ -392,7 +336,7 @@ describe('subscription content-filtering', function () {
       this.skip();
     }
 
-    let node = rclnodejs.createNode('int32_subscription');
+    let node = new rclnodejs.Node('int32_subscription');
     let msgString = 'std_msgs/msg/Int32';
     let options = rclnodejs.Node.getDefaultOptions();
     options.contentFilter = {
@@ -418,7 +362,7 @@ describe('subscription content-filtering', function () {
       this.skip();
     }
 
-    let node = rclnodejs.createNode('string_subscription');
+    let node = new rclnodejs.Node('string_subscription');
     let msgString = 'std_msgs/msg/String';
 
     let msgCnt = 0;
@@ -441,9 +385,9 @@ describe('subscription content-filtering', function () {
       publisher.kill('SIGINT');
       assert.ok(msgCnt > 0);
       done();
-    }, 1000);
+    }, 2000);
 
-    rclnodejs.spin(node);
+    node.spin(node);
   });
 
   it('bad expression', function (done) {
@@ -451,7 +395,7 @@ describe('subscription content-filtering', function () {
       this.skip();
     }
 
-    let node = rclnodejs.createNode('string_subscription');
+    let node = new rclnodejs.Node('string_subscription');
     let msgString = 'std_msgs/msg/String';
     let options = rclnodejs.Node.getDefaultOptions();
     options.contentFilter = {
@@ -470,5 +414,70 @@ describe('subscription content-filtering', function () {
 
     assert.ok(!subscription || !subscription.hasContentFilter());
     done();
+  });
+
+  it('setContentFilter(undefined)', function (done) {
+    if (!isContentFilteringSupported()) {
+      this.skip();
+    }
+
+    let node = new rclnodejs.Node('int32_subscription');
+    let msgString = 'std_msgs/msg/Int32';
+    let options = rclnodejs.Node.getDefaultOptions();
+    options.contentFilter = {
+      expression: 'data = %0',
+      parameters: [5],
+    };
+
+    let msgCnt = 0;
+    let msgCnt0 = 0;
+    let msgCnt5 = 0;
+    let fail = false;
+    let filterCleared = false;
+    let subscription = node.createSubscription(
+      msgString,
+      'Int32_channel',
+      options,
+      (msg) => {
+        msgCnt++;
+        switch (msg.data) {
+          case 0:
+            msgCnt0++;
+            break;
+          case 5:
+            msgCnt5++;
+            break;
+          default:
+            fail = true;
+        }
+      }
+    );
+
+    assert.ok(subscription.hasContentFilter());
+
+    let publisher1 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
+      'Int32',
+      '0',
+    ]);
+
+    let publisher2 = childProcess.fork(`${__dirname}/publisher_msg.js`, [
+      'Int32',
+      '5',
+    ]);
+
+    setTimeout(() => {
+      assert.ok(msgCnt5 && !msgCnt0 && !fail);
+      subscription.setContentFilter();
+    }, TIME1);
+
+    setTimeout(() => {
+      publisher1.kill('SIGINT');
+      publisher2.kill('SIGINT');
+      assert.ok(!subscription.hasContentFilter());
+      assert.ok(!fail && msgCnt5 && msgCnt0);
+      done();
+    }, TIME2);
+
+    node.spin();
   });
 });

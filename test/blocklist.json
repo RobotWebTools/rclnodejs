@@ -20,7 +20,7 @@
     "test-msg-type-py-node.js", 
     "test-msg-type-cpp-node.js", 
     "test-cross-lang.js", 
-    "test-generate-messages-bin.js", 
+    "test-message-generation-bin.js", 
     "test-subscription-content-filter.js"
   ]
 }

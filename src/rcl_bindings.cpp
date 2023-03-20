@@ -36,6 +36,7 @@
 #include <rosidl_generator_c/string_functions.h>
 #endif
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -775,21 +776,21 @@ NAN_METHOD(SetContentFilter) {
   info.GetReturnValue().Set(Nan::False());
   return;
 #else
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  v8::Local<v8::Context> currentContext = Nan::GetCurrentContext();
   RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
 
   v8::Local<v8::Object> contentFilter =
-      info[1]->ToObject(currentContent).ToLocalChecked();
+      info[1]->ToObject(currentContext).ToLocalChecked();
 
-  // expression property is required
-  std::string expression(*Nan::Utf8String(
-      Nan::Get(contentFilter, Nan::New("expression").ToLocalChecked())
-          .ToLocalChecked()
-          ->ToString(currentContent)
-          .ToLocalChecked()));
+  Nan::MaybeLocal<v8::Value> jsExpression =
+      Nan::Get(contentFilter, Nan::New("expression").ToLocalChecked());
+  Nan::Utf8String utf8_arg(jsExpression.ToLocalChecked());
+  int len = utf8_arg.length() + 1;
+  char* expression = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
+  snprintf(expression, len, "%s", *utf8_arg);
 
   // parameters property (string[]) is optional
   int argc = 0;
@@ -817,22 +818,53 @@ NAN_METHOD(SetContentFilter) {
   rcl_subscription_content_filter_options_t options =
       rcl_get_zero_initialized_subscription_content_filter_options();
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_subscription_content_filter_options_init(
-          subscription, expression.c_str(), argc, (const char**)argv, &options),
-      rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_subscription_content_filter_options_set(
+                               subscription,
+                               expression,  // expression.c_str(),
+                               argc, (const char**)argv, &options),
+                           rcl_get_error_string().str);
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_subscription_set_content_filter(subscription, &options),
       rcl_get_error_string().str);
 
   if (argc) {
+    free(expression);
+
     for (int i = 0; i < argc; i++) {
       free(argv[i]);
     }
     free(argv);
   }
+
+  info.GetReturnValue().Set(Nan::True());
+#endif
+}
+
+NAN_METHOD(ClearContentFilter) {
+#if ROS_VERSION < 2205  // 2205 => Humble+
+  info.GetReturnValue().Set(Nan::False());
+  return;
+#else
+  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
+
+  // create ctf options
+  rcl_subscription_content_filter_options_t options =
+      rcl_get_zero_initialized_subscription_content_filter_options();
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_subscription_content_filter_options_init(
+          subscription, "", 0, (const char**)nullptr, &options),
+      rcl_get_error_string().str);
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_subscription_set_content_filter(subscription, &options),
+      rcl_get_error_string().str);
 
   info.GetReturnValue().Set(Nan::True());
 #endif
@@ -1934,6 +1966,7 @@ std::vector<BindingMethod> binding_methods = {
     {"createSubscription", CreateSubscription},
     {"hasContentFilter", HasContentFilter},
     {"setContentFilter", SetContentFilter},
+    {"clearContentFilter", ClearContentFilter},
     {"createPublisher", CreatePublisher},
     {"publish", Publish},
     {"getTopic", GetTopic},
