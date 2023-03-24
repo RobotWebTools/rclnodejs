@@ -33,7 +33,7 @@ rclnodejs.init().then(() => {
 - [Installation](#installation)
 - [rclnodejs-cli](#rclnodejs-cli)
 - [API Documentation](#api-documentation)
-- [Using TypeScript](#using-typescript)
+- [Using TypeScript](#using-rclnodejs-with-typescript)
 - [Examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
 - [Efficient Usage Tips](./docs/EFFICIENCY.md)
 - [FAQ and Known Issues](./docs/FAQ.md)
@@ -71,7 +71,7 @@ npm i rclnodejs@x.y.z
 
 ## rclnodejs-cli
 
-[rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs/) is a companion project we recently launched to provide a commandline interface to a set of developer tools for working with this `rclnodejs`. You may find `rclnodejs-cli` particularly useful if you plan to create ROS 2 node(s) and launch files for working with multiple node orchestrations.
+[rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) is a companion project we recently launched to provide a commandline interface to a set of developer tools for working with this `rclnodejs`. You may find `rclnodejs-cli` particularly useful if you plan to create ROS 2 node(s) and launch files for working with multiple node orchestrations.
 
 ```
            _                 _       _
