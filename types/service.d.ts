@@ -76,5 +76,17 @@ declare module 'rclnodejs' {
      * Name of the service.
      */
     readonly serviceName: string;
+
+    /**
+     * Configure introspection.
+     * @param clock - Clock to use for service event timestamps
+     * @param QoSProfile - QOS profile for the service event publisher
+     * @param introspectionState - The state to set introspection to
+     */
+    configureIntrospection(
+      clock: Clock,
+      serviceEventPubQOS: QoS,
+      introspectionState: ServiceIntrospectionStates
+    ): void;
   }
 }

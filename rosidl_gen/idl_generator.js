@@ -19,6 +19,7 @@ const fse = require('fs-extra');
 const path = require('path');
 const parser = require('../rosidl_parser/rosidl_parser.js');
 const actionMsgs = require('./action_msgs.js');
+const DistroUtils = require('../lib/distro.js');
 
 dot.templateSettings.strip = false;
 dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
@@ -42,7 +43,7 @@ async function writeGeneratedCode(dir, fileName, code) {
   await fse.writeFile(path.join(dir, fileName), code);
 }
 
-function generateServiceJSStruct(serviceInfo, dir) {
+async function generateServiceJSStruct(serviceInfo, dir) {
   dir = path.join(dir, `${serviceInfo.pkgName}`);
   const fileName =
     serviceInfo.pkgName +
@@ -51,10 +52,29 @@ function generateServiceJSStruct(serviceInfo, dir) {
     '__' +
     serviceInfo.interfaceName +
     '.js';
-  const generatedCode = removeEmptyLines(
+  const generatedSrvCode = removeEmptyLines(
     dots.service({ serviceInfo: serviceInfo })
   );
-  return writeGeneratedCode(dir, fileName, generatedCode);
+  let result = writeGeneratedCode(dir, fileName, generatedSrvCode);
+
+  if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+    return result;
+  }
+
+  // Otherwise, for post-Humble ROS 2 releases generate service_event msgs
+  await result;
+  const eventFileName =
+    serviceInfo.pkgName +
+    '__' +
+    serviceInfo.subFolder +
+    '__' +
+    serviceInfo.interfaceName +
+    '_Event.js';
+  const generatedSrvEventCode = removeEmptyLines(
+    dots.service_event({ serviceInfo: serviceInfo })
+  );
+
+  return writeGeneratedCode(dir, eventFileName, generatedSrvEventCode);
 }
 
 async function generateMessageJSStruct(messageInfo, dir) {

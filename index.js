@@ -52,6 +52,7 @@ const {
   getActionServerNamesAndTypesByNode,
   getActionNamesAndTypes,
 } = require('./lib/action/graph.js');
+const ServiceIntrospectionStates = require('./lib/service_introspection.js');
 
 /**
  * Get the version of the generator that was used for the currently present interfaces.
@@ -142,6 +143,9 @@ let rcl = {
 
   /** {@link ROSClock} class */
   ROSClock: ROSClock,
+
+  /** {@link ServiceIntrospectionStates} */
+  ServiceIntrospectionStates: ServiceIntrospectionStates,
 
   /** {@link Time} class */
   Time: Time,
