@@ -254,14 +254,14 @@ describe('subscription content-filtering', function () {
         expression: 'data = 5',
       };
       subscription.setContentFilter(contentFilter5);
-    }, 500);
+    }, TIME1);
 
     setTimeout(() => {
       publisher1.kill('SIGINT');
       publisher2.kill('SIGINT');
       assert.ok(!fail && msgCnt5 && !msgCnt0);
       done();
-    }, 1000);
+    }, TIME2);
 
     node.spin();
   });
@@ -385,7 +385,7 @@ describe('subscription content-filtering', function () {
       publisher.kill('SIGINT');
       assert.ok(msgCnt > 0);
       done();
-    }, 2000);
+    }, TIME1);
 
     node.spin(node);
   });
