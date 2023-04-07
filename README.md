@@ -67,7 +67,7 @@ To install a specific version of rclnodejs use:
 npm i rclnodejs@x.y.z
 ```
 
-- **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` depdendency section.
+- **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
 
 ## rclnodejs-cli
 

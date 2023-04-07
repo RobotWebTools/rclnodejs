@@ -23,7 +23,7 @@ Here's the process to follow once a bug or feature request has been assigned to 
 4. Run the test suite and ensure all tests pass.
 5. Commit your changes to your cloned repo.
 
-#### Submiting your Code
+#### Submitting your Code
 1. Submit your changes for review by opening a Pull Request (PR) on the rclnodejs project. Fix any CI failures resulting from your code changes.
 2. The PR will be reviewed by the project team members. Please keep the PR updated to reflect reviewer comments and requests. You may also be requested to rebase the PR and fix any conflicts. When the PR has gained "Looks Good To Me (LGTM)" status, the project maintainers will merge the PR.
 
