@@ -26,7 +26,7 @@ The table lists the directories for each kind of the ROS 2.0 clients.
 | :-------: | ------------------------------------------------------ |
 |   topic   | Benchmarks for `publisher` and `subscription` features |
 |  service  | Benchmarks for `client` and `service` features         |
-|  startup  | Benchamrks for measuring the startup time consumption  |
+|  startup  | Benchmarks for measuring the startup time consumption  |
 
 ## Run tests
 
@@ -34,14 +34,14 @@ The table lists the directories for each kind of the ROS 2.0 clients.
 
 - Compile the source files, `cd benchmark/rclcpp/` and run `colcon build`
 - The executable files locate at `build/rclcpp_benchmark/`
-- `your_benchamrk -h` for help.
+- `your_benchmark -h` for help.
 
   2.Benchmark for [rclpy](https://github.com/ros2/rclpy)
 
 - Enter the Python scripts folder `benchmark/rclpy/`
-- `python3 your_benchamrk -h` for help.
+- `python3 your_benchmark -h` for help.
 
   3.Benchmark for rclnodejs
 
 - Enter the Node.js scripts folder `benchmark/rclnodejs/`
-- `node your_benchamrk -h` for help.
+- `node your_benchmark -h` for help.

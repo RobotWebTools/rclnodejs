@@ -2,7 +2,7 @@
 
 A node.js script that creates and updates the TypeScript interfaces.d.ts declaration file with type declarations for the generated interfaces (messages and services).
 
-Run this script everytime new interfaces are generated, see script/generate_messages.js
+Run this script every time new interfaces are generated, see script/generate_messages.js
 
 # run
 

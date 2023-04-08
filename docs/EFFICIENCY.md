@@ -1,6 +1,6 @@
 # Tips for efficent use of rclnodejs
 
-While our benchmarks place rclnodejs performance at or above that of [rclpy](https://github.com/ros2/rclpy) we recommend appyling efficient coding and configuration practices where applicable.
+While our benchmarks place rclnodejs performance at or above that of [rclpy](https://github.com/ros2/rclpy) we recommend applying efficient coding and configuration practices where applicable.
 
 ## Tip-1: Disable Parameter Services
 

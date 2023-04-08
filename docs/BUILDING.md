@@ -8,7 +8,7 @@ ROS 2 is a cross-platform system, which covers Linux, macOS and Windows, and the
 
 2.Build ROS 2 from scratch.
 
-Alternatively, you can build ROS 2 from scratch. Please select the platform you want to work on, then reference the instructions of [Linux](https://index.ros.org/doc/ros2/Installation/Linux-Development-Setup/)/[macOS](https://index.ros.org/doc/ros2/Installation/OSX-Development-Setup/)/[Windows](https://index.ros.org/doc/ros2/Installation/Windows-Development-Setup/) to build ROS 2 (please build wiht flag `--merge-install`).
+Alternatively, you can build ROS 2 from scratch. Please select the platform you want to work on, then reference the instructions of [Linux](https://index.ros.org/doc/ros2/Installation/Linux-Development-Setup/)/[macOS](https://index.ros.org/doc/ros2/Installation/OSX-Development-Setup/)/[Windows](https://index.ros.org/doc/ros2/Installation/Windows-Development-Setup/) to build ROS 2 (please build with flag `--merge-install`).
 
 ### Install `Node.js`
 
@@ -17,7 +17,7 @@ Alternatively, you can build ROS 2 from scratch. Please select the platform you 
 
 I install Nodejs from either:
 
-- Node.js offical [website](https://nodejs.org/en/)
+- Node.js official [website](https://nodejs.org/en/)
 - Node Version Manager ([nvm](https://github.com/creationix/nvm))
 
 ### Get Code
