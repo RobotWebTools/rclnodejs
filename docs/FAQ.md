@@ -9,7 +9,7 @@ The most common reasons for this error are:
 * The ROS package containing the target message was installed after the `rclnodejs` package was installed in your ROS2-nodejs environment.
 
 #### Verify the ROS package is installed
-The first step is to verify that your ROS environment includes the package containing the target message. Using the `ros2` cli list all of the packages in your ROS envionrment and inspect the output for the package.
+The first step is to verify that your ROS environment includes the package containing the target message. Using the `ros2` cli list all of the packages in your ROS environment and inspect the output for the package.
 ```
 ros2 pkg list
 ```

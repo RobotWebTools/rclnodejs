@@ -4,7 +4,7 @@ Actionlib tutorial based on `rclnodejs`.
 
 ## Actionlib background
 
-To continue the tutorial, you should have some basic understanding of the `action` term in ROS. If you're not familar with it, please refer to the [description](http://wiki.ros.org/actionlib/DetailedDescription).
+To continue the tutorial, you should have some basic understanding of the `action` term in ROS. If you're not familiar with it, please refer to the [description](http://wiki.ros.org/actionlib/DetailedDescription).
 
 ## Precondition
 
@@ -84,7 +84,7 @@ And here is the action server output:
 A goal, whose id is 7c28f24a-5ce8-4b13-a2aa-7aa62128fd03, was received.
 ```
 
-## Explaination of the action example:
+## Explanation of the action example:
 
 1. Action server
    For the action server, the skeleton code is like this:
@@ -162,8 +162,8 @@ rclnodejs.init().then(() => {
 
 To construct an action client, use `new rclnodejs.ActionClientInterface()`. The action client can emit 3 type events:
 
-- `status` event: tirggered when the action server sends messages to the action client during the goal is executing.
+- `status` event: triggered when the action server sends messages to the action client during the goal is executing.
 - `feedback` event: triggered after the action server called `publishFeedback`.
 - `result` event: triggered after the action server called `setSucceeded`.
 
-**Notice**, the action state transitions must obey some specific order, for more details please refer to [this articile](http://wiki.ros.org/actionlib/DetailedDescription)
+**Notice**, the action state transitions must obey some specific order, for more details please refer to [this article](http://wiki.ros.org/actionlib/DetailedDescription)
