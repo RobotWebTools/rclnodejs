@@ -1,5 +1,8 @@
 [
   {
     "pkgName": "rosbag2_storage_mcap_testdata"
+  },
+  {
+    "pkgName": "rosbag2_test_msgdefs"
   }
 ]
