@@ -135,6 +135,7 @@
                     "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/builtin_interfaces ').replace(/\\\/g, '/') + '/include/builtin_interfaces')\")",
                     "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rcl_lifecycle ').replace(/\\\/g, '/') + '/include/rcl_lifecycle')\")",
                     "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/lifecycle_msgs ').replace(/\\\/g, '/') + '/include/lifecycle_msgs')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/;/g, '/include/rosidl_dynamic_typesupport ').replace(/\\\/g, '/') + '/include/rosidl_dynamic_typesupport')\")",
                   ],
                 }
               ]
