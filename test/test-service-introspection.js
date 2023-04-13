@@ -54,7 +54,7 @@ describe('service introspection', function () {
   let serviceEventSubscriber;
   let eventQueue;
 
-  before(() => {
+  before( function() {
     if (!isServiceIntrospectionSupported()) {
       this.skip();
     }
