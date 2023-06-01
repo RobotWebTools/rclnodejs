@@ -88,6 +88,7 @@
                     "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rcl_lifecycle/ ') + '/include/rcl_lifecycle/')\")",
                     "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/lifecycle_msgs/ ') + '/include/lifecycle_msgs/')\")",
                     "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rosidl_runtime_c/ ') + '/include/rosidl_runtime_c/')\")",
+                    "<!@(node -e \"console.log(process.env.AMENT_PREFIX_PATH.replace(/:/g, '/include/rosidl_dynamic_typesupport/ ') + '/include/rosidl_dynamic_typesupport/')\")",
                   ],
                 }
               ],
