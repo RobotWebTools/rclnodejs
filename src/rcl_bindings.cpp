@@ -1495,17 +1495,22 @@ NAN_METHOD(CreateArrayBufferFromAddress) {
   char* addr = reinterpret_cast<char*>(result);
   int32_t length = Nan::To<int32_t>(info[1]).FromJust();
 
-  // We will create an ArrayBuffer with mode of
-  // ArrayBufferCreationMode::kInternalized and copy data starting from |addr|,
-  // thus the memory block will be collected by the garbage collector.
-#if NODE_MAJOR_VERSION <= 12
+  static_assert(NODE_MAJOR_VERSION > 12, "nodejs version must > 12");
+#if (NODE_RUNTIME_ELECTRON && NODE_MODULE_VERSION >= 109)
+  // Because V8 sandboxed pointers was enabled since Electron 21, we have to
+  // make a deep copy for Electron 21 and up.
+  // See more details: https://www.electronjs.org/blog/v8-memory-cage
   v8::Local<v8::ArrayBuffer> array_buffer =
-      v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), addr, length,
-                           v8::ArrayBufferCreationMode::kInternalized);
+      v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), length);
+  memcpy(array_buffer->Data(), addr, length);
+  free(addr);
 #else
-  std::unique_ptr<v8::BackingStore> backing =
-      v8::ArrayBuffer::NewBackingStore(v8::Isolate::GetCurrent(), length);
-  memcpy(backing->Data(), addr, length);
+  // For nodejs > 12 or electron < 21, we will create a new `BackingStore` and
+  // take over the ownership of `addr`.
+  std::unique_ptr<v8::BackingStore> backing = v8::ArrayBuffer::NewBackingStore(
+      addr, length,
+      [](void* data, size_t length, void* deleter_data) { free(data); },
+      nullptr);
   auto array_buffer =
       v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), std::move(backing));
 #endif
