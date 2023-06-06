@@ -9,6 +9,7 @@
   },
   'variables': {
     'ros_version': '<!(node scripts/ros_distro.js)',
+    'runtime%': 'node',
   },
   'targets': [
     {
@@ -174,7 +175,10 @@
               '-lrosidl_runtime_c'
             ]
           }
-        ]
+        ],
+        ['runtime=="electron"', {
+          "defines": ["NODE_RUNTIME_ELECTRON=1"]
+        }],
       ]
     }
   ]
