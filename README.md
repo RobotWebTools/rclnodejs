@@ -46,7 +46,7 @@ rclnodejs.init().then(() => {
 
 Before installing `rclnodejs` please ensure the following software is installed and configured on your system:
 
-- [Nodejs](https://nodejs.org/en/) version between 10.23.1 - 19.x.
+- [Nodejs](https://nodejs.org/en/) version >= 16.13.0.
 
 - [ROS 2 SDK](https://index.ros.org/doc/ros2/Installation/) for details.
   **DON'T FORGET TO [SOURCE THE ROS 2 SETUP FILE](https://index.ros.org/doc/ros2/Tutorials/Configuring-ROS2-Environment/#source-the-setup-files)**
