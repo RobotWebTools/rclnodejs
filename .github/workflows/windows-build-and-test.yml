@@ -5,12 +5,14 @@ on:
   push:
     branches:
       - develop
+      - iron-irwini
       - humble-hawksbill
       - galactic-geochelone
       - foxy-fitzroy
   pull_request:
     branches:
       - develop
+      - iron-irwini
       - humble-hawksbill
       - galactic-geochelone
       - foxy-fitzroy
@@ -28,7 +30,7 @@ jobs:
       matrix:
         # Explicit node versions are used to workaround an error
         # where node-gyp fails due to some silly cacheing
-        node-version: [14.21.2, 16.19.0, 18.14.1, 19.X]
+        node-version: [16.20.0, 18.16.0, 20.X]
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3

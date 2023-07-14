@@ -11,6 +11,7 @@ on:
         value: ${{ jobs.identify-ros-distro.outputs.linuxos }}
 env:
   ROLLING_VAR: ${{ contains(github.ref, 'develop') }}
+  IRON_VAR: ${{ contains(github.ref, 'iron') }}
   HUMBLE_VAR: ${{ contains(github.ref, 'humble') }}
   GALACTIC_VAR: ${{ contains(github.ref, 'galactic') }}
   FOXY_VAR: ${{ contains(github.ref, 'foxy') }}
@@ -26,8 +27,10 @@ jobs:
         id: identify
         run: |
           if ${ROLLING_VAR} == true; then
-            # echo "::set-output name=distro::rolling"
             echo "::set-output name=distro::rolling"
+            echo "::set-output name=linuxos::ubuntu-22.04"
+          elif ${IRON_VAR} == true; then
+            echo "::set-output name=distro::iron"
             echo "::set-output name=linuxos::ubuntu-22.04"
           elif ${HUMBLE_VAR} == true; then
             echo "::set-output name=distro::humble"
