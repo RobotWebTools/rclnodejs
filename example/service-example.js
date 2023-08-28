@@ -21,7 +21,7 @@ rclnodejs
   .then(() => {
     let node = rclnodejs.createNode('service_example_node');
 
-    node.createService(
+    let service = node.createService(
       'example_interfaces/srv/AddTwoInts',
       'add_two_ints',
       (request, response) => {
@@ -32,6 +32,20 @@ rclnodejs
         response.send(result);
       }
     );
+
+    if (
+      rclnodejs.DistroUtils.getDistroId() >
+      rclnodejs.DistroUtils.getDistroId('humble')
+    ) {
+      console.log('Introspection configured');
+      // To view service events use the following command:
+      //    ros2 topic echo "/add_two_ints/_service_event"
+      service.configureIntrospection(
+        node.getClock(),
+        rclnodejs.QoS.profileSystemDefault,
+        rclnodejs.ServiceIntrospectionStates.CONTENTS
+      );
+    }
 
     rclnodejs.spin(node);
   })

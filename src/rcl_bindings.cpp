@@ -36,6 +36,10 @@
 #include <rosidl_generator_c/string_functions.h>
 #endif
 
+#if ROS_VERSION > 2205
+#include <rcl/service_introspection.h>
+#endif
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -1120,6 +1124,68 @@ NAN_METHOD(SendResponse) {
                            RCL_RET_OK, rcl_get_error_string().str);
 }
 
+#if ROS_VERSION > 2205  // 2205 == Humble
+NAN_METHOD(ConfigureServiceIntrospection) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[2]).ToLocalChecked())
+          ->ptr());
+
+  std::string interface_name(
+      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
+  std::string package_name(
+      *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
+  const rosidl_service_type_support_t* ts =
+      GetServiceTypeSupport(package_name, interface_name);
+
+  if (ts) {
+    rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
+    auto qos_profile = GetQoSProfile(info[5]);
+    if (qos_profile) {
+      publisher_ops.qos = *qos_profile;
+    }
+
+    rcl_service_introspection_state_t state =
+        static_cast<rcl_service_introspection_state_t>(
+            Nan::To<uint32_t>(info[6]).ToChecked());
+
+    bool configureForService = Nan::To<bool>(info[7]).FromJust();
+
+    if (configureForService) {
+      RclHandle* service_handle = RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked());
+      rcl_service_t* service =
+          reinterpret_cast<rcl_service_t*>(service_handle->ptr());
+
+      THROW_ERROR_IF_NOT_EQUAL(
+          rcl_service_configure_service_introspection(service, node, clock, ts,
+                                                      publisher_ops, state),
+          RCL_RET_OK, rcl_get_error_string().str);
+
+    } else {
+      RclHandle* client_handle = RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked());
+      rcl_client_t* client =
+          reinterpret_cast<rcl_client_t*>(client_handle->ptr());
+
+      THROW_ERROR_IF_NOT_EQUAL(
+          rcl_client_configure_service_introspection(client, node, clock, ts,
+                                                     publisher_ops, state),
+          RCL_RET_OK, rcl_get_error_string().str);
+    }
+
+  } else {
+    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+  }
+}
+#endif
+
 NAN_METHOD(ValidateFullTopicName) {
   v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
   int validation_result;
@@ -2011,6 +2077,11 @@ std::vector<BindingMethod> binding_methods = {
     {"serviceServerIsAvailable", ServiceServerIsAvailable},
     {"publishRawMessage", PublishRawMessage},
     {"rclTakeRaw", RclTakeRaw},
-    {"", nullptr}};
+    {"", nullptr}
+#if ROS_VERSION > 2205  // 2205 == Humble
+    ,
+    {"configureServiceIntrospection", ConfigureServiceIntrospection}
+#endif
+};
 
 }  // namespace rclnodejs
