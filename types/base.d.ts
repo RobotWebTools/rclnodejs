@@ -21,6 +21,7 @@
 /// <reference path="qos.d.ts" />
 /// <reference path="rate.d.ts" />
 /// <reference path="service.d.ts" />
+/// <reference path="service_introspection.d.ts" />
 /// <reference path="subscription.d.ts" />
 /// <reference path="time_source.d.ts" />
 /// <reference path="time.d.ts" />

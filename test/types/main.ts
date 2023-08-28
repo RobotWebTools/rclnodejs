@@ -250,17 +250,9 @@ subscription.hasContentFilter();
 
 // ---- Service ----
 // $ExpectType AddTwoIntsConstructor
-let service = node.createService(
+const service = node.createService(
   'example_interfaces/srv/AddTwoInts',
   'add_two_ints',
-  (request, response) => {}
-);
-
-// $ExpectType AddTwoIntsConstructor
-service = node.createService(
-  'example_interfaces/srv/AddTwoInts',
-  'add_two_ints',
-  {},
   (request, response) => {}
 );
 
@@ -269,6 +261,12 @@ service.serviceName;
 
 // $ExpectType object
 service.options;
+
+service.configureIntrospection(
+  node.getClock(),
+  rclnodejs.Node.getDefaultOptions() as rclnodejs.QoS,
+  rclnodejs.ServiceIntrospectionStates.CONTENTS
+);
 
 // $ExpectType boolean
 service.isDestroyed();
@@ -288,6 +286,12 @@ client.isServiceServerAvailable();
 
 // $ExpectType Promise<boolean>
 client.waitForService();
+
+client.configureIntrospection(
+  node.getClock(),
+  rclnodejs.Node.getDefaultOptions() as rclnodejs.QoS,
+  rclnodejs.ServiceIntrospectionStates.CONTENTS
+);
 
 // $ExpectType boolean
 client.isDestroyed();
