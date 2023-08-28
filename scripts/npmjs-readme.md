@@ -1,4 +1,4 @@
-# rclnodejs [![Build Status](https://travis-ci.org/RobotWebTools/rclnodejs.svg?branch=develop)](https://travis-ci.org/RobotWebTools/rclnodejs)
+# rclnodejs ![GitHub Workflow Status](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-build-and-test.yml/badge.svg?branch=iron-irwini)
 
 `rclnodejs` is a Node.js client for the Robot Operating System (ROS 2). It provides a simple and easy JavaScript API for ROS 2 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects.
 
@@ -18,7 +18,7 @@ rclnodejs.init().then(() => {
 
 **Node.js**
 
-- [Node.js](https://nodejs.org/en/) version between 10.23 - 17.x.
+- [Node.js](https://nodejs.org/en/) version >= 16.13.0.
 
 **ROS 2 SDK**
 
@@ -43,14 +43,13 @@ npm i rclnodejs@x.y.z
 
 #### RCLNODEJS - ROS 2 Version Compatibility
 
-|                                                            RCLNODEJS Version                                                            |                                                                                                                                                                     Compatible ROS 2 Release                                                                                                                                                                     |
-| :-------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [0.21.4 (current)](https://www.npmjs.com/package/rclnodejs/v/0.21.4) ([API](http://robotwebtools.org/rclnodejs/docs/0.21.3/index.html)) | [Humble Hawksbill](https://github.com/ros2/ros2/releases/tag/release-humble-20220523)<br>[Galactic Geochelone](https://github.com/ros2/ros2/releases/tag/release-galactic-20210716)<br>[Foxy Fitzroy](https://github.com/ros2/ros2/releases/tag/release-foxy-20201211)<br>[Eloquent Elusor](https://github.com/ros2/ros2/releases/tag/release-eloquent-20200124) |
-|                                [0.10.3](https://github.com/RobotWebTools/rclnodejs/releases/tag/0.10.3)                                 |                                                                                                                                [Dashing Diademata - Patch 4](https://github.com/ros2/ros2/releases/tag/release-dashing-20191018)                                                                                                                                 |
+|                                      RCLNODEJS Version                                       |                                                               Compatible ROS 2 LTS                                                                |
+| :------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------: |
+| latest version (currently [v0.22.3](https://github.com/RobotWebTools/rclnodejs/tree/0.22.3)) | [Humble](https://github.com/RobotWebTools/rclnodejs/tree/humble-hawksbill)<br>[Iron](https://github.com/RobotWebTools/rclnodejs/tree/iron-irwini) |
 
 ## Documentation
 
-API [documentation](http://robotwebtools.org/rclnodejs/docs/index.html) is available online.
+API [documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html) is available online.
 
 ## JavaScript Examples
 
