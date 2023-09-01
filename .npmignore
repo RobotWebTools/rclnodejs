@@ -19,3 +19,7 @@ docs/
 example/
 benchmark/
 tutorials/
+.github/
+.vscode/
+.gitignore
+.prettierrc.yml
