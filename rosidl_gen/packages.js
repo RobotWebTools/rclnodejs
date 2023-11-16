@@ -63,7 +63,8 @@ function grabInterfaceInfo(filePath, amentExecuted) {
   let pkgName = getPackageName(filePath, amentExecuted);
   let interfaceName = path.parse(filePath).name;
   let subFolder = getSubFolder(filePath, amentExecuted);
-  return { pkgName, interfaceName, subFolder, filePath };
+  const isServiceEvent = false;
+  return { pkgName, interfaceName, subFolder, filePath, isServiceEvent };
 }
 
 function addInterfaceInfo(info, type, pkgMap) {

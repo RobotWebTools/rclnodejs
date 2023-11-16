@@ -196,6 +196,10 @@ function getModulePathByType(type, messageInfo) {
     return type.pkgName + '__action__' + type.type + '.js';
   }
 
+  /* We should use '__msg__' to require "service_msgs/msg/ServiceEventInfo.msg" for service event message. */
+  if (messageInfo && messageInfo.isServiceEvent && (type.type !== 'ServiceEventInfo')) {
+    return type.pkgName + '__srv__' + type.type + '.js';
+  }
   return type.pkgName + '__msg__' + type.type + '.js';
 }
 
