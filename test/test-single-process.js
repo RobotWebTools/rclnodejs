@@ -176,6 +176,46 @@ describe('Test rclnodejs nodes in a single process', function () {
     rclnodejs.spin(clientNode);
   });
 
+  it('Client/Service in one process - async callback', function (done) {
+    // this should expose issue #944
+    var clientNode = rclnodejs.createNode('single_ps_client_async');
+    var serviceNode = rclnodejs.createNode('single_ps_service_async');
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+
+    var service = serviceNode.createService(
+      AddTwoInts,
+      'single_ps_channel2',
+      async (request, response) => {
+        assert.deepStrictEqual(request.a, 1);
+        assert.deepStrictEqual(request.b, 2);
+        let result = response.template;
+        result.sum = request.a + request.b;
+        // to trigger the bug, two conditions must hold: 
+        //   - the response is send assynchronously(!) by the callback
+        //     via side effect
+        //   - the callback returns something unrelated to the
+        //     actual response. For an async function, if I do not
+        //     explicitly return anything, it will return a Promise resolving to
+        //     undefined.
+        setTimeout(()=>response.send(result), 0);
+      }
+    );
+    var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
+    const request = { a: 1, b: 2 };
+
+    var timer = clientNode.createTimer(100, () => {
+      client.sendRequest(request, (response) => {
+        timer.cancel();
+        assert.deepStrictEqual(response.sum, 3);
+        serviceNode.destroy();
+        clientNode.destroy();
+        done();
+      });
+    });
+    rclnodejs.spin(serviceNode);
+    rclnodejs.spin(clientNode);
+  });
+
   it('New style requiring for services', function (done) {
     var node = rclnodejs.createNode('new_style_require_services');
     const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
