@@ -176,6 +176,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     rclnodejs.spin(clientNode);
   });
 
+
   it('New style requiring for services', function (done) {
     var node = rclnodejs.createNode('new_style_require_services');
     const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
