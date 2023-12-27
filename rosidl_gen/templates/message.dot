@@ -311,7 +311,7 @@ class {{=objectWrapper}} {
     {{??}}
     {{? field.type.isPrimitiveType && !field.type.isArray}}
     {{? field.default_value === null}}
-    this._{{=field.name}}Intialized = false;
+    this._{{=field.name}}Intialized = true;
     {{?? field.type.type === 'string' || field.type.type === 'wstring'}}
     this._refObject.{{=field.name}} = "{{=field.default_value.replace(/"/g, '\\"')}}";
     this._{{=field.name}}Intialized = true;
