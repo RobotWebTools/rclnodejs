@@ -439,7 +439,7 @@ describe('topic & serviceName getter/setter', function () {
   it('publisher: topic property getter', function () {
     var node = rclnodejs.createNode('publisher', '/topic_getter');
     var publisher = node.createPublisher(RclString, 'chatter');
-    assert.deepStrictEqual(publisher.topic, 'chatter');
+    assert.deepStrictEqual(publisher.topic, '/topic_getter/chatter');
     node.destroy();
   });
 
@@ -450,7 +450,7 @@ describe('topic & serviceName getter/setter', function () {
       'chatter',
       (msg) => {}
     );
-    assert.deepStrictEqual(subscription.topic, 'chatter');
+    assert.deepStrictEqual(subscription.topic, '/topic_getter/chatter');
     node.destroy();
   });
 

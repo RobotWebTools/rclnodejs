@@ -942,13 +942,23 @@ NAN_METHOD(Publish) {
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
-NAN_METHOD(GetTopic) {
+NAN_METHOD(GetPublisherTopic) {
   rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
       RclHandle::Unwrap<RclHandle>(
           Nan::To<v8::Object>(info[0]).ToLocalChecked())
           ->ptr());
 
   const char* topic = rcl_publisher_get_topic_name(publisher);
+  info.GetReturnValue().Set(Nan::New(topic).ToLocalChecked());
+}
+
+NAN_METHOD(GetSubscriptionTopic) {
+  rcl_subscription_t* subscription = reinterpret_cast<rcl_subscription_t*>(
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
+
+  const char* topic = rcl_subscription_get_topic_name(subscription);
   info.GetReturnValue().Set(Nan::New(topic).ToLocalChecked());
 }
 
@@ -2039,7 +2049,8 @@ std::vector<BindingMethod> binding_methods = {
     {"clearContentFilter", ClearContentFilter},
     {"createPublisher", CreatePublisher},
     {"publish", Publish},
-    {"getTopic", GetTopic},
+    {"getPublisherTopic", GetPublisherTopic},
+    {"getSubscriptionTopic", GetSubscriptionTopic},
     {"createClient", CreateClient},
     {"rclTakeResponse", RclTakeResponse},
     {"sendRequest", SendRequest},
