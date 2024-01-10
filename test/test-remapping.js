@@ -66,7 +66,7 @@ describe('rcl node remapping', function () {
       (request) => {}
     );
 
-    assert.equal(service.serviceName, 'foo_service');
+    assert.equal(service.serviceName, '/foo_service');
   });
 
   it('remap node, namespace, topic and servicename', async function () {
@@ -95,6 +95,6 @@ describe('rcl node remapping', function () {
     assert.equal(node.name(), 'foo_node');
     assert.equal(node.namespace(), '/foo_ns');
     assert.equal(publisher.topic, '/foo_ns/foo_topic');
-    assert.equal(service.serviceName, 'foo_service');
+    assert.equal(service.serviceName, '/foo_ns/foo_service');
   });
 });
