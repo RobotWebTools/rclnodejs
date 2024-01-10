@@ -1107,16 +1107,6 @@ NAN_METHOD(RclTakeRequest) {
   info.GetReturnValue().Set(Nan::Undefined());
 }
 
-NAN_METHOD(GetServiceName) {
-  rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
-
-  const char* name = rcl_service_get_service_name(service);
-  info.GetReturnValue().Set(Nan::New(name).ToLocalChecked());
-}
-
 NAN_METHOD(SendResponse) {
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
       RclHandle::Unwrap<RclHandle>(
@@ -2017,6 +2007,26 @@ NAN_METHOD(RclTakeRaw) {
                            "Failed to deallocate message buffer");
 }
 
+NAN_METHOD(GetClientServiceName) {
+  rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
+
+  const char* service_name = rcl_client_get_service_name(client);
+  info.GetReturnValue().Set(Nan::New(service_name).ToLocalChecked());
+}
+
+NAN_METHOD(GetServiceServiceName) {
+  rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
+      RclHandle::Unwrap<RclHandle>(
+          Nan::To<v8::Object>(info[0]).ToLocalChecked())
+          ->ptr());
+
+  const char* service_name = rcl_service_get_service_name(service);
+  info.GetReturnValue().Set(Nan::New(service_name).ToLocalChecked());
+}
+
 std::vector<BindingMethod> binding_methods = {
     {"init", Init},
     {"createNode", CreateNode},
@@ -2055,7 +2065,6 @@ std::vector<BindingMethod> binding_methods = {
     {"rclTakeResponse", RclTakeResponse},
     {"sendRequest", SendRequest},
     {"createService", CreateService},
-    {"getServiceName", GetServiceName},
     {"rclTakeRequest", RclTakeRequest},
     {"sendResponse", SendResponse},
     {"shutdown", Shutdown},
@@ -2088,6 +2097,8 @@ std::vector<BindingMethod> binding_methods = {
     {"serviceServerIsAvailable", ServiceServerIsAvailable},
     {"publishRawMessage", PublishRawMessage},
     {"rclTakeRaw", RclTakeRaw},
+    {"getClientServiceName", GetClientServiceName},
+    {"getServiceServiceName", GetServiceServiceName},
     {"", nullptr}
 #if ROS_VERSION > 2205  // 2205 == Humble
     ,
