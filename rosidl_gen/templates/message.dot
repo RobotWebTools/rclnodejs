@@ -269,8 +269,9 @@ const {{=refObjectArrayType}} = StructType({
 
 // Define the wrapper class.
 class {{=objectWrapper}} {
-  constructor(other) {
+  constructor(other, wilCheckConsistency = false) {
     this._wrapperFields = {};
+    this._wilCheckConsistency = wilCheckConsistency;
     {{~ it.spec.fields :field}}
     {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
     this._{{=field.name}}Array = [];
@@ -311,7 +312,7 @@ class {{=objectWrapper}} {
     {{??}}
     {{? field.type.isPrimitiveType && !field.type.isArray}}
     {{? field.default_value === null}}
-    this._{{=field.name}}Intialized = true;
+    this._{{=field.name}}Intialized = false;
     {{?? field.type.type === 'string' || field.type.type === 'wstring'}}
     this._refObject.{{=field.name}} = "{{=field.default_value.replace(/"/g, '\\"')}}";
     this._{{=field.name}}Intialized = true;
@@ -369,7 +370,7 @@ class {{=objectWrapper}} {
     if (checkConsistency) {
     {{~ it.spec.fields :field}}
       {{? field.type.isPrimitiveType && !field.type.isArray}}
-      if (!this._{{=field.name}}Intialized) {
+      if (this._wilCheckConsistency && !this._{{=field.name}}Intialized) {
         throw new TypeError('Invalid argument: {{=field.name}} in {{=it.spec.msgName}}');
       }
       {{?}}

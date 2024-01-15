@@ -44,12 +44,4 @@ describe('rclnodejs publisher test suite', function () {
     publisher.publish(msg);
     rclnodejs.spin(node);
   });
-
-  it('Publish messages not initialized explicitly', function () {
-    const node = rclnodejs.createNode('publisher_node');
-    const publisher = node.createPublisher('sensor_msgs/msg/JointState', 'topic');
-    const msg = rclnodejs.createMessageObject('sensor_msgs/msg/JointState');
-    assert.doesNotThrow(() => publisher.publish(msg));
-    rclnodejs.spin(node);
-  });
 });

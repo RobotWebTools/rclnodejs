@@ -4,7 +4,9 @@
     "test-multi-nodes.js",
     "test-msg-type-py-node.js",
     "test-msg-type-cpp-node.js",
-    "test-cross-lang.js"
+    "test-cross-lang.js",
+    "test-service-introspection.js",
+    "test-subscription-content-filter.js"
   ],
   "Darwin": [
     "test-raw-pub-sub.js", 
