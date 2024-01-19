@@ -292,7 +292,7 @@ describe('Fuzzing API calls testing', function () {
     const RclString = 'std_msgs/msg/String';
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
-    var publisher = node.createPublisher(RclString, 'chatter9', {willCheckConsistency: true});
+    var publisher = node.createPublisher(RclString, 'chatter9');
     var subscription = node.createSubscription(RclString, 'chatter9', () => {});
     var client = node.createClient(AddTwoInts, 'add_two_ints');
     var service = node.createService(
