@@ -269,9 +269,9 @@ const {{=refObjectArrayType}} = StructType({
 
 // Define the wrapper class.
 class {{=objectWrapper}} {
-  constructor(other, wilCheckConsistency = false) {
+  constructor(other, willCheckConsistency = false) {
     this._wrapperFields = {};
-    this._wilCheckConsistency = wilCheckConsistency;
+    this._willCheckConsistency = willCheckConsistency;
     {{~ it.spec.fields :field}}
     {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
     this._{{=field.name}}Array = [];
@@ -367,15 +367,13 @@ class {{=objectWrapper}} {
   }
 
   freeze(own = false, checkConsistency = false) {
-    if (checkConsistency) {
     {{~ it.spec.fields :field}}
       {{? field.type.isPrimitiveType && !field.type.isArray}}
-      if (this._wilCheckConsistency && !this._{{=field.name}}Intialized) {
+      if (checkConsistency && !this._{{=field.name}}Intialized) {
         throw new TypeError('Invalid argument: {{=field.name}} in {{=it.spec.msgName}}');
       }
       {{?}}
     {{~}}
-    }
 
     {{~ it.spec.fields :field}}
     {{? field.type.isArray && field.type.isPrimitiveType && field.type.isFixedSizeArray}}
@@ -421,7 +419,7 @@ class {{=objectWrapper}} {
   }
 
   serialize() {
-    this.freeze(false, true);
+    this.freeze(/*own=*/false, this._willCheckConsistency);
     return this._refObject.ref();
   }
 

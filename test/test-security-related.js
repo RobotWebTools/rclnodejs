@@ -227,6 +227,18 @@ describe('Fuzzing API calls testing', function () {
       `Type should be ${RclString}`
     );
 
+    const String = rclnodejs.require(RclString);
+    const str = new String();
+    str.a = 1;
+    assertThrowsError(
+      () => {
+        publisher.publish(str);
+      },
+      TypeError,
+      'Invalid argument',
+      `Type should be ${RclString}`
+    );
+
     rclnodejs.spin(node);
     node.destroy();
   });
@@ -258,6 +270,19 @@ describe('Fuzzing API calls testing', function () {
       'Invalid argument',
       'request.b does not exist'
     );
+
+    const Request = rclnodejs.require(AddTwoInts).Request;
+    const req = new Request();
+    req.a = 1;
+    assertThrowsError(
+      () => {
+        client.sendRequest(req, (response) => {});
+      },
+      TypeError,
+      'Invalid argument',
+      'request.b does not exist'
+    );
+
     rclnodejs.spin(node);
     node.destroy();
   });
