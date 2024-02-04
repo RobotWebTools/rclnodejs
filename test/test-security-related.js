@@ -217,10 +217,22 @@ describe('Fuzzing API calls testing', function () {
     var node = rclnodejs.createNode('node1', '/inconsistent');
     const RclString = 'std_msgs/msg/String';
 
-    var publisher = node.createPublisher(RclString, 'chatter7');
+    var publisher = node.createPublisher(RclString, 'chatter7', {willCheckConsistency: true});
     assertThrowsError(
       () => {
         publisher.publish({ a: 1 });
+      },
+      TypeError,
+      'Invalid argument',
+      `Type should be ${RclString}`
+    );
+
+    const String = rclnodejs.require(RclString);
+    const str = new String();
+    str.a = 1;
+    assertThrowsError(
+      () => {
+        publisher.publish(str);
       },
       TypeError,
       'Invalid argument',
@@ -235,7 +247,7 @@ describe('Fuzzing API calls testing', function () {
     var node = rclnodejs.createNode('node2', '/inconsistent');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
-    var client = node.createClient(AddTwoInts, 'add_two_ints');
+    var client = node.createClient(AddTwoInts, 'add_two_ints', {willCheckConsistency: true});
     var service = node.createService(
       AddTwoInts,
       'add_two_ints',
@@ -258,6 +270,19 @@ describe('Fuzzing API calls testing', function () {
       'Invalid argument',
       'request.b does not exist'
     );
+
+    const Request = rclnodejs.require(AddTwoInts).Request;
+    const req = new Request();
+    req.a = 1;
+    assertThrowsError(
+      () => {
+        client.sendRequest(req, (response) => {});
+      },
+      TypeError,
+      'Invalid argument',
+      'request.b does not exist'
+    );
+
     rclnodejs.spin(node);
     node.destroy();
   });
