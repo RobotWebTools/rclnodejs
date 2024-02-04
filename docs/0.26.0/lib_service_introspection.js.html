@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: lib/service_introspection.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: lib/service_introspection.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Copyright (c) 2023 Wayne Parrott. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/**
+ * @typedef {number} ServiceIntrospectionState
+ **/
+
+/**
+ * Enum for service introspection states.
+ * @readonly
+ * @enum {ServiceIntrospectionState}
+ */
+const ServiceIntrospectionStates = {
+  OFF: 0,
+  METADATA: 1,
+  CONTENTS: 2,
+};
+
+module.exports = ServiceIntrospectionStates;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="ActionClient.html">ActionClient</a></li><li><a href="ActionServer.html">ActionServer</a></li><li><a href="CallbackReturnValue.html">CallbackReturnValue</a></li><li><a href="Client.html">Client</a></li><li><a href="ClientGoalHandle.html">ClientGoalHandle</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Context.html">Context</a></li><li><a href="Duration.html">Duration</a></li><li><a href="FloatingPointRange.html">FloatingPointRange</a></li><li><a href="GuardCondition.html">GuardCondition</a></li><li><a href="IntegerRange.html">IntegerRange</a></li><li><a href="LifecycleNode.html">LifecycleNode</a></li><li><a href="LifecyclePublisher.html">LifecyclePublisher</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeOptions.html">NodeOptions</a></li><li><a href="Parameter.html">Parameter</a></li><li><a href="ParameterDescriptor.html">ParameterDescriptor</a></li><li><a href="ParameterService.html">ParameterService</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="Range.html">Range</a></li><li><a href="Rate.html">Rate</a></li><li><a href="RateTimerServer.html">RateTimerServer</a></li><li><a href="Response.html">Response</a></li><li><a href="ServerGoalHandle.html">ServerGoalHandle</a></li><li><a href="Service.html">Service</a></li><li><a href="State.html">State</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="TimeSource.html">TimeSource</a></li><li><a href="Timer.html">Timer</a></li><li><a href="Transition.html">Transition</a></li><li><a href="TransitionDescription.html">TransitionDescription</a></li></ul><h3>Global</h3><ul><li><a href="global.html#CallbackReturnCode">CallbackReturnCode</a></li><li><a href="global.html#CancelResponse">CancelResponse</a></li><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DEFAULT_NUMERIC_RANGE_TOLERANCE">DEFAULT_NUMERIC_RANGE_TOLERANCE</a></li><li><a href="global.html#DistroId">DistroId</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#GoalResponse">GoalResponse</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ParameterType">ParameterType</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li><li><a href="global.html#ServiceIntrospectionStates">ServiceIntrospectionStates</a></li><li><a href="global.html#defaultCancelCallback">defaultCancelCallback</a></li><li><a href="global.html#defaultGoalCallback">defaultGoalCallback</a></li><li><a href="global.html#defaultHandleAcceptedCallback">defaultHandleAcceptedCallback</a></li><li><a href="global.html#getActionClientNamesAndTypesByNode">getActionClientNamesAndTypesByNode</a></li><li><a href="global.html#getActionNamesAndTypes">getActionNamesAndTypes</a></li><li><a href="global.html#getActionServerNamesAndTypesByNode">getActionServerNamesAndTypesByNode</a></li><li><a href="global.html#getCurrentGeneratorVersion">getCurrentGeneratorVersion</a></li><li><a href="global.html#parameterTypeFromValue">parameterTypeFromValue</a></li><li><a href="global.html#validType">validType</a></li><li><a href="global.html#validValue">validValue</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Sun Feb 04 2024 18:07:43 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
