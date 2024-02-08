@@ -92,6 +92,9 @@ async function generateServiceEventMsg(serviceInfo, dir) {
 
 async function generateServiceEventJSStruct(msgInfo, dir) {
   const spec = await parser.parseMessageFile(msgInfo.pkgName, msgInfo.filePath);
+  // Pass `msgInfo.subFolder` to the `spec`, because some .srv files of the
+  // package may not be put under srv/ folder, e.g., slam_toolbox.
+  spec.subFolder = msgInfo.subFolder;
 
   // Remove the `.msg` files generated in `generateServiceEventMsg()` to avoid
   // being found later.
