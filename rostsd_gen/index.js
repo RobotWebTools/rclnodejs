@@ -64,6 +64,7 @@ function getPkgInfos(rootDir) {
 
     for (let filename of files) {
       const typeClass = fileName2Typeclass(filename);
+      if (typeClass.type !== 'srv' && typeClass.type !== 'action' && typeClass.type !== 'msg') continue;
       if (
         !typeClass.type ||
         pkgFilters.matchesAny({
