@@ -5,17 +5,15 @@ on:
   push:
     branches:
       - develop
+      - jazzy
       - iron-irwini
       - humble-hawksbill
-      - galactic-geochelone
-      - foxy-fitzroy
   pull_request:
     branches:
       - develop
+      - jazzy
       - iron-irwini
       - humble-hawksbill
-      - galactic-geochelone
-      - foxy-fitzroy
   workflow_dispatch:
 
 jobs:
@@ -31,12 +29,12 @@ jobs:
         node-version: [18.X, 20.X]
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
 
     - name: Setup ROS2
-      uses: ros-tooling/setup-ros@v0.7
+      uses: ros-tooling/setup-ros@0.7.6
       with:
         required-ros-distributions: ${{ needs.identify-ros-distro.outputs.distro }}
 

@@ -11,23 +11,24 @@ jobs:
       matrix:
         node-version: [18.X, 20.X]
         ros_distribution:
+          - jazzy
           - iron
           - humble
           - rolling
 
     steps:
     - name: Setup ROS2
-      uses: ros-tooling/setup-ros@v0.7
+      uses: ros-tooling/setup-ros@0.7.6
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
     - name: Install test-msgs on Linux
       run: |
         sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
 

@@ -11,10 +11,9 @@ on:
         value: ${{ jobs.identify-ros-distro.outputs.linuxos }}
 env:
   ROLLING_VAR: ${{ contains(github.ref, 'develop') }}
+  JAZZY_VAR: ${{ contains(github.ref, 'jazzy') }}
   IRON_VAR: ${{ contains(github.ref, 'iron') }}
   HUMBLE_VAR: ${{ contains(github.ref, 'humble') }}
-  GALACTIC_VAR: ${{ contains(github.ref, 'galactic') }}
-  FOXY_VAR: ${{ contains(github.ref, 'foxy') }}
 
 jobs:
   identify-ros-distro:
@@ -28,21 +27,18 @@ jobs:
         run: |
           if ${ROLLING_VAR} == true; then
             echo "::set-output name=distro::rolling"
-            echo "::set-output name=linuxos::ubuntu-22.04"
+            echo "::set-output name=linuxos::ubuntu-24.04"
+          elif ${JAZZY_VAR} == true; then
+            echo "::set-output name=distro::jazzy"
+            echo "::set-output name=linuxos::ubuntu-24.04"
           elif ${IRON_VAR} == true; then
             echo "::set-output name=distro::iron"
             echo "::set-output name=linuxos::ubuntu-22.04"
           elif ${HUMBLE_VAR} == true; then
             echo "::set-output name=distro::humble"
             echo "::set-output name=linuxos::ubuntu-22.04"
-          elif ${GALACTIC_VAR} == true; then
-            echo "::set-output name=distro::galactic"
-            echo "::set-output name=linuxos::ubuntu-20.04"
-          elif ${FOXY_VAR} == true; then
-            echo "::set-output name=distro::foxy"
-            echo "::set-output name=linuxos::ubuntu-20.04"
           else
             echo "Unable to map branch name to ROS distro, using ROLLING as default"
             echo "::set-output name=distro::rolling"
-            echo "::set-output name=linuxos::ubuntu-22.04"
+            echo "::set-output name=linuxos::ubuntu-24.04"
           fi

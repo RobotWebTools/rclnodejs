@@ -12,17 +12,18 @@ jobs:
       matrix:
         node-version: [18.16.0, 20.X]
         ros_distribution:
+          - jazzy
           - iron
           - humble
           - rolling
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
 
     - name: Setup ROS2
-      uses: ros-tooling/setup-ros@v0.7
+      uses: ros-tooling/setup-ros@0.7.6
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
@@ -36,7 +37,7 @@ jobs:
     - name: Prebuild - Setup VS Dev Environment
       uses: seanmiddleditch/gha-setup-vsdevenv@v4
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Build rclnodejs
       shell: cmd
