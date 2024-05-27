@@ -16,6 +16,10 @@ on:
       - humble-hawksbill
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   identify-ros-distro:
     uses: ./.github/workflows/identify-ros-distro.yml
@@ -23,6 +27,8 @@ jobs:
   build:
     needs: identify-ros-distro
     runs-on: ${{ needs.identify-ros-distro.outputs.linuxos }}
+    container:
+      image: osrf/ros:${{ needs.identify-ros-distro.outputs.distro }}-desktop
     strategy:
       fail-fast: false
       matrix:
@@ -35,8 +41,6 @@ jobs:
 
     - name: Setup ROS2
       uses: ros-tooling/setup-ros@0.7.6
-      with:
-        required-ros-distributions: ${{ needs.identify-ros-distro.outputs.distro }}
 
     - name: Install test-msgs on Linux
       run: |
