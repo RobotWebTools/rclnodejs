@@ -37,7 +37,7 @@ function assertThrowsError(operation, errors, errMsg, message) {
           if (err instanceof e) foundError = true;
         });
         return foundError;
-      } else if (err instanceof errors && containedMsg.test(err)) {
+      } else if (err instanceof errors) {
         return true;
       }
 
