@@ -26,6 +26,7 @@ const pkgFilters = require('../rosidl_gen/filter.js');
 const fsp = fs.promises;
 
 const generatedRoot = path.join(__dirname, '../generated/');
+const serviceMsgPath = path.join(generatedRoot, 'srv_msg');
 
 function getPackageName(filePath, amentExecuted) {
   if (os.type() === 'Windows_NT') {
@@ -131,6 +132,58 @@ async function getPackageDefinitionsFiles(packageName, amentRoot) {
   return rosFiles;
 }
 
+async function generateMsgForSrv(filePath, interfaceInfo, pkgMap) {
+  const requestMsgName = `${path.parse(filePath).name}_Request.msg`;
+  const responseMsgName = `${path.parse(filePath).name}_Response.msg`;
+  const data = await fsp.readFile(filePath, 'utf8');
+
+  const arr = data.split(/-{3,}/);
+  if (arr.length == 2) {
+    const packagePath = path.join(serviceMsgPath, interfaceInfo.pkgName);
+    if (!fs.existsSync(packagePath)) {
+      fs.mkdirSync(packagePath);
+    }
+
+    await fsp.writeFile(path.join(packagePath, requestMsgName), arr[0]);
+    await fsp.writeFile(path.join(packagePath, responseMsgName), arr[1]);
+    let requestInfo = Object.assign({}, interfaceInfo);
+    requestInfo.filePath = path.join(packagePath, requestMsgName);
+    requestInfo.interfaceName = requestInfo.interfaceName + "_Request"
+    let responseInfo = Object.assign({}, interfaceInfo);
+    responseInfo.filePath = path.join(packagePath, responseMsgName);
+    responseInfo.interfaceName = responseInfo.interfaceName + "_Response"
+
+    addInterfaceInfo(requestInfo, 'messages', pkgMap);
+    addInterfaceInfo(responseInfo, 'messages', pkgMap);
+  }
+}
+
+async function addInterfaceInfos(filePath, dir, pkgMap) {
+  const interfaceInfo = grabInterfaceInfo(filePath, true);
+  const ignore = pkgFilters.matchesAny(interfaceInfo);
+  if (ignore) {
+    console.log('Omitting filtered interface: ', interfaceInfo);
+  } else {
+    if (path.extname(filePath) === '.msg') {
+      // Some .msg files were generated prior to 0.3.2 for .action files,
+      // which has been disabled. So these files should be ignored here.
+      if (path.dirname(dir).split(path.sep).pop() !== 'action') {
+        addInterfaceInfo(interfaceInfo, 'messages', pkgMap);
+      }
+    } else if (path.extname(filePath) === '.srv') {
+      const requestMsgName = `${path.parse(filePath).name}_Request.msg`;
+      if (!fs.existsSync(path.join(path.dirname(filePath), requestMsgName))) {
+        await generateMsgForSrv(filePath, interfaceInfo, pkgMap);
+      }
+      addInterfaceInfo(interfaceInfo, 'services', pkgMap);
+    } else if (path.extname(filePath) === '.action') {
+      addInterfaceInfo(interfaceInfo, 'actions', pkgMap);
+    } else {
+      // we ignore all other files
+    }
+  }
+}
+
 /**
  * Collects all packages in a directory by using the ament index.
  * @param {string} dir - the directory to search in
@@ -144,32 +197,11 @@ async function findAmentPackagesInDirectory(dir) {
 
   // Support flat() method for nodejs < 11.
   const rosFiles = Array.prototype.flat ? files.flat() : flat(files);
-
   const pkgMap = new Map();
-  return new Promise((resolve, reject) => {
-    rosFiles.forEach((filePath) => {
-      const interfaceInfo = grabInterfaceInfo(filePath, true);
-      const ignore = pkgFilters.matchesAny(interfaceInfo);
-      if (ignore) {
-        console.log('Omitting filtered interface: ', interfaceInfo);
-      } else {
-        if (path.extname(filePath) === '.msg') {
-          // Some .msg files were generated prior to 0.3.2 for .action files,
-          // which has been disabled. So these files should be ignored here.
-          if (path.dirname(dir).split(path.sep).pop() !== 'action') {
-            addInterfaceInfo(interfaceInfo, 'messages', pkgMap);
-          }
-        } else if (path.extname(filePath) === '.srv') {
-          addInterfaceInfo(interfaceInfo, 'services', pkgMap);
-        } else if (path.extname(filePath) === '.action') {
-          addInterfaceInfo(interfaceInfo, 'actions', pkgMap);
-        } else {
-          // we ignore all other files
-        }
-      }
-    });
-    resolve(pkgMap);
-  });
+  await Promise.all(
+    rosFiles.map(filePath => addInterfaceInfos(filePath, dir, pkgMap))
+  );
+  return pkgMap;
 }
 
 /**

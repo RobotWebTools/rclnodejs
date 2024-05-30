@@ -20,6 +20,7 @@ const packages = require('./packages.js');
 const path = require('path');
 
 const generatedRoot = path.join(__dirname, '../generated/');
+const serviceMsgPath = path.join(generatedRoot, 'srv_msg');
 
 function getInstalledPackagePaths() {
   return process.env.AMENT_PREFIX_PATH.split(path.delimiter);
@@ -50,7 +51,7 @@ async function generateAll(forcedGenerating) {
       path.join(__dirname, 'generator.json'),
       path.join(generatedRoot, 'generator.json')
     );
-
+    await fse.mkdir(serviceMsgPath);
     // Process in AMENT_PREFIX_PATH in reverse order to
     // such that interfaces defined earlier on the AMENX_PREFIX_PATH
     // have higher priority over earlier versions and will override

@@ -21,6 +21,7 @@
     "test-msg-type-cpp-node.js", 
     "test-cross-lang.js", 
     "test-message-generation-bin.js", 
-    "test-subscription-content-filter.js"
+    "test-subscription-content-filter.js",
+    "test-guard-condition.js"
   ]
 }
