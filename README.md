@@ -11,7 +11,7 @@
 \* rclnodejs development and maintenance is limited to the ROS 2 LTS releases and the Rolling development branch
 
 **rclnodejs** is a Node.js client library for the Robot Operating System
-([ROS 2](https://index.ros.org/doc/ros2/)). It provides tooling and comprehensive
+([ROS 2](https://www.ros.org/)). It provides tooling and comprehensive
 JavaScript and TypeScript APIs for developing ROS 2 solutions capable of
 interoperating with ROS 2 nodes implemented in other languages such as
 C++ and Python.
@@ -48,8 +48,8 @@ Before installing `rclnodejs` please ensure the following software is installed 
 
 - [Nodejs](https://nodejs.org/en/) version >= 16.13.0.
 
-- [ROS 2 SDK](https://index.ros.org/doc/ros2/Installation/) for details.
-  **DON'T FORGET TO [SOURCE THE ROS 2 SETUP FILE](https://index.ros.org/doc/ros2/Tutorials/Configuring-ROS2-Environment/#source-the-setup-files)**
+- [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html) for details.
+  **DON'T FORGET TO [SOURCE THE ROS 2 SETUP FILE](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#source-the-setup-files)**
 
 ### Installing rclnodejs
 
@@ -137,7 +137,7 @@ message files of a ROS environment and generates corresponding JavaScript
 message interface files. Additionally, the tool generates the TypeScript
 `interface.d.ts` file containing declarations for each IDL message file.
 
-Learn more about ROS interfaces and IDL [here](https://index.ros.org/doc/ros2/Concepts/About-ROS-Interfaces/).
+Learn more about ROS interfaces and IDL [here](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Interfaces.html).
 
 In the following example rclnodejs loads a generated JavaScript message file corresponding to the ROS `std_msgs/msg/String' definition.
 
