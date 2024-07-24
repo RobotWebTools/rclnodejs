@@ -22,8 +22,8 @@ rclnodejs.init().then(() => {
 
 **ROS 2 SDK**
 
-- See the ROS 2 SDK [Installation Guide](https://index.ros.org/doc/ros2/Installation/) for details.
-- **DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://index.ros.org/doc/ros2/Tutorials/Configuring-ROS2-Environment/#source-the-setup-files)**
+- See the ROS 2 SDK [Installation Guide](https://docs.ros.org/en/jazzy/Installation.html) for details.
+- **DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#source-the-setup-files)**
 
 ## Install rclnodejs
 

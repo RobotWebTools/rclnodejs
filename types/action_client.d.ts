@@ -139,7 +139,7 @@ declare module 'rclnodejs' {
      * Send a goal and wait for the goal ACK asynchronously.
      *
      * Return a Promise object that is resolved with a ClientGoalHandle when receipt of the goal
-     * is acknowledged by an action server, see client state transition https://index.ros.org/doc/ros2/Tutorials/Understanding-ROS2-Actions/
+     * is acknowledged by an action server, see client state transition https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Actions/Understanding-ROS2-Actions.html
      *
      * @param goal - The goal request.
      * @param feedbackCallback - Callback function for feedback associated with the goal.

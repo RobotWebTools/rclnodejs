@@ -4,11 +4,11 @@
 
 1.Install ROS 2 from binary package.
 
-ROS 2 is a cross-platform system, which covers Linux, macOS and Windows, and the `rclnodejs` module is developed against the [`master`](https://github.com/ros2/ros2/blob/master/ros2.repos) branch of ROS 2. You can download the latest binary packages from [ROS 2 build farm](http://ci.ros2.org/view/packaging/) and follow the instructions of [Linux](https://index.ros.org/doc/ros2/Installation/Linux-Install-Binary/)/[macOS](https://index.ros.org/doc/ros2/Installation/OSX-Install-Binary/)/[Windows](https://index.ros.org/doc/ros2/Installation/Windows-Install-Binary/) to setup the environment (If you want to run your apps on a stable release of ROS 2, e.g. crystal-clemmys, please see the section `Running on Stable Release of ROS 2).
+ROS 2 is a cross-platform system, which covers Linux, macOS and Windows, and the `rclnodejs` module is developed against the [`master`](https://github.com/ros2/ros2/blob/master/ros2.repos) branch of ROS 2. You can download the latest binary packages from [ROS 2 build farm](http://ci.ros2.org/view/packaging/) and follow the instructions of [Linux](https://docs.ros.org/en/rolling/Installation/Ubuntu-Install-Debians.html)/[Windows](https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html) to setup the environment (If you want to run your apps on a stable release of ROS 2, e.g. crystal-clemmys, please see the section `Running on Stable Release of ROS 2).
 
 2.Build ROS 2 from scratch.
 
-Alternatively, you can build ROS 2 from scratch. Please select the platform you want to work on, then reference the instructions of [Linux](https://index.ros.org/doc/ros2/Installation/Linux-Development-Setup/)/[macOS](https://index.ros.org/doc/ros2/Installation/OSX-Development-Setup/)/[Windows](https://index.ros.org/doc/ros2/Installation/Windows-Development-Setup/) to build ROS 2 (please build with flag `--merge-install`).
+Alternatively, you can build ROS 2 from scratch. Please select the platform you want to work on, then reference the instructions of [Linux](https://docs.ros.org/en/rolling/Installation/Alternatives/Ubuntu-Development-Setup.html#)/[Windows](https://docs.ros.org/en/rolling/Installation/Alternatives/Windows-Development-Setup.html) to build ROS 2 (please build with flag `--merge-install`).
 
 ### Install `Node.js`
 
