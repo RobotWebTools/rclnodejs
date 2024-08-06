@@ -145,10 +145,13 @@ function toPlainObject(message, enableTypedArray = true) {
           obj[name] = Array.from(message[name]);
         } else {
           // Direct assignment
-          //  Note: TypedArray also falls into this branch if |enableTypedArray| is true
+          // Note: TypedArray also falls into this branch if |enableTypedArray| is true
           // TODO(Kenny): make sure Int64 & Uint64 type can be copied here
           obj[name] = message[name];
         }
+      } else if (def.fields[i].type.isArray && def.fields[i].type.type === 'Constants') {
+        // For a constants array, because its field is empty we just return an empty array here.
+        obj[name] = [];
       } else {
         // Proceed further
         obj[name] = toPlainObject(message[name], enableTypedArray);

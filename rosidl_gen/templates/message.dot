@@ -330,6 +330,11 @@ class {{=objectWrapper}} {
     {{? field.default_value !== null && field.type.isPrimitiveType && isTypedArrayType(field.type)}}
     this._wrapperFields.{{=field.name}}.fill({{=getTypedArrayName(field.type)}}.from({{=JSON.stringify(field.default_value)}}));
     {{?}}
+    {{? field.type.type === 'string' && field.type.isFixedSizeArray}}
+    for (let i = 0; i < {{=field.type.arraySize}}; i++) {
+      primitiveTypes.initString(this._refObject.{{=field.name}}[i]);
+    }
+    {{?}}
     {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
     this._wrapperFields.{{=field.name}} = new {{=getWrapperNameByType(field.type)}}();
     {{?? it.spec.msgName === 'String'}}
@@ -376,10 +381,26 @@ class {{=objectWrapper}} {
     {{~}}
 
     {{~ it.spec.fields :field}}
-    {{? field.type.isArray && field.type.isPrimitiveType && field.type.isFixedSizeArray}}
-    for (let i = 0; i < this._wrapperFields.{{=field.name}}.data.length; i++) {
-      this._refObject.{{=field.name}}[i] = this._wrapperFields.{{=field.name}}.data[i];
+    {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type) && field.type.isFixedSizeArray }}
+    {{? field.type.type === 'string'}}
+    for (let i = 0; i < {{=field.type.arraySize}}; i++) {
+      if (own) {
+        primitiveTypes.initString(this._refObject.{{=field.name}}[i].ref(), own);
+      } else {
+        if (this._{{=field.name}}Array.length === {{=field.type.arraySize}}) {
+          const value = this._{{=field.name}}Array[i];
+          this._refObject.{{=field.name}}[i].data = value;
+          this._refObject.{{=field.name}}[i].size = Buffer.byteLength(value);
+          this._refObject.{{=field.name}}[i].capacity = Buffer.byteLength(value) + 1;
+        }
+      }
     }
+    // For non-typed array like int64/uint64/bool.
+    {{?? true}}
+    this._refObject.{{=field.name}} = this._{{=field.name}}Array;
+    {{?}}
+    {{?? field.type.isArray && field.type.isPrimitiveType && isTypedArrayType(field.type) && field.type.isFixedSizeArray}}
+    this._refObject.{{=field.name}} = Array.from(this._wrapperFields.{{=field.name}}.data);
     {{?? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
     if (!own) {
       this._wrapperFields.{{=field.name}}.fill(this._{{=field.name}}Array);
@@ -391,9 +412,11 @@ class {{=objectWrapper}} {
       this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
     }
     {{?? field.type.isArray && !field.type.isPrimitiveType && field.type.isFixedSizeArray}}
-    for (let i = 0; i < this._wrapperFields.{{=field.name}}.data.length; i++) {
-      this._refObject.{{=field.name}}[i] = this._wrapperFields.{{=field.name}}.data[i].freeze(own, checkConsistency);
-      this._refObject.{{=field.name}}[i] = this._wrapperFields.{{=field.name}}.data[i].refObject;
+    for (let i = 0; i < {{=field.type.arraySize}}; i++) {
+      if (this._wrapperFields.{{=field.name}}.data[i]) {
+        this._wrapperFields.{{=field.name}}.data[i].freeze(own, checkConsistency);
+        this._refObject.{{=field.name}}[i] = this._wrapperFields.{{=field.name}}.data[i].refObject;
+      }
     }
     {{?? !field.type.isPrimitiveType || field.type.isArray}}
     this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
@@ -429,9 +452,17 @@ class {{=objectWrapper}} {
     this._{{=field.name}}Intialized = true;
     {{?}}
 
-    {{? field.type.isArray && field.type.isPrimitiveType && field.type.isFixedSizeArray}}
-    this._refObject.{{=field.name}} = refObject.{{=field.name}};
+    {{? field.type.isArray && field.type.isPrimitiveType && field.type.isFixedSizeArray && isTypedArrayType(field.type)}}
     this._wrapperFields.{{=field.name}}.fill(refObject.{{=field.name}}.toArray());
+    {{?? field.type.isArray && field.type.isPrimitiveType && field.type.isFixedSizeArray && !isTypedArrayType(field.type)}}
+    {{? field.type.type === 'string' }}
+    for (let index = 0; index < {{=field.type.arraySize}}; index++) {
+      this._{{=field.name}}Array[index] = refObject.{{=field.name}}[index].data;
+    }
+    // For non-typed array like int64/uint64/bool.
+    {{?? true}}
+    this._{{=field.name}}Array = refObject.{{=field.name}}.toArray();
+    {{?}}
     {{?? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
     refObject.{{=field.name}}.data.length = refObject.{{=field.name}}.size;
     for (let index = 0; index < refObject.{{=field.name}}.size; index++) {
@@ -472,6 +503,10 @@ class {{=objectWrapper}} {
     for (let i = 0; i < {{=field.type.arraySize}}; i++) {
       {{=getWrapperNameByType(field.type)}}.freeStruct(refObject.{{=field.name}}[i]);
     }
+    {{?? field.type.isArray && field.type.type === 'string' && field.type.isFixedSizeArray}}
+    for (let i = 0; i < {{=field.type.arraySize}}; i++) {
+      {{=getWrapperNameByType(field.type)}}.freeStruct(refObject.{{=field.name}}[i]);
+    }
     {{?? !field.type.isPrimitiveType || (field.type.type === 'string' && it.spec.msgName !== 'String')}}
     {{=getWrapperNameByType(field.type)}}.freeStruct(refObject.{{=field.name}});
     {{?? it.spec.msgName === 'String'}}
@@ -502,7 +537,9 @@ class {{=objectWrapper}} {
 
   {{~ it.spec.fields :field}}
   get {{=field.name}}() {
-    {{? field.type.isArray && isTypedArrayType(field.type)}}
+    {{? field.type.isArray && field.type.type === 'Constants'}}
+    return [];
+    {{?? field.type.isArray && isTypedArrayType(field.type)}}
     return this._wrapperFields['{{=field.name}}'].data;
     {{?? field.type.isArray && field.type.isPrimitiveType}}
     return this._{{=field.name}}Array;
