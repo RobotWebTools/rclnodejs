@@ -655,6 +655,7 @@ NAN_METHOD(ActionProcessCancelRequest) {
           rcl_get_error_string().str);
       rcl_reset_error();
     }
+    free(cancel_response_ptr);
     Nan::ThrowError(cancel_error.str);
     info.GetReturnValue().Set(Nan::Undefined());
     return;
