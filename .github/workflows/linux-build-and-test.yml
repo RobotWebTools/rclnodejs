@@ -35,18 +35,18 @@ jobs:
         node-version: [18.X, 20.X]
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v4.0.3
       with:
         node-version: ${{ matrix.node-version }}
 
     - name: Setup ROS2
-      uses: ros-tooling/setup-ros@0.7.6
+      uses: ros-tooling/setup-ros@0.7.8
 
     - name: Install test-msgs on Linux
       run: |
         sudo apt install ros-${{ needs.identify-ros-distro.outputs.distro }}-test-msgs
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4.1.7
 
     - name: Build and test rclnodejs
       run: |
