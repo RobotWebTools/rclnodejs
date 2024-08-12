@@ -327,8 +327,8 @@ NAN_METHOD(CreateTimer) {
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
-      rcl_timer_init(timer, clock, context, RCL_MS_TO_NS(period_ms), nullptr,
-                     rcl_get_default_allocator()),
+      rcl_timer_init2(timer, clock, context, RCL_MS_TO_NS(period_ms), nullptr,
+                      rcl_get_default_allocator(), /*autostart=*/true),
       rcl_get_error_string().str);
 
   auto js_obj = RclHandle::NewInstance(timer, clock_handle, [](void* ptr) {
