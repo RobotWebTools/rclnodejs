@@ -361,8 +361,9 @@ function isInternalActionMsgInterface(rosMsgInterface) {
 function isInternalServiceEventMsgInterface(rosMsgInterface) {
   let name = rosMsgInterface.type().interfaceName;
   let subFolder = rosMsgInterface.type().subFolder;
+  // Some package puts .srv files under srvs/, e.g., slam_toolbox.
   return (
-    (subFolder == 'srv' || subFolder == 'action') 
+    (subFolder == 'srv' || subFolder == 'srvs' || subFolder == 'action')
     && name.endsWith('_Event')
   );
 }
