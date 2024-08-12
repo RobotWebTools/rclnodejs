@@ -325,11 +325,19 @@ NAN_METHOD(CreateTimer) {
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
 
+#if ROS_VERSION > 2205  // After humble.
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
       rcl_timer_init2(timer, clock, context, RCL_MS_TO_NS(period_ms), nullptr,
                       rcl_get_default_allocator(), /*autostart=*/true),
       rcl_get_error_string().str);
+#else
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_timer_init(timer, clock, context, RCL_MS_TO_NS(period_ms), nullptr,
+                     rcl_get_default_allocator()),
+      rcl_get_error_string().str);
+#endif
 
   auto js_obj = RclHandle::NewInstance(timer, clock_handle, [](void* ptr) {
     rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(ptr);
