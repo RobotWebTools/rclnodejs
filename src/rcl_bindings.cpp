@@ -325,7 +325,7 @@ NAN_METHOD(CreateTimer) {
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
 
-#if ROS_VERSION > 2205  // After humble.
+#if ROS_VERSION > 2305  // After Iron.
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
       rcl_timer_init2(timer, clock, context, RCL_MS_TO_NS(period_ms), nullptr,
