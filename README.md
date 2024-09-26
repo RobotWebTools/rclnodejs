@@ -35,6 +35,7 @@ rclnodejs.init().then(() => {
 - [API Documentation](#api-documentation)
 - [Using TypeScript](#using-rclnodejs-with-typescript)
 - [Examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
+- [Electron demo](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo)
 - [Efficient Usage Tips](./docs/EFFICIENCY.md)
 - [FAQ and Known Issues](./docs/FAQ.md)
 - [Building from Scratch](./docs/BUILDING.md)

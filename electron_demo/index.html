@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>RCLNODEJS Electron Demo</title>
+</head>
+
+<body>
+  <div>
+    <div style="height: 20px;"></div>
+    <div>
+      <input id="topic-input"></input>
+      <button id="publish-topic">Publish topic</button>
+    </div>
+    <div style="height: 20px;"></div>
+    <span>Received topic:</span>
+    <span id="received-topic"></span>
+  </div>
+  <script src="./renderer.js"></script>
+</body>
+
+</html>
