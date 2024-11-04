@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18.16.0, 20.X]
+        node-version: [22.X]
         ros_distribution:
           - jazzy
           - iron
