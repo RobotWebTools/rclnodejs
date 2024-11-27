@@ -6,13 +6,11 @@ on:
     branches:
       - develop
       - jazzy
-      - iron-irwini
       - humble-hawksbill
   pull_request:
     branches:
       - develop
       - jazzy
-      - iron-irwini
       - humble-hawksbill
   workflow_dispatch:
 

@@ -13,7 +13,6 @@ jobs:
         node-version: [22.X]
         ros_distribution:
           - jazzy
-          - iron
           - humble
           - rolling
     steps:
