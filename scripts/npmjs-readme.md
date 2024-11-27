@@ -1,4 +1,4 @@
-# rclnodejs ![GitHub Workflow Status](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-build-and-test.yml/badge.svg?branch=iron-irwini)
+# rclnodejs ![GitHub Workflow Status](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-build-and-test.yml/badge.svg?branch=jazzy)
 
 `rclnodejs` is a Node.js client for the Robot Operating System (ROS 2). It provides a simple and easy JavaScript API for ROS 2 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects.
 
@@ -45,7 +45,7 @@ npm i rclnodejs@x.y.z
 
 |                                      RCLNODEJS Version                                       |                                                               Compatible ROS 2 LTS                                                                |
 | :------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------: |
-| latest version (currently [v0.22.3](https://github.com/RobotWebTools/rclnodejs/tree/0.22.3)) | [Humble](https://github.com/RobotWebTools/rclnodejs/tree/humble-hawksbill)<br>[Iron](https://github.com/RobotWebTools/rclnodejs/tree/iron-irwini) |
+| latest version (currently [v0.27.4](https://github.com/RobotWebTools/rclnodejs/tree/0.27.4)) | [Humble](https://github.com/RobotWebTools/rclnodejs/tree/humble-hawksbill)<br>[Jazzy](https://github.com/RobotWebTools/rclnodejs/tree/jazzy) |
 
 ## Documentation
 
