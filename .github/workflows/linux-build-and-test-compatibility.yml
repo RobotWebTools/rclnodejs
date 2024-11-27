@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-humble-and-rolling: # iron, humble and rolling distros
+  build-humble-and-rolling: # jazzy, humble and rolling distros
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -12,7 +12,6 @@ jobs:
         node-version: [20.X, 22.X]
         ros_distribution:
           - jazzy
-          - iron
           - humble
           - rolling
 
