@@ -23,6 +23,7 @@ const DistroUtils = require('../lib/distro.js');
 
 dot.templateSettings.strip = false;
 dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
+const isDebug = !!process.argv.find((arg) => arg === '--debug');
 const dots = dot.process({
   path: path.join(__dirname, '../rosidl_gen/templates'),
 });
@@ -119,6 +120,7 @@ async function generateServiceEventJSStruct(msgInfo, dir) {
       messageInfo: msgInfo,
       spec: spec,
       json: JSON.stringify(spec, null, '  '),
+      isDebug: isDebug,
     })
   );
 
@@ -148,6 +150,7 @@ function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
       messageInfo: messageInfo,
       spec: spec,
       json: JSON.stringify(spec, null, '  '),
+      isDebug: isDebug,
     })
   );
   return writeGeneratedCode(dir, fileName, generatedCode);
