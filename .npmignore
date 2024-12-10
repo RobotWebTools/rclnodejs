@@ -23,3 +23,4 @@ tutorials/
 .vscode/
 .gitignore
 .prettierrc.yml
+.husky/
