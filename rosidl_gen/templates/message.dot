@@ -863,7 +863,9 @@ Object.defineProperty({{=objectWrapper}}, "{{=c.name}}", {value: {{=c.value}}, w
 
 module.exports = {{=objectWrapper}};
 
+{{? it.isDebug}}
 /*
  * The following is the original spec object coming from parser:
 {{=it.json}}
 */
+{{?}}
