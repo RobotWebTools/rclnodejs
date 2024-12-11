@@ -43,8 +43,8 @@ npm i rclnodejs@x.y.z
 
 #### RCLNODEJS - ROS 2 Version Compatibility
 
-|                                      RCLNODEJS Version                                       |                                                               Compatible ROS 2 LTS                                                                |
-| :------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------: |
+|                                      RCLNODEJS Version                                       |                                                             Compatible ROS 2 LTS                                                             |
+| :------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------: |
 | latest version (currently [v0.27.4](https://github.com/RobotWebTools/rclnodejs/tree/0.27.4)) | [Humble](https://github.com/RobotWebTools/rclnodejs/tree/humble-hawksbill)<br>[Jazzy](https://github.com/RobotWebTools/rclnodejs/tree/jazzy) |
 
 ## Documentation

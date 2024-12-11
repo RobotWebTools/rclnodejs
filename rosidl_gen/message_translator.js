@@ -149,7 +149,10 @@ function toPlainObject(message, enableTypedArray = true) {
           // TODO(Kenny): make sure Int64 & Uint64 type can be copied here
           obj[name] = message[name];
         }
-      } else if (def.fields[i].type.isArray && def.fields[i].type.type === 'Constants') {
+      } else if (
+        def.fields[i].type.isArray &&
+        def.fields[i].type.type === 'Constants'
+      ) {
         // For a constants array, because its field is empty we just return an empty array here.
         obj[name] = [];
       } else {

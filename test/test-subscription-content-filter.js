@@ -19,7 +19,13 @@ function isContentFilteringSupported() {
   );
 }
 
-function createAndRunPublisher(node, typeclass, topic, msgValue, interval=PUBLISHER_INTERVAL) {
+function createAndRunPublisher(
+  node,
+  typeclass,
+  topic,
+  msgValue,
+  interval = PUBLISHER_INTERVAL
+) {
   const publisher = node.createPublisher(typeclass, topic);
   const msg = rclnodejs.createMessage(typeclass);
   msg.data = msgValue;
@@ -36,7 +42,7 @@ describe('subscription content-filtering', function () {
 
   this.timeout(30 * 1000);
 
-  before(function() {
+  before(function () {
     if (!isContentFilteringSupported()) {
       this.skip();
     }
@@ -50,7 +56,7 @@ describe('subscription content-filtering', function () {
   });
 
   afterEach(function () {
-    this.intervals.forEach(interval => clearInterval(interval));
+    this.intervals.forEach((interval) => clearInterval(interval));
     this.publisherNode.destroy();
     this.subscriberNode.destroy();
     rclnodejs.shutdown();
@@ -82,24 +88,22 @@ describe('subscription content-filtering', function () {
     done();
   });
 
-  it('no parameters', async function() {
+  it('no parameters', async function () {
     const typeclass = 'std_msgs/msg/String';
-    const publisherTimer1 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        'FilteredData'
-      );
+    const publisherTimer1 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      'FilteredData'
+    );
     this.intervals.push(publisherTimer1);
-  
-    const publisherTimer2 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        'Data'
-      );
+
+    const publisherTimer2 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      'Data'
+    );
     this.intervals.push(publisherTimer2);
 
     let options = Node.getDefaultOptions();
@@ -107,58 +111,6 @@ describe('subscription content-filtering', function () {
       expression: "data = 'FilteredData'",
     };
 
-    let msgCnt = 0;
-    let fail = false;
-    let subscription = this.subscriberNode.createSubscription(
-      typeclass,
-      TOPIC,
-      options,
-      (msg) => {
-        msgCnt++;
-        if (msg.data != 'FilteredData')  fail = true;
-      }
-    );
-
-    assert.ok(subscription.hasContentFilter());
-
-    this.subscriberNode.spin();
-
-    const p = new Promise((resolve) => 
-      setTimeout(() => {
-        resolve(msgCnt && !fail);
-      }, SUBSCRIBER_WAIT_TIME)
-    );
-    let result = await p;
-
-    assert.ok(result);
-  });
-
-  it('single parameter', async function() {
-    const typeclass = 'std_msgs/msg/String';
-    const publisherTimer1 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        'FilteredData'
-      );
-    this.intervals.push(publisherTimer1);
-  
-    const publisherTimer2 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        'Data',
-        200);
-    this.intervals.push(publisherTimer2);
-
-    let options = Node.getDefaultOptions();
-    options.contentFilter = {
-      expression: 'data = %0',
-      parameters: ["'FilteredData'"],
-    };
-   
     let msgCnt = 0;
     let fail = false;
     let subscription = this.subscriberNode.createSubscription(
@@ -175,7 +127,58 @@ describe('subscription content-filtering', function () {
 
     this.subscriberNode.spin();
 
-    const p = new Promise((resolve) => 
+    const p = new Promise((resolve) =>
+      setTimeout(() => {
+        resolve(msgCnt && !fail);
+      }, SUBSCRIBER_WAIT_TIME)
+    );
+    let result = await p;
+
+    assert.ok(result);
+  });
+
+  it('single parameter', async function () {
+    const typeclass = 'std_msgs/msg/String';
+    const publisherTimer1 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      'FilteredData'
+    );
+    this.intervals.push(publisherTimer1);
+
+    const publisherTimer2 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      'Data',
+      200
+    );
+    this.intervals.push(publisherTimer2);
+
+    let options = Node.getDefaultOptions();
+    options.contentFilter = {
+      expression: 'data = %0',
+      parameters: ["'FilteredData'"],
+    };
+
+    let msgCnt = 0;
+    let fail = false;
+    let subscription = this.subscriberNode.createSubscription(
+      typeclass,
+      TOPIC,
+      options,
+      (msg) => {
+        msgCnt++;
+        if (msg.data != 'FilteredData') fail = true;
+      }
+    );
+
+    assert.ok(subscription.hasContentFilter());
+
+    this.subscriberNode.spin();
+
+    const p = new Promise((resolve) =>
       setTimeout(() => {
         resolve(msgCnt && !fail);
       }, 1000)
@@ -185,24 +188,23 @@ describe('subscription content-filtering', function () {
     assert.ok(result);
   });
 
-  it('multiple parameters', async function() {
+  it('multiple parameters', async function () {
     const typeclass = 'std_msgs/msg/Int32';
-    const publisherTimer1 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        0
-      );
+    const publisherTimer1 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      0
+    );
     this.intervals.push(publisherTimer1);
-  
-    const publisherTimer2 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        7,
-        200);
+
+    const publisherTimer2 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      7,
+      200
+    );
     this.intervals.push(publisherTimer2);
 
     let options = Node.getDefaultOptions();
@@ -210,7 +212,7 @@ describe('subscription content-filtering', function () {
       expression: 'data >= %0 AND data <= %1',
       parameters: [5, 10],
     };
-   
+
     let msgCnt = 0;
     let fail = false;
     const subscription = this.subscriberNode.createSubscription(
@@ -227,7 +229,7 @@ describe('subscription content-filtering', function () {
 
     this.subscriberNode.spin();
 
-    const p = new Promise((resolve) => 
+    const p = new Promise((resolve) =>
       setTimeout(() => {
         resolve(msgCnt && !fail);
       }, 1000)
@@ -237,24 +239,23 @@ describe('subscription content-filtering', function () {
     assert.ok(result);
   });
 
-  it('setContentFilter', async function() {
+  it('setContentFilter', async function () {
     const typeclass = 'std_msgs/msg/Int32';
-    const publisherTimer1 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        0
-      );
+    const publisherTimer1 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      0
+    );
     this.intervals.push(publisherTimer1);
-  
-    const publisherTimer2 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        5,
-        200);
+
+    const publisherTimer2 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      5,
+      200
+    );
     this.intervals.push(publisherTimer2);
 
     let options = Node.getDefaultOptions();
@@ -288,7 +289,7 @@ describe('subscription content-filtering', function () {
 
     this.subscriberNode.spin();
 
-    const p1 = new Promise((resolve) => 
+    const p1 = new Promise((resolve) =>
       setTimeout(() => {
         let msgCnt = msgCnt0 + msgCnt5;
         const contentFilter5 = {
@@ -301,7 +302,7 @@ describe('subscription content-filtering', function () {
     let result = await p1;
     assert.strictEqual(result, 0);
 
-    const p2 = new Promise((resolve) => 
+    const p2 = new Promise((resolve) =>
       setTimeout(() => {
         resolve(!fail && msgCnt5 && !msgCnt0);
       }, SUBSCRIBER_WAIT_TIME)
@@ -310,24 +311,23 @@ describe('subscription content-filtering', function () {
     assert.ok(result);
   });
 
-  it('set undefined content filter', async function() {
+  it('set undefined content filter', async function () {
     const typeclass = 'std_msgs/msg/Int32';
-    const publisherTimer1 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        0
-      );
+    const publisherTimer1 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      0
+    );
     this.intervals.push(publisherTimer1);
-  
-    const publisherTimer2 = 
-      createAndRunPublisher(
-        this.publisherNode,
-        typeclass,
-        TOPIC,
-        5,
-        200);
+
+    const publisherTimer2 = createAndRunPublisher(
+      this.publisherNode,
+      typeclass,
+      TOPIC,
+      5,
+      200
+    );
     this.intervals.push(publisherTimer2);
 
     let options = Node.getDefaultOptions();
@@ -361,7 +361,7 @@ describe('subscription content-filtering', function () {
 
     this.subscriberNode.spin();
 
-    const p1 = new Promise((resolve) => 
+    const p1 = new Promise((resolve) =>
       setTimeout(() => {
         const result = !msgCnt0 && msgCnt5 && !fail;
         subscription.setContentFilter();
@@ -372,7 +372,7 @@ describe('subscription content-filtering', function () {
     assert.ok(result);
     assert.ok(!subscription.hasContentFilter());
 
-    const p2 = new Promise((resolve) => 
+    const p2 = new Promise((resolve) =>
       setTimeout(() => {
         resolve(msgCnt0 && msgCnt5 && !fail);
       }, SUBSCRIBER_WAIT_TIME)
@@ -381,7 +381,7 @@ describe('subscription content-filtering', function () {
     assert.ok(result);
   });
 
-  it('clearContentFilter', function(done) {
+  it('clearContentFilter', function (done) {
     const typeclass = 'std_msgs/msg/Int32';
     let options = Node.getDefaultOptions();
     options.contentFilter = {
@@ -403,7 +403,7 @@ describe('subscription content-filtering', function () {
     done();
   });
 
-  it('multiple clearContentFilter', function(done) {
+  it('multiple clearContentFilter', function (done) {
     const typeclass = 'std_msgs/msg/Int32';
     let options = Node.getDefaultOptions();
     options.contentFilter = {
@@ -449,5 +449,4 @@ describe('subscription content-filtering', function () {
 
     done();
   });
-
 });

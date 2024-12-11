@@ -217,7 +217,9 @@ describe('Fuzzing API calls testing', function () {
     var node = rclnodejs.createNode('node1', '/inconsistent');
     const RclString = 'std_msgs/msg/String';
 
-    var publisher = node.createPublisher(RclString, 'chatter7', {willCheckConsistency: true});
+    var publisher = node.createPublisher(RclString, 'chatter7', {
+      willCheckConsistency: true,
+    });
     assertThrowsError(
       () => {
         publisher.publish({ a: 1 });
@@ -247,7 +249,9 @@ describe('Fuzzing API calls testing', function () {
     var node = rclnodejs.createNode('node2', '/inconsistent');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
 
-    var client = node.createClient(AddTwoInts, 'add_two_ints', {willCheckConsistency: true});
+    var client = node.createClient(AddTwoInts, 'add_two_ints', {
+      willCheckConsistency: true,
+    });
     var service = node.createService(
       AddTwoInts,
       'add_two_ints',

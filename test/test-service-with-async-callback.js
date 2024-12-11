@@ -17,8 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe('Test creating a service with an async callback', function(){
-
+describe('Test creating a service with an async callback', function () {
   this.timeout(60 * 1000);
 
   before(function () {
@@ -43,14 +42,14 @@ describe('Test creating a service with an async callback', function(){
         assert.deepStrictEqual(request.b, 2);
         let result = response.template;
         result.sum = request.a + request.b;
-        // to trigger the bug, two conditions must hold: 
+        // to trigger the bug, two conditions must hold:
         //   - the response is send assynchronously(!) by the callback
         //     via side effect
         //   - the callback returns something unrelated to the
         //     actual response. For an async function, if I do not
         //     explicitly return anything, it will return a Promise resolving to
         //     undefined.
-        setTimeout(()=>response.send(result), 0);
+        setTimeout(() => response.send(result), 0);
       }
     );
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
