@@ -148,10 +148,10 @@ async function generateMsgForSrv(filePath, interfaceInfo, pkgMap) {
     await fsp.writeFile(path.join(packagePath, responseMsgName), arr[1]);
     let requestInfo = Object.assign({}, interfaceInfo);
     requestInfo.filePath = path.join(packagePath, requestMsgName);
-    requestInfo.interfaceName = requestInfo.interfaceName + "_Request"
+    requestInfo.interfaceName = requestInfo.interfaceName + '_Request';
     let responseInfo = Object.assign({}, interfaceInfo);
     responseInfo.filePath = path.join(packagePath, responseMsgName);
-    responseInfo.interfaceName = responseInfo.interfaceName + "_Response"
+    responseInfo.interfaceName = responseInfo.interfaceName + '_Response';
 
     addInterfaceInfo(requestInfo, 'messages', pkgMap);
     addInterfaceInfo(responseInfo, 'messages', pkgMap);
@@ -199,7 +199,7 @@ async function findAmentPackagesInDirectory(dir) {
   const rosFiles = Array.prototype.flat ? files.flat() : flat(files);
   const pkgMap = new Map();
   await Promise.all(
-    rosFiles.map(filePath => addInterfaceInfos(filePath, dir, pkgMap))
+    rosFiles.map((filePath) => addInterfaceInfos(filePath, dir, pkgMap))
   );
   return pkgMap;
 }
