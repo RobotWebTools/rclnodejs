@@ -363,8 +363,8 @@ function isInternalServiceEventMsgInterface(rosMsgInterface) {
   let subFolder = rosMsgInterface.type().subFolder;
   // Some package puts .srv files under srvs/, e.g., slam_toolbox.
   return (
-    (subFolder == 'srv' || subFolder == 'srvs' || subFolder == 'action')
-    && name.endsWith('_Event')
+    (subFolder == 'srv' || subFolder == 'srvs' || subFolder == 'action') &&
+    name.endsWith('_Event')
   );
 }
 

@@ -112,7 +112,7 @@ describe('Test message which has a fixed array of 36', function () {
     const node = rclnodejs.createNode('set_map_client');
     const client = node.createClient('nav_msgs/srv/SetMap', 'set_map');
     assert.throws(() => {
-      client.sendRequest(mapData, (response) => { });
+      client.sendRequest(mapData, (response) => {});
     }, RangeError);
     node.destroy();
     done();
@@ -126,7 +126,7 @@ describe('Test message which has a fixed array of 36', function () {
     const node = rclnodejs.createNode('set_map_client');
     const client = node.createClient('nav_msgs/srv/SetMap', 'set_map');
     assert.throws(() => {
-      client.sendRequest(mapData, (response) => { });
+      client.sendRequest(mapData, (response) => {});
     }, RangeError);
     node.destroy();
     done();
@@ -219,7 +219,7 @@ describe('Test message which has a fixed array of 36', function () {
       uint32_values_default: Uint32Array.from([0, 1, 4294967295]),
       int64_values_default: [0, 9223372036854775807, -9223372036854775808],
       uint64_values_default: [0, 1, '18446744073709551615'],
-      string_values_default: ["", "max value", "min value"],
+      string_values_default: ['', 'max value', 'min value'],
       alignment_check: 100,
       constants_values: [],
     };
