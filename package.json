@@ -59,7 +59,6 @@
     "jsdoc": "^4.0.4",
     "lint-staged": "^15.2.10",
     "mocha": "^11.0.2",
-    "prettier": "^3.4.2",
     "sinon": "^19.0.2",
     "tree-kill": "^1.2.2",
     "typescript": "^5.7.2"
@@ -83,7 +82,8 @@
     "nan": "^2.22.0",
     "rimraf": "^6.0.1",
     "uuid": "^11.0.3",
-    "walk": "^2.3.15"
+    "walk": "^2.3.15",
+    "prettier": "^3.4.2"
   },
   "husky": {
     "hooks": {
