@@ -230,28 +230,28 @@ const deallocator = require('../../rosidl_gen/deallocator.js');
 const translator = require('../../rosidl_gen/message_translator.js');
 
 {{~ it.spec.fields :field}}
-{{? shouldRequire(it.spec.baseType, field.type)}}
-const {{=getWrapperNameByType(field.type)}} = require('../../generated/{{=getPackageNameByType(field.type)}}/{{=getModulePathByType(field.type, it.messageInfo)}}');
-{{?}}
+  {{? shouldRequire(it.spec.baseType, field.type)}}
+  const {{=getWrapperNameByType(field.type)}} = require('../../generated/{{=getPackageNameByType(field.type)}}/{{=getModulePathByType(field.type, it.messageInfo)}}');
+  {{?}}
 {{~}}
 
 {{? it.spec.msgName === 'String'}}
 const {{=refObjectType}} = primitiveTypes.string;
 {{??}}
 const {{=refObjectType}} = StructType({
-{{~ it.spec.fields :field}}
-  {{? field.type.isPrimitiveType && !field.type.isArray}}
-  {{=field.name}}: primitiveTypes.{{=field.type.type}},
-  {{?? field.type.isPrimitiveType && field.type.isArray && field.type.isFixedSizeArray}}
-  {{=field.name}}: ArrayType(primitiveTypes.{{=field.type.type}}, {{=field.type.arraySize}}),
-  {{?? !field.type.isPrimitiveType && field.type.isArray && field.type.isFixedSizeArray}}
-  {{=field.name}}: ArrayType({{=getWrapperNameByType(field.type)}}.refObjectType, {{=field.type.arraySize}}),
-  {{?? field.type.isArray}}
-  {{=field.name}}: {{=getWrapperNameByType(field.type)}}.refObjectArrayType,
-  {{?? true}}
-  {{=field.name}}: {{=getWrapperNameByType(field.type)}}.refObjectType,
-  {{?}}
-{{~}}
+  {{~ it.spec.fields :field}}
+    {{? field.type.isPrimitiveType && !field.type.isArray}}
+    {{=field.name}}: primitiveTypes.{{=field.type.type}},
+    {{?? field.type.isPrimitiveType && field.type.isArray && field.type.isFixedSizeArray}}
+    {{=field.name}}: ArrayType(primitiveTypes.{{=field.type.type}}, {{=field.type.arraySize}}),
+    {{?? !field.type.isPrimitiveType && field.type.isArray && field.type.isFixedSizeArray}}
+    {{=field.name}}: ArrayType({{=getWrapperNameByType(field.type)}}.refObjectType, {{=field.type.arraySize}}),
+    {{?? field.type.isArray}}
+    {{=field.name}}: {{=getWrapperNameByType(field.type)}}.refObjectArrayType,
+    {{??}}
+    {{=field.name}}: {{=getWrapperNameByType(field.type)}}.refObjectType,
+    {{?}}
+  {{~}}
 });
 {{?}}
 
@@ -259,7 +259,7 @@ const {{=refArrayType}} = ArrayType({{=refObjectType}});
 const {{=refObjectArrayType}} = StructType({
 {{? usePlainTypedArray}}
   data: ref.refType(ref.types.{{=currentTypedArrayElementType}}),
-{{?? true}}
+{{??}}
   data: {{=refArrayType}},
 {{?}}
   size: ref.types.size_t,
@@ -322,7 +322,6 @@ class {{=objectWrapper}} {
     this._willCheckConsistency = willCheckConsistency;
     this._wrapperFields = {};
     this._refObject = new {{=refObjectType}}();
-
     {{~ it.spec.fields :field}}
       {{? field.type.isArray}}
       this._wrapperFields.{{=field.name}} = {{=getWrapperNameByType(field.type)}}.createArray();
@@ -708,7 +707,7 @@ class {{=arrayWrapper}} {
       {{? usePlainTypedArray}}
       const buffer = Buffer.from(new Uint8Array(this._wrappers.buffer));
       this._refObject.data = buffer;
-      {{?? true}}
+      {{??}}
       this._refObject.data = this._refArray.buffer;
       {{?}}
     }
