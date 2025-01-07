@@ -269,7 +269,7 @@ const {{=refObjectArrayType}} = StructType({
 {{/* Define the wrapper class for the message. */}}
 class {{=objectWrapper}} {
   constructor(other, willCheckConsistency = false) {
-    this._initMembers(willCheckConsistency);
+    this._initialize(willCheckConsistency);
     this._setDefaults();
 
     {{/* Construct `this` from `other`. */}}
@@ -296,6 +296,7 @@ class {{=objectWrapper}} {
     this.freeze();
   }
 
+  {{/* Set default values if the fields have. */}}
   _setDefaults() {
     {{~ it.spec.fields :field}}
       {{/* Set the flag of initialization. */}}
@@ -318,7 +319,7 @@ class {{=objectWrapper}} {
     {{~}}
   }
 
-  _initMembers(willCheckConsistency) {
+  _initialize(willCheckConsistency) {
     this._willCheckConsistency = willCheckConsistency;
     this._wrapperFields = {};
     this._refObject = new {{=refObjectType}}();
@@ -368,7 +369,7 @@ class {{=objectWrapper}} {
     return this._refObject.ref();
   }
 
-  {{ /*Allocate the memory following the struct of the message*/ }}
+  {{ /*Assign values to the ref object. */ }}
   freeze(own = false, checkConsistency = false) {
     {{~ it.spec.fields :field}}
       {{? field.type.isPrimitiveType && !field.type.isArray}}
@@ -409,6 +410,15 @@ class {{=objectWrapper}} {
         this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
         this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
       }
+      {{?? field.type.isArray && field.type.isPrimitiveType && isTypedArrayType(field.type)}}
+      if (!own) {
+        this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
+        this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+      } else {
+        this._wrapperFields.{{=field.name}}.fill({{=getTypedArrayName(field.type)}}.from([]));
+        this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
+        this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+      }
       {{?? field.type.isArray && !field.type.isPrimitiveType && field.type.isFixedSizeArray}}
       for (let i = 0; i < {{=field.type.arraySize}}; i++) {
         if (this._wrapperFields.{{=field.name}}.data[i]) {
@@ -416,16 +426,9 @@ class {{=objectWrapper}} {
           this._refObject.{{=field.name}}[i] = this._wrapperFields.{{=field.name}}.data[i].refObject;
         }
       }
-      {{?? !field.type.isPrimitiveType || field.type.isArray}}
+      {{?? field.type.isArray || !field.type.isPrimitiveType}}
       this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
       this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
-        {{? field.type.isArray && field.type.isPrimitiveType}}
-        if (own) {
-          this._wrapperFields.{{=field.name}}.fill({{=getTypedArrayName(field.type)}}.from([]));
-          this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
-          this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
-        }
-        {{?}}
       {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
       if (own) {
         this._wrapperFields.{{=field.name}}.freeze(own, checkConsistency);
@@ -470,7 +473,7 @@ class {{=objectWrapper}} {
     for (let i = 0; i < {{=field.type.arraySize}}; i++) {
       this._wrapperFields.{{=field.name}}.data[i].copyRefObject(refObject.{{=field.name}}[i]);
     }
-    {{?? !field.type.isPrimitiveType || field.type.isArray}}
+    {{?? field.type.isArray || !field.type.isPrimitiveType}}
     this._wrapperFields.{{=field.name}}.copyRefObject(refObject.{{=field.name}});
     {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
     this._wrapperFields.{{=field.name}}.data = refObject.{{=field.name}}.data;
@@ -565,6 +568,7 @@ class {{=objectWrapper}} {
     if (value.length !== {{=field.type.arraySize}}) {
       throw new RangeError('The length of the array must be {{=field.type.arraySize}}.');
     }
+
     {{?}}
     {{?field.type.isArray && field.type.isUpperBound}}
     if (value.length > {{=field.type.arraySize}}) {
@@ -660,7 +664,7 @@ class {{=arrayWrapper}} {
   fill(values) {
     {{? usePlainTypedArray}}
     if (Array.isArray(values)) {
-      {{/* Convert JavaScript array. */}}
+      {{/* Convert to TypedArray. */}}
       this._wrappers = new {{=currentTypedArray}}(values);
     } else {
       this._wrappers = values;
@@ -840,14 +844,14 @@ class {{=arrayWrapper}} {
 }
 
 {{? it.spec.constants != undefined && it.spec.constants.length}}
-{{/* Define constants ({{=it.spec.constants.length}} in total). */}}
-{{~ it.spec.constants :c}}
-{{? c.type === "string"}}
-Object.defineProperty({{=objectWrapper}}, "{{=c.name}}", {value: "{{=c.value}}", writable: false, enumerable: true, configurable: true});
-{{??}}
-Object.defineProperty({{=objectWrapper}}, "{{=c.name}}", {value: {{=c.value}}, writable: false, enumerable: true, configurable: true});
-{{?}}
-{{~}}
+  {{/* Define constants ({{=it.spec.constants.length}} in total). */}}
+  {{~ it.spec.constants :c}}
+    {{? c.type === "string"}}
+    Object.defineProperty({{=objectWrapper}}, "{{=c.name}}", {value: "{{=c.value}}", writable: false, enumerable: true, configurable: true});
+    {{??}}
+    Object.defineProperty({{=objectWrapper}}, "{{=c.name}}", {value: {{=c.value}}, writable: false, enumerable: true, configurable: true});
+    {{?}}
+  {{~}}
 {{?}}
 
 module.exports = {{=objectWrapper}};
