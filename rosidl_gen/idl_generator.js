@@ -42,7 +42,7 @@ function removeEmptyLines(str) {
  */
 async function writeGeneratedCode(dir, fileName, code) {
   if (fileName.endsWith('.js')) {
-    code = await prettier.format(code, { singleQuote: true, parser: 'babel' });
+    code = await prettier.format(code, { parser: 'babel' });
   }
   await fse.mkdirs(dir);
   await fse.writeFile(path.join(dir, fileName), code);
