@@ -293,7 +293,7 @@ class {{=objectWrapper}} {
     this.freeze();
   }
 
-  {{/* Set default values if the fields have. */}}
+  {{/* Set default values if the fields of the message have. */}}
   _setDefaults() {
     {{~ it.spec.fields :field}}
       {{? field.type.isPrimitiveType && !field.type.isArray && field.default_value}}
@@ -376,8 +376,8 @@ class {{=objectWrapper}} {
             }
           }
         }
-        {{/* For non-typed array like int64/uint64/bool. */}}
         {{??}}
+        {{/* For non-typed array like int64/uint64/bool. */}}
         this._refObject.{{=field.name}} = this._{{=field.name}}Array;
         {{?}}
       {{?? field.type.isArray && field.type.isPrimitiveType && isTypedArrayType(field.type) && field.type.isFixedSizeArray}}
@@ -661,9 +661,8 @@ class {{=arrayWrapper}} {
 
   {{/* Put all data currently stored in `this._wrappers` into `this._refObject`. */}}
   freeze(own) {
-    {{? usePlainTypedArray}}
     {{/* When it's a TypedArray: no need to copy to `this._refArray`. */}}
-    {{??}}
+    {{? !usePlainTypedArray}}
     this._wrappers.forEach((wrapper, index) => {
       wrapper.freeze(own);
       this._refArray[index] = wrapper.refObject;
