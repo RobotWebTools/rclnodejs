@@ -290,7 +290,7 @@ class {{=objectWrapper}} {
       {{/* Try to construct the message from a plan object of JavaScript. */}}
       translator.constructFromPlanObject(this, other);
     }
-    this.freeze();
+    this.freeze(/*own=*/false);
   }
 
   {{/* Set default values if the fields of the message have. */}}
@@ -360,7 +360,7 @@ class {{=objectWrapper}} {
   }
 
   {{ /*Assign values to the ref object wrapped by `this`. */ }}
-  freeze(own = false) {
+  freeze(own) {
     {{~ it.spec.fields :field}}
       {{? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type) && field.type.isFixedSizeArray}}
         {{? field.type.type === 'string'}}
@@ -383,24 +383,19 @@ class {{=objectWrapper}} {
       {{?? field.type.isArray && field.type.isPrimitiveType && isTypedArrayType(field.type) && field.type.isFixedSizeArray}}
       this._refObject.{{=field.name}} = Array.from(this._wrapperFields.{{=field.name}}.data);
       {{?? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
-      if (!own) {
-        this._wrapperFields.{{=field.name}}.fill(this._{{=field.name}}Array);
-        this._wrapperFields.{{=field.name}}.freeze(own);
-        this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
-      } else {
+      if (own) {
         this._wrapperFields.{{=field.name}}.fill([]);
-        this._wrapperFields.{{=field.name}}.freeze(own);
-        this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
-      }
-      {{?? field.type.isArray && field.type.isPrimitiveType && isTypedArrayType(field.type)}}
-      if (!own) {
-        this._wrapperFields.{{=field.name}}.freeze(own);
-        this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
       } else {
-        this._wrapperFields.{{=field.name}}.fill({{=getTypedArrayName(field.type)}}.from([]));
-        this._wrapperFields.{{=field.name}}.freeze(own);
-        this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+        this._wrapperFields.{{=field.name}}.fill(this._{{=field.name}}Array);
       }
+      this._wrapperFields.{{=field.name}}.freeze(own);
+      this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
+      {{?? field.type.isArray && field.type.isPrimitiveType && isTypedArrayType(field.type)}}
+      if (own) {
+        this._wrapperFields.{{=field.name}}.fill({{=getTypedArrayName(field.type)}}.from([]));
+      }
+      this._wrapperFields.{{=field.name}}.freeze(own);
+      this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
       {{?? field.type.isArray && !field.type.isPrimitiveType && field.type.isFixedSizeArray}}
       for (let i = 0; i < {{=field.type.arraySize}}; i++) {
         if (this._wrapperFields.{{=field.name}}.data[i]) {
@@ -409,6 +404,11 @@ class {{=objectWrapper}} {
         }
       }
       {{?? field.type.isArray || !field.type.isPrimitiveType}}
+        {{? field.type.isArray}}
+        if (own) {
+          this._wrapperFields.{{=field.name}}.fill([]);
+        }
+        {{?}}
       this._wrapperFields.{{=field.name}}.freeze(own);
       this._refObject.{{=field.name}} = this._wrapperFields.{{=field.name}}.refObject;
       {{?? field.type.type === 'string' && it.spec.msgName !== 'String'}}
