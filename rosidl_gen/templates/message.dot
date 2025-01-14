@@ -157,7 +157,7 @@ function isTypedArrayType(type) {
   return typedArrayType.indexOf(type.type.toLowerCase()) !== -1;
 }
 
-const usePlainTypedArray = isTypedArrayType(it.spec.baseType);
+const willUseTypedArray = isTypedArrayType(it.spec.baseType);
 const currentTypedArray = getTypedArrayName(it.spec.baseType);
 const currentTypedArrayElementType = getTypedArrayElementName(it.spec.baseType);
 
@@ -219,7 +219,7 @@ function extractMemberNames(fields) {
 }
 }}
 
-{{? usePlainTypedArray}}
+{{? willUseTypedArray}}
 const rclnodejs = require('bindings')('rclnodejs');
 {{?}}
 const ref = require('@rclnodejs/ref-napi');
@@ -257,7 +257,7 @@ const {{=refObjectType}} = StructType({
 
 const {{=refArrayType}} = ArrayType({{=refObjectType}});
 const {{=refObjectArrayType}} = StructType({
-  {{? usePlainTypedArray}}
+  {{? willUseTypedArray}}
   data: ref.refType(ref.types.{{=currentTypedArrayElementType}}),
   {{??}}
   data: {{=refArrayType}},
@@ -377,7 +377,7 @@ class {{=objectWrapper}} {
           }
         }
         {{??}}
-        {{/* For non-typed array like int64/uint64/bool. */}}
+        {{/* For non-TypedArray like int64/uint64/bool. */}}
         this._refObject.{{=field.name}} = this._{{=field.name}}Array;
         {{?}}
       {{?? field.type.isArray && field.type.isPrimitiveType && isTypedArrayType(field.type) && field.type.isFixedSizeArray}}
@@ -439,7 +439,7 @@ class {{=objectWrapper}} {
         this._{{=field.name}}Array[index] = refObject.{{=field.name}}[index].data;
       }
       {{??}}
-      {{/* For non-typed array like int64/uint64/bool. */}}
+      {{/* For non-TypedArray like int64/uint64/bool. */}}
       this._{{=field.name}}Array = refObject.{{=field.name}}.toArray();
       {{?}}
     {{?? field.type.isArray && field.type.isPrimitiveType && !isTypedArrayType(field.type)}}
@@ -472,9 +472,8 @@ class {{=objectWrapper}} {
     {{? field.type.isArray && !field.type.isFixedSizeArray}}
     if (refObject.{{=field.name}}.size != 0) {
       {{=getWrapperNameByType(field.type)}}.ArrayType.freeArray(refObject.{{=field.name}});
-      if ({{=getWrapperNameByType(field.type)}}.ArrayType.useTypedArray) {
-        {{/* Do nothing, the v8 will take the ownership of the ArrayBuffer used by the typed array. */}}
-      } else {
+      {{/* We don't need to free the memory for TypedArray objects, because v8 takes the ownership of it. */}}
+      if (!{{=getWrapperNameByType(field.type)}}.ArrayType.useTypedArray) {
         deallocator.freeStructMember(refObject.{{=field.name}}, {{=getWrapperNameByType(field.type)}}.refObjectArrayType, 'data');
       }
     }
@@ -630,7 +629,7 @@ class {{=arrayWrapper}} {
   }
 
   fill(values) {
-    {{? usePlainTypedArray}}
+    {{? willUseTypedArray}}
     if (Array.isArray(values)) {
       {{/* Convert to TypedArray. */}}
       this._wrappers = new {{=currentTypedArray}}(values);
@@ -662,7 +661,7 @@ class {{=arrayWrapper}} {
   {{/* Put all data currently stored in `this._wrappers` into `this._refObject`. */}}
   freeze(own) {
     {{/* When it's a TypedArray: no need to copy to `this._refArray`. */}}
-    {{? !usePlainTypedArray}}
+    {{? !willUseTypedArray}}
     this._wrappers.forEach((wrapper, index) => {
       wrapper.freeze(own);
       this._refArray[index] = wrapper.refObject;
@@ -675,7 +674,7 @@ class {{=arrayWrapper}} {
     if (this._refObject.capacity === 0) {
       this._refObject.data = null
     } else {
-      {{? usePlainTypedArray}}
+      {{? willUseTypedArray}}
       const buffer = Buffer.from(new Uint8Array(this._wrappers.buffer));
       this._refObject.data = buffer;
       {{??}}
@@ -722,7 +721,7 @@ class {{=arrayWrapper}} {
     if (size < 0) {
       throw new RangeError('Invalid argument: should provide a positive number');
     }
-    {{? usePlainTypedArray}}
+    {{? willUseTypedArray}}
     this._refArray = undefined;
     {{??}}
     this._refArray = new {{=refArrayType}}(size);
@@ -732,7 +731,7 @@ class {{=arrayWrapper}} {
     this._refObject.size = size;
     this._refObject.capacity = size;
 
-    {{? usePlainTypedArray}}
+    {{? willUseTypedArray}}
     this._wrappers = new {{=currentTypedArray}}(size);
     {{??}}
     this._wrappers = new Array();
@@ -746,9 +745,9 @@ class {{=arrayWrapper}} {
   copyRefObject(refObject) {
     this._refObject = refObject;
 
-    {{? usePlainTypedArray}}
+    {{? willUseTypedArray}}
     const byteLen = refObject.size * ref.types.{{=currentTypedArrayElementType}}.size;
-    {{/* An ArrayBuffer object doesn't hold the ownership of memory block starting from address. */}}
+    {{/* An ArrayBuffer object doesn't hold the ownership of memory block starting from address for TypedArray. */}}
     const arrayBuffer = refObject.data.length !== 0 ?
         rclnodejs.createArrayBufferFromAddress(refObject.data.hexAddress(), byteLen) :
         Buffer.alloc(0);
@@ -769,10 +768,10 @@ class {{=arrayWrapper}} {
     }
 
     this._resize(other.size);
-    {{? usePlainTypedArray}}
+    {{? willUseTypedArray}}
     this._wrappers = other._wrappers.slice();
     {{??}}
-    {{/* Deep copy for the type of Array. */}}
+    {{/* Deep copy for non-TypedArray. */}}
     other._wrappers.forEach((wrapper, index) => {
       this._wrappers[index].copy(wrapper);
     });
@@ -780,9 +779,8 @@ class {{=arrayWrapper}} {
   }
 
   static freeArray(refObject) {
-    {{? usePlainTypedArray}}
-    {{/* For TypedArray, `.data` will be 'free()'-ed in parent struct. */}}
-    {{??}}
+    {{/* We don't need to free the memory for TypedArray objects, because v8 takes the ownership of it. */}}
+    {{? !willUseTypedArray}}
     let refObjectArray = refObject.data;
     refObjectArray.length = refObject.size;
     for (let index = 0; index < refObject.size; index++) {
@@ -800,7 +798,7 @@ class {{=arrayWrapper}} {
   }
 
   static get useTypedArray() {
-    return {{=usePlainTypedArray}};
+    return {{=willUseTypedArray}};
   }
 
   get classType() {
