@@ -27,7 +27,7 @@ cp -f scripts/npmjs-readme.md $MODULEDIR/README.md
 
 pushd . > /dev/null
 cd $WORKDIR
-FILENAME=`npm pack $RAWMODULEDIR`
+FILENAME=`npm pack $RAWMODULEDIR | awk '{for(i=1; i<=NF; i++) if ($i ~ /rclnodejs-.*\.tgz/) print $i}'`
 TARFILENAME="$WORKDIR/$FILENAME"
 
 popd > /dev/null
