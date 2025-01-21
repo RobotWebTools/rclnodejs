@@ -60,7 +60,7 @@
               'OS_LINUX'
             ],
             'cflags_cc': [
-              '-std=c++17'
+              '-std=c++20'
             ],
             'include_dirs': 
             [
@@ -104,7 +104,7 @@
               'OS_WINDOWS'
             ],
             'cflags_cc': [
-              '-std=c++17'
+              '-std=c++20'
             ],
             'include_dirs': [
               './src/third_party/dlfcn-win32/',
