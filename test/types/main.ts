@@ -21,6 +21,9 @@ rclnodejs.isShutdown();
 // $ExpectType void
 rclnodejs.shutdown();
 
+// $ExpectType void
+rclnodejs.removeSignalHandlers();
+
 // ---- DistroUtil ----
 
 // $ExpectType DistroId
