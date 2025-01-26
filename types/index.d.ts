@@ -145,6 +145,13 @@ declare module 'rclnodejs' {
   ): MessageType<T>;
 
   /**
+   * Removes the default signal handler installed by rclnodejs. After calling this, rclnodejs
+   * will no longer clean itself up when a SIGINT is received, it is the application's
+   * responsibility to properly shut down all nodes and contexts.
+   */
+  function removeSignalHandlers(): void;
+
+  /**
    * Get a list of action names and types for action clients associated with a node.
    * @param node - The node used for discovery.
    * @param nodeName - The name of a remote node to get action clients for.
