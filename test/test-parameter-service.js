@@ -367,4 +367,34 @@ describe('Parameter_server tests', function () {
       `Expected 3 parameter-events, received ${eventCount} events.`
     );
   });
+
+  it('Get_parameter_types', async function () {
+    const client = clientNode.createClient(
+      'rcl_interfaces/srv/GetParameterTypes',
+      'test_node/get_parameter_types'
+    );
+    await client.waitForService();
+
+    const ParamTypes = rclnodejs.require('rcl_interfaces/msg/ParameterType');
+    const request = new (rclnodejs.require(
+      'rcl_interfaces/srv/GetParameterTypes'
+    ).Request)();
+    request.names = ['p1', 'p2', 'A.p3'];
+    let success = false;
+
+    client.sendRequest(request, (response) => {
+      assert.deepEqual(response.types.length, 3);
+      assert.deepEqual(
+        response.types,
+        Uint8Array.from([
+          ParamTypes.PARAMETER_STRING,
+          ParamTypes.PARAMETER_INTEGER,
+          ParamTypes.PARAMETER_BOOL,
+        ])
+      );
+      success = true;
+    });
+    await assertUtils.createDelay(STD_WAIT);
+    assert.ok(success);
+  });
 });
