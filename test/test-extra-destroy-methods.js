@@ -105,7 +105,7 @@ describe('Node extra destroy methods testing', function () {
     );
 
     node.destroyService(service);
-    assert.deepStrictEqual(node._services.length, 5);
+    assert.deepStrictEqual(node._services.length, 6);
   });
 
   it('destroyTimer()', function () {
