@@ -93,7 +93,7 @@ describe('Node extra destroy methods testing', function () {
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     // const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
     var service = node.createService(AddTwoInts, 'add_two_ints', () => {});
-    assert.deepStrictEqual(node._services.length, 6);
+    assert.deepStrictEqual(node._services.length, 7);
 
     assertThrowsError(
       function () {
@@ -105,7 +105,7 @@ describe('Node extra destroy methods testing', function () {
     );
 
     node.destroyService(service);
-    assert.deepStrictEqual(node._services.length, 5);
+    assert.deepStrictEqual(node._services.length, 6);
   });
 
   it('destroyTimer()', function () {
