@@ -243,7 +243,7 @@ subscription = node.createSubscription(
   TOPIC,
   { isRaw: false },
   (message: rclnodejs.std_msgs.msg.String) => {
-    const receivedMessage: rclnodejs.std_msgs.msg.String = message;
+    const receivedMessage = message;
   }
 );
 
@@ -253,7 +253,7 @@ subscription = node.createSubscription(
   TOPIC,
   { isRaw: true },
   (message: Buffer) => {
-    const receivedRawMessage: Buffer = message;
+    const receivedRawMessage = message;
   }
 );
 
