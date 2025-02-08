@@ -237,6 +237,26 @@ subscription = node.createSubscription(
   (msg) => {}
 );
 
+// $ExpectType Subscription
+subscription = node.createSubscription(
+  TYPE_CLASS,
+  TOPIC,
+  { isRaw: false },
+  (message: rclnodejs.std_msgs.msg.String) => {
+    const receivedMessage = message;
+  }
+);
+
+// $ExpectType Subscription receiving raw message
+subscription = node.createSubscription(
+  TYPE_CLASS,
+  TOPIC,
+  { isRaw: true },
+  (message: Buffer) => {
+    const receivedRawMessage = message;
+  }
+);
+
 // $ExpectType string
 subscription.topic;
 

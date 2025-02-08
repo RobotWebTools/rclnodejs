@@ -13,7 +13,23 @@ declare module 'rclnodejs' {
    */
   type SubscriptionCallback<T extends TypeClass<MessageTypeClassName>> =
     // * @param message - The published message
-    (message: MessageType<T> | Buffer) => void;
+    (message: MessageType<T>) => void;
+
+  /**
+   * A callback for receiving published raw messages.
+   *
+   * @param message - The published message.
+   *
+   * @remarks
+   * See {@link Node#createSubscription | Node.createSubscription}
+   * See {@link SubscriptionContentFilter}
+   * See {@link Node#createPublisher | Node.createPublisher}
+   * See {@link Publisher}
+   * See {@link Subscription}
+   */
+  type SubscriptionWithRawMessageCallback =
+    // * @param message - The published raw message
+    (message: Buffer) => void;
 
   /**
    * A ROS Subscription for published messages on a topic.
