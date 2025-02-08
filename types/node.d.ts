@@ -324,7 +324,7 @@ declare module 'rclnodejs' {
       typeClass: T,
       topic: string,
       options: Options,
-      callback: SubscriptionCallback<T>
+      callback: SubscriptionCallback<T> | SubscriptionWithRawMessageCallback
     ): Subscription;
 
     /**
