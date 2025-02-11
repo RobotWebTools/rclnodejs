@@ -91,20 +91,20 @@ describe('Test rclnodejs nodes in a single process', function () {
       AddTwoInts,
       'single_ps_channel2',
       (request, response) => {
-        assert.deepStrictEqual(request.a, 1);
-        assert.deepStrictEqual(request.b, 2);
+        assert.deepStrictEqual(request.a, 1n);
+        assert.deepStrictEqual(request.b, 2n);
         let result = response.template;
         result.sum = request.a + request.b;
         return result;
       }
     );
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
-    const request = { a: 1, b: 2 };
+    const request = { a: 1n, b: 2n };
 
     var timer = clientNode.createTimer(100, () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
-        assert.deepStrictEqual(response.sum, 3);
+        assert.deepStrictEqual(response.sum, 3n);
         serviceNode.destroy();
         clientNode.destroy();
         done();
@@ -123,20 +123,20 @@ describe('Test rclnodejs nodes in a single process', function () {
       AddTwoInts,
       'single_ps_channel2_2',
       (request, response) => {
-        assert.deepStrictEqual(request.a, 1);
-        assert.deepStrictEqual(request.b, 2);
+        assert.deepStrictEqual(request.a, 1n);
+        assert.deepStrictEqual(request.b, 2n);
         let result = response.template;
         result.sum = request.a + request.b;
         response.send(result);
       }
     );
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2_2');
-    const request = { a: 1, b: 2 };
+    const request = { a: 1n, b: 2n };
 
     var timer = clientNode.createTimer(100, () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
-        assert.deepStrictEqual(response.sum, 3);
+        assert.deepStrictEqual(response.sum, 3n);
         serviceNode.destroy();
         clientNode.destroy();
         done();
@@ -155,18 +155,18 @@ describe('Test rclnodejs nodes in a single process', function () {
       AddTwoInts,
       'single_ps_channel2_3',
       (request, response) => {
-        assert.deepStrictEqual(request.a, 1);
-        assert.deepStrictEqual(request.b, 2);
+        assert.deepStrictEqual(request.a, 1n);
+        assert.deepStrictEqual(request.b, 2n);
         response.send({ sum: request.a + request.b });
       }
     );
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2_3');
-    const request = { a: 1, b: 2 };
+    const request = { a: 1n, b: 2n };
 
     var timer = clientNode.createTimer(100, () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
-        assert.deepStrictEqual(response.sum, 3);
+        assert.deepStrictEqual(response.sum, 3n);
         serviceNode.destroy();
         clientNode.destroy();
         done();
@@ -184,8 +184,8 @@ describe('Test rclnodejs nodes in a single process', function () {
       AddTwoInts,
       'new_style_require2',
       (request, response) => {
-        assert.deepStrictEqual(request.a, 1);
-        assert.deepStrictEqual(request.b, 2);
+        assert.deepStrictEqual(request.a, 1n);
+        assert.deepStrictEqual(request.b, 2n);
         let result = response.template;
         result.sum = request.a + request.b;
         return result;
@@ -193,13 +193,13 @@ describe('Test rclnodejs nodes in a single process', function () {
     );
     var client = node.createClient(AddTwoInts, 'new_style_require2');
     let request = new AddTwoInts.Request();
-    request.a = 1;
-    request.b = 2;
+    request.a = 1n;
+    request.b = 2n;
 
     var timer = node.createTimer(100, () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
-        assert.deepStrictEqual(response.sum, 3);
+        assert.deepStrictEqual(response.sum, 3n);
         node.destroy();
         done();
       });
@@ -225,11 +225,11 @@ describe('Test rclnodejs nodes in a single process', function () {
     );
     var client = node.createClient(AddTwoInts, 'multi_request_service');
     let request = new AddTwoInts.Request();
-    request.a = 1;
-    request.b = 2;
+    request.a = 1n;
+    request.b = 2n;
     let request2 = new AddTwoInts.Request();
-    request2.a = 3;
-    request2.b = 4;
+    request2.a = 3n;
+    request2.b = 4n;
 
     let pendingRequests = 2;
     let request1Succeeded = false;
@@ -241,7 +241,7 @@ describe('Test rclnodejs nodes in a single process', function () {
       logger.info(
         `[Callback 1] received response: ${response.sum}, pending requests: ${pendingRequests}`
       );
-      assert.deepStrictEqual(response.sum, 3);
+      assert.deepStrictEqual(response.sum, 3n);
       request1Succeeded = true;
       if (pendingRequests == 0 && request1Succeeded && request2Succeeded) {
         logger.info(
@@ -257,7 +257,7 @@ describe('Test rclnodejs nodes in a single process', function () {
       logger.info(
         `[Callback 2] received response: ${response.sum}, pending requests: ${pendingRequests}`
       );
-      assert.deepStrictEqual(response.sum, 7);
+      assert.deepStrictEqual(response.sum, 7n);
       request2Succeeded = true;
       if (pendingRequests == 0 && request1Succeeded && request2Succeeded) {
         logger.info(

@@ -14,10 +14,18 @@
 
 'use strict';
 
+const compareVersions = require('compare-versions');
 const path = require('path');
 const execFile = require('child_process').execFile;
 
 const pythonExecutable = require('./py_utils').getPythonExecutable('python3');
+
+const version = process.version;
+const isContextSupported = compareVersions.compare(
+  version.substring(1, version.length),
+  '21.0.0.0',
+  '>='
+);
 
 const rosidlParser = {
   parseMessageFile(packageName, filePath) {
@@ -30,6 +38,22 @@ const rosidlParser = {
 
   parseActionFile(packageName, filePath) {
     return this._parseFile('parse_action_file', packageName, filePath);
+  },
+
+  _parseJSONObject(str) {
+    if (isContextSupported) {
+      return JSON.parse(str, (key, value, context) => {
+        if (
+          Number.isInteger(value) &&
+          !Number.isSafeInteger(Number(context.source))
+        ) {
+          return context.source;
+        }
+        return value;
+      });
+    }
+    const JSONbigString = require('json-bigint')({ storeAsString: true });
+    return JSONbigString.parse(str);
   },
 
   _parseFile(command, packageName, filePath) {
@@ -54,7 +78,7 @@ const rosidlParser = {
               )
             );
           } else {
-            resolve(JSON.parse(stdout));
+            resolve(this._parseJSONObject(stdout));
           }
         }
       );

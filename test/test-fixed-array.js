@@ -145,8 +145,8 @@ describe('Test message which has a fixed array of 36', function () {
       uint16_value: 1,
       int32_value: 1,
       uint32_value: 1,
-      int64_value: 2,
-      uint64_value: 2,
+      int64_value: 2n,
+      uint64_value: 2n,
     };
 
     const defaultValue = {
@@ -161,8 +161,8 @@ describe('Test message which has a fixed array of 36', function () {
       uint16_value: 2000,
       int32_value: -30000,
       uint32_value: 60000,
-      int64_value: -40000000,
-      uint64_value: 50000000,
+      int64_value: -40000000n,
+      uint64_value: 50000000n,
     };
 
     const msg = {
@@ -177,14 +177,14 @@ describe('Test message which has a fixed array of 36', function () {
       uint16_values: Uint16Array.from([1, 2, 3]),
       int32_values: Int32Array.from([1, 2, 3]),
       uint32_values: Uint32Array.from([1, 2, 3]),
-      int64_values: [1, 2, 3],
-      uint64_values: [1, 2, 3],
+      int64_values: [1n, 2n, 3n],
+      uint64_values: [1n, 2n, 3n],
       string_values: ['hello', 'world', 'abc'],
       basic_types_values: [bacicType, bacicType, bacicType],
       defaults_values: [defaultValue, defaultValue, defaultValue],
       // Use a string, '18446744073709551615', representing UINT64_MAX for ref,
       // see details https://github.com/node-ffi-napi/ref-napi/blob/latest/test/uint64.js#L17.
-      uint64_values_default: [0, 1, '18446744073709551615'],
+      uint64_values_default: [0, 1, 18446744073709551615n],
       alignment_check: 100,
     };
 
@@ -201,8 +201,8 @@ describe('Test message which has a fixed array of 36', function () {
       uint16_values: Uint16Array.from([1, 2, 3]),
       int32_values: Int32Array.from([1, 2, 3]),
       uint32_values: Uint32Array.from([1, 2, 3]),
-      int64_values: [1, 2, 3],
-      uint64_values: [1, 2, 3],
+      int64_values: [1n, 2n, 3n],
+      uint64_values: [1n, 2n, 3n],
       string_values: ['hello', 'world', 'abc'],
       basic_types_values: [bacicType, bacicType, bacicType],
       defaults_values: [defaultValue, defaultValue, defaultValue],
@@ -217,8 +217,8 @@ describe('Test message which has a fixed array of 36', function () {
       uint16_values_default: Uint16Array.from([0, 1, 65535]),
       int32_values_default: Int32Array.from([0, 2147483647, -2147483648]),
       uint32_values_default: Uint32Array.from([0, 1, 4294967295]),
-      int64_values_default: [0, 9223372036854775807, -9223372036854775808],
-      uint64_values_default: [0, 1, '18446744073709551615'],
+      int64_values_default: [0n, 9223372036854775807n, -9223372036854775808n],
+      uint64_values_default: [0n, 1n, 18446744073709551615n],
       string_values_default: ['', 'max value', 'min value'],
       alignment_check: 100,
       constants_values: [],

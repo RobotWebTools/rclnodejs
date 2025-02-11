@@ -478,7 +478,6 @@ function primitiveType2JSName(type) {
     case 'int8':
     case 'int16':
     case 'int32':
-    case 'int64':
 
     // signed explicit float types
     case 'float32':
@@ -488,7 +487,6 @@ function primitiveType2JSName(type) {
     case 'uint8':
     case 'uint16':
     case 'uint32':
-    case 'uint64':
       jsName = 'number';
       break;
     case 'bool':
@@ -498,6 +496,10 @@ function primitiveType2JSName(type) {
     case 'string':
     case 'wstring':
       jsName = 'string';
+      break;
+    case 'int64':
+    case 'uint64':
+      jsName = 'bigint';
       break;
   }
 

@@ -301,9 +301,9 @@ describe('Rclnodejs message type data testing', function () {
     var msgInt64 = rclnodejs.require('std_msgs').msg.Int64;
     var msg = new msgInt64();
 
-    msg.data = 0x1fffffffffffff;
-    assert.deepStrictEqual(typeof msg.data, 'number');
-    assert.deepStrictEqual(msg.data, Number.MAX_SAFE_INTEGER);
+    msg.data = BigInt('0x1fffffffffffff');
+    assert.deepStrictEqual(typeof msg.data, 'bigint');
+    assert.deepStrictEqual(msg.data, BigInt(Number.MAX_SAFE_INTEGER));
   });
 
   it('UInt64 data checking', function () {
@@ -311,9 +311,9 @@ describe('Rclnodejs message type data testing', function () {
     var msgUInt64 = rclnodejs.require('std_msgs').msg.UInt64;
     var msg = new msgUInt64();
 
-    msg.data = 0x1fffffffffffff;
-    assert.deepStrictEqual(typeof msg.data, 'number');
-    assert.deepStrictEqual(msg.data, Number.MAX_SAFE_INTEGER);
+    msg.data = BigInt('0x1fffffffffffff');
+    assert.deepStrictEqual(typeof msg.data, 'bigint');
+    assert.deepStrictEqual(msg.data, BigInt(Number.MAX_SAFE_INTEGER));
   });
 
   it('Float32 data checking', function () {
