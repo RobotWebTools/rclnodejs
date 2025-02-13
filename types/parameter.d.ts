@@ -261,16 +261,15 @@ declare module 'rclnodejs' {
   /**
    *
    */
-  class IntegerRange extends FloatingPointRange {
+  class IntegerRange extends Range {
     /**
      * Create a new instance.
      * @constructor
-     * @param {number} fromValue - The lowest inclusive value in range
-     * @param {number} toValue - The highest inclusive value in range
-     * @param {number} step - The internal unit size.
-     * @param {number} tolerance - The plus/minus tolerance for number equivalence.
+     * @param {bigint} fromValue - The lowest inclusive value in range
+     * @param {bigint} toValue - The highest inclusive value in range
+     * @param {bigint} step - The internal unit size.
      */
-    constructor(from: number, to: number, step?: number, tolerance?: number);
+    constructor(from: bigint, to: bigint, step?: bigint);
 
     /**
      * Determine if a ParameterType is compatible.
