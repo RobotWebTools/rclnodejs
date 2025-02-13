@@ -265,11 +265,15 @@ declare module 'rclnodejs' {
     /**
      * Create a new instance.
      * @constructor
-     * @param {bigint} fromValue - The lowest inclusive value in range
-     * @param {bigint} toValue - The highest inclusive value in range
-     * @param {bigint} step - The internal unit size.
+     * @param {bigint|number} fromValue - The lowest inclusive value in range
+     * @param {bigint|number} toValue - The highest inclusive value in range
+     * @param {bigint|number} step - The internal unit size.
      */
-    constructor(from: bigint, to: bigint, step?: bigint);
+    constructor(
+      from: bigint | number,
+      to: bigint | number,
+      step?: bigint | number
+    );
 
     /**
      * Determine if a ParameterType is compatible.
