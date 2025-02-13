@@ -20,10 +20,11 @@ const execFile = require('child_process').execFile;
 
 const pythonExecutable = require('./py_utils').getPythonExecutable('python3');
 
-const version = process.version;
+const contextSupportedVersion = '21.0.0.0';
+const currentVersion = process.version;
 const isContextSupported = compareVersions.compare(
-  version.substring(1, version.length),
-  '21.0.0.0',
+  currentVersion.substring(1, currentVersion.length),
+  contextSupportedVersion,
   '>='
 );
 
@@ -41,6 +42,9 @@ const rosidlParser = {
   },
 
   _parseJSONObject(str) {
+    // For nodejs >= `contextSupportedVersion`, we leverage context parameter to
+    // convert unsafe integer to string, otherwise, json-bigint is used.
+    // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
     if (isContextSupported) {
       return JSON.parse(str, (key, value, context) => {
         if (

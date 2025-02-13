@@ -308,8 +308,10 @@ class {{=objectWrapper}} {
         {{?}}
       {{?? field.type.isPrimitiveType && !isTypedArrayType(field.type) && field.default_value}}
         {{? isBigInt(field.type)}}
+        {{/* For non-TypedArray like int64/uint64. */}}
         this._{{=field.name}}Array = {{=JSON.stringify(field.default_value)}}.map(num => BigInt(num));
         {{??}}
+        {{/* For non-TypedArray like bool. */}}
         this._{{=field.name}}Array = {{=JSON.stringify(field.default_value)}};
         {{?}}
       {{?? field.type.isPrimitiveType && isTypedArrayType(field.type) && field.default_value}}
@@ -574,14 +576,9 @@ class {{=objectWrapper}} {
     this._wrapperFields.{{=field.name}}.data = value;
     {{?? isBigInt(field.type)}}
     if (typeof value !== "bigint") {
-      throw new TypeError('Must be type of bigint');
+      throw new TypeError('int64/uint64 must be type of bigint');
     }
     this._refObject.{{=field.name}} = value.toString();
-    /*if (typeof value === "bigint") {
-      this._refObject.{{=field.name}} = value.toString();
-    } else {
-      this._refObject.{{=field.name}} = value
-    }*/
     {{??}}
       {{? it.spec.msgName === 'String'}}
       this._refObject.size = Buffer.byteLength(value);

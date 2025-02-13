@@ -21,7 +21,6 @@ var rclValue = eval(process.argv[3]);
 
 if (['int64', 'uint64'].indexOf(rclType.toLowerCase()) !== -1) {
   rclValue = BigInt(rclValue);
-  0;
 }
 
 rclnodejs

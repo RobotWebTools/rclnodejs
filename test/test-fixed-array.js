@@ -182,8 +182,6 @@ describe('Test message which has a fixed array of 36', function () {
       string_values: ['hello', 'world', 'abc'],
       basic_types_values: [bacicType, bacicType, bacicType],
       defaults_values: [defaultValue, defaultValue, defaultValue],
-      // Use a string, '18446744073709551615', representing UINT64_MAX for ref,
-      // see details https://github.com/node-ffi-napi/ref-napi/blob/latest/test/uint64.js#L17.
       uint64_values_default: [0, 1, 18446744073709551615n],
       alignment_check: 100,
     };

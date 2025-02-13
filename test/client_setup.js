@@ -14,7 +14,6 @@
 
 'use strict';
 
-const assert = require('assert');
 const rclnodejs = require('../index.js');
 
 rclnodejs
@@ -31,8 +30,6 @@ rclnodejs
     var publisher = node.createPublisher(Int8, 'back_add_two_ints');
     client.waitForService().then(() => {
       client.sendRequest(request, (response) => {
-        // Conver `response.sum` from bigint to number.
-        assert.equal(typeof response.sum, 'bigint');
         publisher.publish(Number(response.sum));
       });
     });
