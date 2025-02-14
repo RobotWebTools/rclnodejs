@@ -45,7 +45,7 @@ declare module 'rclnodejs' {
      *
      * @param name - The parameter name, must be a valid name.
      * @param type - The type identifier.
-     * @param {value - The parameter value.
+     * @param value - The parameter value.
      */
     constructor(name: string, type: ParameterType, value?: any);
 
@@ -265,15 +265,11 @@ declare module 'rclnodejs' {
     /**
      * Create a new instance.
      * @constructor
-     * @param {bigint|number} fromValue - The lowest inclusive value in range
-     * @param {bigint|number} toValue - The highest inclusive value in range
-     * @param {bigint|number} step - The internal unit size.
+     * @param {bigint} fromValue - The lowest inclusive value in range
+     * @param {bigint} toValue - The highest inclusive value in range
+     * @param {bigint} step - The internal unit size.
      */
-    constructor(
-      from: bigint | number,
-      to: bigint | number,
-      step?: bigint | number
-    );
+    constructor(from: bigint, to: bigint, step?: bigint);
 
     /**
      * Determine if a ParameterType is compatible.
