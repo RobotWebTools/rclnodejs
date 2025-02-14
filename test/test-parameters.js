@@ -92,12 +92,12 @@ describe('rclnodejs parameters test suite', function () {
       let param = new Parameter(
         'int_param',
         ParameterType.PARAMETER_INTEGER,
-        100
+        100n
       );
-      assert.strictEqual(param.value, 100);
+      assert.strictEqual(param.value, 100n);
 
-      param.value = 101;
-      assert.strictEqual(param.value, 101);
+      param.value = 101n;
+      assert.strictEqual(param.value, 101n);
 
       assertThrowsError(() => (param.value = 'hello world'), TypeError);
     });
@@ -211,7 +211,7 @@ describe('rclnodejs parameters test suite', function () {
       ))();
       param_msg.name = 'integer_param';
       param_msg.value.type = ParameterType.PARAMETER_INTEGER;
-      param_msg.value.integer_value = 123;
+      param_msg.value.integer_value = 123n;
 
       let param;
       assert.doesNotThrow(() => {
@@ -219,7 +219,7 @@ describe('rclnodejs parameters test suite', function () {
       });
       assert.strictEqual(param.name, 'integer_param');
       assert.strictEqual(param.type, ParameterType.PARAMETER_INTEGER);
-      assert.strictEqual(param.value, 123);
+      assert.strictEqual(param.value, 123n);
     });
 
     it('should convert PARAMETER_INTEGER_ARRAY type', function () {
@@ -228,7 +228,7 @@ describe('rclnodejs parameters test suite', function () {
       ))();
       param_msg.name = 'integer_array_param';
       param_msg.value.type = ParameterType.PARAMETER_INTEGER_ARRAY;
-      param_msg.value.integer_array_value = [1, 2, 3, 4, 5];
+      param_msg.value.integer_array_value = [1n, 2n, 3n, 4n, 5n];
 
       let param;
       assert.doesNotThrow(() => {
@@ -236,7 +236,7 @@ describe('rclnodejs parameters test suite', function () {
       });
       assert.strictEqual(param.name, 'integer_array_param');
       assert.strictEqual(param.type, ParameterType.PARAMETER_INTEGER_ARRAY);
-      assert.deepStrictEqual(param.value, [1, 2, 3, 4, 5]);
+      assert.deepStrictEqual(param.value, [1n, 2n, 3n, 4n, 5n]);
     });
 
     it('should convert PARAMETER_STRING type', function () {
@@ -282,25 +282,25 @@ describe('rclnodejs parameters test suite', function () {
     });
 
     it('IntegerRange test', function () {
-      const range = new IntegerRange(0, 100, 1);
+      const range = new IntegerRange(0n, 100n, 1n);
 
       // test property accessors
-      assert.equal(range.fromValue, 0);
-      assert.equal(range.toValue, 100);
-      assert.equal(range.step, 1);
+      assert.equal(range.fromValue, 0n);
+      assert.equal(range.toValue, 100n);
+      assert.equal(range.step, 1n);
 
       // test midpoint
-      assert.ok(range.inRange(50));
+      assert.ok(range.inRange(50n));
 
       // test lower boundary
-      assert.ok(range.inRange(1));
-      assert.ok(range.inRange(0));
-      assert.ok(!range.inRange(-1));
+      assert.ok(range.inRange(1n));
+      assert.ok(range.inRange(0n));
+      assert.ok(!range.inRange(-1n));
 
       // test upper boundary
-      assert.ok(range.inRange(99));
-      assert.ok(range.inRange(100));
-      assert.ok(!range.inRange(101));
+      assert.ok(range.inRange(99n));
+      assert.ok(range.inRange(100n));
+      assert.ok(!range.inRange(101n));
     });
 
     it('FloatingPointRange test', function () {
@@ -345,22 +345,22 @@ describe('rclnodejs parameters test suite', function () {
         'int_param',
         ParameterType.PARAMETER_INTEGER
       );
-      descriptor.range = new IntegerRange(0, 255);
+      descriptor.range = new IntegerRange(0n, 255n);
 
       const param = new Parameter(
         'int_param',
         ParameterType.PARAMETER_INTEGER,
-        100
+        100n
       );
       assert.ifError(descriptor.validateParameter(param));
 
-      param.value = 255;
+      param.value = 255n;
       assert.ifError(descriptor.validateParameter(param));
 
-      param.value = -1;
+      param.value = -1n;
       assertThrowsError(() => descriptor.validateParameter(param), RangeError);
 
-      param.value = 256;
+      param.value = 256n;
       assertThrowsError(() => descriptor.validateParameter(param), RangeError);
     });
 
@@ -369,22 +369,22 @@ describe('rclnodejs parameters test suite', function () {
         'int_param',
         ParameterType.PARAMETER_INTEGER
       );
-      descriptor.range = new IntegerRange(0, 255, 5);
+      descriptor.range = new IntegerRange(0n, 255n, 5n);
 
       const param = new Parameter(
         'int_param',
         ParameterType.PARAMETER_INTEGER,
-        100
+        100n
       );
       assert.ifError(descriptor.validateParameter(param));
 
-      param.value = 255;
+      param.value = 255n;
       assert.ifError(descriptor.validateParameter(param));
 
-      param.value = 1;
+      param.value = 1n;
       assertThrowsError(() => descriptor.validateParameter(param), RangeError);
 
-      param.value = 256;
+      param.value = 256n;
       assertThrowsError(() => descriptor.validateParameter(param), RangeError);
     });
   });

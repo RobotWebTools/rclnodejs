@@ -86,8 +86,8 @@ describe('service introspection', function () {
     }
 
     this.request = {
-      a: Math.floor(Math.random() * 100),
-      b: Math.floor(Math.random() * 100),
+      a: BigInt(Math.floor(Math.random() * 100)),
+      b: BigInt(Math.floor(Math.random() * 100)),
     };
 
     this.eventQueue = [];

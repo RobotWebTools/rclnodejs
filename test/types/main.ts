@@ -680,3 +680,14 @@ actionUuid.toMessage();
 
 // $ExpectType UUID
 rclnodejs.ActionUuid.randomMessage();
+
+// ---- Parameter -----
+// $ExpectType Parameter
+const param = rclnodejs.createMessageObject('rcl_interfaces/msg/Parameter');
+param.name = 'integer_param';
+param.value.type = rclnodejs.ParameterType.PARAMETER_INTEGER;
+param.value.integer_value = BigInt(123);
+
+param.name = 'byte_array_param';
+param.value.type = rclnodejs.ParameterType.PARAMETER_BYTE_ARRAY;
+param.value.byte_array_value = [1, 2, 3];

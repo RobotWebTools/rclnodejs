@@ -271,11 +271,8 @@ describe('Rclnodejs message type testing', function () {
         'Int64_channel',
         (msg) => {
           publisher.kill('SIGINT');
-          // assert.deepStrictEqual(typeof msg.data, 'string');
-          assert.deepStrictEqual(
-            parseInt(msg.data, 10),
-            Number.MAX_SAFE_INTEGER
-          );
+          assert.deepStrictEqual(typeof msg.data, 'bigint');
+          assert.deepStrictEqual(msg.data, BigInt('0x1fffffffffffff'));
           done();
         }
       );
@@ -294,11 +291,8 @@ describe('Rclnodejs message type testing', function () {
         'UInt64_channel',
         (msg) => {
           publisher.kill('SIGINT');
-          // assert.deepStrictEqual(typeof msg.data, 'string');
-          assert.deepStrictEqual(
-            parseInt(msg.data, 10),
-            Number.MAX_SAFE_INTEGER
-          );
+          assert.deepStrictEqual(typeof msg.data, 'bigint');
+          assert.deepStrictEqual(msg.data, BigInt('0x1fffffffffffff'));
           done();
         }
       );

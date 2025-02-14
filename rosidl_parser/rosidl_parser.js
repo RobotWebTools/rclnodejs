@@ -14,10 +14,19 @@
 
 'use strict';
 
+const compareVersions = require('compare-versions');
 const path = require('path');
 const execFile = require('child_process').execFile;
 
 const pythonExecutable = require('./py_utils').getPythonExecutable('python3');
+
+const contextSupportedVersion = '21.0.0.0';
+const currentVersion = process.version;
+const isContextSupported = compareVersions.compare(
+  currentVersion.substring(1, currentVersion.length),
+  contextSupportedVersion,
+  '>='
+);
 
 const rosidlParser = {
   parseMessageFile(packageName, filePath) {
@@ -30,6 +39,25 @@ const rosidlParser = {
 
   parseActionFile(packageName, filePath) {
     return this._parseFile('parse_action_file', packageName, filePath);
+  },
+
+  _parseJSONObject(str) {
+    // For nodejs >= `contextSupportedVersion`, we leverage context parameter to
+    // convert unsafe integer to string, otherwise, json-bigint is used.
+    // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
+    if (isContextSupported) {
+      return JSON.parse(str, (key, value, context) => {
+        if (
+          Number.isInteger(value) &&
+          !Number.isSafeInteger(Number(context.source))
+        ) {
+          return context.source;
+        }
+        return value;
+      });
+    }
+    const JSONbigString = require('json-bigint')({ storeAsString: true });
+    return JSONbigString.parse(str);
   },
 
   _parseFile(command, packageName, filePath) {
@@ -54,7 +82,7 @@ const rosidlParser = {
               )
             );
           } else {
-            resolve(JSON.parse(stdout));
+            resolve(this._parseJSONObject(stdout));
           }
         }
       );
