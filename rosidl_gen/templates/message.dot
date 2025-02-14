@@ -576,7 +576,7 @@ class {{=objectWrapper}} {
     this._wrapperFields.{{=field.name}}.data = value;
     {{?? isBigInt(field.type)}}
     if (typeof value !== "bigint") {
-      throw new TypeError('int64/uint64 must be type of bigint');
+      throw new TypeError('{{=field.name}} must be type of bigint');
     }
     this._refObject.{{=field.name}} = value.toString();
     {{??}}
