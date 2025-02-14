@@ -161,9 +161,7 @@ async function generateMsgForSrv(filePath, interfaceInfo, pkgMap) {
 async function addInterfaceInfos(filePath, dir, pkgMap) {
   const interfaceInfo = grabInterfaceInfo(filePath, true);
   const ignore = pkgFilters.matchesAny(interfaceInfo);
-  if (ignore) {
-    console.log('Omitting filtered interface: ', interfaceInfo);
-  } else {
+  if (!ignore) {
     if (path.extname(filePath) === '.msg') {
       // Some .msg files were generated prior to 0.3.2 for .action files,
       // which has been disabled. So these files should be ignored here.
@@ -232,9 +230,7 @@ async function findPackagesInDirectory(dir) {
           amentExecuted
         );
         const ignore = pkgFilters.matchesAny(interfaceInfo);
-        if (ignore) {
-          console.log('Omitting filtered interface: ', interfaceInfo);
-        } else {
+        if (!ignore) {
           if (path.extname(file.name) === '.msg') {
             // Some .msg files were generated prior to 0.3.2 for .action files,
             // which has been disabled. So these files should be ignored here.

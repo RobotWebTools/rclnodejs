@@ -19,6 +19,10 @@ const rclnodejs = require('../index.js');
 var rclType = process.argv[2];
 var rclValue = eval(process.argv[3]);
 
+if (['int64', 'uint64'].indexOf(rclType.toLowerCase()) !== -1) {
+  rclValue = BigInt(rclValue);
+}
+
 rclnodejs
   .init()
   .then(() => {

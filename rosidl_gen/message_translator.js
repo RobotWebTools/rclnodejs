@@ -27,7 +27,12 @@ function copyMsgObject(msg, obj) {
     for (let i in obj) {
       if (msg.hasMember(i)) {
         const type = typeof obj[i];
-        if (type === 'string' || type === 'number' || type === 'boolean') {
+        if (
+          type === 'string' ||
+          type === 'number' ||
+          type === 'boolean' ||
+          type === 'bigint'
+        ) {
           // A primitive-type value
           msg[i] = obj[i];
         } else if (Array.isArray(obj[i]) || isTypedArray(obj[i])) {
@@ -80,17 +85,20 @@ function verifyMessage(message, obj) {
           case 'char':
           case 'int16':
           case 'int32':
-          case 'int64':
           case 'byte':
           case 'uint16':
           case 'uint32':
-          case 'uint64':
           case 'float32':
           case 'float64':
             if (typeof obj[name] != 'number') {
               return false;
             }
             break;
+          case 'int64':
+          case 'uint64':
+            if (typeof obj[name] != 'bigint') {
+              return false;
+            }
           case 'bool':
             if (typeof obj[name] != 'boolean') {
               return false;
@@ -171,7 +179,12 @@ function toROSMessage(TypeClass, obj) {
 
 function constructFromPlanObject(msg, obj) {
   const type = typeof obj;
-  if (type === 'string' || type === 'number' || type === 'boolean') {
+  if (
+    type === 'string' ||
+    type === 'number' ||
+    type === 'boolean' ||
+    type === 'bigint'
+  ) {
     msg.data = obj;
   } else if (type === 'object') {
     copyMsgObject(msg, obj);

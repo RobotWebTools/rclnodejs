@@ -61,9 +61,9 @@ describe('rclnodejs interactive testing', function () {
         'add_two_ints',
         (request, response) => {
           assert.ok('a' in request);
-          assert.deepStrictEqual(typeof request.a, 'number');
+          assert.deepStrictEqual(typeof request.a, 'bigint');
           assert.ok('b' in request);
-          assert.deepStrictEqual(typeof request.b, 'number');
+          assert.deepStrictEqual(typeof request.b, 'bigint');
           let result = response.template;
           result.sum = request.a + request.b;
           response.send(result);

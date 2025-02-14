@@ -38,8 +38,8 @@ describe('Test creating a service with an async callback', function () {
       AddTwoInts,
       'single_ps_channel2',
       async (request, response) => {
-        assert.deepStrictEqual(request.a, 1);
-        assert.deepStrictEqual(request.b, 2);
+        assert.deepStrictEqual(request.a, 1n);
+        assert.deepStrictEqual(request.b, 2n);
         let result = response.template;
         result.sum = request.a + request.b;
         // to trigger the bug, two conditions must hold:
@@ -53,12 +53,12 @@ describe('Test creating a service with an async callback', function () {
       }
     );
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
-    const request = { a: 1, b: 2 };
+    const request = { a: 1n, b: 2n };
 
     var timer = clientNode.createTimer(100, () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
-        assert.deepStrictEqual(response.sum, 3);
+        assert.deepStrictEqual(response.sum, 3n);
         serviceNode.destroy();
         clientNode.destroy();
         done();

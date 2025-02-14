@@ -71,7 +71,7 @@ describe('Parameter_server tests', function () {
       )
     );
     node.declareParameter(
-      new Parameter('p2', ParameterType.PARAMETER_INTEGER, 123),
+      new Parameter('p2', ParameterType.PARAMETER_INTEGER, 123n),
       new ParameterDescriptor('p2', ParameterType.PARAMETER_INTEGER)
     );
     node.declareParameter(
@@ -84,7 +84,11 @@ describe('Parameter_server tests', function () {
       )
     );
     node.declareParameter(
-      new Parameter('A.B.p4', ParameterType.PARAMETER_INTEGER_ARRAY, [1, 2, 3]),
+      new Parameter('A.B.p4', ParameterType.PARAMETER_INTEGER_ARRAY, [
+        1n,
+        2n,
+        3n,
+      ]),
       new ParameterDescriptor(
         'A.B.p4',
         ParameterType.PARAMETER_INTEGER_ARRAY,
@@ -115,7 +119,7 @@ describe('Parameter_server tests', function () {
     const request = new (rclnodejs.require(
       'rcl_interfaces/srv/ListParameters'
     ).Request)();
-    request.depth = 1;
+    request.depth = 1n;
     request.prefixes = [];
 
     let success = false;
@@ -141,7 +145,7 @@ describe('Parameter_server tests', function () {
     const request = new (rclnodejs.require(
       'rcl_interfaces/srv/ListParameters'
     ).Request)();
-    request.depth = 2;
+    request.depth = 2n;
     request.prefixes = ['A'];
 
     let success = false;
@@ -168,7 +172,7 @@ describe('Parameter_server tests', function () {
     const request = new (rclnodejs.require(
       'rcl_interfaces/srv/ListParameters'
     ).Request)();
-    request.depth = 3;
+    request.depth = 3n;
     request.prefixes = ['A'];
 
     let success = false;

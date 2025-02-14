@@ -276,7 +276,7 @@ describe('Fuzzing API calls testing', function () {
       done();
     });
 
-    let request = { a: 1, b: 2 };
+    let request = { a: 1n, b: 2n };
     client.sendRequest(request, (response) => {
       throw new Error('never reached');
     });
