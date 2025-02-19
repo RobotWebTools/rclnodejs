@@ -49,7 +49,7 @@ class FibonacciActionClient {
     this._node.getLogger().info('Goal accepted');
 
     // Start a 2 second timer
-    this._timer = this._node.createTimer(2000, () =>
+    this._timer = this._node.createTimer(BigInt(2000000), () =>
       this.timerCallback(goalHandle)
     );
   }

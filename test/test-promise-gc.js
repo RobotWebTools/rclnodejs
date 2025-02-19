@@ -76,7 +76,9 @@ describe('Test promise wrapper with garbage collection', function () {
       const topic = `promise_gc_channel_${i}`;
 
       const publisher = node.createPublisher(typeClass, topic);
-      const timer = node.createTimer(100, () => publisher.publish(msg));
+      const timer = node.createTimer(BigInt(100000), () =>
+        publisher.publish(msg)
+      );
 
       const result = await new Promise((res) =>
         node.createSubscription(typeClass, topic, (msg) => {

@@ -50,7 +50,7 @@ describe('Test rclnodejs nodes in a single process', function () {
       RclString,
       'single_ps_channel1'
     );
-    var timer = publisherNode.createTimer(100, () => {
+    var timer = publisherNode.createTimer(BigInt(100000000), () => {
       publisher.publish(msg);
     });
     rclnodejs.spin(subscriptionNode);
@@ -75,7 +75,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     );
 
     var publisher = node.createPublisher(RclString, 'new_style_require1');
-    var timer = node.createTimer(100, () => {
+    var timer = node.createTimer(BigInt(100000000), () => {
       publisher.publish(msg);
     });
 
@@ -101,7 +101,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
     const request = { a: 1n, b: 2n };
 
-    var timer = clientNode.createTimer(100, () => {
+    var timer = clientNode.createTimer(BigInt(100000000), () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3n);
@@ -133,7 +133,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2_2');
     const request = { a: 1n, b: 2n };
 
-    var timer = clientNode.createTimer(100, () => {
+    var timer = clientNode.createTimer(BigInt(100000000), () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3n);
@@ -163,7 +163,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2_3');
     const request = { a: 1n, b: 2n };
 
-    var timer = clientNode.createTimer(100, () => {
+    var timer = clientNode.createTimer(BigInt(100000000), () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3n);
@@ -196,7 +196,7 @@ describe('Test rclnodejs nodes in a single process', function () {
     request.a = 1n;
     request.b = 2n;
 
-    var timer = node.createTimer(100, () => {
+    var timer = node.createTimer(BigInt(100000000), () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3n);

@@ -267,7 +267,7 @@ declare module 'rclnodejs' {
      * @returns New instance of Timer.
      */
     createTimer(
-      period: number,
+      period: bigint,
       callback: TimerRequestCallback,
       clock?: Clock
     ): Timer;

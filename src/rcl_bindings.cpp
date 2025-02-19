@@ -319,8 +319,12 @@ NAN_METHOD(CreateTimer) {
       Nan::To<v8::Object>(info[1]).ToLocalChecked());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
-  int64_t period_ms = Nan::To<int64_t>(info[2]).FromJust();
-
+  if (!info[2]->IsBigInt()) {
+    Nan::ThrowTypeError("Timer period must be a BigInt");
+    return;
+  }
+  v8::Local<v8::BigInt> bigInt = info[2].As<v8::BigInt>();
+  int64_t period_nsec = bigInt->Int64Value();
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
@@ -328,15 +332,14 @@ NAN_METHOD(CreateTimer) {
 #if ROS_VERSION > 2305  // After Iron.
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
-      rcl_timer_init2(timer, clock, context, RCL_MS_TO_NS(period_ms), nullptr,
+      rcl_timer_init2(timer, clock, context, period_nsec, nullptr,
                       rcl_get_default_allocator(), /*autostart=*/true),
       rcl_get_error_string().str);
 #else
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_timer_init(timer, clock, context, RCL_MS_TO_NS(period_ms), nullptr,
-                     rcl_get_default_allocator()),
-      rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_timer_init(timer, clock, context, period_nsec,
+                                          nullptr, rcl_get_default_allocator()),
+                           rcl_get_error_string().str);
 #endif
 
   auto js_obj = RclHandle::NewInstance(timer, clock_handle, [](void* ptr) {
@@ -410,9 +413,9 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
       RCL_RET_OK, rcl_timer_get_time_until_next_call(timer, &remaining_time),
       rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(
-      Nan::New<v8::String>(std::to_string(RCL_NS_TO_MS(remaining_time)))
-          .ToLocalChecked());
+  v8::Local<v8::BigInt> bigInt =
+      v8::BigInt::New(v8::Isolate::GetCurrent(), remaining_time);
+  info.GetReturnValue().Set(bigInt);
 }
 
 NAN_METHOD(TimerGetTimeSinceLastCall) {
@@ -425,9 +428,9 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
       RCL_RET_OK, rcl_timer_get_time_since_last_call(timer, &elapsed_time),
       rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(
-      Nan::New<v8::String>(std::to_string(RCL_NS_TO_MS(elapsed_time)))
-          .ToLocalChecked());
+  v8::Local<v8::BigInt> bigInt =
+      v8::BigInt::New(v8::Isolate::GetCurrent(), elapsed_time);
+  info.GetReturnValue().Set(bigInt);
 }
 
 NAN_METHOD(CreateTimePoint) {

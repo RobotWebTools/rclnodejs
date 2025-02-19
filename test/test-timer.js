@@ -17,7 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-const TIMER_INTERVAL = Math.pow(10, 2);
+const TIMER_INTERVAL = '100000000';
 describe('rclnodejs Timer class testing', function () {
   this.timeout(60 * 1000);
 
@@ -33,7 +33,7 @@ describe('rclnodejs Timer class testing', function () {
     it('node.createTimer', function (done) {
       var times = 0;
       var node = rclnodejs.createNode('timer');
-      var timer = node.createTimer(TIMER_INTERVAL, function () {
+      var timer = node.createTimer(BigInt(TIMER_INTERVAL), function () {
         times += 1;
         timer.cancel();
         node.destroy();
@@ -55,7 +55,7 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.period should be readonly', function (done) {
-      var timer = node.createTimer(TIMER_INTERVAL, function () {
+      var timer = node.createTimer(BigInt(TIMER_INTERVAL), function () {
         assert.deepEqual(timer.period, TIMER_INTERVAL);
         assert.throws(
           () => {
@@ -79,7 +79,7 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.cancel', function (done) {
-      var timer = node.createTimer(TIMER_INTERVAL, function () {
+      var timer = node.createTimer(BigInt(TIMER_INTERVAL), function () {
         timer.cancel();
         assert.ok(timer.isCanceled());
         done();
@@ -88,7 +88,7 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.isCanceled', function (done) {
-      var timer = node.createTimer(TIMER_INTERVAL, function () {
+      var timer = node.createTimer(BigInt(TIMER_INTERVAL), function () {
         assert.ok(!timer.isCanceled());
         timer.cancel();
         assert.ok(timer.isCanceled());
@@ -98,7 +98,7 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.isReady', function (done) {
-      var timer = node.createTimer(TIMER_INTERVAL, function () {
+      var timer = node.createTimer(BigInt(TIMER_INTERVAL), function () {
         assert.ok(!timer.isReady());
         timer.cancel();
         done();
@@ -107,7 +107,7 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.reset', function (done) {
-      var timer = node.createTimer(TIMER_INTERVAL, function () {
+      var timer = node.createTimer(BigInt(TIMER_INTERVAL), function () {
         timer.cancel();
         done();
       });
@@ -119,8 +119,8 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.timeSinceLastCall', function (done) {
-      var timer = node.createTimer(TIMER_INTERVAL, function () {
-        assert.deepStrictEqual(typeof timer.timeSinceLastCall(), 'number');
+      var timer = node.createTimer(BigInt(TIMER_INTERVAL), function () {
+        assert.deepStrictEqual(typeof timer.timeSinceLastCall(), 'bigint');
         timer.cancel();
         done();
       });
@@ -128,9 +128,9 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.timeUntilNextCall', function (done) {
-      var timer = node.createTimer(TIMER_INTERVAL, function () {
+      var timer = node.createTimer(BigInt(TIMER_INTERVAL), function () {
         var nextCallInterval = timer.timeUntilNextCall();
-        assert.deepStrictEqual(typeof nextCallInterval, 'number');
+        assert.deepStrictEqual(typeof nextCallInterval, 'bigint');
         assert.ok(nextCallInterval <= TIMER_INTERVAL);
         timer.cancel();
         done();

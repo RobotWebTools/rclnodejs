@@ -142,7 +142,7 @@ describe('Destroying non-existent objects testing', function () {
     );
 
     var count = 0;
-    var timer = node.createTimer(100, () => {
+    var timer = node.createTimer(BigInt(100000), () => {
       count++;
     });
     node.destroyTimer(timer);
@@ -232,7 +232,7 @@ describe('Fuzzing API calls testing', function () {
     var node = rclnodejs.createNode('node3', '/inconsistent');
     const invalidParams = [
       ['100', () => {}],
-      [100, null],
+      [BigInt(100), null],
     ];
     invalidParams.forEach((param) => {
       assertThrowsError(

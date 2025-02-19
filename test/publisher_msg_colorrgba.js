@@ -29,7 +29,7 @@ rclnodejs
     };
 
     var publisher = node.createPublisher(ColorRGBA, 'ColorRGBA_channel');
-    var timer = node.createTimer(100, () => {
+    var timer = node.createTimer(BigInt('100000000'), () => {
       publisher.publish(msg);
     });
 

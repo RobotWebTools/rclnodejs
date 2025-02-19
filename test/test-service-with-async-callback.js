@@ -55,7 +55,7 @@ describe('Test creating a service with an async callback', function () {
     var client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
     const request = { a: 1n, b: 2n };
 
-    var timer = clientNode.createTimer(100, () => {
+    var timer = clientNode.createTimer(BigInt(100000000), () => {
       client.sendRequest(request, (response) => {
         timer.cancel();
         assert.deepStrictEqual(response.sum, 3n);

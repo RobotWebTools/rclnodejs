@@ -324,7 +324,7 @@ client.isDestroyed();
 const timerCallback = () => {};
 
 // $ExpectType Timer
-const timer = node.createTimer(100, timerCallback);
+const timer = node.createTimer(BigInt(100000), timerCallback);
 
 // $ExpectType number
 timer.period;

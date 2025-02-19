@@ -61,8 +61,8 @@ describe('Node & Entity destroy testing', function () {
     var defaultServicesCount = node._services.length;
 
     // timers
-    var timer1 = node.createTimer(0.1, () => {});
-    var timer2 = node.createTimer(1, () => {});
+    var timer1 = node.createTimer(BigInt(1000), () => {});
+    var timer2 = node.createTimer(BigInt(100), () => {});
     assert.deepStrictEqual(2, node._timers.length);
     node.destroyTimer(timer1);
     assert.deepStrictEqual(1, node._timers.length);
@@ -129,7 +129,7 @@ describe('Node & Entity destroy testing', function () {
     var node = rclnodejs.createNode('my_node7');
 
     // timers
-    var timer = node.createTimer(0.1, () => {});
+    var timer = node.createTimer(BigInt(100), () => {});
     node.destroyTimer(timer);
     node.destroyTimer(timer);
 

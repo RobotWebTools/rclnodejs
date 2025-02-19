@@ -27,7 +27,7 @@ function forkDoPublish(context) {
     .then(() => {
       const node = rclnodejs.createNode('test_pub', undefined, context);
       const publisher = node.createPublisher('std_msgs/msg/String', 'test');
-      node.createTimer(100, () => {
+      node.createTimer(BigInt(100000), () => {
         publisher.publish({ data: 'hello' });
       });
       rclnodejs.spin(node);

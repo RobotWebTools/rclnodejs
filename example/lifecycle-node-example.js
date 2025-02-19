@@ -88,7 +88,7 @@ class App {
   onActivate() {
     console.log('Lifecycle: ACTIVATE');
     this._publisher.activate();
-    this._timer = this._node.createTimer(1000, () => {
+    this._timer = this._node.createTimer(BigInt(1000000), () => {
       this._publisher.publish(`${this._count--}`);
     });
     return rclnodejs.lifecycle.CallbackReturnCode.SUCCESS;
