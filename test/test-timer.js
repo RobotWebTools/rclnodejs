@@ -17,7 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-const TIMER_INTERVAL = Math.pow(10, 2);
+const TIMER_INTERVAL = BigInt('100000000');
 describe('rclnodejs Timer class testing', function () {
   this.timeout(60 * 1000);
 
@@ -59,7 +59,7 @@ describe('rclnodejs Timer class testing', function () {
         assert.deepEqual(timer.period, TIMER_INTERVAL);
         assert.throws(
           () => {
-            timer.period = TIMER_INTERVAL * 2;
+            timer.period = TIMER_INTERVAL * 2n;
           },
           function (err) {
             if (
@@ -120,7 +120,7 @@ describe('rclnodejs Timer class testing', function () {
 
     it('timer.timeSinceLastCall', function (done) {
       var timer = node.createTimer(TIMER_INTERVAL, function () {
-        assert.deepStrictEqual(typeof timer.timeSinceLastCall(), 'number');
+        assert.deepStrictEqual(typeof timer.timeSinceLastCall(), 'bigint');
         timer.cancel();
         done();
       });
@@ -130,7 +130,7 @@ describe('rclnodejs Timer class testing', function () {
     it('timer.timeUntilNextCall', function (done) {
       var timer = node.createTimer(TIMER_INTERVAL, function () {
         var nextCallInterval = timer.timeUntilNextCall();
-        assert.deepStrictEqual(typeof nextCallInterval, 'number');
+        assert.deepStrictEqual(typeof nextCallInterval, 'bigint');
         assert.ok(nextCallInterval <= TIMER_INTERVAL);
         timer.cancel();
         done();

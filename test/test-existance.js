@@ -246,7 +246,7 @@ describe('rclnodejs class existance testing', function () {
 
     before(function () {
       node = rclnodejs.createNode('Timer');
-      timer = node.createTimer(10, () => {});
+      timer = node.createTimer(BigInt(10000), () => {});
     });
 
     after(function () {
@@ -255,8 +255,8 @@ describe('rclnodejs class existance testing', function () {
     });
 
     it('period property should exist', function () {
-      assertMember('period', timer, timer.period, 'number');
-      assert.deepStrictEqual(timer.period, 10);
+      assertMember('period', timer, timer.period, 'bigint');
+      assert.deepStrictEqual(timer.period, BigInt(10000));
     });
 
     it('cancel method should exist', function () {

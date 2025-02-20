@@ -83,7 +83,9 @@ class FibonacciActionServer {
   handleAcceptedCallback(goalHandle) {
     this._node.getLogger().info('Deferring execution...');
     this._goalHandle = goalHandle;
-    this._timer = this._node.createTimer(3000, () => this.timerCallback());
+    this._timer = this._node.createTimer(BigInt(3000000), () =>
+      this.timerCallback()
+    );
   }
 
   cancelCallback(goalHandle) {
