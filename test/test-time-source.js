@@ -72,13 +72,13 @@ describe('rclnodejs TimeSource testing', function () {
     let now = clock.now();
     let sysClock = new Clock(Clock.ClockType.SYSTEM_TIME);
     let sysNow = sysClock.now();
-    assert.ok(sysNow.nanoseconds - now.nanoseconds < 1n ** 9n);
+    assert.ok(sysNow.nanoseconds - now.nanoseconds < 10n ** 9n);
 
     publishClockMessage(node);
     assert.strictEqual(clock.isRosTimeActive, false);
     now = clock.now();
     sysNow = sysClock.now();
-    assert.ok(sysNow.nanoseconds - now.nanoseconds < 1n ** 9n);
+    assert.ok(sysNow.nanoseconds - now.nanoseconds < 10n ** 9n);
 
     assert.strictEqual(timeSource.isRosTimeActive, false);
     let clock2 = new ROSClock();
