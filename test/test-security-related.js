@@ -232,7 +232,7 @@ describe('Fuzzing API calls testing', function () {
     var node = rclnodejs.createNode('node3', '/inconsistent');
     const invalidParams = [
       ['100', () => {}],
-      [BigInt(100), null],
+      [BigInt('100000000'), null],
     ];
     invalidParams.forEach((param) => {
       assertThrowsError(
