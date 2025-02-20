@@ -434,12 +434,17 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
 }
 
 NAN_METHOD(CreateTimePoint) {
-  std::string str(*Nan::Utf8String(info[0]));
+  if (!info[0]->IsBigInt()) {
+    Nan::ThrowTypeError("Timer period must be a BigInt");
+    return;
+  }
+  v8::Local<v8::BigInt> bigInt = info[0].As<v8::BigInt>();
+  const int64_t total_nanoseconds = bigInt->Int64Value();
   uint32_t clock_type = Nan::To<uint32_t>(info[1]).FromJust();
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(malloc(sizeof(rcl_time_point_t)));
 
-  time_point->nanoseconds = std::stoll(str);
+  time_point->nanoseconds = total_nanoseconds;
   time_point->clock_type = static_cast<rcl_clock_type_t>(clock_type);
 
   auto js_obj =
@@ -452,16 +457,21 @@ NAN_METHOD(GetNanoseconds) {
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(time_point_handle->ptr());
-  info.GetReturnValue().Set(
-      Nan::New<v8::String>(std::to_string(time_point->nanoseconds))
-          .ToLocalChecked());
+  v8::Local<v8::BigInt> bigInt =
+      v8::BigInt::New(v8::Isolate::GetCurrent(), time_point->nanoseconds);
+  info.GetReturnValue().Set(bigInt);
 }
 
 NAN_METHOD(CreateDuration) {
-  std::string str(*Nan::Utf8String(info[0]));
+  if (!info[0]->IsBigInt()) {
+    Nan::ThrowTypeError("Timer period must be a BigInt");
+    return;
+  }
+  v8::Local<v8::BigInt> bigInt = info[0].As<v8::BigInt>();
+  const int64_t total_nanoseconds = bigInt->Int64Value();
   rcl_duration_t* duration =
       reinterpret_cast<rcl_duration_t*>(malloc(sizeof(rcl_duration_t)));
-  duration->nanoseconds = std::stoll(str);
+  duration->nanoseconds = total_nanoseconds;
 
   auto js_obj =
       RclHandle::NewInstance(duration, nullptr, [](void* ptr) { free(ptr); });
@@ -473,10 +483,9 @@ NAN_METHOD(GetDurationNanoseconds) {
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_duration_t* duration =
       reinterpret_cast<rcl_duration_t*>(duration_handle->ptr());
-
-  info.GetReturnValue().Set(
-      Nan::New<v8::String>(std::to_string(duration->nanoseconds))
-          .ToLocalChecked());
+  v8::Local<v8::BigInt> bigInt =
+      v8::BigInt::New(v8::Isolate::GetCurrent(), duration->nanoseconds);
+  info.GetReturnValue().Set(bigInt);
 }
 
 NAN_METHOD(SetRosTimeOverrideIsEnabled) {
@@ -546,7 +555,6 @@ static void ReturnJSTimeObj(
     Nan::NAN_METHOD_ARGS_TYPE info, int64_t nanoseconds,
     rcl_clock_type_t clock_type = RCL_CLOCK_UNINITIALIZED) {
   auto obj = v8::Object::New(v8::Isolate::GetCurrent());
-
   const auto sec = static_cast<std::int32_t>(RCL_NS_TO_S(nanoseconds));
   const auto nanosec =
       static_cast<std::int32_t>(nanoseconds % (1000 * 1000 * 1000));
@@ -572,8 +580,9 @@ NAN_METHOD(ClockGetNow) {
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_clock_get_now(clock, &time_point.nanoseconds),
                            rcl_get_error_string().str);
-
-  ReturnJSTimeObj(info, time_point.nanoseconds, time_point.clock_type);
+  v8::Local<v8::BigInt> bigInt =
+      v8::BigInt::New(v8::Isolate::GetCurrent(), time_point.nanoseconds);
+  info.GetReturnValue().Set(bigInt);
 }
 
 NAN_METHOD(StaticClockGetNow) {

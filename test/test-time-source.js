@@ -18,7 +18,6 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const { Clock, Parameter, ParameterType, ROSClock, TimeSource, Time } =
   rclnodejs;
-const int64 = require('int64-napi');
 
 describe('rclnodejs TimeSource testing', function () {
   this.timeout(60 * 1000);
@@ -73,13 +72,13 @@ describe('rclnodejs TimeSource testing', function () {
     let now = clock.now();
     let sysClock = new Clock(Clock.ClockType.SYSTEM_TIME);
     let sysNow = sysClock.now();
-    assert.ok(int64.subtract(sysNow.nanoseconds, now.nanoseconds) < 1e9);
+    assert.ok(sysNow.nanoseconds - now.nanoseconds < 1n ** 9n);
 
     publishClockMessage(node);
     assert.strictEqual(clock.isRosTimeActive, false);
     now = clock.now();
     sysNow = sysClock.now();
-    assert.ok(int64.subtract(sysNow.nanoseconds, now.nanoseconds) < 1e9);
+    assert.ok(sysNow.nanoseconds - now.nanoseconds < 1n ** 9n);
 
     assert.strictEqual(timeSource.isRosTimeActive, false);
     let clock2 = new ROSClock();
@@ -121,19 +120,19 @@ describe('rclnodejs TimeSource testing', function () {
 
     assert.ok(timeSource._clockSubscription);
     assert.strictEqual(
-      clock.now().eq(new Time(0, 0, Clock.ClockType.ROS_TIME)),
+      clock.now().eq(new Time(0n, 0n, Clock.ClockType.ROS_TIME)),
       true
     );
 
     publishClockMessage(node);
     setTimeout(() => {
-      assert.ok(clock.now().gt(new Time(0, 0, Clock.ClockType.ROS_TIME)));
-      assert.ok(clock.now().lte(new Time(5, 0, Clock.ClockType.ROS_TIME)));
+      assert.ok(clock.now().gt(new Time(0n, 0n, Clock.ClockType.ROS_TIME)));
+      assert.ok(clock.now().lte(new Time(5n, 0n, Clock.ClockType.ROS_TIME)));
 
       let clock2 = new ROSClock();
       timeSource.attachClock(clock2);
-      assert.ok(clock2.now().gt(new Time(0, 0, Clock.ClockType.ROS_TIME)));
-      assert.ok(clock2.now().lte(new Time(5, 0, Clock.ClockType.ROS_TIME)));
+      assert.ok(clock2.now().gt(new Time(0n, 0n, Clock.ClockType.ROS_TIME)));
+      assert.ok(clock2.now().lte(new Time(5n, 0n, Clock.ClockType.ROS_TIME)));
 
       timeSource.detachNode();
       let node2 = rclnodejs.createNode(
