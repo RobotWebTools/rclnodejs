@@ -59,7 +59,7 @@ describe('rclnodejs Timer class testing', function () {
         assert.deepEqual(timer.period, TIMER_INTERVAL);
         assert.throws(
           () => {
-            timer.period = TIMER_INTERVAL * 2;
+            timer.period = TIMER_INTERVAL * 2n;
           },
           function (err) {
             if (
