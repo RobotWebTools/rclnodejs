@@ -39,7 +39,7 @@ rclnodejs
       effort: [4, 5, 6],
     };
 
-    var timer = node.createTimer(100, () => {
+    var timer = node.createTimer(BigInt('100000000'), () => {
       publisher.publish(state);
     });
     rclnodejs.spin(node);

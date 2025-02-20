@@ -32,7 +32,7 @@ rclnodejs
     msg.data = rclValue;
 
     var publisher = node.createPublisher(msgType, rclType + '_channel');
-    var timer = node.createTimer(100, () => {
+    var timer = node.createTimer(BigInt('100000000'), () => {
       publisher.publish(msg);
     });
 

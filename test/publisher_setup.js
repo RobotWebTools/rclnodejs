@@ -25,7 +25,7 @@ rclnodejs
     const msg = 'Greeting from publisher';
 
     var publisher = node.createPublisher(RclString, 'topic');
-    var timer = node.createTimer(100, () => {
+    var timer = node.createTimer(BigInt('100000000'), () => {
       publisher.publish(msg);
     });
     rclnodejs.spin(node);

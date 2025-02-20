@@ -58,7 +58,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -86,7 +86,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -114,7 +114,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -142,7 +142,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -170,7 +170,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -198,7 +198,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -226,7 +226,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -254,7 +254,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -282,7 +282,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -310,7 +310,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -338,7 +338,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -366,7 +366,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -394,7 +394,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -422,7 +422,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -470,7 +470,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -506,7 +506,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -541,7 +541,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);
@@ -585,7 +585,7 @@ describe('Rclnodejs - Python message type testing', function () {
           done();
         }
       );
-      var timer = node.createTimer(100, () => {
+      var timer = node.createTimer(BigInt(100000), () => {
         publisher.publish(msg);
       });
       rclnodejs.spin(node);

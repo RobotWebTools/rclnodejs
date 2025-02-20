@@ -110,7 +110,7 @@ describe('Node extra destroy methods testing', function () {
 
   it('destroyTimer()', function () {
     var node = rclnodejs.createNode('node5');
-    var timer = node.createTimer(1000, () => {});
+    var timer = node.createTimer(BigInt(1000000), () => {});
     assert.deepStrictEqual(node._timers.length, 1);
 
     assertThrowsError(
