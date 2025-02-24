@@ -31,74 +31,73 @@ describe('rclnodejs Time/Clock testing', function () {
   });
 
   it('Construct time object', function () {
-    let time = new Time(1, 64);
-    assert.strictEqual(time.nanoseconds, 1000000064);
+    let time = new Time(1n, 64n);
+    assert.strictEqual(time.nanoseconds, 1000000064n);
     assert.strictEqual(time.clockType, ClockType.SYSTEM_TIME);
 
-    time = new Time(0, Number.MAX_SAFE_INTEGER);
-    assert.strictEqual(time.nanoseconds, 9007199254740991);
+    time = new Time(0n, BigInt(Number.MAX_SAFE_INTEGER));
+    assert.strictEqual(time.nanoseconds, 9007199254740991n);
 
-    // The nanoseconds property will be presented in a string, if the value excesses 2^53-1
-    time = new Time(0, '9007199254740992');
-    assert.strictEqual(time.nanoseconds, '9007199254740992');
+    time = new Time(0n, 9007199254740992n);
+    assert.strictEqual(time.nanoseconds, 9007199254740992n);
 
-    time = new Time(0, '9223372036854775807');
-    assert.strictEqual(time.nanoseconds, '9223372036854775807');
+    time = new Time(0n, 9223372036854775807n);
+    assert.strictEqual(time.nanoseconds, 9223372036854775807n);
 
-    time = Time.fromMsg({ sec: 1, nanosec: 64 });
-    assert.strictEqual(time.nanoseconds, 1000000064);
+    time = Time.fromMsg({ sec: 1n, nanosec: 64n });
+    assert.strictEqual(time.nanoseconds, 1000000064n);
     assert.strictEqual(time.clockType, ClockType.ROS_TIME);
 
     assert.throws(() => {
-      new Time(1, 1, 'SYSTEM_TIME');
+      new Time(1n, 1n, 'SYSTEM_TIME');
     }, TypeError);
 
     assert.throws(() => {
-      new Time({ seconds: 0, nanoseconds: 0 });
+      new Time({ seconds: 0n, nanoseconds: 0n });
     }, TypeError);
 
     assert.throws(() => {
-      new Time(-1, 0);
+      new Time(-1n, 0n);
     }, RangeError);
 
     assert.throws(() => {
-      new Time(0, '-9007199254740992');
+      new Time(0n, -9007199254740992n);
     }, RangeError);
 
     assert.throws(() => {
-      new Time(0, -1);
+      new Time(0n, -1n);
     }, RangeError);
   });
 
   it('Construct duration object', function () {
     let duration = new Duration();
-    assert.strictEqual(duration.nanoseconds, 0);
+    assert.strictEqual(duration.nanoseconds, 0n);
 
-    duration = new Duration(1, 64);
-    assert.strictEqual(duration.nanoseconds, 1000000064);
+    duration = new Duration(1n, 64n);
+    assert.strictEqual(duration.nanoseconds, 1000000064n);
 
-    duration = new Duration(-1);
-    assert.strictEqual(duration.nanoseconds, -1000000000);
+    duration = new Duration(-1n);
+    assert.strictEqual(duration.nanoseconds, -1000000000n);
 
-    duration = new Duration(0, -1);
-    assert.strictEqual(duration.nanoseconds, -1);
+    duration = new Duration(0n, -1n);
+    assert.strictEqual(duration.nanoseconds, -1n);
 
-    duration = new Duration(0, Number.MAX_SAFE_INTEGER);
-    assert.strictEqual(duration.nanoseconds, 9007199254740991);
+    duration = new Duration(0n, BigInt(Number.MAX_SAFE_INTEGER));
+    assert.strictEqual(duration.nanoseconds, 9007199254740991n);
 
-    duration = new Duration(0, '9007199254740992');
-    assert.strictEqual(duration.nanoseconds, '9007199254740992');
+    duration = new Duration(0n, 9007199254740992n);
+    assert.strictEqual(duration.nanoseconds, 9007199254740992n);
 
-    duration = new Duration(0, '-9007199254740992');
-    assert.strictEqual(duration.nanoseconds, '-9007199254740992');
+    duration = new Duration(0n, -9007199254740992n);
+    assert.strictEqual(duration.nanoseconds, -9007199254740992n);
 
-    duration = new Duration(0, '9223372036854775807');
-    assert.strictEqual(duration.nanoseconds, '9223372036854775807');
+    duration = new Duration(0n, 9223372036854775807n);
+    assert.strictEqual(duration.nanoseconds, 9223372036854775807n);
   });
 
   it('Test time functions', function () {
-    let left = new Time(0, 1);
-    let right = new Time(0, 2);
+    let left = new Time(0n, 1n);
+    let right = new Time(0n, 2n);
 
     assert.strictEqual(left.eq(right), false);
     assert.strictEqual(left.ne(right), true);
@@ -107,8 +106,8 @@ describe('rclnodejs Time/Clock testing', function () {
     assert.strictEqual(left.gt(right), false);
     assert.strictEqual(left.gte(right), false);
 
-    left = new Time(0, 1, ClockType.SYSTEM_TIME);
-    right = new Time(0, 2, ClockType.STEADY_TIME);
+    left = new Time(0n, 1n, ClockType.SYSTEM_TIME);
+    right = new Time(0n, 2n, ClockType.STEADY_TIME);
 
     assert.throws(() => {
       left.eq(right);
@@ -134,21 +133,21 @@ describe('rclnodejs Time/Clock testing', function () {
       left.gte(right);
     }, TypeError);
 
-    let time = new Time(0, 1, ClockType.STEADY_TIME);
-    let duration = new Duration(0, 1);
+    let time = new Time(0n, 1n, ClockType.STEADY_TIME);
+    let duration = new Duration(0n, 1n);
     let result = time.add(duration);
     assert.ok(result instanceof Time);
-    assert.strictEqual(result.nanoseconds, 2);
+    assert.strictEqual(result.nanoseconds, 2n);
     assert.strictEqual(result.clockType, ClockType.STEADY_TIME);
 
     result = time.sub(duration);
     assert.ok(result instanceof Time);
-    assert.strictEqual(result.nanoseconds, 0);
+    assert.strictEqual(result.nanoseconds, 0n);
     assert.strictEqual(result.clockType, ClockType.STEADY_TIME);
 
     let diff = time.sub(result);
     assert.ok(diff instanceof Duration);
-    assert.strictEqual(diff.nanoseconds, 1);
+    assert.strictEqual(diff.nanoseconds, 1n);
     assert.throws(() => {
       time.add(result);
     }, TypeError);
@@ -159,8 +158,8 @@ describe('rclnodejs Time/Clock testing', function () {
   });
 
   it('Test duration functions', function () {
-    let left = new Duration(0, 1);
-    let right = new Duration(0, 2);
+    let left = new Duration(0n, 1n);
+    let right = new Duration(0n, 2n);
     assert.strictEqual(left.eq(right), false);
     assert.strictEqual(left.ne(right), true);
     assert.strictEqual(left.gt(right), false);
@@ -168,12 +167,12 @@ describe('rclnodejs Time/Clock testing', function () {
     assert.strictEqual(left.lt(right), true);
     assert.strictEqual(left.lte(right), true);
 
-    left = new Duration(0, 5e9);
-    right = new Duration(5, 0);
+    left = new Duration(0n, 5n * 10n ** 9n);
+    right = new Duration(5n, 0n);
     assert.ok(left.eq(right));
 
     assert.throws(() => {
-      left.eq(5e9);
+      left.eq(5n ** 9n);
     }, TypeError);
 
     let time = new Time();
@@ -198,10 +197,10 @@ describe('rclnodejs Time/Clock testing', function () {
   });
 
   it('Conversion to Time message', function () {
-    let time = new Time(100, 200);
+    let time = new Time(100n, 200n);
     let msg = time.toMsg();
 
-    assert.strictEqual(msg.sec, 100);
-    assert.strictEqual(msg.nanosec, 200);
+    assert.strictEqual(msg.sec, 100n);
+    assert.strictEqual(msg.nanosec, 200n);
   });
 });

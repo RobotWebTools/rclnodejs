@@ -372,7 +372,7 @@ describe('rcl node methods testing', function () {
     assert.ok(time);
     assert.strictEqual(node.getClock().clockType, time.clockType);
 
-    const seconds = time.secondsAndNanoseconds.seconds;
+    const seconds = Number(time.secondsAndNanoseconds.seconds);
     const dateSeconds = Date.now() / 1000;
     assert.ok(IsClose.isClose(seconds, dateSeconds, 1));
   });
