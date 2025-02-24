@@ -439,12 +439,12 @@ NAN_METHOD(CreateTimePoint) {
     return;
   }
   v8::Local<v8::BigInt> bigInt = info[0].As<v8::BigInt>();
-  const int64_t total_nanoseconds = bigInt->Int64Value();
+  const int64_t nanoseconds = bigInt->Int64Value();
   uint32_t clock_type = Nan::To<uint32_t>(info[1]).FromJust();
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(malloc(sizeof(rcl_time_point_t)));
 
-  time_point->nanoseconds = total_nanoseconds;
+  time_point->nanoseconds = nanoseconds;
   time_point->clock_type = static_cast<rcl_clock_type_t>(clock_type);
 
   auto js_obj =
@@ -468,10 +468,10 @@ NAN_METHOD(CreateDuration) {
     return;
   }
   v8::Local<v8::BigInt> bigInt = info[0].As<v8::BigInt>();
-  const int64_t total_nanoseconds = bigInt->Int64Value();
+  const int64_t nanoseconds = bigInt->Int64Value();
   rcl_duration_t* duration =
       reinterpret_cast<rcl_duration_t*>(malloc(sizeof(rcl_duration_t)));
-  duration->nanoseconds = total_nanoseconds;
+  duration->nanoseconds = nanoseconds;
 
   auto js_obj =
       RclHandle::NewInstance(duration, nullptr, [](void* ptr) { free(ptr); });
@@ -551,24 +551,6 @@ NAN_METHOD(CreateClock) {
       }));
 }
 
-static void ReturnJSTimeObj(
-    Nan::NAN_METHOD_ARGS_TYPE info, int64_t nanoseconds,
-    rcl_clock_type_t clock_type = RCL_CLOCK_UNINITIALIZED) {
-  auto obj = v8::Object::New(v8::Isolate::GetCurrent());
-  const auto sec = static_cast<std::int32_t>(RCL_NS_TO_S(nanoseconds));
-  const auto nanosec =
-      static_cast<std::int32_t>(nanoseconds % (1000 * 1000 * 1000));
-  const int32_t type = clock_type;
-
-  Nan::Set(obj, Nan::New("sec").ToLocalChecked(), Nan::New(sec));
-  Nan::Set(obj, Nan::New("nanosec").ToLocalChecked(), Nan::New(nanosec));
-  if (clock_type != RCL_CLOCK_UNINITIALIZED) {
-    Nan::Set(obj, Nan::New("type").ToLocalChecked(), Nan::New(type));
-  }
-
-  info.GetReturnValue().Set(obj);
-}
-
 NAN_METHOD(ClockGetNow) {
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
       RclHandle::Unwrap<RclHandle>(
@@ -583,62 +565,6 @@ NAN_METHOD(ClockGetNow) {
   v8::Local<v8::BigInt> bigInt =
       v8::BigInt::New(v8::Isolate::GetCurrent(), time_point.nanoseconds);
   info.GetReturnValue().Set(bigInt);
-}
-
-NAN_METHOD(StaticClockGetNow) {
-  int32_t type = Nan::To<int32_t>(info[0]).FromJust();
-
-  if (type < RCL_ROS_TIME && type > RCL_STEADY_TIME) {
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
-  }
-
-  rcl_clock_t ros_clock;
-  rcl_time_point_t rcl_time;
-  rcl_allocator_t allocator = rcl_get_default_allocator();
-
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_clock_init(static_cast<rcl_clock_type_t>(type),
-                                          &ros_clock, &allocator),
-                           rcl_get_error_string().str);
-
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_clock_get_now(&ros_clock, &rcl_time.nanoseconds),
-                           rcl_get_error_string().str);
-
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_clock_fini(&ros_clock),
-                           rcl_get_error_string().str);
-
-  ReturnJSTimeObj(info, rcl_time.nanoseconds, rcl_time.clock_type);
-}
-
-NAN_METHOD(TimeDiff) {
-  int64_t s_sec = Nan::To<int32_t>(info[0]).FromJust();
-  uint32_t s_nano = Nan::To<uint32_t>(info[1]).FromJust();
-  int32_t s_type = Nan::To<int32_t>(info[2]).FromJust();
-
-  int64_t f_sec = Nan::To<int32_t>(info[3]).FromJust();
-  uint32_t f_nano = Nan::To<uint32_t>(info[4]).FromJust();
-  int32_t f_type = Nan::To<int32_t>(info[5]).FromJust();
-
-  rcl_time_point_t start;
-  rcl_time_point_t finish;
-  rcl_duration_t delta;
-
-  start.nanoseconds = s_sec * 1000 * 1000 * 1000 + s_nano;
-  start.clock_type = static_cast<rcl_clock_type_t>(s_type);
-
-  finish.nanoseconds = f_sec * 1000 * 1000 * 1000 + f_nano;
-  finish.clock_type = static_cast<rcl_clock_type_t>(f_type);
-
-  auto ret = rcl_difference_times(&start, &finish, &delta);
-
-  if (ret == RCL_RET_OK) {
-    ReturnJSTimeObj(info, delta.nanoseconds);
-    return;
-  }
-
-  info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(RclTake) {
@@ -2063,8 +1989,6 @@ std::vector<BindingMethod> binding_methods = {
     {"timerGetTimeUntilNextCall", TimerGetTimeUntilNextCall},
     {"createClock", CreateClock},
     {"clockGetNow", ClockGetNow},
-    {"staticClockGetNow", StaticClockGetNow},
-    {"timeDiff", TimeDiff},
     {"createTimePoint", CreateTimePoint},
     {"getNanoseconds", GetNanoseconds},
     {"createDuration", CreateDuration},
