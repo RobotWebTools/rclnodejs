@@ -10,15 +10,14 @@ declare module 'rclnodejs' {
      * @param seconds - The seconds component of the duration, default = 0.
      * @param nanoseconds - The nanoseconds component of the duration, default = 0.
      */
-    constructor(seconds?: number | string, nanoseconds?: number | string);
+    constructor(seconds?: bigint, nanoseconds?: bigint);
 
     /**
      * Get the nanosecond component of the Duration.
      *
-     * @returns The nanoseconds, if the value is greater than Number.MAX_SAFE_INTEGER (2^53-1),
-     *         will be presented in a string of decimal format.
+     * @returns The nanoseconds.
      */
-    readonly nanoseconds: number | string;
+    readonly nanoseconds: bigint;
 
     /**
      * Test if this Duration is equal to another Duration.
