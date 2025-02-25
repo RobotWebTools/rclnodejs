@@ -14,11 +14,7 @@ declare module 'rclnodejs' {
      * @param nanoseconds - The nanoseconds component of the time, default = 0.
      * @param clockType - The clock type, default = Clock.ClockType.SYSTEM_TIME
      */
-    constructor(
-      seconds?: number | string,
-      nanoseconds?: number | string,
-      clockType?: ClockType
-    );
+    constructor(seconds?: bigint, nanoseconds?: bigint, clockType?: ClockType);
 
     /**
      * Get the the clock type of the Time object.
@@ -27,15 +23,13 @@ declare module 'rclnodejs' {
 
     /**
      * Get the nanosecond part of the time.
-     * If the value is greater than Number.MAX_SAFE_INTEGER (2^53-1) it
-     * will be returned in a string of decimal format.
      */
-    readonly nanoseconds: number | string;
+    readonly nanoseconds: bigint;
 
     /**
      * Get the time as a plain JavaScript object.
      */
-    readonly secondsAndNanoseconds: { seconds: number; nanoseconds: number };
+    readonly secondsAndNanoseconds: { seconds: bigint; nanoseconds: bigint };
 
     /**
      * Add a duration to this time object.

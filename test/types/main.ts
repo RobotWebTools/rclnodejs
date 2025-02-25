@@ -326,16 +326,16 @@ const timerCallback = () => {};
 // $ExpectType Timer
 const timer = node.createTimer(BigInt(100000), timerCallback);
 
-// $ExpectType number
+// $ExpectType bigint
 timer.period;
 
 // $ExpectType boolean
 timer.isReady();
 
-// $ExpectType number
+// $ExpectType bigint
 timer.timeSinceLastCall();
 
-// $ExpectType number
+// $ExpectType bigint
 timer.timeUntilNextCall();
 
 // $ExpectType boolean
@@ -366,9 +366,12 @@ timer.cancel();
 // $ExpectType Duration
 const duration1: rclnodejs.Duration = new rclnodejs.Duration();
 
-const duration2: rclnodejs.Duration = new rclnodejs.Duration(100, '1000');
+const duration2: rclnodejs.Duration = new rclnodejs.Duration(
+  BigInt(100),
+  BigInt(1000)
+);
 
-// $ExpectType string | number
+// $ExpectType bigint
 duration1.nanoseconds;
 
 // $ExpectType boolean
@@ -391,7 +394,7 @@ duration1.gte(duration2);
 
 // ---- Time ----
 // $ExpectType Time
-const time1 = new rclnodejs.Time(100, 100);
+const time1 = new rclnodejs.Time(BigInt(100), BigInt(100));
 
 // $ExpectType Time
 const time2 = rclnodejs.Time.fromMsg({ sec: 0, nanosec: 0 });
@@ -405,10 +408,10 @@ const time3 = rclnodejs.Time.fromMsg(
 // $ExpectType ClockType
 time1.clockType;
 
-// $ExpectType string | number
+// $ExpectType bigint
 time1.nanoseconds;
 
-// $ExpectType { seconds: number; nanoseconds: number; }
+// $ExpectType { seconds: bigint; nanoseconds: bigint; }
 time1.secondsAndNanoseconds;
 
 // $ExpectType Time

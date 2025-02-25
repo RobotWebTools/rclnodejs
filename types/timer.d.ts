@@ -4,9 +4,9 @@ declare module 'rclnodejs' {
    */
   interface Timer {
     /**
-     * Time between callbacks in milliseconds.
+     * Time between callbacks in nanoseconds.
      */
-    readonly period: number;
+    readonly period: bigint;
 
     /**
      * Check if the timer is ready.
@@ -35,15 +35,15 @@ declare module 'rclnodejs' {
     /**
      * Get the interval since the last call of this timer.
      *
-     * @returns The interval value in milliseconds.
+     * @returns The interval value in nanoseconds.
      */
-    timeSinceLastCall(): number;
+    timeSinceLastCall(): bigint;
 
     /**
      * Get the interval until the next call will happen.
      *
-     * @returns The interval value in milliseconds
+     * @returns The interval value in nanoseconds
      */
-    timeUntilNextCall(): number;
+    timeUntilNextCall(): bigint;
   }
 }
