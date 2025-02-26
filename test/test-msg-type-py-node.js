@@ -447,7 +447,7 @@ describe('Rclnodejs - Python message type testing', function () {
           ],
           data_offset: 0,
         },
-        data: [65, 66, 67],
+        data: Uint8Array.from([65, 66, 67]),
       };
 
       var destroy = false;
@@ -560,9 +560,9 @@ describe('Rclnodejs - Python message type testing', function () {
           frame_id: 'main frame',
         },
         name: ['Tom', 'Jerry'],
-        position: [1, 2],
-        velocity: [2, 3],
-        effort: [4, 5, 6],
+        position: Float64Array.from([1, 2]),
+        velocity: Float64Array.from([2, 3]),
+        effort: Float64Array.from([4, 5, 6]),
       };
 
       var destroy = false;
