@@ -18,6 +18,10 @@ const rclnodejs = require('../index.js');
 const deepEqual = require('deep-equal');
 const arrayGen = require('./array_generator.js');
 
+function isTypedArray(v) {
+  return ArrayBuffer.isView(v) && !(v instanceof DataView);
+}
+
 /* eslint-disable camelcase */
 /* eslint-disable indent */
 
@@ -219,7 +223,11 @@ describe('Rclnodejs message translation: primitive types array', function () {
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {
             // For primitive types, msgs are defined as a single `.data` field
-            if (deepEqual(value.data, testData.values)) {
+            if (
+              (isTypedArray(value.data) &&
+                deepEqual(Array.from(value.data), testData.values)) ||
+              deepEqual(value.data, testData.values)
+            ) {
               node.destroy();
               resolve();
             } else {
@@ -474,7 +482,11 @@ describe('Rclnodejs message translation: TypedArray large data', function () {
         return new Promise((resolve, reject) => {
           const sub = node.createSubscription(MessageType, topic, (value) => {
             // For primitive types, msgs are defined as a single `.data` field
-            if (deepEqual(value.data, testData.values)) {
+            if (
+              (isTypedArray(value.data) &&
+                deepEqual(Array.from(value.data), testData.values)) ||
+              deepEqual(value.data, testData.values)
+            ) {
               node.destroy();
               resolve();
             } else {

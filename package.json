@@ -43,7 +43,6 @@
     "type": "git",
     "url": "git+https://github.com/RobotWebTools/rclnodejs.git"
   },
-  "//": "Pin deep-equal to ^1.1.1",
   "devDependencies": {
     "@babel/eslint-parser": "^7.25.9",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
@@ -51,7 +50,7 @@
     "babel-eslint": "^10.1.0",
     "clang-format": "^1.8.0",
     "commander": "^13.1.0",
-    "deep-equal": "^1.1.1",
+    "deep-equal": "^2.2.3",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.1",
