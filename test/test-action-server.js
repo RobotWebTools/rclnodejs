@@ -446,7 +446,7 @@ describe('rclnodejs action server', function () {
     let result = await handle.getResult();
     assert.ok(result);
     assert.ok(handle.status, GoalStatus.STATUS_SUCCEEDED);
-    assert.ok(deepEqual(result.sequence, testSequence));
+    assert.ok(deepEqual(result.sequence, Int32Array.from(testSequence)));
 
     server.destroy();
   });
@@ -480,7 +480,7 @@ describe('rclnodejs action server', function () {
     let result = await handle.getResult();
     assert.ok(result);
     assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
-    assert.ok(deepEqual(result.sequence, testSequence));
+    assert.ok(deepEqual(result.sequence, Int32Array.from(testSequence)));
 
     server.destroy();
   });
@@ -515,7 +515,7 @@ describe('rclnodejs action server', function () {
     assert.ok(result);
     // Goal status should default to aborted
     assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
-    assert.ok(deepEqual(result.sequence, testSequence));
+    assert.ok(deepEqual(result.sequence, Int32Array.from(testSequence)));
 
     server.destroy();
   });
@@ -543,7 +543,7 @@ describe('rclnodejs action server', function () {
     assert.ok(result);
     // Goal status should default to aborted
     assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
-    assert.ok(deepEqual(result.sequence, []));
+    assert.ok(deepEqual(result.sequence, Int32Array.from([])));
 
     server.destroy();
   });
@@ -660,7 +660,7 @@ describe('rclnodejs action server', function () {
     await assertUtils.createDelay(50);
 
     assert.ok(feedbackMessage);
-    assert.ok(deepEqual(sequence, feedbackMessage.sequence));
+    assert.ok(deepEqual(Int32Array.from(sequence), feedbackMessage.sequence));
 
     server.destroy();
   });
@@ -704,7 +704,7 @@ describe('rclnodejs action server', function () {
     await assertUtils.createDelay(50);
 
     assert.ok(feedbackMessage);
-    assert.ok(deepEqual(sequence, feedbackMessage.sequence));
+    assert.ok(deepEqual(Int32Array.from(sequence), feedbackMessage.sequence));
 
     server.destroy();
   });

@@ -21,7 +21,6 @@ const path = require('path');
 const childProcess = require('child_process');
 const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
-const utils = require('./utils.js');
 
 describe('Rclnodejs - Cpp message type testing', function () {
   var cppSubscriptionPath = path.join(__dirname, 'cpp', 'subscription_msg');
@@ -423,7 +422,7 @@ describe('Rclnodejs - Cpp message type testing', function () {
           ],
           data_offset: 0,
         },
-        data: [65, 66, 67],
+        data: Uint8Array.from([65, 66, 67]),
       };
 
       var publisher = node.createPublisher(
@@ -491,12 +490,11 @@ describe('Rclnodejs - Cpp message type testing', function () {
           frame_id: 'main frame',
         },
         name: ['Tom', 'Jerry'],
-        position: [1, 2],
-        velocity: [2, 3],
-        effort: [4, 5, 6],
+        position: Float64Array.from([1, 2]),
+        velocity: Float64Array.from([2, 3]),
+        effort: Float64Array.from([4, 5, 6]),
       };
 
-      var destroy = false;
       var publisher = node.createPublisher(
         JointState,
         'JointState_js_cpp_channel'

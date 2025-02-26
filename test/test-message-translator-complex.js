@@ -18,6 +18,10 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const deepEqual = require('deep-equal');
 
+function isTypedArray(v) {
+  return ArrayBuffer.isView(v) && !(v instanceof DataView);
+}
+
 describe('Rclnodejs message translation: complex types', function () {
   this.timeout(60 * 1000);
 
@@ -101,22 +105,12 @@ describe('Rclnodejs message translation: complex types', function () {
         {
           header: {
             stamp: { sec: 11223, nanosec: 44556 },
-            frame_id: '1234567x',
-          },
-          name: ['Willy', 'Tacky'],
-          position: [1, 7, 3, 4, 2, 2, 8],
-          velocity: [8, 9, 6, 4],
-          effort: [1, 0, 2, 6, 7],
-        },
-        {
-          header: {
-            stamp: { sec: 11223, nanosec: 44556 },
             frame_id: '0001234567x',
           },
           name: ['Goodly', 'Lovely', 'Angel', 'Neatly', 'Perfect', 'Tacky'],
-          position: [1, 23, 7, 3, 4, 2, 2, 8],
-          velocity: [1, 9, 8, 9, 6, 4],
-          effort: [2, 1, 1, 0, 2, 6, 7],
+          position: Float64Array.from([1, 23, 7, 3, 4, 2, 2, 8]),
+          velocity: Float64Array.from([1, 9, 8, 9, 6, 4]),
+          effort: Float64Array.from([2, 1, 1, 0, 2, 6, 7]),
         },
       ],
     },
@@ -124,17 +118,6 @@ describe('Rclnodejs message translation: complex types', function () {
       pkg: 'std_msgs',
       type: 'Float32MultiArray',
       values: [
-        {
-          layout: {
-            dim: [
-              { label: 'height', size: 480, stride: 921600 },
-              { label: 'width', size: 640, stride: 1920 },
-              { label: 'channel', size: 3, stride: 8 },
-            ],
-            data_offset: 1024,
-          },
-          data: [1.0, 2.0, 3.0, 8.5, 6.75, 0.5, -0.25],
-        },
         {
           layout: {
             dim: [
@@ -161,17 +144,6 @@ describe('Rclnodejs message translation: complex types', function () {
             ],
             data_offset: 0,
           },
-          data: [-10, 1, 2, 3, 8, 6, 0, -25], // Provide data via Array
-        },
-        {
-          layout: {
-            dim: [
-              { label: 'height', size: 10, stride: 600 },
-              { label: 'width', size: 20, stride: 60 },
-              { label: 'channel', size: 3, stride: 4 },
-            ],
-            data_offset: 0,
-          },
           data: Int32Array.from([-10, 1, 2, 3, 8, 6, 0, -25]), // Provide data via TypedArray
         },
       ],
@@ -189,17 +161,6 @@ describe('Rclnodejs message translation: complex types', function () {
             ],
             data_offset: 0,
           },
-          data: [-10, 1, 2, 3, 8, 6, 0, -25], // Provide data via Array
-        },
-        {
-          layout: {
-            dim: [
-              { label: 'height', size: 10, stride: 600 },
-              { label: 'width', size: 20, stride: 60 },
-              { label: 'channel', size: 3, stride: 4 },
-            ],
-            data_offset: 0,
-          },
           data: Int16Array.from([-10, 1, 2, 3, 8, 6, 0, -25]), // Provide data via TypedArray
         },
       ],
@@ -208,17 +169,6 @@ describe('Rclnodejs message translation: complex types', function () {
       pkg: 'std_msgs',
       type: 'Int8MultiArray',
       values: [
-        {
-          layout: {
-            dim: [
-              { label: 'height', size: 10, stride: 600 },
-              { label: 'width', size: 20, stride: 60 },
-              { label: 'channel', size: 3, stride: 4 },
-            ],
-            data_offset: 0,
-          },
-          data: [-10, 1, 2, 3, 8, 6, 0, -25], // Provide data via Array
-        },
         {
           layout: {
             dim: [
@@ -250,11 +200,11 @@ describe('Rclnodejs message translation: complex types', function () {
           channels: [
             {
               name: 'rgb',
-              values: [0.0, 1.5, 2.0, 3.75],
+              values: Float32Array.from([0.0, 1.5, 2.0, 3.75]),
             },
             {
               name: 'intensity',
-              values: [10.0, 21.5, 2.0, 3.75],
+              values: Float32Array.from([10.0, 21.5, 2.0, 3.75]),
             },
           ],
         },

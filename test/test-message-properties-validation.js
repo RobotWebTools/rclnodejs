@@ -75,9 +75,9 @@ describe('Rclnodejs message properities validation', function () {
           frame_id: '1234567x',
         },
         name: ['Willy', 'Tacky'],
-        position: [1, 7, 3, 4, 2, 2, 8],
-        velocity: [8, 9, 6, 4],
-        effort: [1, 0, 2, 6, 7],
+        position: Float64Array.from([1, 7, 3, 4, 2, 2, 8]),
+        velocity: Float64Array.from([8, 9, 6, 4]),
+        effort: Float64Array.from([1, 0, 2, 6, 7]),
       },
     },
     {
@@ -92,7 +92,7 @@ describe('Rclnodejs message properities validation', function () {
           ],
           data_offset: 1024,
         },
-        data: [1.0, 2.0, 3.0, 8.5, 6.75, 0.5, -0.25],
+        data: Float32Array.from([1.0, 2.0, 3.0, 8.5, 6.75, 0.5, -0.25]),
       },
     },
     {
@@ -157,11 +157,11 @@ describe('Rclnodejs message properities validation', function () {
         channels: [
           {
             name: 'rgb',
-            values: [0.0, 1.5, 2.0, 3.75],
+            values: Float32Array.from([0.0, 1.5, 2.0, 3.75]),
           },
           {
             name: 'intensity',
-            values: [10.0, 21.5, 2.0, 3.75],
+            values: Float32Array.from([10.0, 21.5, 2.0, 3.75]),
           },
         ],
       },
@@ -174,7 +174,17 @@ describe('Rclnodejs message properities validation', function () {
       for (let i in testData.value) {
         // Assign the property with a plain object.
         left[i] = testData.value[i];
-        deepEqual(left[i], right[i]);
+        if (typeof left[i].toPlainObject === 'function') {
+          assert.ok(deepEqual(testData.value[i], left[i].toPlainObject()));
+        } else if (left[i].classType && left[i].classType.isROSArray) {
+          left[i].data.forEach((value, index) => {
+            assert.ok(
+              deepEqual(testData.value[i][index], value.toPlainObject())
+            );
+          });
+        } else {
+          assert.ok(deepEqual(testData.value[i], left[i]));
+        }
       }
     });
   });
