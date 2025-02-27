@@ -66,7 +66,6 @@
     "@rclnodejs/ref-array-di": "^1.2.2",
     "@rclnodejs/ref-napi": "^4.0.0",
     "@rclnodejs/ref-struct-di": "^1.1.1",
-    "array.prototype.flat": "^1.3.2",
     "bindings": "^1.5.0",
     "compare-versions": "^6.1.1",
     "debug": "^4.4.0",

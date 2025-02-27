@@ -20,7 +20,6 @@ const readline = require('readline');
 const path = require('path');
 const walk = require('walk');
 const os = require('os');
-const flat = require('array.prototype.flat');
 const pkgFilters = require('../rosidl_gen/filter.js');
 
 const fsp = fs.promises;
@@ -193,8 +192,7 @@ async function findAmentPackagesInDirectory(dir) {
     pkgs.map((pkg) => getPackageDefinitionsFiles(pkg, dir))
   );
 
-  // Support flat() method for nodejs < 11.
-  const rosFiles = Array.prototype.flat ? files.flat() : flat(files);
+  const rosFiles = files.flat();
   const pkgMap = new Map();
   await Promise.all(
     rosFiles.map((filePath) => addInterfaceInfos(filePath, dir, pkgMap))
