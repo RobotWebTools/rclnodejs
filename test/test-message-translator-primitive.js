@@ -17,10 +17,7 @@
 const rclnodejs = require('../index.js');
 const deepEqual = require('deep-equal');
 const arrayGen = require('./array_generator.js');
-
-function isTypedArray(v) {
-  return ArrayBuffer.isView(v) && !(v instanceof DataView);
-}
+const { isTypedArray } = require('./utils.js');
 
 /* eslint-disable camelcase */
 /* eslint-disable indent */
