@@ -175,13 +175,12 @@ describe('Rclnodejs message properities validation', function () {
         // Assign the property with a plain object.
         left[i] = testData.value[i];
         if (typeof left[i].toPlainObject === 'function') {
-          assert.ok(deepEqual(testData.value[i], left[i].toPlainObject()));
-        } else if (left[i].classType && left[i].classType.isROSArray) {
-          left[i].data.forEach((value, index) => {
-            assert.ok(
-              deepEqual(testData.value[i][index], value.toPlainObject())
-            );
-          });
+          assert.ok(
+            deepEqual(
+              testData.value[i],
+              left[i].toPlainObject(/*enableTypedArray=*/ true)
+            )
+          );
         } else {
           assert.ok(deepEqual(testData.value[i], left[i]));
         }
