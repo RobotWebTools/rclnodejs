@@ -14,13 +14,8 @@
 
 'use strict';
 
-const assert = require('assert');
 const rclnodejs = require('../index.js');
 const deepEqual = require('deep-equal');
-
-function isTypedArray(v) {
-  return ArrayBuffer.isView(v) && !(v instanceof DataView);
-}
 
 describe('Rclnodejs message translation: complex types', function () {
   this.timeout(60 * 1000);

@@ -824,6 +824,10 @@ class {{=arrayWrapper}} {
   get classType() {
     return {{=arrayWrapper}};
   }
+
+  toPlainObject(enableTypedArray) {
+    return translator.toPlainObject(this, enableTypedArray);
+  }
 }
 
 {{? it.spec.constants != undefined && it.spec.constants.length}}

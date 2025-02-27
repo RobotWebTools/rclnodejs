@@ -19,10 +19,7 @@ const deepEqual = require('deep-equal');
 const rclnodejs = require('../index.js');
 const translator = require('../rosidl_gen/message_translator.js');
 const arrayGen = require('./array_generator.js');
-
-function isTypedArray(v) {
-  return ArrayBuffer.isView(v) && !(v instanceof DataView);
-}
+const { isTypedArray } = require('./utils.js');
 
 describe('rclnodejs message communication', function () {
   this.timeout(60 * 1000);

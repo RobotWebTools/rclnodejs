@@ -85,10 +85,15 @@ function createDelay(millis) {
   return new Promise((resolve) => setTimeout(resolve, millis));
 }
 
+function isTypedArray(v) {
+  return ArrayBuffer.isView(v) && !(v instanceof DataView);
+}
+
 module.exports = {
   assertMember: assertMember,
   assertThrowsError: assertThrowsError,
   createDelay: createDelay,
   getAvailablePath: getAvailablePath,
   launchPythonProcess: launchPythonProcess,
+  isTypedArray: isTypedArray,
 };
