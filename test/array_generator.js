@@ -41,20 +41,6 @@ function noRound(v) {
   return v;
 }
 
-// const arrayGen = require('./array_generator.js');
-// const arrayLength = 100 * 1024;
-// arrayGen.generateValues(Float32Array, arrayLength, 100000000, arrayGen.negative, arrayGen.noRound);
-// arrayGen.generateValues(Float32Array, arrayLength, 10000, arrayGen.negative, arrayGen.noRound);
-// arrayGen.generateValues(Float64Array, arrayLength, Number.MAX_VALUE, arrayGen.negative, arrayGen.noRound);
-// arrayGen.generateValues(Float64Array, arrayLength, 10000, arrayGen.negative, arrayGen.noRound);
-// arrayGen.generateValues(Int8Array,    arrayLength, 128, arrayGen.negative, Math.floor);
-// arrayGen.generateValues(Int16Array,   arrayLength, 32768, arrayGen.negative, Math.floor);
-// arrayGen.generateValues(Int32Array,   arrayLength, 2147483648, arrayGen.negative, Math.floor);
-// arrayGen.generateValues(Uint8Array,   arrayLength, 256, arrayGen.positive, Math.floor);
-// arrayGen.generateValues(Uint16Array,  arrayLength, 65536, arrayGen.positive, Math.floor);
-// arrayGen.generateValues(Uint32Array,  arrayLength, 4294967296, arrayGen.positive, Math.floor);
-// arrayGen.generateValues(Array, arrayLength, 256, arrayGen.positive, Math.floor);
-
 module.exports = {
   generateValues: generateValues,
   positive: positive,

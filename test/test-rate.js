@@ -14,11 +14,8 @@
 'use strict';
 
 const assert = require('assert');
-
-const isClose = require('is-close');
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
-const assertThrowsError = assertUtils.assertThrowsError;
 const { performance } = require('perf_hooks');
 
 describe('rclnodejs rate test suite', function () {
@@ -110,6 +107,5 @@ describe('rclnodejs rate test suite', function () {
       arr.reduce((prev, cur) => {
         return prev + cur;
       }, 0) / dataSize;
-    // console.log('data avg: ', avg);
   });
 });

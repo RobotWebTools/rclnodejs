@@ -1,4 +1,3 @@
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,7 +17,6 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const childProcess = require('child_process');
 const assertUtils = require('./utils.js');
-const assertThrowsError = assertUtils.assertThrowsError;
 
 const NODE_NAME = 'lifecycle_node';
 
@@ -332,7 +330,6 @@ describe('LifecycleNode test suite', function () {
     if (version < GALACTIC_VERSION) return;
 
     let rosDistro = process.env.ROS_DISTRO;
-    let firstChar = rosDistro.charAt(0);
     let testNode = new rclnodejs.lifecycle.LifecycleNode(
       'TEST_NODE',
       undefined,
