@@ -14,6 +14,7 @@
     "test-subscription-content-filter.js"
   ],
   "Windows_NT": [
+    "test-raw-pub-sub.js",
     "test-multi-nodes.js", 
     "test-msg-type-py-node.js", 
     "test-msg-type-cpp-node.js", 
