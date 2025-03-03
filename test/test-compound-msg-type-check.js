@@ -16,7 +16,6 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const assertThrowsError = require('./utils.js').assertThrowsError;
 
 describe('Compound types', function () {
   this.timeout(60 * 1000);

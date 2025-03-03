@@ -19,8 +19,6 @@ const Mocha = require('mocha');
 const os = require('os');
 const path = require('path');
 
-let rootDir = path.dirname(__dirname);
-
 fs.remove(path.join(path.dirname(__dirname), 'generated'), (err) => {
   if (!err) {
     let mocha = new Mocha();

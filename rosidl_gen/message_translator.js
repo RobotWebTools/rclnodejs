@@ -16,8 +16,6 @@
 
 /* eslint-disable max-depth */
 
-const debug = require('debug')('rclnodejs:message_translator');
-
 function isTypedArray(value) {
   return ArrayBuffer.isView(value) && !(value instanceof DataView);
 }
@@ -39,7 +37,6 @@ function copyMsgObject(msg, obj) {
           // It's an array
           if (typeof obj[i][0] === 'object') {
             // It's an array of objects: converting to ROS message objects
-
             // 1. Extract the element-type first
             // 2. Build the array by translate every elements
             let msgArray = [];
@@ -66,8 +63,7 @@ function copyMsgObject(msg, obj) {
 function verifyMessage(message, obj) {
   if (message.constructor.isROSArray) {
     // It's a ROS message array
-    //  Note: there won't be any JavaScript array in message
-
+    // Note: there won't be any JavaScript array in message.
     if (!Array.isArray(obj)) {
       return false;
     }
@@ -131,7 +127,7 @@ function toPlainObject(message, enableTypedArray = true) {
 
   if (message.constructor.isROSArray) {
     // It's a ROS message array
-    //  Note: there won't be any JavaScript array in message
+    // Note: there won't be any JavaScript array in message.
     let array = [];
     message.data.forEach((e) => {
       array.push(toPlainObject(e, enableTypedArray)); // Translate every elements

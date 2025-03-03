@@ -21,9 +21,6 @@ const assertThrowsError = assertUtils.assertThrowsError;
 
 const NODE_NAME = 'lifecycle_node';
 
-// let StateInterface = rclnodejs.createMessage('lifecycle_msgs/msg/State').constructor;
-// let TransitionInterface = rclnodejs.createMessage('lifecycle_msgs/msg/Transition').constructor;
-
 describe('LifecyclePublisher test suite', function () {
   let node;
   this.timeout(60 * 1000);
