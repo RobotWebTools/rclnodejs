@@ -28,10 +28,6 @@ const {
   PARAMETER_SEPARATOR,
 } = require('../lib/parameter.js');
 
-const PARAM_REL_TOL = 1e-6;
-
-const Node = rclnodejs.Node;
-
 const PARAMETER_EVENT_MSG_TYPE = 'rcl_interfaces/msg/ParameterEvent';
 const PARAMETER_EVENT_TOPIC = 'parameter_events';
 

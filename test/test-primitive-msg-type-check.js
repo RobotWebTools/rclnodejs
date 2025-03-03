@@ -30,7 +30,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('Bool data checking', function () {
-    var node = rclnodejs.createNode('bool');
     var msgBool = rclnodejs.require('std_msgs').msg.Bool;
     var msg = new msgBool();
 
@@ -54,7 +53,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('Char data checking', function () {
-    var node = rclnodejs.createNode('char');
     var msgChar = rclnodejs.require('std_msgs').msg.Char;
     var msg = new msgChar();
 
@@ -81,7 +79,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('Byte data checking', function () {
-    var node = rclnodejs.createNode('byte');
     var msgByte = rclnodejs.require('std_msgs').msg.Byte;
     var msg = new msgByte();
 
@@ -108,7 +105,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('String data checking', function () {
-    var node = rclnodejs.createNode('string');
     var msgString = rclnodejs.require('std_msgs').msg.String;
     var msg = new msgString();
 
@@ -135,7 +131,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('Int8 data checking', function () {
-    var node = rclnodejs.createNode('int8');
     var msgInt8 = rclnodejs.require('std_msgs').msg.Int8;
     var msg = new msgInt8();
 
@@ -162,7 +157,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('UInt8 data checking', function () {
-    var node = rclnodejs.createNode('uint8');
     var msgUInt8 = rclnodejs.require('std_msgs').msg.UInt8;
     var msg = new msgUInt8();
 
@@ -189,7 +183,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('Int16 data checking', function () {
-    var node = rclnodejs.createNode('int16');
     var msgInt16 = rclnodejs.require('std_msgs').msg.Int16;
     var msg = new msgInt16();
 
@@ -216,7 +209,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('UInt16 data checking', function () {
-    var node = rclnodejs.createNode('uint16');
     var msgUInt16 = rclnodejs.require('std_msgs').msg.UInt16;
     var msg = new msgUInt16();
 
@@ -243,7 +235,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('Int32 data checking', function () {
-    var node = rclnodejs.createNode('int32');
     var msgInt32 = rclnodejs.require('std_msgs').msg.Int32;
     var msg = new msgInt32();
 
@@ -270,7 +261,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('UInt32 data checking', function () {
-    var node = rclnodejs.createNode('uint32');
     var msgUInt32 = rclnodejs.require('std_msgs').msg.UInt32;
     var msg = new msgUInt32();
 
@@ -297,7 +287,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('Int64 data checking', function () {
-    var node = rclnodejs.createNode('int64');
     var msgInt64 = rclnodejs.require('std_msgs').msg.Int64;
     var msg = new msgInt64();
 
@@ -307,7 +296,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('UInt64 data checking', function () {
-    var node = rclnodejs.createNode('uint64');
     var msgUInt64 = rclnodejs.require('std_msgs').msg.UInt64;
     var msg = new msgUInt64();
 
@@ -317,7 +305,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('Float32 data checking', function () {
-    var node = rclnodejs.createNode('float32');
     var msgFloat32 = rclnodejs.require('std_msgs').msg.Float32;
     var msg = new msgFloat32();
 
@@ -327,7 +314,6 @@ describe('Rclnodejs message type data testing', function () {
   });
 
   it('Float64 data checking', function () {
-    var node = rclnodejs.createNode('float64');
     var msgFloat64 = rclnodejs.require('std_msgs').msg.Float64;
     var msg = new msgFloat64();
 

@@ -14,8 +14,6 @@
 'use strict';
 
 const assert = require('assert');
-const IsClose = require('is-close');
-
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;

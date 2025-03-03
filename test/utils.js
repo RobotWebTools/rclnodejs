@@ -29,8 +29,6 @@ function assertThrowsError(operation, errors, errMsg, message) {
   assert.throws(
     operation,
     function (err) {
-      var containedMsg = new RegExp(errMsg);
-
       if (errors instanceof Array) {
         var foundError = false;
         errors.forEach((e) => {

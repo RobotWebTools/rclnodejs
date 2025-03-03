@@ -14,7 +14,6 @@
 
 'use strict';
 
-const childProcess = require('child_process');
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const DistroUtils = rclnodejs.DistroUtils;
@@ -49,12 +48,6 @@ describe('rclnodejs publisher test suite', function () {
         clearInterval(timer);
 
         let buffer = topic;
-        const distroId = DistroUtils.getDistroId();
-
-        if (distroId >= DistroUtils.DistroId.GALACTIC) {
-          // The received Buffer is null-terminated.
-          buffer = Buffer.concat([buffer, Buffer.from([0x00])]);
-        }
         assert.deepStrictEqual(
           Buffer.compare(msg, buffer),
           0,

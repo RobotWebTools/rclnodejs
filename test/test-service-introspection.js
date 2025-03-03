@@ -28,8 +28,6 @@ const QOS = rclnodejs.QoS.profileSystemDefault;
 
 const DELAY = 1000; // ms
 
-//  ros2 topic echo /add_two_ints/_service_event
-
 function isServiceIntrospectionSupported() {
   return DistroUtils.getDistroId() > DistroUtils.getDistroId('humble');
 }

@@ -710,7 +710,6 @@ NAN_METHOD(HasContentFilter) {
   info.GetReturnValue().Set(Nan::False());
   return;
 #else
-
   RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
       Nan::To<v8::Object>(info[0]).ToLocalChecked());
   rcl_subscription_t* subscription =

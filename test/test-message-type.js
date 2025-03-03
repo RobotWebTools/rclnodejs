@@ -18,22 +18,6 @@ const assert = require('assert');
 const childProcess = require('child_process');
 const rclnodejs = require('../index.js');
 
-// function checkType(m, rclType, jsType, value, callback) {
-//                   // rclnodejs, 'Bool', 'boolean', '"true"', callback
-//   if ((typeof rclType !== 'string') || (typeof value !== 'string')) {
-//     throw TypeError('Invalid type of parameters!');
-//   }
-
-//   var node = m.createNode(rclType + '_subscription');
-//   var msgType = m.require('std_msgs').msg[rclType];
-//   var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, [rclType, value]);
-//   var subscription = node.createSubscription(msgType, rclType + '_type_channel', (msg) => {
-//     publisher.send('quit');
-//     callback(msg, jsType, value);
-//   });
-//   m.spin(node);
-// }
-
 describe('Rclnodejs message type testing', function () {
   this.timeout(60 * 1000);
 
@@ -125,19 +109,6 @@ describe('Rclnodejs message type testing', function () {
       );
       rclnodejs.spin(node);
     });
-
-    // it('InitString', function(done) {
-    //   var node = rclnodejs.createNode('init_string_subscription');
-    //   var msgString = 'std_msgs/msg/String';
-    //   var publisher = childProcess.fork(`${__dirname}/publisher_msg.js`, ['InitString', '"RCL String"']);
-    //   var subscription = node.createSubscription(msgString, 'InitString_channel', (msg) => {
-    //     publisher.send('quit');
-    //     assert.deepStrictEqual(typeof msg.data, 'string');
-    //     assert.deepStrictEqual(msg.data, 'RCL String');
-    //     done();
-    //   });
-    //   rclnodejs.spin(node);
-    // });
 
     it('Int8', function (done) {
       var node = rclnodejs.createNode('int8_subscription');
@@ -354,26 +325,22 @@ describe('Rclnodejs message type testing', function () {
         (msg) => {
           publisher.kill('SIGINT');
           assert.ok('r' in msg);
-          // assert.deepStrictEqual(typeof msg.r, 'number');
+          assert.deepStrictEqual(typeof msg.r, 'number');
           assert.deepStrictEqual(msg.r, 127);
           assert.ok('g' in msg);
-          // assert.deepStrictEqual(typeof msg.g, 'number');
+          assert.deepStrictEqual(typeof msg.g, 'number');
           assert.deepStrictEqual(msg.g, 255);
           assert.ok('b' in msg);
-          // assert.deepStrictEqual(typeof msg.b, 'number');
+          assert.deepStrictEqual(typeof msg.b, 'number');
           assert.deepStrictEqual(msg.b, 255);
           assert.ok('a' in msg);
-          // assert.deepStrictEqual(typeof msg.a, 'number');
+          assert.deepStrictEqual(typeof msg.a, 'number');
           assert.ok(Math.abs(msg.a - 0.5) < 0.000001);
           done();
         }
       );
       rclnodejs.spin(node);
     });
-
-    // it('Array', function(done) {
-
-    // });
 
     it('Object with Header', function (done) {
       var node = rclnodejs.createNode('header_subscription');
