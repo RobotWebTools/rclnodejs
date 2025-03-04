@@ -292,7 +292,7 @@ describe('Fuzzing API calls testing', function () {
     for (let i = 0; i < dataLength; i++) {
       uint8Data[i] = i % 255;
     }
-    /* eslint-disable camelcase */
+
     const value = {
       header: { stamp: { sec: 11223, nanosec: 44556 }, frame_id: 'f001' },
       height: 240,

@@ -64,7 +64,6 @@ async function generateAll(forcedGenerating) {
 
 const generator = {
   version() {
-    // eslint-disable-next-line
     return fse.readJsonSync(path.join(__dirname, 'generator.json')).version;
   },
 

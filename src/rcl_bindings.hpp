@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RCLNODEJS_RCL_BINDINGS_HPP_
-#define RCLNODEJS_RCL_BINDINGS_HPP_
+#ifndef SRC_RCL_BINDINGS_HPP_
+#define SRC_RCL_BINDINGS_HPP_
 
 #include <nan.h>
 #include <rcl/graph.h>
@@ -43,4 +43,4 @@ extern std::vector<BindingMethod> binding_methods;
 
 }  // namespace rclnodejs
 
-#endif
+#endif  // SRC_RCL_BINDINGS_HPP_

@@ -17,7 +17,6 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-/* eslint-disable camelcase */
 describe('Rclnodejs non primitive message type testing', function () {
   this.timeout(60 * 1000);
 

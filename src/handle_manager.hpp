@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RCLNODEJS_HANDLE_MANAGER_HPP_
-#define RCLNODEJS_HANDLE_MANAGER_HPP_
+#ifndef SRC_HANDLE_MANAGER_HPP_
+#define SRC_HANDLE_MANAGER_HPP_
 
 #include <nan.h>
 #include <rcl/wait.h>
@@ -132,4 +132,4 @@ class HandleManager {
 
 }  // namespace rclnodejs
 
-#endif
+#endif  // SRC_HANDLE_MANAGER_HPP_

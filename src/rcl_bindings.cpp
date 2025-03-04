@@ -40,6 +40,7 @@
 #include <rcl/service_introspection.h>
 #endif
 
+#include <cstdio>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -963,7 +964,7 @@ NAN_METHOD(SendRequest) {
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_request(client, buffer, &sequence_number),
                            RCL_RET_OK, rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::New((uint32_t)sequence_number));
+  info.GetReturnValue().Set(Nan::New(static_cast<uint32_t>(sequence_number)));
 }
 
 NAN_METHOD(RclTakeResponse) {
@@ -980,7 +981,7 @@ NAN_METHOD(RclTakeResponse) {
   int64_t sequence_number = header.request_id.sequence_number;
 
   if (ret == RCL_RET_OK) {
-    info.GetReturnValue().Set(Nan::New((uint32_t)sequence_number));
+    info.GetReturnValue().Set(Nan::New(static_cast<uint32_t>(sequence_number)));
     return;
   }
 
@@ -1161,7 +1162,7 @@ NAN_METHOD(ValidateFullTopicName) {
   Nan::Set(
       result_list, 0,
       Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
-  Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
+  Nan::Set(result_list, 1, Nan::New(static_cast<int32_t>(invalid_index)));
 
   info.GetReturnValue().Set(result_list);
 }
@@ -1196,7 +1197,7 @@ NAN_METHOD(ValidateNodeName) {
   Nan::Set(
       result_list, 0,
       Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
-  Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
+  Nan::Set(result_list, 1, Nan::New(static_cast<int32_t>(invalid_index)));
 
   info.GetReturnValue().Set(result_list);
 }
@@ -1231,7 +1232,7 @@ NAN_METHOD(ValidateTopicName) {
   Nan::Set(
       result_list, 0,
       Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
-  Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
+  Nan::Set(result_list, 1, Nan::New(static_cast<int32_t>(invalid_index)));
 
   info.GetReturnValue().Set(result_list);
 }
@@ -1266,7 +1267,7 @@ NAN_METHOD(ValidateNamespace) {
   Nan::Set(
       result_list, 0,
       Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
-  Nan::Set(result_list, 1, Nan::New((int32_t)invalid_index));
+  Nan::Set(result_list, 1, Nan::New(static_cast<int32_t>(invalid_index)));
 
   info.GetReturnValue().Set(result_list);
 }

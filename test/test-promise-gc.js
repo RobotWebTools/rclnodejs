@@ -15,7 +15,6 @@
  *
  */
 
-/* eslint-disable camelcase */
 'use strict';
 
 const assert = require('assert');

@@ -14,8 +14,6 @@
 
 'use strict';
 
-/* eslint-disable camelcase */
-
 const assert = require('assert');
 const childProcess = require('child_process');
 const deepEqual = require('deep-equal');

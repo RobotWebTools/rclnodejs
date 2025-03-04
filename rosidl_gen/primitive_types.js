@@ -18,8 +18,6 @@ const ref = require('@rclnodejs/ref-napi');
 const StructType = require('@rclnodejs/ref-struct-di')(ref);
 const rclnodejs = require('bindings')('rclnodejs');
 
-/* eslint-disable camelcase */
-
 const StringRefStruct = StructType({
   data: ref.types.CString,
   size: ref.types.size_t,
@@ -65,5 +63,3 @@ module.exports = {
   wstring: StringRefStruct,
   initString: initString,
 };
-
-/* eslint-enable camelcase */

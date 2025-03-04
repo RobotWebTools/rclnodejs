@@ -87,7 +87,6 @@ const RosPackageFilters = {
 
     if (!fs.existsSync(blocklistPath)) return;
 
-    // eslint-disable-next-line
     let blocklistData = JSON.parse(fs.readFileSync(blocklistPath, 'utf8'));
 
     let filters = blocklistData.map((pkgFilterData) => {

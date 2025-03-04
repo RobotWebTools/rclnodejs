@@ -24,7 +24,7 @@
     "postinstall": "npm run generate-messages",
     "docs": "cd docs && make",
     "test": "node --expose-gc ./scripts/run_test.js && npx tsd",
-    "lint": "eslint --max-warnings=0 --ext js,ts index.js types scripts lib example rosidl_gen rosidl_parser test benchmark/rclnodejs && node ./scripts/cpplint.js",
+    "lint": "eslint && node ./scripts/cpplint.js",
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.hpp && prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark}/**/*.{js,md,ts}\" ./*.{js,md,ts}",
     "prepare": "husky"
   },
@@ -44,6 +44,8 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.25.9",
+    "@eslint/eslintrc": "^3.3.0",
+    "@eslint/js": "^9.21.0",
     "@types/node": "^22.13.5",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
@@ -54,6 +56,7 @@
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^16.0.0",
     "husky": "^9.1.7",
     "jsdoc": "^4.0.4",
     "lint-staged": "^15.2.10",

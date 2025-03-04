@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RCLNODEJS_RCL_HANDLE_HPP_
-#define RCLNODEJS_RCL_HANDLE_HPP_
+#ifndef SRC_RCL_HANDLE_HPP_
+#define SRC_RCL_HANDLE_HPP_
 
 #include <nan.h>
 
@@ -68,4 +68,4 @@ class RclHandle : public Nan::ObjectWrap {
 
 }  // namespace rclnodejs
 
-#endif
+#endif  // SRC_RCL_HANDLE_HPP_

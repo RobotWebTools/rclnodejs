@@ -19,9 +19,6 @@ const deepEqual = require('deep-equal');
 const arrayGen = require('./array_generator.js');
 const { isTypedArray } = require('./utils.js');
 
-/* eslint-disable camelcase */
-/* eslint-disable indent */
-
 describe('Rclnodejs message translation: primitive types', function () {
   this.timeout(60 * 1000);
 
@@ -259,7 +256,6 @@ describe('Rclnodejs message translation: TypedArray large data', function () {
 
   const arrayLength = 100 * 1000;
   [
-    /* eslint-disable max-len */
     {
       type: 'ByteMultiArray',
       values: arrayGen.generateValues(
@@ -464,7 +460,6 @@ describe('Rclnodejs message translation: TypedArray large data', function () {
         Math.floor
       ),
     },
-    /* eslint-enable max-len */
   ].forEach((testData) => {
     const topic = testData.topic || 'topic' + testData.type;
     it(

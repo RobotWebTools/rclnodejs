@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RCLNODEJS_EXECUTOR_HPP_
-#define RCLNODEJS_EXECUTOR_HPP_
+#ifndef SRC_EXECUTOR_HPP_
+#define SRC_EXECUTOR_HPP_
 
 #include <rcl/wait.h>
 #include <uv.h>
@@ -74,4 +74,4 @@ class Executor {
 
 }  // namespace rclnodejs
 
-#endif
+#endif  // SRC_EXECUTOR_HPP_

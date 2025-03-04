@@ -645,12 +645,10 @@ describe('rclnodejs parameters test suite', function () {
     let node;
     this.timeout(60 * 1000);
 
-    /* eslint-disable-next-line space-before-function-paren */
     before(async () => {
       await rclnodejs.init();
     });
 
-    /* eslint-disable-next-line space-before-function-paren */
     this.beforeEach(async () => {
       node = rclnodejs.createNode(NODE_NAME);
       PARAMETER = new Parameter(PARAM_NAME, PARAM_TYPE, PARAM_VALUE);
