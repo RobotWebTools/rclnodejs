@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 declare module 'rclnodejs' {
   /**
    * Goal handle for working with Action Servers.

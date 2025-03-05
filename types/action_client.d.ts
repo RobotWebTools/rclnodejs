@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 declare module 'rclnodejs' {
   type ActionGoal<T> = T extends ActionTypeClassName
     ? InstanceType<ActionsMap[T]['Goal']>

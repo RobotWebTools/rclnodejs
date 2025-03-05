@@ -17,9 +17,6 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-/* eslint-disable camelcase */
-/* eslint-disable key-spacing */
-/* eslint-disable comma-spacing */
 describe('Test bounded sequeces', function () {
   this.timeout(60 * 1000);
 

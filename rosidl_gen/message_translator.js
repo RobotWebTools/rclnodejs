@@ -14,8 +14,6 @@
 
 'use strict';
 
-/* eslint-disable max-depth */
-
 function isTypedArray(value) {
   return ArrayBuffer.isView(value) && !(value instanceof DataView);
 }
@@ -133,7 +131,6 @@ function toPlainObject(message, enableTypedArray = true) {
       array.push(toPlainObject(e, enableTypedArray)); // Translate every elements
     });
     return array;
-    // eslint-disable-next-line no-else-return
   } else {
     // It's a ROS message
     const def = message.constructor.ROSMessageDef;

@@ -17,10 +17,6 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-/* eslint-disable camelcase */
-/* eslint-disable key-spacing */
-/* eslint-disable comma-spacing */
-
 describe('Test message which has a non-primitive array', function () {
   this.timeout(60 * 1000);
 

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RCLNODEJS_RCL_UTILITIES_HPP_
-#define RCLNODEJS_RCL_UTILITIES_HPP_
+#ifndef SRC_RCL_UTILITIES_HPP_
+#define SRC_RCL_UTILITIES_HPP_
 
 #include <string>
 
@@ -37,4 +37,4 @@ std::string GetErrorMessageAndClear();
 
 }  // namespace rclnodejs
 
-#endif
+#endif  // SRC_RCL_UTILITIES_HPP_

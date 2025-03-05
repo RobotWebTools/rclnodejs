@@ -36,7 +36,7 @@ rclnodejs
         const weightStride = dim[1].stride;
         const channel = dim[2].size;
         const channelStride = dim[2].stride;
-        // eslint-disable-next-line
+
         const offset = multiArray.layout.data_offset;
 
         for (let i = 0; i < height; i++) {

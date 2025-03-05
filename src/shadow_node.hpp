@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RCLNODEJS_SHADOW_NODE_HPP_
-#define RCLNODEJS_SHADOW_NODE_HPP_
+#ifndef SRC_SHADOW_NODE_HPP_
+#define SRC_SHADOW_NODE_HPP_
 
 #include <nan.h>
 
@@ -60,4 +60,4 @@ class ShadowNode : public Nan::ObjectWrap, public Executor::Delegate {
 
 }  // namespace rclnodejs
 
-#endif
+#endif  // SRC_SHADOW_NODE_HPP_

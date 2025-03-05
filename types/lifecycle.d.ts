@@ -53,10 +53,8 @@ declare module 'rclnodejs' {
       asMessage(): {
         transition: SerializedState;
 
-        // eslint-disable-next-line camelcase
         start_state: SerializedState;
 
-        // eslint-disable-next-line camelcase
         goal_state: SerializedState;
       };
     }

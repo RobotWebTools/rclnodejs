@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 declare module 'rclnodejs' {
   /**
    * Identifies type of ROS message such as msg or srv.

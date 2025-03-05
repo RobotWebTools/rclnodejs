@@ -1,6 +1,4 @@
-/* eslint-disable camelcase */
-
-import { Message, builtin_interfaces } from 'rclnodejs';
+import { builtin_interfaces } from 'rclnodejs';
 
 declare module 'rclnodejs' {
   /**
@@ -100,7 +98,6 @@ declare module 'rclnodejs' {
      *
      * @returns The new Time message.
      */
-    // eslint-disable-next-line camelcase
     toMsg(): builtin_interfaces.msg.Time;
 
     /**
@@ -110,7 +107,6 @@ declare module 'rclnodejs' {
      * @param clockType - The type of the time object. Default is ClockType.ROS_TIME
      * @returns The new Time.
      */
-    // eslint-disable-next-line camelcase
     static fromMsg(
       msg: builtin_interfaces.msg.Time,
       clockType?: ClockType

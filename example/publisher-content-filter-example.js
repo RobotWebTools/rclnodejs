@@ -14,8 +14,6 @@
 
 'use strict';
 
-/* eslint-disable camelcase */
-
 const rclnodejs = require('../index.js');
 
 async function main() {

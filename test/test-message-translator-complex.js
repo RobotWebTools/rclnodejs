@@ -28,10 +28,6 @@ describe('Rclnodejs message translation: complex types', function () {
     rclnodejs.shutdown();
   });
 
-  /* eslint-disable camelcase */
-  /* eslint-disable key-spacing */
-  /* eslint-disable comma-spacing */
-
   [
     {
       pkg: 'std_msgs',
@@ -205,9 +201,6 @@ describe('Rclnodejs message translation: complex types', function () {
         },
       ],
     },
-    /* eslint-enable camelcase */
-    /* eslint-enable key-spacing */
-    /* eslint-enable comma-spacing */
   ].forEach((testData) => {
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RCLNODEJS_MARCOS_HPP_
-#define RCLNODEJS_MARCOS_HPP_
+#ifndef SRC_MACROS_HPP_
+#define SRC_MACROS_HPP_
 
 #include "rcutils/logging_macros.h"
 
@@ -43,4 +43,4 @@
 #define RCLNODEJS_DEBUG(...)
 #endif
 
-#endif
+#endif  // SRC_MACROS_HPP_
