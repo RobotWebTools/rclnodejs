@@ -66,7 +66,6 @@ function getAvailablePath(amentPrefixPath, otherDirs) {
       appendedPath = path.join(appendedPath, dir);
     });
 
-    // eslint-disable-next-line
     if (fs.existsSync(appendedPath) || fs.existsSync(appendedPath + '.exe')) {
       availablePath = appendedPath;
     }

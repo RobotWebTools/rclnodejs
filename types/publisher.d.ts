@@ -8,7 +8,6 @@ declare module 'rclnodejs' {
      * Topic on which messages are published.
      */
     readonly topic: string;
-
     /**
      * Publish a message
      *

@@ -29,9 +29,6 @@ describe('Rclnodejs message properities validation', function () {
     rclnodejs.shutdown();
   });
 
-  /* eslint-disable camelcase */
-  /* eslint-disable key-spacing */
-  /* eslint-disable comma-spacing */
   [
     {
       pkg: 'std_msgs',

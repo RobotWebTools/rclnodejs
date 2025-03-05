@@ -32,10 +32,6 @@ describe('rclnodejs message communication', function () {
     rclnodejs.shutdown();
   });
 
-  /* eslint-disable camelcase */
-  /* eslint-disable key-spacing */
-  /* eslint-disable comma-spacing */
-
   const layout = {
     dim: [
       { label: 'height', size: 10, stride: 600 },
@@ -143,9 +139,6 @@ describe('rclnodejs message communication', function () {
         }, // Provide data via TypedArray
       ],
     },
-    /* eslint-enable camelcase */
-    /* eslint-enable key-spacing */
-    /* eslint-enable comma-spacing */
   ].forEach((testData) => {
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {
@@ -222,9 +215,6 @@ describe('rclnodejs message communication', function () {
   );
 
   [
-    /* eslint-disable camelcase */
-    /* eslint-disable key-spacing */
-    /* eslint-disable comma-spacing */
     {
       pkg: 'sensor_msgs',
       type: 'PointCloud2',
@@ -353,9 +343,6 @@ describe('rclnodejs message communication', function () {
         },
       ],
     },
-    /* eslint-enable camelcase */
-    /* eslint-enable key-spacing */
-    /* eslint-enable comma-spacing */
   ].forEach((testData) => {
     const topic = testData.topic || 'topic' + testData.type;
     testData.values.forEach((v, i) => {
@@ -383,7 +370,6 @@ describe('rclnodejs message communication', function () {
 
   const arrayLength = 1024;
   [
-    /* eslint-disable max-len */
     {
       type: 'ByteMultiArray',
       arrayType: Uint8Array,
@@ -583,7 +569,6 @@ describe('rclnodejs message communication', function () {
         Math.floor
       ),
     },
-    /* eslint-enable max-len */
   ].forEach((testData) => {
     const topic = testData.topic || 'topic' + testData.type;
     it('Make sure ' + testData.type + ' use TypedArray', function () {
@@ -591,7 +576,7 @@ describe('rclnodejs message communication', function () {
       const msg = translator.toROSMessage(MessageType, {
         layout: {
           dim: [{ label: 'length', size: 0, stride: 0 }],
-          // eslint-disable-next-line
+
           data_offset: 0,
         },
         data: testData.values,

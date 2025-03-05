@@ -12,7 +12,6 @@
 
 'use strict';
 
-/* eslint-disable camelcase */
 const GOAL_ID_FIELD = {
   name: 'goal_id',
   type: {

@@ -23,10 +23,6 @@ declare module "rclnodejs" {
 }
 */
 
-/* eslint-disable max-depth */
-/* eslint-disable no-sync */
-/* eslint-disable camelcase */
-
 'use strict';
 
 const path = require('path');

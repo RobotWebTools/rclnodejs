@@ -50,4 +50,5 @@ jobs:
       run: |
         source /opt/ros/${{ needs.identify-ros-distro.outputs.distro }}/setup.bash
         npm i
+        npm run lint
         npm test
