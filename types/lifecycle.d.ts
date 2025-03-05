@@ -247,7 +247,7 @@ declare module 'rclnodejs' {
        * Register a callback function to be invoked during the deactivate() action.
        * @param  cb - The callback function to invoke.
        */
-      registerOnDectivate(cb: TransitionCallback): void;
+      registerOnDeactivate(cb: TransitionCallback): void;
 
       /**
        * Register a callback function to be invoked during the cleanup() action.
