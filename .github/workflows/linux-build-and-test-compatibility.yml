@@ -35,4 +35,5 @@ jobs:
       run: |
         source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
         npm i
+        npm run lint
         npm test

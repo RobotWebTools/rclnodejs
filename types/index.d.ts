@@ -1,5 +1,4 @@
-// eslint-disable-next-line spaced-comment
-/// <reference path="base.d.ts" />
+/// <reference types="./base.d.ts" />
 
 declare module 'rclnodejs' {
   /**

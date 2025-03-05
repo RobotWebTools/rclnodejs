@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 declare module 'rclnodejs' {
   /** 
    * The plus/minus tolerance for determining number equivalence.
