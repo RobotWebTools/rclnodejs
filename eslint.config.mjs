@@ -16,7 +16,6 @@ export default [
             "**/benchmark/",
             "**/docs/",
             "**/electron_demo/",
-            "**/generated/",
         ],
     },
     {
