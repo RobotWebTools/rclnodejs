@@ -23,10 +23,11 @@
     "install": "npm run rebuild",
     "postinstall": "npm run generate-messages",
     "docs": "cd docs && make",
-    "test": "node --expose-gc ./scripts/run_test.js && npx tsd",
+    "test": "nyc node --expose-gc ./scripts/run_test.js && npx tsd",
     "lint": "eslint && node ./scripts/cpplint.js",
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.hpp && prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark}/**/*.{js,md,ts}\" ./*.{js,md,ts}",
-    "prepare": "husky"
+    "prepare": "husky",
+    "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "bin": {
     "generate-ros-messages": "./scripts/generate_messages.js"
@@ -49,6 +50,7 @@
     "@typescript-eslint/parser": "^8.18.0",
     "clang-format": "^1.8.0",
     "commander": "^13.1.0",
+    "coveralls": "^3.1.1",
     "deep-equal": "^2.2.3",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^10.0.2",
@@ -58,6 +60,7 @@
     "jsdoc": "^4.0.4",
     "lint-staged": "^15.2.10",
     "mocha": "^11.0.2",
+    "nyc": "^17.1.0",
     "rimraf": "^6.0.1",
     "sinon": "^19.0.2",
     "tree-kill": "^1.2.2",

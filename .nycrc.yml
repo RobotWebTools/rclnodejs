@@ -1,0 +1,7 @@
+extension:
+  - .js
+include:
+  - lib/**/*
+report-dir: './coverage'
+reporter:
+  - lcov
