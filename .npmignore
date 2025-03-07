@@ -11,6 +11,7 @@ suppr.txt
 types/interfaces.d.ts
 generated/
 build/
+coverage/
 dist/
 electron_demo/
 log/
@@ -21,5 +22,6 @@ example/
 benchmark/
 tutorials/
 .github/
+.nyc_output/
 .vscode/
 .husky/
