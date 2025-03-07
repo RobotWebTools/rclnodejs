@@ -20,6 +20,8 @@ build
 log
 .vscode
 .project
+.nyc_output/
+coverage/
 
 # test build artifacts
 /test/cpp/add_two_ints_client

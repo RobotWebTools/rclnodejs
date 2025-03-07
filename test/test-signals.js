@@ -21,7 +21,7 @@ function forkOnlyRemoveRclnodejsHandlers() {
   const myHandler = () => {};
   process.on('SIGINT', myHandler);
   rclnodejs.removeSignalHandlers();
-  if (myHandler in process.listeners('SIGINT')) {
+  if (process.listeners('SIGINT').includes(myHandler)) {
     process.exitCode = 0;
   } else {
     process.exitCode = 1;
@@ -29,8 +29,13 @@ function forkOnlyRemoveRclnodejsHandlers() {
 }
 
 function forkRemoveSignalHandlers() {
+  const listenerCount = process.listenerCount('SIGINT');
   rclnodejs.removeSignalHandlers();
-  process.exitCode = process.listenerCount('SIGINT');
+  if (listenerCount - 1 === process.listenerCount('SIGINT')) {
+    process.exitCode = 0;
+  } else {
+    process.exitCode = 1;
+  }
 }
 
 function forkDoPublish(context) {
@@ -146,7 +151,7 @@ if (process.env['RCLNODEJS_TEST_FORK']) {
       );
       await new Promise((res) => {
         child.on('close', (exitCode) => {
-          assert.strictEqual(exitCode, 1);
+          assert.strictEqual(exitCode, 0);
           res();
         });
       });
