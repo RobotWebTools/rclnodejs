@@ -1,5 +1,7 @@
 .coveralls.yml
 .clang-format
+.gitattributes
+.nycrc.yml
 .istanbul.yml
 .gitignore
 .prettierrc.yml
