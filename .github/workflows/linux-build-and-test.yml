@@ -52,6 +52,7 @@ jobs:
         npm i
         npm run lint
         npm test
+        npm run clean
 
     - name: Coveralls Parallel
       uses: coverallsapp/github-action@v2
