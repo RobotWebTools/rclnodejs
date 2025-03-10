@@ -25,6 +25,7 @@ declare module "rclnodejs" {
 
 'use strict';
 
+const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const loader = require('../lib/interface_loader.js');
@@ -34,7 +35,10 @@ async function generateAll() {
   // load pkg and interface info (msgs and srvs)
   const generatedPath = path.join(__dirname, '../generated/');
   const pkgInfos = getPkgInfos(generatedPath);
-
+  if (pkgInfos.length === 0) {
+    console.log('No package found, prebuild interfaces.d.ts will be used.');
+    return;
+  }
   // write interfaces.d.ts file
   const interfacesFilePath = path.join(__dirname, '../types/interfaces.d.ts');
   const fd = fs.openSync(interfacesFilePath, 'w');
@@ -69,8 +73,15 @@ function getPkgInfos(rootDir) {
         })
       )
         continue;
-
-      const rosInterface = loader.loadInterface(typeClass);
+      let rosInterface = null;
+      try {
+        rosInterface = loader.loadInterface(typeClass);
+      } catch (e) {
+        console.log(
+          `${e.message}, please make sure it's built for ${os.arch()} platform correctly.`
+        );
+        return pkgInfos;
+      }
 
       if (!pkgInfo.subfolders.has(typeClass.type)) {
         pkgInfo.subfolders.set(typeClass.type, []);

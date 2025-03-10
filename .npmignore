@@ -10,7 +10,6 @@ CONTRIBUTORS.md
 Dockerfile
 cpplint.py
 suppr.txt
-types/interfaces.d.ts
 generated/
 build/
 coverage/
