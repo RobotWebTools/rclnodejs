@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es6",
+    /* Strict Type-Checking Options */
+    "strict": true,
+    /* Additional Checks */
+    /* next line commented out because we need unused vars for type tests */
+    // "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "lib": ["es2017"]
+  },
+  "include": [
+        "types/**/*"
+    ]
+}
