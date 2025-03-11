@@ -1,4 +1,4 @@
-/// <reference types="./base.d.ts" />
+/// <reference path="./base.d.ts" />
 
 declare module 'rclnodejs' {
   /**
