@@ -16,7 +16,6 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const { v4: uuidv4 } = require('uuid');
 const assertUtils = require('./utils.js');
 const rclnodejs = require('../index.js');
 const { ActionUuid } = require('../index.js');

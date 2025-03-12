@@ -16,8 +16,8 @@
 
 const assert = require('assert');
 const deepEqual = require('deep-equal');
-const { v4: uuidv4 } = require('uuid');
 const assertUtils = require('./utils.js');
+const { randomUUID } = require('crypto');
 const rclnodejs = require('../index.js');
 
 describe('rclnodejs action server', function () {
@@ -34,7 +34,7 @@ describe('rclnodejs action server', function () {
   }
 
   function createUuid() {
-    let uuid = uuidv4().replace(/-/g, '');
+    let uuid = randomUUID().replace(/-/g, '');
     let bytes = Uint8Array.from(Buffer.from(uuid, 'hex'));
 
     let UUID = rclnodejs.require('unique_identifier_msgs/msg/UUID');
