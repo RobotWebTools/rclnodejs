@@ -20,7 +20,7 @@
     "generate-messages": "node scripts/generate_messages.js",
     "generate-messages:dev": "node scripts/generate_messages.js --debug",
     "generate-tsd-messages": "node scripts/generate_tsd.js",
-    "clean": "node-gyp clean && rimraf ./generated",
+    "clean": "node-gyp clean && npx rimraf@6.0.1 ./generated",
     "install": "npm run rebuild",
     "postinstall": "npm run generate-messages",
     "docs": "cd docs && make",
@@ -80,7 +80,6 @@
     "json-bigint": "^1.0.0",
     "nan": "^2.22.0",
     "prettier": "^3.4.2",
-    "rimraf": "^6.0.1",
     "walk": "^2.3.15"
   },
   "husky": {
