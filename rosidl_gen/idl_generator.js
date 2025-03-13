@@ -43,8 +43,14 @@ function removeEmptyLines(str) {
 async function writeGeneratedCode(dir, fileName, code) {
   let result = null;
   if (!isDebug && fileName.endsWith('.js')) {
-    result = await minify(code);
+    try {
+      result = await minify(code);
+    } catch (error) {
+      console.error(`Error minifying ${fileName}:`, error);
+      result = null;
+    }
   }
+
   await fse.mkdirs(dir);
   await fse.writeFile(path.join(dir, fileName), result ? result.code : code);
 }
