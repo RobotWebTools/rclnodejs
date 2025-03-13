@@ -15,7 +15,7 @@
 #ifndef SRC_RCL_BINDINGS_HPP_
 #define SRC_RCL_BINDINGS_HPP_
 
-#include <nan.h>
+#include <node_api.h>
 #include <rcl/graph.h>
 #include <rcl/rcl.h>
 
@@ -25,7 +25,7 @@
 
 namespace rclnodejs {
 
-typedef void (*JsCFuntcion)(const Nan::FunctionCallbackInfo<v8::Value>&);
+typedef void (*JsCFuntcion)(const Napi::CallbackInfo& info);
 
 typedef struct {
   const char* name;

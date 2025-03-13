@@ -813,7 +813,6 @@ Napi::Value ClearContentFilter(const Napi::CallbackInfo& info) {
       rcl_get_error_string().str);
 
   return Napi::Boolean::New(env, true);
-#endif
 }
 
 Napi::Value CreatePublisher(const Napi::CallbackInfo& info) {

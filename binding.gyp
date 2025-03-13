@@ -28,8 +28,7 @@
         './src/shadow_node.cpp',
       ],
       'include_dirs': [
-        '.',
-        "<!(node -e \"require('nan')\")",
+        '<!@(node -p "require(\"node-addon-api\").include")',
         '<(ros_include_root)',
       ],
       'cflags!': [
@@ -129,7 +128,11 @@
             "defines": ["NODE_RUNTIME_ELECTRON=1"]
           }
         ],
-      ]
+      ],
+      'dependencies': [
+        'scripts/config.js',
+        '<!(node -p "require(\"node-addon-api\").gyp")',
+      ],
     }
   ]
 }
