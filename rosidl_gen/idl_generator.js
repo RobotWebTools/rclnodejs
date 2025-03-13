@@ -29,10 +29,6 @@ const dots = dot.process({
   path: path.join(__dirname, '../rosidl_gen/templates'),
 });
 
-function removeEmptyLines(str) {
-  return str.replace(/^\s*\n/gm, '');
-}
-
 /**
  * Output generated code to disk. Do not overwrite
  * an existing file. If file already exists do nothing.
@@ -68,9 +64,7 @@ async function generateServiceJSStruct(
     '__' +
     serviceInfo.interfaceName +
     '.js';
-  const generatedSrvCode = removeEmptyLines(
-    dots.service({ serviceInfo: serviceInfo })
-  );
+  const generatedSrvCode = dots.service({ serviceInfo: serviceInfo });
 
   // We are going to only generate the service JavaScript file if it meets one
   // of the followings:
@@ -91,9 +85,7 @@ async function generateServiceJSStruct(
 
 async function generateServiceEventMsg(serviceInfo, dir) {
   const fileName = serviceInfo.interfaceName + '.msg';
-  const generatedEvent = removeEmptyLines(
-    dots.service_event({ serviceInfo: serviceInfo })
-  );
+  const generatedEvent = dots.service_event({ serviceInfo: serviceInfo });
 
   return writeGeneratedCode(dir, fileName, generatedEvent).then(() => {
     serviceInfo.interfaceName += '_Event';
@@ -126,14 +118,12 @@ async function generateServiceEventJSStruct(msgInfo, dir) {
   // const AddTwoInts_RequestWrapper = require('../../generated/example_interfaces/example_interfaces__srv__AddTwoInts_Request.js');
   // const AddTwoInts_ResponseWrapper = require('../../generated/example_interfaces/example_interfaces__srv__AddTwoInts_Response.js');
   msgInfo.isServiceEvent = true;
-  const generatedCode = removeEmptyLines(
-    dots.message({
-      messageInfo: msgInfo,
-      spec: spec,
-      json: JSON.stringify(spec, null, '  '),
-      isDebug: isDebug,
-    })
-  );
+  const generatedCode = dots.message({
+    messageInfo: msgInfo,
+    spec: spec,
+    json: JSON.stringify(spec, null, '  '),
+    isDebug: isDebug,
+  });
 
   return writeGeneratedCode(dir, eventFileName, generatedCode);
 }
@@ -156,14 +146,12 @@ function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
     spec.msgName +
     '.js';
 
-  const generatedCode = removeEmptyLines(
-    dots.message({
-      messageInfo: messageInfo,
-      spec: spec,
-      json: JSON.stringify(spec, null, '  '),
-      isDebug: isDebug,
-    })
-  );
+  const generatedCode = dots.message({
+    messageInfo: messageInfo,
+    spec: spec,
+    json: JSON.stringify(spec, null, '  '),
+    isDebug: isDebug,
+  });
   return writeGeneratedCode(dir, fileName, generatedCode);
 }
 
@@ -298,9 +286,7 @@ async function generateActionJSStruct(actionInfo, dir) {
     '__' +
     actionInfo.interfaceName +
     '.js';
-  const generatedCode = removeEmptyLines(
-    dots.action({ actionInfo: actionInfo })
-  );
+  const generatedCode = dots.action({ actionInfo: actionInfo });
   dir = path.join(dir, actionInfo.pkgName);
   const action = writeGeneratedCode(dir, fileName, generatedCode);
 
