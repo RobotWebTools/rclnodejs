@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <nan.h>
+#include <node_api.h>
 
 #include "macros.hpp"
 #include "rcl_action_bindings.hpp"
@@ -23,18 +23,20 @@
 #include "rcutils/macros.h"
 #include "shadow_node.hpp"
 
-bool IsRunningInElectronRenderer() {
-  auto global = Nan::GetCurrentContext()->Global();
-  auto process =
-      Nan::To<v8::Object>(Nan::Get(global, Nan::New("process").ToLocalChecked())
-                              .ToLocalChecked())
-          .ToLocalChecked();
-  auto process_type =
-      Nan::Get(process, Nan::New("type").ToLocalChecked()).ToLocalChecked();
-  return process_type->StrictEquals(Nan::New("renderer").ToLocalChecked());
+bool IsRunningInElectronRenderer(napi_env env) {
+  napi_value global, process, process_type;
+  napi_get_global(env, &global);
+  napi_get_named_property(env, global, "process", &process);
+  napi_get_named_property(env, process, "type", &process_type);
+
+  bool is_renderer;
+  napi_value renderer_str;
+  napi_create_string_utf8(env, "renderer", NAPI_AUTO_LENGTH, &renderer_str);
+  napi_strict_equals(env, process_type, renderer_str, &is_renderer);
+  return is_renderer;
 }
 
-void InitModule(v8::Local<v8::Object> exports) {
+void InitModule(napi_env env, napi_value exports) {
 // workaround process name mangling by chromium
 //
 // rcl logging uses `program_invocation_name` to determine the log file,
@@ -43,7 +45,7 @@ void InitModule(v8::Local<v8::Object> exports) {
 // occurence of ' -' with the null terminator. see:
 // https://unix.stackexchange.com/questions/432419/unexpected-non-null-encoding-of-proc-pid-cmdline
 #if defined(__linux__) && defined(__GLIBC__)
-  if (IsRunningInElectronRenderer()) {
+  if (IsRunningInElectronRenderer(env)) {
     auto prog_name = program_invocation_name;
     auto end = strstr(prog_name, " -");
     assert(end);
@@ -51,34 +53,25 @@ void InitModule(v8::Local<v8::Object> exports) {
   }
 #endif
 
-  v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
+  napi_value context;
+  napi_get_value_string_utf8(env, exports, "context", &context, NULL, NULL);
 
   for (uint32_t i = 0; i < rclnodejs::binding_methods.size(); i++) {
-    Nan::Set(
-        exports, Nan::New(rclnodejs::binding_methods[i].name).ToLocalChecked(),
-        Nan::New<v8::FunctionTemplate>(rclnodejs::binding_methods[i].function)
-            ->GetFunction(context)
-            .ToLocalChecked());
+    napi_value func;
+    napi_create_function(env, NULL, 0, rclnodejs::binding_methods[i].function, NULL, &func);
+    napi_set_named_property(env, exports, rclnodejs::binding_methods[i].name, func);
   }
 
   for (uint32_t i = 0; i < rclnodejs::action_binding_methods.size(); i++) {
-    Nan::Set(
-        exports,
-        Nan::New(rclnodejs::action_binding_methods[i].name).ToLocalChecked(),
-        Nan::New<v8::FunctionTemplate>(
-            rclnodejs::action_binding_methods[i].function)
-            ->GetFunction(context)
-            .ToLocalChecked());
+    napi_value func;
+    napi_create_function(env, NULL, 0, rclnodejs::action_binding_methods[i].function, NULL, &func);
+    napi_set_named_property(env, exports, rclnodejs::action_binding_methods[i].name, func);
   }
 
   for (uint32_t i = 0; i < rclnodejs::lifecycle_binding_methods.size(); i++) {
-    Nan::Set(
-        exports,
-        Nan::New(rclnodejs::lifecycle_binding_methods[i].name).ToLocalChecked(),
-        Nan::New<v8::FunctionTemplate>(
-            rclnodejs::lifecycle_binding_methods[i].function)
-            ->GetFunction(context)
-            .ToLocalChecked());
+    napi_value func;
+    napi_create_function(env, NULL, 0, rclnodejs::lifecycle_binding_methods[i].function, NULL, &func);
+    napi_set_named_property(env, exports, rclnodejs::lifecycle_binding_methods[i].name, func);
   }
 
   rclnodejs::ShadowNode::Init(exports);

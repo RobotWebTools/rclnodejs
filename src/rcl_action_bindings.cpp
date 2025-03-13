@@ -95,21 +95,16 @@ NAN_METHOD(ActionCreateClient) {
   }
 }
 
-NAN_METHOD(ActionCreateServer) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionCreateServer(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(info[1].As<Napi::Object>());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
-  std::string action_name(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
-  std::string interface_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
-  std::string package_name(
-      *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
-  int64_t result_timeout = info[10]->IntegerValue(currentContent).FromJust();
+  std::string action_name = info[2].As<Napi::String>().Utf8Value();
+  std::string interface_name = info[3].As<Napi::String>().Utf8Value();
+  std::string package_name = info[4].As<Napi::String>().Utf8Value();
+  int64_t result_timeout = info[10].As<Napi::Number>().Int64Value();
 
   const rosidl_action_type_support_t* ts =
       GetActionTypeSupport(package_name, interface_name);
@@ -160,9 +155,10 @@ NAN_METHOD(ActionCreateServer) {
           THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
 
-    info.GetReturnValue().Set(js_obj);
+    return js_obj;
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+    Napi::Error::New(env, GetErrorMessageAndClear()).ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 }
 
