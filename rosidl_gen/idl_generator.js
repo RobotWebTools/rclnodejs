@@ -15,7 +15,7 @@
 'use strict';
 
 const dot = require('dot');
-const prettier = require('prettier');
+const { minify } = require('terser');
 const fse = require('fs-extra');
 const path = require('path');
 const parser = require('../rosidl_parser/rosidl_parser.js');
@@ -41,11 +41,12 @@ function removeEmptyLines(str) {
  * @param {string} code
  */
 async function writeGeneratedCode(dir, fileName, code) {
-  if (fileName.endsWith('.js')) {
-    code = await prettier.format(code, { parser: 'babel' });
+  let result = null;
+  if (!isDebug && fileName.endsWith('.js')) {
+    result = await minify(code);
   }
   await fse.mkdirs(dir);
-  await fse.writeFile(path.join(dir, fileName), code);
+  await fse.writeFile(path.join(dir, fileName), result ? result.code : code);
 }
 
 async function generateServiceJSStruct(
