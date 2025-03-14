@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <napi.h>
 #include <node_api.h>
 
 #include "macros.hpp"
@@ -36,14 +37,14 @@ bool IsRunningInElectronRenderer(napi_env env) {
   return is_renderer;
 }
 
-void InitModule(napi_env env, napi_value exports) {
-// workaround process name mangling by chromium
-//
-// rcl logging uses `program_invocation_name` to determine the log file,
-// chromium mangles the program name to include all args, this causes a
-// ENAMETOOLONG error when starting ros. Workaround is to replace the first
-// occurence of ' -' with the null terminator. see:
-// https://unix.stackexchange.com/questions/432419/unexpected-non-null-encoding-of-proc-pid-cmdline
+napi_value Init(napi_env env, napi_value exports) {
+  // workaround process name mangling by chromium
+  //
+  // rcl logging uses `program_invocation_name` to determine the log file,
+  // chromium mangles the program name to include all args, this causes a
+  // ENAMETOOLONG error when starting ros. Workaround is to replace the first
+  // occurence of ' -' with the null terminator. see:
+  // https://unix.stackexchange.com/questions/432419/unexpected-non-null-encoding-of-proc-pid-cmdline
 #if defined(__linux__) && defined(__GLIBC__)
   if (IsRunningInElectronRenderer(env)) {
     auto prog_name = program_invocation_name;
@@ -54,7 +55,7 @@ void InitModule(napi_env env, napi_value exports) {
 #endif
 
   napi_value context;
-  napi_get_value_string_utf8(env, exports, "context", &context, NULL, NULL);
+  napi_get_named_property(env, exports, "context", &context);
 
   for (uint32_t i = 0; i < rclnodejs::binding_methods.size(); i++) {
     napi_value func;
@@ -82,6 +83,8 @@ void InitModule(napi_env env, napi_value exports) {
                                                 RCUTILS_LOG_SEVERITY_DEBUG);
   RCUTILS_UNUSED(result);
 #endif
+
+  return exports;
 }
 
-NODE_MODULE(rclnodejs, InitModule);
+NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)

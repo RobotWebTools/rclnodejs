@@ -95,7 +95,7 @@ NAN_METHOD(ActionCreateClient) {
   }
 }
 
-Napi::Value ActionCreateServer(const Napi::CallbackInfo& info) {
+napi_value ActionCreateServer(napi_env env, napi_callback_info info) {
   Napi::Env env = info.Env();
   RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());

@@ -56,6 +56,7 @@ class ShadowNode : public Napi::ObjectWrap<ShadowNode>, public Executor::Delegat
 
   std::unique_ptr<HandleManager> handle_manager_;
   std::unique_ptr<Executor> executor_;
+  Napi::FunctionReference callback_;
 };
 
 }  // namespace rclnodejs

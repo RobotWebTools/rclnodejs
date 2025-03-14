@@ -59,56 +59,24 @@ namespace rclnodejs {
 static v8::Local<v8::Object> wrapParameters(
     rcl_params_t* params);  // NOLINT(whitespace/line_length)
 
-Napi::Value Init(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
+napi_value Init(napi_env env, napi_value exports) {
   rcl_allocator_t allocator = rcl_get_default_allocator();
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_init_options_init(&init_options, allocator),
                            rcl_get_error_string().str);
 
-  // preprocess Context
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[0].As<Napi::Object>());
-  rcl_context_t* context =
-      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
-
-  // preprocess argc & argv
-  Napi::Array jsArgv = info[1].As<Napi::Array>();
-  int argc = jsArgv.Length();
-  char** argv = nullptr;
-  if (argc > 0) {
-    argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
-    for (int i = 0; i < argc; i++) {
-      Napi::Value jsElement = jsArgv[i];
-      std::string utf8_arg = jsElement.As<Napi::String>().Utf8Value();
-      int len = utf8_arg.length() + 1;
-      argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
-      snprintf(argv[i], len, "%s", utf8_arg.c_str());
-    }
-  }
-
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_init(argc, argc > 0 ? argv : nullptr, &init_options, context),
-      rcl_get_error_string().str);
-
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK, rcl_logging_configure(&context->global_arguments, &allocator),
-      rcl_get_error_string().str);
-
-  for (int i = 0; i < argc; i++) {
-    free(argv[i]);
-  }
-  free(argv);
-
-  return env.Undefined();
+  return exports;
 }
 
-Napi::Value CreateNode(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-  std::string node_name = info[0].As<Napi::String>().Utf8Value();
-  std::string name_space = info[1].As<Napi::String>().Utf8Value();
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(info[2].As<Napi::Object>());
+napi_value CreateNode(napi_env env, napi_callback_info info) {
+  size_t argc = 3;
+  napi_value args[3];
+  napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+
+  std::string node_name = GetStringFromValue(env, args[0]);
+  std::string name_space = GetStringFromValue(env, args[1]);
+  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(args[2]);
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 

@@ -19,6 +19,36 @@
 
 namespace rclnodejs {
 
+class RclHandle : public Napi::ObjectWrap<RclHandle> {
+ public:
+  static void Init(Napi::Env env, Napi::Object exports);
+  void New(const Napi::CallbackInfo& info);
+  void SyncProperties(const Napi::CallbackInfo& info);
+  Napi::Value PropertiesGetter(const Napi::CallbackInfo& info);
+  void Release(const Napi::CallbackInfo& info);
+  void Dismiss(const Napi::CallbackInfo& info);
+  static Napi::Object NewInstance(Napi::Env env, Napi::Value arg);
+
+ private:
+  explicit RclHandle();
+  ~RclHandle();
+
+  void Reset();
+  void* ptr() const { return pointer_; }
+  void set_ptr(void* ptr) { pointer_ = ptr; }
+  void set_deleter(std::function<void(void*)> deleter) { deleter_ = deleter; }
+  void set_parent(RclHandle* parent) { parent_ = parent; }
+  void AddChild(RclHandle* child) { children_.insert(child); }
+  void RemoveChild(RclHandle* child) { children_.erase(child); }
+
+  void* pointer_;
+  RclHandle* parent_;
+  std::function<void(void*)> deleter_;
+  std::set<RclHandle*> children_;
+  Napi::ObjectReference properties_obj_;
+  std::map<std::string, Napi::Value> properties_;
+};
+
 Napi::FunctionReference RclHandle::constructor;
 
 RclHandle::RclHandle() : pointer_(nullptr), parent_(nullptr) {}
@@ -47,7 +77,8 @@ void RclHandle::New(const Napi::CallbackInfo& info) {
   }
 }
 
-void RclHandle::SyncProperties(napi_env env) {
+void RclHandle::SyncProperties(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
   Napi::Object obj = Napi::Object::New(env);
 
   for (auto it = properties_.begin(); it != properties_.end(); it++) {
@@ -80,18 +111,14 @@ Napi::Value RclHandle::Dismiss(const Napi::CallbackInfo& info) {
   return info.Env().Undefined();
 }
 
-Napi::Object RclHandle::NewInstance(napi_env env, void* handle, RclHandle* parent, std::function<void(void*)> deleter) {
+Napi::Object RclHandle::NewInstance(Napi::Env env, Napi::Value arg) {
   Napi::EscapableHandleScope scope(env);
 
   Napi::Object instance = constructor.New({});
 
   RclHandle* rcl_handle = Napi::ObjectWrap<RclHandle>::Unwrap(instance);
-  rcl_handle->set_ptr(handle);
-  rcl_handle->set_deleter(deleter);
-  if (parent) {
-    rcl_handle->set_parent(parent);
-    parent->AddChild(rcl_handle);
-  }
+  rcl_handle->set_ptr(arg.As<Napi::External<void>>().Data());
+  rcl_handle->set_deleter([](void* ptr) { /* custom deleter logic */ });
 
   return scope.Escape(instance);
 }

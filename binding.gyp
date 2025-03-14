@@ -133,6 +133,26 @@
         'scripts/config.js',
         '<!(node -p "require(\"node-addon-api\").gyp")',
       ],
+    },
+    {
+      "target_name": "addon",
+      "sources": [ "src/addon.cpp" ],
+      "include_dirs": [
+        "<!(node -e \"require('node-addon-api').include\")"
+      ],
+      "dependencies": [
+        "<!(node -e \"require('node-addon-api').gyp\")"
+      ],
+      "cflags!": [ "-fno-exceptions" ],
+      "cflags_cc!": [ "-fno-exceptions" ],
+      "defines": [ "NAPI_DISABLE_CPP_EXCEPTIONS" ],
+      "conditions": [
+        [ 'OS=="win"', {
+          "msvs_settings": {
+            "VCCLCompilerTool": { "ExceptionHandling": 1 }
+          }
+        }]
+      ]
     }
   ]
 }
