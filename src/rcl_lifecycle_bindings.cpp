@@ -32,27 +32,26 @@
 
 namespace rclnodejs {
 
-static v8::Local<v8::Object> wrapState(const rcl_lifecycle_state_t* state) {
-  v8::Local<v8::Object> jsState = Nan::New<v8::Object>();
-  Nan::Set(jsState, Nan::New("id").ToLocalChecked(), Nan::New(state->id));
-  Nan::Set(jsState, Nan::New("label").ToLocalChecked(),
-           Nan::New(state->label).ToLocalChecked());
+static Napi::Object wrapState(Napi::Env env,
+                              const rcl_lifecycle_state_t* state) {
+  Napi::Object jsState = Napi::Object::New(env);
+  jsState.Set("id", state->id);
+  jsState.Set("label", state->label);
   return jsState;
 }
 
-static v8::Local<v8::Object> wrapTransition(
-    const rcl_lifecycle_transition_t* transition) {
-  v8::Local<v8::Object> jsTransition = Nan::New<v8::Object>();
-  Nan::Set(jsTransition, Nan::New("id").ToLocalChecked(),
-           Nan::New(transition->id));
-  Nan::Set(jsTransition, Nan::New("label").ToLocalChecked(),
-           Nan::New(transition->label).ToLocalChecked());
+static Napi::Object wrapTransition(
+    Napi::Env env, const rcl_lifecycle_transition_t* transition) {
+  Napi::Object jsTransition = Napi::Object::New(env);
+  jsTransition.Set("id", transition->id);
+  jsTransition.Set("label", transition->label);
   return jsTransition;
 }
 
-NAN_METHOD(CreateLifecycleStateMachine) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CreateLifecycleStateMachine(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
 
   rcl_lifecycle_state_machine_t* state_machine =
@@ -76,7 +75,7 @@ NAN_METHOD(CreateLifecycleStateMachine) {
 #if ROS_VERSION >= 2105
   rcl_lifecycle_state_machine_options_t options =
       rcl_lifecycle_get_default_state_machine_options();
-  options.enable_com_interface = Nan::To<bool>(info[1]).FromJust();
+  options.enable_com_interface = info[1].As<Napi::Boolean>().Value();
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK,
@@ -84,8 +83,8 @@ NAN_METHOD(CreateLifecycleStateMachine) {
                                        gat, gtg, &options),
       rcl_get_error_string().str);
 
-  auto js_obj =
-      RclHandle::NewInstance(state_machine, node_handle, [node](void* ptr) {
+  auto js_obj = RclHandle::NewInstance(
+      env, state_machine, node_handle, [node](void* ptr) {
         rcl_lifecycle_state_machine_t* state_machine =
             reinterpret_cast<rcl_lifecycle_state_machine_t*>(ptr);
         rcl_ret_t ret = rcl_lifecycle_state_machine_fini(state_machine, node);
@@ -103,7 +102,7 @@ NAN_METHOD(CreateLifecycleStateMachine) {
                            rcl_get_error_string().str);
 
   auto js_obj = RclHandle::NewInstance(
-      state_machine, node_handle, [node, node_options](void* ptr) {
+      env, state_machine, node_handle, [node, node_options](void* ptr) {
         rcl_lifecycle_state_machine_t* state_machine =
             reinterpret_cast<rcl_lifecycle_state_machine_t*>(ptr);
         rcl_ret_t ret = rcl_lifecycle_state_machine_fini(
@@ -113,116 +112,122 @@ NAN_METHOD(CreateLifecycleStateMachine) {
       });
 #endif
 
-  info.GetReturnValue().Set(js_obj);
+  return js_obj;
 }
 
-NAN_METHOD(GetCurrentLifecycleState) {
-  RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetCurrentLifecycleState(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
           state_machine_handle->ptr());
 
   const rcl_lifecycle_state_t* current_state = state_machine->current_state;
-  info.GetReturnValue().Set(wrapState(current_state));
+  return wrapState(env, current_state);
 }
 
-NAN_METHOD(GetLifecycleTransitionByLabel) {
-  RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetLifecycleTransitionByLabel(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
           state_machine_handle->ptr());
 
-  std::string transition_label(*Nan::Utf8String(info[1]));
+  std::string transition_label = info[1].As<Napi::String>();
 
   auto transition = rcl_lifecycle_get_transition_by_label(
       state_machine->current_state, transition_label.c_str());
 
-  info.GetReturnValue().Set(transition == nullptr ? Nan::New<v8::Object>()
-                                                  : wrapTransition(transition));
+  return transition == nullptr ? Napi::Object::New(env)
+                               : wrapTransition(env, transition);
 }
 
 // return all registered states
-NAN_METHOD(GetLifecycleStates) {
-  RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetLifecycleStates(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
           state_machine_handle->ptr());
 
-  v8::Local<v8::Array> states = Nan::New<v8::Array>();
+  Napi::Array states = Napi::Array::New(env);
 
   for (uint8_t i = 0; i < state_machine->transition_map.states_size; ++i) {
     const rcl_lifecycle_state_t state = state_machine->transition_map.states[i];
-    v8::Local<v8::Object> jsState = wrapState(&state);
-    Nan::Set(states, i, jsState);
+    Napi::Object jsState = wrapState(env, &state);
+    states[i] = jsState;
   }
 
-  info.GetReturnValue().Set(states);
+  return states;
 }
 
 // return all registered transitions
-NAN_METHOD(GetLifecycleTransitions) {
-  RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetLifecycleTransitions(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
           state_machine_handle->ptr());
 
-  v8::Local<v8::Array> jsTransitions = Nan::New<v8::Array>();
+  Napi::Array jsTransitions = Napi::Array::New(env);
 
   for (uint8_t i = 0; i < state_machine->transition_map.transitions_size; ++i) {
     auto transition = state_machine->transition_map.transitions[i];
-    v8::Local<v8::Object> jsTransitionDesc = Nan::New<v8::Object>();
-    Nan::Set(jsTransitionDesc, Nan::New("transition").ToLocalChecked(),
-             wrapTransition(&transition));
-    Nan::Set(jsTransitionDesc, Nan::New("start_state").ToLocalChecked(),
-             wrapState(transition.start));
-    Nan::Set(jsTransitionDesc, Nan::New("goal_state").ToLocalChecked(),
-             wrapState(transition.goal));
+    Napi::Object jsTransitionDesc = Napi::Object::New(env);
+    jsTransitionDesc.Set("transition", wrapTransition(env, &transition));
+    jsTransitionDesc.Set("start_state", wrapState(env, transition.start));
+    jsTransitionDesc.Set("goal_state", wrapState(env, transition.goal));
 
-    Nan::Set(jsTransitions, i, jsTransitionDesc);
+    jsTransitions[i] = jsTransitionDesc;
   }
 
-  info.GetReturnValue().Set(jsTransitions);
+  return jsTransitions;
 }
 
 // return the transitions available from the current state
-NAN_METHOD(GetAvailableLifecycleTransitions) {
-  RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetAvailableLifecycleTransitions(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
           state_machine_handle->ptr());
 
-  v8::Local<v8::Array> jsTransitions = Nan::New<v8::Array>();
+  Napi::Array jsTransitions = Napi::Array::New(env);
 
   for (uint8_t i = 0; i < state_machine->current_state->valid_transition_size;
        ++i) {
     auto transition = state_machine->current_state->valid_transitions[i];
-    v8::Local<v8::Object> jsTransitionDesc = Nan::New<v8::Object>();
-    Nan::Set(jsTransitionDesc, Nan::New("transition").ToLocalChecked(),
-             wrapTransition(&transition));
-    Nan::Set(jsTransitionDesc, Nan::New("start_state").ToLocalChecked(),
-             wrapState(transition.start));
-    Nan::Set(jsTransitionDesc, Nan::New("goal_state").ToLocalChecked(),
-             wrapState(transition.goal));
+    Napi::Object jsTransitionDesc = Napi::Object::New(env);
+    jsTransitionDesc.Set("transition", wrapTransition(env, &transition));
+    jsTransitionDesc.Set("start_state", wrapState(env, transition.start));
+    jsTransitionDesc.Set("goal_state", wrapState(env, transition.goal));
 
-    Nan::Set(jsTransitions, i, jsTransitionDesc);
+    jsTransitions[i] = jsTransitionDesc;
   }
 
-  info.GetReturnValue().Set(jsTransitions);
+  return jsTransitions;
 }
 
-NAN_METHOD(GetLifecycleSrvNameAndHandle) {
-  RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetLifecycleSrvNameAndHandle(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
           state_machine_handle->ptr());
 
-  std::string lifecycle_srv_field_name(*Nan::Utf8String(info[1]));
+  std::string lifecycle_srv_field_name = info[1].As<Napi::String>();
 
   rcl_service_t* service = nullptr;
   if (lifecycle_srv_field_name.compare("srv_get_state") == 0) {
@@ -242,27 +247,28 @@ NAN_METHOD(GetLifecycleSrvNameAndHandle) {
   std::string service_name = rcl_service_get_service_name(service);
 
   // build result object {name: <srv_name>, handle: <rcl handle of service_t>}
-  v8::Local<v8::Object> named_srv_obj = Nan::New<v8::Object>();
-  Nan::Set(named_srv_obj, Nan::New("name").ToLocalChecked(),
-           Nan::New(service_name).ToLocalChecked());
+  Napi::Object named_srv_obj = Napi::Object::New(env);
+  named_srv_obj.Set("name", service_name);
 
   // Note: lifecycle Services are created and managed by their
   // rcl_lifecycle_state_machine. Thus we must not manually
   // free the lifecycle_state_machine's service pointers.
-  auto srv_handle = RclHandle::NewInstance(service, nullptr, nullptr);
+  auto srv_handle = RclHandle::NewInstance(env, service, nullptr, nullptr);
 
-  Nan::Set(named_srv_obj, Nan::New("handle").ToLocalChecked(), srv_handle);
-  info.GetReturnValue().Set(named_srv_obj);
+  named_srv_obj.Set("handle", srv_handle);
+  return named_srv_obj;
 }
 
 // return null if transition exists from current state
-NAN_METHOD(TriggerLifecycleTransitionById) {
-  RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value TriggerLifecycleTransitionById(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
           state_machine_handle->ptr());
-  int transition_id = Nan::To<int64_t>(info[1]).FromJust();
+  int transition_id = info[1].As<Napi::Number>().Int64Value();
 
   bool publish = true;
 
@@ -272,17 +278,19 @@ NAN_METHOD(TriggerLifecycleTransitionById) {
                            rcl_get_error_string().str);
 
   const rcl_lifecycle_state_t* current_state = state_machine->current_state;
-  info.GetReturnValue().Set(wrapState(current_state));
+  return wrapState(env, current_state);
 }
 
 // return null if transition exists from current state
-NAN_METHOD(TriggerLifecycleTransitionByLabel) {
-  RclHandle* state_machine_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value TriggerLifecycleTransitionByLabel(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_lifecycle_state_machine_t* state_machine =
       reinterpret_cast<rcl_lifecycle_state_machine_t*>(
           state_machine_handle->ptr());
-  std::string transition_label(*Nan::Utf8String(info[1]));
+  std::string transition_label = info[1].As<Napi::String>();
 
   bool publish = true;
 
@@ -293,7 +301,7 @@ NAN_METHOD(TriggerLifecycleTransitionByLabel) {
       rcl_get_error_string().str);
 
   const rcl_lifecycle_state_t* current_state = state_machine->current_state;
-  info.GetReturnValue().Set(wrapState(current_state));
+  return wrapState(env, current_state);
 }
 
 static const char* transitionId2Label(int callback_ret) {
@@ -340,15 +348,17 @@ static const char* transitionId2Label(int callback_ret) {
   return rcl_lifecycle_transition_error_label;
 }
 
-NAN_METHOD(GetLifecycleTransitionIdToLabel) {
-  int callback_ret = Nan::To<int64_t>(info[0]).FromJust();
+Napi::Value GetLifecycleTransitionIdToLabel(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  int callback_ret = info[0].As<Napi::Number>().Int64Value();
   const char* transition_label = transitionId2Label(callback_ret);
-  info.GetReturnValue().Set(Nan::New(transition_label).ToLocalChecked());
+  return Napi::String::New(env, transition_label);
 }
 
-NAN_METHOD(GetLifecycleShutdownTransitionLabel) {
-  info.GetReturnValue().Set(
-      Nan::New(rcl_lifecycle_shutdown_label).ToLocalChecked());
+Napi::Value GetLifecycleShutdownTransitionLabel(
+    const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  return Napi::String::New(env, rcl_lifecycle_shutdown_label);
 }
 
 std::vector<BindingMethod> lifecycle_binding_methods = {

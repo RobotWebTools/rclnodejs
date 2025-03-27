@@ -23,36 +23,32 @@
 
 namespace rclnodejs {
 
-Nan::Persistent<v8::Function> ShadowNode::constructor;
+Napi::FunctionReference ShadowNode::constructor;
 
-ShadowNode::ShadowNode() : handle_manager_(std::make_unique<HandleManager>()) {
-  executor_ = std::make_unique<Executor>(handle_manager_.get(), this);
+ShadowNode::ShadowNode(const Napi::CallbackInfo& info)
+    : Napi::ObjectWrap<ShadowNode>(info),
+      handle_manager_(std::make_unique<HandleManager>()) {
+  executor_ =
+      std::make_unique<Executor>(info.Env(), handle_manager_.get(), this);
 }
 
-ShadowNode::~ShadowNode() {
-  Nan::HandleScope scope;
+ShadowNode::~ShadowNode() { StopRunning(); }
 
-  StopRunning();
-}
+void ShadowNode::Init(Napi::Env env, Napi::Object exports) {
+  Napi::HandleScope scope(env);
 
-void ShadowNode::Init(v8::Local<v8::Object> exports) {
-  Nan::HandleScope scope;
+  Napi::Function func =
+      DefineClass(env, "ShadowNode",
+                  {
+                      InstanceMethod("start", &ShadowNode::Start),
+                      InstanceMethod("stop", &ShadowNode::Stop),
+                      InstanceMethod("syncHandles", &ShadowNode::SyncHandles),
+                      InstanceMethod("spinOnce", &ShadowNode::SpinOnce),
+                  });
 
-  // Prepare constructor template
-  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
-  tpl->SetClassName(Nan::New("ShadowNode").ToLocalChecked());
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
-  Nan::SetPrototypeMethod(tpl, "start", Start);
-  Nan::SetPrototypeMethod(tpl, "stop", Stop);
-  Nan::SetPrototypeMethod(tpl, "syncHandles", SyncHandles);
-  Nan::SetPrototypeMethod(tpl, "spinOnce", SpinOnce);
-
-  v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
-
-  constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
-  Nan::Set(exports, Nan::New("ShadowNode").ToLocalChecked(),
-           tpl->GetFunction(context).ToLocalChecked());
+  constructor = Napi::Persistent(func);
+  constructor.SuppressDestruct();
+  exports.Set("ShadowNode", func);
 }
 
 void ShadowNode::StopRunning() {
@@ -61,82 +57,67 @@ void ShadowNode::StopRunning() {
 }
 
 void ShadowNode::StartRunning(rcl_context_t* context, int32_t timeout) {
-  handle_manager_->SynchronizeHandles(this->handle());
+  handle_manager_->SynchronizeHandles(this->Value());
   executor_->Start(context, timeout);
 }
 
 void ShadowNode::RunOnce(rcl_context_t* context, int32_t timeout) {
-  handle_manager_->SynchronizeHandles(this->handle());
+  handle_manager_->SynchronizeHandles(this->Value());
   executor_->SpinOnce(context, timeout);
 }
 
-NAN_METHOD(ShadowNode::Start) {
-  auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
-  auto timeout = Nan::To<int32_t>(info[1]).FromJust();
-  rcl_context_t* context =
-      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
-  if (me) me->StartRunning(context, timeout);
+Napi::Value ShadowNode::Start(const Napi::CallbackInfo& info) {
+  Napi::Object context_handle = info[0].As<Napi::Object>();
+  RclHandle* handle = RclHandle::Unwrap(context_handle);
+  int32_t timeout = info[1].As<Napi::Number>().Int32Value();
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  rcl_context_t* context = reinterpret_cast<rcl_context_t*>(handle->ptr());
+  StartRunning(context, timeout);
+
+  return info.Env().Undefined();
 }
 
-NAN_METHOD(ShadowNode::Stop) {
-  auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
-  if (me) me->StopRunning();
-
-  info.GetReturnValue().Set(Nan::Undefined());
+Napi::Value ShadowNode::Stop(const Napi::CallbackInfo& info) {
+  StopRunning();
+  return info.Env().Undefined();
 }
 
-NAN_METHOD(ShadowNode::SpinOnce) {
-  auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
-  auto timeout = Nan::To<int32_t>(info[1]).FromJust();
-  rcl_context_t* context =
-      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
-  if (me) me->RunOnce(context, timeout);
+Napi::Value ShadowNode::SpinOnce(const Napi::CallbackInfo& info) {
+  Napi::Object context_handle = info[0].As<Napi::Object>();
+  RclHandle* handle = RclHandle::Unwrap(context_handle);
+  int32_t timeout = info[1].As<Napi::Number>().Int32Value();
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  rcl_context_t* context = reinterpret_cast<rcl_context_t*>(handle->ptr());
+  RunOnce(context, timeout);
+
+  return info.Env().Undefined();
 }
 
-NAN_METHOD(ShadowNode::SyncHandles) {
-  auto* me = Nan::ObjectWrap::Unwrap<ShadowNode>(info.Holder());
-  if (me) {
-    me->handle_manager()->SynchronizeHandles(me->handle());
-  }
+Napi::Value ShadowNode::SyncHandles(const Napi::CallbackInfo& info) {
+  handle_manager()->SynchronizeHandles(this->Value());
+  return info.Env().Undefined();
 }
 
 void ShadowNode::Execute(const std::vector<rclnodejs::RclHandle*>& handles) {
-  Nan::HandleScope scope;
-  Nan::AsyncResource res("shadow_node");
+  Napi::Env env = Env();
+  Napi::HandleScope scope(env);
 
-  v8::Local<v8::Array> results = Nan::New<v8::Array>(handles.size());
+  Napi::Array results = Napi::Array::New(env, handles.size());
   for (size_t i = 0; i < handles.size(); ++i) {
     handles[i]->SyncProperties();
-    Nan::Set(results, i, handles[i]->handle());
+    results[i] = handles[i]->Value();
   }
 
-  v8::Local<v8::Value> argv[] = {results};
-
-  res.runInAsyncScope(Nan::New(this->persistent()), "execute", 1, argv);
+  Napi::Function execute =
+      Value().As<Napi::Object>().Get("execute").As<Napi::Function>();
+  execute.Call(Value(), {results});
 }
 
 void ShadowNode::CatchException(std::exception_ptr e_ptr) {
   try {
     std::rethrow_exception(e_ptr);
   } catch (const std::exception& e) {
-    Nan::ThrowError(e.what());
-  }
-}
-
-void ShadowNode::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-  if (info.IsConstructCall()) {
-    // Invoked as constructor: `new ShadowNode(...)`
-    ShadowNode* obj = new ShadowNode();
-    obj->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
+    Napi::Error::New(Env(), e.what()).ThrowAsJavaScriptException();
   }
 }
 

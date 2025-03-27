@@ -15,14 +15,27 @@
 #ifndef SRC_MACROS_HPP_
 #define SRC_MACROS_HPP_
 
+#include <napi.h>
+
 #include "rcutils/logging_macros.h"
+
+namespace rclnodejs {
+// Store a reference to the environment that can be used for error reporting
+inline Napi::Env& GetEnv() {
+  static thread_local Napi::Env env = nullptr;
+  return env;
+}
+
+// Call this at the beginning of each function that may throw errors
+inline void StoreEnv(Napi::Env current_env) { GetEnv() = current_env; }
+}  // namespace rclnodejs
 
 #define CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE(op, lhs, rhs, message) \
   {                                                                 \
     if (lhs op rhs) {                                               \
-      Nan::ThrowError(message);                                     \
       rcl_reset_error();                                            \
-      return;                                                       \
+      Napi::Error::New(rclnodejs::GetEnv(), message)                \
+          .ThrowAsJavaScriptException();                            \
     }                                                               \
   }
 

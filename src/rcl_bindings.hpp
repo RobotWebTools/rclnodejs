@@ -15,7 +15,7 @@
 #ifndef SRC_RCL_BINDINGS_HPP_
 #define SRC_RCL_BINDINGS_HPP_
 
-#include <nan.h>
+#include <napi.h>
 #include <rcl/graph.h>
 #include <rcl/rcl.h>
 
@@ -25,21 +25,29 @@
 
 namespace rclnodejs {
 
-typedef void (*JsCFuntcion)(const Nan::FunctionCallbackInfo<v8::Value>&);
+typedef Napi::Value (*JsCFunction)(const Napi::CallbackInfo& info);
 
 typedef struct {
   const char* name;
-  JsCFuntcion function;
+  JsCFunction function;
 } BindingMethod;
 
 extern rcl_guard_condition_t* g_sigint_gc;
 
 void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
-                          v8::Local<v8::Array>* result_list);
+                          Napi::Array* result_list);
 
-std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos);
+std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(Napi::Value qos);
 
 extern std::vector<BindingMethod> binding_methods;
+
+Napi::Object InitBindings(Napi::Env env, Napi::Object exports);
+
+// Initialize the environment
+void InitEnvironment(Napi::Env env);
+
+// Get the current environment
+Napi::Env GetEnvironment();
 
 }  // namespace rclnodejs
 

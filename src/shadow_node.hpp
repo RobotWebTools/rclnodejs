@@ -15,7 +15,7 @@
 #ifndef SRC_SHADOW_NODE_HPP_
 #define SRC_SHADOW_NODE_HPP_
 
-#include <nan.h>
+#include <napi.h>
 
 #include <exception>
 #include <memory>
@@ -28,9 +28,10 @@ namespace rclnodejs {
 class HandleManager;
 class Executor;
 
-class ShadowNode : public Nan::ObjectWrap, public Executor::Delegate {
+class ShadowNode : public Napi::ObjectWrap<ShadowNode>,
+                   public Executor::Delegate {
  public:
-  static void Init(v8::Local<v8::Object> exports);
+  static void Init(Napi::Env env, Napi::Object exports);
   void StartRunning(rcl_context_t* context, int32_t timeout);
   void StopRunning();
   void RunOnce(rcl_context_t* context, int32_t timeout);
@@ -41,18 +42,18 @@ class ShadowNode : public Nan::ObjectWrap, public Executor::Delegate {
   void Execute(const std::vector<rclnodejs::RclHandle*>& handles) override;
   void CatchException(std::exception_ptr e_ptr) override;
 
- private:
-  ShadowNode();
+  ShadowNode(const Napi::CallbackInfo& info);
   ~ShadowNode();
 
-  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static Nan::Persistent<v8::Function> constructor;
-  static NAN_METHOD(Stop);
-  static NAN_METHOD(Start);
-  static NAN_METHOD(SyncHandles);
-  static NAN_METHOD(SpinOnce);
-  static NAN_GETTER(HandleGetter);
-  static NAN_SETTER(HandleSetter);
+ private:
+  static Napi::FunctionReference constructor;
+
+  Napi::Value Stop(const Napi::CallbackInfo& info);
+  Napi::Value Start(const Napi::CallbackInfo& info);
+  Napi::Value SyncHandles(const Napi::CallbackInfo& info);
+  Napi::Value SpinOnce(const Napi::CallbackInfo& info);
+  Napi::Value HandleGetter(const Napi::CallbackInfo& info);
+  void HandleSetter(const Napi::CallbackInfo& info, const Napi::Value& value);
 
   std::unique_ptr<HandleManager> handle_manager_;
   std::unique_ptr<Executor> executor_;

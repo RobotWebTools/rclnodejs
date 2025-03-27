@@ -41,12 +41,14 @@ struct RclResult {
   std::string error_msg;
 };
 
-Executor::Executor(HandleManager* handle_manager, Delegate* delegate)
+Executor::Executor(Napi::Env env, HandleManager* handle_manager,
+                   Delegate* delegate)
     : async_(nullptr),
       main_thread_(uv_thread_self()),
       handle_manager_(handle_manager),
       delegate_(delegate),
-      context_(nullptr) {
+      context_(nullptr),
+      env_(env) {
   running_.store(false);
 }
 
@@ -74,12 +76,19 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
   rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
   rcl_ret_t ret = rcl_wait_set_init(&wait_set, 0, 0, 0, 0, 0, 0, context,
                                     rcl_get_default_allocator());
-  if (ret != RCL_RET_OK) Nan::ThrowError(rcl_get_error_string().str);
+  if (ret != RCL_RET_OK) {
+    Napi::Error::New(env_, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return;
+  }
 
   RclResult wait_result = WaitForReadyCallbacks(&wait_set, time_out);
 
-  if (wait_result.ret != RCL_RET_OK)
-    Nan::ThrowError(wait_result.error_msg.c_str());
+  if (wait_result.ret != RCL_RET_OK) {
+    Napi::Error::New(env_, wait_result.error_msg.c_str())
+        .ThrowAsJavaScriptException();
+    return;
+  }
 
   if (handle_manager_->ready_handles_count() > 0) ExecuteReadyHandles();
 
@@ -87,7 +96,7 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
     std::string error_message =
         std::string("Failed to destroy guard waitset:") +
         std::string(rcl_get_error_string().str);
-    Nan::ThrowError(error_message.c_str());
+    Napi::Error::New(env_, error_message.c_str()).ThrowAsJavaScriptException();
   }
 }
 

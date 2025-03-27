@@ -15,8 +15,9 @@
 #ifndef SRC_HANDLE_MANAGER_HPP_
 #define SRC_HANDLE_MANAGER_HPP_
 
-#include <nan.h>
+#include <napi.h>
 #include <rcl/wait.h>
+#include <uv.h>
 
 #include <atomic>
 #include <vector>
@@ -53,7 +54,7 @@ class HandleManager {
   HandleManager();
   ~HandleManager();
 
-  void SynchronizeHandles(const v8::Local<v8::Object> node);
+  void SynchronizeHandles(const Napi::Object& node);
   void WaitForSynchronizing();
 
   // Waits the handles to be attached from the background thread.
@@ -89,7 +90,7 @@ class HandleManager {
 
  protected:
   // Synchronize the handles from `typeObject`.
-  uint32_t SynchronizeHandlesByType(const v8::Local<v8::Object>& typeObject,
+  uint32_t SynchronizeHandlesByType(const Napi::Object& typeObject,
                                     std::vector<rclnodejs::RclHandle*>* vec);
   template <typename T>
   void CollectReadyHandlesByType(

@@ -14,21 +14,23 @@
 
 #ifndef SRC_RCL_HANDLE_HPP_
 #define SRC_RCL_HANDLE_HPP_
-
-#include <nan.h>
+#include <napi.h>
 
 #include <functional>
+#include <iostream>
 #include <map>
+#include <mutex>
 #include <set>
 #include <string>
-
+#include <vector>
 namespace rclnodejs {
 
-class RclHandle : public Nan::ObjectWrap {
+class RclHandle : public Napi::ObjectWrap<RclHandle> {
  public:
-  static void Init(v8::Local<v8::Object> exports);
-  static v8::Local<v8::Object> NewInstance(void* handle, RclHandle* parent,
-                                           std::function<void(void*)> deleter);
+  static Napi::Object Init(Napi::Env env, Napi::Object exports);
+  static Napi::Object NewInstance(Napi::Env env, void* handle,
+                                  RclHandle* parent,
+                                  std::function<void(void*)> deleter);
 
   void set_deleter(std::function<void(void*)> deleter) { deleter_ = deleter; }
 
@@ -41,29 +43,114 @@ class RclHandle : public Nan::ObjectWrap {
   void Reset();
   void AddChild(RclHandle* child) { children_.insert(child); }
   void RemoveChild(RclHandle* child) { children_.erase(child); }
+  // void SetBoolProperty(const std::string& name, bool value);
+  void SyncProperties();
+
+  RclHandle(const Napi::CallbackInfo& info);
+  ~RclHandle();
+
+ public:
+  // Methods
+  Napi::Value Release(const Napi::CallbackInfo& info);
+  Napi::Value Dismiss(const Napi::CallbackInfo& info);
+
+  // Property getter
+  Napi::Value PropertiesGetter(const Napi::CallbackInfo& info);
+
+  // Store property updates to be applied later
+  struct PropertyUpdate {
+    std::string name;
+    bool value;
+  };
+
+  std::mutex property_mutex_;
+  std::vector<PropertyUpdate> pending_property_updates_;
+
+  // ThreadSafeFunction to process updates on main thread
+  static Napi::ThreadSafeFunction tsfn_;
+
+  // Thread-safe version to queue property updates
+  //   void SetBoolProperty(const std::string& name, bool value) {
+
+  //     std::lock_guard<std::mutex> lock(property_mutex_);
+  //     pending_property_updates_.push_back({name, value});
+  //     if (tsfn_) {
+  //         // Queue work to be processed on main thread
+  //         tsfn_.BlockingCall(this, []( Napi::Env env, Napi::Function
+  //         jsCallback, RclHandle* handle) {
+  //           std::cout << "====ProcessPropertyUpdates" << std::endl;
+  //           handle->ProcessPropertyUpdates();
+  //         });
+  //         // napi_status status = tsfn_.BlockingCall(this, [](Napi::Env env,
+  //         Napi::Function jsCallback, RclHandle* handle) {
+  //         //   std::cout << "====SetBoolProperty" << std::endl;
+  //         // });
+  //         // if ( status != napi_ok )
+  //         // {
+  //         //   std::cout << "===ERRRRRRRRRRRRRrr" << std::endl;
+  //         // }
+  //     }
+  // }
   void SetBoolProperty(const std::string& name, bool value) {
     properties_[name] = value;
   }
-  void SyncProperties();
+  // Process pending property updates on main thread
+  void ProcessPropertyUpdates() {
+    std::vector<PropertyUpdate> updates;
+    {
+      std::lock_guard<std::mutex> lock(property_mutex_);
+      updates.swap(pending_property_updates_);
+    }
 
- private:
-  RclHandle();
-  ~RclHandle();
+    Napi::Env env = Env();  // Get env from ObjectWrap
+    for (const auto& update : updates) {
+      if (!properties_obj_.IsEmpty()) {
+        Napi::Object props = properties_obj_.Value().As<Napi::Object>();
+        props.Set(update.name, Napi::Boolean::New(env, update.value));
+      }
+    }
+  }
 
-  static Nan::Persistent<v8::Function> constructor;
-  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static NAN_METHOD(Release);
-  static NAN_METHOD(Dismiss);
-  static NAN_GETTER(PropertiesGetter);
+  // Initialize thread-safe function
+  static void InitThreadSafeFunction(Napi::Env env) {
+    if (!tsfn_) {
+      // std::cout << "====InitThreadSafeFunction" << std::endl;
+      tsfn_ = Napi::ThreadSafeFunction::New(
+          env,
+          Napi::Function::New(env,
+                              [](const Napi::CallbackInfo& info) {
+                                // This runs on the main thread
+                                // Napi::Env env = info.Env();
+                                // RclHandle* handle =
+                                // RclHandle::Unwrap(info[0].As<Napi::Object>());
+                                // handle->ProcessPropertyUpdates();
+                                // std::cout << "====ProcessPropertyUpdates" <<
+                                // std::endl;
+                              }),
+          "SetBoolProperty",
+          0,  // Max queue size (0 = unlimited)
+          1   // Initial thread count
+      );
+    }
+  }
+
+  // Finalize the thread-safe function
+  static void CleanupThreadSafeFunction() {
+    if (tsfn_) {
+      tsfn_.Release();
+    }
+  }
 
  private:
   void* pointer_;
   RclHandle* parent_;
   std::map<std::string, bool> properties_;
-  v8::Local<v8::Object> properties_obj_;
+  Napi::ObjectReference properties_obj_;
 
   std::function<void(void*)> deleter_;
   std::set<RclHandle*> children_;
+
+  static Napi::FunctionReference constructor;
 };
 
 }  // namespace rclnodejs

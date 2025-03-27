@@ -15,16 +15,17 @@
 #ifndef SRC_RCL_ACTION_BINDINGS_HPP_
 #define SRC_RCL_ACTION_BINDINGS_HPP_
 
-#include <nan.h>
+#include <napi.h>
 #include <rcl/rcl.h>
 
+#include <utility>
 #include <vector>
 
 #include "rcl_bindings.hpp"
 
 namespace rclnodejs {
 
-extern std::vector<BindingMethod> action_binding_methods;
+Napi::Object InitAction(Napi::Env env, Napi::Object exports);
 
 }  // namespace rclnodejs
 

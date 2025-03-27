@@ -14,6 +14,7 @@
 
 #include "rcl_action_bindings.hpp"
 
+#include <napi.h>
 #include <rcl/error_handling.h>
 #include <rcl/graph.h>
 #include <rcl/rcl.h>
@@ -31,17 +32,14 @@
 
 namespace rclnodejs {
 
-NAN_METHOD(ActionCreateClient) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionCreateClient(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string action_name(
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
-  std::string interface_name(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
-  std::string package_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
+  std::string action_name = info[1].As<Napi::String>().Utf8Value();
+  std::string interface_name = info[2].As<Napi::String>().Utf8Value();
+  std::string package_name = info[3].As<Napi::String>().Utf8Value();
 
   const rosidl_action_type_support_t* ts =
       GetActionTypeSupport(package_name, interface_name);
@@ -80,8 +78,8 @@ NAN_METHOD(ActionCreateClient) {
         rcl_action_client_init(action_client, node, ts, action_name.c_str(),
                                &action_client_ops),
         RCL_RET_OK, rcl_get_error_string().str);
-    auto js_obj =
-        RclHandle::NewInstance(action_client, node_handle, [node](void* ptr) {
+    auto js_obj = RclHandle::NewInstance(
+        env, action_client, node_handle, [node](void* ptr) {
           rcl_action_client_t* action_client =
               reinterpret_cast<rcl_action_client_t*>(ptr);
           rcl_ret_t ret = rcl_action_client_fini(action_client, node);
@@ -89,27 +87,25 @@ NAN_METHOD(ActionCreateClient) {
           THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
 
-    info.GetReturnValue().Set(js_obj);
+    return js_obj;
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+    Napi::Error::New(env, GetErrorMessageAndClear())
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 }
 
-NAN_METHOD(ActionCreateServer) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionCreateServer(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  RclHandle* clock_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
-  std::string action_name(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
-  std::string interface_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
-  std::string package_name(
-      *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
-  int64_t result_timeout = info[10]->IntegerValue(currentContent).FromJust();
+  std::string action_name = info[2].As<Napi::String>().Utf8Value();
+  std::string interface_name = info[3].As<Napi::String>().Utf8Value();
+  std::string package_name = info[4].As<Napi::String>().Utf8Value();
+  int64_t result_timeout = info[10].As<Napi::Number>().Int64Value();
 
   const rosidl_action_type_support_t* ts =
       GetActionTypeSupport(package_name, interface_name);
@@ -151,8 +147,8 @@ NAN_METHOD(ActionCreateServer) {
         rcl_action_server_init(action_server, node, clock, ts,
                                action_name.c_str(), &action_server_ops),
         RCL_RET_OK, rcl_get_error_string().str);
-    auto js_obj =
-        RclHandle::NewInstance(action_server, node_handle, [node](void* ptr) {
+    auto js_obj = RclHandle::NewInstance(
+        env, action_server, node_handle, [node](void* ptr) {
           rcl_action_server_t* action_server =
               reinterpret_cast<rcl_action_server_t*>(ptr);
           rcl_ret_t ret = rcl_action_server_fini(action_server, node);
@@ -160,18 +156,21 @@ NAN_METHOD(ActionCreateServer) {
           THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
 
-    info.GetReturnValue().Set(js_obj);
+    return js_obj;
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+    Napi::Error::New(env, GetErrorMessageAndClear())
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 }
 
-NAN_METHOD(ActionServerIsAvailable) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionServerIsAvailable(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[1].As<Napi::Object>());
   rcl_action_client_t* action_client =
       reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
 
@@ -181,76 +180,74 @@ NAN_METHOD(ActionServerIsAvailable) {
       rcl_action_server_is_available(node, action_client, &is_available),
       rcl_get_error_string().str);
 
-  v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(is_available);
-  info.GetReturnValue().Set(result);
+  return Napi::Boolean::New(env, is_available);
 }
 
-NAN_METHOD(ActionSendGoalRequest) {
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionSendGoalRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_client_t* action_client =
       reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
 
   int64_t sequence_number;
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_action_send_goal_request(action_client, buffer, &sequence_number),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  v8::Local<v8::Integer> result =
-      Nan::New<v8::Integer>(static_cast<int32_t>(sequence_number));
-  info.GetReturnValue().Set(result);
+  return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
 }
 
-NAN_METHOD(ActionTakeGoalRequest) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionTakeGoalRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
 
-  void* taken_request =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* taken_request = info[1].As<Napi::Buffer<char>>().Data();
   rcl_ret_t ret =
       rcl_action_take_goal_request(action_server, header, taken_request);
   if (ret != RCL_RET_ACTION_SERVER_TAKE_FAILED) {
-    auto js_obj =
-        RclHandle::NewInstance(header, nullptr, [](void* ptr) { free(ptr); });
-    info.GetReturnValue().Set(js_obj);
-    return;
+    auto js_obj = RclHandle::NewInstance(env, header, nullptr,
+                                         [](void* ptr) { free(ptr); });
+    return js_obj;
   }
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionSendGoalResponse) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionSendGoalResponse(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
   rmw_request_id_t* header = reinterpret_cast<rmw_request_id_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[1]).ToLocalChecked())
-          ->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked());
+      RclHandle::Unwrap(info[1].As<Napi::Object>())->ptr());
+  void* buffer = info[2].As<Napi::Buffer<char>>().Data();
 
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_action_send_goal_response(action_server, header, buffer), RCL_RET_OK,
       rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionTakeGoalResponse) {
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionTakeGoalResponse(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_client_t* action_client =
       reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
 
@@ -259,87 +256,83 @@ NAN_METHOD(ActionTakeGoalResponse) {
   free(header);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   if (ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    v8::Local<v8::Integer> result =
-        Nan::New<v8::Integer>(static_cast<int32_t>(sequence_number));
-    info.GetReturnValue().Set(result);
-    return;
+    return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
   }
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionSendCancelRequest) {
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionSendCancelRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_client_t* action_client =
       reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
 
   int64_t sequence_number;
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_action_send_cancel_request(action_client, buffer, &sequence_number),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  v8::Local<v8::Integer> result =
-      Nan::New<v8::Integer>(static_cast<int32_t>(sequence_number));
-  info.GetReturnValue().Set(result);
+  return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
 }
 
-NAN_METHOD(ActionTakeCancelRequest) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionTakeCancelRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
 
-  void* taken_request =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* taken_request = info[1].As<Napi::Buffer<char>>().Data();
   rcl_ret_t ret =
       rcl_action_take_cancel_request(action_server, header, taken_request);
   if (ret != RCL_RET_ACTION_SERVER_TAKE_FAILED) {
-    auto js_obj =
-        RclHandle::NewInstance(header, nullptr, [](void* ptr) { free(ptr); });
-    info.GetReturnValue().Set(js_obj);
-    return;
+    auto js_obj = RclHandle::NewInstance(env, header, nullptr,
+                                         [](void* ptr) { free(ptr); });
+    return js_obj;
   }
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionSendCancelResponse) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionSendCancelResponse(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
   rmw_request_id_t* header = reinterpret_cast<rmw_request_id_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[1]).ToLocalChecked())
-          ->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked());
+      RclHandle::Unwrap(info[1].As<Napi::Object>())->ptr());
+  void* buffer = info[2].As<Napi::Buffer<char>>().Data();
 
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_action_send_cancel_response(action_server, header, buffer),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionTakeCancelResponse) {
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionTakeCancelResponse(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_client_t* action_client =
       reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
 
@@ -349,88 +342,84 @@ NAN_METHOD(ActionTakeCancelResponse) {
   free(header);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   if (ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    v8::Local<v8::Integer> result =
-        Nan::New<v8::Integer>(static_cast<int32_t>(sequence_number));
-    info.GetReturnValue().Set(result);
-    return;
+    return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
   }
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionSendResultRequest) {
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionSendResultRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_client_t* action_client =
       reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
 
   int64_t sequence_number;
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_action_send_result_request(action_client, buffer, &sequence_number),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  v8::Local<v8::Integer> result =
-      Nan::New<v8::Integer>(static_cast<int32_t>(sequence_number));
-  info.GetReturnValue().Set(result);
+  return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
 }
 
-NAN_METHOD(ActionTakeResultRequest) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionTakeResultRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
 
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
 
-  void* taken_request =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* taken_request = info[1].As<Napi::Buffer<char>>().Data();
   rcl_ret_t ret =
       rcl_action_take_result_request(action_server, header, taken_request);
   if (ret != RCL_RET_ACTION_SERVER_TAKE_FAILED) {
-    auto js_obj =
-        RclHandle::NewInstance(header, nullptr, [](void* ptr) { free(ptr); });
-    info.GetReturnValue().Set(js_obj);
-    return;
+    auto js_obj = RclHandle::NewInstance(env, header, nullptr,
+                                         [](void* ptr) { free(ptr); });
+    return js_obj;
   }
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionSendResultResponse) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionSendResultResponse(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
   rmw_request_id_t* header = reinterpret_cast<rmw_request_id_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[1]).ToLocalChecked())
-          ->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked());
+      RclHandle::Unwrap(info[1].As<Napi::Object>())->ptr());
+  void* buffer = info[2].As<Napi::Buffer<char>>().Data();
 
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_action_send_result_response(action_server, header, buffer),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionTakeResultResponse) {
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionTakeResultResponse(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_client_t* action_client =
       reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
 
@@ -440,28 +429,27 @@ NAN_METHOD(ActionTakeResultResponse) {
   free(header);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   if (ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    v8::Local<v8::Integer> result =
-        Nan::New<v8::Integer>(static_cast<int32_t>(sequence_number));
-    info.GetReturnValue().Set(result);
-    return;
+    return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
   }
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionAcceptNewGoal) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionAcceptNewGoal(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
   rcl_action_goal_info_t* buffer = reinterpret_cast<rcl_action_goal_info_t*>(
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked()));
+      info[1].As<Napi::Buffer<char>>().Data());
 
   rcl_action_goal_handle_t* goal_handle =
       reinterpret_cast<rcl_action_goal_handle_t*>(
@@ -469,41 +457,44 @@ NAN_METHOD(ActionAcceptNewGoal) {
 
   *goal_handle = *rcl_action_accept_new_goal(action_server, buffer);
   if (!goal_handle) {
-    Nan::ThrowError(rcl_get_error_string().str);
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
     rcl_reset_error();
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
 
-  auto js_obj = RclHandle::NewInstance(goal_handle, nullptr, [](void* ptr) {
-    rcl_action_goal_handle_t* goal_handle =
-        reinterpret_cast<rcl_action_goal_handle_t*>(ptr);
-    rcl_ret_t ret = rcl_action_goal_handle_fini(goal_handle);
-    free(ptr);
-    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
-  });
+  auto js_obj =
+      RclHandle::NewInstance(env, goal_handle, nullptr, [](void* ptr) {
+        rcl_action_goal_handle_t* goal_handle =
+            reinterpret_cast<rcl_action_goal_handle_t*>(ptr);
+        rcl_ret_t ret = rcl_action_goal_handle_fini(goal_handle);
+        free(ptr);
+        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+      });
 
-  info.GetReturnValue().Set(js_obj);
+  return js_obj;
 }
 
-NAN_METHOD(ActionUpdateGoalState) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* goal_handle_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionUpdateGoalState(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* goal_handle_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_goal_handle_t* goal_handle =
       reinterpret_cast<rcl_action_goal_handle_t*>(goal_handle_handle->ptr());
   rcl_action_goal_event_t event = static_cast<rcl_action_goal_event_t>(
-      info[1]->IntegerValue(currentContent).FromJust());
+      info[1].As<Napi::Number>().Int32Value());
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_action_update_goal_state(goal_handle, event),
                            RCL_RET_OK, rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionPublishStatus) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionPublishStatus(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
 
@@ -518,59 +509,62 @@ NAN_METHOD(ActionPublishStatus) {
       rcl_action_publish_status(action_server, &status_message), RCL_RET_OK,
       rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionTakeStatus) {
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionTakeStatus(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_client_t* action_client =
       reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
 
   rcl_ret_t ret = rcl_action_take_status(action_client, buffer);
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
-    info.GetReturnValue().Set(Nan::False());
-    return;
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return Napi::Boolean::New(env, false);
   }
 
   if (ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    info.GetReturnValue().Set(Nan::True());
-    return;
+    return Napi::Boolean::New(env, true);
   }
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionGoalHandleIsActive) {
-  RclHandle* goal_handle_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionGoalHandleIsActive(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* goal_handle_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_goal_handle_t* goal_handle =
       reinterpret_cast<rcl_action_goal_handle_t*>(goal_handle_handle->ptr());
 
   bool is_active = rcl_action_goal_handle_is_active(goal_handle);
 
-  v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(is_active);
-  info.GetReturnValue().Set(result);
+  return Napi::Boolean::New(env, is_active);
 }
 
-NAN_METHOD(ActionNotifyGoalDone) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionNotifyGoalDone(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_action_notify_goal_done(action_server),
                            RCL_RET_OK, rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionGoalHandleGetStatus) {
-  RclHandle* goal_handle_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionGoalHandleGetStatus(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* goal_handle_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_goal_handle_t* goal_handle =
       reinterpret_cast<rcl_action_goal_handle_t*>(goal_handle_handle->ptr());
 
@@ -579,59 +573,56 @@ NAN_METHOD(ActionGoalHandleGetStatus) {
       rcl_action_goal_handle_get_status(goal_handle, &status), RCL_RET_OK,
       rcl_get_error_string().str);
 
-  v8::Local<v8::Integer> result =
-      Nan::New<v8::Integer>(static_cast<int32_t>(status));
-  info.GetReturnValue().Set(result);
+  return Napi::Number::New(env, static_cast<int32_t>(status));
 }
 
-NAN_METHOD(ActionPublishFeedback) {
+Napi::Value ActionPublishFeedback(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_action_server_t* action_server = reinterpret_cast<rcl_action_server_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_action_publish_feedback(action_server, buffer),
                            RCL_RET_OK, rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionTakeFeedback) {
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionTakeFeedback(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_client_t* action_client =
       reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
 
   rcl_ret_t ret = rcl_action_take_feedback(action_client, buffer);
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    Nan::ThrowError(rcl_get_error_string().str);
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
     rcl_reset_error();
-    info.GetReturnValue().Set(Nan::False());
-    return;
+    return Napi::Boolean::New(env, false);
   }
 
   if (ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    info.GetReturnValue().Set(Nan::True());
-    return;
+    return Napi::Boolean::New(env, true);
   }
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(ActionProcessCancelRequest) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionProcessCancelRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
   rcl_action_cancel_request_t* cancel_request =
       reinterpret_cast<rcl_action_cancel_request_t*>(buffer);
-  void* response_buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked());
+  void* response_buffer = info[2].As<Napi::Buffer<char>>().Data();
   action_msgs__srv__CancelGoal_Response* response =
       reinterpret_cast<action_msgs__srv__CancelGoal_Response*>(response_buffer);
 
@@ -656,66 +647,63 @@ NAN_METHOD(ActionProcessCancelRequest) {
       rcl_reset_error();
     }
     free(cancel_response_ptr);
-    Nan::ThrowError(cancel_error.str);
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    Napi::Error::New(env, cancel_error.str).ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   *response = cancel_response_ptr->msg;
   auto js_obj =
-      RclHandle::NewInstance(cancel_response_ptr, nullptr, [](void* ptr) {
+      RclHandle::NewInstance(env, cancel_response_ptr, nullptr, [](void* ptr) {
         rcl_action_cancel_response_t* cancel_response_ptr =
             reinterpret_cast<rcl_action_cancel_response_t*>(ptr);
         rcl_ret_t ret = rcl_action_cancel_response_fini(cancel_response_ptr);
         free(ptr);
         THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
       });
-  info.GetReturnValue().Set(js_obj);
+  return js_obj;
 }
 
-NAN_METHOD(ActionServerGoalExists) {
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionServerGoalExists(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
   rcl_action_goal_info_t* buffer = reinterpret_cast<rcl_action_goal_info_t*>(
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked()));
+      info[1].As<Napi::Buffer<char>>().Data());
 
   bool exists = rcl_action_server_goal_exists(action_server, buffer);
 
-  v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(exists);
-  info.GetReturnValue().Set(result);
+  return Napi::Boolean::New(env, exists);
 }
 
-NAN_METHOD(ActionExpireGoals) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionExpireGoals(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
-  int64_t max_num_goals = info[1]->IntegerValue(currentContent).FromJust();
+  int64_t max_num_goals = info[1].As<Napi::Number>().Int64Value();
   rcl_action_goal_info_t* buffer = reinterpret_cast<rcl_action_goal_info_t*>(
-      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked()));
+      info[2].As<Napi::Buffer<char>>().Data());
 
   size_t num_expired;
   THROW_ERROR_IF_NOT_EQUAL(rcl_action_expire_goals(action_server, buffer,
                                                    max_num_goals, &num_expired),
                            RCL_RET_OK, rcl_get_error_string().str);
 
-  v8::Local<v8::Integer> result =
-      Nan::New<v8::Integer>(static_cast<int32_t>(num_expired));
-  info.GetReturnValue().Set(result);
+  return Napi::Number::New(env, static_cast<int32_t>(num_expired));
 }
 
-NAN_METHOD(ActionGetClientNamesAndTypesByNode) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionGetClientNamesAndTypesByNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string node_name =
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
-  std::string node_namespace =
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
+  std::string node_name = info[1].As<Napi::String>().Utf8Value();
+  std::string node_namespace = info[2].As<Napi::String>().Utf8Value();
 
   rcl_names_and_types_t names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -726,26 +714,23 @@ NAN_METHOD(ActionGetClientNamesAndTypesByNode) {
                                node_namespace.c_str(), &names_and_types),
                            "Failed to action client names and types.");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(names_and_types.names.size);
+  Napi::Array result_list = Napi::Array::New(env, names_and_types.names.size);
   ExtractNamesAndTypes(names_and_types, &result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_names_and_types_fini(&names_and_types),
                            "Failed to destroy names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(ActionGetServerNamesAndTypesByNode) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionGetServerNamesAndTypesByNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string node_name =
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
-  std::string node_namespace =
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
+  std::string node_name = info[1].As<Napi::String>().Utf8Value();
+  std::string node_namespace = info[2].As<Napi::String>().Utf8Value();
 
   rcl_names_and_types_t names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -756,20 +741,20 @@ NAN_METHOD(ActionGetServerNamesAndTypesByNode) {
                                node_namespace.c_str(), &names_and_types),
                            "Failed to action server names and types");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(names_and_types.names.size);
+  Napi::Array result_list = Napi::Array::New(env, names_and_types.names.size);
   ExtractNamesAndTypes(names_and_types, &result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_names_and_types_fini(&names_and_types),
                            "Failed to destroy names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(ActionGetNamesAndTypes) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionGetNamesAndTypes(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
 
   rcl_names_and_types_t names_and_types =
@@ -780,47 +765,77 @@ NAN_METHOD(ActionGetNamesAndTypes) {
       rcl_action_get_names_and_types(node, &allocator, &names_and_types),
       "Failed to action server names and types");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(names_and_types.names.size);
+  Napi::Array result_list = Napi::Array::New(env, names_and_types.names.size);
   ExtractNamesAndTypes(names_and_types, &result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_names_and_types_fini(&names_and_types),
                            "Failed to destroy names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-std::vector<BindingMethod> action_binding_methods = {
-    {"actionCreateClient", ActionCreateClient},
-    {"actionCreateServer", ActionCreateServer},
-    {"actionServerIsAvailable", ActionServerIsAvailable},
-    {"actionSendGoalRequest", ActionSendGoalRequest},
-    {"actionTakeGoalRequest", ActionTakeGoalRequest},
-    {"actionSendGoalResponse", ActionSendGoalResponse},
-    {"actionTakeGoalResponse", ActionTakeGoalResponse},
-    {"actionSendCancelRequest", ActionSendCancelRequest},
-    {"actionTakeCancelRequest", ActionTakeCancelRequest},
-    {"actionSendCancelResponse", ActionSendCancelResponse},
-    {"actionTakeCancelResponse", ActionTakeCancelResponse},
-    {"actionSendResultRequest", ActionSendResultRequest},
-    {"actionTakeResultRequest", ActionTakeResultRequest},
-    {"actionSendResultResponse", ActionSendResultResponse},
-    {"actionTakeResultResponse", ActionTakeResultResponse},
-    {"actionAcceptNewGoal", ActionAcceptNewGoal},
-    {"actionUpdateGoalState", ActionUpdateGoalState},
-    {"actionPublishStatus", ActionPublishStatus},
-    {"actionTakeStatus", ActionTakeStatus},
-    {"actionGoalHandleIsActive", ActionGoalHandleIsActive},
-    {"actionNotifyGoalDone", ActionNotifyGoalDone},
-    {"actionGoalHandleGetStatus", ActionGoalHandleGetStatus},
-    {"actionPublishFeedback", ActionPublishFeedback},
-    {"actionTakeFeedback", ActionTakeFeedback},
-    {"actionProcessCancelRequest", ActionProcessCancelRequest},
-    {"actionServerGoalExists", ActionServerGoalExists},
-    {"actionExpireGoals", ActionExpireGoals},
-    {"actionGetClientNamesAndTypesByNode", ActionGetClientNamesAndTypesByNode},
-    {"actionGetServerNamesAndTypesByNode", ActionGetServerNamesAndTypesByNode},
-    {"actionGetNamesAndTypes", ActionGetNamesAndTypes}};
+Napi::Object InitAction(Napi::Env env, Napi::Object exports) {
+  exports.Set("actionCreateClient",
+              Napi::Function::New(env, ActionCreateClient));
+  exports.Set("actionCreateServer",
+              Napi::Function::New(env, ActionCreateServer));
+  exports.Set("actionServerIsAvailable",
+              Napi::Function::New(env, ActionServerIsAvailable));
+  exports.Set("actionSendGoalRequest",
+              Napi::Function::New(env, ActionSendGoalRequest));
+  exports.Set("actionTakeGoalRequest",
+              Napi::Function::New(env, ActionTakeGoalRequest));
+  exports.Set("actionSendGoalResponse",
+              Napi::Function::New(env, ActionSendGoalResponse));
+  exports.Set("actionTakeGoalResponse",
+              Napi::Function::New(env, ActionTakeGoalResponse));
+  exports.Set("actionSendCancelRequest",
+              Napi::Function::New(env, ActionSendCancelRequest));
+  exports.Set("actionTakeCancelRequest",
+              Napi::Function::New(env, ActionTakeCancelRequest));
+  exports.Set("actionSendCancelResponse",
+              Napi::Function::New(env, ActionSendCancelResponse));
+  exports.Set("actionTakeCancelResponse",
+              Napi::Function::New(env, ActionTakeCancelResponse));
+  exports.Set("actionSendResultRequest",
+              Napi::Function::New(env, ActionSendResultRequest));
+  exports.Set("actionTakeResultRequest",
+              Napi::Function::New(env, ActionTakeResultRequest));
+  exports.Set("actionSendResultResponse",
+              Napi::Function::New(env, ActionSendResultResponse));
+  exports.Set("actionTakeResultResponse",
+              Napi::Function::New(env, ActionTakeResultResponse));
+  exports.Set("actionAcceptNewGoal",
+              Napi::Function::New(env, ActionAcceptNewGoal));
+  exports.Set("actionUpdateGoalState",
+              Napi::Function::New(env, ActionUpdateGoalState));
+  exports.Set("actionPublishStatus",
+              Napi::Function::New(env, ActionPublishStatus));
+  exports.Set("actionTakeStatus", Napi::Function::New(env, ActionTakeStatus));
+  exports.Set("actionGoalHandleIsActive",
+              Napi::Function::New(env, ActionGoalHandleIsActive));
+  exports.Set("actionNotifyGoalDone",
+              Napi::Function::New(env, ActionNotifyGoalDone));
+  exports.Set("actionGoalHandleGetStatus",
+              Napi::Function::New(env, ActionGoalHandleGetStatus));
+  exports.Set("actionPublishFeedback",
+              Napi::Function::New(env, ActionPublishFeedback));
+  exports.Set("actionTakeFeedback",
+              Napi::Function::New(env, ActionTakeFeedback));
+  exports.Set("actionProcessCancelRequest",
+              Napi::Function::New(env, ActionProcessCancelRequest));
+  exports.Set("actionServerGoalExists",
+              Napi::Function::New(env, ActionServerGoalExists));
+  exports.Set("actionExpireGoals", Napi::Function::New(env, ActionExpireGoals));
+  exports.Set("actionGetClientNamesAndTypesByNode",
+              Napi::Function::New(env, ActionGetClientNamesAndTypesByNode));
+  exports.Set("actionGetServerNamesAndTypesByNode",
+              Napi::Function::New(env, ActionGetServerNamesAndTypesByNode));
+  exports.Set("actionGetNamesAndTypes",
+              Napi::Function::New(env, ActionGetNamesAndTypes));
+
+  return exports;
+}
 
 }  // namespace rclnodejs

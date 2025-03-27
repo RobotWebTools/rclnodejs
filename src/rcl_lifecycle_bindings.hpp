@@ -15,6 +15,8 @@
 #ifndef SRC_RCL_LIFECYCLE_BINDINGS_HPP_
 #define SRC_RCL_LIFECYCLE_BINDINGS_HPP_
 
+#include <napi.h>
+
 #include <vector>
 
 #include "rcl_bindings.hpp"

@@ -17,86 +17,105 @@
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 
+#include <iostream>
+
+#include "macros.hpp"
+
 namespace rclnodejs {
 
-Nan::Persistent<v8::Function> RclHandle::constructor;
+Napi::FunctionReference RclHandle::constructor;
 
-RclHandle::RclHandle() : pointer_(nullptr), parent_(nullptr) {}
+// Define the static ThreadSafeFunction
+Napi::ThreadSafeFunction RclHandle::tsfn_;
+
+RclHandle::RclHandle(const Napi::CallbackInfo& info)
+    : Napi::ObjectWrap<RclHandle>(info), pointer_(nullptr), parent_(nullptr) {}
 
 RclHandle::~RclHandle() {
   if (pointer_) Reset();
+
+  // tsfn_.Release();
 }
 
-void RclHandle::Init(v8::Local<v8::Object> exports) {
-  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);
-  tpl->SetClassName(Nan::New("RclHandle").ToLocalChecked());
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+Napi::Object RclHandle::Init(Napi::Env env, Napi::Object exports) {
+  Napi::HandleScope scope(env);
 
-  Nan::SetAccessor(tpl->InstanceTemplate(),
-                   Nan::New("properties").ToLocalChecked(), PropertiesGetter);
-  Nan::SetPrototypeMethod(tpl, "release", Release);
-  Nan::SetPrototypeMethod(tpl, "dismiss", Dismiss);
+  Napi::Function func = DefineClass(
+      env, "RclHandle",
+      {InstanceMethod("release", &RclHandle::Release),
+       InstanceMethod("dismiss", &RclHandle::Dismiss),
+       InstanceAccessor("properties", &RclHandle::PropertiesGetter, nullptr)});
 
-  v8::Local<v8::Context> context = exports->GetIsolate()->GetCurrentContext();
+  constructor = Napi::Persistent(func);
+  constructor.SuppressDestruct();
+  exports.Set("RclHandle", func);
 
-  constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
-  Nan::Set(exports, Nan::New("RclHandle").ToLocalChecked(),
-           tpl->GetFunction(context).ToLocalChecked());
-}
-
-void RclHandle::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-  if (info.IsConstructCall()) {
-    RclHandle* obj = new RclHandle();
-    obj->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
-  }
+  return exports;
 }
 
 void RclHandle::SyncProperties() {
-  auto obj = v8::Object::New(v8::Isolate::GetCurrent());
+  // Napi::Env env = Env();
+  Napi::Env env = rclnodejs::GetEnv();
+  // if (env.IsNull()) return;
+  // std::cout << "===before SyncProperties" << std::endl;
 
-  for (auto it = properties_.begin(); it != properties_.end(); it++) {
-    Nan::Set(obj, Nan::New(it->first).ToLocalChecked(), Nan::New(it->second));
+  Napi::HandleScope scope(env);
+  // std::cout << "====after SyncProperties" << std::endl;
+  Napi::Object obj = Napi::Object::New(env);
+  // std::cout << "after====after SyncProperties" << std::endl;
+
+  for (auto& pair : properties_) {
+    obj.Set(pair.first, Napi::Boolean::New(env, pair.second));
   }
 
-  properties_obj_ = obj;
+  properties_obj_ = Napi::Persistent(obj);
 }
 
-NAN_GETTER(RclHandle::PropertiesGetter) {
-  auto* me = RclHandle::Unwrap<RclHandle>(info.Holder());
+// void RclHandle::SetBoolProperty(const std::string& name, bool value) {
+//   // properties_[name] = value;
+//   // SyncProperties();
+//   std::lock_guard<std::mutex> lock(property_mutex_);
 
-  if (!me->properties_obj_.IsEmpty())
-    info.GetReturnValue().Set(me->properties_obj_);
+//   // Allocate a new update object
+//   PropertyUpdate* update = new PropertyUpdate{name, value};
+
+//   // Queue the update to be executed on the main thread
+//   napi_status status = tsfn_.BlockingCall(update);
+//   if (status != napi_ok) {
+//     delete update;  // Clean up if failed
+//     // Handle error appropriately (log or handle internally)
+//   }
+// }
+
+Napi::Value RclHandle::PropertiesGetter(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  if (!properties_obj_.IsEmpty())
+    return properties_obj_.Value();
   else
-    info.GetReturnValue().Set(Nan::Undefined());
+    return env.Undefined();
 }
 
-NAN_METHOD(RclHandle::Release) {
-  auto* me = Nan::ObjectWrap::Unwrap<RclHandle>(info.Holder());
-  if (me->ptr()) me->Reset();
-
-  info.GetReturnValue().Set(Nan::Undefined());
+Napi::Value RclHandle::Release(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  if (ptr()) Reset();
+  return env.Undefined();
 }
 
-NAN_METHOD(RclHandle::Dismiss) {
-  auto* me = Nan::ObjectWrap::Unwrap<RclHandle>(info.Holder());
-  if (me) me->set_ptr(nullptr);
-
-  info.GetReturnValue().Set(Nan::Undefined());
+Napi::Value RclHandle::Dismiss(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  set_ptr(nullptr);
+  return env.Undefined();
 }
 
-v8::Local<v8::Object> RclHandle::NewInstance(
-    void* handle, RclHandle* parent, std::function<void(void*)> deleter) {
-  Nan::EscapableHandleScope scope;
+Napi::Object RclHandle::NewInstance(Napi::Env env, void* handle,
+                                    RclHandle* parent,
+                                    std::function<void(void*)> deleter) {
+  Napi::EscapableHandleScope scope(env);
 
-  v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);
-  v8::Local<v8::Context> context =
-      v8::Isolate::GetCurrent()->GetCurrentContext();
+  Napi::Object instance = constructor.New({});
 
-  v8::Local<v8::Object> instance =
-      cons->NewInstance(context, 0, nullptr).ToLocalChecked();
-
-  auto* rcl_handle = Nan::ObjectWrap::Unwrap<RclHandle>(instance);
+  RclHandle* rcl_handle = Napi::ObjectWrap<RclHandle>::Unwrap(instance);
   rcl_handle->set_ptr(handle);
   rcl_handle->set_deleter(deleter);
   if (parent) {
@@ -104,7 +123,7 @@ v8::Local<v8::Object> RclHandle::NewInstance(
     parent->AddChild(rcl_handle);
   }
 
-  return scope.Escape(instance);
+  return scope.Escape(instance).As<Napi::Object>();
 }
 
 void RclHandle::Reset() {

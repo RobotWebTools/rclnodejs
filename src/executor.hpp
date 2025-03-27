@@ -15,6 +15,7 @@
 #ifndef SRC_EXECUTOR_HPP_
 #define SRC_EXECUTOR_HPP_
 
+#include <napi.h>
 #include <rcl/wait.h>
 #include <uv.h>
 
@@ -37,7 +38,7 @@ class Executor {
     virtual void CatchException(std::exception_ptr e_ptr) = 0;
   };
 
-  Executor(HandleManager* handle_manager, Delegate* delegate);
+  Executor(Napi::Env env, HandleManager* handle_manager, Delegate* delegate);
   ~Executor();
 
   void Start(rcl_context_t* context, int32_t time_out);
@@ -68,6 +69,7 @@ class Executor {
   Delegate* delegate_;
   rcl_context_t* context_;
   int32_t time_out_;
+  Napi::Env env_;
 
   std::atomic_bool running_;
 };
