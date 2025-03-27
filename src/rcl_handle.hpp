@@ -46,7 +46,7 @@ class RclHandle : public Napi::ObjectWrap<RclHandle> {
   // void SetBoolProperty(const std::string& name, bool value);
   void SyncProperties();
 
-  RclHandle(const Napi::CallbackInfo& info);
+  explicit RclHandle(const Napi::CallbackInfo& info);
   ~RclHandle();
 
  public:
@@ -128,9 +128,8 @@ class RclHandle : public Napi::ObjectWrap<RclHandle> {
                                 // std::endl;
                               }),
           "SetBoolProperty",
-          0,  // Max queue size (0 = unlimited)
-          1   // Initial thread count
-      );
+          0,   // Max queue size (0 = unlimited)
+          1);  // Number of threads to use);
     }
   }
 

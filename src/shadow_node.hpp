@@ -42,7 +42,7 @@ class ShadowNode : public Napi::ObjectWrap<ShadowNode>,
   void Execute(const std::vector<rclnodejs::RclHandle*>& handles) override;
   void CatchException(std::exception_ptr e_ptr) override;
 
-  ShadowNode(const Napi::CallbackInfo& info);
+  explicit ShadowNode(const Napi::CallbackInfo& info);
   ~ShadowNode();
 
  private:
