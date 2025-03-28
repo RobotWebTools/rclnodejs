@@ -18,7 +18,6 @@
 #include <napi.h>
 #include <rcl/rcl.h>
 
-#include <utility>
 #include <vector>
 
 #include "rcl_bindings.hpp"

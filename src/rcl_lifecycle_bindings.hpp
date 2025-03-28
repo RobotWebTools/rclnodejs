@@ -23,7 +23,7 @@
 
 namespace rclnodejs {
 
-extern std::vector<BindingMethod> lifecycle_binding_methods;
+Napi::Object InitLifecycle(Napi::Env env, Napi::Object exports);
 
 }  // namespace rclnodejs
 

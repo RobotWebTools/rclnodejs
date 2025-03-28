@@ -14,8 +14,8 @@
 
 #include "rcl_bindings.hpp"
 
+#include <napi.h>
 #include <node.h>
-#include <node_buffer.h>
 #include <rcl/arguments.h>
 #include <rcl/error_handling.h>
 #include <rcl/expand_topic_name.h>
@@ -33,7 +33,6 @@
 #include <rmw/validate_namespace.h>
 #include <rmw/validate_node_name.h>
 
-#include "v8.h"
 #if ROS_VERSION >= 2006
 #include <rosidl_runtime_c/string_functions.h>
 #else
@@ -52,8 +51,6 @@
 #if NODE_MAJOR_VERSION > 12
 #include <utility>
 #endif
-
-#include <napi.h>
 
 #include "handle_manager.hpp"
 #include "macros.hpp"

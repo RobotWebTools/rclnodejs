@@ -25,16 +25,11 @@ namespace rclnodejs {
 
 Napi::FunctionReference RclHandle::constructor;
 
-// Define the static ThreadSafeFunction
-Napi::ThreadSafeFunction RclHandle::tsfn_;
-
 RclHandle::RclHandle(const Napi::CallbackInfo& info)
     : Napi::ObjectWrap<RclHandle>(info), pointer_(nullptr), parent_(nullptr) {}
 
 RclHandle::~RclHandle() {
   if (pointer_) Reset();
-
-  // tsfn_.Release();
 }
 
 Napi::Object RclHandle::Init(Napi::Env env, Napi::Object exports) {
@@ -54,38 +49,14 @@ Napi::Object RclHandle::Init(Napi::Env env, Napi::Object exports) {
 }
 
 void RclHandle::SyncProperties() {
-  // Napi::Env env = Env();
   Napi::Env env = rclnodejs::GetEnv();
-  // if (env.IsNull()) return;
-  // std::cout << "===before SyncProperties" << std::endl;
-
   Napi::HandleScope scope(env);
-  // std::cout << "====after SyncProperties" << std::endl;
   Napi::Object obj = Napi::Object::New(env);
-  // std::cout << "after====after SyncProperties" << std::endl;
-
   for (auto& pair : properties_) {
     obj.Set(pair.first, Napi::Boolean::New(env, pair.second));
   }
-
   properties_obj_ = Napi::Persistent(obj);
 }
-
-// void RclHandle::SetBoolProperty(const std::string& name, bool value) {
-//   // properties_[name] = value;
-//   // SyncProperties();
-//   std::lock_guard<std::mutex> lock(property_mutex_);
-
-//   // Allocate a new update object
-//   PropertyUpdate* update = new PropertyUpdate{name, value};
-
-//   // Queue the update to be executed on the main thread
-//   napi_status status = tsfn_.BlockingCall(update);
-//   if (status != napi_ok) {
-//     delete update;  // Clean up if failed
-//     // Handle error appropriately (log or handle internally)
-//   }
-// }
 
 Napi::Value RclHandle::PropertiesGetter(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();

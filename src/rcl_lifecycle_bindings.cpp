@@ -361,18 +361,30 @@ Napi::Value GetLifecycleShutdownTransitionLabel(
   return Napi::String::New(env, rcl_lifecycle_shutdown_label);
 }
 
-std::vector<BindingMethod> lifecycle_binding_methods = {
-    {"createLifecycleStateMachine", CreateLifecycleStateMachine},
-    {"getCurrentLifecycleState", GetCurrentLifecycleState},
-    {"getLifecycleTransitionByLabel", GetLifecycleTransitionByLabel},
-    {"getLifecycleStates", GetLifecycleStates},
-    {"getLifecycleTransitions", GetLifecycleTransitions},
-    {"getAvailableLifecycleTransitions", GetAvailableLifecycleTransitions},
-    {"triggerLifecycleTransitionById", TriggerLifecycleTransitionById},
-    {"triggerLifecycleTransitionByLabel", TriggerLifecycleTransitionByLabel},
-    {"getLifecycleSrvNameAndHandle", GetLifecycleSrvNameAndHandle},
-    {"getLifecycleTransitionIdToLabel", GetLifecycleTransitionIdToLabel},
-    {"getLifecycleShutdownTransitionLabel",
-     GetLifecycleShutdownTransitionLabel}};
+Napi::Object InitLifecycle(Napi::Env env, Napi::Object exports) {
+  exports.Set("createLifecycleStateMachine",
+              Napi::Function::New(env, CreateLifecycleStateMachine));
+  exports.Set("getCurrentLifecycleState",
+              Napi::Function::New(env, GetCurrentLifecycleState));
+  exports.Set("getLifecycleTransitionByLabel",
+              Napi::Function::New(env, GetLifecycleTransitionByLabel));
+  exports.Set("getLifecycleStates",
+              Napi::Function::New(env, GetLifecycleStates));
+  exports.Set("getLifecycleTransitions",
+              Napi::Function::New(env, GetLifecycleTransitions));
+  exports.Set("getAvailableLifecycleTransitions",
+              Napi::Function::New(env, GetAvailableLifecycleTransitions));
+  exports.Set("triggerLifecycleTransitionById",
+              Napi::Function::New(env, TriggerLifecycleTransitionById));
+  exports.Set("triggerLifecycleTransitionByLabel",
+              Napi::Function::New(env, TriggerLifecycleTransitionByLabel));
+  exports.Set("getLifecycleSrvNameAndHandle",
+              Napi::Function::New(env, GetLifecycleSrvNameAndHandle));
+  exports.Set("getLifecycleTransitionIdToLabel",
+              Napi::Function::New(env, GetLifecycleTransitionIdToLabel));
+  exports.Set("getLifecycleShutdownTransitionLabel",
+              Napi::Function::New(env, GetLifecycleShutdownTransitionLabel));
+  return exports;
+}
 
 }  // namespace rclnodejs

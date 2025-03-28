@@ -39,15 +39,7 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
 
 std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(Napi::Value qos);
 
-extern std::vector<BindingMethod> binding_methods;
-
 Napi::Object InitBindings(Napi::Env env, Napi::Object exports);
-
-// Initialize the environment
-void InitEnvironment(Napi::Env env);
-
-// Get the current environment
-Napi::Env GetEnvironment();
 
 }  // namespace rclnodejs
 

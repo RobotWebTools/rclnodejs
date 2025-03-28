@@ -48,7 +48,6 @@ describe('rclnodejs publisher test suite', function () {
         clearInterval(timer);
 
         let buffer = topic;
-        console.log(msg.toString());
         assert.deepStrictEqual(
           Buffer.compare(msg, buffer),
           0,
