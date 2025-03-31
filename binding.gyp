@@ -66,7 +66,7 @@
             'conditions': [
               [
                 'node_major_version >= 23', {
-                  'cflags': [
+                  'cflags_cc': [
                     '-std=c++20'
                   ]
                 }
@@ -89,7 +89,7 @@
             'conditions': [
               [
                 'node_major_version >= 23', {
-                  'cflags': [
+                  'cflags_cc': [
                     '-std=c++20'
                   ]
                 }
