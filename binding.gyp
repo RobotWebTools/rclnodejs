@@ -12,6 +12,7 @@
     'runtime%': 'node',
     'ros_lib_dir': "<!(node -p \"require('./scripts/config.js').getROSLibPath()\")",
     'ros_include_root': "<!(node -p \"require('./scripts/config.js').getROSIncludeRootPath()\")",
+    'node_major_version': '<!(node -p \"process.versions.node.split(\'.\')[0]\")',
   },
   'targets': [
     {
@@ -62,8 +63,21 @@
             'defines': [
               'OS_LINUX'
             ],
-            'cflags_cc': [
-              '-std=c++20'
+            'conditions': [
+              [
+                'node_major_version >= 23', {
+                  'cflags': [
+                    '-std=c++20'
+                  ]
+                }
+              ],
+              [
+                'node_major_version < 23', {
+                  'cflags_cc': [
+                    '-std=c++17'
+                  ]
+                }
+              ]
             ]
           }
         ],
@@ -72,8 +86,21 @@
             'defines': [
               'OS_WINDOWS'
             ],
-            'cflags_cc': [
-              '-std=c++20'
+            'conditions': [
+              [
+                'node_major_version >= 23', {
+                  'cflags': [
+                    '-std=c++20'
+                  ]
+                }
+              ],
+              [
+                'node_major_version < 23', {
+                  'cflags_cc': [
+                    '-std=c++17'
+                  ]
+                }
+              ]
             ],
             'include_dirs': [
               './src/third_party/dlfcn-win32/',
