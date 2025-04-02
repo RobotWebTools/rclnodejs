@@ -31,6 +31,9 @@ class RclHandle : public Napi::ObjectWrap<RclHandle> {
                                   RclHandle* parent,
                                   std::function<void(void*)> deleter);
 
+  explicit RclHandle(const Napi::CallbackInfo& info);
+  ~RclHandle();
+
   void set_deleter(std::function<void(void*)> deleter) { deleter_ = deleter; }
 
   RclHandle* parent() { return parent_; }
@@ -42,22 +45,15 @@ class RclHandle : public Napi::ObjectWrap<RclHandle> {
   void Reset();
   void AddChild(RclHandle* child) { children_.insert(child); }
   void RemoveChild(RclHandle* child) { children_.erase(child); }
-  void SyncProperties();
-
-  explicit RclHandle(const Napi::CallbackInfo& info);
-  ~RclHandle();
-
- public:
-  // Methods
-  Napi::Value Release(const Napi::CallbackInfo& info);
-  Napi::Value Dismiss(const Napi::CallbackInfo& info);
-
-  // Property getter
-  Napi::Value PropertiesGetter(const Napi::CallbackInfo& info);
-
   void SetBoolProperty(const std::string& name, bool value) {
     properties_[name] = value;
   }
+  void SyncProperties();
+
+ private:
+  Napi::Value Release(const Napi::CallbackInfo& info);
+  Napi::Value Dismiss(const Napi::CallbackInfo& info);
+  Napi::Value PropertiesGetter(const Napi::CallbackInfo& info);
 
  private:
   void* pointer_;

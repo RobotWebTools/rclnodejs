@@ -1502,15 +1502,8 @@ Napi::Value CreateArrayBufferFromAddress(const Napi::CallbackInfo& info) {
   memcpy(array_buffer.Data(), addr, length);
   free(addr);
 #else
-  // For nodejs > 12 or electron < 21, we will create a new `BackingStore` and
-  // take over the ownership of `addr`.
-  // std::unique_ptr<v8::BackingStore> backing =
-  // v8::ArrayBuffer::NewBackingStore(
-  //     addr, length,
-  //     [](void* data, size_t length, void* deleter_data) { free(data); },
-  //     nullptr);
-  // auto array_buffer =
-  //     Napi::ArrayBuffer::New(env, std::move(backing));
+  // For nodejs > 12 or electron < 21, we will take over the ownership of
+  // `addr`.
   auto array_buffer = Napi::ArrayBuffer::New(
       env, addr, length, [](Napi::Env /*env*/, void* data) { free(data); });
 #endif

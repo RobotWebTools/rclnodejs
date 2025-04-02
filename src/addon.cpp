@@ -13,14 +13,14 @@
 // limitations under the License.
 
 #include <node_api.h>
+#include <rcutils/logging.h>
 
 #include "macros.hpp"
 #include "rcl_action_bindings.hpp"
 #include "rcl_bindings.hpp"
 #include "rcl_handle.hpp"
 #include "rcl_lifecycle_bindings.hpp"
-#include "rcutils/logging.h"
-#include "rcutils/macros.h"
+#include "rcl_utilities.hpp"
 #include "shadow_node.hpp"
 
 bool IsRunningInElectronRenderer(const Napi::Env& env) {
@@ -46,6 +46,8 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
     prog_name[end - prog_name] = 0;
   }
 #endif
+
+  // Init the C++ bindings.
   rclnodejs::StoreEnv(env);
   rclnodejs::InitBindings(env, exports);
   rclnodejs::InitAction(env, exports);

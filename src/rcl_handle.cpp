@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include "macros.hpp"
+#include "rcl_utilities.hpp"
 
 namespace rclnodejs {
 
@@ -59,12 +59,8 @@ void RclHandle::SyncProperties() {
 }
 
 Napi::Value RclHandle::PropertiesGetter(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-
-  if (!properties_obj_.IsEmpty())
-    return properties_obj_.Value();
-  else
-    return env.Undefined();
+  return !properties_obj_.IsEmpty() ? properties_obj_.Value()
+                                    : info.Env().Undefined();
 }
 
 Napi::Value RclHandle::Release(const Napi::CallbackInfo& info) {
