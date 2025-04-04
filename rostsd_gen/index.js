@@ -405,7 +405,7 @@ function saveActionAsTSD(
   fd,
   descriptorInterfaceType = false
 ) {
-  if (!descriptorInterfaceNamespace) {
+  if (!descriptorInterfaceType) {
     const actionName = rosActionInterface.type().interfaceName;
 
     const interfaceTemplate = [
