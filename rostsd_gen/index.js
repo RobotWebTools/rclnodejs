@@ -31,6 +31,8 @@ const fs = require('fs');
 const loader = require('../lib/interface_loader.js');
 const pkgFilters = require('../rosidl_gen/filter.js');
 
+const descriptorInterfaceNamespace = 'descriptor';
+
 async function generateAll() {
   // load pkg and interface info (msgs and srvs)
   const generatedPath = path.join(__dirname, '../generated/');
@@ -119,47 +121,30 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
     for (const subfolder of pkgInfo.subfolders.keys()) {
       fs.writeSync(fd, `    namespace ${subfolder} {\n`);
 
-      for (const rosInterface of pkgInfo.subfolders.get(subfolder)) {
-        const type = rosInterface.type();
-        const fullInterfaceName = `${type.pkgName}/${type.subFolder}/${type.interfaceName}`;
-        const fullInterfacePath = `${type.pkgName}.${type.subFolder}.${type.interfaceName}`;
-        const fullInterfaceConstructor = fullInterfacePath + 'Constructor';
+      // generate real msg/srv/action interfaces
+      generateRosMsgInterfaces(
+        pkgInfo,
+        subfolder,
+        messagesMap,
+        servicesMap,
+        actionsMap,
+        fd
+      );
 
-        if (isMsgInterface(rosInterface)) {
-          // create message interface
-          saveMsgAsTSD(rosInterface, fd);
-          saveMsgConstructorAsTSD(rosInterface, fd);
-          messagesMap[fullInterfaceName] = fullInterfacePath;
-        } else if (isSrvInterface(rosInterface)) {
-          if (
-            !isValidService(rosInterface, pkgInfo.subfolders.get(subfolder))
-          ) {
-            let type = rosInterface.type();
-            console.log(
-              `Incomplete service: ${type.pkgName}.${type.subFolder}.${type.interfaceName}.`
-            );
-            continue;
-          }
-
-          // create service interface
-          saveSrvAsTSD(rosInterface, fd);
-          if (!isInternalActionSrvInterface(rosInterface)) {
-            servicesMap[fullInterfaceName] = fullInterfaceConstructor;
-          }
-        } else if (isActionInterface(rosInterface)) {
-          if (!isValidAction(rosInterface, pkgInfo.subfolders.get(subfolder))) {
-            let type = rosInterface.type();
-            console.log(
-              `Incomplete action: ${type.pkgName}.${type.subFolder}.${type.interfaceName}.`
-            );
-            continue;
-          }
-
-          // create action interface
-          saveActionAsTSD(rosInterface, fd);
-          actionsMap[fullInterfaceName] = fullInterfaceConstructor;
-        }
-      }
+      // generate descriptor msg/srv/action interfaces
+      fs.writeSync(fd, `      namespace ${descriptorInterfaceNamespace} {\n`);
+      const descriptorInterfaceType = true;
+      generateRosMsgInterfaces(
+        pkgInfo,
+        subfolder,
+        messagesMap,
+        servicesMap,
+        actionsMap,
+        fd,
+        descriptorInterfaceType
+      );
+      // close namespace descriptor declare
+      fs.writeSync(fd, '      }\n');
 
       // close namespace declare
       fs.writeSync(fd, '    }\n');
@@ -238,16 +223,78 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(fd, '}\n');
 }
 
-function saveMsgAsTSD(rosMsgInterface, fd) {
-  fs.writeSync(
-    fd,
-    `      export interface ${rosMsgInterface.type().interfaceName} {\n`
+function generateRosMsgInterfaces(
+  pkgInfo,
+  subfolder,
+  messagesMap,
+  servicesMap,
+  actionsMap,
+  fd,
+  descriptorInterfaceType = false
+) {
+  for (const rosInterface of pkgInfo.subfolders.get(subfolder)) {
+    const type = rosInterface.type();
+    const fullInterfaceName = `${type.pkgName}/${type.subFolder}/${type.interfaceName}`;
+    const fullInterfacePath = `${type.pkgName}.${type.subFolder}.${type.interfaceName}`;
+    const fullInterfaceConstructor = fullInterfacePath + 'Constructor';
+
+    if (isMsgInterface(rosInterface)) {
+      // create message interface
+      saveMsgAsTSD(rosInterface, fd, descriptorInterfaceType);
+      saveMsgConstructorAsTSD(rosInterface, fd, descriptorInterfaceType);
+      messagesMap[fullInterfaceName] = fullInterfacePath;
+    } else if (isSrvInterface(rosInterface)) {
+      if (!isValidService(rosInterface, pkgInfo.subfolders.get(subfolder))) {
+        let type = rosInterface.type();
+        console.log(
+          `Incomplete service: ${type.pkgName}.${type.subFolder}.${type.interfaceName}.`
+        );
+        continue;
+      }
+
+      // create service interface
+      saveSrvAsTSD(rosInterface, fd, descriptorInterfaceType);
+      if (!isInternalActionSrvInterface(rosInterface)) {
+        servicesMap[fullInterfaceName] = fullInterfaceConstructor;
+      }
+    } else if (isActionInterface(rosInterface)) {
+      if (!isValidAction(rosInterface, pkgInfo.subfolders.get(subfolder))) {
+        let type = rosInterface.type();
+        console.log(
+          `Incomplete action: ${type.pkgName}.${type.subFolder}.${type.interfaceName}.`
+        );
+        continue;
+      }
+
+      // create action interface
+      saveActionAsTSD(rosInterface, fd, descriptorInterfaceType);
+      actionsMap[fullInterfaceName] = fullInterfaceConstructor;
+    }
+  }
+}
+
+function saveMsgAsTSD(rosMsgInterface, fd, descriptorInterfaceType = false) {
+  const indentlevel = descriptorInterfaceType ? 8 : 6;
+  const tmpl = indentString(
+    `export interface ${rosMsgInterface.type().interfaceName} {\n`,
+    indentlevel
   );
+  fs.writeSync(fd, tmpl);
   const useSamePkg =
     isInternalActionMsgInterface(rosMsgInterface) ||
     isInternalServiceEventMsgInterface(rosMsgInterface);
-  saveMsgFieldsAsTSD(rosMsgInterface, fd, 8, ';', '', useSamePkg);
-  fs.writeSync(fd, '      }\n');
+  const indentLevel = descriptorInterfaceType ? 10 : 8;
+  saveMsgFieldsAsTSD(
+    rosMsgInterface,
+    fd,
+    indentLevel,
+    ';',
+    '',
+    useSamePkg,
+    descriptorInterfaceType
+  );
+  const tmplEnd = indentString('}\n', indentlevel);
+  fs.writeSync(fd, tmplEnd);
 }
 
 /**
@@ -261,6 +308,7 @@ function saveMsgAsTSD(rosMsgInterface, fd) {
  * @param {string} typePrefix The prefix to put before the type name for
  * non-primitive types
  * @param {boolean} useSamePackageSubFolder Indicates if the sub folder name should be taken from the message
+ * @param {boolean} descriptorInterfaceType Indicates if descriptor interface is being generated
  * when the field type comes from the same package. This is needed for action interfaces. Defaults to false.
  * @returns {undefined}
  */
@@ -270,7 +318,8 @@ function saveMsgFieldsAsTSD(
   indent = 0,
   lineEnd = ',',
   typePrefix = '',
-  useSamePackageSubFolder = false
+  useSamePackageSubFolder = false,
+  descriptorInterfaceType = false
 ) {
   let type = rosMsgInterface.type();
   let fields = rosMsgInterface.ROSMessageDef.fields;
@@ -280,75 +329,96 @@ function saveMsgFieldsAsTSD(
       useSamePackageSubFolder && field.type.pkgName === type.pkgName
         ? type.subFolder
         : 'msg';
-    let fieldType = fieldType2JSName(field, subFolder);
+    let fieldType = fieldType2JSName(field, subFolder, descriptorInterfaceType);
     let tp = field.type.isPrimitiveType ? '' : typePrefix;
     if (typePrefix === 'rclnodejs.') {
       fieldType = 'any';
       tp = '';
     }
 
-    const tmpl = indentString(`${field.name}: ${tp}${fieldType}`, indent);
-    fs.writeSync(fd, tmpl);
+    let arrayString = '';
     if (field.type.isArray) {
-      fs.writeSync(fd, '[]');
+      arrayString = '[]';
 
-      if (fieldType === 'number') {
+      if (field.type.isFixedSizeArray && descriptorInterfaceType) {
+        arrayString = `[${field.type.arraySize}]`;
+      }
+
+      if (fieldType === 'number' && !descriptorInterfaceType) {
         // for number[] include alternate typed-array types, e.g., number[] | uint8[]
         let jsTypedArrayName = fieldTypeArray2JSTypedArrayName(field.type.type);
 
         if (jsTypedArrayName) {
-          fs.writeSync(fd, ` | ${jsTypedArrayName}`);
+          arrayString += ` | ${jsTypedArrayName}`;
         }
       }
     }
+    const fieldString = descriptorInterfaceType
+      ? `${field.name}: '${tp}${fieldType}${arrayString}'`
+      : `${field.name}: ${tp}${fieldType}${arrayString}`;
+    const tmpl = indentString(fieldString, indent);
+    fs.writeSync(fd, tmpl);
 
     fs.writeSync(fd, lineEnd);
     fs.writeSync(fd, '\n');
   }
 }
 
-function saveMsgConstructorAsTSD(rosMsgInterface, fd) {
+function saveMsgConstructorAsTSD(
+  rosMsgInterface,
+  fd,
+  descriptorInterfaceType = false
+) {
   const type = rosMsgInterface.type();
   const msgName = type.interfaceName;
+  if (!descriptorInterfaceType) {
+    fs.writeSync(fd, `      export interface ${msgName}Constructor {\n`);
 
-  fs.writeSync(fd, `      export interface ${msgName}Constructor {\n`);
+    for (const constant of rosMsgInterface.ROSMessageDef.constants) {
+      const constantType = primitiveType2JSName(constant.type);
+      fs.writeSync(fd, `        readonly ${constant.name}: ${constantType};\n`);
+    }
 
-  for (const constant of rosMsgInterface.ROSMessageDef.constants) {
-    const constantType = primitiveType2JSName(constant.type);
-    fs.writeSync(fd, `        readonly ${constant.name}: ${constantType};\n`);
+    fs.writeSync(fd, `        new(other?: ${msgName}): ${msgName};\n`);
+    fs.writeSync(fd, '      }\n');
   }
-
-  fs.writeSync(fd, `        new(other?: ${msgName}): ${msgName};\n`);
-  fs.writeSync(fd, '      }\n');
 }
 
-function saveSrvAsTSD(rosSrvInterface, fd) {
-  const serviceName = rosSrvInterface.type().interfaceName;
+function saveSrvAsTSD(rosSrvInterface, fd, descriptorInterfaceType = false) {
+  if (!descriptorInterfaceType) {
+    const serviceName = rosSrvInterface.type().interfaceName;
 
-  const interfaceTemplate = [
-    `export interface ${serviceName}Constructor extends ROSService {`,
-    `  readonly Request: ${serviceName}_RequestConstructor;`,
-    `  readonly Response: ${serviceName}_ResponseConstructor;`,
-    '}',
-    '',
-  ];
-
-  fs.writeSync(fd, indentLines(interfaceTemplate, 6).join('\n'));
+    const interfaceTemplate = [
+      `export interface ${serviceName}Constructor extends ROSService {`,
+      `  readonly Request: ${serviceName}_RequestConstructor;`,
+      `  readonly Response: ${serviceName}_ResponseConstructor;`,
+      '}',
+      '',
+    ];
+    const indentLevel = 6;
+    fs.writeSync(fd, indentLines(interfaceTemplate, indentLevel).join('\n'));
+  }
 }
 
-function saveActionAsTSD(rosActionInterface, fd) {
-  const actionName = rosActionInterface.type().interfaceName;
+function saveActionAsTSD(
+  rosActionInterface,
+  fd,
+  descriptorInterfaceType = false
+) {
+  if (!descriptorInterfaceNamespace) {
+    const actionName = rosActionInterface.type().interfaceName;
 
-  const interfaceTemplate = [
-    `export interface ${actionName}Constructor {`,
-    `  readonly Goal: ${actionName}_GoalConstructor;`,
-    `  readonly Result: ${actionName}_ResultConstructor;`,
-    `  readonly Feedback: ${actionName}_FeedbackConstructor;`,
-    '}',
-    '',
-  ];
-
-  fs.writeSync(fd, indentLines(interfaceTemplate, 6).join('\n'));
+    const interfaceTemplate = [
+      `export interface ${actionName}Constructor {`,
+      `  readonly Goal: ${actionName}_GoalConstructor;`,
+      `  readonly Result: ${actionName}_ResultConstructor;`,
+      `  readonly Feedback: ${actionName}_FeedbackConstructor;`,
+      '}',
+      '',
+    ];
+    const indentLevel = 6;
+    fs.writeSync(fd, indentLines(interfaceTemplate, indentLevel).join('\n'));
+  }
 }
 
 function isMsgInterface(rosInterface) {
@@ -451,7 +521,16 @@ function isValidAction(rosActionInterface, infos) {
   return matches === SUCCESS_MATCH_COUNT;
 }
 
-function fieldType2JSName(fieldInfo, subFolder = 'msg') {
+function fieldType2JSName(
+  fieldInfo,
+  subFolder = 'msg',
+  descriptorInterfaceType = false
+) {
+  if (descriptorInterfaceType) {
+    return fieldInfo.type.isPrimitiveType
+      ? `${fieldInfo.type.type}`
+      : `${fieldInfo.type.pkgName}/${subFolder}/${fieldInfo.type.type}`;
+  }
   return fieldInfo.type.isPrimitiveType
     ? primitiveType2JSName(fieldInfo.type.type)
     : `${fieldInfo.type.pkgName}.${subFolder}.${fieldInfo.type.type}`;
