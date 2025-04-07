@@ -390,3 +390,48 @@ param.value.integer_value = BigInt(123);
 expectType<bigint>(param.value.integer_value);
 param.value.byte_array_value = [1, 2, 3];
 expectType<number[]>(param.value.byte_array_value);
+
+// ---- Descriptors -----
+// Note: All fields are of type string exactly equal to the type of interface.
+// built-in msg
+const duration = rclnodejs.createMessageObject(
+  'builtin_interfaces/msg/descriptor/Duration'
+);
+expectType<rclnodejs.builtin_interfaces.msg.descriptor.Duration>(duration);
+expectType<'int32'>(duration.sec);
+expectType<'uint32'>(duration.nanosec);
+// msg containing complex types
+const poseStampedDescriptor = rclnodejs.createMessageObject(
+  'geometry_msgs/msg/descriptor/PoseStamped'
+);
+expectType<rclnodejs.geometry_msgs.msg.descriptor.PoseStamped>(
+  poseStampedDescriptor
+);
+expectType<'std_msgs/msg/Header'>(poseStampedDescriptor.header);
+expectType<'geometry_msgs/msg/Pose'>(poseStampedDescriptor.pose);
+// action interface
+const navigateToPoseFeedbackDescriptor = rclnodejs.createMessageObject(
+  'nav2_msgs/action/descriptor/NavigateToPose_Feedback'
+);
+expectType<rclnodejs.nav2_msgs.action.descriptor.NavigateToPose_Feedback>(
+  navigateToPoseFeedbackDescriptor
+);
+expectType<'geometry_msgs/msg/PoseStamped'>(
+  navigateToPoseFeedbackDescriptor.current_pose
+);
+expectType<'float32'>(navigateToPoseFeedbackDescriptor.distance_remaining);
+expectType<'builtin_interfaces/msg/Duration'>(
+  navigateToPoseFeedbackDescriptor.estimated_time_remaining
+);
+expectType<'builtin_interfaces/msg/Duration'>(
+  navigateToPoseFeedbackDescriptor.navigation_time
+);
+expectType<'int16'>(navigateToPoseFeedbackDescriptor.number_of_recoveries);
+// srv interface
+const cancelGoalRequestDescriptor = rclnodejs.createMessageObject(
+  'action_msgs/srv/descriptor/CancelGoal_Request'
+);
+expectType<rclnodejs.action_msgs.srv.descriptor.CancelGoal_Request>(
+  cancelGoalRequestDescriptor
+);
+expectType<'action_msgs/msg/GoalInfo'>(cancelGoalRequestDescriptor.goal_info);
