@@ -410,27 +410,13 @@ expectType<rclnodejs.geometry_msgs.msg.descriptor.PoseStamped>(
 expectAssignable<'std_msgs/msg/Header'>(poseStampedDescriptor.header);
 expectAssignable<'geometry_msgs/msg/Pose'>(poseStampedDescriptor.pose);
 // action interface
-const navigateToPoseFeedbackDescriptor = rclnodejs.createMessageObject(
-  'nav2_msgs/action/descriptor/NavigateToPose_Feedback'
+const fibonacciFeedback = rclnodejs.createMessageObject(
+  'example_interfaces/action/descriptor/Fibonacci_Feedback'
 );
-expectType<rclnodejs.nav2_msgs.action.descriptor.NavigateToPose_Feedback>(
-  navigateToPoseFeedbackDescriptor
+expectType<rclnodejs.example_interfaces.action.descriptor.Fibonacci_Feedback>(
+  fibonacciFeedback
 );
-expectAssignable<'geometry_msgs/msg/PoseStamped'>(
-  navigateToPoseFeedbackDescriptor.current_pose
-);
-expectAssignable<'float32'>(
-  navigateToPoseFeedbackDescriptor.distance_remaining
-);
-expectAssignable<'builtin_interfaces/msg/Duration'>(
-  navigateToPoseFeedbackDescriptor.estimated_time_remaining
-);
-expectAssignable<'builtin_interfaces/msg/Duration'>(
-  navigateToPoseFeedbackDescriptor.navigation_time
-);
-expectAssignable<'int16'>(
-  navigateToPoseFeedbackDescriptor.number_of_recoveries
-);
+expectAssignable<'int32[]'>(fibonacciFeedback.sequence);
 // srv interface
 const cancelGoalRequestDescriptor = rclnodejs.createMessageObject(
   'action_msgs/srv/descriptor/CancelGoal_Request'
