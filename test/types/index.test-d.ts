@@ -57,6 +57,9 @@ expectType<rclnodejs.NamesAndTypesQueryResult[]>(
   node.getServiceNamesAndTypesByNode(NODE_NAME)
 );
 expectType<rclnodejs.NamesAndTypesQueryResult[]>(
+  node.getClientNamesAndTypesByNode(NODE_NAME)
+);
+expectType<rclnodejs.NamesAndTypesQueryResult[]>(
   node.getSubscriptionNamesAndTypesByNode(NODE_NAME)
 );
 expectType<rclnodejs.NamesAndTypesQueryResult[]>(node.getTopicNamesAndTypes());
