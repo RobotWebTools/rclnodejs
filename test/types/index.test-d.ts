@@ -1,6 +1,6 @@
 /// <reference path='../../types/index.d.ts' />
 
-import { expectType } from 'tsd';
+import { expectType, expectAssignable } from 'tsd';
 import * as rclnodejs from 'rclnodejs';
 
 const NODE_NAME = 'test_node';
@@ -398,8 +398,8 @@ const duration = rclnodejs.createMessageObject(
   'builtin_interfaces/msg/descriptor/Duration'
 );
 expectType<rclnodejs.builtin_interfaces.msg.descriptor.Duration>(duration);
-expectType<'int32'>(duration.sec);
-expectType<'uint32'>(duration.nanosec);
+expectAssignable<'int32'>(duration.sec);
+expectAssignable<'uint32'>(duration.nanosec);
 // msg containing complex types
 const poseStampedDescriptor = rclnodejs.createMessageObject(
   'geometry_msgs/msg/descriptor/PoseStamped'
@@ -407,8 +407,8 @@ const poseStampedDescriptor = rclnodejs.createMessageObject(
 expectType<rclnodejs.geometry_msgs.msg.descriptor.PoseStamped>(
   poseStampedDescriptor
 );
-expectType<'std_msgs/msg/Header'>(poseStampedDescriptor.header);
-expectType<'geometry_msgs/msg/Pose'>(poseStampedDescriptor.pose);
+expectAssignable<'std_msgs/msg/Header'>(poseStampedDescriptor.header);
+expectAssignable<'geometry_msgs/msg/Pose'>(poseStampedDescriptor.pose);
 // action interface
 const navigateToPoseFeedbackDescriptor = rclnodejs.createMessageObject(
   'nav2_msgs/action/descriptor/NavigateToPose_Feedback'
@@ -416,17 +416,21 @@ const navigateToPoseFeedbackDescriptor = rclnodejs.createMessageObject(
 expectType<rclnodejs.nav2_msgs.action.descriptor.NavigateToPose_Feedback>(
   navigateToPoseFeedbackDescriptor
 );
-expectType<'geometry_msgs/msg/PoseStamped'>(
+expectAssignable<'geometry_msgs/msg/PoseStamped'>(
   navigateToPoseFeedbackDescriptor.current_pose
 );
-expectType<'float32'>(navigateToPoseFeedbackDescriptor.distance_remaining);
-expectType<'builtin_interfaces/msg/Duration'>(
+expectAssignable<'float32'>(
+  navigateToPoseFeedbackDescriptor.distance_remaining
+);
+expectAssignable<'builtin_interfaces/msg/Duration'>(
   navigateToPoseFeedbackDescriptor.estimated_time_remaining
 );
-expectType<'builtin_interfaces/msg/Duration'>(
+expectAssignable<'builtin_interfaces/msg/Duration'>(
   navigateToPoseFeedbackDescriptor.navigation_time
 );
-expectType<'int16'>(navigateToPoseFeedbackDescriptor.number_of_recoveries);
+expectAssignable<'int16'>(
+  navigateToPoseFeedbackDescriptor.number_of_recoveries
+);
 // srv interface
 const cancelGoalRequestDescriptor = rclnodejs.createMessageObject(
   'action_msgs/srv/descriptor/CancelGoal_Request'
@@ -434,4 +438,6 @@ const cancelGoalRequestDescriptor = rclnodejs.createMessageObject(
 expectType<rclnodejs.action_msgs.srv.descriptor.CancelGoal_Request>(
   cancelGoalRequestDescriptor
 );
-expectType<'action_msgs/msg/GoalInfo'>(cancelGoalRequestDescriptor.goal_info);
+expectAssignable<'action_msgs/msg/GoalInfo'>(
+  cancelGoalRequestDescriptor.goal_info
+);
