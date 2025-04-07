@@ -46,6 +46,11 @@ rclnodejs
       }
     );
 
+    let clientNode = new rclnodejs.Node('client_node', 'ns2');
+    clientNode.createClient(
+      'example_interfaces/srv/AddTwoInts',
+      'add_two_ints'
+    );
     let node = rclnodejs.createNode('ros_graph_display_node', ns);
     let nodeNamesAndNameSpaces = node.getNodeNamesAndNamespaces();
 
@@ -114,6 +119,15 @@ rclnodejs
             ),
           };
         }),
+        undefined,
+        '  '
+      )
+    );
+
+    console.log('CLIENTS BY NODE');
+    console.log(
+      JSON.stringify(
+        node.getClientNamesAndTypesByNode('client_node', '/ns2'),
         undefined,
         '  '
       )
