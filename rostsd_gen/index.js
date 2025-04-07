@@ -232,10 +232,16 @@ function generateRosMsgInterfaces(
   fd,
   descriptorInterfaceType = false
 ) {
+  const descriptorNamespaceName = descriptorInterfaceType
+    ? `${descriptorInterfaceNamespace}/`
+    : '';
+  const descriptorNamespacePath = descriptorInterfaceType
+    ? `${descriptorInterfaceNamespace}.`
+    : '';
   for (const rosInterface of pkgInfo.subfolders.get(subfolder)) {
     const type = rosInterface.type();
-    const fullInterfaceName = `${type.pkgName}/${type.subFolder}/${type.interfaceName}`;
-    const fullInterfacePath = `${type.pkgName}.${type.subFolder}.${type.interfaceName}`;
+    const fullInterfaceName = `${type.pkgName}/${type.subFolder}/${descriptorNamespaceName}${type.interfaceName}`;
+    const fullInterfacePath = `${type.pkgName}.${type.subFolder}.${descriptorNamespacePath}${type.interfaceName}`;
     const fullInterfaceConstructor = fullInterfacePath + 'Constructor';
 
     if (isMsgInterface(rosInterface)) {
@@ -371,33 +377,31 @@ function saveMsgConstructorAsTSD(
 ) {
   const type = rosMsgInterface.type();
   const msgName = type.interfaceName;
-  if (!descriptorInterfaceType) {
-    fs.writeSync(fd, `      export interface ${msgName}Constructor {\n`);
+  let interfaceTmpl = [`export interface ${msgName}Constructor {`];
 
-    for (const constant of rosMsgInterface.ROSMessageDef.constants) {
-      const constantType = primitiveType2JSName(constant.type);
-      fs.writeSync(fd, `        readonly ${constant.name}: ${constantType};\n`);
-    }
-
-    fs.writeSync(fd, `        new(other?: ${msgName}): ${msgName};\n`);
-    fs.writeSync(fd, '      }\n');
+  for (const constant of rosMsgInterface.ROSMessageDef.constants) {
+    const constantType = primitiveType2JSName(constant.type);
+    interfaceTmpl.push(`  readonly ${constant.name}: ${constantType};`);
   }
+  interfaceTmpl.push(`  new(other?: ${msgName}): ${msgName};`);
+  interfaceTmpl.push('}');
+  interfaceTmpl.push('');
+  const indentLevel = descriptorInterfaceType ? 8 : 6;
+  fs.writeSync(fd, indentLines(interfaceTmpl, indentLevel).join('\n'));
 }
 
 function saveSrvAsTSD(rosSrvInterface, fd, descriptorInterfaceType = false) {
-  if (!descriptorInterfaceType) {
-    const serviceName = rosSrvInterface.type().interfaceName;
+  const serviceName = rosSrvInterface.type().interfaceName;
 
-    const interfaceTemplate = [
-      `export interface ${serviceName}Constructor extends ROSService {`,
-      `  readonly Request: ${serviceName}_RequestConstructor;`,
-      `  readonly Response: ${serviceName}_ResponseConstructor;`,
-      '}',
-      '',
-    ];
-    const indentLevel = 6;
-    fs.writeSync(fd, indentLines(interfaceTemplate, indentLevel).join('\n'));
-  }
+  const interfaceTemplate = [
+    `export interface ${serviceName}Constructor extends ROSService {`,
+    `  readonly Request: ${serviceName}_RequestConstructor;`,
+    `  readonly Response: ${serviceName}_ResponseConstructor;`,
+    '}',
+    '',
+  ];
+  const indentLevel = descriptorInterfaceType ? 8 : 6;
+  fs.writeSync(fd, indentLines(interfaceTemplate, indentLevel).join('\n'));
 }
 
 function saveActionAsTSD(
@@ -405,20 +409,18 @@ function saveActionAsTSD(
   fd,
   descriptorInterfaceType = false
 ) {
-  if (!descriptorInterfaceType) {
-    const actionName = rosActionInterface.type().interfaceName;
+  const actionName = rosActionInterface.type().interfaceName;
 
-    const interfaceTemplate = [
-      `export interface ${actionName}Constructor {`,
-      `  readonly Goal: ${actionName}_GoalConstructor;`,
-      `  readonly Result: ${actionName}_ResultConstructor;`,
-      `  readonly Feedback: ${actionName}_FeedbackConstructor;`,
-      '}',
-      '',
-    ];
-    const indentLevel = 6;
-    fs.writeSync(fd, indentLines(interfaceTemplate, indentLevel).join('\n'));
-  }
+  const interfaceTemplate = [
+    `export interface ${actionName}Constructor {`,
+    `  readonly Goal: ${actionName}_GoalConstructor;`,
+    `  readonly Result: ${actionName}_ResultConstructor;`,
+    `  readonly Feedback: ${actionName}_FeedbackConstructor;`,
+    '}',
+    '',
+  ];
+  const indentLevel = descriptorInterfaceType ? 8 : 6;
+  fs.writeSync(fd, indentLines(interfaceTemplate, indentLevel).join('\n'));
 }
 
 function isMsgInterface(rosInterface) {
