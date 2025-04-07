@@ -686,6 +686,22 @@ declare module 'rclnodejs' {
     ): Array<NamesAndTypesQueryResult>;
 
     /**
+     * Get a remote node's client topics.
+     *
+     * @param remoteNodeName - Name of the remote node.
+     * @param namespace - Name of the remote namespace.
+     * @returns An array of the names and types.
+     *        [
+     *          { name: '/rosout', types: [ 'rcl_interfaces/msg/Log' ] },
+     *          ...
+     *        ]
+     */
+    getClientNamesAndTypesByNode(
+      remoteNodeName: string,
+      namespace?: string
+    ): Array<NamesAndTypesQueryResult>;
+
+    /**
      * Get this node's topics and corresponding types.
      *
      * @param noDemangle - If true. topic names and types returned will not be demangled, default: false.

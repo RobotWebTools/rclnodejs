@@ -1738,15 +1738,45 @@ NAN_METHOD(GetServiceNamesAndTypesByNode) {
       rcl_get_service_names_and_types_by_node(
           node, &allocator, node_name.c_str(), node_namespace.c_str(),
           &service_names_and_types),
-      "Failed to get_publisher_names_and_types.");
+      "Failed to get_service_names_and_types.");
 
   v8::Local<v8::Array> result_list =
       Nan::New<v8::Array>(service_names_and_types.names.size);
   ExtractNamesAndTypes(service_names_and_types, &result_list);
 
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_names_and_types_fini(&service_names_and_types),
+      "Failed to destroy rcl_get_zero_initialized_names_and_types");
+
+  info.GetReturnValue().Set(result_list);
+}
+
+NAN_METHOD(GetClientNamesAndTypesByNode) {
+  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
+      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string node_name =
+      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
+  std::string node_namespace =
+      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
+
+  rcl_names_and_types_t client_names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_names_and_types_fini(&service_names_and_types),
-                           "Failed to destroy topic_names_and_types");
+                           rcl_get_client_names_and_types_by_node(
+                               node, &allocator, node_name.c_str(),
+                               node_namespace.c_str(), &client_names_and_types),
+                           "Failed to get_client_names_and_types.");
+
+  v8::Local<v8::Array> result_list =
+      Nan::New<v8::Array>(client_names_and_types.names.size);
+  ExtractNamesAndTypes(client_names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_names_and_types_fini(&client_names_and_types),
+      "Failed to destroy rcl_get_zero_initialized_names_and_types");
 
   info.GetReturnValue().Set(result_list);
 }
@@ -2033,6 +2063,7 @@ std::vector<BindingMethod> binding_methods = {
     {"getPublisherNamesAndTypesByNode", GetPublisherNamesAndTypesByNode},
     {"getSubscriptionNamesAndTypesByNode", GetSubscriptionNamesAndTypesByNode},
     {"getServiceNamesAndTypesByNode", GetServiceNamesAndTypesByNode},
+    {"getClientNamesAndTypesByNode", GetClientNamesAndTypesByNode},
     {"getTopicNamesAndTypes", GetTopicNamesAndTypes},
     {"getServiceNamesAndTypes", GetServiceNamesAndTypes},
     {"getNodeNames", GetNodeNames},
