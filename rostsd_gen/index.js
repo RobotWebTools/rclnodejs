@@ -133,7 +133,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
 
       // generate descriptor msg/srv/action interfaces
       fs.writeSync(fd, `      namespace ${descriptorInterfaceNamespace} {\n`);
-      const descriptorInterfaceType = true;
+      const willGenerateDescriptorInterface = true;
       generateRosMsgInterfaces(
         pkgInfo,
         subfolder,
@@ -141,7 +141,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
         servicesMap,
         actionsMap,
         fd,
-        descriptorInterfaceType
+        willGenerateDescriptorInterface
       );
       // close namespace descriptor declare
       fs.writeSync(fd, '      }\n');
@@ -230,12 +230,12 @@ function generateRosMsgInterfaces(
   servicesMap,
   actionsMap,
   fd,
-  descriptorInterfaceType = false
+  willGenerateDescriptorInterface = false
 ) {
-  const descriptorNamespaceName = descriptorInterfaceType
+  const descriptorNamespaceName = willGenerateDescriptorInterface
     ? `${descriptorInterfaceNamespace}/`
     : '';
-  const descriptorNamespacePath = descriptorInterfaceType
+  const descriptorNamespacePath = willGenerateDescriptorInterface
     ? `${descriptorInterfaceNamespace}.`
     : '';
   for (const rosInterface of pkgInfo.subfolders.get(subfolder)) {
@@ -244,10 +244,16 @@ function generateRosMsgInterfaces(
     const fullInterfacePath = `${type.pkgName}.${type.subFolder}.${descriptorNamespacePath}${type.interfaceName}`;
     const fullInterfaceConstructor = fullInterfacePath + 'Constructor';
 
+    const indentStartLevel = willGenerateDescriptorInterface ? 4 : 3;
     if (isMsgInterface(rosInterface)) {
       // create message interface
-      saveMsgAsTSD(rosInterface, fd, descriptorInterfaceType);
-      saveMsgConstructorAsTSD(rosInterface, fd, descriptorInterfaceType);
+      saveMsgAsTSD(
+        rosInterface,
+        fd,
+        indentStartLevel,
+        willGenerateDescriptorInterface
+      );
+      saveMsgConstructorAsTSD(rosInterface, fd, indentStartLevel);
       messagesMap[fullInterfaceName] = fullInterfacePath;
     } else if (isSrvInterface(rosInterface)) {
       if (!isValidService(rosInterface, pkgInfo.subfolders.get(subfolder))) {
@@ -259,7 +265,7 @@ function generateRosMsgInterfaces(
       }
 
       // create service interface
-      saveSrvAsTSD(rosInterface, fd, descriptorInterfaceType);
+      saveSrvAsTSD(rosInterface, fd, indentStartLevel);
       if (!isInternalActionSrvInterface(rosInterface)) {
         servicesMap[fullInterfaceName] = fullInterfaceConstructor;
       }
@@ -273,33 +279,39 @@ function generateRosMsgInterfaces(
       }
 
       // create action interface
-      saveActionAsTSD(rosInterface, fd, descriptorInterfaceType);
+      saveActionAsTSD(rosInterface, fd, indentStartLevel);
       actionsMap[fullInterfaceName] = fullInterfaceConstructor;
     }
   }
 }
 
-function saveMsgAsTSD(rosMsgInterface, fd, descriptorInterfaceType = false) {
-  const indentlevel = descriptorInterfaceType ? 8 : 6;
+function saveMsgAsTSD(
+  rosMsgInterface,
+  fd,
+  indentLevel = 3,
+  willGenerateDescriptorInterface = false
+) {
+  const outerIndentSpacing = getIndentSpacing(indentLevel);
   const tmpl = indentString(
     `export interface ${rosMsgInterface.type().interfaceName} {\n`,
-    indentlevel
+    outerIndentSpacing
   );
   fs.writeSync(fd, tmpl);
   const useSamePkg =
     isInternalActionMsgInterface(rosMsgInterface) ||
     isInternalServiceEventMsgInterface(rosMsgInterface);
-  const indentLevel = descriptorInterfaceType ? 10 : 8;
+  const innerIndentLevel = indentLevel + 1;
+  const innerIndentSpacing = getIndentSpacing(innerIndentLevel);
   saveMsgFieldsAsTSD(
     rosMsgInterface,
     fd,
-    indentLevel,
+    innerIndentSpacing,
     ';',
     '',
     useSamePkg,
-    descriptorInterfaceType
+    willGenerateDescriptorInterface
   );
-  const tmplEnd = indentString('}\n', indentlevel);
+  const tmplEnd = indentString('}\n', outerIndentSpacing);
   fs.writeSync(fd, tmplEnd);
 }
 
@@ -314,7 +326,7 @@ function saveMsgAsTSD(rosMsgInterface, fd, descriptorInterfaceType = false) {
  * @param {string} typePrefix The prefix to put before the type name for
  * non-primitive types
  * @param {boolean} useSamePackageSubFolder Indicates if the sub folder name should be taken from the message
- * @param {boolean} descriptorInterfaceType Indicates if descriptor interface is being generated
+ * @param {boolean} willGenerateDescriptorInterface Indicates if descriptor interface is being generated
  * when the field type comes from the same package. This is needed for action interfaces. Defaults to false.
  * @returns {undefined}
  */
@@ -325,7 +337,7 @@ function saveMsgFieldsAsTSD(
   lineEnd = ',',
   typePrefix = '',
   useSamePackageSubFolder = false,
-  descriptorInterfaceType = false
+  willGenerateDescriptorInterface = false
 ) {
   let type = rosMsgInterface.type();
   let fields = rosMsgInterface.ROSMessageDef.fields;
@@ -335,7 +347,11 @@ function saveMsgFieldsAsTSD(
       useSamePackageSubFolder && field.type.pkgName === type.pkgName
         ? type.subFolder
         : 'msg';
-    let fieldType = fieldType2JSName(field, subFolder, descriptorInterfaceType);
+    let fieldType = fieldType2JSName(
+      field,
+      subFolder,
+      willGenerateDescriptorInterface
+    );
     let tp = field.type.isPrimitiveType ? '' : typePrefix;
     if (typePrefix === 'rclnodejs.') {
       fieldType = 'any';
@@ -346,11 +362,11 @@ function saveMsgFieldsAsTSD(
     if (field.type.isArray) {
       arrayString = '[]';
 
-      if (field.type.isFixedSizeArray && descriptorInterfaceType) {
+      if (field.type.isFixedSizeArray && willGenerateDescriptorInterface) {
         arrayString = `[${field.type.arraySize}]`;
       }
 
-      if (fieldType === 'number' && !descriptorInterfaceType) {
+      if (fieldType === 'number' && !willGenerateDescriptorInterface) {
         // for number[] include alternate typed-array types, e.g., number[] | uint8[]
         let jsTypedArrayName = fieldTypeArray2JSTypedArrayName(field.type.type);
 
@@ -359,7 +375,7 @@ function saveMsgFieldsAsTSD(
         }
       }
     }
-    const fieldString = descriptorInterfaceType
+    const fieldString = willGenerateDescriptorInterface
       ? `${field.name}: '${tp}${fieldType}${arrayString}'`
       : `${field.name}: ${tp}${fieldType}${arrayString}`;
     const tmpl = indentString(fieldString, indent);
@@ -370,11 +386,7 @@ function saveMsgFieldsAsTSD(
   }
 }
 
-function saveMsgConstructorAsTSD(
-  rosMsgInterface,
-  fd,
-  descriptorInterfaceType = false
-) {
+function saveMsgConstructorAsTSD(rosMsgInterface, fd, indentLevel = 3) {
   const type = rosMsgInterface.type();
   const msgName = type.interfaceName;
   let interfaceTmpl = [`export interface ${msgName}Constructor {`];
@@ -386,11 +398,11 @@ function saveMsgConstructorAsTSD(
   interfaceTmpl.push(`  new(other?: ${msgName}): ${msgName};`);
   interfaceTmpl.push('}');
   interfaceTmpl.push('');
-  const indentLevel = descriptorInterfaceType ? 8 : 6;
-  fs.writeSync(fd, indentLines(interfaceTmpl, indentLevel).join('\n'));
+  const indentSpacing = getIndentSpacing(indentLevel);
+  fs.writeSync(fd, indentLines(interfaceTmpl, indentSpacing).join('\n'));
 }
 
-function saveSrvAsTSD(rosSrvInterface, fd, descriptorInterfaceType = false) {
+function saveSrvAsTSD(rosSrvInterface, fd, indentLevel = 3) {
   const serviceName = rosSrvInterface.type().interfaceName;
 
   const interfaceTemplate = [
@@ -400,15 +412,11 @@ function saveSrvAsTSD(rosSrvInterface, fd, descriptorInterfaceType = false) {
     '}',
     '',
   ];
-  const indentLevel = descriptorInterfaceType ? 8 : 6;
-  fs.writeSync(fd, indentLines(interfaceTemplate, indentLevel).join('\n'));
+  const indentSpacing = getIndentSpacing(indentLevel);
+  fs.writeSync(fd, indentLines(interfaceTemplate, indentSpacing).join('\n'));
 }
 
-function saveActionAsTSD(
-  rosActionInterface,
-  fd,
-  descriptorInterfaceType = false
-) {
+function saveActionAsTSD(rosActionInterface, fd, indentLevel = 3) {
   const actionName = rosActionInterface.type().interfaceName;
 
   const interfaceTemplate = [
@@ -419,8 +427,19 @@ function saveActionAsTSD(
     '}',
     '',
   ];
-  const indentLevel = descriptorInterfaceType ? 8 : 6;
-  fs.writeSync(fd, indentLines(interfaceTemplate, indentLevel).join('\n'));
+  const indentSpacing = getIndentSpacing(indentLevel);
+  fs.writeSync(fd, indentLines(interfaceTemplate, indentSpacing).join('\n'));
+}
+
+/**
+ * Get number of indent spaces for given level
+ *
+ * @param {*} indentLevel Indention level
+ * @param {*} spacesPerLevel Number of spaces per level
+ * @returns Total number of space
+ */
+function getIndentSpacing(indentLevel, spacesPerLevel = 2) {
+  return indentLevel * spacesPerLevel;
 }
 
 function isMsgInterface(rosInterface) {
@@ -526,9 +545,9 @@ function isValidAction(rosActionInterface, infos) {
 function fieldType2JSName(
   fieldInfo,
   subFolder = 'msg',
-  descriptorInterfaceType = false
+  willGenerateDescriptorInterface = false
 ) {
-  if (descriptorInterfaceType) {
+  if (willGenerateDescriptorInterface) {
     return fieldInfo.type.isPrimitiveType
       ? `${fieldInfo.type.type}`
       : `${fieldInfo.type.pkgName}/${subFolder}/${fieldInfo.type.type}`;
