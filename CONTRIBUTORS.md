@@ -1,6 +1,6 @@
 # rclnodejs contributors (sorted alphabetically)
 
-- **[Alaa El Jawad](https://github.com/ejalaa12), [Ian McElroy](https://github.com/imcelroy)**
+- **[Alaa El Jawad](https://github.com/ejalaa12)**
 
   - Fix compatibility with ROS2 parameters array types
   - Unit tests for all parameter types
@@ -19,6 +19,13 @@
 - **[Hanyia](https://github.com/hanyia)**
 
   - Benchmark test script
+
+- **[Ian McElroy](https://github.com/imcelroy)**
+
+  - Add descriptor namespace for all interfaces, rostsd_gen improvements
+  - Fix compatibility with ROS2 parameters array types
+  - Unit tests for all parameter types
+  - Handle concurrent ROS2 client calls, with unit tests
 
 - **[Kenny Yuan](https://github.com/kenny-y)**
 

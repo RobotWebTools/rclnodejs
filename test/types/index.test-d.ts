@@ -1,6 +1,6 @@
 /// <reference path='../../types/index.d.ts' />
 
-import { expectType } from 'tsd';
+import { expectType, expectAssignable } from 'tsd';
 import * as rclnodejs from 'rclnodejs';
 
 const NODE_NAME = 'test_node';
@@ -393,3 +393,40 @@ param.value.integer_value = BigInt(123);
 expectType<bigint>(param.value.integer_value);
 param.value.byte_array_value = [1, 2, 3];
 expectType<number[]>(param.value.byte_array_value);
+
+// ---- Descriptors -----
+// Note: All fields are of type string exactly equal to the type of interface.
+// built-in msg
+const duration = rclnodejs.createMessageObject(
+  'builtin_interfaces/msg/descriptor/Duration'
+);
+expectType<rclnodejs.builtin_interfaces.msg.descriptor.Duration>(duration);
+expectAssignable<'int32'>(duration.sec);
+expectAssignable<'uint32'>(duration.nanosec);
+// msg containing complex types
+const poseStampedDescriptor = rclnodejs.createMessageObject(
+  'geometry_msgs/msg/descriptor/PoseStamped'
+);
+expectType<rclnodejs.geometry_msgs.msg.descriptor.PoseStamped>(
+  poseStampedDescriptor
+);
+expectAssignable<'std_msgs/msg/Header'>(poseStampedDescriptor.header);
+expectAssignable<'geometry_msgs/msg/Pose'>(poseStampedDescriptor.pose);
+// action interface
+const fibonacciFeedback = rclnodejs.createMessageObject(
+  'example_interfaces/action/descriptor/Fibonacci_Feedback'
+);
+expectType<rclnodejs.example_interfaces.action.descriptor.Fibonacci_Feedback>(
+  fibonacciFeedback
+);
+expectAssignable<'int32[]'>(fibonacciFeedback.sequence);
+// srv interface
+const cancelGoalRequestDescriptor = rclnodejs.createMessageObject(
+  'action_msgs/srv/descriptor/CancelGoal_Request'
+);
+expectType<rclnodejs.action_msgs.srv.descriptor.CancelGoal_Request>(
+  cancelGoalRequestDescriptor
+);
+expectAssignable<'action_msgs/msg/GoalInfo'>(
+  cancelGoalRequestDescriptor.goal_info
+);
