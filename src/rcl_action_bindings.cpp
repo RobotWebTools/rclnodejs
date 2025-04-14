@@ -95,21 +95,16 @@ NAN_METHOD(ActionCreateClient) {
   }
 }
 
-NAN_METHOD(ActionCreateServer) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+napi_value ActionCreateServer(napi_env env, napi_callback_info info) {
+  Napi::Env env = info.Env();
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(info[1].As<Napi::Object>());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
-  std::string action_name(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
-  std::string interface_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
-  std::string package_name(
-      *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
-  int64_t result_timeout = info[10]->IntegerValue(currentContent).FromJust();
+  std::string action_name = info[2].As<Napi::String>().Utf8Value();
+  std::string interface_name = info[3].As<Napi::String>().Utf8Value();
+  std::string package_name = info[4].As<Napi::String>().Utf8Value();
+  int64_t result_timeout = info[10].As<Napi::Number>().Int64Value();
 
   const rosidl_action_type_support_t* ts =
       GetActionTypeSupport(package_name, interface_name);
@@ -160,29 +155,24 @@ NAN_METHOD(ActionCreateServer) {
           THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
 
-    info.GetReturnValue().Set(js_obj);
+    return js_obj;
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+    Napi::Error::New(env, GetErrorMessageAndClear()).ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 }
 
-NAN_METHOD(ActionServerIsAvailable) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
-  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  RclHandle* action_client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
-  rcl_action_client_t* action_client =
-      reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
+Napi::Value ActionServerIsAvailable(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(info[0].As<Napi::Object>());
+  rcl_action_server_t* action_server =
+      reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
+  rcl_action_goal_info_t* buffer = reinterpret_cast<rcl_action_goal_info_t*>(
+      node::Buffer::Data(info[1].As<Napi::Object>()));
 
-  bool is_available;
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_action_server_is_available(node, action_client, &is_available),
-      rcl_get_error_string().str);
+  bool exists = rcl_action_server_goal_exists(action_server, buffer);
 
-  v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(is_available);
-  info.GetReturnValue().Set(result);
+  return Napi::Boolean::New(env, exists);
 }
 
 NAN_METHOD(ActionSendGoalRequest) {
@@ -687,35 +677,31 @@ NAN_METHOD(ActionServerGoalExists) {
   info.GetReturnValue().Set(result);
 }
 
-NAN_METHOD(ActionExpireGoals) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionExpireGoals(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* action_server_handle = RclHandle::Unwrap<RclHandle>(info[0].As<Napi::Object>());
   rcl_action_server_t* action_server =
       reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
-  int64_t max_num_goals = info[1]->IntegerValue(currentContent).FromJust();
+  int64_t max_num_goals = info[1].As<Napi::Number>().Int64Value();
   rcl_action_goal_info_t* buffer = reinterpret_cast<rcl_action_goal_info_t*>(
-      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked()));
+      node::Buffer::Data(info[2].As<Napi::Object>()));
 
   size_t num_expired;
   THROW_ERROR_IF_NOT_EQUAL(rcl_action_expire_goals(action_server, buffer,
                                                    max_num_goals, &num_expired),
                            RCL_RET_OK, rcl_get_error_string().str);
 
-  v8::Local<v8::Integer> result =
-      Nan::New<v8::Integer>(static_cast<int32_t>(num_expired));
-  info.GetReturnValue().Set(result);
+  return Napi::Number::New(env, static_cast<int32_t>(num_expired));
 }
 
-NAN_METHOD(ActionGetClientNamesAndTypesByNode) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ActionGetClientNamesAndTypesByNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   std::string node_name =
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
+      info[1].As<Napi::String>().Utf8Value();
   std::string node_namespace =
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
+      info[2].As<Napi::String>().Utf8Value();
 
   rcl_names_and_types_t names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -726,15 +712,14 @@ NAN_METHOD(ActionGetClientNamesAndTypesByNode) {
                                node_namespace.c_str(), &names_and_types),
                            "Failed to action client names and types.");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(names_and_types.names.size);
-  ExtractNamesAndTypes(names_and_types, &result_list);
+  Napi::Array result_list = Napi::Array::New(env, names_and_types.names.size);
+  ExtractNamesAndTypes(env, names_and_types, result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_names_and_types_fini(&names_and_types),
                            "Failed to destroy names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
 NAN_METHOD(ActionGetServerNamesAndTypesByNode) {

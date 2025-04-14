@@ -29,8 +29,7 @@
         './src/shadow_node.cpp',
       ],
       'include_dirs': [
-        '.',
-        "<!(node -e \"require('nan')\")",
+        '<!@(node -p "require(\"node-addon-api\").include")',
         '<(ros_include_root)',
       ],
       'cflags!': [
@@ -156,6 +155,30 @@
             "defines": ["NODE_RUNTIME_ELECTRON=1"]
           }
         ],
+      ],
+      'dependencies': [
+        'scripts/config.js',
+        '<!(node -p "require(\"node-addon-api\").gyp")',
+      ],
+    },
+    {
+      "target_name": "addon",
+      "sources": [ "src/addon.cpp" ],
+      "include_dirs": [
+        "<!(node -e \"require('node-addon-api').include\")"
+      ],
+      "dependencies": [
+        "<!(node -e \"require('node-addon-api').gyp\")"
+      ],
+      "cflags!": [ "-fno-exceptions" ],
+      "cflags_cc!": [ "-fno-exceptions" ],
+      "defines": [ "NAPI_DISABLE_CPP_EXCEPTIONS" ],
+      "conditions": [
+        [ 'OS=="win"', {
+          "msvs_settings": {
+            "VCCLCompilerTool": { "ExceptionHandling": 1 }
+          }
+        }]
       ]
     }
   ]
