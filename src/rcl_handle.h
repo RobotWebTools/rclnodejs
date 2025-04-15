@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_RCL_HANDLE_HPP_
-#define SRC_RCL_HANDLE_HPP_
+#ifndef SRC_RCL_HANDLE_H_
+#define SRC_RCL_HANDLE_H_
 
 #include <napi.h>
 
@@ -69,4 +69,4 @@ class RclHandle : public Napi::ObjectWrap<RclHandle> {
 
 }  // namespace rclnodejs
 
-#endif  // SRC_RCL_HANDLE_HPP_
+#endif  // SRC_RCL_HANDLE_H_

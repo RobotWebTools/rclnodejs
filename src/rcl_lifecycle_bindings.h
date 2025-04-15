@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Matt Richard. All rights reserved.
+// Copyright (c) 2017 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_RCL_ACTION_BINDINGS_HPP_
-#define SRC_RCL_ACTION_BINDINGS_HPP_
+#ifndef SRC_RCL_LIFECYCLE_BINDINGS_H_
+#define SRC_RCL_LIFECYCLE_BINDINGS_H_
 
 #include <napi.h>
-#include <rcl/rcl.h>
 
 #include <vector>
 
-#include "rcl_bindings.hpp"
+#include "rcl_bindings.h"
 
 namespace rclnodejs {
 
-Napi::Object InitAction(Napi::Env env, Napi::Object exports);
+Napi::Object InitLifecycle(Napi::Env env, Napi::Object exports);
 
 }  // namespace rclnodejs
 
-#endif  // SRC_RCL_ACTION_BINDINGS_HPP_
+#endif  // SRC_RCL_LIFECYCLE_BINDINGS_H_

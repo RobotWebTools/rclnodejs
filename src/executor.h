@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_EXECUTOR_HPP_
-#define SRC_EXECUTOR_HPP_
+#ifndef SRC_EXECUTOR_H_
+#define SRC_EXECUTOR_H_
 
 #include <napi.h>
 #include <rcl/wait.h>
@@ -23,7 +23,7 @@
 #include <exception>
 #include <vector>
 
-#include "rcl_handle.hpp"
+#include "rcl_handle.h"
 
 namespace rclnodejs {
 
@@ -76,4 +76,4 @@ class Executor {
 
 }  // namespace rclnodejs
 
-#endif  // SRC_EXECUTOR_HPP_
+#endif  // SRC_EXECUTOR_H_

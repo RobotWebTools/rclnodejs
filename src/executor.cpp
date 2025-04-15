@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "executor.hpp"
+#include "executor.h"
 
 #include <rcl/error_handling.h>
 
 #include <stdexcept>
 #include <string>
 
-#include "handle_manager.hpp"
-#include "macros.hpp"
-#include "rcl_bindings.hpp"
+#include "handle_manager.h"
+#include "macros.h"
+#include "rcl_bindings.h"
 
 #ifdef WIN32
 #define UNUSED

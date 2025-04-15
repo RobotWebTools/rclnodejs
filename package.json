@@ -26,7 +26,7 @@
     "docs": "cd docs && make",
     "test": "nyc node --expose-gc ./scripts/run_test.js && tsd",
     "lint": "eslint && node ./scripts/cpplint.js",
-    "format": "clang-format -i -style=file ./src/*.cpp ./src/*.hpp && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,md,ts}\" ./*.{js,md,ts}",
+    "format": "clang-format -i -style=file ./src/*.cpp ./src/*.h && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,md,ts}\" ./*.{js,md,ts}",
     "prepare": "husky",
     "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },

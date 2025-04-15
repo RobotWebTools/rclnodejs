@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_MACROS_HPP_
-#define SRC_MACROS_HPP_
+#ifndef SRC_MACROS_H_
+#define SRC_MACROS_H_
 
 #include <napi.h>
 
@@ -45,4 +45,4 @@
 #define RCLNODEJS_DEBUG(...)
 #endif
 
-#endif  // SRC_MACROS_HPP_
+#endif  // SRC_MACROS_H_

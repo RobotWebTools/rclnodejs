@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcl_lifecycle_bindings.hpp"
+#include "rcl_lifecycle_bindings.h"
 
 #include <rcl/error_handling.h>
 #include <rcl_lifecycle/rcl_lifecycle.h>
@@ -26,9 +26,9 @@
 #include "lifecycle_msgs/srv/get_available_states.h"
 #include "lifecycle_msgs/srv/get_available_transitions.h"
 #include "lifecycle_msgs/srv/get_state.h"
-#include "macros.hpp"
-#include "rcl_handle.hpp"
-#include "rcl_utilities.hpp"
+#include "macros.h"
+#include "rcl_handle.h"
+#include "rcl_utilities.h"
 
 namespace rclnodejs {
 

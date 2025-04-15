@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SHADOW_NODE_HPP_
-#define SRC_SHADOW_NODE_HPP_
+#ifndef SRC_SHADOW_NODE_H_
+#define SRC_SHADOW_NODE_H_
 
 #include <napi.h>
 
@@ -21,7 +21,7 @@
 #include <memory>
 #include <vector>
 
-#include "executor.hpp"
+#include "executor.h"
 
 namespace rclnodejs {
 
@@ -61,4 +61,4 @@ class ShadowNode : public Napi::ObjectWrap<ShadowNode>,
 
 }  // namespace rclnodejs
 
-#endif  // SRC_SHADOW_NODE_HPP_
+#endif  // SRC_SHADOW_NODE_H_

@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "shadow_node.hpp"
+#include "shadow_node.h"
 
 #include <memory>
 #include <vector>
 
-#include "executor.hpp"
-#include "handle_manager.hpp"
-#include "rcl_handle.hpp"
+#include "executor.h"
+#include "handle_manager.h"
+#include "rcl_handle.h"
 
 namespace rclnodejs {
 

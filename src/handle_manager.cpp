@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "handle_manager.hpp"
+#include "handle_manager.h"
 
 #include <rcl_action/rcl_action.h>
 
 #include <utility>
 #include <vector>
 
-#include "macros.hpp"
+#include "macros.h"
 
 namespace rclnodejs {
 

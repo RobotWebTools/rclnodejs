@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcl_bindings.hpp"
+#include "rcl_bindings.h"
 
 #include <napi.h>
 #include <node.h>
@@ -52,10 +52,10 @@
 #include <utility>
 #endif
 
-#include "handle_manager.hpp"
-#include "macros.hpp"
-#include "rcl_handle.hpp"
-#include "rcl_utilities.hpp"
+#include "handle_manager.h"
+#include "macros.h"
+#include "rcl_handle.h"
+#include "rcl_utilities.h"
 
 namespace rclnodejs {
 
@@ -1006,11 +1006,9 @@ Napi::Value CreateService(const Napi::CallbackInfo& info) {
     *service = rcl_get_zero_initialized_service();
     rcl_service_options_t service_ops = rcl_service_get_default_options();
     auto qos_profile = GetQoSProfile(info[4]);
-
     if (qos_profile) {
       service_ops.qos = *qos_profile;
     }
-
     THROW_ERROR_IF_NOT_EQUAL(
         rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
         RCL_RET_OK, rcl_get_error_string().str);
@@ -1741,12 +1739,11 @@ Napi::Value GetClientNamesAndTypesByNode(const Napi::CallbackInfo& info) {
   rcl_names_and_types_t client_names_and_types =
       rcl_get_zero_initialized_names_and_types();
   rcl_allocator_t allocator = rcl_get_default_allocator();
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_get_service_names_and_types_by_node(
-          node, &allocator, node_name.c_str(), node_namespace.c_str(),
-          &client_names_and_types),
-      "Failed to get_client_names_and_types.");
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_get_service_names_and_types_by_node(
+                               node, &allocator, node_name.c_str(),
+                               node_namespace.c_str(), &client_names_and_types),
+                           "Failed to get_client_names_and_types.");
 
   Napi::Array result_list =
       Napi::Array::New(env, client_names_and_types.names.size);

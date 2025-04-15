@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_HANDLE_MANAGER_HPP_
-#define SRC_HANDLE_MANAGER_HPP_
+#ifndef SRC_HANDLE_MANAGER_H_
+#define SRC_HANDLE_MANAGER_H_
 
 #include <napi.h>
 #include <rcl/wait.h>
@@ -22,7 +22,7 @@
 #include <atomic>
 #include <vector>
 
-#include "rcl_handle.hpp"
+#include "rcl_handle.h"
 
 namespace rclnodejs {
 
@@ -133,4 +133,4 @@ class HandleManager {
 
 }  // namespace rclnodejs
 
-#endif  // SRC_HANDLE_MANAGER_HPP_
+#endif  // SRC_HANDLE_MANAGER_H_

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcl_utilities.hpp"
+#include "rcl_utilities.h"
 
 #include <rcl/rcl.h>
 #include <rcl_action/rcl_action.h>

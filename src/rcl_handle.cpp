@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcl_handle.hpp"
+#include "rcl_handle.h"
 
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 
 #include <iostream>
 
-#include "rcl_utilities.hpp"
+#include "rcl_utilities.h"
 
 namespace rclnodejs {
 

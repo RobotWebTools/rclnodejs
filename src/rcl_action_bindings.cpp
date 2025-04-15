@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcl_action_bindings.hpp"
+#include "rcl_action_bindings.h"
 
 #include <napi.h>
 #include <rcl/error_handling.h>
@@ -25,10 +25,10 @@
 #include <string>
 #include <vector>
 
-#include "handle_manager.hpp"
-#include "macros.hpp"
-#include "rcl_handle.hpp"
-#include "rcl_utilities.hpp"
+#include "handle_manager.h"
+#include "macros.h"
+#include "rcl_handle.h"
+#include "rcl_utilities.h"
 
 namespace rclnodejs {
 

@@ -15,13 +15,13 @@
 #include <node_api.h>
 #include <rcutils/logging.h>
 
-#include "macros.hpp"
-#include "rcl_action_bindings.hpp"
-#include "rcl_bindings.hpp"
-#include "rcl_handle.hpp"
-#include "rcl_lifecycle_bindings.hpp"
-#include "rcl_utilities.hpp"
-#include "shadow_node.hpp"
+#include "macros.h"
+#include "rcl_action_bindings.h"
+#include "rcl_bindings.h"
+#include "rcl_handle.h"
+#include "rcl_lifecycle_bindings.h"
+#include "rcl_utilities.h"
+#include "shadow_node.h"
 
 bool IsRunningInElectronRenderer(const Napi::Env& env) {
   Napi::Object global = env.Global();
