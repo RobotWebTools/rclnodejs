@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_RCL_UTILITIES_HPP_
-#define SRC_RCL_UTILITIES_HPP_
+#ifndef SRC_RCL_UTILITIES_H_
+#define SRC_RCL_UTILITIES_H_
+
+#include <napi.h>
 
 #include <string>
 
@@ -35,6 +37,10 @@ const rosidl_action_type_support_t* GetActionTypeSupport(
 
 std::string GetErrorMessageAndClear();
 
+// Store a reference to the environment that can be used for error reporting.
+Napi::Env& GetEnv();
+void StoreEnv(Napi::Env current_env);
+
 }  // namespace rclnodejs
 
-#endif  // SRC_RCL_UTILITIES_HPP_
+#endif  // SRC_RCL_UTILITIES_H_

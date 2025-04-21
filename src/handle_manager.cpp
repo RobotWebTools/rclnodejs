@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "handle_manager.hpp"
+#include "handle_manager.h"
 
 #include <rcl_action/rcl_action.h>
 
 #include <utility>
 #include <vector>
 
-#include "macros.hpp"
+#include "macros.h"
 
 namespace rclnodejs {
 
@@ -38,22 +38,16 @@ HandleManager::~HandleManager() {
   uv_sem_destroy(&wait_handle_sem_);
 }
 
-void HandleManager::SynchronizeHandles(const v8::Local<v8::Object> node) {
-  Nan::HandleScope scope;
-  Nan::MaybeLocal<v8::Value> timers =
-      Nan::Get(node, Nan::New("_timers").ToLocalChecked());
-  Nan::MaybeLocal<v8::Value> subscriptions =
-      Nan::Get(node, Nan::New("_subscriptions").ToLocalChecked());
-  Nan::MaybeLocal<v8::Value> clients =
-      Nan::Get(node, Nan::New("_clients").ToLocalChecked());
-  Nan::MaybeLocal<v8::Value> services =
-      Nan::Get(node, Nan::New("_services").ToLocalChecked());
-  Nan::MaybeLocal<v8::Value> guard_conditions =
-      Nan::Get(node, Nan::New("_guards").ToLocalChecked());
-  Nan::MaybeLocal<v8::Value> action_clients =
-      Nan::Get(node, Nan::New("_actionClients").ToLocalChecked());
-  Nan::MaybeLocal<v8::Value> action_servers =
-      Nan::Get(node, Nan::New("_actionServers").ToLocalChecked());
+void HandleManager::SynchronizeHandles(const Napi::Object& node) {
+  Napi::HandleScope scope(node.Env());
+
+  Napi::Value timers = node.Get("_timers");
+  Napi::Value subscriptions = node.Get("_subscriptions");
+  Napi::Value clients = node.Get("_clients");
+  Napi::Value services = node.Get("_services");
+  Napi::Value guard_conditions = node.Get("_guards");
+  Napi::Value action_clients = node.Get("_actionClients");
+  Napi::Value action_servers = node.Get("_actionServers");
 
   uint32_t sum = 0;
   is_synchronizing_.store(true);
@@ -61,27 +55,17 @@ void HandleManager::SynchronizeHandles(const v8::Local<v8::Object> node) {
     ScopedReadWriteLock scoped_lock(&sync_handles_rwlock_,
                                     ScopedReadWriteLock::LockType::kWrite);
     ClearHandles();
-    sum += SynchronizeHandlesByType(
-        Nan::To<v8::Object>(timers.ToLocalChecked()).ToLocalChecked(),
-        &timers_);
-    sum += SynchronizeHandlesByType(
-        Nan::To<v8::Object>(subscriptions.ToLocalChecked()).ToLocalChecked(),
-        &subscriptions_);
-    sum += SynchronizeHandlesByType(
-        Nan::To<v8::Object>(clients.ToLocalChecked()).ToLocalChecked(),
-        &clients_);
-    sum += SynchronizeHandlesByType(
-        Nan::To<v8::Object>(services.ToLocalChecked()).ToLocalChecked(),
-        &services_);
-    sum += SynchronizeHandlesByType(
-        Nan::To<v8::Object>(guard_conditions.ToLocalChecked()).ToLocalChecked(),
-        &guard_conditions_);
-    sum += SynchronizeHandlesByType(
-        Nan::To<v8::Object>(action_clients.ToLocalChecked()).ToLocalChecked(),
-        &action_clients_);
-    sum += SynchronizeHandlesByType(
-        Nan::To<v8::Object>(action_servers.ToLocalChecked()).ToLocalChecked(),
-        &action_servers_);
+    sum += SynchronizeHandlesByType(timers.As<Napi::Object>(), &timers_);
+    sum += SynchronizeHandlesByType(subscriptions.As<Napi::Object>(),
+                                    &subscriptions_);
+    sum += SynchronizeHandlesByType(clients.As<Napi::Object>(), &clients_);
+    sum += SynchronizeHandlesByType(services.As<Napi::Object>(), &services_);
+    sum += SynchronizeHandlesByType(guard_conditions.As<Napi::Object>(),
+                                    &guard_conditions_);
+    sum += SynchronizeHandlesByType(action_clients.As<Napi::Object>(),
+                                    &action_clients_);
+    sum += SynchronizeHandlesByType(action_servers.As<Napi::Object>(),
+                                    &action_servers_);
   }
   is_synchronizing_.store(false);
 
@@ -265,26 +249,16 @@ uint32_t HandleManager::ready_handles_count() {
 }
 
 uint32_t HandleManager::SynchronizeHandlesByType(
-    const v8::Local<v8::Object>& typeObject,
-    std::vector<rclnodejs::RclHandle*>* vec) {
-  Nan::HandleScope scope;
-
-  if (typeObject->IsArray()) {
-    uint32_t length =
-        Nan::To<uint32_t>(
-            Nan::Get(typeObject, Nan::New("length").ToLocalChecked())
-                .ToLocalChecked())
-            .FromJust();
+    const Napi::Object& typeObject, std::vector<rclnodejs::RclHandle*>* vec) {
+  if (typeObject.IsArray()) {
+    uint32_t length = typeObject.Get("length").As<Napi::Number>().Uint32Value();
 
     for (uint32_t index = 0; index < length; index++) {
-      v8::Local<v8::Object> obj =
-          Nan::To<v8::Object>(Nan::Get(typeObject, index).ToLocalChecked())
-              .ToLocalChecked();
-      Nan::MaybeLocal<v8::Value> handle =
-          Nan::Get(obj, Nan::New("_handle").ToLocalChecked());
+      Napi::Object obj = typeObject.Get(index).As<Napi::Object>();
+      Napi::Value handle = obj.Get("_handle");
       rclnodejs::RclHandle* rcl_handle =
-          rclnodejs::RclHandle::Unwrap<rclnodejs::RclHandle>(
-              Nan::To<v8::Object>(handle.ToLocalChecked()).ToLocalChecked());
+          Napi::ObjectWrap<rclnodejs::RclHandle>::Unwrap(
+              handle.As<Napi::Object>());
       vec->push_back(rcl_handle);
     }
   }

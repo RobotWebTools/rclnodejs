@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcl_bindings.hpp"
+#include "rcl_bindings.h"
 
+#include <node.h>
 #include <rcl/arguments.h>
 #include <rcl/error_handling.h>
 #include <rcl/expand_topic_name.h>
@@ -30,6 +31,7 @@
 #include <rmw/validate_full_topic_name.h>
 #include <rmw/validate_namespace.h>
 #include <rmw/validate_node_name.h>
+
 #if ROS_VERSION >= 2006
 #include <rosidl_runtime_c/string_functions.h>
 #else
@@ -49,41 +51,41 @@
 #include <utility>
 #endif
 
-#include "handle_manager.hpp"
-#include "macros.hpp"
-#include "rcl_handle.hpp"
-#include "rcl_utilities.hpp"
+#include "handle_manager.h"
+#include "macros.h"
+#include "rcl_handle.h"
+#include "rcl_utilities.h"
 
 namespace rclnodejs {
 
-static v8::Local<v8::Object> wrapParameters(
-    rcl_params_t* params);  // NOLINT(whitespace/line_length)
+static Napi::Object wrapParameters(Napi::Env env, rcl_params_t* params);
 
-NAN_METHOD(Init) {
+Napi::Value InitRclnodejs(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_allocator_t allocator = rcl_get_default_allocator();
   rcl_init_options_t init_options = rcl_get_zero_initialized_init_options();
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_init_options_init(&init_options, allocator),
                            rcl_get_error_string().str);
 
-  // preprocess Context
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  // Preprocess Context
+  RclHandle* context_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
-  // preprocess argc & argv
-  v8::Local<v8::Array> jsArgv = v8::Local<v8::Array>::Cast(info[1]);
-  int argc = jsArgv->Length();
+  // Preprocess argc & argv
+  Napi::Array jsArgv = info[1].As<Napi::Array>();
+  int argc = jsArgv.Length();
   char** argv = nullptr;
+
   if (argc > 0) {
     argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
     for (int i = 0; i < argc; i++) {
-      Nan::MaybeLocal<v8::Value> jsElement = Nan::Get(jsArgv, i);
-      Nan::Utf8String utf8_arg(jsElement.ToLocalChecked());
-      int len = utf8_arg.length() + 1;
+      std::string arg = jsArgv.Get(i).As<Napi::String>().Utf8Value();
+      int len = arg.length() + 1;
       argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
-      snprintf(argv[i], len, "%s", *utf8_arg);
+      snprintf(argv[i], len, "%s", arg.c_str());
     }
   }
 
@@ -100,11 +102,14 @@ NAN_METHOD(Init) {
     free(argv[i]);
   }
   free(argv);
+
+  return env.Undefined();
 }
 
-NAN_METHOD(GetParameterOverrides) {
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetParameterOverrides(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* context_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
@@ -115,13 +120,13 @@ NAN_METHOD(GetParameterOverrides) {
       rcl_get_error_string().str);
 
   if (params == NULL) {
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
 
-  info.GetReturnValue().Set(wrapParameters(params));
+  Napi::Object result = wrapParameters(env, params);
 
   rcl_yaml_node_struct_fini(params);
+  return result;
 }
 
 static const int PARAMETER_NOT_SET = 0;
@@ -151,25 +156,24 @@ type Node = {
 
 parameters = array<Node>;
 */
-static v8::Local<v8::Object> wrapParameters(rcl_params_t* parsed_args) {
-  v8::Local<v8::Array> nodes = Nan::New<v8::Array>();
+static Napi::Object wrapParameters(Napi::Env env, rcl_params_t* parsed_args) {
+  Napi::Array nodes = Napi::Array::New(env);
 
   // iterate over nodes
   for (size_t i = 0; i < parsed_args->num_nodes; i++) {
-    v8::Local<v8::Object> node = Nan::New<v8::Object>();
-    Nan::Set(node, Nan::New("name").ToLocalChecked(),
-             Nan::New(parsed_args->node_names[i]).ToLocalChecked());
+    Napi::Object node = Napi::Object::New(env);
+    node.Set("name", Napi::String::New(env, parsed_args->node_names[i]));
 
     rcl_node_params_t node_parameters = parsed_args->params[i];
 
     // iterate over node.parameters
-    v8::Local<v8::Array> parameters = Nan::New<v8::Array>();
+    Napi::Array parameters = Napi::Array::New(env);
     for (size_t j = 0; j < node_parameters.num_params; j++) {
-      v8::Local<v8::Object> parameter = Nan::New<v8::Object>();
+      Napi::Object parameter = Napi::Object::New(env);
 
-      Nan::Set(
-          parameter, Nan::New("name").ToLocalChecked(),
-          Nan::New(parsed_args->params[i].parameter_names[j]).ToLocalChecked());
+      parameter.Set(
+          "name",
+          Napi::String::New(env, parsed_args->params[i].parameter_names[j]));
 
       int param_type = PARAMETER_NOT_SET;
 
@@ -177,83 +181,76 @@ static v8::Local<v8::Object> wrapParameters(rcl_params_t* parsed_args) {
       rcl_variant_t value = node_parameters.parameter_values[j];
       if (value.bool_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BOOL;
-        Nan::Set(parameter, Nan::New("value").ToLocalChecked(),
-                 (*value.bool_value ? Nan::True() : Nan::False()));
+        parameter.Set("value", Napi::Boolean::New(env, *value.bool_value));
       } else if (value.integer_value != NULL) {  // NOLINT()
         param_type = PARAMETER_INTEGER;
-        Nan::Set(parameter, Nan::New("value").ToLocalChecked(),
-                 Nan::New<v8::Number>(*value.integer_value));
+        parameter.Set("value", Napi::Number::New(env, *value.integer_value));
       } else if (value.double_value != NULL) {  // NOLINT()
         param_type = PARAMETER_DOUBLE;
-        Nan::Set(parameter, Nan::New("value").ToLocalChecked(),
-                 Nan::New<v8::Number>(*value.double_value));
+        parameter.Set("value", Napi::Number::New(env, *value.double_value));
       } else if (value.string_value != NULL) {  // NOLINT()
         param_type = PARAMETER_STRING;
-        Nan::Set(parameter, Nan::New("value").ToLocalChecked(),
-                 Nan::New(value.string_value).ToLocalChecked());
+        parameter.Set("value", Napi::String::New(env, value.string_value));
       } else if (value.bool_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BOOL_ARRAY;
-        v8::Local<v8::Array> bool_array = Nan::New<v8::Array>();
+        Napi::Array bool_array = Napi::Array::New(env);
 
         for (size_t k = 0; k < value.bool_array_value->size; k++) {
-          Nan::Set(
-              bool_array, k,
-              (value.bool_array_value->values[k] ? Nan::True() : Nan::False()));
+          bool_array.Set(
+              k, Napi::Boolean::New(env, value.bool_array_value->values[k]));
         }
-        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), bool_array);
+        parameter.Set("value", bool_array);
       } else if (value.string_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_STRING_ARRAY;
-        v8::Local<v8::Array> string_array = Nan::New<v8::Array>();
+        Napi::Array string_array = Napi::Array::New(env);
         for (size_t k = 0; k < value.string_array_value->size; k++) {
-          Nan::Set(string_array, k,
-                   Nan::New(value.string_array_value->data[k])
-                       .ToLocalChecked());  // NOLINT(whitespace/line_length)
+          string_array.Set(
+              k, Napi::String::New(env, value.string_array_value->data[k]));
         }
-        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), string_array);
+        parameter.Set("value", string_array);
       } else if (value.byte_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_BYTE_ARRAY;
-        v8::Local<v8::Array> byte_array = Nan::New<v8::Array>();
+        Napi::Array byte_array = Napi::Array::New(env);
         for (size_t k = 0; k < value.byte_array_value->size; k++) {
-          Nan::Set(byte_array, k, Nan::New(value.byte_array_value->values[k]));
+          byte_array.Set(
+              k, Napi::Number::New(env, value.byte_array_value->values[k]));
         }
-        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), byte_array);
+        parameter.Set("value", byte_array);
       } else if (value.integer_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_INTEGER_ARRAY;
-        v8::Local<v8::Array> int_array = Nan::New<v8::Array>();
+        Napi::Array int_array = Napi::Array::New(env);
         for (size_t k = 0; k < value.integer_array_value->size; k++) {
-          Nan::Set(int_array, k,
-                   Nan::New<v8::Number>(value.integer_array_value->values[k]));
+          int_array.Set(
+              k, Napi::Number::New(env, value.integer_array_value->values[k]));
         }
-        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), int_array);
+        parameter.Set("value", int_array);
       } else if (value.double_array_value != NULL) {  // NOLINT()
         param_type = PARAMETER_DOUBLE_ARRAY;
-        v8::Local<v8::Array> dbl_array = Nan::New<v8::Array>();
+        Napi::Array dbl_array = Napi::Array::New(env);
         for (size_t k = 0; k < value.double_array_value->size; k++) {
-          Nan::Set(dbl_array, k,
-                   Nan::New<v8::Number>(
-                       value.double_array_value
-                           ->values[k]));  // NOLINT(whitespace/line_length)
+          dbl_array.Set(
+              k, Napi::Number::New(env, value.double_array_value->values[k]));
         }
-        Nan::Set(parameter, Nan::New("value").ToLocalChecked(), dbl_array);
+        parameter.Set("value", dbl_array);
       }
 
-      Nan::Set(parameter, Nan::New("type").ToLocalChecked(),
-               Nan::New<v8::Number>(param_type));
-      Nan::Set(parameters, j, parameter);
+      parameter.Set("type", Napi::Number::New(env, param_type));
+      parameters.Set(j, parameter);
     }
 
-    Nan::Set(node, Nan::New("parameters").ToLocalChecked(), parameters);
-    Nan::Set(nodes, i, node);
+    node.Set("parameters", parameters);
+    nodes.Set(i, node);
   }
 
   return nodes;
 }
 
-NAN_METHOD(CreateNode) {
-  std::string node_name(*Nan::Utf8String(info[0]));
-  std::string name_space(*Nan::Utf8String(info[1]));
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[2]).ToLocalChecked());
+Napi::Value CreateNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  std::string node_name = info[0].As<Napi::String>().Utf8Value();
+  std::string name_space = info[1].As<Napi::String>().Utf8Value();
+  RclHandle* context_handle = RclHandle::Unwrap(info[2].As<Napi::Object>());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
@@ -267,18 +264,20 @@ NAN_METHOD(CreateNode) {
                                          name_space.c_str(), context, &options),
                            rcl_get_error_string().str);
 
-  auto handle = RclHandle::NewInstance(node, nullptr, [](void* ptr) {
+  auto handle = RclHandle::NewInstance(env, node, nullptr, [](void* ptr) {
     rcl_node_t* node = reinterpret_cast<rcl_node_t*>(ptr);
     rcl_ret_t ret = rcl_node_fini(node);
     free(ptr);
     THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
   });
-  info.GetReturnValue().Set(handle);
+
+  return handle;
 }
 
-NAN_METHOD(CreateGuardCondition) {
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CreateGuardCondition(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* context_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
@@ -293,39 +292,47 @@ NAN_METHOD(CreateGuardCondition) {
                            rcl_guard_condition_init(gc, context, gc_options),
                            rcl_get_error_string().str);
 
-  auto handle = RclHandle::NewInstance(gc, nullptr, [](void* ptr) {
+  auto handle = RclHandle::NewInstance(env, gc, nullptr, [](void* ptr) {
     rcl_guard_condition_t* gc = reinterpret_cast<rcl_guard_condition_t*>(ptr);
     rcl_ret_t ret = rcl_guard_condition_fini(gc);
     free(ptr);
     THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
   });
-  info.GetReturnValue().Set(handle);
+
+  return handle;
 }
 
-NAN_METHOD(TriggerGuardCondition) {
-  RclHandle* gc_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value TriggerGuardCondition(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* gc_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_guard_condition_t* gc =
       reinterpret_cast<rcl_guard_condition_t*>(gc_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_trigger_guard_condition(gc),
                            rcl_get_error_string().str);
+
+  return env.Undefined();
 }
 
-NAN_METHOD(CreateTimer) {
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* clock_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+
+  RclHandle* context_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
-  if (!info[2]->IsBigInt()) {
-    Nan::ThrowTypeError("Timer period must be a BigInt");
-    return;
+
+  if (!info[2].IsBigInt()) {
+    Napi::TypeError::New(env, "Timer period must be a BigInt")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
-  v8::Local<v8::BigInt> bigInt = info[2].As<v8::BigInt>();
-  int64_t period_nsec = bigInt->Int64Value();
+
+  bool lossless;
+  int64_t period_nsec = info[2].As<Napi::BigInt>().Int64Value(&lossless);
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
@@ -343,48 +350,57 @@ NAN_METHOD(CreateTimer) {
                            rcl_get_error_string().str);
 #endif
 
-  auto js_obj = RclHandle::NewInstance(timer, clock_handle, [](void* ptr) {
+  auto js_obj = RclHandle::NewInstance(env, timer, clock_handle, [](void* ptr) {
     rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(ptr);
     rcl_ret_t ret = rcl_timer_fini(timer);
     free(ptr);
     THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
   });
-  info.GetReturnValue().Set(js_obj);
+
+  return js_obj;
 }
 
-NAN_METHOD(IsTimerReady) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value IsTimerReady(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
   bool is_ready = false;
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_is_ready(timer, &is_ready),
                            rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::New(is_ready));
+  return Napi::Boolean::New(env, is_ready);
 }
 
-NAN_METHOD(CallTimer) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CallTimer(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_call(timer),
                            rcl_get_error_string().str);
+
+  return env.Undefined();
 }
 
-NAN_METHOD(CancelTimer) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CancelTimer(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_cancel(timer),
                            rcl_get_error_string().str);
+
+  return env.Undefined();
 }
 
-NAN_METHOD(IsTimerCanceled) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value IsTimerCanceled(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
   bool is_canceled = false;
 
@@ -392,21 +408,25 @@ NAN_METHOD(IsTimerCanceled) {
                            rcl_timer_is_canceled(timer, &is_canceled),
                            rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::New(is_canceled));
+  return Napi::Boolean::New(env, is_canceled);
 }
 
-NAN_METHOD(ResetTimer) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ResetTimer(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_reset(timer),
                            rcl_get_error_string().str);
+
+  return env.Undefined();
 }
 
-NAN_METHOD(TimerGetTimeUntilNextCall) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value TimerGetTimeUntilNextCall(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
   int64_t remaining_time = 0;
 
@@ -414,14 +434,13 @@ NAN_METHOD(TimerGetTimeUntilNextCall) {
       RCL_RET_OK, rcl_timer_get_time_until_next_call(timer, &remaining_time),
       rcl_get_error_string().str);
 
-  v8::Local<v8::BigInt> bigInt =
-      v8::BigInt::New(v8::Isolate::GetCurrent(), remaining_time);
-  info.GetReturnValue().Set(bigInt);
+  return Napi::BigInt::New(env, remaining_time);
 }
 
-NAN_METHOD(TimerGetTimeSinceLastCall) {
-  RclHandle* timer_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value TimerGetTimeSinceLastCall(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
   int64_t elapsed_time = 0;
 
@@ -429,71 +448,80 @@ NAN_METHOD(TimerGetTimeSinceLastCall) {
       RCL_RET_OK, rcl_timer_get_time_since_last_call(timer, &elapsed_time),
       rcl_get_error_string().str);
 
-  v8::Local<v8::BigInt> bigInt =
-      v8::BigInt::New(v8::Isolate::GetCurrent(), elapsed_time);
-  info.GetReturnValue().Set(bigInt);
+  return Napi::BigInt::New(env, elapsed_time);
 }
 
-NAN_METHOD(CreateTimePoint) {
-  if (!info[0]->IsBigInt()) {
-    Nan::ThrowTypeError("Timer period must be a BigInt");
-    return;
+Napi::Value CreateTimePoint(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  if (!info[0].IsBigInt()) {
+    Napi::TypeError::New(env, "Timer period must be a BigInt")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
-  v8::Local<v8::BigInt> bigInt = info[0].As<v8::BigInt>();
-  const int64_t nanoseconds = bigInt->Int64Value();
-  uint32_t clock_type = Nan::To<uint32_t>(info[1]).FromJust();
+
+  bool lossless;
+  int64_t nanoseconds = info[0].As<Napi::BigInt>().Int64Value(&lossless);
+  uint32_t clock_type = info[1].As<Napi::Number>().Uint32Value();
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(malloc(sizeof(rcl_time_point_t)));
 
   time_point->nanoseconds = nanoseconds;
   time_point->clock_type = static_cast<rcl_clock_type_t>(clock_type);
 
-  auto js_obj =
-      RclHandle::NewInstance(time_point, nullptr, [](void* ptr) { free(ptr); });
-  info.GetReturnValue().Set(js_obj);
+  auto js_obj = RclHandle::NewInstance(env, time_point, nullptr,
+                                       [](void* ptr) { free(ptr); });
+
+  return js_obj;
 }
 
-NAN_METHOD(GetNanoseconds) {
-  RclHandle* time_point_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetNanoseconds(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* time_point_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(time_point_handle->ptr());
-  v8::Local<v8::BigInt> bigInt =
-      v8::BigInt::New(v8::Isolate::GetCurrent(), time_point->nanoseconds);
-  info.GetReturnValue().Set(bigInt);
+
+  return Napi::BigInt::New(env, time_point->nanoseconds);
 }
 
-NAN_METHOD(CreateDuration) {
-  if (!info[0]->IsBigInt()) {
-    Nan::ThrowTypeError("Timer period must be a BigInt");
-    return;
+Napi::Value CreateDuration(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  if (!info[0].IsBigInt()) {
+    Napi::TypeError::New(env, "Timer period must be a BigInt")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
-  v8::Local<v8::BigInt> bigInt = info[0].As<v8::BigInt>();
-  const int64_t nanoseconds = bigInt->Int64Value();
+
+  bool lossless;
+  int64_t nanoseconds = info[0].As<Napi::BigInt>().Int64Value(&lossless);
   rcl_duration_t* duration =
       reinterpret_cast<rcl_duration_t*>(malloc(sizeof(rcl_duration_t)));
   duration->nanoseconds = nanoseconds;
 
-  auto js_obj =
-      RclHandle::NewInstance(duration, nullptr, [](void* ptr) { free(ptr); });
-  info.GetReturnValue().Set(js_obj);
+  auto js_obj = RclHandle::NewInstance(env, duration, nullptr,
+                                       [](void* ptr) { free(ptr); });
+
+  return js_obj;
 }
 
-NAN_METHOD(GetDurationNanoseconds) {
-  RclHandle* duration_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetDurationNanoseconds(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* duration_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_duration_t* duration =
       reinterpret_cast<rcl_duration_t*>(duration_handle->ptr());
-  v8::Local<v8::BigInt> bigInt =
-      v8::BigInt::New(v8::Isolate::GetCurrent(), duration->nanoseconds);
-  info.GetReturnValue().Set(bigInt);
+
+  return Napi::BigInt::New(env, duration->nanoseconds);
 }
 
-NAN_METHOD(SetRosTimeOverrideIsEnabled) {
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value SetRosTimeOverrideIsEnabled(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* clock_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
-  bool enabled = Nan::To<bool>(info[1]).FromJust();
+  bool enabled = info[1].As<Napi::Boolean>();
 
   if (enabled) {
     THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_enable_ros_time_override(clock),
@@ -502,39 +530,45 @@ NAN_METHOD(SetRosTimeOverrideIsEnabled) {
     THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_disable_ros_time_override(clock),
                              rcl_get_error_string().str);
   }
-  info.GetReturnValue().Set(Nan::Undefined());
+
+  return env.Undefined();
 }
 
-NAN_METHOD(SetRosTimeOverride) {
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value SetRosTimeOverride(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* clock_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
-  RclHandle* time_point_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  RclHandle* time_point_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
   rcl_time_point_t* time_point =
       reinterpret_cast<rcl_time_point_t*>(time_point_handle->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_set_ros_time_override(clock, time_point->nanoseconds),
       rcl_get_error_string().str);
-  info.GetReturnValue().Set(Nan::Undefined());
+
+  return env.Undefined();
 }
 
-NAN_METHOD(GetRosTimeOverrideIsEnabled) {
-  RclHandle* clock_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetRosTimeOverrideIsEnabled(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* clock_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
 
   bool is_enabled;
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_is_enabled_ros_time_override(clock, &is_enabled),
                            rcl_get_error_string().str);
-  info.GetReturnValue().Set(Nan::New(is_enabled));
+
+  return Napi::Boolean::New(env, is_enabled);
 }
 
-NAN_METHOD(CreateClock) {
+Napi::Value CreateClock(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   auto clock_type =
-      static_cast<rcl_clock_type_t>(Nan::To<int32_t>(info[0]).FromJust());
+      static_cast<rcl_clock_type_t>(info[0].As<Napi::Number>().Int32Value());
   rcl_clock_t* clock =
       reinterpret_cast<rcl_clock_t*>(malloc(sizeof(rcl_clock_t)));
   rcl_allocator_t allocator = rcl_get_default_allocator();
@@ -543,69 +577,64 @@ NAN_METHOD(CreateClock) {
                            rcl_clock_init(clock_type, clock, &allocator),
                            rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(
-      RclHandle::NewInstance(clock, nullptr, [](void* ptr) {
-        rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(ptr);
-        rcl_ret_t ret = rcl_clock_fini(clock);
-        free(ptr);
-        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
-      }));
+  return RclHandle::NewInstance(env, clock, nullptr, [](void* ptr) {
+    rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(ptr);
+    rcl_ret_t ret = rcl_clock_fini(clock);
+    free(ptr);
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  });
 }
 
-NAN_METHOD(ClockGetNow) {
+Napi::Value ClockGetNow(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
   rcl_time_point_t time_point;
   time_point.clock_type = clock->type;
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_clock_get_now(clock, &time_point.nanoseconds),
                            rcl_get_error_string().str);
-  v8::Local<v8::BigInt> bigInt =
-      v8::BigInt::New(v8::Isolate::GetCurrent(), time_point.nanoseconds);
-  info.GetReturnValue().Set(bigInt);
+
+  return Napi::BigInt::New(env, time_point.nanoseconds);
 }
 
-NAN_METHOD(RclTake) {
-  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value RclTake(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
-  void* msg_taken =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* msg_taken = info[1].As<Napi::Buffer<char>>().Data();
   rcl_ret_t ret = rcl_take(subscription, msg_taken, nullptr, nullptr);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
-    Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
-    info.GetReturnValue().Set(Nan::False());
-    return;
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return Napi::Boolean::New(env, false);
   }
 
   if (ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
-    info.GetReturnValue().Set(Nan::True());
-    return;
+    return Napi::Boolean::New(env, true);
   }
-  info.GetReturnValue().Set(Nan::Undefined());
+
+  return env.Undefined();
 }
 
-NAN_METHOD(CreateSubscription) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string package_name(
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
-  std::string message_sub_folder(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
-  std::string message_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
-  std::string topic(
-      *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
-  v8::Local<v8::Object> options =
-      info[5]->ToObject(currentContent).ToLocalChecked();
+
+  std::string package_name = info[1].As<Napi::String>().Utf8Value();
+  std::string message_sub_folder = info[2].As<Napi::String>().Utf8Value();
+  std::string message_name = info[3].As<Napi::String>().Utf8Value();
+  std::string topic = info[4].As<Napi::String>().Utf8Value();
+  Napi::Object options = info[5].As<Napi::Object>();
 
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(malloc(sizeof(rcl_subscription_t)));
@@ -614,51 +643,38 @@ NAN_METHOD(CreateSubscription) {
   rcl_subscription_options_t subscription_ops =
       rcl_subscription_get_default_options();
 
-  v8::Local<v8::Value> qos =
-      Nan::Get(options, Nan::New("qos").ToLocalChecked()).ToLocalChecked();
+  Napi::Value qos = options.Get("qos");
   auto qos_profile = GetQoSProfile(qos);
   if (qos_profile) {
     subscription_ops.qos = *qos_profile;
   }
 
 #if ROS_VERSION >= 2205  // 2205 => Humble+
-  if (Nan::Has(options, Nan::New("contentFilter").ToLocalChecked())
-          .FromMaybe(false)) {
+  if (options.Has("contentFilter")) {
     // configure content-filter
-    v8::MaybeLocal<v8::Value> contentFilterVal =
-        Nan::Get(options, Nan::New("contentFilter").ToLocalChecked());
+    Napi::Value contentFilterVal = options.Get("contentFilter");
 
-    if (!Nan::Equals(contentFilterVal.ToLocalChecked(), Nan::Undefined())
-             .ToChecked()) {
-      v8::Local<v8::Object> contentFilter = contentFilterVal.ToLocalChecked()
-                                                ->ToObject(currentContent)
-                                                .ToLocalChecked();
+    if (!contentFilterVal.IsUndefined()) {
+      Napi::Object contentFilter = contentFilterVal.As<Napi::Object>();
 
       // expression property is required
-      std::string expression(*Nan::Utf8String(
-          Nan::Get(contentFilter, Nan::New("expression").ToLocalChecked())
-              .ToLocalChecked()
-              ->ToString(currentContent)
-              .ToLocalChecked()));
+      std::string expression =
+          contentFilter.Get("expression").As<Napi::String>().Utf8Value();
 
       // parameters property (string[]) is optional
       int argc = 0;
       char** argv = nullptr;
 
-      if (Nan::Has(contentFilter, Nan::New("parameters").ToLocalChecked())
-              .FromMaybe(false)) {
-        v8::Local<v8::Array> jsArgv = v8::Local<v8::Array>::Cast(
-            Nan::Get(contentFilter, Nan::New("parameters").ToLocalChecked())
-                .ToLocalChecked());
-        argc = jsArgv->Length();
+      if (contentFilter.Has("parameters")) {
+        Napi::Array jsArgv = contentFilter.Get("parameters").As<Napi::Array>();
+        argc = jsArgv.Length();
         if (argc > 0) {
           argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
           for (int i = 0; i < argc; i++) {
-            Nan::MaybeLocal<v8::Value> jsElement = Nan::Get(jsArgv, i);
-            Nan::Utf8String utf8_arg(jsElement.ToLocalChecked());
-            int len = utf8_arg.length() + 1;
+            std::string arg = jsArgv.Get(i).As<Napi::String>().Utf8Value();
+            int len = arg.length() + 1;
             argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
-            snprintf(argv[i], len, "%s", *utf8_arg);
+            snprintf(argv[i], len, "%s", arg.c_str());
           }
         }
       }
@@ -667,8 +683,9 @@ NAN_METHOD(CreateSubscription) {
           expression.c_str(), argc, (const char**)argv, &subscription_ops);
 
       if (ret != RCL_RET_OK) {
-        Nan::ThrowError(rcl_get_error_string().str);
         rcl_reset_error();
+        Napi::Error::New(env, rcl_get_error_string().str)
+            .ThrowAsJavaScriptException();
       }
 
       if (argc) {
@@ -679,7 +696,6 @@ NAN_METHOD(CreateSubscription) {
       }
     }
   }
-
 #endif
 
   const rosidl_message_type_support_t* ts =
@@ -692,74 +708,69 @@ NAN_METHOD(CreateSubscription) {
                               &subscription_ops),
         rcl_get_error_string().str);
 
-    auto js_obj =
-        RclHandle::NewInstance(subscription, node_handle, [node](void* ptr) {
+    auto js_obj = RclHandle::NewInstance(
+        env, subscription, node_handle, [node](void* ptr) {
           rcl_subscription_t* subscription =
               reinterpret_cast<rcl_subscription_t*>(ptr);
           rcl_ret_t ret = rcl_subscription_fini(subscription, node);
           free(ptr);
           THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
-    info.GetReturnValue().Set(js_obj);
+
+    return js_obj;
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+    Napi::Error::New(env, GetErrorMessageAndClear())
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 }
 
-NAN_METHOD(HasContentFilter) {
+Napi::Value HasContentFilter(const Napi::CallbackInfo& info) {
 #if ROS_VERSION < 2205  // 2205 => Humble+
-  info.GetReturnValue().Set(Nan::False());
-  return;
+  return Napi::Boolean::New(info.Env(), false);
 #else
-  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
 
   bool is_valid = rcl_subscription_is_cft_enabled(subscription);
-  info.GetReturnValue().Set(Nan::New(is_valid));
+  return Napi::Boolean::New(env, is_valid);
 #endif
 }
 
-NAN_METHOD(SetContentFilter) {
+Napi::Value SetContentFilter(const Napi::CallbackInfo& info) {
 #if ROS_VERSION < 2205  // 2205 => Humble+
-  info.GetReturnValue().Set(Nan::False());
-  return;
+  return Napi::Boolean::New(info.Env(), false);
 #else
-  v8::Local<v8::Context> currentContext = Nan::GetCurrentContext();
-  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
 
-  v8::Local<v8::Object> contentFilter =
-      info[1]->ToObject(currentContext).ToLocalChecked();
+  Napi::Object contentFilter = info[1].As<Napi::Object>();
 
-  Nan::MaybeLocal<v8::Value> jsExpression =
-      Nan::Get(contentFilter, Nan::New("expression").ToLocalChecked());
-  Nan::Utf8String utf8_arg(jsExpression.ToLocalChecked());
-  int len = utf8_arg.length() + 1;
-  char* expression = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
-  snprintf(expression, len, "%s", *utf8_arg);
+  std::string expression =
+      contentFilter.Get("expression").As<Napi::String>().Utf8Value();
 
   // parameters property (string[]) is optional
   int argc = 0;
   char** argv = nullptr;
 
-  if (Nan::Has(contentFilter, Nan::New("parameters").ToLocalChecked())
-          .FromMaybe(false)) {
-    v8::Local<v8::Array> jsArgv = v8::Local<v8::Array>::Cast(
-        Nan::Get(contentFilter, Nan::New("parameters").ToLocalChecked())
-            .ToLocalChecked());
-    argc = jsArgv->Length();
+  if (contentFilter.Has("parameters")) {
+    Napi::Array jsArgv = contentFilter.Get("parameters").As<Napi::Array>();
+    argc = jsArgv.Length();
     if (argc > 0) {
       argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
       for (int i = 0; i < argc; i++) {
-        Nan::MaybeLocal<v8::Value> jsElement = Nan::Get(jsArgv, i);
-        Nan::Utf8String utf8_arg(jsElement.ToLocalChecked());
-        int len = utf8_arg.length() + 1;
+        std::string arg = jsArgv.Get(i).As<Napi::String>().Utf8Value();
+        int len = arg.length() + 1;
         argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
-        snprintf(argv[i], len, "%s", *utf8_arg);
+        snprintf(argv[i], len, "%s", arg.c_str());
       }
     }
   }
@@ -768,37 +779,35 @@ NAN_METHOD(SetContentFilter) {
   rcl_subscription_content_filter_options_t options =
       rcl_get_zero_initialized_subscription_content_filter_options();
 
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_subscription_content_filter_options_set(
-                               subscription,
-                               expression,  // expression.c_str(),
-                               argc, (const char**)argv, &options),
-                           rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_subscription_content_filter_options_set(
+          subscription, expression.c_str(), argc, (const char**)argv, &options),
+      rcl_get_error_string().str);
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_subscription_set_content_filter(subscription, &options),
       rcl_get_error_string().str);
 
   if (argc) {
-    free(expression);
-
     for (int i = 0; i < argc; i++) {
       free(argv[i]);
     }
     free(argv);
   }
 
-  info.GetReturnValue().Set(Nan::True());
+  return Napi::Boolean::New(env, true);
 #endif
 }
 
-NAN_METHOD(ClearContentFilter) {
+Napi::Value ClearContentFilter(const Napi::CallbackInfo& info) {
 #if ROS_VERSION < 2205  // 2205 => Humble+
-  info.GetReturnValue().Set(Nan::False());
-  return;
+  return Napi::Boolean::New(info.Env(), false);
 #else
-  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
 
@@ -816,36 +825,29 @@ NAN_METHOD(ClearContentFilter) {
       RCL_RET_OK, rcl_subscription_set_content_filter(subscription, &options),
       rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::True());
+  return Napi::Boolean::New(env, true);
 #endif
 }
 
-NAN_METHOD(CreatePublisher) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  // Extract arguments
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
-  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string package_name(
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
-  std::string message_sub_folder(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
-  std::string message_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
-  std::string topic(
-      *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
+Napi::Value CreatePublisher(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
 
-  // Prepare publisher object
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+
+  std::string package_name = info[1].As<Napi::String>().Utf8Value();
+  std::string message_sub_folder = info[2].As<Napi::String>().Utf8Value();
+  std::string message_name = info[3].As<Napi::String>().Utf8Value();
+  std::string topic = info[4].As<Napi::String>().Utf8Value();
+
   rcl_publisher_t* publisher =
       reinterpret_cast<rcl_publisher_t*>(malloc(sizeof(rcl_publisher_t)));
   *publisher = rcl_get_zero_initialized_publisher();
 
-  // Get type support object dynamically
   const rosidl_message_type_support_t* ts =
       GetMessageTypeSupport(package_name, message_sub_folder, message_name);
 
   if (ts) {
-    // Using default options
     rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
     auto qos_profile = GetQoSProfile(info[5]);
 
@@ -853,72 +855,68 @@ NAN_METHOD(CreatePublisher) {
       publisher_ops.qos = *qos_profile;
     }
 
-    // Initialize the publisher
     THROW_ERROR_IF_NOT_EQUAL(
         rcl_publisher_init(publisher, node, ts, topic.c_str(), &publisher_ops),
         RCL_RET_OK, rcl_get_error_string().str);
 
-    // Wrap the handle into JS object
     auto js_obj =
-        RclHandle::NewInstance(publisher, node_handle, [node](void* ptr) {
+        RclHandle::NewInstance(env, publisher, node_handle, [node](void* ptr) {
           rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(ptr);
           rcl_ret_t ret = rcl_publisher_fini(publisher, node);
           free(ptr);
           THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
 
-    // Everything is done
-    info.GetReturnValue().Set(js_obj);
+    return js_obj;
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+    Napi::Error::New(env, GetErrorMessageAndClear())
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 }
 
-NAN_METHOD(Publish) {
-  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
+Napi::Value Publish(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
 
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
   THROW_ERROR_IF_NOT_EQUAL(rcl_publish(publisher, buffer, nullptr), RCL_RET_OK,
                            rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(GetPublisherTopic) {
+Napi::Value GetPublisherTopic(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
 
   const char* topic = rcl_publisher_get_topic_name(publisher);
-  info.GetReturnValue().Set(Nan::New(topic).ToLocalChecked());
+  return Napi::String::New(env, topic);
 }
 
-NAN_METHOD(GetSubscriptionTopic) {
+Napi::Value GetSubscriptionTopic(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_subscription_t* subscription = reinterpret_cast<rcl_subscription_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
 
   const char* topic = rcl_subscription_get_topic_name(subscription);
-  info.GetReturnValue().Set(Nan::New(topic).ToLocalChecked());
+  return Napi::String::New(env, topic);
 }
 
-NAN_METHOD(CreateClient) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CreateClient(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string service_name(
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
-  std::string interface_name(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
-  std::string package_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
+
+  std::string service_name = info[1].As<Napi::String>().Utf8Value();
+  std::string interface_name = info[2].As<Napi::String>().Utf8Value();
+  std::string package_name = info[3].As<Napi::String>().Utf8Value();
 
   const rosidl_service_type_support_t* ts =
       GetServiceTypeSupport(package_name, interface_name);
@@ -939,67 +937,63 @@ NAN_METHOD(CreateClient) {
         RCL_RET_OK, rcl_get_error_string().str);
 
     auto js_obj =
-        RclHandle::NewInstance(client, node_handle, [node](void* ptr) {
+        RclHandle::NewInstance(env, client, node_handle, [node](void* ptr) {
           rcl_client_t* client = reinterpret_cast<rcl_client_t*>(ptr);
           rcl_ret_t ret = rcl_client_fini(client, node);
           free(ptr);
           THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
 
-    info.GetReturnValue().Set(js_obj);
+    return js_obj;
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+    Napi::Error::New(env, GetErrorMessageAndClear())
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 }
 
-NAN_METHOD(SendRequest) {
-  rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
-  int64_t sequence_number;
+Napi::Value SendRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
 
+  rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+  char* buffer = info[1].As<Napi::Buffer<char>>().Data();
+  int64_t sequence_number;
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_request(client, buffer, &sequence_number),
                            RCL_RET_OK, rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::New(static_cast<uint32_t>(sequence_number)));
+  return Napi::Number::New(env, static_cast<uint32_t>(sequence_number));
 }
 
-NAN_METHOD(RclTakeResponse) {
+Napi::Value RclTakeResponse(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
 
   rmw_service_info_t header;
 
-  void* taken_response =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  void* taken_response = info[1].As<Napi::Buffer<char>>().Data();
   rcl_ret_t ret = rcl_take_response_with_info(client, &header, taken_response);
   int64_t sequence_number = header.request_id.sequence_number;
 
   if (ret == RCL_RET_OK) {
-    info.GetReturnValue().Set(Nan::New(static_cast<uint32_t>(sequence_number)));
-    return;
+    return Napi::Number::New(env, static_cast<uint32_t>(sequence_number));
   }
 
   rcl_reset_error();
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(CreateService) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CreateService(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string service_name(
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
-  std::string interface_name(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
-  std::string package_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
+
+  std::string service_name = info[1].As<Napi::String>().Utf8Value();
+  std::string interface_name = info[2].As<Napi::String>().Utf8Value();
+  std::string package_name = info[3].As<Napi::String>().Utf8Value();
 
   const rosidl_service_type_support_t* ts =
       GetServiceTypeSupport(package_name, interface_name);
@@ -1010,83 +1004,75 @@ NAN_METHOD(CreateService) {
     *service = rcl_get_zero_initialized_service();
     rcl_service_options_t service_ops = rcl_service_get_default_options();
     auto qos_profile = GetQoSProfile(info[4]);
-
     if (qos_profile) {
       service_ops.qos = *qos_profile;
     }
-
     THROW_ERROR_IF_NOT_EQUAL(
         rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
         RCL_RET_OK, rcl_get_error_string().str);
     auto js_obj =
-        RclHandle::NewInstance(service, node_handle, [node](void* ptr) {
+        RclHandle::NewInstance(env, service, node_handle, [node](void* ptr) {
           rcl_service_t* service = reinterpret_cast<rcl_service_t*>(ptr);
           rcl_ret_t ret = rcl_service_fini(service, node);
           free(ptr);
           THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
         });
 
-    info.GetReturnValue().Set(js_obj);
+    return js_obj;
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+    Napi::Error::New(env, GetErrorMessageAndClear())
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 }
 
-NAN_METHOD(RclTakeRequest) {
+Napi::Value RclTakeRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
   rmw_request_id_t* header =
       reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
 
-  void* taken_request =
-      node::Buffer::Data(Nan::To<v8::Object>(info[2]).ToLocalChecked());
+  void* taken_request = info[2].As<Napi::Buffer<char>>().Data();
   rcl_ret_t ret = rcl_take_request(service, header, taken_request);
   if (ret != RCL_RET_SERVICE_TAKE_FAILED) {
-    auto js_obj =
-        RclHandle::NewInstance(header, nullptr, [](void* ptr) { free(ptr); });
-    info.GetReturnValue().Set(js_obj);
-    return;
+    auto js_obj = RclHandle::NewInstance(env, header, nullptr,
+                                         [](void* ptr) { free(ptr); });
+    return js_obj;
   }
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(SendResponse) {
+Napi::Value SendResponse(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[1]).ToLocalChecked());
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
 
   rmw_request_id_t* header = reinterpret_cast<rmw_request_id_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[2]).ToLocalChecked())
-          ->ptr());
+      RclHandle::Unwrap(info[2].As<Napi::Object>())->ptr());
 
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_response(service, header, buffer),
                            RCL_RET_OK, rcl_get_error_string().str);
+
+  return env.Undefined();
 }
 
 #if ROS_VERSION > 2205  // 2205 == Humble
-NAN_METHOD(ConfigureServiceIntrospection) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+Napi::Value ConfigureServiceIntrospection(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
 
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  RclHandle* node_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
 
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[2]).ToLocalChecked())
-          ->ptr());
+      RclHandle::Unwrap(info[2].As<Napi::Object>())->ptr());
 
-  std::string interface_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
-  std::string package_name(
-      *Nan::Utf8String(info[4]->ToString(currentContent).ToLocalChecked()));
+  std::string interface_name = info[3].As<Napi::String>().Utf8Value();
+  std::string package_name = info[4].As<Napi::String>().Utf8Value();
   const rosidl_service_type_support_t* ts =
       GetServiceTypeSupport(package_name, interface_name);
 
@@ -1099,13 +1085,12 @@ NAN_METHOD(ConfigureServiceIntrospection) {
 
     rcl_service_introspection_state_t state =
         static_cast<rcl_service_introspection_state_t>(
-            Nan::To<uint32_t>(info[6]).ToChecked());
+            info[6].As<Napi::Number>().Uint32Value());
 
-    bool configureForService = Nan::To<bool>(info[7]).FromJust();
+    bool configureForService = info[7].As<Napi::Boolean>();
 
     if (configureForService) {
-      RclHandle* service_handle = RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked());
+      RclHandle* service_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
       rcl_service_t* service =
           reinterpret_cast<rcl_service_t*>(service_handle->ptr());
 
@@ -1115,8 +1100,7 @@ NAN_METHOD(ConfigureServiceIntrospection) {
           RCL_RET_OK, rcl_get_error_string().str);
 
     } else {
-      RclHandle* client_handle = RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked());
+      RclHandle* client_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
       rcl_client_t* client =
           reinterpret_cast<rcl_client_t*>(client_handle->ptr());
 
@@ -1127,159 +1111,160 @@ NAN_METHOD(ConfigureServiceIntrospection) {
     }
 
   } else {
-    Nan::ThrowError(GetErrorMessageAndClear().c_str());
+    Napi::Error::New(env, GetErrorMessageAndClear())
+        .ThrowAsJavaScriptException();
   }
+
+  return env.Undefined();
 }
 #endif
 
-NAN_METHOD(ValidateFullTopicName) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+Napi::Value ValidateFullTopicName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   int validation_result;
   size_t invalid_index;
-  std::string topic_name(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+  std::string topic_name = info[0].As<Napi::String>().Utf8Value();
   rmw_ret_t ret = rmw_validate_full_topic_name(
       topic_name.c_str(), &validation_result, &invalid_index);
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
-      Nan::ThrowError(rmw_get_error_string().str);
+      Napi::Error::New(env, rmw_get_error_string().str)
+          .ThrowAsJavaScriptException();
     }
     rmw_reset_error();
-    return info.GetReturnValue().Set(Nan::Undefined());
+    return env.Undefined();
   }
 
   if (validation_result == RMW_NAMESPACE_VALID) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
+    return env.Null();
   }
   const char* validation_message =
       rmw_full_topic_name_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
                        "Unable to get validation error message");
 
-  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(2);
-  Nan::Set(
-      result_list, 0,
-      Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
-  Nan::Set(result_list, 1, Nan::New(static_cast<int32_t>(invalid_index)));
+  Napi::Array result_list = Napi::Array::New(env, 2);
+  result_list.Set(static_cast<uint32_t>(0),
+                  Napi::String::New(env, std::string(validation_message)));
+  result_list.Set(static_cast<uint32_t>(1),
+                  Napi::Number::New(env, static_cast<int32_t>(invalid_index)));
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(ValidateNodeName) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+Napi::Value ValidateNodeName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   int validation_result;
   size_t invalid_index;
-  std::string node_name(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+  std::string node_name = info[0].As<Napi::String>().Utf8Value();
   rmw_ret_t ret = rmw_validate_node_name(node_name.c_str(), &validation_result,
                                          &invalid_index);
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
-      Nan::ThrowError(rmw_get_error_string().str);
+      Napi::Error::New(env, rmw_get_error_string().str)
+          .ThrowAsJavaScriptException();
     }
     rmw_reset_error();
-    return info.GetReturnValue().Set(Nan::Undefined());
+    return env.Undefined();
   }
 
   if (validation_result == RMW_NODE_NAME_VALID) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
+    return env.Null();
   }
   const char* validation_message =
       rmw_node_name_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
                        "Unable to get validation error message");
 
-  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(2);
-  Nan::Set(
-      result_list, 0,
-      Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
-  Nan::Set(result_list, 1, Nan::New(static_cast<int32_t>(invalid_index)));
+  Napi::Array result_list = Napi::Array::New(env, 2);
+  result_list.Set(static_cast<uint32_t>(0),
+                  Napi::String::New(env, std::string(validation_message)));
+  result_list.Set(static_cast<uint32_t>(1),
+                  Napi::Number::New(env, static_cast<int32_t>(invalid_index)));
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(ValidateTopicName) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+Napi::Value ValidateTopicName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   int validation_result;
   size_t invalid_index;
-  std::string topic_name(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+  std::string topic_name = info[0].As<Napi::String>().Utf8Value();
   rmw_ret_t ret = rcl_validate_topic_name(topic_name.c_str(),
                                           &validation_result, &invalid_index);
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
-      Nan::ThrowError(rmw_get_error_string().str);
+      Napi::Error::New(env, rmw_get_error_string().str)
+          .ThrowAsJavaScriptException();
     }
     rmw_reset_error();
-    return info.GetReturnValue().Set(Nan::Undefined());
+    return env.Undefined();
   }
 
   if (validation_result == RMW_NODE_NAME_VALID) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
+    return env.Null();
   }
   const char* validation_message =
       rcl_topic_name_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
                        "Unable to get validation error message");
 
-  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(2);
-  Nan::Set(
-      result_list, 0,
-      Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
-  Nan::Set(result_list, 1, Nan::New(static_cast<int32_t>(invalid_index)));
+  Napi::Array result_list = Napi::Array::New(env, 2);
+  result_list.Set(static_cast<uint32_t>(0),
+                  Napi::String::New(env, std::string(validation_message)));
+  result_list.Set(static_cast<uint32_t>(1),
+                  Napi::Number::New(env, static_cast<int32_t>(invalid_index)));
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(ValidateNamespace) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+Napi::Value ValidateNamespace(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   int validation_result;
   size_t invalid_index;
-  std::string namespace_name(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+  std::string namespace_name = info[0].As<Napi::String>().Utf8Value();
   rmw_ret_t ret = rmw_validate_namespace(namespace_name.c_str(),
                                          &validation_result, &invalid_index);
 
   if (ret != RMW_RET_OK) {
     if (ret == RMW_RET_BAD_ALLOC) {
-      Nan::ThrowError(rmw_get_error_string().str);
+      Napi::Error::New(env, rmw_get_error_string().str)
+          .ThrowAsJavaScriptException();
     }
     rmw_reset_error();
-    return info.GetReturnValue().Set(Nan::Undefined());
+    return env.Undefined();
   }
 
   if (validation_result == RMW_NODE_NAME_VALID) {
-    info.GetReturnValue().Set(Nan::Null());
-    return;
+    return env.Null();
   }
   const char* validation_message =
       rmw_namespace_validation_result_string(validation_result);
   THROW_ERROR_IF_EQUAL(nullptr, validation_message,
                        "Unable to get validation error message");
 
-  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(2);
-  Nan::Set(
-      result_list, 0,
-      Nan::New<v8::String>(std::string(validation_message)).ToLocalChecked());
-  Nan::Set(result_list, 1, Nan::New(static_cast<int32_t>(invalid_index)));
+  Napi::Array result_list = Napi::Array::New(env, 2);
+  result_list.Set(static_cast<uint32_t>(0),
+                  Napi::String::New(env, std::string(validation_message)));
+  result_list.Set(static_cast<uint32_t>(1),
+                  Napi::Number::New(env, static_cast<int32_t>(invalid_index)));
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(ExpandTopicName) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  std::string topic_name(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
-  std::string node_name(
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked()));
-  std::string node_namespace(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
+Napi::Value ExpandTopicName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  std::string topic_name = info[0].As<Napi::String>().Utf8Value();
+  std::string node_name = info[1].As<Napi::String>().Utf8Value();
+  std::string node_namespace = info[2].As<Napi::String>().Utf8Value();
 
   char* expanded_topic = nullptr;
   rcl_allocator_t allocator = rcl_get_default_allocator();
@@ -1291,26 +1276,29 @@ NAN_METHOD(ExpandTopicName) {
       rcutils_string_map_init(&substitutions_map, 0, rcutils_allocator);
   if (rcutils_ret != RCUTILS_RET_OK) {
     if (rcutils_ret == RCUTILS_RET_BAD_ALLOC) {
-      Nan::ThrowError(rcutils_get_error_string().str);
+      rcl_reset_error();
+      Napi::Error::New(env, rcutils_get_error_string().str)
+          .ThrowAsJavaScriptException();
     }
     rcutils_reset_error();
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
   rcl_ret_t ret = rcl_get_default_topic_name_substitutions(&substitutions_map);
   if (ret != RCL_RET_OK) {
-    if (ret == RCL_RET_BAD_ALLOC) {
-      Nan::ThrowError(rcl_get_error_string().str);
-    }
     rcl_reset_error();
+
+    if (ret == RCL_RET_BAD_ALLOC) {
+      Napi::Error::New(env, rcl_get_error_string().str)
+          .ThrowAsJavaScriptException();
+    }
 
     rcutils_ret = rcutils_string_map_fini(&substitutions_map);
     if (rcutils_ret != RCUTILS_RET_OK) {
-      Nan::ThrowError(rcutils_get_error_string().str);
       rcutils_reset_error();
+      Napi::Error::New(env, rcutils_get_error_string().str)
+          .ThrowAsJavaScriptException();
     }
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
 
   ret = rcl_expand_topic_name(topic_name.c_str(), node_name.c_str(),
@@ -1319,52 +1307,52 @@ NAN_METHOD(ExpandTopicName) {
 
   rcutils_ret = rcutils_string_map_fini(&substitutions_map);
   if (rcutils_ret != RCUTILS_RET_OK) {
-    Nan::ThrowError(rcutils_get_error_string().str);
+    Napi::Error::New(env, rcutils_get_error_string().str)
+        .ThrowAsJavaScriptException();
     rcutils_reset_error();
     allocator.deallocate(expanded_topic, allocator.state);
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
   if (ret != RCL_RET_OK) {
-    Nan::ThrowError(rcl_get_error_string().str);
     rcl_reset_error();
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   if (!expanded_topic) {
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
 
   rcl_allocator_t topic_allocator = rcl_get_default_allocator();
   std::string topic(expanded_topic);
   allocator.deallocate(expanded_topic, topic_allocator.state);
-  info.GetReturnValue().Set(Nan::New<v8::String>(topic).ToLocalChecked());
+  return Napi::String::New(env, topic);
 }
 
-NAN_METHOD(GetNodeName) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetNodeName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   const char* node_name = rcl_node_get_name(node);
   if (!node_name) {
-    info.GetReturnValue().Set(Nan::Undefined());
+    return env.Undefined();
   } else {
-    info.GetReturnValue().Set(Nan::New<v8::String>(node_name).ToLocalChecked());
+    return Napi::String::New(env, node_name);
   }
 }
 
-NAN_METHOD(GetNamespace) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetNamespace(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   const char* node_namespace = rcl_node_get_namespace(node);
   if (!node_namespace) {
-    info.GetReturnValue().Set(Nan::Undefined());
+    return env.Undefined();
   } else {
-    info.GetReturnValue().Set(
-        Nan::New<v8::String>(node_namespace).ToLocalChecked());
+    return Napi::String::New(env, node_namespace);
   }
 }
 
@@ -1390,59 +1378,51 @@ const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
 }
 
 std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
-    v8::Local<v8::Object> object) {
+    Napi::Object object) {
   std::unique_ptr<rmw_qos_profile_t> qos_profile =
       std::make_unique<rmw_qos_profile_t>();
 
-  auto history =
-      Nan::Get(object, Nan::New("history").ToLocalChecked()).ToLocalChecked();
-  auto depth =
-      Nan::Get(object, Nan::New("depth").ToLocalChecked()).ToLocalChecked();
-  auto reliability = Nan::Get(object, Nan::New("reliability").ToLocalChecked())
-                         .ToLocalChecked();
-  auto durability = Nan::Get(object, Nan::New("durability").ToLocalChecked())
-                        .ToLocalChecked();
+  auto history = object.Get("history");
+  auto depth = object.Get("depth");
+  auto reliability = object.Get("reliability");
+  auto durability = object.Get("durability");
   auto avoid_ros_namespace_conventions =
-      Nan::Get(object,
-               Nan::New("avoidRosNameSpaceConventions").ToLocalChecked())
-          .ToLocalChecked();
+      object.Get("avoidRosNameSpaceConventions");
 
   qos_profile->history = static_cast<rmw_qos_history_policy_t>(
-      Nan::To<uint32_t>(history).FromJust());
-  qos_profile->depth = Nan::To<uint32_t>(depth).FromJust();
+      history.As<Napi::Number>().Uint32Value());
+  qos_profile->depth = depth.As<Napi::Number>().Uint32Value();
   qos_profile->reliability = static_cast<rmw_qos_reliability_policy_t>(
-      Nan::To<uint32_t>(reliability).FromJust());
+      reliability.As<Napi::Number>().Uint32Value());
   qos_profile->durability = static_cast<rmw_qos_durability_policy_t>(
-      Nan::To<uint32_t>(durability).FromJust());
+      durability.As<Napi::Number>().Uint32Value());
   qos_profile->avoid_ros_namespace_conventions =
-      Nan::To<bool>(avoid_ros_namespace_conventions).FromJust();
+      avoid_ros_namespace_conventions.As<Napi::Boolean>();
 
   return qos_profile;
 }
 
-std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(v8::Local<v8::Value> qos) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
+std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(Napi::Value qos) {
   std::unique_ptr<rmw_qos_profile_t> qos_profile =
       std::make_unique<rmw_qos_profile_t>();
 
-  if (qos->IsString()) {
-    *qos_profile = *GetQoSProfileFromString(std::string(
-        *Nan::Utf8String(qos->ToString(currentContent).ToLocalChecked())));
-  } else if (qos->IsObject()) {
-    qos_profile =
-        GetQosProfileFromObject(Nan::To<v8::Object>(qos).ToLocalChecked());
+  if (qos.IsString()) {
+    *qos_profile = *GetQoSProfileFromString(qos.As<Napi::String>().Utf8Value());
+  } else if (qos.IsObject()) {
+    qos_profile = GetQosProfileFromObject(qos.As<Napi::Object>());
   } else {
     return qos_profile;
   }
   return qos_profile;
 }
 
-int DestroyContext(rcl_context_t* context) {
+int DestroyContext(Napi::Env env, rcl_context_t* context) {
   rcl_ret_t ret = RCL_RET_OK;
   if (context->impl) {
     if (rcl_context_is_valid(context)) {
       if (RCL_RET_OK != rcl_shutdown(context)) {
-        Nan::ThrowError(rcl_get_error_string().str);
+        Napi::Error::New(env, rcl_get_error_string().str)
+            .ThrowAsJavaScriptException();
       }
       ret = rcl_context_fini(context);
     }
@@ -1450,9 +1430,10 @@ int DestroyContext(rcl_context_t* context) {
   return ret;
 }
 
-NAN_METHOD(Shutdown) {
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value Shutdown(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* context_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   THROW_ERROR_IF_NOT_EQUAL(rcl_shutdown(context), RCL_RET_OK,
@@ -1460,12 +1441,13 @@ NAN_METHOD(Shutdown) {
   THROW_ERROR_IF_NOT_EQUAL(rcl_logging_fini(), RCL_RET_OK,
                            rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(InitString) {
-  void* buffer =
-      node::Buffer::Data(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value InitString(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  void* buffer = info[0].As<Napi::Buffer<char>>().Data();
 #if ROS_VERSION >= 2006
   rosidl_runtime_c__String* ptr =
       reinterpret_cast<rosidl_runtime_c__String*>(buffer);
@@ -1477,124 +1459,118 @@ NAN_METHOD(InitString) {
 
   rosidl_generator_c__String__init(ptr);
 #endif
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-inline char* GetBufAddr(v8::Local<v8::Value> buf) {
-  return node::Buffer::Data(buf.As<v8::Object>());
+inline char* GetBufAddr(Napi::Value buf) {
+  return buf.As<Napi::Buffer<char>>().Data();
 }
 
-NAN_METHOD(FreeMemeoryAtOffset) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  std::string addr_str(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+Napi::Value FreeMemeoryAtOffset(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  std::string addr_str = info[0].As<Napi::String>().Utf8Value();
   int64_t result = std::stoull(addr_str, 0, 16);
   char* addr = reinterpret_cast<char*>(result);
   int64_t offset =
-      info[1]->IsNumber() ? Nan::To<int64_t>(info[1]).FromJust() : 0;
+      info[1].IsNumber() ? info[1].As<Napi::Number>().Int64Value() : 0;
   auto ptr = addr + offset;
 
   char* val = *reinterpret_cast<char**>(ptr);
   free(val);
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(CreateArrayBufferFromAddress) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  std::string addr_str(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+Napi::Value CreateArrayBufferFromAddress(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  std::string addr_str = info[0].As<Napi::String>().Utf8Value();
   int64_t result = std::stoull(addr_str, 0, 16);
   char* addr = reinterpret_cast<char*>(result);
-  int32_t length = Nan::To<int32_t>(info[1]).FromJust();
+  int32_t length = info[1].As<Napi::Number>().Int32Value();
 
   static_assert(NODE_MAJOR_VERSION > 12, "nodejs version must > 12");
 #if (NODE_RUNTIME_ELECTRON && NODE_MODULE_VERSION >= 109)
   // Because V8 sandboxed pointers was enabled since Electron 21, we have to
   // make a deep copy for Electron 21 and up.
   // See more details: https://www.electronjs.org/blog/v8-memory-cage
-  v8::Local<v8::ArrayBuffer> array_buffer =
-      v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), length);
-  memcpy(array_buffer->Data(), addr, length);
+  Napi::ArrayBuffer array_buffer = Napi::ArrayBuffer::New(env, length);
+  memcpy(array_buffer.Data(), addr, length);
   free(addr);
 #else
-  // For nodejs > 12 or electron < 21, we will create a new `BackingStore` and
-  // take over the ownership of `addr`.
-  std::unique_ptr<v8::BackingStore> backing = v8::ArrayBuffer::NewBackingStore(
-      addr, length,
-      [](void* data, size_t length, void* deleter_data) { free(data); },
-      nullptr);
-  auto array_buffer =
-      v8::ArrayBuffer::New(v8::Isolate::GetCurrent(), std::move(backing));
+  // For nodejs > 12 or electron < 21, we will take over the ownership of
+  // `addr`.
+  auto array_buffer = Napi::ArrayBuffer::New(
+      env, addr, length, [](Napi::Env /*env*/, void* data) { free(data); });
 #endif
 
-  info.GetReturnValue().Set(array_buffer);
+  return array_buffer;
 }
 
-NAN_METHOD(CreateArrayBufferCleaner) {
+Napi::Value CreateArrayBufferCleaner(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   auto address = GetBufAddr(info[0]);
-  int32_t offset = Nan::To<int32_t>(info[1]).FromJust();
+  int32_t offset = info[1].As<Napi::Number>().Int32Value();
 
   char* target = *reinterpret_cast<char**>(address + offset);
-  info.GetReturnValue().Set(
-      RclHandle::NewInstance(target, nullptr, [](void* ptr) { free(ptr); }));
+  return RclHandle::NewInstance(env, target, nullptr,
+                                [](void* ptr) { free(ptr); });
 }
 
-NAN_METHOD(setLoggerLevel) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  std::string name(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
-  int level = Nan::To<int64_t>(info[1]).FromJust();
+Napi::Value setLoggerLevel(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  std::string name = info[0].As<Napi::String>().Utf8Value();
+  int level = info[1].As<Napi::Number>().Int64Value();
 
   rcutils_ret_t ret = rcutils_logging_set_logger_level(name.c_str(), level);
   if (ret != RCUTILS_RET_OK) {
-    Nan::ThrowError(rcutils_get_error_string().str);
+    Napi::Error::New(env, rcutils_get_error_string().str)
+        .ThrowAsJavaScriptException();
     rcutils_reset_error();
   }
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(GetLoggerEffectiveLevel) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  std::string name(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
+Napi::Value GetLoggerEffectiveLevel(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  std::string name = info[0].As<Napi::String>().Utf8Value();
   int logger_level = rcutils_logging_get_logger_effective_level(name.c_str());
 
   if (logger_level < 0) {
-    Nan::ThrowError(rcutils_get_error_string().str);
+    Napi::Error::New(env, rcutils_get_error_string().str)
+        .ThrowAsJavaScriptException();
     rcutils_reset_error();
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
-  info.GetReturnValue().Set(Nan::New(logger_level));
+  return Napi::Number::New(env, logger_level);
 }
 
-NAN_METHOD(GetNodeLoggerName) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetNodeLoggerName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
 
   const char* node_logger_name = rcl_node_get_logger_name(node);
   if (!node_logger_name) {
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
 
-  info.GetReturnValue().Set(
-      Nan::New<v8::String>(node_logger_name).ToLocalChecked());
+  return Napi::String::New(env, node_logger_name);
 }
 
-NAN_METHOD(Log) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  std::string name(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
-  int severity = Nan::To<int64_t>(info[1]).FromJust();
-  std::string message(
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked()));
-  std::string function_name(
-      *Nan::Utf8String(info[3]->ToString(currentContent).ToLocalChecked()));
-  size_t line_number = Nan::To<int64_t>(info[4]).FromJust();
-  std::string file_name(
-      *Nan::Utf8String(info[5]->ToString(currentContent).ToLocalChecked()));
+Napi::Value Log(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  std::string name = info[0].As<Napi::String>().Utf8Value();
+  int severity = info[1].As<Napi::Number>().Int64Value();
+  std::string message = info[2].As<Napi::String>().Utf8Value();
+  std::string function_name = info[3].As<Napi::String>().Utf8Value();
+  size_t line_number = info[4].As<Napi::Number>().Int64Value();
+  std::string file_name = info[5].As<Napi::String>().Utf8Value();
   bool enabled = rcutils_logging_logger_is_enabled_for(name.c_str(), severity);
 
   if (enabled) {
@@ -1604,70 +1580,73 @@ NAN_METHOD(Log) {
                 message.c_str());
   }
 
-  info.GetReturnValue().Set(Nan::New(enabled));
+  return Napi::Boolean::New(env, enabled);
 }
 
-NAN_METHOD(IsEnableFor) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  std::string name(
-      *Nan::Utf8String(info[0]->ToString(currentContent).ToLocalChecked()));
-  int severity = Nan::To<int64_t>(info[1]).FromJust();
+Napi::Value IsEnableFor(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  std::string name = info[0].As<Napi::String>().Utf8Value();
+  int severity = info[1].As<Napi::Number>().Int64Value();
   bool enabled = rcutils_logging_logger_is_enabled_for(name.c_str(), severity);
-  info.GetReturnValue().Set(Nan::New(enabled));
+  return Napi::Boolean::New(env, enabled);
 }
 
-NAN_METHOD(CreateContext) {
+Napi::Value CreateContext(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(malloc(sizeof(rcl_context_t)));
   *context = rcl_get_zero_initialized_context();
-  auto js_obj = RclHandle::NewInstance(context, nullptr, [](void* ptr) {
-    rcl_context_t* context = reinterpret_cast<rcl_context_t*>(ptr);
-    rcl_ret_t ret = DestroyContext(context);
-    free(ptr);
-    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
-  });
+  auto js_obj =
+      RclHandle::NewInstance(env, context, nullptr, [&env](void* ptr) {
+        rcl_context_t* context = reinterpret_cast<rcl_context_t*>(ptr);
+        rcl_ret_t ret = DestroyContext(env, context);
+        free(ptr);
+        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+      });
 
-  info.GetReturnValue().Set(js_obj);
+  return js_obj;
 }
 
-NAN_METHOD(IsContextValid) {
-  RclHandle* context_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value IsContextValid(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* context_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
   bool is_valid = rcl_context_is_valid(context);
-  info.GetReturnValue().Set(Nan::New(is_valid));
+  return Napi::Boolean::New(env, is_valid);
 }
 
 void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
-                          v8::Local<v8::Array>* result_list) {
-  for (size_t i = 0; i < names_and_types.names.size; ++i) {
-    auto item = v8::Object::New(v8::Isolate::GetCurrent());
-    std::string topic_name = names_and_types.names.data[i];
-    Nan::Set(item, Nan::New("name").ToLocalChecked(),
-             Nan::New(names_and_types.names.data[i]).ToLocalChecked());
+                          Napi::Array* result_list) {
+  Napi::Env env = result_list->Env();
 
-    v8::Local<v8::Array> type_list =
-        Nan::New<v8::Array>(names_and_types.types[i].size);
+  for (size_t i = 0; i < names_and_types.names.size; ++i) {
+    Napi::Object item = Napi::Object::New(env);
+    std::string topic_name = names_and_types.names.data[i];
+    item.Set("name", Napi::String::New(env, names_and_types.names.data[i]));
+
+    Napi::Array type_list =
+        Napi::Array::New(env, names_and_types.types[i].size);
     for (size_t j = 0; j < names_and_types.types[i].size; ++j) {
-      Nan::Set(type_list, j,
-               Nan::New(names_and_types.types[i].data[j]).ToLocalChecked());
+      type_list.Set(j,
+                    Napi::String::New(env, names_and_types.types[i].data[j]));
     }
-    Nan::Set(item, Nan::New("types").ToLocalChecked(), type_list);
-    Nan::Set(*result_list, i, item);
+    item.Set("types", type_list);
+    result_list->Set(i, item);
   }
 }
 
-NAN_METHOD(GetPublisherNamesAndTypesByNode) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetPublisherNamesAndTypesByNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string node_name =
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
-  std::string node_namespace =
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
-  bool no_demangle = Nan::To<bool>(info[3]).FromJust();
+  std::string node_name = info[1].As<Napi::String>().Utf8Value();
+  std::string node_namespace = info[2].As<Napi::String>().Utf8Value();
+  bool no_demangle = info[3].As<Napi::Boolean>();
 
   rcl_names_and_types_t topic_names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -1678,27 +1657,25 @@ NAN_METHOD(GetPublisherNamesAndTypesByNode) {
                                node_namespace.c_str(), &topic_names_and_types),
                            "Failed to get_publisher_names_and_types.");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(topic_names_and_types.names.size);
+  Napi::Array result_list =
+      Napi::Array::New(env, topic_names_and_types.names.size);
   ExtractNamesAndTypes(topic_names_and_types, &result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_names_and_types_fini(&topic_names_and_types),
                            "Failed to destroy topic_names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(GetSubscriptionNamesAndTypesByNode) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetSubscriptionNamesAndTypesByNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string node_name =
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
-  std::string node_namespace =
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
-  bool no_demangle = Nan::To<bool>(info[3]).FromJust();
+  std::string node_name = info[1].As<Napi::String>().Utf8Value();
+  std::string node_namespace = info[2].As<Napi::String>().Utf8Value();
+  bool no_demangle = info[3].As<Napi::Boolean>();
 
   rcl_names_and_types_t topic_names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -1709,26 +1686,24 @@ NAN_METHOD(GetSubscriptionNamesAndTypesByNode) {
                                node_namespace.c_str(), &topic_names_and_types),
                            "Failed to get_publisher_names_and_types.");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(topic_names_and_types.names.size);
+  Napi::Array result_list =
+      Napi::Array::New(env, topic_names_and_types.names.size);
   ExtractNamesAndTypes(topic_names_and_types, &result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_names_and_types_fini(&topic_names_and_types),
                            "Failed to destroy topic_names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(GetServiceNamesAndTypesByNode) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetServiceNamesAndTypesByNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string node_name =
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
-  std::string node_namespace =
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
+  std::string node_name = info[1].As<Napi::String>().Utf8Value();
+  std::string node_namespace = info[2].As<Napi::String>().Utf8Value();
 
   rcl_names_and_types_t service_names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -1740,26 +1715,24 @@ NAN_METHOD(GetServiceNamesAndTypesByNode) {
           &service_names_and_types),
       "Failed to get_service_names_and_types.");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(service_names_and_types.names.size);
+  Napi::Array result_list =
+      Napi::Array::New(env, service_names_and_types.names.size);
   ExtractNamesAndTypes(service_names_and_types, &result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_names_and_types_fini(&service_names_and_types),
       "Failed to destroy rcl_get_zero_initialized_names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(GetClientNamesAndTypesByNode) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetClientNamesAndTypesByNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string node_name =
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
-  std::string node_namespace =
-      *Nan::Utf8String(info[2]->ToString(currentContent).ToLocalChecked());
+  std::string node_name = info[1].As<Napi::String>().Utf8Value();
+  std::string node_namespace = info[2].As<Napi::String>().Utf8Value();
 
   rcl_names_and_types_t client_names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -1770,22 +1743,23 @@ NAN_METHOD(GetClientNamesAndTypesByNode) {
                                node_namespace.c_str(), &client_names_and_types),
                            "Failed to get_client_names_and_types.");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(client_names_and_types.names.size);
+  Napi::Array result_list =
+      Napi::Array::New(env, client_names_and_types.names.size);
   ExtractNamesAndTypes(client_names_and_types, &result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_names_and_types_fini(&client_names_and_types),
       "Failed to destroy rcl_get_zero_initialized_names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(GetTopicNamesAndTypes) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetTopicNamesAndTypes(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  bool no_demangle = Nan::To<bool>(info[1]).FromJust();
+  bool no_demangle = info[1].As<Napi::Boolean>();
   rcl_names_and_types_t topic_names_and_types =
       rcl_get_zero_initialized_names_and_types();
   rcl_allocator_t allocator = rcl_get_default_allocator();
@@ -1796,20 +1770,21 @@ NAN_METHOD(GetTopicNamesAndTypes) {
                                     &topic_names_and_types),
       "Failed to get_publisher_names_and_types.");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(topic_names_and_types.names.size);
+  Napi::Array result_list =
+      Napi::Array::New(env, topic_names_and_types.names.size);
   ExtractNamesAndTypes(topic_names_and_types, &result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_names_and_types_fini(&topic_names_and_types),
                            "Failed to destroy topic_names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(GetServiceNamesAndTypes) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetServiceNamesAndTypes(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   rcl_names_and_types_t service_names_and_types =
       rcl_get_zero_initialized_names_and_types();
@@ -1820,20 +1795,21 @@ NAN_METHOD(GetServiceNamesAndTypes) {
                                node, &allocator, &service_names_and_types),
                            "Failed to get_publisher_names_and_types.");
 
-  v8::Local<v8::Array> result_list =
-      Nan::New<v8::Array>(service_names_and_types.names.size);
+  Napi::Array result_list =
+      Napi::Array::New(env, service_names_and_types.names.size);
   ExtractNamesAndTypes(service_names_and_types, &result_list);
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_names_and_types_fini(&service_names_and_types),
                            "Failed to destroy topic_names_and_types");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(GetNodeNames) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value GetNodeNames(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
   rcutils_string_array_t node_names =
       rcutils_get_zero_initialized_string_array();
@@ -1846,17 +1822,15 @@ NAN_METHOD(GetNodeNames) {
       rcl_get_node_names(node, allocator, &node_names, &node_namespaces),
       "Failed to get_node_names.");
 
-  v8::Local<v8::Array> result_list = Nan::New<v8::Array>(node_names.size);
+  Napi::Array result_list = Napi::Array::New(env, node_names.size);
 
   for (size_t i = 0; i < node_names.size; ++i) {
-    auto item = v8::Object::New(v8::Isolate::GetCurrent());
+    Napi::Object item = Napi::Object::New(env);
 
-    Nan::Set(item, Nan::New("name").ToLocalChecked(),
-             Nan::New(node_names.data[i]).ToLocalChecked());
-    Nan::Set(item, Nan::New("namespace").ToLocalChecked(),
-             Nan::New(node_namespaces.data[i]).ToLocalChecked());
+    item.Set("name", Napi::String::New(env, node_names.data[i]));
+    item.Set("namespace", Napi::String::New(env, node_namespaces.data[i]));
 
-    Nan::Set(result_list, i, item);
+    result_list.Set(i, item);
   }
 
   rcutils_ret_t fini_names_ret = rcutils_string_array_fini(&node_names);
@@ -1868,51 +1842,45 @@ NAN_METHOD(GetNodeNames) {
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, fini_namespaces_ret,
                            "Failed to destroy node_namespaces");
 
-  info.GetReturnValue().Set(result_list);
+  return result_list;
 }
 
-NAN_METHOD(CountPublishers) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CountPublishers(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string topic_name =
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
+  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
 
   size_t count = 0;
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_count_publishers(node, topic_name.c_str(), &count),
       "Failed to count publishers.");
 
-  v8::Local<v8::Integer> result =
-      Nan::New<v8::Integer>(static_cast<int32_t>(count));
-  info.GetReturnValue().Set(result);
+  return Napi::Number::New(env, static_cast<int32_t>(count));
 }
 
-NAN_METHOD(CountSubscribers) {
-  v8::Local<v8::Context> currentContent = Nan::GetCurrentContext();
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value CountSubscribers(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string topic_name =
-      *Nan::Utf8String(info[1]->ToString(currentContent).ToLocalChecked());
+  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
 
   size_t count = 0;
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_count_subscribers(node, topic_name.c_str(), &count),
       "Failed to count subscribers.");
 
-  v8::Local<v8::Integer> result =
-      Nan::New<v8::Integer>(static_cast<int32_t>(count));
-  info.GetReturnValue().Set(result);
+  return Napi::Number::New(env, static_cast<int32_t>(count));
 }
 
-NAN_METHOD(ServiceServerIsAvailable) {
-  RclHandle* node_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value ServiceServerIsAvailable(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  RclHandle* client_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[1]).ToLocalChecked());
+  RclHandle* client_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
   rcl_client_t* client = reinterpret_cast<rcl_client_t*>(client_handle->ptr());
 
   bool is_available;
@@ -1920,34 +1888,34 @@ NAN_METHOD(ServiceServerIsAvailable) {
       RCL_RET_OK, rcl_service_server_is_available(node, client, &is_available),
       "Failed to get service state.");
 
-  v8::Local<v8::Boolean> result = Nan::New<v8::Boolean>(is_available);
-  info.GetReturnValue().Set(result);
+  return Napi::Boolean::New(env, is_available);
 }
 
-NAN_METHOD(PublishRawMessage) {
-  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
+Napi::Value PublishRawMessage(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
 
-  auto object = Nan::To<v8::Object>(info[1]).ToLocalChecked();
+  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+
+  auto object = info[1].As<Napi::Buffer<char>>();
   rcl_serialized_message_t serialized_msg =
       rmw_get_zero_initialized_serialized_message();
-  serialized_msg.buffer_capacity = node::Buffer::Length(object);
+  serialized_msg.buffer_capacity = object.Length();
   serialized_msg.buffer_length = serialized_msg.buffer_capacity;
-  serialized_msg.buffer =
-      reinterpret_cast<uint8_t*>(node::Buffer::Data(object));
+  serialized_msg.buffer = reinterpret_cast<uint8_t*>(object.Data());
 
   THROW_ERROR_IF_NOT_EQUAL(
       rcl_publish_serialized_message(publisher, &serialized_msg, nullptr),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  info.GetReturnValue().Set(Nan::Undefined());
+  return env.Undefined();
 }
 
-NAN_METHOD(RclTakeRaw) {
-  RclHandle* subscription_handle = RclHandle::Unwrap<RclHandle>(
-      Nan::To<v8::Object>(info[0]).ToLocalChecked());
+Napi::Value RclTakeRaw(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
 
@@ -1957,128 +1925,154 @@ NAN_METHOD(RclTakeRaw) {
   if (ret != RCL_RET_OK) {
     THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
                              "Failed to deallocate message buffer.");
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
   ret = rcl_take_serialized_message(subscription, &msg, nullptr, nullptr);
   if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
     rcl_reset_error();
     THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
                              "Failed to deallocate message buffer.");
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
 
   if (ret == RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
     THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
                              "Failed to deallocate message buffer.");
-    info.GetReturnValue().Set(Nan::Undefined());
-    return;
+    return env.Undefined();
   }
 
-  info.GetReturnValue().Set(
-      Nan::CopyBuffer(reinterpret_cast<char*>(msg.buffer), msg.buffer_length)
-          .ToLocalChecked());
+  Napi::Buffer<char> buffer = Napi::Buffer<char>::Copy(
+      env, reinterpret_cast<char*>(msg.buffer), msg.buffer_length);
   THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
                            "Failed to deallocate message buffer");
+  return buffer;
 }
 
-NAN_METHOD(GetClientServiceName) {
+Napi::Value GetClientServiceName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_client_t* client = reinterpret_cast<rcl_client_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
 
   const char* service_name = rcl_client_get_service_name(client);
-  info.GetReturnValue().Set(Nan::New(service_name).ToLocalChecked());
+  return Napi::String::New(env, service_name);
 }
 
-NAN_METHOD(GetServiceServiceName) {
+Napi::Value GetServiceServiceName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
-      RclHandle::Unwrap<RclHandle>(
-          Nan::To<v8::Object>(info[0]).ToLocalChecked())
-          ->ptr());
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
 
   const char* service_name = rcl_service_get_service_name(service);
-  info.GetReturnValue().Set(Nan::New(service_name).ToLocalChecked());
+  return Napi::String::New(env, service_name);
 }
 
-std::vector<BindingMethod> binding_methods = {
-    {"init", Init},
-    {"createNode", CreateNode},
-    {"getParameterOverrides", GetParameterOverrides},
-    {"createGuardCondition", CreateGuardCondition},
-    {"triggerGuardCondition", TriggerGuardCondition},
-    {"createTimer", CreateTimer},
-    {"isTimerReady", IsTimerReady},
-    {"callTimer", CallTimer},
-    {"cancelTimer", CancelTimer},
-    {"isTimerCanceled", IsTimerCanceled},
-    {"resetTimer", ResetTimer},
-    {"timerGetTimeSinceLastCall", TimerGetTimeSinceLastCall},
-    {"timerGetTimeUntilNextCall", TimerGetTimeUntilNextCall},
-    {"createClock", CreateClock},
-    {"clockGetNow", ClockGetNow},
-    {"createTimePoint", CreateTimePoint},
-    {"getNanoseconds", GetNanoseconds},
-    {"createDuration", CreateDuration},
-    {"getDurationNanoseconds", GetDurationNanoseconds},
-    {"setRosTimeOverrideIsEnabled", SetRosTimeOverrideIsEnabled},
-    {"setRosTimeOverride", SetRosTimeOverride},
-    {"getRosTimeOverrideIsEnabled", GetRosTimeOverrideIsEnabled},
-    {"rclTake", RclTake},
-    {"createSubscription", CreateSubscription},
-    {"hasContentFilter", HasContentFilter},
-    {"setContentFilter", SetContentFilter},
-    {"clearContentFilter", ClearContentFilter},
-    {"createPublisher", CreatePublisher},
-    {"publish", Publish},
-    {"getPublisherTopic", GetPublisherTopic},
-    {"getSubscriptionTopic", GetSubscriptionTopic},
-    {"createClient", CreateClient},
-    {"rclTakeResponse", RclTakeResponse},
-    {"sendRequest", SendRequest},
-    {"createService", CreateService},
-    {"rclTakeRequest", RclTakeRequest},
-    {"sendResponse", SendResponse},
-    {"shutdown", Shutdown},
-    {"validateFullTopicName", ValidateFullTopicName},
-    {"validateNodeName", ValidateNodeName},
-    {"validateTopicName", ValidateTopicName},
-    {"validateNamespace", ValidateNamespace},
-    {"expandTopicName", ExpandTopicName},
-    {"getNodeName", GetNodeName},
-    {"getNamespace", GetNamespace},
-    {"initString", InitString},
-    {"freeMemeoryAtOffset", FreeMemeoryAtOffset},
-    {"createArrayBufferFromAddress", CreateArrayBufferFromAddress},
-    {"createArrayBufferCleaner", CreateArrayBufferCleaner},
-    {"setLoggerLevel", setLoggerLevel},
-    {"getLoggerEffectiveLevel", GetLoggerEffectiveLevel},
-    {"getNodeLoggerName", GetNodeLoggerName},
-    {"log", Log},
-    {"isEnableFor", IsEnableFor},
-    {"createContext", CreateContext},
-    {"isContextValid", IsContextValid},
-    {"getPublisherNamesAndTypesByNode", GetPublisherNamesAndTypesByNode},
-    {"getSubscriptionNamesAndTypesByNode", GetSubscriptionNamesAndTypesByNode},
-    {"getServiceNamesAndTypesByNode", GetServiceNamesAndTypesByNode},
-    {"getClientNamesAndTypesByNode", GetClientNamesAndTypesByNode},
-    {"getTopicNamesAndTypes", GetTopicNamesAndTypes},
-    {"getServiceNamesAndTypes", GetServiceNamesAndTypes},
-    {"getNodeNames", GetNodeNames},
-    {"countPublishers", CountPublishers},
-    {"countSubscribers", CountSubscribers},
-    {"serviceServerIsAvailable", ServiceServerIsAvailable},
-    {"publishRawMessage", PublishRawMessage},
-    {"rclTakeRaw", RclTakeRaw},
-    {"getClientServiceName", GetClientServiceName},
-    {"getServiceServiceName", GetServiceServiceName},
-    {"", nullptr}
+Napi::Object InitBindings(Napi::Env env, Napi::Object exports) {
+  exports.Set("init", Napi::Function::New(env, InitRclnodejs));
+  exports.Set("createNode", Napi::Function::New(env, CreateNode));
+  exports.Set("getParameterOverrides",
+              Napi::Function::New(env, GetParameterOverrides));
+  exports.Set("createGuardCondition",
+              Napi::Function::New(env, CreateGuardCondition));
+  exports.Set("triggerGuardCondition",
+              Napi::Function::New(env, TriggerGuardCondition));
+  exports.Set("createTimer", Napi::Function::New(env, CreateTimer));
+  exports.Set("isTimerReady", Napi::Function::New(env, IsTimerReady));
+  exports.Set("callTimer", Napi::Function::New(env, CallTimer));
+  exports.Set("cancelTimer", Napi::Function::New(env, CancelTimer));
+  exports.Set("isTimerCanceled", Napi::Function::New(env, IsTimerCanceled));
+  exports.Set("resetTimer", Napi::Function::New(env, ResetTimer));
+  exports.Set("timerGetTimeSinceLastCall",
+              Napi::Function::New(env, TimerGetTimeSinceLastCall));
+  exports.Set("timerGetTimeUntilNextCall",
+              Napi::Function::New(env, TimerGetTimeUntilNextCall));
+  exports.Set("createClock", Napi::Function::New(env, CreateClock));
+  exports.Set("clockGetNow", Napi::Function::New(env, ClockGetNow));
+  exports.Set("createTimePoint", Napi::Function::New(env, CreateTimePoint));
+  exports.Set("getNanoseconds", Napi::Function::New(env, GetNanoseconds));
+  exports.Set("createDuration", Napi::Function::New(env, CreateDuration));
+  exports.Set("getDurationNanoseconds",
+              Napi::Function::New(env, GetDurationNanoseconds));
+  exports.Set("setRosTimeOverrideIsEnabled",
+              Napi::Function::New(env, SetRosTimeOverrideIsEnabled));
+  exports.Set("setRosTimeOverride",
+              Napi::Function::New(env, SetRosTimeOverride));
+  exports.Set("getRosTimeOverrideIsEnabled",
+              Napi::Function::New(env, GetRosTimeOverrideIsEnabled));
+  exports.Set("rclTake", Napi::Function::New(env, RclTake));
+  exports.Set("createSubscription",
+              Napi::Function::New(env, CreateSubscription));
+  exports.Set("hasContentFilter", Napi::Function::New(env, HasContentFilter));
+  exports.Set("setContentFilter", Napi::Function::New(env, SetContentFilter));
+  exports.Set("clearContentFilter",
+              Napi::Function::New(env, ClearContentFilter));
+  exports.Set("createPublisher", Napi::Function::New(env, CreatePublisher));
+  exports.Set("publish", Napi::Function::New(env, Publish));
+  exports.Set("getPublisherTopic", Napi::Function::New(env, GetPublisherTopic));
+  exports.Set("getSubscriptionTopic",
+              Napi::Function::New(env, GetSubscriptionTopic));
+  exports.Set("createClient", Napi::Function::New(env, CreateClient));
+  exports.Set("rclTakeResponse", Napi::Function::New(env, RclTakeResponse));
+  exports.Set("sendRequest", Napi::Function::New(env, SendRequest));
+  exports.Set("createService", Napi::Function::New(env, CreateService));
+  exports.Set("rclTakeRequest", Napi::Function::New(env, RclTakeRequest));
+  exports.Set("sendResponse", Napi::Function::New(env, SendResponse));
+  exports.Set("shutdown", Napi::Function::New(env, Shutdown));
+  exports.Set("validateFullTopicName",
+              Napi::Function::New(env, ValidateFullTopicName));
+  exports.Set("validateNodeName", Napi::Function::New(env, ValidateNodeName));
+  exports.Set("validateTopicName", Napi::Function::New(env, ValidateTopicName));
+  exports.Set("validateNamespace", Napi::Function::New(env, ValidateNamespace));
+  exports.Set("expandTopicName", Napi::Function::New(env, ExpandTopicName));
+  exports.Set("getNodeName", Napi::Function::New(env, GetNodeName));
+  exports.Set("getNamespace", Napi::Function::New(env, GetNamespace));
+  exports.Set("initString", Napi::Function::New(env, InitString));
+  exports.Set("freeMemeoryAtOffset",
+              Napi::Function::New(env, FreeMemeoryAtOffset));
+  exports.Set("createArrayBufferFromAddress",
+              Napi::Function::New(env, CreateArrayBufferFromAddress));
+  exports.Set("createArrayBufferCleaner",
+              Napi::Function::New(env, CreateArrayBufferCleaner));
+  exports.Set("setLoggerLevel", Napi::Function::New(env, setLoggerLevel));
+  exports.Set("getLoggerEffectiveLevel",
+              Napi::Function::New(env, GetLoggerEffectiveLevel));
+  exports.Set("getNodeLoggerName", Napi::Function::New(env, GetNodeLoggerName));
+  exports.Set("log", Napi::Function::New(env, Log));
+  exports.Set("isEnableFor", Napi::Function::New(env, IsEnableFor));
+  exports.Set("createContext", Napi::Function::New(env, CreateContext));
+  exports.Set("isContextValid", Napi::Function::New(env, IsContextValid));
+  exports.Set("getPublisherNamesAndTypesByNode",
+              Napi::Function::New(env, GetPublisherNamesAndTypesByNode));
+  exports.Set("getSubscriptionNamesAndTypesByNode",
+              Napi::Function::New(env, GetSubscriptionNamesAndTypesByNode));
+  exports.Set("getServiceNamesAndTypesByNode",
+              Napi::Function::New(env, GetServiceNamesAndTypesByNode));
+  exports.Set("getClientNamesAndTypesByNode",
+              Napi::Function::New(env, GetClientNamesAndTypesByNode));
+  exports.Set("getTopicNamesAndTypes",
+              Napi::Function::New(env, GetTopicNamesAndTypes));
+  exports.Set("getServiceNamesAndTypes",
+              Napi::Function::New(env, GetServiceNamesAndTypes));
+  exports.Set("getNodeNames", Napi::Function::New(env, GetNodeNames));
+  exports.Set("countPublishers", Napi::Function::New(env, CountPublishers));
+  exports.Set("countSubscribers", Napi::Function::New(env, CountSubscribers));
+  exports.Set("serviceServerIsAvailable",
+              Napi::Function::New(env, ServiceServerIsAvailable));
+  exports.Set("publishRawMessage", Napi::Function::New(env, PublishRawMessage));
+  exports.Set("rclTakeRaw", Napi::Function::New(env, RclTakeRaw));
+  exports.Set("getClientServiceName",
+              Napi::Function::New(env, GetClientServiceName));
+  exports.Set("getServiceServiceName",
+              Napi::Function::New(env, GetServiceServiceName));
 #if ROS_VERSION > 2205  // 2205 == Humble
-    ,
-    {"configureServiceIntrospection", ConfigureServiceIntrospection}
+  exports.Set("configureServiceIntrospection",
+              Napi::Function::New(env, ConfigureServiceIntrospection));
 #endif
-};
+
+  return exports;
+}
+
+// NODE_API_MODULE(rcl_bindings, Init)
 
 }  // namespace rclnodejs

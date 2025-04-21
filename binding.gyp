@@ -30,8 +30,8 @@
       ],
       'include_dirs': [
         '.',
-        "<!(node -e \"require('nan')\")",
         '<(ros_include_root)',
+        "<!@(node -p \"require('node-addon-api').include\")",
       ],
       'cflags!': [
         '-fno-exceptions'
