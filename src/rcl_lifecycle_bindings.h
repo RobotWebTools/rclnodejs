@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_RCL_LIFECYCLE_BINDINGS_HPP_
-#define SRC_RCL_LIFECYCLE_BINDINGS_HPP_
+#ifndef SRC_RCL_LIFECYCLE_BINDINGS_H_
+#define SRC_RCL_LIFECYCLE_BINDINGS_H_
+
+#include <napi.h>
 
 #include <vector>
 
-#include "rcl_bindings.hpp"
+#include "rcl_bindings.h"
 
 namespace rclnodejs {
 
-extern std::vector<BindingMethod> lifecycle_binding_methods;
+Napi::Object InitLifecycle(Napi::Env env, Napi::Object exports);
 
 }  // namespace rclnodejs
 
-#endif  // SRC_RCL_LIFECYCLE_BINDINGS_HPP_
+#endif  // SRC_RCL_LIFECYCLE_BINDINGS_H_

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_RCL_HANDLE_HPP_
-#define SRC_RCL_HANDLE_HPP_
+#ifndef SRC_RCL_HANDLE_H_
+#define SRC_RCL_HANDLE_H_
 
-#include <nan.h>
+#include <napi.h>
 
 #include <functional>
 #include <map>
@@ -24,11 +24,15 @@
 
 namespace rclnodejs {
 
-class RclHandle : public Nan::ObjectWrap {
+class RclHandle : public Napi::ObjectWrap<RclHandle> {
  public:
-  static void Init(v8::Local<v8::Object> exports);
-  static v8::Local<v8::Object> NewInstance(void* handle, RclHandle* parent,
-                                           std::function<void(void*)> deleter);
+  static Napi::Object Init(Napi::Env env, Napi::Object exports);
+  static Napi::Object NewInstance(Napi::Env env, void* handle,
+                                  RclHandle* parent,
+                                  std::function<void(void*)> deleter);
+
+  explicit RclHandle(const Napi::CallbackInfo& info);
+  ~RclHandle();
 
   void set_deleter(std::function<void(void*)> deleter) { deleter_ = deleter; }
 
@@ -47,25 +51,22 @@ class RclHandle : public Nan::ObjectWrap {
   void SyncProperties();
 
  private:
-  RclHandle();
-  ~RclHandle();
-
-  static Nan::Persistent<v8::Function> constructor;
-  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static NAN_METHOD(Release);
-  static NAN_METHOD(Dismiss);
-  static NAN_GETTER(PropertiesGetter);
+  Napi::Value Release(const Napi::CallbackInfo& info);
+  Napi::Value Dismiss(const Napi::CallbackInfo& info);
+  Napi::Value PropertiesGetter(const Napi::CallbackInfo& info);
 
  private:
   void* pointer_;
   RclHandle* parent_;
   std::map<std::string, bool> properties_;
-  v8::Local<v8::Object> properties_obj_;
+  Napi::ObjectReference properties_obj_;
 
   std::function<void(void*)> deleter_;
   std::set<RclHandle*> children_;
+
+  static Napi::FunctionReference constructor;
 };
 
 }  // namespace rclnodejs
 
-#endif  // SRC_RCL_HANDLE_HPP_
+#endif  // SRC_RCL_HANDLE_H_

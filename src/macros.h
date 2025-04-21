@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_MACROS_HPP_
-#define SRC_MACROS_HPP_
+#ifndef SRC_MACROS_H_
+#define SRC_MACROS_H_
+
+#include <napi.h>
 
 #include "rcutils/logging_macros.h"
 
 #define CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE(op, lhs, rhs, message) \
   {                                                                 \
     if (lhs op rhs) {                                               \
-      Nan::ThrowError(message);                                     \
       rcl_reset_error();                                            \
-      return;                                                       \
+      Napi::Error::New(rclnodejs::GetEnv(), message)                \
+          .ThrowAsJavaScriptException();                            \
     }                                                               \
   }
 
@@ -43,4 +45,4 @@
 #define RCLNODEJS_DEBUG(...)
 #endif
 
-#endif  // SRC_MACROS_HPP_
+#endif  // SRC_MACROS_H_

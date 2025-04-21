@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rcl_utilities.hpp"
+#include "rcl_utilities.h"
 
 #include <rcl/rcl.h>
 #include <rcl_action/rcl_action.h>
@@ -21,7 +21,10 @@
 #include <string>
 
 namespace {
+
 uv_lib_t g_lib;
+Napi::Env g_env = nullptr;
+
 }  // namespace
 
 namespace rclnodejs {
@@ -94,5 +97,9 @@ const rosidl_action_type_support_t* GetActionTypeSupport(
 std::string GetErrorMessageAndClear() {
   return std::string(uv_dlerror(&g_lib));
 }
+
+Napi::Env& GetEnv() { return g_env; }
+
+void StoreEnv(Napi::Env current_env) { g_env = current_env; }
 
 }  // namespace rclnodejs
