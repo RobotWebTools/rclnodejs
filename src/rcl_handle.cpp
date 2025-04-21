@@ -17,8 +17,6 @@
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 
-#include <iostream>
-
 #include "rcl_utilities.h"
 
 namespace rclnodejs {

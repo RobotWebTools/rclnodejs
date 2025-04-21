@@ -25,15 +25,6 @@
 
 namespace rclnodejs {
 
-typedef Napi::Value (*JsCFunction)(const Napi::CallbackInfo& info);
-
-typedef struct {
-  const char* name;
-  JsCFunction function;
-} BindingMethod;
-
-extern rcl_guard_condition_t* g_sigint_gc;
-
 void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
                           Napi::Array* result_list);
 

@@ -38,12 +38,8 @@ const rosidl_action_type_support_t* GetActionTypeSupport(
 std::string GetErrorMessageAndClear();
 
 // Store a reference to the environment that can be used for error reporting.
-inline Napi::Env& GetEnv() {
-  static thread_local Napi::Env env = nullptr;
-  return env;
-}
-
-inline void StoreEnv(Napi::Env current_env) { GetEnv() = current_env; }
+Napi::Env& GetEnv();
+void StoreEnv(Napi::Env current_env);
 
 }  // namespace rclnodejs
 

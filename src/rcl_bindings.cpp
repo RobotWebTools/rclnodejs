@@ -14,7 +14,6 @@
 
 #include "rcl_bindings.h"
 
-#include <napi.h>
 #include <node.h>
 #include <rcl/arguments.h>
 #include <rcl/error_handling.h>
@@ -59,8 +58,7 @@
 
 namespace rclnodejs {
 
-static Napi::Object wrapParameters(
-    Napi::Env env, rcl_params_t* params);  // NOLINT(whitespace/line_length)
+static Napi::Object wrapParameters(Napi::Env env, rcl_params_t* params);
 
 Napi::Value InitRclnodejs(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -71,12 +69,12 @@ Napi::Value InitRclnodejs(const Napi::CallbackInfo& info) {
                            rcl_init_options_init(&init_options, allocator),
                            rcl_get_error_string().str);
 
-  // preprocess Context
+  // Preprocess Context
   RclHandle* context_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
-  // preprocess argc & argv
+  // Preprocess argc & argv
   Napi::Array jsArgv = info[1].As<Napi::Array>();
   int argc = jsArgv.Length();
   char** argv = nullptr;
@@ -1740,7 +1738,7 @@ Napi::Value GetClientNamesAndTypesByNode(const Napi::CallbackInfo& info) {
       rcl_get_zero_initialized_names_and_types();
   rcl_allocator_t allocator = rcl_get_default_allocator();
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_get_service_names_and_types_by_node(
+                           rcl_get_client_names_and_types_by_node(
                                node, &allocator, node_name.c_str(),
                                node_namespace.c_str(), &client_names_and_types),
                            "Failed to get_client_names_and_types.");
