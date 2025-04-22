@@ -25,7 +25,7 @@
         './src/rcl_bindings.cpp',
         './src/rcl_client_bindings.cpp',
         './src/rcl_context_bindings.cpp',
-        './src/rcl_graph_binding.cpp',
+        './src/rcl_graph_bindings.cpp',
         './src/rcl_guard_condition_bindings.cpp',
         './src/rcl_handle.cpp',
         './src/rcl_lifecycle_bindings.cpp',

@@ -50,7 +50,7 @@ Napi::Value Init(const Napi::CallbackInfo& info) {
     for (int i = 0; i < argc; i++) {
       std::string arg = jsArgv.Get(i).As<Napi::String>().Utf8Value();
       int len = arg.length() + 1;
-      argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
+      argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char)));
       snprintf(argv[i], len, "%s", arg.c_str());
     }
   }

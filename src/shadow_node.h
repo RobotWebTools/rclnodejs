@@ -17,8 +17,8 @@
 
 #include <napi.h>
 
-#include <memory>
 #include <exception>
+#include <memory>
 #include <vector>
 
 #include "executor.h"

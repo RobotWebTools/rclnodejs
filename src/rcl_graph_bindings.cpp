@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "rcl_graph_bindings.h"
+
 #include <rcl/error_handling.h>
 #include <rcl/graph.h>
 #include <rcl/rcl.h>
@@ -19,7 +21,6 @@
 #include <string>
 
 #include "macros.h"
-#include "rcl_graph_bindings.h"
 #include "rcl_handle.h"
 #include "rcl_utilities.h"
 
