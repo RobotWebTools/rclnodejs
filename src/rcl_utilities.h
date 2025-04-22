@@ -16,7 +16,10 @@
 #define SRC_RCL_UTILITIES_H_
 
 #include <napi.h>
+#include <rcl/graph.h>
+#include <rmw/rmw.h>
 
+#include <memory>
 #include <string>
 
 struct rosidl_message_type_support_t;
@@ -40,6 +43,10 @@ std::string GetErrorMessageAndClear();
 // Store a reference to the environment that can be used for error reporting.
 Napi::Env& GetEnv();
 void StoreEnv(Napi::Env current_env);
+
+std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(Napi::Value qos);
+void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
+                          Napi::Array* result_list);
 
 }  // namespace rclnodejs
 

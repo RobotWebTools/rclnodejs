@@ -18,9 +18,56 @@
 #include <rcl_action/rcl_action.h>
 #include <uv.h>
 
+#include <memory>
 #include <string>
 
 namespace {
+
+const rmw_qos_profile_t* GetQoSProfileFromString(const std::string& profile) {
+  const rmw_qos_profile_t* qos_profile = nullptr;
+  if (profile == "qos_profile_sensor_data") {
+    qos_profile = &rmw_qos_profile_sensor_data;
+  } else if (profile == "qos_profile_system_default") {
+    qos_profile = &rmw_qos_profile_system_default;
+  } else if (profile == "qos_profile_services_default") {
+    qos_profile = &rmw_qos_profile_services_default;
+  } else if (profile == "qos_profile_parameters") {
+    qos_profile = &rmw_qos_profile_parameters;
+  } else if (profile == "qos_profile_parameter_events") {
+    qos_profile = &rmw_qos_profile_parameter_events;
+  } else if (profile == "qos_profile_action_status_default") {
+    qos_profile = &rcl_action_qos_profile_status_default;
+  } else {
+    return &rmw_qos_profile_default;
+  }
+
+  return qos_profile;
+}
+
+std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
+    Napi::Object object) {
+  std::unique_ptr<rmw_qos_profile_t> qos_profile =
+      std::make_unique<rmw_qos_profile_t>();
+
+  auto history = object.Get("history");
+  auto depth = object.Get("depth");
+  auto reliability = object.Get("reliability");
+  auto durability = object.Get("durability");
+  auto avoid_ros_namespace_conventions =
+      object.Get("avoidRosNameSpaceConventions");
+
+  qos_profile->history = static_cast<rmw_qos_history_policy_t>(
+      history.As<Napi::Number>().Uint32Value());
+  qos_profile->depth = depth.As<Napi::Number>().Uint32Value();
+  qos_profile->reliability = static_cast<rmw_qos_reliability_policy_t>(
+      reliability.As<Napi::Number>().Uint32Value());
+  qos_profile->durability = static_cast<rmw_qos_durability_policy_t>(
+      durability.As<Napi::Number>().Uint32Value());
+  qos_profile->avoid_ros_namespace_conventions =
+      avoid_ros_namespace_conventions.As<Napi::Boolean>();
+
+  return qos_profile;
+}
 
 uv_lib_t g_lib;
 Napi::Env g_env = nullptr;
@@ -101,5 +148,39 @@ std::string GetErrorMessageAndClear() {
 Napi::Env& GetEnv() { return g_env; }
 
 void StoreEnv(Napi::Env current_env) { g_env = current_env; }
+
+std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(Napi::Value qos) {
+  std::unique_ptr<rmw_qos_profile_t> qos_profile =
+      std::make_unique<rmw_qos_profile_t>();
+
+  if (qos.IsString()) {
+    *qos_profile = *GetQoSProfileFromString(qos.As<Napi::String>().Utf8Value());
+  } else if (qos.IsObject()) {
+    qos_profile = GetQosProfileFromObject(qos.As<Napi::Object>());
+  } else {
+    return qos_profile;
+  }
+  return qos_profile;
+}
+
+void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
+                          Napi::Array* result_list) {
+  Napi::Env env = result_list->Env();
+
+  for (size_t i = 0; i < names_and_types.names.size; ++i) {
+    Napi::Object item = Napi::Object::New(env);
+    std::string topic_name = names_and_types.names.data[i];
+    item.Set("name", Napi::String::New(env, names_and_types.names.data[i]));
+
+    Napi::Array type_list =
+        Napi::Array::New(env, names_and_types.types[i].size);
+    for (size_t j = 0; j < names_and_types.types[i].size; ++j) {
+      type_list.Set(j,
+                    Napi::String::New(env, names_and_types.types[i].data[j]));
+    }
+    item.Set("types", type_list);
+    result_list->Set(i, item);
+  }
+}
 
 }  // namespace rclnodejs

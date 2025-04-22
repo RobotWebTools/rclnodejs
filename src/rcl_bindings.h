@@ -16,19 +16,8 @@
 #define SRC_RCL_BINDINGS_H_
 
 #include <napi.h>
-#include <rcl/graph.h>
-#include <rcl/rcl.h>
-
-#include <memory>
-#include <string>
-#include <vector>
 
 namespace rclnodejs {
-
-void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
-                          Napi::Array* result_list);
-
-std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(Napi::Value qos);
 
 Napi::Object InitBindings(Napi::Env env, Napi::Object exports);
 
