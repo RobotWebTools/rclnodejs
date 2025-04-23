@@ -38,8 +38,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Install test-msgs on Linux
-        run: |
-          sudo apt install ros-${{ needs.identify-ros-distro.outputs.distro }}-test-msgs
+      run: |
+        sudo apt install ros-${{ needs.identify-ros-distro.outputs.distro }}-test-msgs
 
     - uses: actions/checkout@v4
 
