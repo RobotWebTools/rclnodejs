@@ -23,7 +23,6 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "handle_manager.h"
 #include "macros.h"
@@ -775,7 +774,7 @@ Napi::Value ActionGetNamesAndTypes(const Napi::CallbackInfo& info) {
   return result_list;
 }
 
-Napi::Object InitAction(Napi::Env env, Napi::Object exports) {
+Napi::Object InitActionBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("actionCreateClient",
               Napi::Function::New(env, ActionCreateClient));
   exports.Set("actionCreateServer",
