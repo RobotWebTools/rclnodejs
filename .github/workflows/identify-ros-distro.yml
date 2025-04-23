@@ -27,16 +27,16 @@ jobs:
         run: |
           if ${ROLLING_VAR} == true; then
             echo "::set-output name=distro::rolling"
-            echo "::set-output name=linuxos::ubuntu-24.04"
+            echo "::set-output name=linuxos::ubuntu:noble"
           elif ${JAZZY_VAR} == true; then
             echo "::set-output name=distro::jazzy"
-            echo "::set-output name=linuxos::ubuntu-24.04"
+            echo "::set-output name=linuxos::ubuntu:noble"
           elif ${IRON_VAR} == true; then
             echo "::set-output name=distro::iron"
-            echo "::set-output name=linuxos::ubuntu-22.04"
+            echo "::set-output name=linuxos::ubuntu:jammy"
           elif ${HUMBLE_VAR} == true; then
             echo "::set-output name=distro::humble"
-            echo "::set-output name=linuxos::ubuntu-22.04"
+            echo "::set-output name=linuxos::ubuntu:jammy"
           else
             echo "Unable to map branch name to ROS distro, using ROLLING as default"
             echo "::set-output name=distro::rolling"
