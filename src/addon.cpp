@@ -18,8 +18,20 @@
 #include "macros.h"
 #include "rcl_action_bindings.h"
 #include "rcl_bindings.h"
+#include "rcl_client_bindings.h"
+#include "rcl_context_bindings.h"
+#include "rcl_graph_bindings.h"
+#include "rcl_guard_condition_bindings.h"
 #include "rcl_handle.h"
 #include "rcl_lifecycle_bindings.h"
+#include "rcl_logging_bindings.h"
+#include "rcl_names_bindings.h"
+#include "rcl_node_bindings.h"
+#include "rcl_publisher_bindings.h"
+#include "rcl_service_bindings.h"
+#include "rcl_subscription_bindings.h"
+#include "rcl_time_point_bindings.h"
+#include "rcl_timer_bindings.h"
 #include "rcl_utilities.h"
 #include "shadow_node.h"
 
@@ -47,11 +59,23 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
   }
 #endif
 
-  // Init the C++ bindings.
   rclnodejs::StoreEnv(env);
+  // Init the C++ bindings.
   rclnodejs::InitBindings(env, exports);
-  rclnodejs::InitAction(env, exports);
-  rclnodejs::InitLifecycle(env, exports);
+  rclnodejs::InitClientBindings(env, exports);
+  rclnodejs::InitContextBindings(env, exports);
+  rclnodejs::InitGraphBindings(env, exports);
+  rclnodejs::InitGuardConditionBindings(env, exports);
+  rclnodejs::InitLoggingBindings(env, exports);
+  rclnodejs::InitNamesBindings(env, exports);
+  rclnodejs::InitNodeBindings(env, exports);
+  rclnodejs::InitPublisherBindings(env, exports);
+  rclnodejs::InitServiceBindings(env, exports);
+  rclnodejs::InitSubscriptionBindings(env, exports);
+  rclnodejs::InitTimePointBindings(env, exports);
+  rclnodejs::InitTimerBindings(env, exports);
+  rclnodejs::InitActionBindings(env, exports);
+  rclnodejs::InitLifecycleBindings(env, exports);
   rclnodejs::ShadowNode::Init(env, exports);
   rclnodejs::RclHandle::Init(env, exports);
 

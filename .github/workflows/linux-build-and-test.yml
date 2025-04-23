@@ -24,9 +24,9 @@ jobs:
 
   build:
     needs: identify-ros-distro
-    runs-on: ${{ needs.identify-ros-distro.outputs.linuxos }}
+    runs-on: ubuntu-latest
     container:
-      image: osrf/ros:${{ needs.identify-ros-distro.outputs.distro }}-desktop
+      image: ${{ needs.identify-ros-distro.outputs.linuxos }}
     strategy:
       fail-fast: false
       matrix:
@@ -39,6 +39,8 @@ jobs:
 
     - name: Setup ROS2
       uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: ${{ needs.identify-ros-distro.outputs.distro }}
 
     - name: Install test-msgs on Linux
       run: |

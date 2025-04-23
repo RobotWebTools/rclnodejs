@@ -14,18 +14,17 @@
 
 #include "rcl_lifecycle_bindings.h"
 
+#include <lifecycle_msgs/msg/transition_event.h>
+#include <lifecycle_msgs/srv/change_state.h>
+#include <lifecycle_msgs/srv/get_available_states.h>
+#include <lifecycle_msgs/srv/get_available_transitions.h>
+#include <lifecycle_msgs/srv/get_state.h>
 #include <rcl/error_handling.h>
 #include <rcl_lifecycle/rcl_lifecycle.h>
 
 #include <memory>
 #include <string>
-#include <vector>
 
-#include "lifecycle_msgs/msg/transition_event.h"
-#include "lifecycle_msgs/srv/change_state.h"
-#include "lifecycle_msgs/srv/get_available_states.h"
-#include "lifecycle_msgs/srv/get_available_transitions.h"
-#include "lifecycle_msgs/srv/get_state.h"
 #include "macros.h"
 #include "rcl_handle.h"
 #include "rcl_utilities.h"
@@ -361,7 +360,7 @@ Napi::Value GetLifecycleShutdownTransitionLabel(
   return Napi::String::New(env, rcl_lifecycle_shutdown_label);
 }
 
-Napi::Object InitLifecycle(Napi::Env env, Napi::Object exports) {
+Napi::Object InitLifecycleBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createLifecycleStateMachine",
               Napi::Function::New(env, CreateLifecycleStateMachine));
   exports.Set("getCurrentLifecycleState",
