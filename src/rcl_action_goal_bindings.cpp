@@ -35,18 +35,19 @@ Napi::Value ActionAcceptNewGoal(const Napi::CallbackInfo& info) {
   rcl_action_goal_info_t* buffer = reinterpret_cast<rcl_action_goal_info_t*>(
       info[1].As<Napi::Buffer<char>>().Data());
 
-  rcl_action_goal_handle_t* goal_handle =
-      reinterpret_cast<rcl_action_goal_handle_t*>(
-          malloc(sizeof(rcl_action_goal_handle_t)));
-
-  goal_handle = rcl_action_accept_new_goal(action_server, buffer);
-  if (!goal_handle) {
+  rcl_action_goal_handle_t* new_goal =
+      rcl_action_accept_new_goal(action_server, buffer);
+  if (!new_goal) {
     Napi::Error::New(env, rcl_get_error_string().str)
         .ThrowAsJavaScriptException();
     rcl_reset_error();
     return env.Undefined();
   }
 
+  rcl_action_goal_handle_t* goal_handle =
+      reinterpret_cast<rcl_action_goal_handle_t*>(
+          malloc(sizeof(rcl_action_goal_handle_t)));
+  *goal_handle = *new_goal;
   auto js_obj =
       RclHandle::NewInstance(env, goal_handle, nullptr, [](void* ptr) {
         rcl_action_goal_handle_t* goal_handle =
