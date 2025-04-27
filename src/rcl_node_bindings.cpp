@@ -20,6 +20,7 @@
 #include <rcl/arguments.h>
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
+#include <rcl_action/rcl_action.h>
 #include <rcl_yaml_param_parser/parser.h>
 #include <rcl_yaml_param_parser/types.h>
 
@@ -239,6 +240,84 @@ Napi::Value GetNodeLoggerName(const Napi::CallbackInfo& info) {
   return Napi::String::New(env, node_logger_name);
 }
 
+Napi::Value ActionGetClientNamesAndTypesByNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string node_name = info[1].As<Napi::String>().Utf8Value();
+  std::string node_namespace = info[2].As<Napi::String>().Utf8Value();
+
+  rcl_names_and_types_t names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_action_get_client_names_and_types_by_node(
+                               node, &allocator, node_name.c_str(),
+                               node_namespace.c_str(), &names_and_types),
+                           "Failed to action client names and types.");
+
+  Napi::Array result_list = Napi::Array::New(env, names_and_types.names.size);
+  ExtractNamesAndTypes(names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&names_and_types),
+                           "Failed to destroy names_and_types");
+
+  return result_list;
+}
+
+Napi::Value ActionGetServerNamesAndTypesByNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string node_name = info[1].As<Napi::String>().Utf8Value();
+  std::string node_namespace = info[2].As<Napi::String>().Utf8Value();
+
+  rcl_names_and_types_t names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_action_get_server_names_and_types_by_node(
+                               node, &allocator, node_name.c_str(),
+                               node_namespace.c_str(), &names_and_types),
+                           "Failed to action server names and types");
+
+  Napi::Array result_list = Napi::Array::New(env, names_and_types.names.size);
+  ExtractNamesAndTypes(names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&names_and_types),
+                           "Failed to destroy names_and_types");
+
+  return result_list;
+}
+
+Napi::Value ActionGetNamesAndTypes(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+
+  rcl_names_and_types_t names_and_types =
+      rcl_get_zero_initialized_names_and_types();
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_action_get_names_and_types(node, &allocator, &names_and_types),
+      "Failed to action server names and types");
+
+  Napi::Array result_list = Napi::Array::New(env, names_and_types.names.size);
+  ExtractNamesAndTypes(names_and_types, &result_list);
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_names_and_types_fini(&names_and_types),
+                           "Failed to destroy names_and_types");
+
+  return result_list;
+}
+
 Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getParameterOverrides",
               Napi::Function::New(env, GetParameterOverrides));
@@ -246,6 +325,12 @@ Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getNodeName", Napi::Function::New(env, GetNodeName));
   exports.Set("getNamespace", Napi::Function::New(env, GetNamespace));
   exports.Set("getNodeLoggerName", Napi::Function::New(env, GetNodeLoggerName));
+  exports.Set("actionGetClientNamesAndTypesByNode",
+              Napi::Function::New(env, ActionGetClientNamesAndTypesByNode));
+  exports.Set("actionGetServerNamesAndTypesByNode",
+              Napi::Function::New(env, ActionGetServerNamesAndTypesByNode));
+  exports.Set("actionGetNamesAndTypes",
+              Napi::Function::New(env, ActionGetNamesAndTypes));
   return exports;
 }
 
