@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Intel Corporation. All rights reserved.
+// Copyright (c) 2020 Matt Richard. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_RCL_ACTION_BINDINGS_H_
-#define SRC_RCL_ACTION_BINDINGS_H_
+#ifndef SRC_RCL_ACTION_SERVER_BINDINGS_H_
+#define SRC_RCL_ACTION_SERVER_BINDINGS_H_
 
 #include <napi.h>
 
 namespace rclnodejs {
 
-Napi::Object InitActionBindings(Napi::Env env, Napi::Object exports);
+Napi::Object InitActionServerBindings(Napi::Env env, Napi::Object exports);
 
-}  // namespace rclnodejs
+}
 
-#endif  // SRC_RCL_ACTION_BINDINGS_H_
+#endif  // SRC_RCL_ACTION_SERVER_BINDINGS_H_

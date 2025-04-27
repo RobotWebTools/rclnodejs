@@ -16,7 +16,9 @@
 #include <rcutils/logging.h>
 
 #include "macros.h"
-#include "rcl_action_bindings.h"
+#include "rcl_action_client_bindings.h"
+#include "rcl_action_goal_bindings.h"
+#include "rcl_action_server_bindings.h"
 #include "rcl_bindings.h"
 #include "rcl_client_bindings.h"
 #include "rcl_context_bindings.h"
@@ -62,6 +64,9 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
   rclnodejs::StoreEnv(env);
   // Init the C++ bindings.
   rclnodejs::InitBindings(env, exports);
+  rclnodejs::InitActionClientBindings(env, exports);
+  rclnodejs::InitActionGoalBindings(env, exports);
+  rclnodejs::InitActionServerBindings(env, exports);
   rclnodejs::InitClientBindings(env, exports);
   rclnodejs::InitContextBindings(env, exports);
   rclnodejs::InitGraphBindings(env, exports);
@@ -74,7 +79,6 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
   rclnodejs::InitSubscriptionBindings(env, exports);
   rclnodejs::InitTimePointBindings(env, exports);
   rclnodejs::InitTimerBindings(env, exports);
-  rclnodejs::InitActionBindings(env, exports);
   rclnodejs::InitLifecycleBindings(env, exports);
   rclnodejs::ShadowNode::Init(env, exports);
   rclnodejs::RclHandle::Init(env, exports);
