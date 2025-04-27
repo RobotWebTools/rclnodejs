@@ -39,7 +39,7 @@ Napi::Value ActionAcceptNewGoal(const Napi::CallbackInfo& info) {
       reinterpret_cast<rcl_action_goal_handle_t*>(
           malloc(sizeof(rcl_action_goal_handle_t)));
 
-  *goal_handle = *rcl_action_accept_new_goal(action_server, buffer);
+  goal_handle = rcl_action_accept_new_goal(action_server, buffer);
   if (!goal_handle) {
     Napi::Error::New(env, rcl_get_error_string().str)
         .ThrowAsJavaScriptException();
