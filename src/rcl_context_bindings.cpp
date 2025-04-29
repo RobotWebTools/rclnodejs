@@ -127,11 +127,29 @@ Napi::Value IsContextValid(const Napi::CallbackInfo& info) {
   return Napi::Boolean::New(env, is_valid);
 }
 
+Napi::Value GetDomainId(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* context_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
+  size_t domain_id;
+  rcl_ret_t ret = rcl_context_get_domain_id(context, &domain_id);
+  if (RCL_RET_OK != ret) {
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  return Napi::Number::New(env, domain_id);
+}
+
 Napi::Object InitContextBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("init", Napi::Function::New(env, Init));
   exports.Set("shutdown", Napi::Function::New(env, Shutdown));
   exports.Set("createContext", Napi::Function::New(env, CreateContext));
   exports.Set("isContextValid", Napi::Function::New(env, IsContextValid));
+  exports.Set("getDomainId", Napi::Function::New(env, GetDomainId));
   return exports;
 }
 

@@ -318,6 +318,66 @@ Napi::Value ActionGetNamesAndTypes(const Napi::CallbackInfo& info) {
   return result_list;
 }
 
+Napi::Value CountPublishers(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
+
+  size_t count = 0;
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_count_publishers(node, topic_name.c_str(), &count),
+      "Failed to count publishers.");
+
+  return Napi::Number::New(env, static_cast<int32_t>(count));
+}
+
+Napi::Value CountSubscribers(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
+
+  size_t count = 0;
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_count_subscribers(node, topic_name.c_str(), &count),
+      "Failed to count subscribers.");
+
+  return Napi::Number::New(env, static_cast<int32_t>(count));
+}
+
+Napi::Value CountClients(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+  std::string service_name = info[1].As<Napi::String>().Utf8Value();
+
+  size_t count = 0;
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_count_clients(node, service_name.c_str(), &count), RCL_RET_OK,
+      rcl_get_error_string().str);
+
+  return Napi::Number::New(env, count);
+}
+
+Napi::Value CountServices(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+  std::string service_name = info[1].As<Napi::String>().Utf8Value();
+
+  size_t count = 0;
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_count_services(node, service_name.c_str(), &count), RCL_RET_OK,
+      rcl_get_error_string().str);
+
+  return Napi::Number::New(env, count);
+}
+
 Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getParameterOverrides",
               Napi::Function::New(env, GetParameterOverrides));
@@ -331,6 +391,10 @@ Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, ActionGetServerNamesAndTypesByNode));
   exports.Set("actionGetNamesAndTypes",
               Napi::Function::New(env, ActionGetNamesAndTypes));
+  exports.Set("countPublishers", Napi::Function::New(env, CountPublishers));
+  exports.Set("countSubscribers", Napi::Function::New(env, CountSubscribers));
+  exports.Set("countClients", Napi::Function::New(env, CountClients));
+  exports.Set("countServices", Napi::Function::New(env, CountServices));
   return exports;
 }
 
