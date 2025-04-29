@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Intel Corporation. All rights reserved.
+// Copyright (c) 2025, The Robot Web Tools Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
-describe('rclnodejs publisher test suite', function () {
+describe('rclnodejs subscription test suite', function () {
   this.timeout(60 * 1000);
 
   beforeEach(function () {
@@ -28,27 +28,11 @@ describe('rclnodejs publisher test suite', function () {
     rclnodejs.shutdown();
   });
 
-  it('Try creating a publisher', function () {
+  it('Test count of subscription', function () {
     const node = rclnodejs.createNode('publisher_node');
     const String = 'std_msgs/msg/String';
-    const publisher = node.createPublisher(String, 'topic');
-    rclnodejs.spin(node);
-  });
-
-  it('Try publish a message', function () {
-    const node = rclnodejs.createNode('publisher_node');
-    const String = 'std_msgs/msg/String';
-    const publisher = node.createPublisher(String, 'topic');
-    const msg = 'Hello ROS 2.0 Publisher!';
-    publisher.publish(msg);
-    rclnodejs.spin(node);
-  });
-
-  it('Test count of subscriptions', function () {
-    const node = rclnodejs.createNode('publisher_node');
-    const String = 'std_msgs/msg/String';
-    const publisher = node.createPublisher(String, 'topic');
-    node.createSubscription(String, 'topic', (msg) => {});
-    assert.strictEqual(publisher.subscriptionCount, 1);
+    node.createPublisher(String, 'topic');
+    const subscription = node.createSubscription(String, 'topic', (msg) => {});
+    assert.strictEqual(subscription.publisherCount, 1);
   });
 });

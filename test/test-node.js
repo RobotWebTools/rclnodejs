@@ -420,6 +420,23 @@ describe('rcl node methods testing', function () {
     await assertUtils.createDelay(500);
     assert.strictEqual(node.countSubscribers('chatter'), 2);
   });
+
+  it('node.countClients', function () {
+    const node = rclnodejs.createNode('publisher_node');
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+    node.createClient(AddTwoInts, 'add_two_ints');
+    assert.strictEqual(node.countClients('/add_two_ints'), 1);
+
+    node.createClient(AddTwoInts, 'add_two_ints');
+    assert.strictEqual(node.countClients('/add_two_ints'), 2);
+  });
+
+  it('node.countServices', function () {
+    const node = rclnodejs.createNode('publisher_node');
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+    node.createService(AddTwoInts, 'add_two_ints', (req) => {});
+    assert.strictEqual(node.countServices('/add_two_ints'), 1);
+  });
 });
 
 describe('topic & serviceName getter/setter', function () {

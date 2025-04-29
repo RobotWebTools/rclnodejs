@@ -80,4 +80,10 @@ describe('context test suite', function () {
     context.shutdown();
     assert.strictEqual(context.nodes.length, 0);
   });
+
+  it('context number id', async function () {
+    let context = new rclnodejs.Context();
+    await rclnodejs.init(context);
+    assert.strictEqual(typeof context.domainId, 'number');
+  });
 });

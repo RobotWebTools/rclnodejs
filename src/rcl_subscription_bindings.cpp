@@ -303,6 +303,20 @@ Napi::Value ClearContentFilter(const Napi::CallbackInfo& info) {
 #endif
 }
 
+Napi::Value GetPublisherCount(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  rcl_subscription_t* subscription = reinterpret_cast<rcl_subscription_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+
+  size_t count = 0;
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_subscription_get_publisher_count(subscription, &count), RCL_RET_OK,
+      rcl_get_error_string().str);
+
+  return Napi::Number::New(env, count);
+}
+
 Napi::Object InitSubscriptionBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("rclTake", Napi::Function::New(env, RclTake));
   exports.Set("createSubscription",
@@ -314,6 +328,7 @@ Napi::Object InitSubscriptionBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("setContentFilter", Napi::Function::New(env, SetContentFilter));
   exports.Set("clearContentFilter",
               Napi::Function::New(env, ClearContentFilter));
+  exports.Set("getPublisherCount", Napi::Function::New(env, GetPublisherCount));
   return exports;
 }
 
