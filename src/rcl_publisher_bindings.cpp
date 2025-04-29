@@ -114,11 +114,27 @@ Napi::Value PublishRawMessage(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
+Napi::Value GetSubscriptionCount(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+
+  size_t count = 0;
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_publisher_get_subscription_count(publisher, &count), RCL_RET_OK,
+      rcl_get_error_string().str);
+
+  return Napi::Number::New(env, count);
+}
+
 Napi::Object InitPublisherBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createPublisher", Napi::Function::New(env, CreatePublisher));
   exports.Set("publish", Napi::Function::New(env, Publish));
   exports.Set("getPublisherTopic", Napi::Function::New(env, GetPublisherTopic));
   exports.Set("publishRawMessage", Napi::Function::New(env, PublishRawMessage));
+  exports.Set("getSubscriptionCount",
+              Napi::Function::New(env, GetSubscriptionCount));
   return exports;
 }
 

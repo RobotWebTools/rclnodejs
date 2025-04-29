@@ -232,36 +232,6 @@ Napi::Value GetNodeNames(const Napi::CallbackInfo& info) {
   return result_list;
 }
 
-Napi::Value CountPublishers(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-
-  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
-  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
-
-  size_t count = 0;
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK, rcl_count_publishers(node, topic_name.c_str(), &count),
-      "Failed to count publishers.");
-
-  return Napi::Number::New(env, static_cast<int32_t>(count));
-}
-
-Napi::Value CountSubscribers(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-
-  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
-  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
-
-  size_t count = 0;
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK, rcl_count_subscribers(node, topic_name.c_str(), &count),
-      "Failed to count subscribers.");
-
-  return Napi::Number::New(env, static_cast<int32_t>(count));
-}
-
 Napi::Value ServiceServerIsAvailable(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -292,8 +262,6 @@ Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getServiceNamesAndTypes",
               Napi::Function::New(env, GetServiceNamesAndTypes));
   exports.Set("getNodeNames", Napi::Function::New(env, GetNodeNames));
-  exports.Set("countPublishers", Napi::Function::New(env, CountPublishers));
-  exports.Set("countSubscribers", Napi::Function::New(env, CountSubscribers));
   exports.Set("serviceServerIsAvailable",
               Napi::Function::New(env, ServiceServerIsAvailable));
   return exports;
