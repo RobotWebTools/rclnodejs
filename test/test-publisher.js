@@ -44,7 +44,7 @@ describe('rclnodejs publisher test suite', function () {
     rclnodejs.spin(node);
   });
 
-  it('Test count of subscription', function () {
+  it('Test count of subscriptions', function () {
     const node = rclnodejs.createNode('publisher_node');
     const String = 'std_msgs/msg/String';
     const publisher = node.createPublisher(String, 'topic');
