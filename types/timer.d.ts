@@ -45,5 +45,23 @@ declare module 'rclnodejs' {
      * @returns The interval value in nanoseconds
      */
     timeUntilNextCall(): bigint;
+
+    /**
+     * Change the timer period.
+     * @param period - The new period in nanoseconds.
+     */
+    changeTimerPeriod(period: bigint): void;
+
+    /**
+     * Get the timer period.
+     * @return The period in nanoseconds.
+     */
+    timerPeriod(): bigint;
+
+    /**
+     * Call a timer and starts counting again, retrieves actual and expected call time.
+     * @return - The timer information.
+     */
+    callTimerWithInfo(): object;
   }
 }
