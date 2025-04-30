@@ -159,6 +159,60 @@ Napi::Value TimerGetTimeSinceLastCall(const Napi::CallbackInfo& info) {
   return Napi::BigInt::New(env, elapsed_time);
 }
 
+Napi::Value ChangeTimerPeriod(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
+
+  if (!info[1].IsBigInt()) {
+    Napi::TypeError::New(env, "Timer period must be a BigInt")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  bool lossless;
+  int64_t period_nsec = info[1].As<Napi::BigInt>().Int64Value(&lossless);
+  int64_t old_period;
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_timer_exchange_period(timer, period_nsec, &old_period),
+      rcl_get_error_string().str);
+
+  return env.Undefined();
+}
+
+Napi::Value GetTimerPeriod(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
+  int64_t period_nsec = 0;
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_timer_get_period(timer, &period_nsec),
+                           rcl_get_error_string().str);
+
+  return Napi::BigInt::New(env, period_nsec);
+}
+
+Napi::Value CallTimerWithInfo(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
+  rcl_timer_call_info_t call_info;
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_timer_call_with_info(timer, &call_info),
+                           rcl_get_error_string().str);
+
+  Napi::Object timer_info = Napi::Object::New(env);
+  timer_info.Set("expectedCallTime",
+                 Napi::BigInt::New(env, call_info.expected_call_time));
+  timer_info.Set("actualCallTime",
+                 Napi::BigInt::New(env, call_info.actual_call_time));
+  return timer_info;
+}
+
 Napi::Object InitTimerBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createTimer", Napi::Function::New(env, CreateTimer));
   exports.Set("isTimerReady", Napi::Function::New(env, IsTimerReady));
@@ -170,6 +224,9 @@ Napi::Object InitTimerBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, TimerGetTimeSinceLastCall));
   exports.Set("timerGetTimeUntilNextCall",
               Napi::Function::New(env, TimerGetTimeUntilNextCall));
+  exports.Set("changeTimerPeriod", Napi::Function::New(env, ChangeTimerPeriod));
+  exports.Set("getTimerPeriod", Napi::Function::New(env, GetTimerPeriod));
+  exports.Set("callTimerWithInfo", Napi::Function::New(env, CallTimerWithInfo));
   return exports;
 }
 
