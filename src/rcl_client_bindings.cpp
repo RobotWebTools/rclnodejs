@@ -112,12 +112,30 @@ Napi::Value GetClientServiceName(const Napi::CallbackInfo& info) {
   return Napi::String::New(env, service_name);
 }
 
+Napi::Value ServiceServerIsAvailable(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  RclHandle* client_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
+  rcl_client_t* client = reinterpret_cast<rcl_client_t*>(client_handle->ptr());
+
+  bool is_available;
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_service_server_is_available(node, client, &is_available),
+      "Failed to get service state.");
+
+  return Napi::Boolean::New(env, is_available);
+}
+
 Napi::Object InitClientBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createClient", Napi::Function::New(env, CreateClient));
   exports.Set("sendRequest", Napi::Function::New(env, SendRequest));
   exports.Set("rclTakeResponse", Napi::Function::New(env, RclTakeResponse));
   exports.Set("getClientServiceName",
               Napi::Function::New(env, GetClientServiceName));
+  exports.Set("serviceServerIsAvailable",
+              Napi::Function::New(env, ServiceServerIsAvailable));
   return exports;
 }
 

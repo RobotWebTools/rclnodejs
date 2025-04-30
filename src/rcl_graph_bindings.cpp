@@ -18,6 +18,8 @@
 #include <rcl/graph.h>
 #include <rcl/rcl.h>
 
+#include <rcpputils/scope_exit.hpp>
+// NOLINTNEXTLINE
 #include <string>
 
 #include "macros.h"
@@ -25,6 +27,11 @@
 #include "rcl_utilities.h"
 
 namespace rclnodejs {
+
+typedef rcl_ret_t (*rcl_get_info_by_topic_func_t)(
+    const rcl_node_t* node, rcutils_allocator_t* allocator,
+    const char* topic_name, bool no_mangle,
+    rcl_topic_endpoint_info_array_t* info_array);
 
 Napi::Value GetPublisherNamesAndTypesByNode(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -193,59 +200,61 @@ Napi::Value GetServiceNamesAndTypes(const Napi::CallbackInfo& info) {
   return result_list;
 }
 
-Napi::Value GetNodeNames(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
+Napi::Value GetInfoByTopic(Napi::Env env, rcl_node_t* node,
+                           const char* topic_name, bool no_mangle,
+                           const char* type,
+                           rcl_get_info_by_topic_func_t rcl_get_info_by_topic) {
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+  rcl_topic_endpoint_info_array_t info_array =
+      rcl_get_zero_initialized_topic_endpoint_info_array();
 
-  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
-  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  rcutils_string_array_t node_names =
-      rcutils_get_zero_initialized_string_array();
-  rcutils_string_array_t node_namespaces =
-      rcutils_get_zero_initialized_string_array();
-  rcl_allocator_t allocator = rcl_get_default_allocator();
+  RCPPUTILS_SCOPE_EXIT({
+    rcl_ret_t fini_ret =
+        rcl_topic_endpoint_info_array_fini(&info_array, &allocator);
+    if (RCL_RET_OK != fini_ret) {
+      Napi::Error::New(env, rcl_get_error_string().str)
+          .ThrowAsJavaScriptException();
+      rcl_reset_error();
+    }
+  });
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_get_node_names(node, allocator, &node_names, &node_namespaces),
-      "Failed to get_node_names.");
-
-  Napi::Array result_list = Napi::Array::New(env, node_names.size);
-
-  for (size_t i = 0; i < node_names.size; ++i) {
-    Napi::Object item = Napi::Object::New(env);
-
-    item.Set("name", Napi::String::New(env, node_names.data[i]));
-    item.Set("namespace", Napi::String::New(env, node_namespaces.data[i]));
-
-    result_list.Set(i, item);
+  rcl_ret_t ret = rcl_get_info_by_topic(node, &allocator, topic_name, no_mangle,
+                                        &info_array);
+  if (RCL_RET_OK != ret) {
+    if (RCL_RET_UNSUPPORTED == ret) {
+      Napi::Error::New(
+          env, std::string("Failed to get information by topic for ") + type +
+                   ": function not supported by RMW_IMPLEMENTATION")
+          .ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+    Napi::Error::New(
+        env, std::string("Failed to get information by topic for ") + type)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
-  rcutils_ret_t fini_names_ret = rcutils_string_array_fini(&node_names);
-  rcutils_ret_t fini_namespaces_ret =
-      rcutils_string_array_fini(&node_namespaces);
-
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, fini_names_ret,
-                           "Failed to destroy node_names");
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, fini_namespaces_ret,
-                           "Failed to destroy node_namespaces");
-
-  return result_list;
+  return ConvertToJSTopicEndpointInfoList(env, &info_array);
 }
 
-Napi::Value ServiceServerIsAvailable(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-
+Napi::Value GetPublishersInfoByTopic(const Napi::CallbackInfo& info) {
   RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
-  RclHandle* client_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
-  rcl_client_t* client = reinterpret_cast<rcl_client_t*>(client_handle->ptr());
+  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
+  bool no_mangle = info[2].As<Napi::Boolean>();
 
-  bool is_available;
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK, rcl_service_server_is_available(node, client, &is_available),
-      "Failed to get service state.");
+  return GetInfoByTopic(info.Env(), node, topic_name.c_str(), no_mangle,
+                        "publishers", rcl_get_publishers_info_by_topic);
+}
 
-  return Napi::Boolean::New(env, is_available);
+Napi::Value GetSubscriptionsInfoByTopic(const Napi::CallbackInfo& info) {
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
+  bool no_mangle = info[2].As<Napi::Boolean>();
+
+  return GetInfoByTopic(info.Env(), node, topic_name.c_str(), no_mangle,
+                        "subscriptions", rcl_get_subscriptions_info_by_topic);
 }
 
 Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
@@ -261,9 +270,10 @@ Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, GetTopicNamesAndTypes));
   exports.Set("getServiceNamesAndTypes",
               Napi::Function::New(env, GetServiceNamesAndTypes));
-  exports.Set("getNodeNames", Napi::Function::New(env, GetNodeNames));
-  exports.Set("serviceServerIsAvailable",
-              Napi::Function::New(env, ServiceServerIsAvailable));
+  exports.Set("getPublishersInfoByTopic",
+              Napi::Function::New(env, GetPublishersInfoByTopic));
+  exports.Set("getSubscriptionsInfoByTopic",
+              Napi::Function::New(env, GetSubscriptionsInfoByTopic));
   return exports;
 }
 

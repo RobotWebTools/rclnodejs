@@ -29,6 +29,7 @@ const dependencies = [
   'builtin_interfaces',
   'rcl_lifecycle',
   'lifecycle_msgs',
+  'rcpputils',
   'rosidl_runtime_c',
   'rosidl_dynamic_typesupport',
   'type_description_interfaces',

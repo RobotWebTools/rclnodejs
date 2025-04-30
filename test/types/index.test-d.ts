@@ -65,6 +65,8 @@ expectType<rclnodejs.NamesAndTypesQueryResult[]>(
 expectType<rclnodejs.NamesAndTypesQueryResult[]>(node.getTopicNamesAndTypes());
 expectType<string[]>(node.getNodeNames());
 expectType<rclnodejs.NodeNamesQueryResult[]>(node.getNodeNamesAndNamespaces());
+expectType<Array<object>>(node.getPublishersInfoByTopic('topic', false));
+expectType<Array<object>>(node.getSubscriptionsInfoByTopic('topic', false));
 expectType<number>(node.countPublishers(TOPIC));
 expectType<number>(node.countSubscribers(TOPIC));
 expectType<rclnodejs.Options<string | rclnodejs.QoS>>(

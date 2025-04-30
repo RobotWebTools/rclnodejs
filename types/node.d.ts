@@ -728,6 +728,29 @@ declare module 'rclnodejs' {
     getServiceNamesAndTypes(): Array<NamesAndTypesQueryResult>;
 
     /**
+     * Get an array of publishers on a given topic.
+     *
+     * @param topic - The name of the topic.
+     * @param noDemangle - if `true`, `topic_name` needs to be a valid middleware topic name,
+     *       otherwise it should be a valid ROS topic name.
+     * @returns An array of publishers.
+     */
+    getPublishersInfoByTopic(topic: string, noDemangle: boolean): Array<object>;
+
+    /**
+     * Get an array of subscriptions on a given topic.
+     *
+     * @param topic - The name of the topic.
+     * @param noDemangle - if `true`, `topic_name` needs to be a valid middleware topic name,
+     *     otherwise it should be a valid ROS topic name.
+     * @returns An array of subscriptions.
+     */
+    getSubscriptionsInfoByTopic(
+      topic: string,
+      noDemangle: boolean
+    ): Array<object>;
+
+    /**
      * Get the list of nodes discovered by the provided node.
      *
      * @returns An array of the node names.

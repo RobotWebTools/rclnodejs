@@ -65,6 +65,7 @@
         '-lrcl_lifecycle',
         '-lrcutils',
         '-lrcl_yaml_param_parser',
+        '-lrcpputils',
         '-lrmw',
         '-lrosidl_runtime_c',
       ],
