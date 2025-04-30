@@ -14,5 +14,11 @@ declare module 'rclnodejs' {
      * @param message - The message to be sent.
      */
     publish(message: MessageType<T> | Buffer): void;
+
+    /**
+     * Get the number of subscriptions to this publisher.
+     * @returns The number of subscriptions
+     */
+    subscriptionCount(): number;
   }
 }

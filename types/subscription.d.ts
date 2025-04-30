@@ -66,5 +66,11 @@ declare module 'rclnodejs' {
      * @returns True if successful; false otherwise
      */
     clearContentFilter(): boolean;
+
+    /**
+     * Get the number of publishers to this subscription.
+     * @returns The number of publishers
+     */
+    publisherCount(): number;
   }
 }
