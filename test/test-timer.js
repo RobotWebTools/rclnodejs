@@ -156,7 +156,7 @@ describe('rclnodejs Timer class testing', function () {
     it('timer.callTimerWithInfo', function (done) {
       const timer = node.createTimer(BigInt('100000000'), () => {});
       const info = timer.callTimerWithInfo();
-      assert.deepStrictEqual(typeof info.expectetCallTime, 'bigint');
+      assert.deepStrictEqual(typeof info.expectedCallTime, 'bigint');
       assert.deepStrictEqual(typeof info.actualCallTime, 'bigint');
       timer.cancel();
       done();

@@ -206,7 +206,7 @@ Napi::Value CallTimerWithInfo(const Napi::CallbackInfo& info) {
                            rcl_get_error_string().str);
 
   Napi::Object timer_info = Napi::Object::New(env);
-  timer_info.Set("expectetCallTime",
+  timer_info.Set("expectedCallTime",
                  Napi::BigInt::New(env, call_info.expected_call_time));
   timer_info.Set("actualCallTime",
                  Napi::BigInt::New(env, call_info.actual_call_time));
