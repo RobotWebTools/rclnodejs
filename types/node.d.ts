@@ -719,13 +719,30 @@ declare module 'rclnodejs' {
     /**
      * Get this node's service names and corresponding types.
      *
-     * @returns An array of the names and types.
+     * @returns list of publishers of the names and types.
      *        [
      *          { name: '/start_motor', types: [ 'rplidar_ros/srv/Control' ] },
      *          { name: '/stop_motor',  types: [ 'rplidar_ros/srv/Control' ] }
      *        ]
      */
     getServiceNamesAndTypes(): Array<NamesAndTypesQueryResult>;
+
+    /**
+     * Get a list of publishers on a given topic.
+     *
+     * @returns list of publishers.
+     */
+    getPublishersInfoByTopic(topic: string, noDemangle: boolean): Array<object>;
+
+    /**
+     * Get a list of subscriptions on a given topic.
+     *
+     * @returns list of subscriptions.
+     */
+    getSubscriptionsInfoByTopic(
+      topic: string,
+      noDemangle: boolean
+    ): Array<object>;
 
     /**
      * Get the list of nodes discovered by the provided node.
