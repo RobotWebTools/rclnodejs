@@ -48,6 +48,9 @@ std::unique_ptr<rmw_qos_profile_t> GetQoSProfile(Napi::Value qos);
 void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
                           Napi::Array* result_list);
 
+Napi::Array ConvertToJSTopicEndpointInfoList(
+    Napi::Env env, const rmw_topic_endpoint_info_array_t* info_array);
+
 }  // namespace rclnodejs
 
 #endif  // SRC_RCL_UTILITIES_H_

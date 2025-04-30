@@ -16,6 +16,7 @@
 
 #include <rcl/rcl.h>
 #include <rcl_action/rcl_action.h>
+#include <rmw/topic_endpoint_info.h>
 #include <uv.h>
 
 #include <memory>
@@ -67,6 +68,68 @@ std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
       avoid_ros_namespace_conventions.As<Napi::Boolean>();
 
   return qos_profile;
+}
+
+Napi::Value ConvertRMWTimeToDuration(Napi::Env env,
+                                     const rmw_time_t* duration) {
+  Napi::Object obj = Napi::Object::New(env);
+  obj.Set("seconds", Napi::BigInt::New(env, duration->sec));
+  obj.Set("nanoseconds", Napi::Number::New(env, duration->nsec));
+  return obj;
+}
+
+Napi::Value ConvertToHashObject(Napi::Env env,
+                                const rosidl_type_hash_t* type_hash) {
+  Napi::Object obj = Napi::Object::New(env);
+  obj.Set("version", Napi::Number::New(env, type_hash->version));
+  obj.Set("value", Napi::Buffer<char>::Copy(
+                       env, reinterpret_cast<const char*>(type_hash->value),
+                       ROSIDL_TYPE_HASH_SIZE));
+  return obj;
+}
+
+Napi::Value ConvertToQoS(Napi::Env env, const rmw_qos_profile_t* qos_profile) {
+  Napi::Object qos = Napi::Object::New(env);
+  qos.Set("depth", Napi::Number::New(env, qos_profile->depth));
+  qos.Set("history", Napi::Number::New(env, qos_profile->history));
+  qos.Set("reliability", Napi::Number::New(env, qos_profile->reliability));
+  qos.Set("durability", Napi::Number::New(env, qos_profile->durability));
+  qos.Set("lifespan", ConvertRMWTimeToDuration(env, &qos_profile->lifespan));
+  qos.Set("deadline", ConvertRMWTimeToDuration(env, &qos_profile->deadline));
+  qos.Set("liveliness", Napi::Number::New(env, qos_profile->liveliness));
+  qos.Set(
+      "liveliness_lease_duration",
+      ConvertRMWTimeToDuration(env, &qos_profile->liveliness_lease_duration));
+  qos.Set(
+      "avoid_ros_namespace_conventions",
+      Napi::Boolean::New(env, qos_profile->avoid_ros_namespace_conventions));
+  return qos;
+}
+
+Napi::Value ConvertToJSTopicEndpoint(
+    Napi::Env env, const rmw_topic_endpoint_info_t* topic_endpoint_info) {
+  Napi::Array endpoint_gid = Napi::Array::New(env, RMW_GID_STORAGE_SIZE);
+  for (size_t i = 0; i < RMW_GID_STORAGE_SIZE; i++) {
+    endpoint_gid.Set(
+        i, Napi::Number::New(env, topic_endpoint_info->endpoint_gid[i]));
+  }
+
+  Napi::Object endpoint = Napi::Object::New(env);
+  endpoint.Set("node_name",
+               Napi::String::New(env, topic_endpoint_info->node_name));
+  endpoint.Set("node_namespace",
+               Napi::String::New(env, topic_endpoint_info->node_namespace));
+  endpoint.Set("topic_type",
+               Napi::String::New(env, topic_endpoint_info->topic_type));
+  endpoint.Set("topic_type_hash",
+               ConvertToHashObject(env, &topic_endpoint_info->topic_type_hash));
+  endpoint.Set("endpoint_type",
+               Napi::Number::New(
+                   env, static_cast<int>(topic_endpoint_info->endpoint_type)));
+  endpoint.Set("endpoint_gid", endpoint_gid);
+  endpoint.Set("qos_profile",
+               ConvertToQoS(env, &topic_endpoint_info->qos_profile));
+  return endpoint;
 }
 
 uv_lib_t g_lib;
@@ -181,6 +244,16 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
     item.Set("types", type_list);
     result_list->Set(i, item);
   }
+}
+
+Napi::Array ConvertToJSTopicEndpointInfoList(
+    Napi::Env env, const rmw_topic_endpoint_info_array_t* info_array) {
+  Napi::Array list = Napi::Array::New(env, info_array->size);
+  for (size_t i = 0; i < info_array->size; ++i) {
+    rmw_topic_endpoint_info_t topic_endpoint_info = info_array->info_array[i];
+    list.Set(i, ConvertToJSTopicEndpoint(env, &topic_endpoint_info));
+  }
+  return list;
 }
 
 }  // namespace rclnodejs
