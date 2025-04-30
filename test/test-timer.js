@@ -137,5 +137,29 @@ describe('rclnodejs Timer class testing', function () {
       });
       rclnodejs.spin(node);
     });
+
+    it('timer.timerPeriod', function (done) {
+      const timer = node.createTimer(BigInt('100000000'), () => {});
+      assert.deepStrictEqual(timer.timerPeriod, BigInt('100000000'));
+      timer.cancel();
+      done();
+    });
+
+    it('timer.changeTimerPeriod', function (done) {
+      const timer = node.createTimer(BigInt('100000000'), () => {});
+      timer.changeTimerPeriod(BigInt('200000000'));
+      assert.deepStrictEqual(timer.timerPeriod, BigInt('200000000'));
+      timer.cancel();
+      done();
+    });
+
+    it('timer.callTimerWithInfo', function (done) {
+      const timer = node.createTimer(BigInt('100000000'), () => {});
+      const info = timer.callTimerWithInfo();
+      assert.deepStrictEqual(typeof info.expectedCallTime, 'bigint');
+      assert.deepStrictEqual(typeof info.actualCallTime, 'bigint');
+      timer.cancel();
+      done();
+    });
   });
 });
