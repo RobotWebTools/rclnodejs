@@ -7,6 +7,7 @@ const NODE_NAME = 'test_node';
 const LIFECYCLE_NODE_NAME = 'lifecycle_test_node';
 const TYPE_CLASS = 'std_msgs/msg/String';
 const TOPIC = 'topic';
+const SERVICE_NAME = 'service';
 const MSG = rclnodejs.createMessageObject(TYPE_CLASS);
 MSG.data = '';
 
@@ -27,6 +28,7 @@ expectType<string | undefined>(rclnodejs.DistroUtils.getDistroName(2105));
 
 // ---- Context -----
 expectType<rclnodejs.Context>(rclnodejs.Context.defaultContext());
+expectType<number>(rclnodejs.Context.defaultContext().domainId());
 
 // ---- NodeOptions ----
 const nodeOptions = new rclnodejs.NodeOptions();
@@ -69,6 +71,8 @@ expectType<Array<object>>(node.getPublishersInfoByTopic('topic', false));
 expectType<Array<object>>(node.getSubscriptionsInfoByTopic('topic', false));
 expectType<number>(node.countPublishers(TOPIC));
 expectType<number>(node.countSubscribers(TOPIC));
+expectType<number>(node.countClients(SERVICE_NAME));
+expectType<number>(node.countServices(SERVICE_NAME));
 expectType<rclnodejs.Options<string | rclnodejs.QoS>>(
   rclnodejs.Node.getDefaultOptions()
 );
@@ -229,6 +233,9 @@ expectType<bigint>(timer.timeSinceLastCall());
 expectType<bigint>(timer.timeUntilNextCall());
 expectType<boolean>(timer.isCanceled());
 expectType<void>(timer.cancel());
+expectType<void>(timer.changeTimerPeriod(BigInt(100000)));
+expectType<bigint>(timer.timerPeriod());
+expectType<object>(timer.callTimerWithInfo());
 
 // ---- Rate ----
 const rate = await node.createRate(1);

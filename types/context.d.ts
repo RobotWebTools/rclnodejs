@@ -87,5 +87,11 @@ declare module 'rclnodejs' {
      * @returns The default Context
      */
     static defaultContext(): Context;
+
+    /**
+     * Get the domain ID of this context.
+     * @returns domain ID of this context
+     */
+    domainId(): number;
   }
 }

@@ -782,5 +782,19 @@ declare module 'rclnodejs' {
      * @returns Number of subscribers on the given topic.
      */
     countSubscribers(topic: string): number;
+
+    /**
+     * Get the number of clients on a given service name.
+     * @param serviceName - The service name.
+     * @returns Number of clients.
+     */
+    countClients(serviceName: string): number;
+
+    /**
+     * Get the number of services  on a given service name.
+     * @param serviceName - The service name.
+     * @returns Number of services.
+     */
+    countServices(serviceName: string): number;
   }
 }
