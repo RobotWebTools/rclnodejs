@@ -211,6 +211,8 @@ Napi::Value GetInfoByTopic(Napi::Env env, rcl_node_t* node,
     rcl_ret_t fini_ret =
         rcl_topic_endpoint_info_array_fini(&info_array, &allocator);
     if (RCL_RET_OK != fini_ret) {
+      Napi::Error::New(env, rcl_get_error_string().str)
+          .ThrowAsJavaScriptException();
       rcl_reset_error();
     }
   });

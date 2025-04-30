@@ -719,7 +719,7 @@ declare module 'rclnodejs' {
     /**
      * Get this node's service names and corresponding types.
      *
-     * @returns list of publishers of the names and types.
+     * @returns An array of the names and types.
      *        [
      *          { name: '/start_motor', types: [ 'rplidar_ros/srv/Control' ] },
      *          { name: '/stop_motor',  types: [ 'rplidar_ros/srv/Control' ] }
@@ -728,16 +728,22 @@ declare module 'rclnodejs' {
     getServiceNamesAndTypes(): Array<NamesAndTypesQueryResult>;
 
     /**
-     * Get a list of publishers on a given topic.
+     * Get an array of publishers on a given topic.
      *
-     * @returns list of publishers.
+     * @param topic - The name of the topic.
+     * @param noDemangle - if `true`, `topic_name` needs to be a valid middleware topic name,
+     *       otherwise it should be a valid ROS topic name.
+     * @returns An array of publishers.
      */
     getPublishersInfoByTopic(topic: string, noDemangle: boolean): Array<object>;
 
     /**
-     * Get a list of subscriptions on a given topic.
+     * Get an array of subscriptions on a given topic.
      *
-     * @returns list of subscriptions.
+     * @param topic - The name of the topic.
+     * @param noDemangle - if `true`, `topic_name` needs to be a valid middleware topic name,
+     *     otherwise it should be a valid ROS topic name.
+     * @returns An array of subscriptions.
      */
     getSubscriptionsInfoByTopic(
       topic: string,
