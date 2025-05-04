@@ -128,6 +128,43 @@ Napi::Value ServiceServerIsAvailable(const Napi::CallbackInfo& info) {
   return Napi::Boolean::New(env, is_available);
 }
 
+#if ROS_VERSION > 2205  // 2205 == Humble
+Napi::Value ConfigureClientIntrospection(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* client_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_client_t* client = reinterpret_cast<rcl_client_t*>(client_handle->ptr());
+  RclHandle* node_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
+      RclHandle::Unwrap(info[2].As<Napi::Object>())->ptr());
+
+  std::string interface_name = info[3].As<Napi::String>().Utf8Value();
+  std::string package_name = info[4].As<Napi::String>().Utf8Value();
+  const rosidl_service_type_support_t* ts =
+      GetServiceTypeSupport(package_name, interface_name);
+
+  if (ts) {
+    rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
+    auto qos_profile = GetQoSProfile(info[5]);
+    if (qos_profile) {
+      publisher_ops.qos = *qos_profile;
+    }
+    rcl_service_introspection_state_t state =
+        static_cast<rcl_service_introspection_state_t>(
+            info[6].As<Napi::Number>().Uint32Value());
+
+    THROW_ERROR_IF_NOT_EQUAL(rcl_client_configure_service_introspection(
+                                 client, node, clock, ts, publisher_ops, state),
+                             RCL_RET_OK, rcl_get_error_string().str);
+  } else {
+    Napi::Error::New(env, GetErrorMessageAndClear())
+        .ThrowAsJavaScriptException();
+  }
+  return env.Undefined();
+}
+#endif
+
 Napi::Object InitClientBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createClient", Napi::Function::New(env, CreateClient));
   exports.Set("sendRequest", Napi::Function::New(env, SendRequest));
@@ -136,6 +173,10 @@ Napi::Object InitClientBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, GetClientServiceName));
   exports.Set("serviceServerIsAvailable",
               Napi::Function::New(env, ServiceServerIsAvailable));
+#if ROS_VERSION > 2205  // 2205 == Humble
+  exports.Set("configureClientIntrospection",
+              Napi::Function::New(env, ConfigureClientIntrospection));
+#endif
   return exports;
 }
 
