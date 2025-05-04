@@ -51,6 +51,7 @@ Napi::Value CreateService(const Napi::CallbackInfo& info) {
     if (qos_profile) {
       service_ops.qos = *qos_profile;
     }
+
     THROW_ERROR_IF_NOT_EQUAL(
         rcl_service_init(service, node, ts, service_name.c_str(), &service_ops),
         RCL_RET_OK, rcl_get_error_string().str);
@@ -173,6 +174,18 @@ Napi::Value ConfigureServiceIntrospection(const Napi::CallbackInfo& info) {
 }
 #endif
 
+Napi::Value GetOptions(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+
+  const rcl_service_options_t* options = rcl_service_get_options(service);
+  auto qos_profile = ConvertToQoS(env, &options->qos);
+
+  return qos_profile;
+}
+
 Napi::Object InitServiceBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createService", Napi::Function::New(env, CreateService));
   exports.Set("rclTakeRequest", Napi::Function::New(env, RclTakeRequest));
@@ -183,6 +196,7 @@ Napi::Object InitServiceBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("configureServiceIntrospection",
               Napi::Function::New(env, ConfigureServiceIntrospection));
 #endif
+  exports.Set("getOptions", Napi::Function::New(env, GetOptions));
   return exports;
 }
 
