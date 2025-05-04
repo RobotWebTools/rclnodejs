@@ -88,5 +88,11 @@ declare module 'rclnodejs' {
       serviceEventPubQOS: QoS,
       introspectionState: ServiceIntrospectionStates
     ): void;
+
+    /**
+     * Get the options of this service.
+     * @return The options of this service.
+     */
+    getOptions(): object;
   }
 }

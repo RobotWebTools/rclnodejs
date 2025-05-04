@@ -202,6 +202,7 @@ expectType<void>(
   )
 );
 expectType<boolean>(service.isDestroyed());
+expectType<object>(service.getOptions());
 
 // ---- Client ----
 const client = node.createClient(

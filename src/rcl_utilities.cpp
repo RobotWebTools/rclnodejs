@@ -88,24 +88,6 @@ Napi::Value ConvertToHashObject(Napi::Env env,
   return obj;
 }
 
-Napi::Value ConvertToQoS(Napi::Env env, const rmw_qos_profile_t* qos_profile) {
-  Napi::Object qos = Napi::Object::New(env);
-  qos.Set("depth", Napi::Number::New(env, qos_profile->depth));
-  qos.Set("history", Napi::Number::New(env, qos_profile->history));
-  qos.Set("reliability", Napi::Number::New(env, qos_profile->reliability));
-  qos.Set("durability", Napi::Number::New(env, qos_profile->durability));
-  qos.Set("lifespan", ConvertRMWTimeToDuration(env, &qos_profile->lifespan));
-  qos.Set("deadline", ConvertRMWTimeToDuration(env, &qos_profile->deadline));
-  qos.Set("liveliness", Napi::Number::New(env, qos_profile->liveliness));
-  qos.Set(
-      "liveliness_lease_duration",
-      ConvertRMWTimeToDuration(env, &qos_profile->liveliness_lease_duration));
-  qos.Set(
-      "avoid_ros_namespace_conventions",
-      Napi::Boolean::New(env, qos_profile->avoid_ros_namespace_conventions));
-  return qos;
-}
-
 Napi::Value ConvertToJSTopicEndpoint(
     Napi::Env env, const rmw_topic_endpoint_info_t* topic_endpoint_info) {
   Napi::Array endpoint_gid = Napi::Array::New(env, RMW_GID_STORAGE_SIZE);
@@ -128,7 +110,7 @@ Napi::Value ConvertToJSTopicEndpoint(
                    env, static_cast<int>(topic_endpoint_info->endpoint_type)));
   endpoint.Set("endpoint_gid", endpoint_gid);
   endpoint.Set("qos_profile",
-               ConvertToQoS(env, &topic_endpoint_info->qos_profile));
+               rclnodejs::ConvertToQoS(env, &topic_endpoint_info->qos_profile));
   return endpoint;
 }
 
@@ -244,6 +226,24 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
     item.Set("types", type_list);
     result_list->Set(i, item);
   }
+}
+
+Napi::Value ConvertToQoS(Napi::Env env, const rmw_qos_profile_t* qos_profile) {
+  Napi::Object qos = Napi::Object::New(env);
+  qos.Set("depth", Napi::Number::New(env, qos_profile->depth));
+  qos.Set("history", Napi::Number::New(env, qos_profile->history));
+  qos.Set("reliability", Napi::Number::New(env, qos_profile->reliability));
+  qos.Set("durability", Napi::Number::New(env, qos_profile->durability));
+  qos.Set("lifespan", ConvertRMWTimeToDuration(env, &qos_profile->lifespan));
+  qos.Set("deadline", ConvertRMWTimeToDuration(env, &qos_profile->deadline));
+  qos.Set("liveliness", Napi::Number::New(env, qos_profile->liveliness));
+  qos.Set(
+      "liveliness_lease_duration",
+      ConvertRMWTimeToDuration(env, &qos_profile->liveliness_lease_duration));
+  qos.Set(
+      "avoid_ros_namespace_conventions",
+      Napi::Boolean::New(env, qos_profile->avoid_ros_namespace_conventions));
+  return qos;
 }
 
 Napi::Array ConvertToJSTopicEndpointInfoList(

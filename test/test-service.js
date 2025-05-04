@@ -16,8 +16,9 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
+const { QoS } = rclnodejs;
 
-describe('Test creating a service with an async callback', function () {
+describe('Test service class', function () {
   this.timeout(60 * 1000);
 
   before(function () {
@@ -66,5 +67,30 @@ describe('Test creating a service with an async callback', function () {
     });
     rclnodejs.spin(serviceNode);
     rclnodejs.spin(clientNode);
+  });
+
+  it('Get service options', function () {
+    const node = rclnodejs.createNode('test_node');
+    const service = node.createService(
+      'example_interfaces/srv/AddTwoInts',
+      'add_two_ints',
+      { qos: rclnodejs.QoS.profileSystemDefault },
+      (request, response) => {
+        let result = response.template;
+        result.sum = request.a + request.b;
+      }
+    );
+
+    const options = service.getOptions();
+    assert.strictEqual(options.depth, 0);
+    assert.strictEqual(
+      options.durability,
+      QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT
+    );
+    assert.strictEqual(
+      options.reliability,
+      QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT
+    );
+    node.destroy();
   });
 });

@@ -51,6 +51,8 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
 Napi::Array ConvertToJSTopicEndpointInfoList(
     Napi::Env env, const rmw_topic_endpoint_info_array_t* info_array);
 
+Napi::Value ConvertToQoS(Napi::Env env, const rmw_qos_profile_t* qos_profile);
+
 }  // namespace rclnodejs
 
 #endif  // SRC_RCL_UTILITIES_H_
