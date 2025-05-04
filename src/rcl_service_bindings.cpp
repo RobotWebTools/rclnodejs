@@ -120,6 +120,9 @@ Napi::Value GetServiceServiceName(const Napi::CallbackInfo& info) {
 Napi::Value ConfigureServiceIntrospection(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
+  RclHandle* service_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_service_t* service =
+      reinterpret_cast<rcl_service_t*>(service_handle->ptr());
   RclHandle* node_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
 
@@ -137,39 +140,18 @@ Napi::Value ConfigureServiceIntrospection(const Napi::CallbackInfo& info) {
     if (qos_profile) {
       publisher_ops.qos = *qos_profile;
     }
-
     rcl_service_introspection_state_t state =
         static_cast<rcl_service_introspection_state_t>(
             info[6].As<Napi::Number>().Uint32Value());
 
-    bool configureForService = info[7].As<Napi::Boolean>();
-
-    if (configureForService) {
-      RclHandle* service_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
-      rcl_service_t* service =
-          reinterpret_cast<rcl_service_t*>(service_handle->ptr());
-
-      THROW_ERROR_IF_NOT_EQUAL(
-          rcl_service_configure_service_introspection(service, node, clock, ts,
-                                                      publisher_ops, state),
-          RCL_RET_OK, rcl_get_error_string().str);
-
-    } else {
-      RclHandle* client_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
-      rcl_client_t* client =
-          reinterpret_cast<rcl_client_t*>(client_handle->ptr());
-
-      THROW_ERROR_IF_NOT_EQUAL(
-          rcl_client_configure_service_introspection(client, node, clock, ts,
-                                                     publisher_ops, state),
-          RCL_RET_OK, rcl_get_error_string().str);
-    }
-
+    THROW_ERROR_IF_NOT_EQUAL(
+        rcl_service_configure_service_introspection(service, node, clock, ts,
+                                                    publisher_ops, state),
+        RCL_RET_OK, rcl_get_error_string().str);
   } else {
     Napi::Error::New(env, GetErrorMessageAndClear())
         .ThrowAsJavaScriptException();
   }
-
   return env.Undefined();
 }
 #endif
