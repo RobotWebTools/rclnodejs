@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - develop
+      - kilted
       - jazzy
       - humble-hawksbill
   pull_request:
     branches:
       - develop
+      - kilted
       - jazzy
       - humble-hawksbill
   workflow_dispatch:
@@ -34,6 +36,7 @@ jobs:
       uses: ros-tooling/setup-ros@v0.7
       with:
         required-ros-distributions: ${{ needs.identify-ros-distro.outputs.distro }}
+        use-ros2-testing: true
 
     - name: Install ROS2 Rolling (Conditional)
       if: ${{ needs.identify-ros-distro.outputs.distro == 'rolling' }}
