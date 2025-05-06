@@ -18,6 +18,7 @@ const IsClose = require('is-close');
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
+const DistroUtils = require('../lib/distro.js');
 const { NodeOptions } = require('../index.js');
 const assertThrowsError = assertUtils.assertThrowsError;
 const Context = require('../lib/context.js');
@@ -422,6 +423,10 @@ describe('rcl node methods testing', function () {
   });
 
   it('node.countClients', function () {
+    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+      this.skip();
+      return;
+    }
     const node = rclnodejs.createNode('publisher_node');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     node.createClient(AddTwoInts, 'add_two_ints');
@@ -432,6 +437,10 @@ describe('rcl node methods testing', function () {
   });
 
   it('node.countServices', function () {
+    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+      this.skip();
+      return;
+    }
     const node = rclnodejs.createNode('publisher_node');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     node.createService(AddTwoInts, 'add_two_ints', (req) => {});

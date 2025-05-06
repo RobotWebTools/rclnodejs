@@ -348,6 +348,7 @@ Napi::Value CountSubscribers(const Napi::CallbackInfo& info) {
   return Napi::Number::New(env, static_cast<int32_t>(count));
 }
 
+#if ROS_VERSION > 2205  // 2205 == Humble
 Napi::Value CountClients(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -377,6 +378,7 @@ Napi::Value CountServices(const Napi::CallbackInfo& info) {
 
   return Napi::Number::New(env, count);
 }
+#endif
 
 Napi::Value GetNodeNames(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -432,8 +434,10 @@ Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, ActionGetNamesAndTypes));
   exports.Set("countPublishers", Napi::Function::New(env, CountPublishers));
   exports.Set("countSubscribers", Napi::Function::New(env, CountSubscribers));
+#if ROS_VERSION > 2205  // 2205 == Humble
   exports.Set("countClients", Napi::Function::New(env, CountClients));
   exports.Set("countServices", Napi::Function::New(env, CountServices));
+#endif
   exports.Set("getNodeNames", Napi::Function::New(env, GetNodeNames));
   return exports;
 }
