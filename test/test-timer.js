@@ -16,6 +16,7 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
+const DistroUtils = require('../lib/distro.js');
 
 const TIMER_INTERVAL = BigInt('100000000');
 describe('rclnodejs Timer class testing', function () {
@@ -154,6 +155,10 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.callTimerWithInfo', function (done) {
+      if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+        this.skip();
+        return;
+      }
       const timer = node.createTimer(BigInt('100000000'), () => {});
       const info = timer.callTimerWithInfo();
       assert.deepStrictEqual(typeof info.expectedCallTime, 'bigint');

@@ -78,6 +78,7 @@ Napi::Value ConvertRMWTimeToDuration(Napi::Env env,
   return obj;
 }
 
+#if ROS_VERSION > 2205  // 2205 == Humble
 Napi::Value ConvertToHashObject(Napi::Env env,
                                 const rosidl_type_hash_t* type_hash) {
   Napi::Object obj = Napi::Object::New(env);
@@ -87,6 +88,7 @@ Napi::Value ConvertToHashObject(Napi::Env env,
                        ROSIDL_TYPE_HASH_SIZE));
   return obj;
 }
+#endif
 
 Napi::Value ConvertToJSTopicEndpoint(
     Napi::Env env, const rmw_topic_endpoint_info_t* topic_endpoint_info) {
@@ -103,8 +105,10 @@ Napi::Value ConvertToJSTopicEndpoint(
                Napi::String::New(env, topic_endpoint_info->node_namespace));
   endpoint.Set("topic_type",
                Napi::String::New(env, topic_endpoint_info->topic_type));
+#if ROS_VERSION > 2205  // 2205 == Humble
   endpoint.Set("topic_type_hash",
                ConvertToHashObject(env, &topic_endpoint_info->topic_type_hash));
+#endif
   endpoint.Set("endpoint_type",
                Napi::Number::New(
                    env, static_cast<int>(topic_endpoint_info->endpoint_type)));
