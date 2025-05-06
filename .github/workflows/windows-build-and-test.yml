@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - develop
+      - kilted
       - jazzy
       - humble-hawksbill
   pull_request:
     branches:
       - develop
+      - kilted
       - jazzy
       - humble-hawksbill
   workflow_dispatch:

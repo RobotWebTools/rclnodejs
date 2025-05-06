@@ -11,6 +11,7 @@ on:
         value: ${{ jobs.identify-ros-distro.outputs.linuxos }}
 env:
   ROLLING_VAR: ${{ contains(github.ref, 'develop') }}
+  KILTED_VAR: ${{ contains(github.ref, 'kilted') }}
   JAZZY_VAR: ${{ contains(github.ref, 'jazzy') }}
   IRON_VAR: ${{ contains(github.ref, 'iron') }}
   HUMBLE_VAR: ${{ contains(github.ref, 'humble') }}
@@ -27,6 +28,9 @@ jobs:
         run: |
           if ${ROLLING_VAR} == true; then
             echo "::set-output name=distro::rolling"
+            echo "::set-output name=linuxos::ubuntu:24.04"
+          elif ${KILTED_VAR} == true; then
+            echo "::set-output name=distro::kilted"
             echo "::set-output name=linuxos::ubuntu:24.04"
           elif ${JAZZY_VAR} == true; then
             echo "::set-output name=distro::jazzy"
