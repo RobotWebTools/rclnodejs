@@ -211,7 +211,7 @@ Napi::Value GetNumEntities(const Napi::CallbackInfo& info) {
     std::string error_text{
         "Failed to get number of entities for 'rcl_action_client_t'"};
     Napi::Error::New(env, error_text).ThrowAsJavaScriptException();
-    throw;
+    return env.Undefined();
   }
   Napi::Object entities = Napi::Object::New(env);
   entities.Set("subscriptionsNumber",
@@ -248,8 +248,6 @@ Napi::Object InitActionClientBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, ActionServerIsAvailable));
   exports.Set("actionSendGoalRequest",
               Napi::Function::New(env, ActionSendGoalRequest));
-  exports.Set("actionTakeCancelRequest",
-              Napi::Function::New(env, ActionTakeCancelRequest));
   exports.Set("actionSendResultRequest",
               Napi::Function::New(env, ActionSendResultRequest));
   exports.Set("actionTakeFeedback",
