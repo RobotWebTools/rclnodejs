@@ -283,4 +283,16 @@ describe('rclnodejs action client', function () {
 
     client.destroy();
   });
+
+  it('Test getNumEntities', function () {
+    let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
+    const numEntities = client.getNumEntities();
+    assert.strictEqual(numEntities.subscriptionsNumber, 2);
+    assert.strictEqual(numEntities.guardConditionsNumber, 0);
+    assert.strictEqual(numEntities.timersNumber, 0);
+    assert.strictEqual(numEntities.clientsNumber, 3);
+    assert.strictEqual(numEntities.servicesNumber, 0);
+
+    client.destroy();
+  });
 });

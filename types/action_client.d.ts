@@ -173,5 +173,11 @@ declare module 'rclnodejs' {
      * Destroy the underlying action client handle.
      */
     destroy(): void;
+
+    /**
+     * Get the number of wait set entities that make up an action entity.
+     * @return - The number of subscriptions, guard_conditions, timers, and clients and services.
+     */
+    getNumEntities(): object;
   }
 }

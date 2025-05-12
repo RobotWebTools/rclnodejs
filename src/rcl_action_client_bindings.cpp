@@ -126,28 +126,6 @@ Napi::Value ActionSendGoalRequest(const Napi::CallbackInfo& info) {
   return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
 }
 
-Napi::Value ActionTakeCancelRequest(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-
-  RclHandle* action_server_handle =
-      RclHandle::Unwrap(info[0].As<Napi::Object>());
-  rcl_action_server_t* action_server =
-      reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
-  rmw_request_id_t* header =
-      reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
-
-  void* taken_request = info[1].As<Napi::Buffer<char>>().Data();
-  rcl_ret_t ret =
-      rcl_action_take_cancel_request(action_server, header, taken_request);
-  if (ret != RCL_RET_ACTION_SERVER_TAKE_FAILED) {
-    auto js_obj = RclHandle::NewInstance(env, header, nullptr,
-                                         [](void* ptr) { free(ptr); });
-    return js_obj;
-  }
-
-  return env.Undefined();
-}
-
 Napi::Value ActionSendResultRequest(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -211,6 +189,58 @@ Napi::Value ActionTakeStatus(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
+Napi::Value GetNumEntities(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_action_client_t* action_client =
+      reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
+
+  size_t num_subscriptions = 0u;
+  size_t num_guard_conditions = 0u;
+  size_t num_timers = 0u;
+  size_t num_clients = 0u;
+  size_t num_services = 0u;
+
+  rcl_ret_t ret;
+  ret = rcl_action_client_wait_set_get_num_entities(
+      action_client, &num_subscriptions, &num_guard_conditions, &num_timers,
+      &num_clients, &num_services);
+  if (RCL_RET_OK != ret) {
+    rcl_reset_error();
+    std::string error_text{
+        "Failed to get number of entities for 'rcl_action_client_t'"};
+    Napi::Error::New(env, error_text).ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  Napi::Object entities = Napi::Object::New(env);
+  entities.Set("subscriptionsNumber",
+               Napi::Number::New(env, num_subscriptions));
+  entities.Set("guardConditionsNumber",
+               Napi::Number::New(env, num_guard_conditions));
+  entities.Set("timersNumber", Napi::Number::New(env, num_timers));
+  entities.Set("clientsNumber", Napi::Number::New(env, num_clients));
+  entities.Set("servicesNumber", Napi::Number::New(env, num_services));
+  return entities;
+}
+
+Napi::Value ActionSendCancelRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_action_client_t* action_client =
+      reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
+  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
+
+  int64_t sequence_number;
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_action_send_cancel_request(action_client, buffer, &sequence_number),
+      RCL_RET_OK, rcl_get_error_string().str);
+
+  return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
+}
+
 Napi::Object InitActionClientBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("actionCreateClient",
               Napi::Function::New(env, ActionCreateClient));
@@ -218,13 +248,14 @@ Napi::Object InitActionClientBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, ActionServerIsAvailable));
   exports.Set("actionSendGoalRequest",
               Napi::Function::New(env, ActionSendGoalRequest));
-  exports.Set("actionTakeCancelRequest",
-              Napi::Function::New(env, ActionTakeCancelRequest));
   exports.Set("actionSendResultRequest",
               Napi::Function::New(env, ActionSendResultRequest));
   exports.Set("actionTakeFeedback",
               Napi::Function::New(env, ActionTakeFeedback));
   exports.Set("actionTakeStatus", Napi::Function::New(env, ActionTakeStatus));
+  exports.Set("getNumEntities", Napi::Function::New(env, GetNumEntities));
+  exports.Set("actionSendCancelRequest",
+              Napi::Function::New(env, ActionSendCancelRequest));
   return exports;
 }
 
