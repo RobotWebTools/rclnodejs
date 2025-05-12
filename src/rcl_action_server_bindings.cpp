@@ -96,23 +96,6 @@ Napi::Value ActionCreateServer(const Napi::CallbackInfo& info) {
   }
 }
 
-Napi::Value ActionSendCancelRequest(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-
-  RclHandle* action_client_handle =
-      RclHandle::Unwrap(info[0].As<Napi::Object>());
-  rcl_action_client_t* action_client =
-      reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
-  void* buffer = info[1].As<Napi::Buffer<char>>().Data();
-
-  int64_t sequence_number;
-  THROW_ERROR_IF_NOT_EQUAL(
-      rcl_action_send_cancel_request(action_client, buffer, &sequence_number),
-      RCL_RET_OK, rcl_get_error_string().str);
-
-  return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
-}
-
 Napi::Value ActionTakeResultRequest(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -432,11 +415,31 @@ Napi::Value ActionServerGoalExists(const Napi::CallbackInfo& info) {
   return Napi::Boolean::New(env, exists);
 }
 
+Napi::Value ActionTakeCancelRequest(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_action_server_t* action_server =
+      reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
+  rmw_request_id_t* header =
+      reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
+
+  void* taken_request = info[1].As<Napi::Buffer<char>>().Data();
+  rcl_ret_t ret =
+      rcl_action_take_cancel_request(action_server, header, taken_request);
+  if (ret != RCL_RET_ACTION_SERVER_TAKE_FAILED) {
+    auto js_obj = RclHandle::NewInstance(env, header, nullptr,
+                                         [](void* ptr) { free(ptr); });
+    return js_obj;
+  }
+
+  return env.Undefined();
+}
+
 Napi::Object InitActionServerBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("actionCreateServer",
               Napi::Function::New(env, ActionCreateServer));
-  exports.Set("actionSendCancelRequest",
-              Napi::Function::New(env, ActionSendCancelRequest));
   exports.Set("actionTakeResultRequest",
               Napi::Function::New(env, ActionTakeResultRequest));
   exports.Set("actionTakeGoalRequest",
@@ -464,6 +467,8 @@ Napi::Object InitActionServerBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, ActionProcessCancelRequest));
   exports.Set("actionServerGoalExists",
               Napi::Function::New(env, ActionServerGoalExists));
+  exports.Set("actionTakeCancelRequest",
+              Napi::Function::New(env, ActionTakeCancelRequest));
   return exports;
 }
 

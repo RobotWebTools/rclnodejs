@@ -345,6 +345,7 @@ goalHandlePromise.then((goalHandle) => {
   expectType<boolean>(goalHandle.isCanceled());
   expectType<boolean>(goalHandle.isAborted());
 });
+expectType<object>(actionClient.getNumEntities());
 
 // ---- ActionServer -----
 const actionServer = new rclnodejs.ActionServer(
