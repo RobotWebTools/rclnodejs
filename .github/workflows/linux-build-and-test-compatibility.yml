@@ -11,6 +11,7 @@ jobs:
       matrix:
         node-version: [20.X, 22.X]
         ros_distribution:
+          - kilted
           - jazzy
           - humble
           - rolling

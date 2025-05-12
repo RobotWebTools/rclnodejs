@@ -28,7 +28,7 @@ describe('rclnodejs distro utils', function () {
     );
     assert.equal(
       distroNames.length,
-      7,
+      8,
       'Incorrect number of known distro names'
     );
 
