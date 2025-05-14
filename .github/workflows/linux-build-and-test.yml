@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20.X, 22.X, 23.X]
+        node-version: [20.X, 22.X, 24.X]
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
