@@ -19,6 +19,7 @@ const sinon = require('sinon');
 const assertUtils = require('./utils.js');
 const rclnodejs = require('../index.js');
 const { ActionUuid } = require('../index.js');
+const { isActionIntrospectionSupported } = require('./utils.js');
 
 describe('rclnodejs action client', function () {
   let node;
@@ -294,5 +295,19 @@ describe('rclnodejs action client', function () {
     assert.strictEqual(numEntities.servicesNumber, 0);
 
     client.destroy();
+  });
+
+  it('Configure introspection', function () {
+    if (!isActionIntrospectionSupported()) {
+      this.skip();
+    }
+    let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
+    const ServiceIntrospectionStates = rclnodejs.ServiceIntrospectionStates;
+    const QOS = rclnodejs.QoS.profileSystemDefault;
+    client.configureIntrospection(
+      node.getClock(),
+      QOS,
+      ServiceIntrospectionStates.CONTENTS
+    );
   });
 });

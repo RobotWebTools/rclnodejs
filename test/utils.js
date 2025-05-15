@@ -15,6 +15,7 @@
 'use strict';
 
 const assert = require('assert');
+const { DistroUtils } = require('../index.js');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -86,6 +87,10 @@ function isTypedArray(v) {
   return ArrayBuffer.isView(v) && !(v instanceof DataView);
 }
 
+function isActionIntrospectionSupported() {
+  return DistroUtils.getDistroId() > DistroUtils.getDistroId('jazzy');
+}
+
 module.exports = {
   assertMember: assertMember,
   assertThrowsError: assertThrowsError,
@@ -93,4 +98,5 @@ module.exports = {
   getAvailablePath: getAvailablePath,
   launchPythonProcess: launchPythonProcess,
   isTypedArray: isTypedArray,
+  isActionIntrospectionSupported: isActionIntrospectionSupported,
 };

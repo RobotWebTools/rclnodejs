@@ -179,5 +179,17 @@ declare module 'rclnodejs' {
      * @return - The number of subscriptions, guard_conditions, timers, and clients and services.
      */
     getNumEntities(): object;
+
+    /**
+     * Configure introspection.
+     * @param clock - Clock to use for service event timestamps
+     * @param QoSProfile - QOS profile for the service event publisher
+     * @param introspectionState - The state to set introspection to
+     */
+    configureIntrospection(
+      clock: Clock,
+      serviceEventPubQOS: QoS,
+      introspectionState: ServiceIntrospectionStates
+    ): void;
   }
 }

@@ -346,6 +346,13 @@ goalHandlePromise.then((goalHandle) => {
   expectType<boolean>(goalHandle.isAborted());
 });
 expectType<object>(actionClient.getNumEntities());
+expectType<void>(
+  actionClient.configureIntrospection(
+    node.getClock(),
+    rclnodejs.Node.getDefaultOptions() as rclnodejs.QoS,
+    rclnodejs.ServiceIntrospectionStates.CONTENTS
+  )
+);
 
 // ---- ActionServer -----
 const actionServer = new rclnodejs.ActionServer(
@@ -383,6 +390,13 @@ function executeCallback(
 
   return new Fibonacci.Result();
 }
+expectType<void>(
+  actionServer.configureIntrospection(
+    node.getClock(),
+    rclnodejs.Node.getDefaultOptions() as rclnodejs.QoS,
+    rclnodejs.ServiceIntrospectionStates.CONTENTS
+  )
+);
 
 // ---- ActionUuid -----
 const actionUuid = new rclnodejs.ActionUuid();
