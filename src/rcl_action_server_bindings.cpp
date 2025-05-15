@@ -16,7 +16,7 @@
 
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
-#include <rcl_action/action_client.h>
+#include <rcl_action/action_server.h>
 #include <rcl_action/rcl_action.h>
 
 #include <string>
