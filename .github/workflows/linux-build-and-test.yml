@@ -1,4 +1,3 @@
-
 name:  rclnodejs - Linux Build and Test
 
 on:
@@ -24,8 +23,21 @@ jobs:
   identify-ros-distro:
     uses: ./.github/workflows/identify-ros-distro.yml
 
+  matrix-prep:
+    runs-on: ubuntu-latest
+    outputs:
+      arm64-matrix: ${{ steps.set-matrix.outputs.arm64-matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo "arm64-matrix=[{\"architecture\":\"arm64\",\"node-version\":\"22.X\",\"ubuntu-version\":\"24.04-arm\"}]" >> $GITHUB_OUTPUT
+          else
+            echo "arm64-matrix=[]" >> $GITHUB_OUTPUT
+          fi
+
   build:
-    needs: identify-ros-distro
+    needs: [identify-ros-distro, matrix-prep]
     runs-on: ubuntu-${{ matrix.ubuntu-version }}
     container:
       image: ${{ needs.identify-ros-distro.outputs.linuxos }}
@@ -35,12 +47,8 @@ jobs:
         node-version: [20.X, 22.X, 24.X]
         architecture: [x64]
         ubuntu-version: [latest]
-        # Add arm64 support for rolling.
-        include:
-          - architecture: arm64
-            node-version: 22.X
-            ubuntu-version: 24.04-arm
-            exclude: ${{ !contains(github.ref, 'develop') }}
+        # Include arm64 configuration from matrix-prep job
+        include: ${{ fromJSON(needs.matrix-prep.outputs.arm64-matrix) }}
     steps:
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v4
