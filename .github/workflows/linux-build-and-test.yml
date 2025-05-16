@@ -26,7 +26,6 @@ jobs:
 
   build:
     needs: identify-ros-distro
-    # Use different runners based on the architecture (x64 or arm64)
     runs-on: ubuntu-${{ matrix.ubuntu-version }}
     container:
       image: ${{ needs.identify-ros-distro.outputs.linuxos }}
@@ -36,11 +35,12 @@ jobs:
         node-version: [20.X, 22.X, 24.X]
         architecture: [x64]
         ubuntu-version: [latest]
-        # Add arm64 support with a specific runner
+        # Add arm64 support for rolling.
         include:
           - architecture: arm64
             node-version: 22.X
             ubuntu-version: 24.04-arm
+            condition: ${{ contains(github.ref, 'develop') }}
     steps:
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v4
