@@ -26,18 +26,27 @@ jobs:
 
   build:
     needs: identify-ros-distro
-    runs-on: ubuntu-latest
+    # Use different runners based on the architecture (x64 or arm64)
+    runs-on: ubuntu-${{ matrix.ubuntu-version }}
     container:
       image: ${{ needs.identify-ros-distro.outputs.linuxos }}
     strategy:
       fail-fast: false
       matrix:
         node-version: [20.X, 22.X, 24.X]
+        architecture: [x64]
+        ubuntu-version: [latest]
+        # Add arm64 support with a specific runner
+        include:
+          - architecture: arm64
+            node-version: 20.X
+            ubuntu-version: latest-arm64
     steps:
-    - name: Setup Node.js ${{ matrix.node-version }}
+    - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
+        architecture: ${{ matrix.architecture }}
 
     - name: Setup ROS2
       uses: ros-tooling/setup-ros@v0.7
@@ -54,6 +63,7 @@ jobs:
     - name: Build and test rclnodejs
       run: |
         source /opt/ros/${{ needs.identify-ros-distro.outputs.distro }}/setup.bash
+        echo "Building and testing rclnodejs on ${{ matrix.architecture }} architecture"
         npm i
         npm run lint
         npm test
@@ -63,7 +73,7 @@ jobs:
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        flag-name: run-${{ matrix.node-version}}
+        flag-name: run-${{ matrix.node-version }}-${{ matrix.architecture }}
         parallel: true
 
   finish:
