@@ -26,18 +26,27 @@ jobs:
 
   build:
     needs: identify-ros-distro
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-${{ matrix.ubuntu-version }}
     container:
       image: ${{ needs.identify-ros-distro.outputs.linuxos }}
     strategy:
       fail-fast: false
       matrix:
         node-version: [20.X, 22.X, 24.X]
+        architecture: [x64]
+        ubuntu-version: [latest]
+        # Add arm64 support for rolling.
+        include:
+          - architecture: arm64
+            node-version: 22.X
+            ubuntu-version: 24.04-arm
+            exclude: ${{ !contains(github.ref, 'develop') }}
     steps:
-    - name: Setup Node.js ${{ matrix.node-version }}
+    - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
+        architecture: ${{ matrix.architecture }}
 
     - name: Setup ROS2
       uses: ros-tooling/setup-ros@v0.7
@@ -53,6 +62,7 @@ jobs:
 
     - name: Build and test rclnodejs
       run: |
+        uname -a
         source /opt/ros/${{ needs.identify-ros-distro.outputs.distro }}/setup.bash
         npm i
         npm run lint
@@ -63,7 +73,7 @@ jobs:
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        flag-name: run-${{ matrix.node-version}}
+        flag-name: run-${{ matrix.node-version }}-${{ matrix.architecture }}
         parallel: true
 
   finish:
