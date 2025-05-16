@@ -39,8 +39,8 @@ jobs:
         # Add arm64 support with a specific runner
         include:
           - architecture: arm64
-            node-version: 20.X
-            ubuntu-version: latest-arm64
+            node-version: 22.X
+            ubuntu-version: 24.04-arm
     steps:
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v4
@@ -62,8 +62,8 @@ jobs:
 
     - name: Build and test rclnodejs
       run: |
+        uname -a
         source /opt/ros/${{ needs.identify-ros-distro.outputs.distro }}/setup.bash
-        echo "Building and testing rclnodejs on ${{ matrix.architecture }} architecture"
         npm i
         npm run lint
         npm test
