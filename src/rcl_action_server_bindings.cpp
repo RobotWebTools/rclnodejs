@@ -16,6 +16,7 @@
 
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
+#include <rcl_action/action_server.h>
 #include <rcl_action/rcl_action.h>
 
 #include <string>
@@ -437,6 +438,46 @@ Napi::Value ActionTakeCancelRequest(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
+#if ROS_VERSION >= 2505  // ROS2 >= Kilted
+Napi::Value ConfigureActionServerIntrospection(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* action_server_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_action_server_t* action_server =
+      reinterpret_cast<rcl_action_server_t*>(action_server_handle->ptr());
+  RclHandle* node_handle = RclHandle::Unwrap(info[1].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(
+      RclHandle::Unwrap(info[2].As<Napi::Object>())->ptr());
+
+  std::string action_name = info[3].As<Napi::String>().Utf8Value();
+  std::string package_name = info[4].As<Napi::String>().Utf8Value();
+  const rosidl_action_type_support_t* ts =
+      GetActionTypeSupport(package_name, action_name);
+
+  rcl_ret_t ret = RCL_RET_ERROR;
+  if (ts) {
+    rcl_publisher_options_t publisher_ops = rcl_publisher_get_default_options();
+    auto qos_profile = GetQoSProfile(info[5]);
+    if (qos_profile) {
+      publisher_ops.qos = *qos_profile;
+    }
+    rcl_service_introspection_state_t state =
+        static_cast<rcl_service_introspection_state_t>(
+            info[6].As<Napi::Number>().Uint32Value());
+    ret = rcl_action_server_configure_action_introspection(
+        action_server, node, clock, ts, publisher_ops, state);
+    if (ret == RCL_RET_OK) {
+      return env.Undefined();
+    }
+  }
+
+  Napi::Error::New(env, "failed to configure action server introspection")
+      .ThrowAsJavaScriptException();
+  return env.Undefined();
+}
+#endif  // ROS_VERSION >= 2505
+
 Napi::Object InitActionServerBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("actionCreateServer",
               Napi::Function::New(env, ActionCreateServer));
@@ -469,6 +510,10 @@ Napi::Object InitActionServerBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, ActionServerGoalExists));
   exports.Set("actionTakeCancelRequest",
               Napi::Function::New(env, ActionTakeCancelRequest));
+#if ROS_VERSION >= 2505  // ROS2 >= Kilted
+  exports.Set("configureActionServerIntrospection",
+              Napi::Function::New(env, ConfigureActionServerIntrospection));
+#endif  // ROS_VERSION >= 2505
   return exports;
 }
 

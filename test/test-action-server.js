@@ -17,6 +17,7 @@
 const assert = require('assert');
 const deepEqual = require('deep-equal');
 const assertUtils = require('./utils.js');
+const { isActionIntrospectionSupported } = require('./utils.js');
 const { randomUUID } = require('crypto');
 const rclnodejs = require('../index.js');
 
@@ -707,5 +708,24 @@ describe('rclnodejs action server', function () {
     assert.ok(deepEqual(Int32Array.from(sequence), feedbackMessage.sequence));
 
     server.destroy();
+  });
+
+  it('Configure introspection', function () {
+    if (!isActionIntrospectionSupported()) {
+      this.skip();
+    }
+    let server = new rclnodejs.ActionServer(
+      node,
+      fibonacci,
+      'fibonacci',
+      () => {}
+    );
+    const ServiceIntrospectionStates = rclnodejs.ServiceIntrospectionStates;
+    const QOS = rclnodejs.QoS.profileSystemDefault;
+    server.configureIntrospection(
+      node.getClock(),
+      QOS,
+      ServiceIntrospectionStates.CONTENTS
+    );
   });
 });
