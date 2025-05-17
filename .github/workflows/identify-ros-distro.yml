@@ -10,11 +10,11 @@ on:
         description: "The ROS compatible Linux version"
         value: ${{ jobs.identify-ros-distro.outputs.linuxos }}
 env:
-  ROLLING_VAR: ${{ contains(github.ref, 'develop') }}
-  KILTED_VAR: ${{ contains(github.ref, 'kilted') }}
-  JAZZY_VAR: ${{ contains(github.ref, 'jazzy') }}
-  IRON_VAR: ${{ contains(github.ref, 'iron') }}
-  HUMBLE_VAR: ${{ contains(github.ref, 'humble') }}
+  ROLLING_VAR: ${{ contains(github.ref, 'develop') || contains(github.base_ref, 'develop') }}
+  KILTED_VAR: ${{ contains(github.ref, 'kilted') || contains(github.base_ref, 'kilted') }}
+  JAZZY_VAR: ${{ contains(github.ref, 'jazzy') || contains(github.base_ref, 'jazzy') }}
+  IRON_VAR: ${{ contains(github.ref, 'iron') || contains(github.base_ref, 'iron') }}
+  HUMBLE_VAR: ${{ contains(github.ref, 'humble') || contains(github.base_ref, 'humble') }}
 
 jobs:
   identify-ros-distro:
