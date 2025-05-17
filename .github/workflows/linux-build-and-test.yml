@@ -30,7 +30,7 @@ jobs:
     steps:
       - id: set-matrix
         run: |
-          if [[ "${{ github.base_ref }}" == "develop" ]]; then
+          if [[ ${{ contains(github.base_ref, 'develop') || contains(github.ref, 'develop') }}" ]]; then
             echo "arm64-matrix=[{\"architecture\":\"arm64\",\"node-version\":\"22.X\",\"ubuntu-version\":\"24.04-arm\"}]" >> $GITHUB_OUTPUT
           else
             echo "arm64-matrix=[]" >> $GITHUB_OUTPUT
