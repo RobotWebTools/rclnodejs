@@ -360,6 +360,18 @@ Napi::Value GetLifecycleShutdownTransitionLabel(
   return Napi::String::New(env, rcl_lifecycle_shutdown_label);
 }
 
+Napi::Value IsInitialized(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_lifecycle_state_machine_t* state_machine =
+      reinterpret_cast<rcl_lifecycle_state_machine_t*>(
+          state_machine_handle->ptr());
+  const bool is_initialized =
+      RCL_RET_OK == rcl_lifecycle_state_machine_is_initialized(state_machine);
+  return Napi::Boolean::New(env, is_initialized);
+}
+
 Napi::Object InitLifecycleBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createLifecycleStateMachine",
               Napi::Function::New(env, CreateLifecycleStateMachine));
@@ -383,6 +395,7 @@ Napi::Object InitLifecycleBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, GetLifecycleTransitionIdToLabel));
   exports.Set("getLifecycleShutdownTransitionLabel",
               Napi::Function::New(env, GetLifecycleShutdownTransitionLabel));
+  exports.Set("isInitialized", Napi::Function::New(env, IsInitialized));
   return exports;
 }
 
