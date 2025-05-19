@@ -1,4 +1,4 @@
-name:  rclnodejs - Linux Build & Compatibility Test
+name:  Linux Build & Compatibility Test
 
 on:
   workflow_dispatch:

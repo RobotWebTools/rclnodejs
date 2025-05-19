@@ -1,4 +1,4 @@
-name:  rclnodejs - Windows Build & Test
+name: Windows
 
 on:
   push:
