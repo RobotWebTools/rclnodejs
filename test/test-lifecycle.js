@@ -72,6 +72,7 @@ describe('LifecycleNode test suite', function () {
   it('lifecycleNode initial state', function () {
     const state = node.currentState;
     assert.equal(state.id, StateInterface.PRIMARY_STATE_UNCONFIGURED);
+    assert.equal(node.isInitialized, true);
   });
 
   it('lifecycleNode transitions', function () {
