@@ -143,7 +143,7 @@ Napi::Value WaitForAllAcked(const Napi::CallbackInfo& info) {
   }
   Napi::Error::New(env, "Failed to wait for all acknowledgements")
       .ThrowAsJavaScriptException();
-  throw env.Undefined();
+  return env.Undefined();
 }
 
 Napi::Object InitPublisherBindings(Napi::Env env, Napi::Object exports) {
