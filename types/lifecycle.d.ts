@@ -326,6 +326,13 @@ declare module 'rclnodejs' {
         topic: string,
         options?: Options
       ): LifecyclePublisher<T>;
+
+      /**
+       * Check if state machine is initialized.
+       *
+       * @returns {boolean} true if the state machine is initialized; otherwise false.
+       */
+      get isInitialized(): boolean;
     }
   } // lifecycle namespace
 } // rclnodejs namespace
