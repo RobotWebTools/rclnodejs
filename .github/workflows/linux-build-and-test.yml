@@ -1,4 +1,4 @@
-name:  rclnodejs - Linux Build and Test
+name:  Linux x64/arm64
 
 on:
   push:
