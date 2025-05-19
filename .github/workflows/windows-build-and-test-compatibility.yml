@@ -1,5 +1,5 @@
 
-name:  rclnodejs - Windows Build & Compatibility Test
+name: Windows Build & Compatibility Test
 
 on:
   workflow_dispatch:
