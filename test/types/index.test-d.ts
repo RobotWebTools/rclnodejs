@@ -67,6 +67,9 @@ expectType<rclnodejs.NamesAndTypesQueryResult[]>(
 expectType<rclnodejs.NamesAndTypesQueryResult[]>(node.getTopicNamesAndTypes());
 expectType<string[]>(node.getNodeNames());
 expectType<rclnodejs.NodeNamesQueryResult[]>(node.getNodeNamesAndNamespaces());
+expectType<rclnodejs.NodeNamesQueryResultWithEnclaves[]>(
+  node.getNodeNamesAndNamespacesWithEnclaves()
+);
 expectType<Array<object>>(node.getPublishersInfoByTopic('topic', false));
 expectType<Array<object>>(node.getSubscriptionsInfoByTopic('topic', false));
 expectType<number>(node.countPublishers(TOPIC));
@@ -76,6 +79,7 @@ expectType<number>(node.countServices(SERVICE_NAME));
 expectType<rclnodejs.Options<string | rclnodejs.QoS>>(
   rclnodejs.Node.getDefaultOptions()
 );
+expectType<string>(node.getFullyQualifiedName());
 
 // ---- LifecycleNode ----
 const lifecycleNode = rclnodejs.createLifecycleNode(LIFECYCLE_NODE_NAME);

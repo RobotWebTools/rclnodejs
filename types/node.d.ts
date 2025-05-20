@@ -143,6 +143,24 @@ declare module 'rclnodejs' {
   };
 
   /**
+   * Result of Node.getNodeNames() query
+   *
+   * @example
+   * ```
+   * [
+   *   { name: 'gazebo',                namespace: '/', enclave: '/'},
+   *   { name: 'robot_state_publisher', namespace: '/', enclave: '/' },
+   *   { name: 'cam2image',             namespace: '/demo' , enclave: '/'}
+   * ]
+   * ```
+   */
+  type NodeNamesQueryResultWithEnclaves = {
+    name: string;
+    namespace: string;
+    enclave: string;
+  };
+
+  /**
    * Node is the primary entrypoint in a ROS system for communication.
    * It can be used to create ROS entities such as publishers, subscribers,
    * services, clients and timers.
@@ -770,6 +788,13 @@ declare module 'rclnodejs' {
     getNodeNamesAndNamespaces(): Array<NodeNamesQueryResult>;
 
     /**
+     * Get the list of nodes and their namespaces with enclaves discovered by the provided node.
+     *
+     * @returns An array of the names, namespaces and enclaves.
+     */
+    getNodeNamesAndNamespacesWithEnclaves(): Array<NodeNamesQueryResultWithEnclaves>;
+
+    /**
      * Return the number of publishers on a given topic.
      * @param topic - The name of the topic.
      * @returns Number of publishers on the given topic.
@@ -796,5 +821,12 @@ declare module 'rclnodejs' {
      * @returns Number of services.
      */
     countServices(serviceName: string): number;
+
+    /**
+     * Get the fully qualified name of the node.
+     *
+     * @returns String containing the fully qualified name of the node.
+     */
+    getFullyQualifiedName(): string;
   }
 }
