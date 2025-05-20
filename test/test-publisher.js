@@ -51,4 +51,15 @@ describe('rclnodejs publisher test suite', function () {
     node.createSubscription(String, 'topic', (msg) => {});
     assert.strictEqual(publisher.subscriptionCount, 1);
   });
+
+  it('Wait for all acked', function () {
+    const node = rclnodejs.createNode('publisher_node');
+    const String = 'std_msgs/msg/String';
+    const publisher = node.createPublisher(String, 'topic');
+    node.createSubscription(String, 'topic', (msg) => {});
+    assert.strictEqual(publisher.subscriptionCount, 1);
+
+    publisher.publish('Hello World');
+    assert.strictEqual(publisher.waitForAllAcked(BigInt(1000000000)), true);
+  });
 });
