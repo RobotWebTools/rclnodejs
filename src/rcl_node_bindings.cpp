@@ -385,38 +385,65 @@ Napi::Value GetNodeNames(const Napi::CallbackInfo& info) {
 
   RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  bool get_enclaves = info[1].As<Napi::Boolean>().Value();
   rcutils_string_array_t node_names =
       rcutils_get_zero_initialized_string_array();
   rcutils_string_array_t node_namespaces =
       rcutils_get_zero_initialized_string_array();
+  rcutils_string_array_t enclaves = rcutils_get_zero_initialized_string_array();
   rcl_allocator_t allocator = rcl_get_default_allocator();
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_get_node_names(node, allocator, &node_names, &node_namespaces),
-      "Failed to get_node_names.");
+  if (get_enclaves) {
+    THROW_ERROR_IF_NOT_EQUAL(
+        RCL_RET_OK,
+        rcl_get_node_names_with_enclaves(node, allocator, &node_names,
+                                         &node_namespaces, &enclaves),
+        "Failed to get_node_names.");
+  } else {
+    THROW_ERROR_IF_NOT_EQUAL(
+        RCL_RET_OK,
+        rcl_get_node_names(node, allocator, &node_names, &node_namespaces),
+        "Failed to get_node_names.");
+  }
 
   Napi::Array result_list = Napi::Array::New(env, node_names.size);
 
   for (size_t i = 0; i < node_names.size; ++i) {
     Napi::Object item = Napi::Object::New(env);
-
     item.Set("name", Napi::String::New(env, node_names.data[i]));
     item.Set("namespace", Napi::String::New(env, node_namespaces.data[i]));
-
+    if (get_enclaves) {
+      item.Set("enclave", Napi::String::New(env, enclaves.data[i]));
+    }
     result_list.Set(i, item);
   }
 
   rcutils_ret_t fini_names_ret = rcutils_string_array_fini(&node_names);
   rcutils_ret_t fini_namespaces_ret =
       rcutils_string_array_fini(&node_namespaces);
-
+  rcutils_ret_t fini_enclaves_ret = rcutils_string_array_fini(&enclaves);
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, fini_names_ret,
                            "Failed to destroy node_names");
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, fini_namespaces_ret,
                            "Failed to destroy node_namespaces");
-
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, fini_enclaves_ret,
+                           "Failed to fini enclaves string array");
   return result_list;
+}
+
+Napi::Value GetFullyQualifiedName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  const char* fully_qualified_node_name =
+      rcl_node_get_fully_qualified_name(node);
+  if (!fully_qualified_node_name) {
+    Napi::Error::New(env, "Fully qualified name not set")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  return Napi::String::New(env, fully_qualified_node_name);
 }
 
 Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
@@ -439,6 +466,8 @@ Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("countServices", Napi::Function::New(env, CountServices));
 #endif
   exports.Set("getNodeNames", Napi::Function::New(env, GetNodeNames));
+  exports.Set("getFullyQualifiedName",
+              Napi::Function::New(env, GetFullyQualifiedName));
   return exports;
 }
 
