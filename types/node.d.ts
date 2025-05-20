@@ -792,7 +792,7 @@ declare module 'rclnodejs' {
      *
      * @returns An array of the names, namespaces and enclaves.
      */
-    getNodeNamesAndNamespacesEnclaves(): Array<NodeNamesQueryResultWithEnclaves>;
+    getNodeNamesAndNamespacesWithEnclaves(): Array<NodeNamesQueryResultWithEnclaves>;
 
     /**
      * Return the number of publishers on a given topic.
