@@ -134,6 +134,7 @@ expectType<void>(publisher.publish(MSG));
 expectType<void>(publisher.publish(Buffer.from('Hello ROS World')));
 expectType<void>(node.destroyPublisher(publisher));
 expectType<boolean>(publisher.isDestroyed());
+expectType<boolean>(publisher.waitForAllAcked(BigInt(1000)));
 
 // ---- LifecyclePublisher ----
 const lifecyclePublisher = lifecycleNode.createLifecyclePublisher(

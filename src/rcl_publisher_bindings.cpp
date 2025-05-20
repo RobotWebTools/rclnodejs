@@ -128,6 +128,24 @@ Napi::Value GetSubscriptionCount(const Napi::CallbackInfo& info) {
   return Napi::Number::New(env, count);
 }
 
+Napi::Value WaitForAllAcked(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+  bool lossless;
+  int64_t nanoseconds = info[1].As<Napi::BigInt>().Int64Value(&lossless);
+
+  rcl_ret_t ret = rcl_publisher_wait_for_all_acked(publisher, nanoseconds);
+  if (RCL_RET_OK == ret) {
+    return Napi::Boolean::New(env, true);
+  } else if (RCL_RET_TIMEOUT == ret) {
+    return Napi::Boolean::New(env, false);
+  }
+  Napi::Error::New(env, "Failed to wait for all acknowledgements")
+      .ThrowAsJavaScriptException();
+  return env.Undefined();
+}
+
 Napi::Object InitPublisherBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createPublisher", Napi::Function::New(env, CreatePublisher));
   exports.Set("publish", Napi::Function::New(env, Publish));
@@ -135,6 +153,7 @@ Napi::Object InitPublisherBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("publishRawMessage", Napi::Function::New(env, PublishRawMessage));
   exports.Set("getSubscriptionCount",
               Napi::Function::New(env, GetSubscriptionCount));
+  exports.Set("waitForAllAcked", Napi::Function::New(env, WaitForAllAcked));
   return exports;
 }
 
