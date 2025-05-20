@@ -68,7 +68,7 @@ expectType<rclnodejs.NamesAndTypesQueryResult[]>(node.getTopicNamesAndTypes());
 expectType<string[]>(node.getNodeNames());
 expectType<rclnodejs.NodeNamesQueryResult[]>(node.getNodeNamesAndNamespaces());
 expectType<rclnodejs.NodeNamesQueryResultWithEnclaves[]>(
-  node.getNodeNamesAndNamespacesEnclaves()
+  node.getNodeNamesAndNamespacesWithEnclaves()
 );
 expectType<Array<object>>(node.getPublishersInfoByTopic('topic', false));
 expectType<Array<object>>(node.getSubscriptionsInfoByTopic('topic', false));
