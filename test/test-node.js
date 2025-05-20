@@ -48,6 +48,17 @@ describe('rclnodejs node test suite', function () {
       assert.deepStrictEqual(node.namespace(), '/ns');
     });
 
+    it('Get fully qualified name', function () {
+      let nodeName = 'example_node_with_ns',
+        nodeNamespace = '/ns';
+
+      var node = rclnodejs.createNode(nodeName, nodeNamespace);
+      assert.deepStrictEqual(
+        node.getFullyQualifiedName(),
+        '/ns/example_node_with_ns'
+      );
+    });
+
     it('Try creating a node with the empty namespace', function () {
       let nodeName = 'example_node_with_empty_ns',
         nodeNamespace = '';
@@ -396,6 +407,17 @@ describe('rcl node methods testing', function () {
 
     assert.ok(currentNode);
     assert.strictEqual(currentNode.namespace, '/my_ns');
+  });
+
+  it('node.getNodeNamesAndNamespacesWithEnclaves', function () {
+    var nodeNames = node.getNodeNamesAndNamespacesWithEnclaves();
+    var currentNode = nodeNames.find(function (nodeName) {
+      return nodeName.name === 'my_node';
+    });
+
+    assert.strictEqual(currentNode.name, 'my_node');
+    assert.strictEqual(currentNode.namespace, '/my_ns');
+    assert.strictEqual(currentNode.enclave, '/');
   });
 
   it('node.countPublishers', async () => {
