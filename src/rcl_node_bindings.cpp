@@ -419,6 +419,10 @@ Napi::Value GetNodeNames(const Napi::CallbackInfo& info) {
   return result_list;
 }
 
+Napi::Value GetRMWImplementationIdentifier(const Napi::CallbackInfo& info) {
+  return Napi::String::New(info.Env(), rmw_get_implementation_identifier());
+}
+
 Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getParameterOverrides",
               Napi::Function::New(env, GetParameterOverrides));
@@ -439,6 +443,8 @@ Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("countServices", Napi::Function::New(env, CountServices));
 #endif
   exports.Set("getNodeNames", Napi::Function::New(env, GetNodeNames));
+  exports.Set("getRMWImplementationIdentifier",
+              Napi::Function::New(env, GetRMWImplementationIdentifier));
   return exports;
 }
 

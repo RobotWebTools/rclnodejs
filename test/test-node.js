@@ -544,4 +544,9 @@ describe('Test the node with no handles attached when initializing', function ()
       );
     }, 100);
   });
+
+  it('Get RMW identifier', function () {
+    const node = rclnodejs.createNode('rmw', '/rmw_getter');
+    assert.notStrictEqual(node.getRMWImplementationIdentifier().length, 0);
+  });
 });

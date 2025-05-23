@@ -796,5 +796,11 @@ declare module 'rclnodejs' {
      * @returns Number of services.
      */
     countServices(serviceName: string): number;
+
+    /**
+     * Get the RMW implementation identifier
+     * @returns - The RMW implementation identifier.
+     */
+    getRMWImplementationIdentifier(): string;
   }
 }

@@ -76,6 +76,7 @@ expectType<number>(node.countServices(SERVICE_NAME));
 expectType<rclnodejs.Options<string | rclnodejs.QoS>>(
   rclnodejs.Node.getDefaultOptions()
 );
+expectType<string>(node.getRMWImplementationIdentifier());
 
 // ---- LifecycleNode ----
 const lifecycleNode = rclnodejs.createLifecycleNode(LIFECYCLE_NODE_NAME);
