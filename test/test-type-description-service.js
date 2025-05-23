@@ -31,7 +31,7 @@ describe('type description service test suite', function () {
   });
 
   it('Test type description service', function (done) {
-    if (DistroUtils.getDistroId() > DistroUtils.getDistroId('humble')) {
+    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
       this.skip();
       return;
     }
