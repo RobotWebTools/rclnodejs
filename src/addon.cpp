@@ -34,6 +34,9 @@
 #include "rcl_subscription_bindings.h"
 #include "rcl_time_point_bindings.h"
 #include "rcl_timer_bindings.h"
+#if ROS_VERSION > 2205  // ROS2 > Humble
+#include "rcl_type_description_service_bindings.h"
+#endif
 #include "rcl_utilities.h"
 #include "shadow_node.h"
 
@@ -79,6 +82,9 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
   rclnodejs::InitSubscriptionBindings(env, exports);
   rclnodejs::InitTimePointBindings(env, exports);
   rclnodejs::InitTimerBindings(env, exports);
+#if ROS_VERSION > 2205  // ROS2 > Humble
+  rclnodejs::InitTypeDescriptionServiceBindings(env, exports);
+#endif
   rclnodejs::InitLifecycleBindings(env, exports);
   rclnodejs::ShadowNode::Init(env, exports);
   rclnodejs::RclHandle::Init(env, exports);
