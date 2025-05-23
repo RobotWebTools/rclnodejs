@@ -30,8 +30,8 @@ describe('type description service test suite', function () {
     rclnodejs.shutdown();
   });
 
-  it('Test type description service', (done) => {
-    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+  it('Test type description service', function (done) {
+    if (DistroUtils.getDistroId() > DistroUtils.getDistroId('humble')) {
       this.skip();
       return;
     }

@@ -18,6 +18,7 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
+const DistroUtils = require('../lib/distro.js');
 
 describe('Node extra destroy methods testing', function () {
   before(function () {
@@ -89,7 +90,11 @@ describe('Node extra destroy methods testing', function () {
     var node = rclnodejs.createNode('node4');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     var service = node.createService(AddTwoInts, 'add_two_ints', () => {});
-    assert.deepStrictEqual(node._services.length, 8);
+    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+      assert.deepStrictEqual(node._services.length, 7);
+    } else {
+      assert.deepStrictEqual(node._services.length, 8);
+    }
 
     assertThrowsError(
       function () {
@@ -101,7 +106,11 @@ describe('Node extra destroy methods testing', function () {
     );
 
     node.destroyService(service);
-    assert.deepStrictEqual(node._services.length, 7);
+    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+      assert.deepStrictEqual(node._services.length, 6);
+    } else {
+      assert.deepStrictEqual(node._services.length, 7);
+    }
   });
 
   it('destroyTimer()', function () {
