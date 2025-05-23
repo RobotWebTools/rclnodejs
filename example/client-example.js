@@ -38,8 +38,8 @@ async function main() {
   }
 
   const request = {
-    a: Math.floor(Math.random() * 100),
-    b: Math.floor(Math.random() * 100),
+    a: BigInt(Math.floor(Math.random() * 100)),
+    b: BigInt(Math.floor(Math.random() * 100)),
   };
 
   let result = await client.waitForService(1000);
