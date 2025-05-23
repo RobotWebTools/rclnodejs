@@ -828,5 +828,11 @@ declare module 'rclnodejs' {
      * @returns String containing the fully qualified name of the node.
      */
     getFullyQualifiedName(): string;
+
+    /**
+     * Get the RMW implementation identifier
+     * @returns - The RMW implementation identifier.
+     */
+    getRMWImplementationIdentifier(): string;
   }
 }

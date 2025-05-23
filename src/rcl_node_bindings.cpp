@@ -446,6 +446,10 @@ Napi::Value GetFullyQualifiedName(const Napi::CallbackInfo& info) {
   return Napi::String::New(env, fully_qualified_node_name);
 }
 
+Napi::Value GetRMWImplementationIdentifier(const Napi::CallbackInfo& info) {
+  return Napi::String::New(info.Env(), rmw_get_implementation_identifier());
+}
+
 Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getParameterOverrides",
               Napi::Function::New(env, GetParameterOverrides));
@@ -468,6 +472,8 @@ Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getNodeNames", Napi::Function::New(env, GetNodeNames));
   exports.Set("getFullyQualifiedName",
               Napi::Function::New(env, GetFullyQualifiedName));
+  exports.Set("getRMWImplementationIdentifier",
+              Napi::Function::New(env, GetRMWImplementationIdentifier));
   return exports;
 }
 
