@@ -89,13 +89,9 @@ describe('Node extra destroy methods testing', function () {
   it('destroyService()', function () {
     var node = rclnodejs.createNode('node4');
     const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+    const initialServiceCount = node._services.length;
     var service = node.createService(AddTwoInts, 'add_two_ints', () => {});
-    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
-      assert.deepStrictEqual(node._services.length, 7);
-    } else {
-      assert.deepStrictEqual(node._services.length, 8);
-    }
-
+    assert.deepStrictEqual(node._services.length, initialServiceCount + 1);
     assertThrowsError(
       function () {
         node.destroyService('service');
@@ -106,11 +102,7 @@ describe('Node extra destroy methods testing', function () {
     );
 
     node.destroyService(service);
-    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
-      assert.deepStrictEqual(node._services.length, 6);
-    } else {
-      assert.deepStrictEqual(node._services.length, 7);
-    }
+    assert.deepStrictEqual(node._services.length, initialServiceCount);
   });
 
   it('destroyTimer()', function () {
