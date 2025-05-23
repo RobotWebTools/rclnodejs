@@ -167,6 +167,14 @@
           }
         ],
         [
+          # After Humble, e.g., Jazzy, Kilted.
+          'ros_version > 2205', {
+            'sources': [
+              './src/rcl_type_description_service_bindings.cpp',
+            ]
+          }
+        ],
+        [
           'runtime=="electron"', {
             "defines": ["NODE_RUNTIME_ELECTRON=1"]
           }
