@@ -1,4 +1,4 @@
-name:  Linux x64/arm64
+name:  Linux x64
 
 on:
   push:
@@ -20,35 +20,33 @@ defaults:
     shell: bash
 
 jobs:
-  identify-ros-distro:
-    uses: ./.github/workflows/identify-ros-distro.yml
-
-  matrix-prep:
-    runs-on: ubuntu-latest
-    outputs:
-      arm64-matrix: ${{ steps.set-matrix.outputs.arm64-matrix }}
-    steps:
-      - id: set-matrix
-        run: |
-          if ${{ contains(github.base_ref, 'develop') || contains(github.ref, 'develop') }}; then
-            echo "arm64-matrix=[{\"architecture\":\"arm64\",\"node-version\":\"22.X\",\"ubuntu-version\":\"24.04-arm\"}]" >> $GITHUB_OUTPUT
-          else
-            echo "arm64-matrix=[]" >> $GITHUB_OUTPUT
-          fi
-
   build:
-    needs: [identify-ros-distro, matrix-prep]
-    runs-on: ubuntu-${{ matrix.ubuntu-version }}
+    runs-on: ubuntu-latest
     container:
-      image: ${{ needs.identify-ros-distro.outputs.linuxos }}
+      image: ${{ matrix.docker_image }}
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20.X, 22.X, 24.X]
+        node-version: [22.X, 24.X]
         architecture: [x64]
-        ubuntu-version: [latest]
-        # Include arm64 configuration from matrix-prep job
-        include: ${{ fromJSON(needs.matrix-prep.outputs.arm64-matrix) }}
+        ros_distribution:
+          - humble
+          - jazzy
+          - kilted
+          - rolling
+        include:
+          # Humble Hawksbill (May 2022 - May 2027)
+          - docker_image: ubuntu:jammy
+            ros_distribution: humble
+          # Jazzy Jalisco (May 2024 - May 2029)
+          - docker_image: ubuntu:noble
+            ros_distribution: jazzy
+          # Kilted Kaiju (May 2025 - Dec 2026)
+          - docker_image: ubuntu:noble
+            ros_distribution: kilted
+          # Rolling Ridley (No End-Of-Life)
+          - docker_image: ubuntu:noble
+            ros_distribution: rolling
     steps:
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v4
@@ -59,19 +57,18 @@ jobs:
     - name: Setup ROS2
       uses: ros-tooling/setup-ros@v0.7
       with:
-        required-ros-distributions: ${{ needs.identify-ros-distro.outputs.distro }}
-        use-ros2-testing: true
+        required-ros-distributions: ${{ matrix.ros_distribution }}
 
     - name: Install test-msgs on Linux
       run: |
-        sudo apt install ros-${{ needs.identify-ros-distro.outputs.distro }}-test-msgs
+        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
 
     - uses: actions/checkout@v4
 
     - name: Build and test rclnodejs
       run: |
         uname -a
-        source /opt/ros/${{ needs.identify-ros-distro.outputs.distro }}/setup.bash
+        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
         npm i
         npm run lint
         npm test
