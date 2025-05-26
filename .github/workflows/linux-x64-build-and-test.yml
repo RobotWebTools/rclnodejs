@@ -35,7 +35,7 @@ jobs:
           - kilted
           - rolling
         include:
-            # Humble Hawksbill (May 2022 - May 2027)
+          # Humble Hawksbill (May 2022 - May 2027)
           - docker_image: ubuntu:jammy
             ros_distribution: humble
           # Jazzy Jalisco (May 2024 - May 2029)
