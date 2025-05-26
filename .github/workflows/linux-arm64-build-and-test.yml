@@ -1,4 +1,4 @@
-name:  Linux x64/arm64
+name:  Linux arm64
 
 on:
   push:
@@ -20,24 +20,7 @@ defaults:
     shell: bash
 
 jobs:
-  identify-ros-distro:
-    uses: ./.github/workflows/identify-ros-distro.yml
-
-  matrix-prep:
-    runs-on: ubuntu-latest
-    outputs:
-      arm64-matrix: ${{ steps.set-matrix.outputs.arm64-matrix }}
-    steps:
-      - id: set-matrix
-        run: |
-          if ${{ contains(github.base_ref, 'develop') || contains(github.ref, 'develop') }}; then
-            echo "arm64-matrix=[{\"architecture\":\"arm64\",\"node-version\":\"22.X\",\"ubuntu-version\":\"24.04-arm\"}]" >> $GITHUB_OUTPUT
-          else
-            echo "arm64-matrix=[]" >> $GITHUB_OUTPUT
-          fi
-
   build:
-    needs: [identify-ros-distro, matrix-prep]
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.docker_image }}
@@ -45,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [20.X, 22.X, 24.X]
-        architecture: [x64]
+        architecture: [arm64]
         ros_distribution:
           - humble
           - jazzy
