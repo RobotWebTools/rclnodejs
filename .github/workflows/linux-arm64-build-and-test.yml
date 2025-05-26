@@ -1,0 +1,68 @@
+name:  Linux arm64
+
+on:
+  push:
+    branches:
+      - develop
+      - kilted
+      - jazzy
+      - humble-hawksbill
+  pull_request:
+    branches:
+      - develop
+      - kilted
+      - jazzy
+      - humble-hawksbill
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: ${{ matrix.docker_image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22.X]
+        architecture: [arm64]
+        ros_distribution:
+          - jazzy
+          - kilted
+        include:
+          # Jazzy Jalisco (May 2024 - May 2029)
+          - docker_image: ubuntu:noble
+            ros_distribution: jazzy
+          # Kilted Kaiju (May 2025 - Dec 2026)
+          - docker_image: ubuntu:noble
+            ros_distribution: kilted
+
+    steps:
+    - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        architecture: ${{ matrix.architecture }}
+
+    - name: Setup ROS2
+      uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: ${{ matrix.ros_distribution }}
+
+    - name: Install test-msgs on Linux
+      run: |
+        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
+
+    - uses: actions/checkout@v4
+
+    - name: Build and test rclnodejs
+      run: |
+        uname -a
+        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+        npm i
+        npm run lint
+        npm test
+        npm run clean

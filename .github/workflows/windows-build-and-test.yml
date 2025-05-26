@@ -16,16 +16,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  identify-ros-distro:
-    uses: ./.github/workflows/identify-ros-distro.yml
-
   build:
-    needs: identify-ros-distro
     runs-on: windows-2019
     strategy:
       fail-fast: false
       matrix:
         node-version: [22.X]
+        ros_distribution:
+          - humble
+          - jazzy
+          - kilted
+          - rolling
+        include:
+          # Humble Hawksbill (May 2022 - May 2027)
+          - ros_distribution: humble
+          # Jazzy Jalisco (May 2024 - May 2029)
+          - ros_distribution: jazzy
+          # Kilted Kaiju (May 2025 - Dec 2026)
+          - ros_distribution: kilted
+          # Rolling Ridley (No End-Of-Life)
+          - ros_distribution: rolling
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
@@ -35,11 +45,10 @@ jobs:
     - name: Setup ROS2
       uses: ros-tooling/setup-ros@v0.7
       with:
-        required-ros-distributions: ${{ needs.identify-ros-distro.outputs.distro }}
-        use-ros2-testing: true
+        required-ros-distributions: ${{ matrix.ros_distribution }}
 
     - name: Install ROS2 Rolling (Conditional)
-      if: ${{ needs.identify-ros-distro.outputs.distro == 'rolling' }}
+      if: ${{ matrix.ros_distribution == 'rolling' }}
       shell: bash
       run: |
         wget --quiet https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip -O rolling.zip
@@ -53,7 +62,7 @@ jobs:
     - name: Build rclnodejs
       shell: cmd
       run: |
-        call "c:\dev\${{ needs.identify-ros-distro.outputs.distro }}\ros2-windows\setup.bat"
+        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
         npm i
 
     # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround 
@@ -61,6 +70,5 @@ jobs:
     - name: Test rclnodejs
       shell: cmd
       run: |
-        call "c:\dev\${{ needs.identify-ros-distro.outputs.distro }}\ros2-windows\setup.bat"
-        cmd /c "if ${{ needs.identify-ros-distro.outputs.distro }}==foxy (set RMW_IMPLEMENTATION=rmw_cyclonedds_cpp&&npm test)"
-        cmd /c "if NOT ${{ needs.identify-ros-distro.outputs.distro }}==foxy if NOT ${{ needs.identify-ros-distro.outputs.distro }}==rolling if NOT ${{ needs.identify-ros-distro.outputs.distro }}==kilted (npm test)"
+        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
+        cmd /c "if NOT ${{ matrix.ros_distribution }}==rolling if NOT ${{ matrix.ros_distribution }}==kilted (npm test)"
