@@ -46,6 +46,11 @@ jobs:
       matrix:
         node-version: [20.X, 22.X, 24.X]
         architecture: [x64]
+        ros_distribution:
+          - humble
+          - jazzy
+          - kilted
+          - rolling
         include:
             # Humble Hawksbill (May 2022 - May 2027)
           - docker_image: ubuntu:jammy
@@ -55,7 +60,7 @@ jobs:
             ros_distribution: jazzy
           # Kilted Kaiju (May 2025 - Dec 2026)
           - docker_image: ubuntu:noble
-            ros_distribution: rolling
+            ros_distribution: kilted
           # Rolling Ridley (No End-Of-Life)
           - docker_image: ubuntu:noble
             ros_distribution: rolling
@@ -73,14 +78,14 @@ jobs:
 
     - name: Install test-msgs on Linux
       run: |
-        sudo apt install ros-${{ needs.identify-ros-distro.outputs.distro }}-test-msgs
+        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
 
     - uses: actions/checkout@v4
 
     - name: Build and test rclnodejs
       run: |
         uname -a
-        source /opt/ros/${{ needs.identify-ros-distro.outputs.distro }}/setup.bash
+        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
         npm i
         npm run lint
         npm test
