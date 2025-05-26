@@ -21,13 +21,13 @@ defaults:
 
 jobs:
   build:
-    runs-on: ubuntu-latest-arm
+    runs-on: ubuntu-24.04-arm
     container:
       image: ${{ matrix.docker_image }}
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20.X, 22.X, 24.X]
+        node-version: [22.X]
         architecture: [arm64]
         ros_distribution:
           - humble
@@ -73,20 +73,3 @@ jobs:
         npm run lint
         npm test
         npm run clean
-
-    - name: Coveralls Parallel
-      uses: coverallsapp/github-action@v2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        flag-name: run-${{ matrix.node-version }}-${{ matrix.architecture }}
-        parallel: true
-
-  finish:
-      needs: build
-      runs-on: ubuntu-latest
-      steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
