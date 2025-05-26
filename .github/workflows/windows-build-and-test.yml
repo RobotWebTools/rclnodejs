@@ -50,7 +50,13 @@ jobs:
       uses: ros-tooling/setup-ros@v0.7
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
-        use-ros2-testing: true
+
+    - name: Install ROS2 Rolling (Conditional)
+      if: ${{ matrix.ros_distribution == 'rolling' }}
+      shell: bash
+      run: |
+        wget --quiet https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip -O rolling.zip
+        7z x rolling.zip -y -o/c/dev/rolling
 
     - name: Prebuild - Setup VS Dev Environment
       uses: seanmiddleditch/gha-setup-vsdevenv@v4
