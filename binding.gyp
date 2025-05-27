@@ -120,6 +120,9 @@
             'include_dirs': [
               './src/third_party/dlfcn-win32/',
             ],
+            'libraries': [
+              '-lrmw_fastrtps_cpp',
+            ],
             'msvs_settings': {
               'VCCLCompilerTool': {
                 'ExceptionHandling': '2', # /EHsc
