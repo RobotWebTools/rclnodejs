@@ -21,9 +21,13 @@ const TypeDescriptionService = require('../lib/type_description_service.js');
 
 describe('type description service test suite', function () {
   this.timeout(60 * 1000);
+  let node;
 
-  beforeEach(function () {
-    return rclnodejs.init();
+  beforeEach(async function () {
+    await rclnodejs.init();
+    const nodeName = 'test_type_description_service';
+    node = rclnodejs.createNode(nodeName);
+    rclnodejs.spin(node);
   });
 
   afterEach(function () {
@@ -35,9 +39,7 @@ describe('type description service test suite', function () {
       this.skip();
       return;
     }
-    // Create a node and a publisher
-    const nodeName = 'test_type_description_service';
-    const node = rclnodejs.createNode(nodeName);
+    // Create a publisher
     const topic = 'test_get_type_description_publisher';
     const topicType = 'std_msgs/msg/String';
     node.createPublisher(topicType, topic);
@@ -66,6 +68,5 @@ describe('type description service test suite', function () {
       assert.notStrictEqual(response.type_sources.length, 0);
       done();
     });
-    rclnodejs.spin(node);
   });
 });
