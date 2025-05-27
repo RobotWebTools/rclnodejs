@@ -67,6 +67,7 @@
         '-lrcl_yaml_param_parser',
         '-lrcpputils',
         '-lrmw',
+        '-lrmw_fastrtps_cpp',
         '-lrosidl_runtime_c',
       ],
       'defines': [
