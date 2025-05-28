@@ -27,15 +27,6 @@ jobs:
           - jazzy
           - kilted
           - rolling
-        include:
-          # Humble Hawksbill (May 2022 - May 2027)
-          - ros_distribution: humble
-          # Jazzy Jalisco (May 2024 - May 2029)
-          - ros_distribution: jazzy
-          # Kilted Kaiju (May 2025 - Dec 2026)
-          - ros_distribution: kilted
-          # Rolling Ridley (No End-Of-Life)
-          - ros_distribution: rolling
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
