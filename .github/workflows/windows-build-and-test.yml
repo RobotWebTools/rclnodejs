@@ -63,4 +63,4 @@ jobs:
       run: |
         set RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
-        npm test
+        cmd /c "set RMW_IMPLEMENTATION=rmw_cyclonedds_cpp&&npm test"
