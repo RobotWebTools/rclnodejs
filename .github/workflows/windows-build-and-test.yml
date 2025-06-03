@@ -61,6 +61,5 @@ jobs:
     - name: Test rclnodejs
       shell: cmd
       run: |
-        set RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
-        cmd /c "set RMW_IMPLEMENTATION=rmw_cyclonedds_cpp&&npm test"
+        cmd /c "set RMW_IMPLEMENTATION=rmw_fastrtps_cpp&&npm test"
