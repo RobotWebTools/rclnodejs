@@ -45,16 +45,13 @@ jobs:
         wget --quiet https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip -O rolling.zip
         7z x rolling.zip -y -o/c/dev/rolling
 
-    - name: Prebuild - Setup VS Dev Environment
-      uses: seanmiddleditch/gha-setup-vsdevenv@v4
-
     - uses: actions/checkout@v4
 
     - name: Build rclnodejs
       shell: cmd
       run: |
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
-        cmd /c "set RMW_IMPLEMENTATION=rmw_fastrtps_cpp&&npm i"
+        npm i
 
     # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround 
     # an error when loading the default fastrtps ddl
@@ -62,4 +59,4 @@ jobs:
       shell: cmd
       run: |
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
-        cmd /c "set RMW_IMPLEMENTATION=rmw_fastrtps_cpp&&npm test"
+        cmd /c "set RMW_IMPLEMENTATION=rmw_fastrtps_cpp & &npm test"
