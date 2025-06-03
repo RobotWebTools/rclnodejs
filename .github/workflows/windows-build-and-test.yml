@@ -54,7 +54,7 @@ jobs:
       shell: cmd
       run: |
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
-        npm i
+        cmd /c "set RMW_IMPLEMENTATION=rmw_fastrtps_cpp&&npm i"
 
     # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround 
     # an error when loading the default fastrtps ddl
