@@ -249,14 +249,14 @@ Napi::Value TakeEvent(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   RclHandle* event_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_event_t* event = reinterpret_cast<rcl_event_t*>(event_handle->ptr());
-  auto enent_type = info[1].As<Napi::Object>();
+  auto event_type = info[1].As<Napi::Object>();
 
   event_callback_data_t data;
   rcl_ret_t ret;
-  if (enent_type.Has("subscription_event_type")) {
+  if (event_type.Has("subscription_event_type")) {
     rcl_subscription_event_type_t subscription_event_type =
         static_cast<rcl_subscription_event_type_t>(
-            enent_type.Get("subscription_event_type")
+            event_type.Get("subscription_event_type")
                 .As<Napi::Number>()
                 .Int32Value());
     ret = rcl_take_event(event, &data);
@@ -264,10 +264,10 @@ Napi::Value TakeEvent(const Napi::CallbackInfo& info) {
       return CreateJSObjectForSubscriptionEvent(env, subscription_event_type,
                                                 data);
     }
-  } else if (enent_type.Has("publisher_event_type")) {
+  } else if (event_type.Has("publisher_event_type")) {
     rcl_publisher_event_type_t publisher_event_type =
         static_cast<rcl_publisher_event_type_t>(
-            enent_type.Get("publisher_event_type")
+            event_type.Get("publisher_event_type")
                 .As<Napi::Number>()
                 .Int32Value());
     ret = rcl_take_event(event, &data);

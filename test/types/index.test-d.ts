@@ -140,6 +140,12 @@ expectType<void>(publisher.publish(Buffer.from('Hello ROS World')));
 expectType<void>(node.destroyPublisher(publisher));
 expectType<boolean>(publisher.isDestroyed());
 expectType<boolean>(publisher.waitForAllAcked(BigInt(1000)));
+node.createPublisher(
+  TYPE_CLASS,
+  TOPIC,
+  publisher.options,
+  (event: object) => {}
+);
 
 // ---- LifecyclePublisher ----
 const lifecyclePublisher = lifecycleNode.createLifecyclePublisher(
@@ -155,7 +161,13 @@ expectType<boolean>(lifecyclePublisher.isActivated());
 let subscription = node.createSubscription(TYPE_CLASS, TOPIC, () => {});
 expectType<rclnodejs.Subscription>(subscription);
 expectType<rclnodejs.Subscription>(
-  node.createSubscription(TYPE_CLASS, TOPIC, {}, () => {})
+  node.createSubscription(
+    TYPE_CLASS,
+    TOPIC,
+    {},
+    () => {},
+    (event: object) => {}
+  )
 );
 
 const contentFilter: rclnodejs.SubscriptionContentFilter = {

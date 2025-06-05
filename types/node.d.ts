@@ -303,12 +303,14 @@ declare module 'rclnodejs' {
      * @param typeClass - Type of message that will be published.
      * @param topic - Name of the topic the publisher will publish to.
      * @param options - Configuration options, see DEFAULT_OPTIONS
+     * @param eventCallbacks - Optional The event callbacks for the publisher.
      * @returns New instance of Publisher.
      */
     createPublisher<T extends TypeClass<MessageTypeClassName>>(
       typeClass: T,
       topic: string,
-      options?: Options
+      options?: Options,
+      eventCallbacks?: (event: object) => void
     ): Publisher<T>;
 
     /**
@@ -333,6 +335,7 @@ declare module 'rclnodejs' {
      * @param topic - Name of the topic the subcription will subscribe to.
      * @param options - Configuration options, see DEFAULT_OPTIONS
      * @param callback - Called when a new message is received. The serialized message will be null-terminated.
+     * @param eventCallbacks - Optional The event callbacks for the subscription.
      * @returns New instance of Subscription.
      * @throws Error - May throw an RMW error if options.content-filter is malformed.
      * @see {@link https://www.omg.org/spec/DDS/1.4/PDF|Content-filter details at DDS 1.4 specification, Annex B}
@@ -341,7 +344,8 @@ declare module 'rclnodejs' {
       typeClass: T,
       topic: string,
       options: Options,
-      callback: SubscriptionCallback<T> | SubscriptionWithRawMessageCallback
+      callback: SubscriptionCallback<T> | SubscriptionWithRawMessageCallback,
+      eventCallbacks?: (event: object) => void
     ): Subscription;
 
     /**
