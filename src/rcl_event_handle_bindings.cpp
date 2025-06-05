@@ -109,6 +109,7 @@ Napi::Value CreateJSObjectForSubscriptionEvent(
       obj.Set("current_count_change",
               Napi::Number::New(
                   env, data.subscription_matched.current_count_change));
+      break;
     }
     default:
       break;
@@ -167,6 +168,7 @@ Napi::Value CreateJSObjectForPublisherEvent(
       obj.Set(
           "current_count_change",
           Napi::Number::New(env, data.publisher_matched.current_count_change));
+      break;
     }
     default:
       break;
