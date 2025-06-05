@@ -22,6 +22,7 @@
 #include "handle_manager.h"
 #include "macros.h"
 #include "rcl_bindings.h"
+
 #ifdef WIN32
 #define UNUSED
 #else
