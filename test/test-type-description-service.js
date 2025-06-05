@@ -35,7 +35,7 @@ describe('type description service test suite', function () {
     const nodeName = 'test_type_description_service';
     node = rclnodejs.createNode(nodeName);
     rclnodejs.spin(node);
-    await assertUtils.createDelay(1000);
+    await assertUtils.createDelay(5000);
   });
 
   afterEach(function () {
