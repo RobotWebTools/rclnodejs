@@ -17,9 +17,8 @@
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 
-#include <iostream>
-
 #include "rcl_handle.h"
+
 namespace {
 
 typedef union event_callback_data {
@@ -250,43 +249,34 @@ Napi::Value TakeEvent(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   RclHandle* event_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_event_t* event = reinterpret_cast<rcl_event_t*>(event_handle->ptr());
-
-  rcl_publisher_event_type_t publisher_event_type;
-  rcl_subscription_event_type_t subscription_event_type;
-  bool is_subscription_event = false;
-  bool is_publisher_event = false;
-  if (info[1].As<Napi::Object>().Has("subscription_event_type")) {
-    subscription_event_type = static_cast<rcl_subscription_event_type_t>(
-        info[1]
-            .As<Napi::Object>()
-            .Get("subscription_event_type")
-            .As<Napi::Number>()
-            .Int32Value());
-    is_subscription_event = true;
-  } else if (info[1].As<Napi::Object>().Has("publisher_event_type")) {
-    publisher_event_type =
-        static_cast<rcl_publisher_event_type_t>(info[1]
-                                                    .As<Napi::Object>()
-                                                    .Get("publisher_event_type")
-                                                    .As<Napi::Number>()
-                                                    .Int32Value());
-    is_publisher_event = true;
-  }
+  auto enent_type = info[1].As<Napi::Object>();
 
   event_callback_data_t data;
-  rcl_ret_t ret = rcl_take_event(event, &data);
-  if (RCL_RET_OK != ret) {
-    Napi::Error::New(env, "failed to take event").ThrowAsJavaScriptException();
-    return env.Undefined();
+  rcl_ret_t ret;
+  if (enent_type.Has("subscription_event_type")) {
+    rcl_subscription_event_type_t subscription_event_type =
+        static_cast<rcl_subscription_event_type_t>(
+            enent_type.Get("subscription_event_type")
+                .As<Napi::Number>()
+                .Int32Value());
+    ret = rcl_take_event(event, &data);
+    if (RCL_RET_OK == ret) {
+      return CreateJSObjectForSubscriptionEvent(env, subscription_event_type,
+                                                data);
+    }
+  } else if (enent_type.Has("publisher_event_type")) {
+    rcl_publisher_event_type_t publisher_event_type =
+        static_cast<rcl_publisher_event_type_t>(
+            enent_type.Get("publisher_event_type")
+                .As<Napi::Number>()
+                .Int32Value());
+    ret = rcl_take_event(event, &data);
+    if (RCL_RET_OK == ret) {
+      return CreateJSObjectForPublisherEvent(env, publisher_event_type, data);
+    }
   }
 
-  if (is_subscription_event) {
-    return CreateJSObjectForSubscriptionEvent(env, subscription_event_type,
-                                              data);
-  } else if (is_publisher_event) {
-    return CreateJSObjectForPublisherEvent(env, publisher_event_type, data);
-  }
-
+  Napi::Error::New(env, "failed to take event").ThrowAsJavaScriptException();
   return env.Undefined();
 }
 

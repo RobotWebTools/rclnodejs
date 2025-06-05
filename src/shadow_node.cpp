@@ -14,13 +14,13 @@
 
 #include "shadow_node.h"
 
-#include <iostream>
 #include <memory>
 #include <vector>
 
 #include "executor.h"
 #include "handle_manager.h"
 #include "rcl_handle.h"
+
 namespace rclnodejs {
 
 Napi::FunctionReference ShadowNode::constructor;
@@ -107,7 +107,7 @@ void ShadowNode::Execute(const std::vector<rclnodejs::RclHandle*>& handles) {
     handles[i]->SyncProperties();
     results[i] = handles[i]->Value();
   }
-  // std::cout << "Executing " << handles.size() << " handles." << std::endl;
+
   Napi::Function execute =
       Value().As<Napi::Object>().Get("execute").As<Napi::Function>();
   execute.Call(Value(), {results});
