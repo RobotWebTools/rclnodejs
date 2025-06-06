@@ -23,44 +23,52 @@ jobs:
       matrix:
         node-version: [22.X]
         ros_distribution:
-          - humble
-          - jazzy
           - kilted
-          - rolling
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Setup ROS2
-      uses: ros-tooling/setup-ros@v0.7
-      with:
-        required-ros-distributions: ${{ matrix.ros_distribution }}
+    - name: Install pixi
+      shell: powershell
+      run: |
+        irm -useb https://pixi.sh/install.ps1 | iex
+
+    - name: Install dependencies
+      shell: powershell
+      run: |
+        irm https://raw.githubusercontent.com/ros2/ros2/refs/heads/kilted/pixi.toml -OutFile pixi.toml
+        pixi install
+
+    - name: Install 7-Zip
+      shell: powershell
+      run: |
+        choco install 7zip wget -y
 
     - name: Install ROS2 Rolling (Conditional)
-      if: ${{ matrix.ros_distribution == 'rolling' }}
       shell: bash
       run: |
-        wget --quiet https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip -O rolling.zip
-        7z x rolling.zip -y -o/c/dev/rolling
-
-    - name: Prebuild - Setup VS Dev Environment
-      uses: seanmiddleditch/gha-setup-vsdevenv@v4
+        wget --quiet https://github.com/ros2/ros2/releases/download/release-kilted-20250523/ros2-kilted-20250523-windows-release-amd64.zip -O rolling.zip
+        7z x rolling.zip -y -o/c/dev/kilted
 
     - uses: actions/checkout@v4
 
     - name: Build rclnodejs
       shell: cmd
       run: |
-        set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
+        call "c:\dev\kilted\ros2-windows\setup.bat"
         npm i
 
-    # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround 
-    # an error when loading the default fastrtps ddl
+    - name: Test rclnodejs
+      shell: powershell
+      run: |
+        pixi shell
+        call "c:\dev\kilted\ros2-windows\setup.bat"
+        npm test
+
     - name: Test rclnodejs
       shell: cmd
       run: |
-        set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
+        call "c:\dev\kilted\ros2-windows\local_setup.bat"
+        npm test
