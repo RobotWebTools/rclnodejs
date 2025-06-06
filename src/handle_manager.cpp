@@ -40,7 +40,6 @@ HandleManager::~HandleManager() {
 
 void HandleManager::SynchronizeHandles(const Napi::Object& node) {
   Napi::HandleScope scope(node.Env());
-
   Napi::Value timers = node.Get("_timers");
   Napi::Value subscriptions = node.Get("_subscriptions");
   Napi::Value clients = node.Get("_clients");
@@ -49,6 +48,7 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
   Napi::Value action_clients = node.Get("_actionClients");
   Napi::Value action_servers = node.Get("_actionServers");
   Napi::Value events = node.Get("_events");
+
   uint32_t sum = 0;
   is_synchronizing_.store(true);
   {
