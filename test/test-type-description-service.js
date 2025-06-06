@@ -15,6 +15,7 @@
 'use strict';
 
 const assert = require('assert');
+const assertUtils = require('./utils.js');
 const DistroUtils = require('../lib/distro.js');
 const rclnodejs = require('../index.js');
 const TypeDescriptionService = require('../lib/type_description_service.js');
@@ -23,11 +24,18 @@ describe('type description service test suite', function () {
   this.timeout(60 * 1000);
   let node;
 
+  before(function () {
+    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+      this.skip();
+    }
+  });
+
   beforeEach(async function () {
     await rclnodejs.init();
     const nodeName = 'test_type_description_service';
     node = rclnodejs.createNode(nodeName);
     rclnodejs.spin(node);
+    await assertUtils.createDelay(1000);
   });
 
   afterEach(function () {
@@ -35,10 +43,6 @@ describe('type description service test suite', function () {
   });
 
   it('Test type description service', function (done) {
-    if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
-      this.skip();
-      return;
-    }
     // Create a publisher
     const topic = 'test_get_type_description_publisher';
     const topicType = 'std_msgs/msg/String';

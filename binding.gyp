@@ -173,6 +173,7 @@
           # After Humble, e.g., Jazzy, Kilted.
           'ros_version > 2205', {
             'sources': [
+              './src/rcl_event_handle_bindings.cpp',
               './src/rcl_type_description_service_bindings.cpp',
             ]
           }
