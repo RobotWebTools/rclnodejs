@@ -35,6 +35,7 @@
 #include "rcl_time_point_bindings.h"
 #include "rcl_timer_bindings.h"
 #if ROS_VERSION > 2205  // ROS2 > Humble
+#include "rcl_event_handle_bindings.h"
 #include "rcl_type_description_service_bindings.h"
 #endif
 #include "rcl_utilities.h"
@@ -84,6 +85,7 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
   rclnodejs::InitTimerBindings(env, exports);
 #if ROS_VERSION > 2205  // ROS2 > Humble
   rclnodejs::InitTypeDescriptionServiceBindings(env, exports);
+  rclnodejs::InitEventHandleBindings(env, exports);
 #endif
   rclnodejs::InitLifecycleBindings(env, exports);
   rclnodejs::ShadowNode::Init(env, exports);

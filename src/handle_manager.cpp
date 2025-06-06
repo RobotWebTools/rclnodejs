@@ -40,7 +40,6 @@ HandleManager::~HandleManager() {
 
 void HandleManager::SynchronizeHandles(const Napi::Object& node) {
   Napi::HandleScope scope(node.Env());
-
   Napi::Value timers = node.Get("_timers");
   Napi::Value subscriptions = node.Get("_subscriptions");
   Napi::Value clients = node.Get("_clients");
@@ -48,6 +47,7 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
   Napi::Value guard_conditions = node.Get("_guards");
   Napi::Value action_clients = node.Get("_actionClients");
   Napi::Value action_servers = node.Get("_actionServers");
+  Napi::Value events = node.Get("_events");
 
   uint32_t sum = 0;
   is_synchronizing_.store(true);
@@ -66,6 +66,7 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
                                     &action_clients_);
     sum += SynchronizeHandlesByType(action_servers.As<Napi::Object>(),
                                     &action_servers_);
+    sum += SynchronizeHandlesByType(events.As<Napi::Object>(), &events_);
   }
   is_synchronizing_.store(false);
 
@@ -98,6 +99,7 @@ void HandleManager::ClearHandles() {
   guard_conditions_.clear();
   action_clients_.clear();
   action_servers_.clear();
+  events_.clear();
 }
 
 rcl_ret_t HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
@@ -152,6 +154,11 @@ rcl_ret_t HandleManager::AddHandlesToWaitSet(rcl_wait_set_t* wait_set) {
     if (ret != RCL_RET_OK) return ret;
   }
 
+  for (auto& event : events_) {
+    rcl_event_t* rcl_event = reinterpret_cast<rcl_event_t*>(event->ptr());
+    rcl_ret_t ret = rcl_wait_set_add_event(wait_set, rcl_event, nullptr);
+    if (ret != RCL_RET_OK) return ret;
+  }
   return RCL_RET_OK;
 }
 
@@ -169,6 +176,8 @@ rcl_ret_t HandleManager::CollectReadyHandles(rcl_wait_set_t* wait_set) {
   CollectReadyHandlesByType(wait_set->guard_conditions,
                             wait_set->size_of_guard_conditions,
                             guard_conditions_, &ready_handles);
+  CollectReadyHandlesByType(wait_set->events, wait_set->size_of_events, events_,
+                            &ready_handles);
 
   rcl_ret_t ret = CollectReadyActionHandles(wait_set, &ready_handles);
   if (!ready_handles.empty()) {
@@ -184,7 +193,8 @@ rcl_ret_t HandleManager::GetEntityCounts(size_t* subscriptions_size,
                                          size_t* guard_conditions_size,
                                          size_t* timers_size,
                                          size_t* clients_size,
-                                         size_t* services_size) {
+                                         size_t* services_size,
+                                         size_t* events_size) {
   size_t num_subscriptions = 0u;
   size_t num_guard_conditions = 0u;
   size_t num_timers = 0u;
@@ -230,6 +240,7 @@ rcl_ret_t HandleManager::GetEntityCounts(size_t* subscriptions_size,
   *timers_size += timer_count();
   *clients_size += client_count();
   *services_size += service_count();
+  *events_size += event_count();
 
   return RCL_RET_OK;
 }

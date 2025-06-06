@@ -68,13 +68,15 @@ class HandleManager {
   rcl_ret_t CollectReadyHandles(rcl_wait_set_t* wait_set);
   rcl_ret_t GetEntityCounts(size_t* subscriptions_size,
                             size_t* guard_conditions_size, size_t* timers_size,
-                            size_t* clients_size, size_t* services_size);
+                            size_t* clients_size, size_t* services_size,
+                            size_t* events_size);
 
   uint32_t subscription_count() const { return subscriptions_.size(); }
   uint32_t service_count() const { return services_.size(); }
   uint32_t client_count() const { return clients_.size(); }
   uint32_t timer_count() const { return timers_.size(); }
   uint32_t guard_condition_count() const { return guard_conditions_.size(); }
+  uint32_t event_count() const { return events_.size(); }
   uv_rwlock_t* handle_rwlock() { return &sync_handles_rwlock_; }
 
   uint32_t ready_handles_count();
@@ -110,6 +112,7 @@ class HandleManager {
   std::vector<rclnodejs::RclHandle*> action_servers_;
   std::vector<rclnodejs::RclHandle*> action_clients_;
   std::vector<rclnodejs::RclHandle*> ready_handles_;
+  std::vector<rclnodejs::RclHandle*> events_;
 
   // Protects the handles.
   uv_rwlock_t sync_handles_rwlock_;

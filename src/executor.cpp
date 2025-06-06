@@ -190,10 +190,11 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
     size_t num_timers = 0u;
     size_t num_clients = 0u;
     size_t num_services = 0u;
+    size_t num_events = 0u;
 
     rcl_ret_t get_entity_ret = handle_manager_->GetEntityCounts(
         &num_subscriptions, &num_guard_conditions, &num_timers, &num_clients,
-        &num_services);
+        &num_services, &num_events);
     if (get_entity_ret != RCL_RET_OK) {
       std::string error_message = std::string("Failed to get entity counts: ") +
                                   std::string(rcl_get_error_string().str);
@@ -202,9 +203,7 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
 
     rcl_ret_t resize_ret =
         rcl_wait_set_resize(wait_set, num_subscriptions, num_guard_conditions,
-                            num_timers, num_clients, num_services,
-                            // TODO(minggang): support events.
-                            0u);
+                            num_timers, num_clients, num_services, num_events);
     if (resize_ret != RCL_RET_OK) {
       std::string error_message = std::string("Failed to resize: ") +
                                   std::string(rcl_get_error_string().str);
