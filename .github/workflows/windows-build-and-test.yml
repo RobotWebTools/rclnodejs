@@ -59,4 +59,4 @@ jobs:
       shell: cmd
       run: |
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
-        cmd /c "set RMW_IMPLEMENTATION=rmw_fastrtps_cpp & &npm test"
+        cmd /c "set RMW_IMPLEMENTATION=rmw_fastrtps_cpp && ros2 run demo_nodes_cpp talker"
