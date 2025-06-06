@@ -46,6 +46,7 @@ jobs:
         $pixiPath = "$env:USERPROFILE\.pixi\bin\pixi.exe"
         irm https://raw.githubusercontent.com/ros2/ros2/refs/heads/kilted/pixi.toml -OutFile pixi.toml
         & $pixiPath install
+        & $pixiPath shell
 
     - name: Install 7-Zip
       shell: powershell
@@ -69,8 +70,6 @@ jobs:
     - name: Test rclnodejs
       shell: powershell
       run: |
-        $pixiPath = "$env:USERPROFILE\.pixi\bin\pixi.exe"
-        & $pixiPath shell
         call "c:\dev\kilted\ros2-windows\setup.bat"
         npm test
 
