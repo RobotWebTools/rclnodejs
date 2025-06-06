@@ -68,12 +68,6 @@ jobs:
         npm i
 
     - name: Test rclnodejs
-      shell: powershell
-      run: |
-        call "c:\dev\kilted\ros2-windows\setup.bat"
-        npm test
-
-    - name: Test rclnodejs
       shell: cmd
       run: |
         call "c:\dev\kilted\ros2-windows\local_setup.bat"
