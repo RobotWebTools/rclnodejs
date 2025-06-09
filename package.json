@@ -1,6 +1,6 @@
 {
   "name": "rclnodejs",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "ROS2.0 JavaScript client with Node.js",
   "main": "index.js",
   "types": "types/index.d.ts",

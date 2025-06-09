@@ -1,4 +1,4 @@
-# rclnodejs ![GitHub Workflow Status](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-build-and-test.yml/badge.svg?branch=jazzy)
+# rclnodejs [![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-build-and-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-build-and-test.yml?query=branch%3Adevelop)[![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-build-and-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-build-and-test.yml?query=branch%3Adevelop)
 
 `rclnodejs` is a Node.js client for the Robot Operating System (ROS 2). It provides a simple and easy JavaScript API for ROS 2 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects.
 
@@ -22,8 +22,8 @@ rclnodejs.init().then(() => {
 
 **ROS 2 SDK**
 
-- See the ROS 2 SDK [Installation Guide](https://docs.ros.org/en/jazzy/Installation.html) for details.
-- **DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#source-the-setup-files)**
+- See the ROS 2 SDK [Installation Guide](https://docs.ros.org/en/kilted/Installation.html) for details.
+- **DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://docs.ros.org/en/kilted/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.htmls)**
 
 ## Install rclnodejs
 
@@ -45,7 +45,7 @@ npm i rclnodejs@x.y.z
 
 |                                     RCLNODEJS Version                                      |                                                                                               Compatible ROS 2 LTS                                                                                               |
 | :----------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| latest version (currently [v1.1.0](https://github.com/RobotWebTools/rclnodejs/tree/1.1.0)) | [Kilted](https://github.com/RobotWebTools/rclnodejs/tree/kilted)<br>[Jazzy](https://github.com/RobotWebTools/rclnodejs/tree/jazzy)<br>[Humble](https://github.com/RobotWebTools/rclnodejs/tree/humble-hawksbill) |
+| latest version (currently [v1.2.0](https://github.com/RobotWebTools/rclnodejs/tree/1.2.0)) | [Kilted](https://github.com/RobotWebTools/rclnodejs/tree/kilted)<br>[Jazzy](https://github.com/RobotWebTools/rclnodejs/tree/jazzy)<br>[Humble](https://github.com/RobotWebTools/rclnodejs/tree/humble-hawksbill) |
 
 ## Documentation
 
