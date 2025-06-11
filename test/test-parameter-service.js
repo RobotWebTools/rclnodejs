@@ -18,7 +18,7 @@ const assert = require('assert');
 
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
-const assertThrowsError = assertUtils.assertThrowsError;
+const DistroUtils = require('../lib/distro.js');
 
 const {
   ParameterType,
@@ -120,7 +120,11 @@ describe('Parameter_server tests', function () {
     let success = false;
     client.sendRequest(request, (response) => {
       const result = response.result;
-      assert.equal(result.names.length, 4); // account for use_sim_time and start_type_description_service parameter
+      if (DistroUtils.getDistroId() >= DistroUtils.getDistroId('jazzy')) {
+        assert.equal(result.names.length, 4); // account for use_sim_time and start_type_description_service parameter
+      } else {
+        assert.equal(result.names.length, 3); // account for use_sim_time parameter
+      }
       assert.ok(result.names.includes('p1'));
       assert.ok(result.names.includes('p2'));
       success = true;
