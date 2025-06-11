@@ -19,6 +19,7 @@ const assertUtils = require('./utils.js');
 const DistroUtils = require('../lib/distro.js');
 const rclnodejs = require('../index.js');
 const TypeDescriptionService = require('../lib/type_description_service.js');
+const { exec } = require('child_process');
 
 describe('type description service test suite', function () {
   this.timeout(60 * 1000);
@@ -72,5 +73,23 @@ describe('type description service test suite', function () {
       assert.notStrictEqual(response.type_sources.length, 0);
       done();
     });
+  });
+
+  it('Test type description service configured by parameter', function (done) {
+    exec(
+      'ros2 param list /test_type_description_service',
+      (error, stdout, stderr) => {
+        if (error || stderr) {
+          done(
+            new Error(
+              'Test type description service configured by parameter failed.'
+            )
+          );
+        }
+        if (stdout.includes('start_type_description_service')) {
+          done();
+        }
+      }
+    );
   });
 });
