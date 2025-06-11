@@ -120,7 +120,7 @@ describe('Parameter_server tests', function () {
     let success = false;
     client.sendRequest(request, (response) => {
       const result = response.result;
-      assert.equal(result.names.length, 4); // account for use_sim_time  and start_type_description_service parameter
+      assert.equal(result.names.length, 4); // account for use_sim_time and start_type_description_service parameter
       assert.ok(result.names.includes('p1'));
       assert.ok(result.names.includes('p2'));
       success = true;
