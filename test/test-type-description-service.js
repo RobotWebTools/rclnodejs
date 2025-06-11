@@ -88,6 +88,10 @@ describe('type description service test suite', function () {
         }
         if (stdout.includes('start_type_description_service')) {
           done();
+        } else {
+          done(
+            new Error("'start_type_description_service' not found in stdout.")
+          );
         }
       }
     );
