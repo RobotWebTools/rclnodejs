@@ -19,6 +19,7 @@ const assertUtils = require('./utils.js');
 const DistroUtils = require('../lib/distro.js');
 const rclnodejs = require('../index.js');
 const TypeDescriptionService = require('../lib/type_description_service.js');
+const { exec } = require('child_process');
 
 describe('type description service test suite', function () {
   this.timeout(60 * 1000);
@@ -35,14 +36,13 @@ describe('type description service test suite', function () {
     const nodeName = 'test_type_description_service';
     node = rclnodejs.createNode(nodeName);
     rclnodejs.spin(node);
-    await assertUtils.createDelay(1000);
   });
 
   afterEach(function () {
     rclnodejs.shutdown();
   });
 
-  it('Test type description service', function (done) {
+  it('Test type description service', async function () {
     // Create a publisher
     const topic = 'test_get_type_description_publisher';
     const topicType = 'std_msgs/msg/String';
@@ -63,14 +63,68 @@ describe('type description service test suite', function () {
     const GetTypeDescription =
       'type_description_interfaces/srv/GetTypeDescription';
     const client = node.createClient(GetTypeDescription, serviceName);
-    client.sendRequest(request, (response) => {
-      assert.strictEqual(response.successful, true);
-      assert.strictEqual(
-        response.type_description.type_description.type_name,
-        topicType
-      );
-      assert.notStrictEqual(response.type_sources.length, 0);
-      done();
+    return client.waitForService(60 * 1000).then((result) => {
+      if (!result) {
+        throw new Error('Service not available');
+      }
+      return new Promise((resolve) => {
+        client.sendRequest(request, (response) => {
+          assert.strictEqual(response.successful, true);
+          assert.strictEqual(
+            response.type_description.type_description.type_name,
+            topicType
+          );
+          assert.notStrictEqual(response.type_sources.length, 0);
+          resolve();
+        });
+      });
     });
+  });
+
+  it('Test type description service configured by parameter', function (done) {
+    exec(
+      'ros2 param list /test_type_description_service',
+      (error, stdout, stderr) => {
+        if (error || stderr) {
+          done(
+            new Error(
+              'Test type description service configured by parameter failed.'
+            )
+          );
+        }
+        if (stdout.includes('start_type_description_service')) {
+          done();
+        } else {
+          done(
+            new Error("'start_type_description_service' not found in stdout.")
+          );
+        }
+      }
+    );
+  });
+
+  it('Test start_type_description_service parameter value', function (done) {
+    exec(
+      'ros2 param get /test_type_description_service start_type_description_service',
+      (error, stdout, stderr) => {
+        if (error || stderr) {
+          done(
+            new Error(
+              'Test type description service configured by parameter failed.'
+            )
+          );
+        }
+        if (stdout.includes('Boolean value is: True')) {
+          done();
+        } else {
+          console.log(stdout);
+          done(
+            new Error(
+              "'start_type_description_service param value' not found in stdout."
+            )
+          );
+        }
+      }
+    );
   });
 });
