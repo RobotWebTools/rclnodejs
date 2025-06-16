@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <rcpputils/scope_exit.hpp>
+// NOLINTNEXTLINE
 #include <string>
 
 #include "macros.h"
