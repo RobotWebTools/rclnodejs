@@ -28,7 +28,8 @@ expectType<string | undefined>(rclnodejs.DistroUtils.getDistroName(2105));
 
 // ---- Context -----
 expectType<rclnodejs.Context>(rclnodejs.Context.defaultContext());
-expectType<number>(rclnodejs.Context.defaultContext().domainId());
+expectType<rclnodejs.Context>(new rclnodejs.Context(123n));
+expectType<bigint>(rclnodejs.Context.defaultContext().domainId());
 
 // ---- NodeOptions ----
 const nodeOptions = new rclnodejs.NodeOptions();

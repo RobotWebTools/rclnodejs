@@ -255,7 +255,7 @@ let rcl = {
       throw new TypeError('argv elements must be strings (and not null).');
     }
 
-    rclnodejs.init(context.handle, argv);
+    rclnodejs.init(context.handle, argv, context._domainId);
 
     if (_rosVersionChecked) {
       // no further processing required
