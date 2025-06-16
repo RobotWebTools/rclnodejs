@@ -38,8 +38,9 @@ declare module 'rclnodejs' {
      * Create a new instance in uninitialized state.
      * Call rcl.init(context) to initialize this context state for
      * use in creating nodes, etc.
+     * @param {bigint} - Optional, The domain ID of this context.
      */
-    constructor();
+    constructor(domainId?: bigint);
 
     /**
      * Test if this context has not been initialized by rcl.init(context).
@@ -92,6 +93,6 @@ declare module 'rclnodejs' {
      * Get the domain ID of this context.
      * @returns domain ID of this context
      */
-    domainId(): number;
+    domainId(): bigint;
   }
 }

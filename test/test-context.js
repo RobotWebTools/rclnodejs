@@ -81,9 +81,16 @@ describe('context test suite', function () {
     assert.strictEqual(context.nodes.length, 0);
   });
 
-  it('context number id', async function () {
+  it('context domain id', async function () {
+    let context = new rclnodejs.Context(BigInt(123));
+    await rclnodejs.init(context);
+    assert.strictEqual(typeof context.domainId, 'bigint');
+    assert.strictEqual(context.domainId, BigInt(123));
+  });
+
+  it('context with default domain id', async function () {
     let context = new rclnodejs.Context();
     await rclnodejs.init(context);
-    assert.strictEqual(typeof context.domainId, 'number');
+    assert.strictEqual(typeof context.domainId, 'bigint');
   });
 });

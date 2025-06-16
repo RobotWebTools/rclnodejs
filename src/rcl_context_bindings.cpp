@@ -18,6 +18,7 @@
 #include <rcl/rcl.h>
 
 #include <cstdio>
+#include <rcpputils/scope_exit.hpp>
 #include <string>
 
 #include "macros.h"
@@ -34,6 +35,15 @@ Napi::Value Init(const Napi::CallbackInfo& info) {
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_init_options_init(&init_options, allocator),
                            rcl_get_error_string().str);
+
+  RCPPUTILS_SCOPE_EXIT({
+    rcl_ret_t fini_ret = rcl_init_options_fini(&init_options);
+    if (RCL_RET_OK != fini_ret) {
+      Napi::Error::New(env, rcl_get_error_string().str)
+          .ThrowAsJavaScriptException();
+      rcl_reset_error();
+    }
+  });
 
   // Preprocess Context
   RclHandle* context_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
@@ -53,6 +63,18 @@ Napi::Value Init(const Napi::CallbackInfo& info) {
       argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char)));
       snprintf(argv[i], len, "%s", arg.c_str());
     }
+  }
+  // Set up the domain id.
+  size_t domain_id = RCL_DEFAULT_DOMAIN_ID;
+  if (info.Length() > 2 && info[2].IsBigInt()) {
+    bool lossless;
+    domain_id = info[2].As<Napi::BigInt>().Uint64Value(&lossless);
+  }
+  rcl_ret_t ret = rcl_init_options_set_domain_id(&init_options, domain_id);
+  if (RCL_RET_OK != ret) {
+    Napi::Error::New(env, "failed to set domain id to init options")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   THROW_ERROR_IF_NOT_EQUAL(
@@ -141,7 +163,7 @@ Napi::Value GetDomainId(const Napi::CallbackInfo& info) {
     return env.Undefined();
   }
 
-  return Napi::Number::New(env, domain_id);
+  return Napi::BigInt::New(env, domain_id);
 }
 
 Napi::Object InitContextBindings(Napi::Env env, Napi::Object exports) {
