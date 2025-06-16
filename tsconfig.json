@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es6",
+    "target": "es2020",
     /* Strict Type-Checking Options */
     "strict": true,
     /* Additional Checks */
