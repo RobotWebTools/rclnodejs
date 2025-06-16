@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es6",
+    "target": "es2020",
     /* Strict Type-Checking Options */
     "strict": true,
     /* Additional Checks */
@@ -11,7 +11,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "lib": ["es2017"]
+    "lib": ["es2020"]
   },
   "include": [
         "types/**/*"
