@@ -356,4 +356,10 @@ describe('LifecycleNode test suite', function () {
     assert.equal(serviceMsgs.length, 0, 'Unexpected lifecycle services found');
     testNode.destroy();
   });
+
+  it('lifecycleNode initial state', function () {
+    assert.doesNotThrow(() => {
+      node.print();
+    });
+  });
 });
