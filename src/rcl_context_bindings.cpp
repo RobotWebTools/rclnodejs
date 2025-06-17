@@ -17,7 +17,6 @@
 #include <rcl/logging.h>
 #include <rcl/rcl.h>
 
-#include <cstdio>
 #include <rcpputils/scope_exit.hpp>
 // NOLINTNEXTLINE
 #include <string>
