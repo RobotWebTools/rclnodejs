@@ -77,7 +77,7 @@ Napi::Value Init(const Napi::CallbackInfo& info) {
       RCL_RET_OK, rcl_logging_configure(&context->global_arguments, &allocator),
       rcl_get_error_string().str);
 
-  FreeArgs(argv, argc);
+  RCPPUTILS_SCOPE_EXIT({ FreeArgs(argv, argc); });
   return env.Undefined();
 }
 
