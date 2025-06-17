@@ -333,6 +333,13 @@ declare module 'rclnodejs' {
        * @returns {boolean} true if the state machine is initialized; otherwise false.
        */
       get isInitialized(): boolean;
+
+      /**
+       * Log the state machine data.
+       *
+       * @returns {undefined} void.
+       */
+      print(): void;
     }
   } // lifecycle namespace
 } // rclnodejs namespace
