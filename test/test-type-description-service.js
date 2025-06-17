@@ -15,7 +15,6 @@
 'use strict';
 
 const assert = require('assert');
-const assertUtils = require('./utils.js');
 const DistroUtils = require('../lib/distro.js');
 const rclnodejs = require('../index.js');
 const TypeDescriptionService = require('../lib/type_description_service.js');
@@ -63,22 +62,23 @@ describe('type description service test suite', function () {
     const GetTypeDescription =
       'type_description_interfaces/srv/GetTypeDescription';
     const client = node.createClient(GetTypeDescription, serviceName);
-    return client.waitForService(60 * 1000).then((result) => {
-      if (!result) {
-        throw new Error('Service not available');
-      }
-      return new Promise((resolve) => {
-        client.sendRequest(request, (response) => {
-          assert.strictEqual(response.successful, true);
-          assert.strictEqual(
-            response.type_description.type_description.type_name,
-            topicType
-          );
-          assert.notStrictEqual(response.type_sources.length, 0);
-          resolve();
-        });
+    const result = await client.waitForService(30 * 1000);
+    if (!result) {
+      throw new Error('Service not available');
+    }
+
+    const promise = new Promise((resolve) => {
+      client.sendRequest(request, (response) => {
+        assert.strictEqual(response.successful, true);
+        assert.strictEqual(
+          response.type_description.type_description.type_name,
+          topicType
+        );
+        assert.notStrictEqual(response.type_sources.length, 0);
+        resolve();
       });
     });
+    await promise;
   });
 
   it('Test type description service configured by parameter', function (done) {
