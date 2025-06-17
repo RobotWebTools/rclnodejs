@@ -189,6 +189,10 @@ let rcl = {
    * @param {string} [namespace=''] - The namespace used in ROS.
    * @param {Context} [context=Context.defaultContext()] - The context to create the node in.
    * @param {NodeOptions} [options=NodeOptions.defaultOptions] - The options to configure the new node behavior.
+   * @param {Array} [args=[]] - The arguments to pass to the node.
+   * @param {boolean} [useGlobalArguments=true] - If true, the node will use the global arguments
+   *                                             from the context, otherwise it will only use the arguments
+   *                                             passed in the args parameter.
    * @return {Node} A new instance of the specified node.
    * @throws {Error} If the given context is not registered.
    * @deprecated since 0.18.0, Use new Node constructor.
@@ -197,9 +201,18 @@ let rcl = {
     nodeName,
     namespace = '',
     context = Context.defaultContext(),
-    options = NodeOptions.defaultOptions
+    options = NodeOptions.defaultOptions,
+    args = [],
+    useGlobalArguments = true
   ) {
-    return new this.Node(nodeName, namespace, context, options);
+    return new this.Node(
+      nodeName,
+      namespace,
+      context,
+      options,
+      args,
+      useGlobalArguments
+    );
   },
 
   /**

@@ -53,6 +53,13 @@ Napi::Array ConvertToJSTopicEndpointInfoList(
 
 Napi::Value ConvertToQoS(Napi::Env env, const rmw_qos_profile_t* qos_profile);
 
+// `AbstractArgsFromNapiArray` and `FreeArgs` must be called in pairs.
+char** AbstractArgsFromNapiArray(const Napi::Array& jsArgv);
+// `AbstractArgsFromNapiArray` and `FreeArgs` must be called in pairs.
+void FreeArgs(char** argv, size_t argc);
+
+bool HasUnparsedROSArgs(const rcl_arguments_t& rcl_args);
+
 }  // namespace rclnodejs
 
 #endif  // SRC_RCL_UTILITIES_H_

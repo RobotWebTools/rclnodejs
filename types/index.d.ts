@@ -11,6 +11,9 @@ declare module 'rclnodejs' {
    * @param namespace - The namespace used in ROS, default is an empty string.
    * @param context - The context, default is Context.defaultContext().
    * @param options - The node options, default is NodeOptions.defaultOptions.
+   * @param args - The arguments to be passed to the node, default is an empty array.
+   * @param useGlobalArguments - If true, the node will use global arguments, default is true.
+   *                            If false, the node will not use global arguments.
    * @returns The new Node instance.
    * @deprecated since 0.18.0, Use new Node constructor.
    */
@@ -18,7 +21,9 @@ declare module 'rclnodejs' {
     nodeName: string,
     namespace?: string,
     context?: Context,
-    options?: NodeOptions
+    options?: NodeOptions,
+    args?: string[],
+    useGlobalArguments?: boolean
   ): Node;
 
   /**

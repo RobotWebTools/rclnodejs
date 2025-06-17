@@ -24,6 +24,8 @@
 #include <rcl_yaml_param_parser/parser.h>
 #include <rcl_yaml_param_parser/types.h>
 
+#include <rcpputils/scope_exit.hpp>
+// NOLINTNEXTLINE
 #include <string>
 
 #include "macros.h"
@@ -180,10 +182,34 @@ Napi::Value CreateNode(const Napi::CallbackInfo& info) {
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(context_handle->ptr());
 
-  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(malloc(sizeof(rcl_node_t)));
+  Napi::Array jsArgv = info[3].As<Napi::Array>();
+  size_t argc = jsArgv.Length();
+  char** argv = AbstractArgsFromNapiArray(jsArgv);
+  RCPPUTILS_SCOPE_EXIT({ FreeArgs(argv, argc); });
 
+  rcl_arguments_t arguments = rcl_get_zero_initialized_arguments();
+  rcl_ret_t ret =
+      rcl_parse_arguments(argc, argv, rcl_get_default_allocator(), &arguments);
+  if ((ret != RCL_RET_OK) || HasUnparsedROSArgs(arguments)) {
+    Napi::Error::New(env, "failed to parse arguments")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  RCPPUTILS_SCOPE_EXIT({
+    if (RCL_RET_OK != rcl_arguments_fini(&arguments)) {
+      Napi::Error::New(env, "failed to fini arguments")
+          .ThrowAsJavaScriptException();
+      rcl_reset_error();
+    }
+  });
+  bool use_global_arguments = info[4].As<Napi::Boolean>().Value();
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(malloc(sizeof(rcl_node_t)));
   *node = rcl_get_zero_initialized_node();
+
   rcl_node_options_t options = rcl_node_get_default_options();
+  options.use_global_arguments = use_global_arguments;
+  options.arguments = arguments;
 
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_node_init(node, node_name.c_str(),

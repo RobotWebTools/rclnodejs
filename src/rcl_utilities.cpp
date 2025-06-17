@@ -19,6 +19,7 @@
 #include <rmw/topic_endpoint_info.h>
 #include <uv.h>
 
+#include <cstdio>
 #include <memory>
 #include <string>
 
@@ -258,6 +259,36 @@ Napi::Array ConvertToJSTopicEndpointInfoList(
     list.Set(i, ConvertToJSTopicEndpoint(env, &topic_endpoint_info));
   }
   return list;
+}
+
+char** AbstractArgsFromNapiArray(const Napi::Array& jsArgv) {
+  size_t argc = jsArgv.Length();
+  char** argv = nullptr;
+
+  if (argc > 0) {
+    argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
+    for (size_t i = 0; i < argc; i++) {
+      std::string arg = jsArgv.Get(i).As<Napi::String>().Utf8Value();
+      int len = arg.length() + 1;
+      argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char)));
+      snprintf(argv[i], len, "%s", arg.c_str());
+    }
+  }
+  return argv;
+}
+
+void FreeArgs(char** argv, size_t argc) {
+  if (argv) {
+    for (size_t i = 0; i < argc; i++) {
+      free(argv[i]);
+    }
+    free(argv);
+  }
+}
+
+bool HasUnparsedROSArgs(const rcl_arguments_t& rcl_args) {
+  int unparsed_ros_args_count = rcl_arguments_get_count_unparsed_ros(&rcl_args);
+  return unparsed_ros_args_count != 0;
 }
 
 }  // namespace rclnodejs

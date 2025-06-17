@@ -572,3 +572,85 @@ describe('Test the node with no handles attached when initializing', function ()
     assert.notStrictEqual(node.getRMWImplementationIdentifier().length, 0);
   });
 });
+
+describe('Node arguments', function () {
+  this.timeout(60 * 1000);
+
+  it('Test node arguments', async function () {
+    await rclnodejs.init();
+    var node = rclnodejs.createNode(
+      'publisher',
+      '/topic_getter',
+      Context.defaultContext(),
+      NodeOptions.defaultOptions,
+      ['--ros-args', '-r', '__ns:=/foo/bar']
+    );
+    assert.deepStrictEqual(node.namespace(), '/foo/bar');
+    node.destroy();
+    rclnodejs.shutdown();
+  });
+
+  it('Test node global arguments', async function () {
+    await rclnodejs.init(Context.defaultContext(), [
+      'process_name',
+      '--ros-args',
+      '-r',
+      '__node:=global_node_name',
+    ]);
+    const node1 = rclnodejs.createNode(
+      'publisher',
+      '/topic_getter',
+      Context.defaultContext(),
+      NodeOptions.defaultOptions,
+      ['--ros-args', '-r', '__ns:=/foo/bar']
+    );
+
+    const node2 = rclnodejs.createNode(
+      'my_node',
+      '/topic_getter',
+      Context.defaultContext(),
+      NodeOptions.defaultOptions,
+      [],
+      false
+    );
+
+    assert.deepStrictEqual(node1.name(), 'global_node_name');
+    assert.deepStrictEqual(node2.name(), 'my_node');
+    node1.destroy();
+    node2.destroy();
+    rclnodejs.shutdown();
+  });
+
+  it('Test node invalid arguments', async function () {
+    await rclnodejs.init();
+    assert.throws(
+      () => {
+        rclnodejs.createNode(
+          'invalid_node1',
+          '/topic1',
+          Context.defaultContext(),
+          NodeOptions.defaultOptions,
+          ['--ros-args', '-r', 'not-a-remap']
+        );
+      },
+      Error,
+      /failed to parse arguments/
+    );
+
+    assert.throws(
+      () => {
+        rclnodejs.createNode(
+          'invalid_node2',
+          '/topic2',
+          Context.defaultContext(),
+          NodeOptions.defaultOptions,
+          ['--ros-args', '--my-custom-flag']
+        );
+      },
+      Error,
+      /failed to parse arguments/
+    );
+
+    rclnodejs.shutdown();
+  });
+});
