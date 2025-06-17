@@ -82,6 +82,15 @@ expectType<rclnodejs.Options<string | rclnodejs.QoS>>(
 );
 expectType<string>(node.getFullyQualifiedName());
 expectType<string>(node.getRMWImplementationIdentifier());
+const nodeWithArgs = rclnodejs.createNode(
+  NODE_NAME,
+  'topic',
+  rclnodejs.Context.defaultContext(),
+  rclnodejs.NodeOptions.defaultOptions,
+  ['--ros-args', '-r', '__ns:=/foo/bar'],
+  false
+);
+expectType<rclnodejs.Node>(nodeWithArgs);
 
 // ---- LifecycleNode ----
 const lifecycleNode = rclnodejs.createLifecycleNode(LIFECYCLE_NODE_NAME);

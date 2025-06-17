@@ -17,7 +17,6 @@
 #include <rcl/logging.h>
 #include <rcl/rcl.h>
 
-#include <cstdio>
 #include <rcpputils/scope_exit.hpp>
 // NOLINTNEXTLINE
 #include <string>
@@ -53,18 +52,9 @@ Napi::Value Init(const Napi::CallbackInfo& info) {
 
   // Preprocess argc & argv
   Napi::Array jsArgv = info[1].As<Napi::Array>();
-  int argc = jsArgv.Length();
-  char** argv = nullptr;
+  size_t argc = jsArgv.Length();
+  char** argv = AbstractArgsFromNapiArray(jsArgv);
 
-  if (argc > 0) {
-    argv = reinterpret_cast<char**>(malloc(argc * sizeof(char*)));
-    for (int i = 0; i < argc; i++) {
-      std::string arg = jsArgv.Get(i).As<Napi::String>().Utf8Value();
-      int len = arg.length() + 1;
-      argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char)));
-      snprintf(argv[i], len, "%s", arg.c_str());
-    }
-  }
   // Set up the domain id.
   size_t domain_id = RCL_DEFAULT_DOMAIN_ID;
   if (info.Length() > 2 && info[2].IsBigInt()) {
@@ -87,11 +77,7 @@ Napi::Value Init(const Napi::CallbackInfo& info) {
       RCL_RET_OK, rcl_logging_configure(&context->global_arguments, &allocator),
       rcl_get_error_string().str);
 
-  for (int i = 0; i < argc; i++) {
-    free(argv[i]);
-  }
-  free(argv);
-
+  RCPPUTILS_SCOPE_EXIT({ FreeArgs(argv, argc); });
   return env.Undefined();
 }
 
