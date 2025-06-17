@@ -185,13 +185,14 @@ Napi::Value CreateNode(const Napi::CallbackInfo& info) {
   Napi::Array jsArgv = info[3].As<Napi::Array>();
   size_t argc = jsArgv.Length();
   char** argv = AbstractArgsFromNapiArray(jsArgv);
+  RCPPUTILS_SCOPE_EXIT({ FreeArgs(argv, argc); });
+
   rcl_arguments_t arguments = rcl_get_zero_initialized_arguments();
   rcl_ret_t ret =
       rcl_parse_arguments(argc, argv, rcl_get_default_allocator(), &arguments);
   if ((ret != RCL_RET_OK) || HasUnparsedROSArgs(arguments)) {
     Napi::Error::New(env, "failed to parse arguments")
         .ThrowAsJavaScriptException();
-    FreeArgs(argv, argc);
     return env.Undefined();
   }
 
