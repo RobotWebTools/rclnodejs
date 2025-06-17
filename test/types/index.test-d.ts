@@ -136,6 +136,7 @@ expectType<rclnodejs.lifecycle.State>(lifecycleNode.deactivate());
 expectType<rclnodejs.lifecycle.State>(lifecycleNode.cleanup());
 expectType<rclnodejs.lifecycle.State>(lifecycleNode.shutdown());
 expectType<boolean>(lifecycleNode.isInitialized);
+expectType<void>(lifecycleNode.print());
 
 // ---- Publisher ----
 const publisher = node.createPublisher(TYPE_CLASS, TOPIC);

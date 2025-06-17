@@ -372,6 +372,17 @@ Napi::Value IsInitialized(const Napi::CallbackInfo& info) {
   return Napi::Boolean::New(env, is_initialized);
 }
 
+Napi::Value Print(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* state_machine_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_lifecycle_state_machine_t* state_machine =
+      reinterpret_cast<rcl_lifecycle_state_machine_t*>(
+          state_machine_handle->ptr());
+  rcl_print_state_machine(state_machine);
+  return env.Undefined();
+}
+
 Napi::Object InitLifecycleBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createLifecycleStateMachine",
               Napi::Function::New(env, CreateLifecycleStateMachine));
@@ -396,6 +407,7 @@ Napi::Object InitLifecycleBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getLifecycleShutdownTransitionLabel",
               Napi::Function::New(env, GetLifecycleShutdownTransitionLabel));
   exports.Set("isInitialized", Napi::Function::New(env, IsInitialized));
+  exports.Set("print", Napi::Function::New(env, Print));
   return exports;
 }
 
