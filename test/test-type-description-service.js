@@ -69,7 +69,7 @@ describe('type description service test suite', function () {
 
     const promise = new Promise((resolve) => {
       const timer = setInterval(() => {
-        console.log('Sending request to get type description...');
+        clearInterval(timer);
         client.sendRequest(request, (response) => {
           assert.strictEqual(response.successful, true);
           assert.strictEqual(
@@ -77,7 +77,6 @@ describe('type description service test suite', function () {
             topicType
           );
           assert.notStrictEqual(response.type_sources.length, 0);
-          clearInterval(timer);
           resolve();
         });
       }, 5000);
