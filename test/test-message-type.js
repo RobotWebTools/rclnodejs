@@ -42,6 +42,7 @@ describe('Rclnodejs message type testing', function () {
         'Bool_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'boolean');
           assert.ok(msg.data);
           done();
@@ -62,6 +63,7 @@ describe('Rclnodejs message type testing', function () {
         'Char_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.deepStrictEqual(msg.data, 65);
           done();
@@ -82,6 +84,7 @@ describe('Rclnodejs message type testing', function () {
         'Byte_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.deepStrictEqual(msg.data, 10);
           done();
@@ -122,6 +125,7 @@ describe('Rclnodejs message type testing', function () {
         'Int8_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.deepStrictEqual(msg.data, 127);
           done();
@@ -142,6 +146,7 @@ describe('Rclnodejs message type testing', function () {
         'UInt8_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.deepStrictEqual(msg.data, 255);
           done();
@@ -162,6 +167,7 @@ describe('Rclnodejs message type testing', function () {
         'Int16_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.deepStrictEqual(msg.data, 0x7fff);
           done();
@@ -182,6 +188,7 @@ describe('Rclnodejs message type testing', function () {
         'UInt16_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.deepStrictEqual(msg.data, 0xffff);
           done();
@@ -202,6 +209,7 @@ describe('Rclnodejs message type testing', function () {
         'Int32_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.deepStrictEqual(msg.data, 0x7fffffff);
           done();
@@ -222,6 +230,7 @@ describe('Rclnodejs message type testing', function () {
         'UInt32_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.deepStrictEqual(msg.data, 0xffffffff);
           done();
@@ -242,6 +251,7 @@ describe('Rclnodejs message type testing', function () {
         'Int64_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'bigint');
           assert.deepStrictEqual(msg.data, BigInt('0x1fffffffffffff'));
           done();
@@ -262,6 +272,7 @@ describe('Rclnodejs message type testing', function () {
         'UInt64_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'bigint');
           assert.deepStrictEqual(msg.data, BigInt('0x1fffffffffffff'));
           done();
@@ -282,6 +293,7 @@ describe('Rclnodejs message type testing', function () {
         'Float32_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.ok(Math.abs(msg.data - 3.14) < 0.000001);
           done();
@@ -302,6 +314,7 @@ describe('Rclnodejs message type testing', function () {
         'Float64_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'number');
           assert.ok(Math.abs(msg.data - 3.14) < 0.000001);
           done();
@@ -324,6 +337,7 @@ describe('Rclnodejs message type testing', function () {
         'ColorRGBA_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.ok('r' in msg);
           assert.deepStrictEqual(typeof msg.r, 'number');
           assert.deepStrictEqual(msg.r, 127);
@@ -351,7 +365,7 @@ describe('Rclnodejs message type testing', function () {
         'Header_channel',
         (header) => {
           publisher.kill('SIGINT');
-
+          node.destroySubscription(subscription);
           assert.ok('stamp' in header);
           assert.ok('sec' in header.stamp);
           assert.deepStrictEqual(header.stamp.sec, 123456);
@@ -377,7 +391,7 @@ describe('Rclnodejs message type testing', function () {
         'JointState_channel',
         (state) => {
           publisher.kill('SIGINT');
-
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(state.name, ['Tom', 'Jerry']);
           assert.deepStrictEqual(state.position, Float64Array.from([1, 2]));
           assert.deepStrictEqual(state.velocity, Float64Array.from([2, 3]));
