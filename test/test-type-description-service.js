@@ -62,15 +62,15 @@ describe('type description service test suite', function () {
     const GetTypeDescription =
       'type_description_interfaces/srv/GetTypeDescription';
     const client = node.createClient(GetTypeDescription, serviceName);
-    const result = await client.waitForService(30 * 1000);
+    const result = await client.waitForService(5000);
     if (!result) {
       throw new Error('Service not available');
     }
 
     const promise = new Promise((resolve) => {
       const timer = setInterval(() => {
-        clearInterval(timer);
         client.sendRequest(request, (response) => {
+          clearInterval(timer);
           assert.strictEqual(response.successful, true);
           assert.strictEqual(
             response.type_description.type_description.type_name,
@@ -79,7 +79,7 @@ describe('type description service test suite', function () {
           assert.notStrictEqual(response.type_sources.length, 0);
           resolve();
         });
-      }, 5000);
+      }, 2000);
     });
     await promise;
   });
