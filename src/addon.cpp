@@ -30,6 +30,7 @@
 #include "rcl_names_bindings.h"
 #include "rcl_node_bindings.h"
 #include "rcl_publisher_bindings.h"
+#include "rcl_serialization_bindings.h"
 #include "rcl_service_bindings.h"
 #include "rcl_subscription_bindings.h"
 #include "rcl_time_point_bindings.h"
@@ -88,6 +89,7 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
   rclnodejs::InitEventHandleBindings(env, exports);
 #endif
   rclnodejs::InitLifecycleBindings(env, exports);
+  rclnodejs::InitSerializationBindings(env, exports);
   rclnodejs::ShadowNode::Init(env, exports);
   rclnodejs::RclHandle::Init(env, exports);
 

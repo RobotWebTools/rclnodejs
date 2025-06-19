@@ -35,6 +35,7 @@
         './src/rcl_names_bindings.cpp',
         './src/rcl_node_bindings.cpp',
         './src/rcl_publisher_bindings.cpp',
+        './src/rcl_serialization_bindings.cpp',
         './src/rcl_service_bindings.cpp',
         './src/rcl_subscription_bindings.cpp',
         './src/rcl_time_point_bindings.cpp',
