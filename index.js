@@ -186,19 +186,11 @@ let rcl = {
 
   /** {@link getActionNamesAndTypes} function */
   getActionNamesAndTypes: getActionNamesAndTypes,
-  /**
-   * Serialize a message to a buffer.
-   * @param {Object} message - The message to serialize.
-   * @return {Buffer} The serialized message as a Buffer.
-   */
+
+  /** {@link serializeMessage} function */
   serializeMessage: serializeMessage,
 
-  /**
-   * Deserialize a message from a buffer.
-   * @param {Buffer} buffer - The buffer containing the serialized message.
-   * @param {Object} typeClass - The class of the message type to deserialize into.
-   * @return {Object} The deserialized message object.
-   */
+  /** {@link deserializeMessage} function */
   deserializeMessage: deserializeMessage,
 
   /**
