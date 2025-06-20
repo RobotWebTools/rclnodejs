@@ -67,7 +67,6 @@ Napi::Value Serialize(const Napi::CallbackInfo& info) {
   // Create a serialized message object.
   SerializedMessage serialized_msg(env, rcutils_get_default_allocator());
 
-  // Serialize
   rmw_ret_t rmw_ret = rmw_serialize(ros_msg, ts, &serialized_msg.rcl_msg);
   if (RMW_RET_OK != rmw_ret) {
     Napi::Error::New(env, "Failed to serialize ROS message")
@@ -91,15 +90,13 @@ Napi::Value Deserialize(const Napi::CallbackInfo& info) {
   Napi::Buffer<char> serialized = info[3].As<Napi::Buffer<char>>();
   void* msg_taken = info[4].As<Napi::Buffer<char>>().Data();
 
-  // Create a serialized message object
+  // Create a serialized message object.
   rcl_serialized_message_t serialized_msg =
       rmw_get_zero_initialized_serialized_message();
-  // Just copy pointer to avoid extra allocation and copy
   serialized_msg.buffer_capacity = serialized.Length();
   serialized_msg.buffer_length = serialized.Length();
   serialized_msg.buffer = reinterpret_cast<uint8_t*>(serialized.Data());
 
-  // Deserialize
   rmw_ret_t rmw_ret = rmw_deserialize(&serialized_msg, ts, msg_taken);
 
   if (RMW_RET_OK != rmw_ret) {
