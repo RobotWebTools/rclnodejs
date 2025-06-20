@@ -506,7 +506,7 @@ class {{=objectWrapper}} {
   {{~}}
   }
 
-  static destoryRawROS(msg) {
+  static destroyRawROS(msg) {
     {{=objectWrapper}}.freeStruct(msg.refObject);
   }
 
