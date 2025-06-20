@@ -654,3 +654,36 @@ describe('Node arguments', function () {
     rclnodejs.shutdown();
   });
 });
+
+describe('Test node resolve name', function () {
+  let node = null;
+  before(async function () {
+    await rclnodejs.init();
+    node = rclnodejs.createNode(
+      'topic_resolver',
+      '/my_ns',
+      Context.defaultContext(),
+      NodeOptions.defaultOptions,
+      ['--ros-args', '-r', 'foo:=bar']
+    );
+  });
+
+  after(function () {
+    node.destroy();
+    rclnodejs.shutdown();
+  });
+
+  it('Resolve topic name', function (done) {
+    assert.deepStrictEqual(node.resolveTopicName('foo'), '/my_ns/bar');
+    assert.deepStrictEqual(node.resolveTopicName('/abs'), '/abs');
+    assert.deepStrictEqual(node.resolveTopicName('foo', true), '/my_ns/foo');
+    done();
+  });
+
+  it('Resolve service name', function (done) {
+    assert.deepStrictEqual(node.resolveServiceName('foo'), '/my_ns/bar');
+    assert.deepStrictEqual(node.resolveServiceName('/abs'), '/abs');
+    assert.deepStrictEqual(node.resolveServiceName('foo', true), '/my_ns/foo');
+    done();
+  });
+});

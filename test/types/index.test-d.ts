@@ -91,6 +91,8 @@ const nodeWithArgs = rclnodejs.createNode(
   false
 );
 expectType<rclnodejs.Node>(nodeWithArgs);
+expectType<string>(node.resolveTopicName(TOPIC, true));
+expectType<string>(node.resolveServiceName(SERVICE_NAME, true));
 
 // ---- LifecycleNode ----
 const lifecycleNode = rclnodejs.createLifecycleNode(LIFECYCLE_NODE_NAME);
