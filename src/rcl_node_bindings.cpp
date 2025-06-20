@@ -476,6 +476,37 @@ Napi::Value GetRMWImplementationIdentifier(const Napi::CallbackInfo& info) {
   return Napi::String::New(info.Env(), rmw_get_implementation_identifier());
 }
 
+Napi::Value ResolveName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  const rcl_node_options_t* node_options = rcl_node_get_options(node);
+  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
+  bool only_expand = info[2].As<Napi::Boolean>().Value();
+  bool is_service = info[3].As<Napi::Boolean>().Value();
+
+  char* output_cstr = nullptr;
+  rcl_ret_t ret =
+      rcl_node_resolve_name(node, topic_name.c_str(), node_options->allocator,
+                            is_service, only_expand, &output_cstr);
+
+  auto name_deleter = [&]() {
+    node_options->allocator.deallocate(output_cstr,
+                                       node_options->allocator.state);
+  };
+
+  RCPPUTILS_SCOPE_EXIT({ name_deleter(); });
+
+  if (RCL_RET_OK != ret) {
+    Napi::Error::New(env, ("failed to resolve name"))
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  return Napi::String::New(env, output_cstr);
+}
+
 Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getParameterOverrides",
               Napi::Function::New(env, GetParameterOverrides));
@@ -500,6 +531,7 @@ Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, GetFullyQualifiedName));
   exports.Set("getRMWImplementationIdentifier",
               Napi::Function::New(env, GetRMWImplementationIdentifier));
+  exports.Set("resolveName", Napi::Function::New(env, ResolveName));
   return exports;
 }
 

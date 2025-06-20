@@ -838,5 +838,21 @@ declare module 'rclnodejs' {
      * @returns - The RMW implementation identifier.
      */
     getRMWImplementationIdentifier(): string;
+
+    /**
+     * Return a topic name expanded and remapped.
+     * @param topicName - Topic name to be expanded and remapped.
+     * @param onlyExpand - If `true`, remapping rules won't be applied, default is false.
+     * @returns A fully qualified topic name.
+     */
+    resolveTopicName(topicName: string, onlyExpand?: boolean): string;
+
+    /**
+     * Return a service name expanded and remapped.
+     * @param service - Service name to be expanded and remapped.
+     * @param onlyExpand - If `true`, remapping rules won't be applied, default is false.
+     * @returns A fully qualified service name.
+     */
+    resolveServiceName(service: string, onlyExpand?: boolean): string;
   }
 }
