@@ -1,6 +1,8 @@
 /// <reference path="./base.d.ts" />
 
 declare module 'rclnodejs' {
+  type Class = new (...args: any[]) => any;
+
   /**
    * Create a node.
    *
@@ -187,4 +189,22 @@ declare module 'rclnodejs' {
    * @returns An array of the names and types.
    */
   function getActionNamesAndTypes(node: Node): NamesAndTypesQueryResult;
+
+  /**
+   * Serialize a message to a Buffer.
+   *
+   * @param message - The message to be serialized.
+   * @param typeClass - The type class of the message.
+   * @returns A Buffer containing the serialized message.
+   */
+  function serializeMessage(message: object, typeClass: Class): Buffer;
+
+  /**
+   * Deserialize a message from a Buffer.
+   *
+   * @param buffer - The Buffer containing the serialized message.
+   * @param typeClass - The type class of the message.
+   * @returns An Object representing the deserialized message.
+   */
+  function deserializeMessage(buffer: Buffer, typeClass: Class): object;
 }

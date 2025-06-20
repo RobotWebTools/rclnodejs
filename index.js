@@ -53,6 +53,10 @@ const {
   getActionNamesAndTypes,
 } = require('./lib/action/graph.js');
 const ServiceIntrospectionStates = require('./lib/service_introspection.js');
+const {
+  serializeMessage,
+  deserializeMessage,
+} = require('./lib/serialization.js');
 
 /**
  * Get the version of the generator that was used for the currently present interfaces.
@@ -182,6 +186,12 @@ let rcl = {
 
   /** {@link getActionNamesAndTypes} function */
   getActionNamesAndTypes: getActionNamesAndTypes,
+
+  /** {@link serializeMessage} function */
+  serializeMessage: serializeMessage,
+
+  /** {@link deserializeMessage} function */
+  deserializeMessage: deserializeMessage,
 
   /**
    * Create and initialize a node.
