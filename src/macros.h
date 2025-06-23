@@ -25,7 +25,17 @@
       rcl_reset_error();                                            \
       Napi::Error::New(rclnodejs::GetEnv(), message)                \
           .ThrowAsJavaScriptException();                            \
+      return env.Undefined();                                       \
     }                                                               \
+  }
+
+#define CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE_NO_RETURN(op, lhs, rhs, message) \
+  {                                                                           \
+    if (lhs op rhs) {                                                         \
+      rcl_reset_error();                                                      \
+      Napi::Error::New(rclnodejs::GetEnv(), message)                          \
+          .ThrowAsJavaScriptException();                                      \
+    }                                                                         \
   }
 
 #define THROW_ERROR_IF_NOT_EQUAL(lhs, rhs, message) \
@@ -33,6 +43,12 @@
 
 #define THROW_ERROR_IF_EQUAL(lhs, rhs, message) \
   CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE(==, lhs, rhs, message)
+
+#define THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(lhs, rhs, message) \
+  CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE_NO_RETURN(!=, lhs, rhs, message)
+
+#define THROW_ERROR_IF_EQUAL_NO_RETURN(lhs, rhs, message) \
+  CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE_NO_RETURN(==, lhs, rhs, message)
 
 #define PACKAGE_NAME "rclnodejs"
 

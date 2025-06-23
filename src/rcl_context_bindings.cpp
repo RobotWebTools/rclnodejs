@@ -120,7 +120,8 @@ Napi::Value CreateContext(const Napi::CallbackInfo& info) {
         rcl_context_t* context = reinterpret_cast<rcl_context_t*>(ptr);
         rcl_ret_t ret = DestroyContext(env, context);
         free(ptr);
-        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+        THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                           rcl_get_error_string().str);
       });
 
   return js_obj;

@@ -55,12 +55,13 @@ Napi::Value CreatePublisher(const Napi::CallbackInfo& info) {
         rcl_publisher_init(publisher, node, ts, topic.c_str(), &publisher_ops),
         RCL_RET_OK, rcl_get_error_string().str);
 
-    auto js_obj =
-        RclHandle::NewInstance(env, publisher, node_handle, [node](void* ptr) {
+    auto js_obj = RclHandle::NewInstance(
+        env, publisher, node_handle, [node, env](void* ptr) {
           rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(ptr);
           rcl_ret_t ret = rcl_publisher_fini(publisher, node);
           free(ptr);
-          THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+          THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                             rcl_get_error_string().str);
         });
 
     return js_obj;

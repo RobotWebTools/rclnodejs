@@ -136,12 +136,13 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
         rcl_get_error_string().str);
 
     auto js_obj = RclHandle::NewInstance(
-        env, subscription, node_handle, [node](void* ptr) {
+        env, subscription, node_handle, [node, env](void* ptr) {
           rcl_subscription_t* subscription =
               reinterpret_cast<rcl_subscription_t*>(ptr);
           rcl_ret_t ret = rcl_subscription_fini(subscription, node);
           free(ptr);
-          THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+          THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                             rcl_get_error_string().str);
         });
 
     return js_obj;

@@ -151,11 +151,12 @@ Napi::Value CreateClock(const Napi::CallbackInfo& info) {
                            rcl_clock_init(clock_type, clock, &allocator),
                            rcl_get_error_string().str);
 
-  return RclHandle::NewInstance(env, clock, nullptr, [](void* ptr) {
+  return RclHandle::NewInstance(env, clock, nullptr, [env](void* ptr) {
     rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(ptr);
     rcl_ret_t ret = rcl_clock_fini(clock);
     free(ptr);
-    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+    THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                       rcl_get_error_string().str);
   });
 }
 
