@@ -29,21 +29,34 @@ describe('rclnodejs graph test suite', function () {
   });
 
   it('Get publishers info by topic', function () {
-    const node = rclnodejs.createNode('publisher_node');
+    const node = rclnodejs.createNode('publisher_node', '/my_ns');
+    assert.deepStrictEqual(
+      0,
+      node.getPublishersInfoByTopic('/my_ns/topic', false).length
+    );
     const String = 'std_msgs/msg/String';
     node.createPublisher(String, 'topic');
-    const publishers = node.getPublishersInfoByTopic('/topic', false);
+    const publishers = node.getPublishersInfoByTopic('/my_ns/topic', false);
     assert.strictEqual(publishers.length, 1);
+    assert.strictEqual(publishers[0].node_namespace, '/my_ns');
     assert.strictEqual(publishers[0].node_name, 'publisher_node');
     assert.strictEqual(publishers[0].topic_type, String);
   });
 
   it('Get subscriptions info by topic', function () {
-    const node = rclnodejs.createNode('subscription_node');
+    const node = rclnodejs.createNode('subscription_node', '/my_ns');
+    assert.deepStrictEqual(
+      0,
+      node.getSubscriptionsInfoByTopic('/my_ns/topic', false).length
+    );
     const String = 'std_msgs/msg/String';
     node.createSubscription(String, 'topic', (msg) => {});
-    const subscriptions = node.getSubscriptionsInfoByTopic('/topic', false);
+    const subscriptions = node.getSubscriptionsInfoByTopic(
+      '/my_ns/topic',
+      false
+    );
     assert.strictEqual(subscriptions.length, 1);
+    assert.strictEqual(subscriptions[0].node_namespace, '/my_ns');
     assert.strictEqual(subscriptions[0].node_name, 'subscription_node');
     assert.strictEqual(subscriptions[0].topic_type, String);
   });

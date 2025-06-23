@@ -20,6 +20,7 @@
 #include <rcl/arguments.h>
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
+#include <rcl/remap.h>
 #include <rcl_action/rcl_action.h>
 #include <rcl_yaml_param_parser/parser.h>
 #include <rcl_yaml_param_parser/types.h>
@@ -507,6 +508,47 @@ Napi::Value ResolveName(const Napi::CallbackInfo& info) {
   return Napi::String::New(env, output_cstr);
 }
 
+Napi::Value RemapTopicName(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string topic_name = info[1].As<Napi::String>().Utf8Value();
+
+  const rcl_node_options_t* node_options = rcl_node_get_options(node);
+  if (nullptr == node_options) {
+    Napi::Error::New(env, "failed to get node options")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  const rcl_arguments_t* global_args = nullptr;
+  if (node_options->use_global_arguments) {
+    global_args = &(node->context->global_arguments);
+  }
+
+  char* output_cstr = nullptr;
+  rcl_ret_t ret = rcl_remap_topic_name(
+      &(node_options->arguments), global_args, topic_name.c_str(),
+      rcl_node_get_name(node), rcl_node_get_namespace(node),
+      node_options->allocator, &output_cstr);
+  if (RCL_RET_OK != ret) {
+    Napi::Error::New(env, "failed to remap topic name")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  if (nullptr == output_cstr) {
+    return Napi::String::New(env, topic_name);
+  }
+
+  auto name_deleter = [&]() {
+    node_options->allocator.deallocate(output_cstr,
+                                       node_options->allocator.state);
+  };
+  RCPPUTILS_SCOPE_EXIT({ name_deleter(); });
+
+  return Napi::String::New(env, output_cstr);
+}
+
 Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getParameterOverrides",
               Napi::Function::New(env, GetParameterOverrides));
@@ -532,6 +574,7 @@ Napi::Object InitNodeBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getRMWImplementationIdentifier",
               Napi::Function::New(env, GetRMWImplementationIdentifier));
   exports.Set("resolveName", Napi::Function::New(env, ResolveName));
+  exports.Set("remapTopicName", Napi::Function::New(env, RemapTopicName));
   return exports;
 }
 
