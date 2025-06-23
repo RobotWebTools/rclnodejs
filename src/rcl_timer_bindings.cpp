@@ -58,12 +58,14 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
                            rcl_get_error_string().str);
 #endif
 
-  auto js_obj = RclHandle::NewInstance(env, timer, clock_handle, [](void* ptr) {
-    rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(ptr);
-    rcl_ret_t ret = rcl_timer_fini(timer);
-    free(ptr);
-    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
-  });
+  auto js_obj =
+      RclHandle::NewInstance(env, timer, clock_handle, [env](void* ptr) {
+        rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(ptr);
+        rcl_ret_t ret = rcl_timer_fini(timer);
+        free(ptr);
+        THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                           rcl_get_error_string().str);
+      });
 
   return js_obj;
 }

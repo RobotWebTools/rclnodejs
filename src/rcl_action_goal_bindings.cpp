@@ -49,12 +49,13 @@ Napi::Value ActionAcceptNewGoal(const Napi::CallbackInfo& info) {
           malloc(sizeof(rcl_action_goal_handle_t)));
   *goal_handle = *new_goal;
   auto js_obj =
-      RclHandle::NewInstance(env, goal_handle, nullptr, [](void* ptr) {
+      RclHandle::NewInstance(env, goal_handle, nullptr, [env](void* ptr) {
         rcl_action_goal_handle_t* goal_handle =
             reinterpret_cast<rcl_action_goal_handle_t*>(ptr);
         rcl_ret_t ret = rcl_action_goal_handle_fini(goal_handle);
         free(ptr);
-        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+        THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                           rcl_get_error_string().str);
       });
 
   return js_obj;
