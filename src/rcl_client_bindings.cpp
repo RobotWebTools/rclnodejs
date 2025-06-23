@@ -53,12 +53,13 @@ Napi::Value CreateClient(const Napi::CallbackInfo& info) {
         rcl_client_init(client, node, ts, service_name.c_str(), &client_ops),
         RCL_RET_OK, rcl_get_error_string().str);
 
-    auto js_obj =
-        RclHandle::NewInstance(env, client, node_handle, [node](void* ptr) {
+    auto js_obj = RclHandle::NewInstance(
+        env, client, node_handle, [node, env](void* ptr) {
           rcl_client_t* client = reinterpret_cast<rcl_client_t*>(ptr);
           rcl_ret_t ret = rcl_client_fini(client, node);
           free(ptr);
-          THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+          THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                             rcl_get_error_string().str);
         });
 
     return js_obj;

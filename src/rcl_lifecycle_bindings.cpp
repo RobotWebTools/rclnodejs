@@ -83,12 +83,13 @@ Napi::Value CreateLifecycleStateMachine(const Napi::CallbackInfo& info) {
       rcl_get_error_string().str);
 
   auto js_obj = RclHandle::NewInstance(
-      env, state_machine, node_handle, [node](void* ptr) {
+      env, state_machine, node_handle, [node, env](void* ptr) {
         rcl_lifecycle_state_machine_t* state_machine =
             reinterpret_cast<rcl_lifecycle_state_machine_t*>(ptr);
         rcl_ret_t ret = rcl_lifecycle_state_machine_fini(state_machine, node);
         free(ptr);
-        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+        THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                           rcl_get_error_string().str);
       });
 #else
   const rcl_node_options_t* node_options =
@@ -101,13 +102,14 @@ Napi::Value CreateLifecycleStateMachine(const Napi::CallbackInfo& info) {
                            rcl_get_error_string().str);
 
   auto js_obj = RclHandle::NewInstance(
-      env, state_machine, node_handle, [node, node_options](void* ptr) {
+      env, state_machine, node_handle, [node, node_options, env](void* ptr) {
         rcl_lifecycle_state_machine_t* state_machine =
             reinterpret_cast<rcl_lifecycle_state_machine_t*>(ptr);
         rcl_ret_t ret = rcl_lifecycle_state_machine_fini(
             state_machine, node, &node_options->allocator);
         free(ptr);
-        THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+        THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                           rcl_get_error_string().str);
       });
 #endif
 
