@@ -750,21 +750,45 @@ declare module 'rclnodejs' {
     getServiceNamesAndTypes(): Array<NamesAndTypesQueryResult>;
 
     /**
-     * Get an array of publishers on a given topic.
+     * Return a list of publishers on a given topic.
      *
-     * @param topic - The name of the topic.
-     * @param noDemangle - if `true`, `topic_name` needs to be a valid middleware topic name,
-     *       otherwise it should be a valid ROS topic name.
+     * The returned parameter is a list of TopicEndpointInfo objects, where each will contain
+     * the node name, node namespace, topic type, topic endpoint's GID, and its QoS profile.
+     *
+     * When the `no_mangle` parameter is `true`, the provided `topic` should be a valid
+     * topic name for the middleware (useful when combining ROS with native middleware (e.g. DDS)
+     * apps).  When the `no_mangle` parameter is `false`, the provided `topic` should
+     * follow ROS topic name conventions.
+     *
+     * `topic` may be a relative, private, or fully qualified topic name.
+     *  A relative or private topic will be expanded using this node's namespace and name.
+     *  The queried `topic` is not remapped.
+     *
+     * @param topic - The topic on which to find the publishers.
+     * @param [noDemangle=false] - If `true`, `topic` needs to be a valid middleware topic
+     *                       name, otherwise it should be a valid ROS topic name. Defaults to `false`.
      * @returns An array of publishers.
      */
     getPublishersInfoByTopic(topic: string, noDemangle: boolean): Array<object>;
 
     /**
-     * Get an array of subscriptions on a given topic.
+     * Return a list of subscriptions on a given topic.
      *
-     * @param topic - The name of the topic.
-     * @param noDemangle - if `true`, `topic_name` needs to be a valid middleware topic name,
-     *     otherwise it should be a valid ROS topic name.
+     * The returned parameter is a list of TopicEndpointInfo objects, where each will contain
+     * the node name, node namespace, topic type, topic endpoint's GID, and its QoS profile.
+     *
+     * When the `no_mangle` parameter is `true`, the provided `topic` should be a valid
+     * topic name for the middleware (useful when combining ROS with native middleware (e.g. DDS)
+     * apps).  When the `no_mangle` parameter is `false`, the provided `topic` should
+     * follow ROS topic name conventions.
+     *
+     * `topic` may be a relative, private, or fully qualified topic name.
+     *  A relative or private topic will be expanded using this node's namespace and name.
+     *  The queried `topic` is not remapped.
+     *
+     * @param topic - The topic on which to find the subscriptions..
+     * @param [noDemangle=false] - If `true`, `topic` needs to be a valid middleware topic
+                           name, otherwise it should be a valid ROS topic name. Defaults to `false`.
      * @returns An array of subscriptions.
      */
     getSubscriptionsInfoByTopic(
