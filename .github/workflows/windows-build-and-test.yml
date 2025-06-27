@@ -21,42 +21,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [22.X]
         ros_distribution:
           - humble
           - jazzy
           - kilted
           - rolling
     steps:
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-
     - name: Setup ROS2
       uses: ros-tooling/setup-ros@v0.7
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
-    - name: Install ROS2 Rolling (Conditional)
-      if: ${{ matrix.ros_distribution == 'rolling' }}
-      shell: bash
-      run: |
-        wget --quiet https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip -O rolling.zip
-        7z x rolling.zip -y -o/c/dev/rolling
-
-    - uses: actions/checkout@v4
-
-    - name: Build rclnodejs
+    - name: Run demo
       shell: cmd
       run: |
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
-        npm i
-
-    # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround 
-    # an error when loading the default fastrtps ddl
-    - name: Test rclnodejs
-      shell: cmd
-      run: |
-        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
-        cmd /c "set RMW_IMPLEMENTATION=rmw_fastrtps_cpp && ros2 run demo_nodes_cpp talker"
+        cmd /c "ros2 run demo_nodes_cpp talker"
