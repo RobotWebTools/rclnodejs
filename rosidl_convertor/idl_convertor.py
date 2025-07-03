@@ -1,4 +1,19 @@
 #!/usr/bin/env python3
+
+# Copyright (c) 2025, The Robot Web Tools Contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
 IDL to ROS2 Interface Converter
 
@@ -63,7 +78,7 @@ class IdlInterface:
 
 class IdlParser:
     """Parser for IDL files"""
-    
+
     # Type mapping from IDL to ROS2
     TYPE_MAPPING = {
         'boolean': 'bool',
@@ -84,55 +99,55 @@ class IdlParser:
         'string': 'string',
         'wstring': 'wstring',
     }
-    
+
     def __init__(self):
         self.includes = []
         self.current_package = ""
         self.current_module = ""
         self.typedefs = {}  # Store typedef declarations
-        
+
     def parse_file(self, idl_file_path: str) -> List[IdlInterface]:
         """Parse an IDL file and return list of interfaces"""
         with open(idl_file_path, 'r') as f:
             content = f.read()
-        
+
         return self.parse_content(content, idl_file_path)
-    
+
     def parse_content(self, content: str, file_path: str = "") -> List[IdlInterface]:
         """Parse IDL content string"""
         interfaces = []
-        
+
         # Extract modules and their contents BEFORE preprocessing (to preserve @verbatim)
         modules = self._extract_modules(content)
-        
+
         for module_info in modules:
             module_name = module_info['name']
             module_content = module_info['content']
-            
+
             # Set current package for type mapping
             self.current_package = module_name.split('::')[0]
-            
+
             # Parse typedefs FIRST from raw content (before preprocessing removes them)
             self._parse_typedefs(module_content)
-            
+
             # Parse structures (to extract verbatim comments before preprocessing)
             structures = self._parse_structures(module_content)
-            
+
             # Now preprocess the content to remove comments and normalize
             clean_content = self._preprocess_content(module_content)
-            
+
             # Parse constants from nested modules from clean content
             constants = self._parse_constants_from_modules(clean_content)
-            
+
             # Add constants to the main structure (if any structures exist)
             if structures and constants:
                 # Add constants to the first structure (typically the main message structure)
                 structures[0].constants.extend(constants)
-            
+
             for struct in structures:
                 # Determine interface type based on naming convention or structure
                 interface_type = self._determine_interface_type(struct, file_path)
-                
+
                 interface = IdlInterface(
                     name=struct.name,
                     interface_type=interface_type,
@@ -140,9 +155,9 @@ class IdlParser:
                     structures=[struct]
                 )
                 interfaces.append(interface)
-        
+
         return interfaces
-    
+
     def _preprocess_content(self, content: str) -> str:
         """Remove comments and normalize whitespace"""
         # Remove @verbatim blocks using a more robust approach
@@ -151,7 +166,7 @@ class IdlParser:
         processed_lines = []
         in_verbatim = False
         paren_count = 0
-        
+
         for line in lines:
             if '@verbatim' in line and not in_verbatim:
                 in_verbatim = True
@@ -162,24 +177,24 @@ class IdlParser:
                 if paren_count <= 0:
                     in_verbatim = False
                 continue
-            
+
             # Remove regular comments
             if '//' in line:
                 line = line[:line.index('//')]
-            
+
             processed_lines.append(line)
-        
+
         content = '\n'.join(processed_lines)
-        
+
         # Remove multi-line comments
         content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
-        
+
         return content
-    
+
     def _extract_modules(self, content: str) -> List[Dict]:
         """Extract module definitions from content"""
         modules = []
-        
+
         # Find module blocks - improved pattern for better nested module handling
         # This pattern will match modules even with complex nested structures
         pos = 0
@@ -188,55 +203,55 @@ class IdlParser:
             module_match = re.search(r'module\s+(\w+)\s*\{', content[pos:])
             if not module_match:
                 break
-                
+
             module_name = module_match.group(1)
             start_pos = pos + module_match.end() - 1  # Position of opening brace
-            
+
             # Count braces to find the matching closing brace
             brace_count = 1
             current_pos = start_pos + 1
-            
+
             while current_pos < len(content) and brace_count > 0:
                 if content[current_pos] == '{':
                     brace_count += 1
                 elif content[current_pos] == '}':
                     brace_count -= 1
                 current_pos += 1
-            
+
             if brace_count == 0:
                 # Found the matching closing brace
                 module_content = content[start_pos + 1:current_pos - 1]
-                
+
                 # Handle nested modules recursively
                 nested_modules = self._extract_modules(module_content)
                 if nested_modules:
                     for nested in nested_modules:
                         nested['name'] = f"{module_name}::{nested['name']}"
                         modules.append(nested)
-                
+
                 # Always add the current module as well
                 modules.append({
                     'name': module_name,
                     'content': module_content
                 })
-                
+
                 pos = current_pos
             else:
                 # Unmatched braces, skip this occurrence
                 pos = pos + module_match.end()
-        
+
         return modules
-    
+
     def _parse_typedefs(self, content: str):
         """Parse typedef declarations from module content"""
         # First pass: find simple typedefs like: typedef test_msgs::msg::Arrays test_msgs__msg__Arrays;
         simple_typedef_pattern = r'typedef\s+([^;\s]+)\s+([^;\[\s]+)\s*;'
         matches = re.finditer(simple_typedef_pattern, content, re.DOTALL)
-        
+
         for match in matches:
             source_type = match.group(1).strip()
             target_name = match.group(2).strip()
-            
+
             # Skip if this is actually an array typedef (contains [])
             if '[' not in match.group(0):
                 # Map the source type and store the simple typedef
@@ -245,75 +260,75 @@ class IdlParser:
                     'base_type': ros_source_type,
                     'array_size': None
                 }
-        
+
         # Second pass: find array typedefs like: typedef double double__9[9];
         array_typedef_pattern = r'typedef\s+([^[\s]+)\s+(\w+)\[(\d+)\]\s*;'
         matches = re.finditer(array_typedef_pattern, content, re.DOTALL)
-        
+
         for match in matches:
             base_type = match.group(1)
             typedef_name = match.group(2)
             array_size = int(match.group(3))
-            
+
             # Map the base type and store the typedef
             ros_base_type = self._map_type(base_type)
             self.typedefs[typedef_name] = {
                 'base_type': ros_base_type,
                 'array_size': array_size
             }
-    
+
     def _parse_constants_from_modules(self, content: str) -> List[IdlConstant]:
         """Parse constants from nested constant modules"""
         constants = []
-        
+
         # Find constant modules like: module SomeConstants { const uint8 NAME = VALUE; };
         const_module_pattern = r'module\s+(\w*[Cc]onstants?\w*)\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}'
         matches = re.finditer(const_module_pattern, content, re.DOTALL)
-        
+
         for match in matches:
             module_name = match.group(1)
             module_content = match.group(2)
-            
+
             # Find const declarations within the module
             const_pattern = r'const\s+(\w+)\s+(\w+)\s*=\s*([^;]+);'
             const_matches = re.finditer(const_pattern, module_content)
-            
+
             for const_match in const_matches:
                 const_type = const_match.group(1)
                 const_name = const_match.group(2)
                 const_value = const_match.group(3).strip()
-                
+
                 # Map the type to ROS2 type
                 ros_type = self._map_type(const_type)
-                
+
                 constant = IdlConstant(
                     name=const_name,
                     const_type=ros_type,
                     value=const_value
                 )
                 constants.append(constant)
-        
+
         return constants
-    
+
     def _parse_structures(self, content: str) -> List[IdlStructure]:
         """Parse structure definitions from module content"""
         structures = []
-        
+
         # Find struct definitions
         struct_pattern = r'struct\s+(\w+)\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}'
         matches = re.finditer(struct_pattern, content, re.DOTALL)
-        
+
         for match in matches:
             struct_name = match.group(1)
             struct_content = match.group(2)
-            
+
             # Extract comments from @verbatim blocks before the struct
             comments = self._extract_verbatim_comments(content, match.start())
-            
+
             # Parse fields from the struct content (need to preprocess it first)
             clean_struct_content = self._preprocess_content(struct_content)
             fields = self._parse_fields(clean_struct_content, struct_content, struct_name)  # Pass both clean, original, and struct name
-            
+
             structure = IdlStructure(
                 name=struct_name,
                 fields=fields,
@@ -321,38 +336,38 @@ class IdlParser:
                 comments=comments
             )
             structures.append(structure)
-        
+
         return structures
-    
+
     def _extract_verbatim_comments(self, content: str, struct_start_pos: int) -> List[str]:
         """Extract comments from @verbatim blocks immediately before a struct definition"""
         comments = []
-        
+
         # Look backwards from struct position to find the most recent @verbatim block
         content_before_struct = content[:struct_start_pos]
-        
+
         # Try to find the last @verbatim block before the struct
         # Look for pattern: @verbatim (language="comment", text="...") struct
-        
+
         # First, try single-line @verbatim pattern
         single_line_pattern = r'@verbatim\s*\(\s*language\s*=\s*"comment"\s*,\s*text\s*=\s*"([^"]+)"\s*\)\s*$'
-        
+
         # Split into lines and work backwards
         lines = content_before_struct.split('\n')
-        
+
         for line in reversed(lines):
             line_stripped = line.strip()
-            
+
             # Skip empty lines and braces
             if not line_stripped or line_stripped in ['}', '};']:
                 continue
-                
+
             # If we hit non-verbatim content that's not empty/closing, stop looking
             if not line_stripped.startswith('@verbatim') and line_stripped:
                 # Unless it's just whitespace or a closing brace, stop
                 if not (line_stripped == '}' or line_stripped == '};' or not line_stripped):
                     break
-            
+
             # Look for @verbatim
             if '@verbatim' in line and 'language="comment"' in line:
                 # Try single-line match first
@@ -360,41 +375,41 @@ class IdlParser:
                 if match:
                     comment_text = match.group(1).strip().replace('\\n', '\n')
                     return [comment_text]
-                    
+
                 # For multi-line, we need to look at the next line
                 # This handles cases like:
                 # @verbatim (language="comment", text=
                 #   "The comment text")
                 break
-        
+
         # If single-line didn't work, try multi-line pattern
         # Look for @verbatim blocks that span multiple lines
         multi_line_pattern = r'@verbatim\s*\(\s*language\s*=\s*"comment"\s*,\s*text\s*=\s*"([^"]+)"\s*\)'
-        
+
         # Search in a reasonable window before the struct (last 500 characters)
         search_window = content_before_struct[-500:] if len(content_before_struct) > 500 else content_before_struct
-        
+
         matches = list(re.finditer(multi_line_pattern, search_window, re.DOTALL))
         if matches:
             # Take the last match (closest to the struct)
             last_match = matches[-1]
             comment_text = last_match.group(1).strip().replace('\\n', '\n')
             return [comment_text]
-        
+
         return comments
-    
+
     def _extract_inline_verbatim_comments(self, content: str) -> Dict[str, str]:
         """Extract comments from @verbatim blocks that appear before field definitions"""
         field_comments = {}
         lines = content.split('\n')
-        
+
         i = 0
         while i < len(lines):
             line = lines[i].strip()
             if '@verbatim' in line and 'language="comment"' in line:
                 # Extract the comment text - handle multi-line format
                 comment_text = ""
-                
+
                 # Look for text on the same line first
                 text_match = re.search(r'text\s*=\s*"([^"]*)"', line)
                 if text_match:
@@ -404,10 +419,10 @@ class IdlParser:
                     j = i + 1
                     in_text = True  # Set to True since we found 'text=' in the @verbatim line
                     text_parts = []
-                    
+
                     while j < len(lines):
                         next_line = lines[j].strip()
-                        
+
                         if in_text:
                             # Handle different string concatenation patterns
                             if next_line.startswith('"') and next_line.endswith('" "'):
@@ -429,17 +444,17 @@ class IdlParser:
                                 for quote_match in quote_matches:
                                     if quote_match:  # Skip empty strings unless they're newlines
                                         text_parts.append(quote_match)
-                            
+
                             # Check if we've reached the end of the verbatim block
                             if ')' in next_line and in_text:
                                 break
                         j += 1
-                    
+
                     comment_text = ''.join(text_parts)
-                
+
                 # Convert \n to actual newlines and clean up
                 comment_text = comment_text.replace('\\n', '\n').strip()
-                
+
                 # Find the next field definition
                 k = j + 1  # Start after the verbatim block ends
                 while k < len(lines):
@@ -454,28 +469,28 @@ class IdlParser:
                         break
                     k += 1
             i += 1
-        
+
         return field_comments
-    
+
     def _parse_fields(self, struct_content: str, original_content: str = None, struct_name: str = None) -> List[IdlField]:
         """Parse field definitions from struct content"""
         fields = []
-        
+
         # Use original content for default value extraction if provided
         content_for_defaults = original_content if original_content else struct_content
-        
+
         # First, extract default values from the original content
         default_values = self._extract_default_values(content_for_defaults)
-        
+
         # Extract verbatim comments from within the struct
         inline_comments = self._extract_inline_verbatim_comments(content_for_defaults)
-        
+
         # Remove @verbatim blocks and @default annotations from the clean content
         cleaned_content = self._remove_verbatim_blocks(struct_content)
-        
+
         # Split by semicolon and process each field
         field_lines = [line.strip() for line in cleaned_content.split(';') if line.strip()]
-        
+
         for field_line in field_lines:
             field = self._parse_single_field(field_line, struct_name)
             if field and field.name in default_values:
@@ -485,14 +500,14 @@ class IdlParser:
                 field.comment = inline_comments[field.name]
             if field:
                 fields.append(field)
-        
+
         return fields
-    
+
     def _extract_default_values(self, content: str) -> Dict[str, str]:
         """Extract default values from @default annotations"""
         default_values = {}
         lines = content.split('\n')
-        
+
         i = 0
         while i < len(lines):
             line = lines[i].strip()
@@ -502,7 +517,7 @@ class IdlParser:
                 default_match = re.search(r'@default\s*\(\s*value\s*=\s*(.+)\)\s*$', line)
                 if default_match:
                     default_value = default_match.group(1).strip()
-                    
+
                     # Handle different value formats
                     if default_value.startswith('"') and default_value.endswith('"'):
                         # Quoted string - preserve quotes for string fields
@@ -519,7 +534,7 @@ class IdlParser:
                         else:
                             # For string fields, first unescape any escaped quotes
                             unescaped_value = inner_value.replace('\\"', '"').replace("\\'", "'")
-                            
+
                             # Now apply quoting logic based on content
                             if '"' in unescaped_value and "'" not in unescaped_value:
                                 # Has double quotes only - use single quotes to wrap
@@ -553,7 +568,7 @@ class IdlParser:
                                     default_value = str(int(float_val))
                             except ValueError:
                                 pass  # Keep original value if conversion fails
-                    
+
                     # Look for the field definition in the next lines
                     j = i + 1
                     while j < len(lines):
@@ -567,16 +582,16 @@ class IdlParser:
                             break
                         j += 1
             i += 1
-        
+
         return default_values
-    
+
     def _remove_verbatim_blocks(self, content: str) -> str:
         """Remove @verbatim and @default blocks from content"""
         lines = content.split('\n')
         processed_lines = []
         in_verbatim = False
         paren_count = 0
-        
+
         for line in lines:
             # Skip @verbatim blocks
             if '@verbatim' in line and not in_verbatim:
@@ -588,35 +603,35 @@ class IdlParser:
                 if paren_count <= 0:
                     in_verbatim = False
                 continue
-            
+
             # Skip @default annotations completely
             if '@default' in line:
                 continue
-            
+
             # Skip @unit annotations completely
             if '@unit' in line:
                 continue
-            
+
             processed_lines.append(line)
-        
+
         return '\n'.join(processed_lines)
-    
+
     def _parse_single_field(self, field_line: str, struct_name: str = None) -> Optional[IdlField]:
         """Parse a single field definition"""
         field_line = field_line.strip()
         if not field_line:
             return None
-        
+
         # Handle sequence types: sequence<type> name or sequence<type, bound> name
         sequence_match = re.match(r'sequence<([^,>]+)(?:,\s*(\d+))?>\s+(\w+)', field_line)
         if sequence_match:
             inner_type = sequence_match.group(1).strip()
             bound = sequence_match.group(2)
             field_name = sequence_match.group(3)
-            
+
             # Map the inner type with field name context
             ros_type = self._map_type_with_context(inner_type, field_name, struct_name)
-            
+
             # Handle bounded sequence
             if bound:
                 bound_value = int(bound)
@@ -634,30 +649,30 @@ class IdlParser:
                     is_sequence=True,
                     is_array=True
                 )
-        
+
         # Handle array types: type[size] name or type[] name
         array_match = re.match(r'([^[\s]+)\s*\[([^\]]*)\]\s+(\w+)', field_line)
         if array_match:
             base_type = array_match.group(1)
             array_size_str = array_match.group(2)
             field_name = array_match.group(3)
-            
+
             ros_type = self._map_type_with_context(base_type, field_name, struct_name)
             array_size = int(array_size_str) if array_size_str.isdigit() else None
-            
+
             return IdlField(
                 field_type=ros_type,
                 name=field_name,
                 is_array=True,
                 array_size=array_size
             )
-        
+
         # Handle bounded strings: string<size> name
         bounded_string_match = re.match(r'string<(\d+)>\s+(\w+)', field_line)
         if bounded_string_match:
             bound_size = int(bounded_string_match.group(1))
             field_name = bounded_string_match.group(2)
-            
+
             return IdlField(
                 field_type='string',
                 name=field_name,
@@ -665,15 +680,15 @@ class IdlParser:
                 is_bounded_string=True,
                 array_size=bound_size
             )
-        
+
         # Handle regular types: type name or type<params> name
         regular_match = re.match(r'([^:\s]+(?:::[^:\s]+)*)\s+(\w+)', field_line)
         if regular_match:
             field_type = regular_match.group(1)
             field_name = regular_match.group(2)
-            
+
             ros_type = self._map_type_with_context(field_type, field_name, struct_name)
-            
+
             # Check if this is a typedef array
             if field_type in self.typedefs:
                 typedef_info = self.typedefs[field_type]
@@ -685,21 +700,21 @@ class IdlParser:
                     is_array=True,
                     array_size=typedef_info['array_size']
                 )
-            
+
             return IdlField(
                 field_type=ros_type,
                 name=field_name
             )
-        
+
         return None
-    
+
     def _map_type(self, idl_type: str) -> str:
         """Map IDL type to ROS2 type"""
         # Check if it's a typedef first
         if idl_type in self.typedefs:
             typedef_info = self.typedefs[idl_type]
             return typedef_info['base_type']
-        
+
         # Handle namespaced types (e.g., std_msgs::msg::Header)
         if '::' in idl_type:
             parts = idl_type.split('::')
@@ -707,7 +722,7 @@ class IdlParser:
                 # For types like package::msg::Type, check if it's in the same package context
                 package = parts[0]
                 msg_type = parts[-1]
-                
+
                 # If it's the same package we're currently processing, just use the type name
                 if package == self.current_package or package == 'rmw_dds_common' or package == 'test_msgs':
                     return msg_type
@@ -715,28 +730,28 @@ class IdlParser:
                     return f"{package}/{msg_type}"
             else:
                 return idl_type.replace('::', '/')
-        
+
         # Handle basic types
         return self.TYPE_MAPPING.get(idl_type, idl_type)
-    
+
     def _map_type_with_context(self, idl_type: str, field_name: str, struct_name: str = None) -> str:
         """Map IDL type to ROS2 type with field name context"""
         # Special case: uint8 with "char" in field name should map to char
         if idl_type == 'uint8' and 'char' in field_name.lower():
             return 'char'
-        
+
         # Special case: uint8 in Char struct should map to char
         if idl_type == 'uint8' and struct_name and 'char' in struct_name.lower():
             return 'char'
-        
+
         # Otherwise use regular mapping
         return self._map_type(idl_type)
-    
+
     def _determine_interface_type(self, structure: IdlStructure, file_path: str) -> IdlElementType:
         """Determine if structure represents a message, service, or action"""
         file_name = os.path.basename(file_path).lower()
         struct_name = structure.name.lower()
-        
+
         # Check for service patterns - be more specific to avoid false positives
         if ('.srv' in file_path or 
             struct_name.endswith('_request') or struct_name.endswith('_response') or
@@ -752,50 +767,50 @@ class IdlParser:
 
 class RosInterfaceGenerator:
     """Generates ROS2 interface files from IDL interfaces"""
-    
+
     def __init__(self, output_dir: str = "ros_interfaces"):
         self.output_dir = pathlib.Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
-        
+
         # Create subdirectories
         self.msg_dir = self.output_dir / "msg"
         self.srv_dir = self.output_dir / "srv"
         self.action_dir = self.output_dir / "action"
-        
+
         self.msg_dir.mkdir(exist_ok=True)
         self.srv_dir.mkdir(exist_ok=True)
         self.action_dir.mkdir(exist_ok=True)
-        
+
         # Store interfaces for service/action combining
         self.service_parts = {}
         self.action_parts = {}
-    
+
     def generate_interfaces(self, interfaces: List[IdlInterface]) -> List[str]:
         """Generate ROS2 interface files from IDL interfaces"""
         generated_files = []
-        
+
         # First pass: collect service and action parts
         for interface in interfaces:
             if interface.interface_type == IdlElementType.SERVICE:
                 self._collect_service_part(interface)
             elif interface.interface_type == IdlElementType.ACTION:
                 self._collect_action_part(interface)
-        
+
         # Second pass: generate files
         for interface in interfaces:
             if interface.interface_type == IdlElementType.MESSAGE:
                 file_path = self._generate_message(interface)
                 if file_path:
                     generated_files.append(str(file_path))
-        
+
         # Generate combined service files
         generated_files.extend(self._generate_service_files())
-        
+
         # Generate combined action files  
         generated_files.extend(self._generate_action_files())
-        
+
         return generated_files
-    
+
     def _collect_service_part(self, interface: IdlInterface):
         """Collect service request/response parts"""
         if interface.name.endswith('_Request'):
@@ -808,7 +823,7 @@ class RosInterfaceGenerator:
             if base_name not in self.service_parts:
                 self.service_parts[base_name] = {}
             self.service_parts[base_name]['response'] = interface
-    
+
     def _collect_action_part(self, interface: IdlInterface):
         """Collect action goal/result/feedback parts"""
         name = interface.name
@@ -842,35 +857,35 @@ class RosInterfaceGenerator:
             if base_name not in self.action_parts:
                 self.action_parts[base_name] = {}
             self.action_parts[base_name]['feedback'] = interface
-    
+
     def _generate_service_files(self) -> List[str]:
         """Generate .srv files from collected service parts"""
         generated_files = []
-        
+
         for service_name, parts in self.service_parts.items():
             if 'request' in parts and 'response' in parts:
                 file_path = self._generate_combined_service(service_name, parts['request'], parts['response'])
                 if file_path:
                     generated_files.append(str(file_path))
-        
+
         return generated_files
-    
+
     def _generate_action_files(self) -> List[str]:
         """Generate .action files from collected action parts"""
         generated_files = []
-        
+
         for action_name, parts in self.action_parts.items():
             if all(key in parts for key in ['goal', 'result', 'feedback']):
                 file_path = self._generate_combined_action(action_name, parts)
                 if file_path:
                     generated_files.append(str(file_path))
-        
+
         return generated_files
-    
+
     def _generate_combined_service(self, service_name: str, request_interface: IdlInterface, response_interface: IdlInterface) -> Optional[pathlib.Path]:
         """Generate a combined .srv file"""
         lines = []
-        
+
         # Add request fields
         if request_interface.structures:
             structure = request_interface.structures[0]
@@ -892,10 +907,10 @@ class RosInterfaceGenerator:
                         for comment_line in comment_lines:
                             lines.append(f"# {comment_line}")
                 lines.append(self._format_field(field))
-        
+
         # Add separator
         lines.append("---")
-        
+
         # Add response fields
         if response_interface.structures:
             structure = response_interface.structures[0]
@@ -916,80 +931,80 @@ class RosInterfaceGenerator:
                         for comment_line in comment_lines:
                             lines.append(f"# {comment_line}")
                 lines.append(self._format_field(field))
-        
+
         content = "\n".join(lines)
         file_path = self.srv_dir / f"{service_name}.srv"
-        
+
         with open(file_path, 'w') as f:
             f.write(content)
-        
+
         print(f"Generated: {file_path}")
         return file_path
-    
+
     def _generate_combined_action(self, action_name: str, parts: Dict) -> Optional[pathlib.Path]:
         """Generate a combined .action file"""
         lines = []
-        
+
         # Add header comment
         lines.append(f"# {action_name}.action")
         lines.append("# Generated from IDL file")
         lines.append("")
-        
+
         # Add goal fields
         lines.append("# Goal")
         if parts['goal'].structures:
             for field in parts['goal'].structures[0].fields:
                 lines.append(self._format_field(field))
-        
+
         lines.append("---")
-        
+
         # Add result fields
         lines.append("# Result")
         if parts['result'].structures:
             for field in parts['result'].structures[0].fields:
                 lines.append(self._format_field(field))
-        
+
         lines.append("---")
-        
+
         # Add feedback fields
         lines.append("# Feedback")
         if parts['feedback'].structures:
             for field in parts['feedback'].structures[0].fields:
                 lines.append(self._format_field(field))
-        
+
         content = "\n".join(lines)
         file_path = self.action_dir / f"{action_name}.action"
-        
+
         with open(file_path, 'w') as f:
             f.write(content)
-        
+
         print(f"Generated: {file_path}")
         return file_path
-    
+
     def _generate_message(self, interface: IdlInterface) -> Optional[pathlib.Path]:
         """Generate .msg file"""
         if not interface.structures:
             return None
-        
+
         structure = interface.structures[0]
         content = self._generate_message_content(structure, interface)
-        
+
         file_path = self.msg_dir / f"{interface.name}.msg"
         with open(file_path, 'w') as f:
             f.write(content)
-        
+
         print(f"Generated: {file_path}")
         return file_path
-    
+
     def _generate_message_content(self, structure: IdlStructure, interface: IdlInterface) -> str:
         """Generate the content of a .msg file"""
         lines = []
-        
+
         # Add verbatim comments first (if any)
         if structure.comments:
             for comment in structure.comments:
                 lines.append(f"# {comment}")
-        
+
         # Process fields in their original order to preserve IDL field sequence
         for field in structure.fields:
             # Add field comment if present
@@ -1000,18 +1015,18 @@ class RosInterfaceGenerator:
                     lines.append(f"# {comment_line}")
             line = self._format_field(field)
             lines.append(line)
-        
+
         # Add constants after fields (for ROS2 .msg format compatibility)
         for constant in structure.constants:
             line = self._format_constant_as_field(constant)
             lines.append(line)
-        
+
         return "\n".join(lines)
-    
+
     def _format_field(self, field: IdlField) -> str:
         """Format a field for ROS interface file"""
         field_type = field.field_type
-        
+
         # Handle arrays and bounded types
         if field.is_array:
             if field.is_sequence and field.array_size is not None:
@@ -1029,13 +1044,13 @@ class RosInterfaceGenerator:
             else:
                 # Dynamic array: Type[]
                 field_type += "[]"
-        
+
         line = f"{field_type} {field.name}"
-        
+
         # Add default value if present
         if field.default_value:
             line += f" {field.default_value}"
-        
+
         return line
 
     def _format_constant_as_field(self, constant: IdlConstant) -> str:
@@ -1059,23 +1074,23 @@ def main():
                        help="Package name to use for generated files (overrides package from IDL)")
     parser.add_argument("-v", "--verbose", action="store_true", 
                        help="Enable verbose output")
-    
+
     args = parser.parse_args()
-    
+
     if not os.path.exists(args.idl_file):
         print(f"Error: IDL file '{args.idl_file}' not found")
         return 1
-    
+
     try:
         # Parse IDL file
         idl_parser = IdlParser()
         interfaces = idl_parser.parse_file(args.idl_file)
-        
+
         # Override package name if provided
         if args.package:
             for interface in interfaces:
                 interface.package = args.package
-        
+
         if args.verbose:
             print(f"Parsed {len(interfaces)} interfaces from {args.idl_file}")
             for interface in interfaces:
@@ -1084,21 +1099,21 @@ def main():
                     print(f"    Package: {interface.package} (overridden)")
                 else:
                     print(f"    Package: {interface.package}")
-        
+
         # Determine output directory
         if args.root:
             output_dir = pathlib.Path(args.root) / args.output
         else:
             output_dir = pathlib.Path(args.output)
-        
+
         # Generate ROS interface files
         generator = RosInterfaceGenerator(str(output_dir))
         generated_files = generator.generate_interfaces(interfaces)
-        
+
         print(f"\nGenerated {len(generated_files)} files:")
         for file_path in generated_files:
             print(f"  - {file_path}")
-        
+
         # Display generated file contents if verbose
         if args.verbose:
             print("\n" + "="*60)
@@ -1107,9 +1122,9 @@ def main():
                 print(f"\n--- {pathlib.Path(file_path).name} ---")
                 with open(file_path, 'r') as f:
                     print(f.read())
-        
+
         return 0
-        
+
     except Exception as e:
         print(f"Error: {e}")
         if args.verbose:
