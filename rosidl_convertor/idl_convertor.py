@@ -106,6 +106,10 @@ class IdlParser:
         self.current_module = ""
         self.typedefs = {}  # Store typedef declarations
 
+    def _contains_key_annotations(self, content: str) -> bool:
+        """Check if IDL content contains @key annotations (not supported in ROS2 .msg)"""
+        return '@key' in content
+
     def parse_file(self, idl_file_path: str) -> List[IdlInterface]:
         """Parse an IDL file and return list of interfaces"""
         with open(idl_file_path, 'r') as f:
@@ -116,6 +120,11 @@ class IdlParser:
     def parse_content(self, content: str, file_path: str = "") -> List[IdlInterface]:
         """Parse IDL content string"""
         interfaces = []
+
+        # Check for unsupported features
+        if self._contains_key_annotations(content):
+            print(f"Warning: Skipping {file_path} - contains @key annotations which are not supported in ROS2 .msg files")
+            return interfaces
 
         # Extract modules and their contents BEFORE preprocessing (to preserve @verbatim)
         modules = self._extract_modules(content)
