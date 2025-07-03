@@ -1,7 +1,7 @@
 {
   "name": "rosidl-generator",
-  "version": "0.5.1",
-  "description": "Generate JavaScript object from ROS IDL(.msg) files",
+  "version": "1.0.0",
+  "description": "Generate JavaScript object from ROS IDL(.msg/.srv/.action/.idl) files",
   "main": "index.js",
   "authors": [
     "Minggang Wang <minggang.wang@intel.com>",

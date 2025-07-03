@@ -77,6 +77,7 @@ jobs:
     - name: Test with IDL ROS messages
       if: ${{ matrix.ros_distribution == 'rolling' }}
       run: |
+        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
         npm i
         npm test-idl
         npm run clean
