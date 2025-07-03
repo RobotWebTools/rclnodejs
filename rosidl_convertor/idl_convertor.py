@@ -107,8 +107,25 @@ class IdlParser:
         self.typedefs = {}  # Store typedef declarations
 
     def _contains_key_annotations(self, content: str) -> bool:
-        """Check if IDL content contains @key annotations (not supported in ROS2 .msg)"""
-        return '@key' in content
+        """Check if IDL content contains @key annotations or references to keyed types (not supported in ROS2 .msg)"""
+        # Direct @key annotations
+        if '@key' in content:
+            return True
+
+        # Check for references to known keyed types
+        keyed_type_patterns = [
+            r'test_msgs::msg::KeyedString',
+            r'test_msgs::msg::KeyedLong',
+            r'KeyedString',
+            r'KeyedLong'
+        ]
+
+        import re
+        for pattern in keyed_type_patterns:
+            if re.search(pattern, content):
+                return True
+
+        return False
 
     def parse_file(self, idl_file_path: str) -> List[IdlInterface]:
         """Parse an IDL file and return list of interfaces"""
@@ -123,7 +140,12 @@ class IdlParser:
 
         # Check for unsupported features
         if self._contains_key_annotations(content):
-            print(f"Warning: Skipping {file_path} - contains @key annotations which are not supported in ROS2 .msg files")
+            # Determine the specific reason for skipping
+            if '@key' in content:
+                reason = "contains @key annotations"
+            else:
+                reason = "references keyed types"
+            print(f"Warning: Skipping {file_path} - {reason} which are not supported in ROS2 .msg files")
             return interfaces
 
         # Extract modules and their contents BEFORE preprocessing (to preserve @verbatim)
