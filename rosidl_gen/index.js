@@ -18,18 +18,38 @@ const fse = require('fs-extra');
 const generateJSStructFromIDL = require('./idl_generator.js');
 const packages = require('./packages.js');
 const path = require('path');
-
+const idlConvertor = require('../rosidl_convertor/idl_convertor.js');
 const generatedRoot = path.join(__dirname, '../generated/');
 const serviceMsgPath = path.join(generatedRoot, 'srv_msg');
+const idlPath = path.join(generatedRoot, 'share');
+const useIDL = !!process.argv.find((arg) => arg === '--idl');
 
 function getInstalledPackagePaths() {
   return process.env.AMENT_PREFIX_PATH.split(path.delimiter);
 }
 
 async function generateInPath(path) {
-  const pkgs = await packages.findPackagesInDirectory(path);
-
-  const pkgsInfo = Array.from(pkgs.values());
+  let pkgs = null;
+  let pkgsInfo = null;
+  if (!useIDL) {
+    pkgs = await packages.findPackagesInDirectory(path);
+    pkgsInfo = Array.from(pkgs.values());
+  } else {
+    const idlPkgs = await packages.findPackagesInDirectory(path, useIDL);
+    const exist = await fse.exists(idlPath);
+    if (!exist) {
+      fse.mkdirSync(idlPath);
+    }
+    const promises = [];
+    idlPkgs.forEach((pkg) => {
+      pkg.idls.forEach((idl) => {
+        promises.push(idlConvertor(idl.pkgName, idl.filePath, idlPath));
+      });
+    });
+    await Promise.all(promises);
+    const pkgsFromIdl = await packages.findPackagesInDirectory(idlPath, false);
+    pkgsInfo = Array.from(pkgsFromIdl.values());
+  }
 
   await Promise.all(
     pkgsInfo.map((pkgInfo) => generateJSStructFromIDL(pkgInfo, generatedRoot))

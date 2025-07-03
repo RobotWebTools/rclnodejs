@@ -74,6 +74,13 @@ jobs:
         npm test
         npm run clean
 
+    - name: Test with IDL ROS messages
+      if: ${{ matrix.ros_distribution == 'rolling' }}
+      run: |
+        npm i
+        npm test-idl
+        npm run clean
+
     - name: Coveralls Parallel
       uses: coverallsapp/github-action@v2
       with:
