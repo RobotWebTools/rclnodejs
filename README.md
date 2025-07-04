@@ -32,6 +32,8 @@ rclnodejs.init().then(() => {
 - [rclnodejs-cli](#rclnodejs-cli)
 - [API Documentation](#api-documentation)
 - [Using TypeScript](#using-rclnodejs-with-typescript)
+- [ROS2 Interface Message Generation](#ros2-interface-message-generation-important)
+- [IDL Message Generation](#idl-message-generation)
 - [Examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
 - [Electron demo](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo)
 - [Efficient Usage Tips](./docs/EFFICIENCY.md)
@@ -144,6 +146,18 @@ In the following example rclnodejs loads a generated JavaScript message file cor
 import * as rclnodejs from 'rclnodejs';
 let stringMsgObject = rclnodejs.createMessageObject('std_msgs/msg/String');
 stringMsgObject.data = 'hello world';
+```
+
+## IDL Message Generation
+
+In addition to the standard ROS2 message generation (`.msg`, `.srv`, and `.action`), rclnodejs provides advanced support for generating JavaScript message files directly from IDL (Interface Definition Language) files. This feature is particularly useful when working with custom IDL files or when you need more control over the message generation process.
+
+### Running `generate-messages-idl`
+
+To generate messages from IDL files, use the `generate-messages-idl` npm script:
+
+```bash
+npm run generate-messages-idl
 ```
 
 ### Maintaining Generated JavaScript Message Files

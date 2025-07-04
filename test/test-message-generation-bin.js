@@ -36,6 +36,7 @@ function getNodeVersionInfo() {
 describe('rclnodejs generate-messages binary-script tests', function () {
   let cwd;
   let tmpPkg;
+  const args = process.argv.find((arg) => arg === '--idl') ? ['--idl'] : [];
 
   this.timeout(90 * 1000); // 90 seconds to run this test suite
 
@@ -113,7 +114,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
 
   it('test generate-ros-messages script operation', function (done) {
     let script = createScriptFolderPath(this.tmpPkg);
-    childProcess.spawnSync(script, [], {
+    childProcess.spawnSync(script, args, {
       // stdio: 'inherit',
       shell: true,
     });
@@ -131,7 +132,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
   });
 
   it('test npx generate-ros-messages script operation', function (done) {
-    childProcess.spawnSync('npx', [SCRIPT_NAME], {
+    childProcess.spawnSync('npx', [SCRIPT_NAME, ...args], {
       // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
