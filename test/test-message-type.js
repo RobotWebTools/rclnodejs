@@ -105,6 +105,7 @@ describe('Rclnodejs message type testing', function () {
         'String_channel',
         (msg) => {
           publisher.kill('SIGINT');
+          node.destroySubscription(subscription);
           assert.deepStrictEqual(typeof msg.data, 'string');
           assert.deepStrictEqual(msg.data, 'RCL String');
           done();

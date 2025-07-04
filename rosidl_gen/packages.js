@@ -70,7 +70,13 @@ function grabInterfaceInfo(filePath, amentExecuted) {
 function addInterfaceInfo(info, type, pkgMap) {
   let pkgName = info.pkgName;
   if (!pkgMap.has(pkgName)) {
-    pkgMap.set(pkgName, { messages: [], services: [], actions: [], pkgName });
+    pkgMap.set(pkgName, {
+      messages: [],
+      services: [],
+      actions: [],
+      idls: [],
+      pkgName,
+    });
   }
   let pkg = pkgMap.get(pkgName);
   pkg[type].push(info);
@@ -157,26 +163,32 @@ async function generateMsgForSrv(filePath, interfaceInfo, pkgMap) {
   }
 }
 
-async function addInterfaceInfos(filePath, dir, pkgMap) {
-  const interfaceInfo = grabInterfaceInfo(filePath, true);
+async function addInterfaceInfos(filePath, dir, pkgMap, useIDL) {
+  const interfaceInfo = grabInterfaceInfo(filePath, /*amentExecuted=*/ true);
   const ignore = pkgFilters.matchesAny(interfaceInfo);
   if (!ignore) {
-    if (path.extname(filePath) === '.msg') {
-      // Some .msg files were generated prior to 0.3.2 for .action files,
-      // which has been disabled. So these files should be ignored here.
-      if (path.dirname(dir).split(path.sep).pop() !== 'action') {
-        addInterfaceInfo(interfaceInfo, 'messages', pkgMap);
+    if (useIDL) {
+      if (path.extname(filePath) === '.idl') {
+        addInterfaceInfo(interfaceInfo, 'idls', pkgMap);
       }
-    } else if (path.extname(filePath) === '.srv') {
-      const requestMsgName = `${path.parse(filePath).name}_Request.msg`;
-      if (!fs.existsSync(path.join(path.dirname(filePath), requestMsgName))) {
-        await generateMsgForSrv(filePath, interfaceInfo, pkgMap);
-      }
-      addInterfaceInfo(interfaceInfo, 'services', pkgMap);
-    } else if (path.extname(filePath) === '.action') {
-      addInterfaceInfo(interfaceInfo, 'actions', pkgMap);
     } else {
-      // we ignore all other files
+      if (path.extname(filePath) === '.msg') {
+        // Some .msg files were generated prior to 0.3.2 for .action files,
+        // which has been disabled. So these files should be ignored here.
+        if (path.dirname(dir).split(path.sep).pop() !== 'action') {
+          addInterfaceInfo(interfaceInfo, 'messages', pkgMap);
+        }
+      } else if (path.extname(filePath) === '.srv') {
+        const requestMsgName = `${path.parse(filePath).name}_Request.msg`;
+        if (!fs.existsSync(path.join(path.dirname(filePath), requestMsgName))) {
+          await generateMsgForSrv(filePath, interfaceInfo, pkgMap);
+        }
+        addInterfaceInfo(interfaceInfo, 'services', pkgMap);
+      } else if (path.extname(filePath) === '.action') {
+        addInterfaceInfo(interfaceInfo, 'actions', pkgMap);
+      } else {
+        // we ignore all other files.
+      }
     }
   }
 }
@@ -186,7 +198,7 @@ async function addInterfaceInfos(filePath, dir, pkgMap) {
  * @param {string} dir - the directory to search in
  * @return {Promise<Map<string, object>>} A mapping from the package name to some info about it.
  */
-async function findAmentPackagesInDirectory(dir) {
+async function findAmentPackagesInDirectory(dir, useIDL) {
   const pkgs = await getAmentPackages(dir);
   const files = await Promise.all(
     pkgs.map((pkg) => getPackageDefinitionsFiles(pkg, dir))
@@ -195,7 +207,7 @@ async function findAmentPackagesInDirectory(dir) {
   const rosFiles = files.flat();
   const pkgMap = new Map();
   await Promise.all(
-    rosFiles.map((filePath) => addInterfaceInfos(filePath, dir, pkgMap))
+    rosFiles.map((filePath) => addInterfaceInfos(filePath, dir, pkgMap, useIDL))
   );
   return pkgMap;
 }
@@ -205,7 +217,7 @@ async function findAmentPackagesInDirectory(dir) {
  * @param {string} dir - the directory to search in
  * @return {Promise<Map<string, object>>} A mapping from the package name to some info about it.
  */
-async function findPackagesInDirectory(dir) {
+async function findPackagesInDirectory(dir, useIDL) {
   return new Promise((resolve, reject) => {
     let amentExecuted = true;
 
@@ -217,30 +229,51 @@ async function findPackagesInDirectory(dir) {
       }
 
       if (amentExecuted) {
-        return resolve(findAmentPackagesInDirectory(dir));
+        return resolve(findAmentPackagesInDirectory(dir, useIDL));
       }
 
       let walker = walk.walk(dir, { followLinks: true });
       let pkgMap = new Map();
-      walker.on('file', (root, file, next) => {
+      walker.on('file', async (root, file, next) => {
         const interfaceInfo = grabInterfaceInfo(
           path.join(root, file.name),
           amentExecuted
         );
         const ignore = pkgFilters.matchesAny(interfaceInfo);
         if (!ignore) {
-          if (path.extname(file.name) === '.msg') {
-            // Some .msg files were generated prior to 0.3.2 for .action files,
-            // which has been disabled. So these files should be ignored here.
-            if (path.dirname(root).split(path.sep).pop() !== 'action') {
-              addInterfaceInfo(interfaceInfo, 'messages', pkgMap);
+          if (useIDL) {
+            if (path.extname(file.name) === '.idl') {
+              addInterfaceInfo(interfaceInfo, 'idls', pkgMap);
             }
-          } else if (path.extname(file.name) === '.srv') {
-            addInterfaceInfo(interfaceInfo, 'services', pkgMap);
-          } else if (path.extname(file.name) === '.action') {
-            addInterfaceInfo(interfaceInfo, 'actions', pkgMap);
           } else {
-            // we ignore all other files
+            if (path.extname(file.name) === '.msg') {
+              // Some .msg files were generated prior to 0.3.2 for .action files,
+              // which has been disabled. So these files should be ignored here.
+              if (path.dirname(root).split(path.sep).pop() !== 'action') {
+                addInterfaceInfo(interfaceInfo, 'messages', pkgMap);
+              }
+            } else if (path.extname(file.name) === '.srv') {
+              const requestMsgName = `${path.parse(interfaceInfo.filePath).name}_Request.msg`;
+              if (
+                !fs.existsSync(
+                  path.join(
+                    path.dirname(interfaceInfo.filePath),
+                    requestMsgName
+                  )
+                )
+              ) {
+                await generateMsgForSrv(
+                  interfaceInfo.filePath,
+                  interfaceInfo,
+                  pkgMap
+                );
+              }
+              addInterfaceInfo(interfaceInfo, 'services', pkgMap);
+            } else if (path.extname(file.name) === '.action') {
+              addInterfaceInfo(interfaceInfo, 'actions', pkgMap);
+            } else {
+              // we ignore all other files
+            }
           }
         }
         next();
