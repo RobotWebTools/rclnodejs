@@ -243,7 +243,7 @@ async function findPackagesInDirectory(dir, useIDL) {
         if (!ignore) {
           if (useIDL) {
             if (path.extname(file.name) === '.idl') {
-              addInterfaceInfo(interfaceInfo, 'idl', pkgMap);
+              addInterfaceInfo(interfaceInfo, 'idls', pkgMap);
             }
           } else {
             if (path.extname(file.name) === '.msg') {

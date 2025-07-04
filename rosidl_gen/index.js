@@ -29,17 +29,14 @@ function getInstalledPackagePaths() {
 }
 
 async function generateInPath(path) {
-  let pkgs = null;
   let pkgsInfo = null;
   if (!useIDL) {
-    pkgs = await packages.findPackagesInDirectory(path);
-    pkgsInfo = Array.from(pkgs.values());
+    pkgsInfo = Array.from(
+      (await packages.findPackagesInDirectory(path)).values()
+    );
   } else {
     const idlPkgs = await packages.findPackagesInDirectory(path, useIDL);
-    const exist = await fse.exists(idlPath);
-    if (!exist) {
-      fse.mkdirSync(idlPath);
-    }
+    await fse.ensureDir(idlPath);
     const promises = [];
     idlPkgs.forEach((pkg) => {
       pkg.idls.forEach((idl) => {
