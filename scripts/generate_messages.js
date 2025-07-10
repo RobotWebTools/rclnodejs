@@ -19,9 +19,15 @@
 
 const generator = require('../rosidl_gen/index.js');
 const tsdGenerator = require('../rostsd_gen/index.js');
+const useIDL = !!process.argv.find((arg) => arg === '--idl');
 
 async function main() {
   console.log('Start generation of ROS2 JavaScript messages...');
+  if (!useIDL) {
+    console.log(
+      'See details https://github.com/RobotWebTools/rclnodejs?tab=readme-ov-file#idl-message-generation for generating from .idl files'
+    );
+  }
 
   try {
     await generator.generateAll(true);
