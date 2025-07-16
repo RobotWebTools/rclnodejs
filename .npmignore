@@ -30,3 +30,4 @@ scripts/cpplint.js
 scripts/npm-pack.sh
 scripts/npmjs-readme.md
 scripts/run_test.js
+ts_demo/
