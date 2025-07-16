@@ -1,0 +1,37 @@
+{
+  "name": "rclnodejs-ts-topics-demo",
+  "version": "1.0.0",
+  "description": "TypeScript demo for rclnodejs topics (publisher and subscriber)",
+  "main": "dist/publisher.js",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "tsc",
+    "start:publisher": "npm run build && node dist/publisher.js",
+    "start:subscriber": "npm run build && node dist/subscriber.js",
+    "start:both": "npm run build && concurrently \"node dist/publisher.js\" \"node dist/subscriber.js\"",
+    "clean": "rimraf dist",
+    "dev:publisher": "ts-node src/publisher.ts",
+    "dev:subscriber": "ts-node src/subscriber.ts", 
+    "check-types": "tsc --noEmit"
+  },
+  "keywords": [
+    "rclnodejs",
+    "ros2",
+    "typescript",
+    "publisher",
+    "subscriber", 
+    "demo"
+  ],
+  "author": "rclnodejs contributors",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^22.16.4",
+    "concurrently": "^9.2.0",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "rclnodejs": "file:../../"
+  }
+}
