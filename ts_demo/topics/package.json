@@ -2,7 +2,7 @@
   "name": "rclnodejs-ts-topics-demo",
   "version": "1.0.0",
   "description": "TypeScript demo for rclnodejs topics (publisher and subscriber)",
-  "main": "index.js",
+  "main": "dist/publisher.js",
   "scripts": {
     "prebuild": "npm run clean",
     "build": "tsc",

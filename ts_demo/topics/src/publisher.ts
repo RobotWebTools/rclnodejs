@@ -8,7 +8,7 @@
 import * as rclnodejs from 'rclnodejs';
 
 const TOPIC_NAME = 'ts_demo';
-const PUBLISH_INTERVAL = 1000000000n; // milliseconds
+const PUBLISH_INTERVAL = 1000000000n; // nanoseconds
 
 /**
  * Main publisher function
