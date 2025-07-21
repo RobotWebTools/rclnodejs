@@ -10,7 +10,7 @@
 
 'use strict';
 
-const rclnodejs = require('../index.js');
+const rclnodejs = require('../../index.js');
 
 const ParameterType = rclnodejs.ParameterType;
 const Parameter = rclnodejs.Parameter;

@@ -14,7 +14,7 @@
 
 'use strict';
 
-const rclnodejs = require('../index.js');
+const rclnodejs = require('../../../index.js');
 const { QoS } = rclnodejs;
 
 rclnodejs.init().then(() => {
