@@ -14,8 +14,7 @@
 
 'use strict';
 
-const { assertDefined } = require('dtslint/bin/util.js');
-const rclnodejs = require('../index.js');
+const rclnodejs = require('../../../index.js');
 
 /**
  * This example demonstrates the use of content-filtering

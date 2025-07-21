@@ -14,7 +14,7 @@
 
 'use strict';
 
-const rclnodejs = require('../index.js');
+const rclnodejs = require('../../index.js');
 
 const NODE_NAME = 'test_node';
 const TOPIC = 'test';

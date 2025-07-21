@@ -14,7 +14,7 @@
 
 'use strict';
 
-const rclnodejs = require('../index.js');
+const rclnodejs = require('../../../index.js');
 
 rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('subscription_example_node');

@@ -12,8 +12,6 @@
 
 'use strict';
 
-const parser = require('../rosidl_parser/rosidl_parser.js');
-
 const rosInstallPath = process.env.AMENT_PREFIX_PATH;
 const packageName = 'test_msgs';
 const packagePath = rosInstallPath + '/share/test_msgs/action/Fibonacci.action';
