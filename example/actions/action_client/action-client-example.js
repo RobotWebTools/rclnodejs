@@ -14,9 +14,8 @@
 
 'use strict';
 
-const rclnodejs = require('../index.js');
+const rclnodejs = require('../../../index.js');
 const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
-const GoalStatus = rclnodejs.require('action_msgs/msg/GoalStatus');
 
 class FibonacciActionClient {
   constructor(node) {

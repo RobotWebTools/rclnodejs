@@ -14,7 +14,7 @@
 
 'use strict';
 
-const rclnodejs = require('../index.js');
+const rclnodejs = require('../../index.js');
 
 console.log(
   'This example creates the following nodes and outputs the corresponding ROS2 graph:'

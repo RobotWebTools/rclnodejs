@@ -14,7 +14,7 @@
 
 'use strict';
 
-const parser = require('../rosidl_parser/rosidl_parser.js');
+const parser = require('../../rosidl_parser/rosidl_parser.js');
 
 const rosInstallPath = process.env.AMENT_PREFIX_PATH;
 const packageName = 'std_srvs';

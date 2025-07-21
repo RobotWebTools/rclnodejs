@@ -12,7 +12,7 @@
 
 'use strict';
 
-const rclnodejs = require('../index.js');
+const rclnodejs = require('../../index.js');
 
 /**
  * This example demonstrates a rate limited loop running at
