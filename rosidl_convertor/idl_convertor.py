@@ -190,37 +190,85 @@ class IdlParser:
         return interfaces
 
     def _preprocess_content(self, content: str) -> str:
-        """Remove comments and normalize whitespace"""
-        # Remove @verbatim blocks using a more robust approach
-        # Find and remove complete @verbatim blocks that may span multiple lines
+        """Remove @verbatim blocks from the content with proper string handling."""
         lines = content.split('\n')
-        processed_lines = []
-        in_verbatim = False
-        paren_count = 0
+        result_lines = []
 
-        for line in lines:
-            if '@verbatim' in line and not in_verbatim:
-                in_verbatim = True
-                paren_count = line.count('(') - line.count(')')
-                continue
-            elif in_verbatim:
-                paren_count += line.count('(') - line.count(')')
-                if paren_count <= 0:
-                    in_verbatim = False
-                continue
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            if '@verbatim' in line:
+                # Find opening parenthesis after @verbatim
+                verbatim_pos = line.find('@verbatim')
+                paren_pos = line.find('(', verbatim_pos)
+                if paren_pos == -1:
+                    result_lines.append(line)
+                    i += 1
+                    continue
 
-            # Remove regular comments
-            if '//' in line:
-                line = line[:line.index('//')]
+                # Parse with string awareness
+                paren_count = 0
+                in_string = False
+                escape_next = False
+                start_part = line[:verbatim_pos]
 
-            processed_lines.append(line)
+                # Process current line starting from opening parenthesis
+                j = paren_pos
+                while j < len(line):
+                    char = line[j]
 
-        content = '\n'.join(processed_lines)
+                    if escape_next:
+                        escape_next = False
+                    elif char == '\\':
+                        escape_next = True
+                    elif char == '"' and not escape_next:
+                        in_string = not in_string
+                    elif not in_string:
+                        if char == '(':
+                            paren_count += 1
+                        elif char == ')':
+                            paren_count -= 1
+                            if paren_count == 0:
+                                # Found end of verbatim block
+                                result_lines.append(start_part + line[j+1:])
+                                i += 1
+                                break
+                    j += 1
+                else:
+                    # Verbatim block continues to next lines
+                    i += 1
+                    while i < len(lines) and paren_count > 0:
+                        line = lines[i]
+                        j = 0
+                        while j < len(line):
+                            char = line[j]
 
-        # Remove multi-line comments
-        content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+                            if escape_next:
+                                escape_next = False
+                            elif char == '\\':
+                                escape_next = True
+                            elif char == '"' and not escape_next:
+                                in_string = not in_string
+                            elif not in_string:
+                                if char == '(':
+                                    paren_count += 1
+                                elif char == ')':
+                                    paren_count -= 1
+                                    if paren_count == 0:
+                                        # Found end
+                                        result_lines.append(start_part + line[j+1:])
+                                        i += 1
+                                        break
+                            j += 1
+                        else:
+                            i += 1
+                            continue
+                        break
+            else:
+                result_lines.append(line)
+                i += 1
 
-        return content
+        return '\n'.join(result_lines)
 
     def _extract_modules(self, content: str) -> List[Dict]:
         """Extract module definitions from content"""
@@ -260,11 +308,37 @@ class IdlParser:
                         nested['name'] = f"{module_name}::{nested['name']}"
                         modules.append(nested)
 
-                # Always add the current module as well
-                modules.append({
-                    'name': module_name,
-                    'content': module_content
-                })
+                    # Only add the current module if it has content beyond just nested modules
+                    # Check if there are any struct, enum, typedef, or const definitions directly in this module
+                    lines = module_content.split('\n')
+                    has_direct_definitions = False
+                    in_nested_module = False
+                    brace_level = 0
+
+                    for line in lines:
+                        line = line.strip()
+                        if line.startswith('module ') and '{' in line:
+                            in_nested_module = True
+                            brace_level = 1
+                        elif in_nested_module:
+                            brace_level += line.count('{') - line.count('}')
+                            if brace_level <= 0:
+                                in_nested_module = False
+                        elif not in_nested_module and re.search(r'^\s*(struct|enum|typedef|const)\s+\w+', line):
+                            has_direct_definitions = True
+                            break
+
+                    if has_direct_definitions:
+                        modules.append({
+                            'name': module_name,
+                            'content': module_content
+                        })
+                else:
+                    # No nested modules, always add this module
+                    modules.append({
+                        'name': module_name,
+                        'content': module_content
+                    })
 
                 pos = current_pos
             else:
