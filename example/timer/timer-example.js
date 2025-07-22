@@ -21,7 +21,7 @@ rclnodejs
   .then(() => {
     let node = rclnodejs.createNode('timer_example_node');
 
-    let timer = node.createTimer(BigInt(1000000), () => {
+    let timer = node.createTimer(BigInt(1000000000), () => {
       console.log('One second escaped!');
 
       console.log('Cancel this timer.');
