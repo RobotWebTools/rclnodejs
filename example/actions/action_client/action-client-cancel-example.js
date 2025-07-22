@@ -57,7 +57,7 @@ class FibonacciActionClient {
   feedbackCallback(feedbackMessage) {
     this._node
       .getLogger()
-      .info(`Received feedback: ${feedbackMessage.feedback.sequence}`);
+      .info(`Received feedback: ${feedbackMessage.sequence}`);
   }
 
   async timerCallback(goalHandle) {
