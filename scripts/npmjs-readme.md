@@ -45,7 +45,7 @@ npm i rclnodejs@x.y.z
 
 |                                     RCLNODEJS Version                                      |                                                                                               Compatible ROS 2 LTS                                                                                               |
 | :----------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| latest version (currently [v1.4.0](https://github.com/RobotWebTools/rclnodejs/tree/1.4.0)) | [Kilted](https://github.com/RobotWebTools/rclnodejs/tree/kilted)<br>[Jazzy](https://github.com/RobotWebTools/rclnodejs/tree/jazzy)<br>[Humble](https://github.com/RobotWebTools/rclnodejs/tree/humble-hawksbill) |
+| latest version (currently [v1.4.1](https://github.com/RobotWebTools/rclnodejs/tree/1.4.1)) | [Kilted](https://github.com/RobotWebTools/rclnodejs/tree/kilted)<br>[Jazzy](https://github.com/RobotWebTools/rclnodejs/tree/jazzy)<br>[Humble](https://github.com/RobotWebTools/rclnodejs/tree/humble-hawksbill) |
 
 ## Documentation
 
