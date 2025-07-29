@@ -68,13 +68,12 @@ class FibonacciActionClient {
 
 rclnodejs
   .init()
-  .then(() => {
+  .then(async () => {
     const node = rclnodejs.createNode('action_client_example_node');
     const client = new FibonacciActionClient(node);
-
-    client.sendGoal();
-
     rclnodejs.spin(node);
+
+    await client.sendGoal();
   })
   .catch((err) => {
     console.error(err);
