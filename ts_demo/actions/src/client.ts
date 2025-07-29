@@ -54,7 +54,6 @@ class FibonacciActionClient {
 
     try {
       // Send the goal with feedback callback
-      console.log(goal);
       const goalHandle = await this.actionClient.sendGoal(
         goal,
         (feedback: any) => this.feedbackCallback(feedback)

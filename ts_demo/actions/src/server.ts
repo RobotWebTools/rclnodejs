@@ -114,14 +114,10 @@ class FibonacciActionServer {
    *
    * Note: According to the type definition, this should receive ActionGoal<T>,
    * but the actual implementation may pass different types. Using 'any' to handle
-   * this inconsistency and support both ActionGoal<T> and ServerGoalHandle<T>.
+   * this inconsistency and support ActionGoal<T>.
    */
-  goalCallback(goalHandle: any): rclnodejs.GoalResponse {
-    // Handle both ActionGoal<T> (with direct .order) and ServerGoalHandle<T> (with .request.order)
-    const order =
-      goalHandle.order !== undefined
-        ? goalHandle.order
-        : goalHandle.request?.order;
+  goalCallback(goal: any): rclnodejs.GoalResponse {
+    const order = goal.order;
 
     this.node
       .getLogger()
