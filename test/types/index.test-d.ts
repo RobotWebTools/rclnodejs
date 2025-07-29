@@ -390,7 +390,8 @@ const actionServer = new rclnodejs.ActionServer(
   node,
   'example_interfaces/action/Fibonacci',
   'fibonacci',
-  executeCallback
+  executeCallback,
+  goalCallback
 );
 expectType<rclnodejs.ActionServer<'example_interfaces/action/Fibonacci'>>(
   actionServer
@@ -402,6 +403,13 @@ expectType<void>(
   actionServer.registerExecuteCallback(() => new Fibonacci.Result())
 );
 expectType<void>(actionServer.destroy());
+
+function goalCallback(
+  goal: rclnodejs.ActionGoal<'example_interfaces/action/Fibonacci'>
+): rclnodejs.GoalResponse {
+  expectType<number>(goal.order);
+  return rclnodejs.GoalResponse.ACCEPT;
+}
 
 function executeCallback(
   goalHandle: rclnodejs.ServerGoalHandle<'example_interfaces/action/Fibonacci'>
