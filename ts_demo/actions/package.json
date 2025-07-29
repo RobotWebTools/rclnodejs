@@ -1,0 +1,44 @@
+{
+  "name": "rclnodejs-ts-actions-demo",
+  "version": "1.0.0",
+  "description": "TypeScript demo for rclnodejs actions (client and server)",
+  "main": "dist/client.js",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "tsc",
+    "start:server": "npm run build && node dist/server.js",
+    "start:client": "npm run build && node dist/client.js",
+    "start:both": "npm run build && concurrently \"node dist/server.js\" \"node dist/client.js\"",
+    "clean": "rimraf dist",
+    "dev:server": "ts-node src/server.ts",
+    "dev:client": "ts-node src/client.ts",
+    "check-types": "tsc --noEmit"
+  },
+  "keywords": [
+    "rclnodejs",
+    "ros2",
+    "typescript",
+    "client",
+    "server",
+    "action",
+    "fibonacci",
+    "demo"
+  ],
+  "author": "rclnodejs contributors",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "concurrently": "^9.2.0",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "rclnodejs": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "rclnodejs": {
+      "optional": false
+    }
+  }
+}
