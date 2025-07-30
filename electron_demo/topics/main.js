@@ -10,8 +10,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const { app, BrowserWindow } = require('electron')
-let rclnodejs = require("rclnodejs");
+const { app, BrowserWindow } = require('electron');
+let rclnodejs = require('rclnodejs');
 const { ipcMain } = require('electron');
 
 function createWindow() {
@@ -24,7 +24,7 @@ function createWindow() {
       // https://stackoverflow.com/questions/44391448/electron-require-is-not-defined
       nodeIntegration: true,
       contextIsolation: false,
-    }
+    },
   });
 
   mainWindow.loadFile('index.html');
@@ -62,5 +62,5 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform !== 'darwin') app.quit();
 });
