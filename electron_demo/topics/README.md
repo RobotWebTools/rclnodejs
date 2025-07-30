@@ -22,6 +22,7 @@ git clone https://github.com/RobotWebTools/rclnodejs.git
 ```
 
 2. Go into the demo.
+
 ```bash
 cd rclnodejs/electron_demo
 ```
@@ -29,17 +30,20 @@ cd rclnodejs/electron_demo
 3. [SOURCE THE ROS 2 SETUP FILE](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#source-the-setup-files)
 
 4. Install dependencies
+
 ```bash
 npm install
 ```
 
 5. Rebuild rclnodejs for Electron
+
 ```bash
 # Every time you run "npm install", run this:
 ./node_modules/.bin/electron-rebuild
 ```
 
 6. Run the app
+
 ```
 npm start
 ```
@@ -51,4 +55,3 @@ If it works, you can see the demo as:
 
 - [electronjs.org/docs](https://electronjs.org/docs) - all of Electron's documentation.
 - [Native Node Modules](https://www.electronjs.org/docs/latest/tutorial/using-native-node-modules) - Use a native node module.
-

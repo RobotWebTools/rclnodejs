@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+  <title>ROS2 Car Control Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    .demo-area {
+      display: flex;
+      gap: 40px;
+      justify-content: space-between;
+    }
+
+    .control-panel {
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .car-display {
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #444;
+      text-align: center;
+    }
+
+    /* Joystick Styles */
+    .joystick-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 20px auto;
+      background-color: #ddd;
+      border-radius: 50%;
+      border: 3px solid #999;
+    }
+
+    .joystick-button {
+      position: absolute;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .joystick-button:hover {
+      background-color: #0056b3;
+    }
+
+    .btn-up {
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .btn-down {
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .btn-left {
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+    }
+
+    .btn-right {
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+    }
+
+    .btn-stop {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #dc3545;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      padding: 0;
+    }
+
+    .btn-stop:hover {
+      background-color: #c82333;
+    }
+
+    /* Car Display Styles */
+    .car-area {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 20px auto;
+      background-color: #e8f5e8;
+      border: 2px solid #28a745;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .car {
+      position: absolute;
+      width: 40px;
+      height: 60px;
+      background-color: #007bff;
+      border-radius: 5px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.3s ease;
+      border: 2px solid #0056b3;
+    }
+
+    .car::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: #ffc107;
+      border-radius: 50%;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .car::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 15px solid #dc3545;
+      top: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    /* Status Panel */
+    .status-panel {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      border-left: 4px solid #007bff;
+    }
+
+    .status-item {
+      margin: 5px 0;
+      font-family: monospace;
+    }
+
+    .status-label {
+      font-weight: bold;
+      color: #555;
+    }
+
+    .instructions {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #d1ecf1;
+      border-radius: 5px;
+      border-left: 4px solid #bee5eb;
+    }
+
+    .instructions h3 {
+      margin-top: 0;
+      color: #0c5460;
+    }
+
+    .instructions ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin: 5px 0;
+      color: #0c5460;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🚗 ROS2 Car Control Demo with Joystick</h1>
+    
+    <div class="demo-area">
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <div class="section-title">🕹️ Joystick Control</div>
+        <div class="joystick-container">
+          <button class="joystick-button btn-up" id="btn-forward">↑</button>
+          <button class="joystick-button btn-left" id="btn-left">←</button>
+          <button class="joystick-button btn-stop" id="btn-stop">STOP</button>
+          <button class="joystick-button btn-right" id="btn-right">→</button>
+          <button class="joystick-button btn-down" id="btn-backward">↓</button>
+        </div>
+        
+        <div class="status-panel">
+          <div class="status-item">
+            <span class="status-label">Command:</span> 
+            <span id="current-command">None</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Linear X:</span> 
+            <span id="linear-x">0.0</span> m/s
+          </div>
+          <div class="status-item">
+            <span class="status-label">Angular Z:</span> 
+            <span id="angular-z">0.0</span> rad/s
+          </div>
+          <div class="status-item">
+            <span class="status-label">Topic:</span> 
+            <span id="topic-name">cmd_vel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Car Display -->
+      <div class="car-display">
+        <div class="section-title">🚗 Car Visualization</div>
+        <div class="car-area">
+          <div class="car" id="car"></div>
+        </div>
+        
+        <div class="status-panel">
+          <div class="status-item">
+            <span class="status-label">Received Commands:</span> 
+            <span id="command-count">0</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Last Command:</span> 
+            <span id="last-received-command">None</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Car Position:</span> 
+            <span id="car-position">Center</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="instructions">
+      <h3>📋 Instructions</h3>
+      <ul>
+        <li><strong>↑ Forward:</strong> Move the car forward (positive linear.x)</li>
+        <li><strong>↓ Backward:</strong> Move the car backward (negative linear.x)</li>
+        <li><strong>← Left:</strong> Turn the car left (positive angular.z)</li>
+        <li><strong>→ Right:</strong> Turn the car right (negative angular.z)</li>
+        <li><strong>STOP:</strong> Stop all movement</li>
+        <li><strong>ROS2 Topic:</strong> Commands are published to <code>cmd_vel</code> using <code>geometry_msgs/Twist</code></li>
+        <li><strong>Demo:</strong> The car visualization responds to the same ROS2 messages that are being published</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="./renderer.js"></script>
+</body>
+
+</html>
