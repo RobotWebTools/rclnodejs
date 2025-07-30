@@ -1,0 +1,26 @@
+{
+  "name": "rclnodejs-electron-car-demo",
+  "version": "1.0.0",
+  "description": "An Electron application demonstrating car control with joystick using rclnodejs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild"
+  },
+  "keywords": [
+    "Electron",
+    "rclnodejs",
+    "demo",
+    "car",
+    "joystick",
+    "control"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "rclnodejs": "^1.0.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.6.0",
+    "electron": "^31.0.0"
+  }
+}
