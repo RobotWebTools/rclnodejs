@@ -2,8 +2,6 @@
 
 This demo showcases how to use **rclnodejs** with **Electron** to create an interactive car control application. The demo features a virtual joystick that publishes ROS2 velocity commands and a car visualization that responds to those commands in real-time.
 
-![Demo Screenshot](demo-screenshot.png)
-
 ## 🚗 Features
 
 ### Joystick Control Panel
