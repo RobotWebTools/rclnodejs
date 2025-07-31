@@ -121,6 +121,8 @@ Send a request in a client
 
 ```
 
+Check out more [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example).
+
 ## Using rclnodejs with TypeScript
 
 In your node project install the rclnodejs package as described above. You will also need the TypeScript compiler and node typings installed.
@@ -162,7 +164,13 @@ const msg: rclnodejs.std_msgs.msg.String = {
 };
 ```
 
+Check out more TypeScript [demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo).
+
 **Note** that the interface.d.ts file is updated each time the generate_messages.js script is run.
+
+## Using rclnodejs with Electron
+
+Check out [demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo).
 
 ## License
 
