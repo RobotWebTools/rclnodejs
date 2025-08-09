@@ -121,9 +121,10 @@ function ros2Run(packageName, executableName, args = []) {
     childProcess.on('error', (error) => {
       reject(new Error(`Failed to start ros2 run: ${error.message}`));
     });
-
-    resolve({
-      process: childProcess,
+    childProcess.on('spawn', () => {
+      resolve({
+        process: childProcess,
+      });
     });
   });
 }
@@ -157,8 +158,10 @@ function ros2Launch(packageName, launchFile, args = []) {
       reject(new Error(`Failed to start ros2 launch: ${error.message}`));
     });
 
-    resolve({
-      process: childProcess,
+    childProcess.on('spawn', () => {
+      resolve({
+        process: childProcess,
+      });
     });
   });
 }
@@ -526,9 +529,7 @@ let rcl = {
    * @param {string[]} [args=[]] - Additional arguments to pass to the executable.
    * @return {Promise<{process: ChildProcess}>} A Promise that resolves with the process.
    */
-  ros2Run(packageName, executableName, args = []) {
-    return ros2Run(packageName, executableName, args);
-  },
+  ros2Run: ros2Run,
 
   /**
    * Run a ROS2 launch file using 'ros2 launch' command.
@@ -537,9 +538,7 @@ let rcl = {
    * @param {string[]} [args=[]] - Additional arguments to pass to the launch file.
    * @return {Promise<{process: ChildProcess}>} A Promise that resolves with the process.
    */
-  ros2Launch(packageName, launchFile, args = []) {
-    return ros2Launch(packageName, launchFile, args);
-  },
+  ros2Launch: ros2Launch,
 };
 
 const _sigHandler = () => {
