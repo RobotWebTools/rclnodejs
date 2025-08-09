@@ -1,5 +1,7 @@
 /// <reference path="./base.d.ts" />
 
+import { ChildProcess } from 'child_process';
+
 declare module 'rclnodejs' {
   type Class = new (...args: any[]) => any;
 
@@ -207,4 +209,30 @@ declare module 'rclnodejs' {
    * @returns An Object representing the deserialized message.
    */
   function deserializeMessage(buffer: Buffer, typeClass: Class): object;
+
+  /**
+   * Run a ROS2 package executable using 'ros2 run' command.
+   * @param {string} packageName - The name of the ROS2 package.
+   * @param {string} executableName - The name of the executable to run.
+   * @param {string[]} [args=[]] - Additional arguments to pass to the executable.
+   * @return {Promise<{process: ChildProcess}>} A Promise that resolves with the process.
+   */
+  function ros2Run(
+    packageName: string,
+    executableName: string,
+    args: string[]
+  ): Promise<{ process: ChildProcess }>;
+
+  /**
+   * Run a ROS2 launch file using 'ros2 launch' command.
+   * @param {string} packageName - The name of the ROS2 package.
+   * @param {string} launchFile - The name of the launch file to run.
+   * @param {string[]} [args=[]] - Additional arguments to pass to the launch file.
+   * @return {Promise<{process: ChildProcess}>} A Promise that resolves with the process.
+   */
+  function ros2Launch(
+    packageName: string,
+    launchFile: string,
+    args: string[]
+  ): Promise<{ process: ChildProcess }>;
 }

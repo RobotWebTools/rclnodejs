@@ -2,6 +2,7 @@
 
 import { expectType, expectAssignable } from 'tsd';
 import * as rclnodejs from 'rclnodejs';
+import { ChildProcess } from 'child_process';
 
 const NODE_NAME = 'test_node';
 const LIFECYCLE_NODE_NAME = 'lifecycle_test_node';
@@ -17,6 +18,12 @@ expectType<string | undefined>(rclnodejs.DistroUtils.getDistroName());
 expectType<boolean>(rclnodejs.isShutdown());
 expectType<void>(rclnodejs.shutdown());
 expectType<void>(rclnodejs.removeSignalHandlers());
+expectType<Promise<{ process: ChildProcess }>>(
+  rclnodejs.ros2Run('package_name', 'executable_name', ['arg1', 'arg2'])
+);
+expectType<Promise<{ process: ChildProcess }>>(
+  rclnodejs.ros2Launch('package_name', 'launch_file', ['arg1', 'arg2'])
+);
 
 // ---- DistroUtil ----
 expectType<rclnodejs.DistroUtils.DistroId>(rclnodejs.DistroUtils.getDistroId());
