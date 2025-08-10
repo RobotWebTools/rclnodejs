@@ -57,6 +57,7 @@ const {
   serializeMessage,
   deserializeMessage,
 } = require('./lib/serialization.js');
+const { spawn } = require('child_process');
 
 /**
  * Get the version of the generator that was used for the currently present interfaces.
@@ -88,6 +89,82 @@ async function getCurrentGeneratorVersion() {
 }
 
 let _rosVersionChecked = false;
+
+/**
+ * Run a ROS2 package executable using 'ros2 run' command.
+ * @param {string} packageName - The name of the ROS2 package.
+ * @param {string} executableName - The name of the executable to run.
+ * @param {string[]} [args=[]] - Additional arguments to pass to the executable.
+ * @return {Promise<{process: ChildProcess}>} A Promise that resolves with the process.
+ */
+function ros2Run(packageName, executableName, args = []) {
+  return new Promise((resolve, reject) => {
+    if (typeof packageName !== 'string' || !packageName.trim()) {
+      reject(new Error('Package name must be a non-empty string'));
+      return;
+    }
+
+    if (typeof executableName !== 'string' || !executableName.trim()) {
+      reject(new Error('Executable name must be a non-empty string'));
+      return;
+    }
+
+    if (!Array.isArray(args)) {
+      reject(new Error('Arguments must be an array'));
+      return;
+    }
+
+    const command = 'ros2';
+    const cmdArgs = ['run', packageName, executableName, ...args];
+    const childProcess = spawn(command, cmdArgs);
+
+    childProcess.on('error', (error) => {
+      reject(new Error(`Failed to start ros2 run: ${error.message}`));
+    });
+    childProcess.on('spawn', () => {
+      resolve({
+        process: childProcess,
+      });
+    });
+  });
+}
+
+/**
+ * Run a ROS2 launch file using 'ros2 launch' command.
+ * @param {string} packageName - The name of the ROS2 package.
+ * @param {string} launchFile - The name of the launch file to run.
+ * @param {string[]} [args=[]] - Additional arguments to pass to the launch file.
+ * @return {Promise<{process: ChildProcess}>} A Promise that resolves with the process.
+ */
+function ros2Launch(packageName, launchFile, args = []) {
+  return new Promise((resolve, reject) => {
+    if (typeof packageName !== 'string' || !packageName.trim()) {
+      reject(new Error('Package name must be a non-empty string'));
+      return;
+    }
+    if (typeof launchFile !== 'string' || !launchFile.trim()) {
+      reject(new Error('Launch file name must be a non-empty string'));
+      return;
+    }
+    if (!Array.isArray(args)) {
+      reject(new Error('Arguments must be an array'));
+      return;
+    }
+    const command = 'ros2';
+    const cmdArgs = ['launch', packageName, launchFile, ...args];
+    const childProcess = spawn(command, cmdArgs);
+
+    childProcess.on('error', (error) => {
+      reject(new Error(`Failed to start ros2 launch: ${error.message}`));
+    });
+
+    childProcess.on('spawn', () => {
+      resolve({
+        process: childProcess,
+      });
+    });
+  });
+}
 
 /**
  * A module that exposes the rclnodejs interfaces.
@@ -444,6 +521,24 @@ let rcl = {
     // this will not throw even if the handler is already removed
     process.removeListener('SIGINT', _sigHandler);
   },
+
+  /**
+   * Run a ROS2 package executable using 'ros2 run' command.
+   * @param {string} packageName - The name of the ROS2 package.
+   * @param {string} executableName - The name of the executable to run.
+   * @param {string[]} [args=[]] - Additional arguments to pass to the executable.
+   * @return {Promise<{process: ChildProcess}>} A Promise that resolves with the process.
+   */
+  ros2Run: ros2Run,
+
+  /**
+   * Run a ROS2 launch file using 'ros2 launch' command.
+   * @param {string} packageName - The name of the ROS2 package.
+   * @param {string} launchFile - The name of the launch file to run.
+   * @param {string[]} [args=[]] - Additional arguments to pass to the launch file.
+   * @return {Promise<{process: ChildProcess}>} A Promise that resolves with the process.
+   */
+  ros2Launch: ros2Launch,
 };
 
 const _sigHandler = () => {
