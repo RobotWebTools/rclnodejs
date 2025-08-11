@@ -21,10 +21,11 @@ const path = require('path');
 const walk = require('walk');
 const os = require('os');
 const pkgFilters = require('../rosidl_gen/filter.js');
+const utils = require('./utils.js');
 
 const fsp = fs.promises;
 
-const generatedRoot = path.join(__dirname, '../generated/');
+const generatedRoot = utils.getGeneratedRoot();
 const serviceMsgPath = path.join(generatedRoot, 'srv_msg');
 
 function getPackageName(filePath, amentExecuted) {

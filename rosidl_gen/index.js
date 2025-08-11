@@ -19,7 +19,10 @@ const generateJSStructFromIDL = require('./idl_generator.js');
 const packages = require('./packages.js');
 const path = require('path');
 const idlConvertor = require('../rosidl_convertor/idl_convertor.js');
-const generatedRoot = path.join(__dirname, '../generated/');
+const utils = require('./utils.js');
+
+// Check if GENERATED_MSG_PATH environment variable exists and is valid
+const generatedRoot = utils.getGeneratedRoot();
 const serviceMsgPath = path.join(generatedRoot, 'srv_msg');
 const idlPath = path.join(generatedRoot, 'share');
 const useIDL = !!process.argv.find((arg) => arg === '--idl');

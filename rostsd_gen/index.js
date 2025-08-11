@@ -30,12 +30,13 @@ const path = require('path');
 const fs = require('fs');
 const loader = require('../lib/interface_loader.js');
 const pkgFilters = require('../rosidl_gen/filter.js');
+const utils = require('../rosidl_gen/utils.js');
 
 const descriptorInterfaceNamespace = 'descriptor';
 
 async function generateAll() {
   // load pkg and interface info (msgs and srvs)
-  const generatedPath = path.join(__dirname, '../generated/');
+  const generatedPath = utils.getGeneratedRoot();
   const pkgInfos = getPkgInfos(generatedPath);
   if (pkgInfos.length === 0) {
     console.log('No package found, prebuild interfaces.d.ts will be used.');
