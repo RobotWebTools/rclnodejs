@@ -38,6 +38,7 @@ describe('rclnodejs subscription test suite', function () {
 
   it('Test loggerName', function () {
     const node = rclnodejs.createNode('publisher_node');
+    const String = 'std_msgs/msg/String';
     const subscription = node.createSubscription(String, 'topic', (msg) => {});
     assert.strictEqual(typeof subscription.loggerName, 'string');
   });

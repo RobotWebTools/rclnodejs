@@ -54,6 +54,7 @@ describe('rclnodejs publisher test suite', function () {
 
   it('Test loggerName', function () {
     const node = rclnodejs.createNode('publisher_node');
+    const String = 'std_msgs/msg/String';
     const publisher = node.createPublisher(String, 'topic');
     assert.strictEqual(typeof publisher.loggerName, 'string');
   });

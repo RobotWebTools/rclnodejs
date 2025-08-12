@@ -105,7 +105,7 @@ describe('Test service class', function () {
         result.sum = request.a + request.b;
       }
     );
-    const client = clientNode.createClient(AddTwoInts, 'single_ps_channel2');
+    const client = node.createClient(AddTwoInts, 'single_ps_channel2');
 
     assert.strictEqual(typeof service.loggerName, 'string');
     assert.strictEqual(typeof client.loggerName, 'string');
