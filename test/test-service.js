@@ -96,8 +96,9 @@ describe('Test service class', function () {
 
   it('Test loggerName', function () {
     const node = rclnodejs.createNode('test_node');
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
     const service = node.createService(
-      'example_interfaces/srv/AddTwoInts',
+      AddTwoInts,
       'add_two_ints',
       { qos: rclnodejs.QoS.profileSystemDefault },
       (request, response) => {
