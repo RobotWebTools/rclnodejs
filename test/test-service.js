@@ -93,4 +93,22 @@ describe('Test service class', function () {
     );
     node.destroy();
   });
+
+  it('Test loggerName', function () {
+    const node = rclnodejs.createNode('test_node');
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+    const service = node.createService(
+      AddTwoInts,
+      'add_two_ints',
+      { qos: rclnodejs.QoS.profileSystemDefault },
+      (request, response) => {
+        let result = response.template;
+        result.sum = request.a + request.b;
+      }
+    );
+    const client = node.createClient(AddTwoInts, 'single_ps_channel2');
+
+    assert.strictEqual(typeof service.loggerName, 'string');
+    assert.strictEqual(typeof client.loggerName, 'string');
+  });
 });

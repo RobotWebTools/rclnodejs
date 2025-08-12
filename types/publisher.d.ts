@@ -37,5 +37,10 @@ declare module 'rclnodejs' {
      * @return {boolean} `true` if all published message data is acknowledged before the timeout, otherwise `false`.
      */
     waitForAllAcked(timeout: bigint): boolean;
+
+    /**
+     * Get the logger name for this publisher.
+     */
+    readonly loggerName: string;
   }
 }

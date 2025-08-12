@@ -163,6 +163,7 @@ expectType<boolean>(publisher.waitForAllAcked(BigInt(1000)));
 node.createPublisher(TYPE_CLASS, TOPIC, publisher.options, (event: object) => {
   const receivedEvent = event;
 });
+expectType<string>(publisher.loggerName);
 
 // ---- LifecyclePublisher ----
 const lifecyclePublisher = lifecycleNode.createLifecyclePublisher(
@@ -221,6 +222,7 @@ expectType<boolean>(subscription.isDestroyed());
 expectType<boolean>(subscription.setContentFilter(contentFilter));
 expectType<boolean>(subscription.clearContentFilter());
 expectType<boolean>(subscription.hasContentFilter());
+expectType<string>(subscription.loggerName);
 
 // ---- Service ----
 const service = node.createService(
@@ -241,6 +243,7 @@ expectType<void>(
 );
 expectType<boolean>(service.isDestroyed());
 expectType<object>(service.getOptions());
+expectType<string>(service.loggerName);
 
 // ---- Client ----
 const client = node.createClient(
@@ -259,6 +262,7 @@ expectType<void>(
   )
 );
 expectType<boolean>(client.isDestroyed());
+expectType<string>(client.loggerName);
 
 // ---- Timer ----
 const timerCallback = () => {};

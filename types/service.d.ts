@@ -94,5 +94,10 @@ declare module 'rclnodejs' {
      * @return The options of this service.
      */
     getOptions(): object;
+
+    /**
+     * Get the logger name for this service.
+     */
+    readonly loggerName: string;
   }
 }
