@@ -52,6 +52,11 @@ declare module 'rclnodejs' {
       serviceEventPubQOS: QoS,
       introspectionState: ServiceIntrospectionStates
     ): void;
+
+    /**
+     * Get the logger name for this client.
+     */
+    readonly loggerName: string;
   }
 
   namespace Client {

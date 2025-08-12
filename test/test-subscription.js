@@ -35,4 +35,10 @@ describe('rclnodejs subscription test suite', function () {
     const subscription = node.createSubscription(String, 'topic', (msg) => {});
     assert.strictEqual(subscription.publisherCount, 1);
   });
+
+  it('Test loggerName', function () {
+    const node = rclnodejs.createNode('publisher_node');
+    const subscription = node.createSubscription(String, 'topic', (msg) => {});
+    assert.strictEqual(typeof subscription.loggerName, 'string');
+  });
 });

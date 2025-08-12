@@ -52,6 +52,12 @@ describe('rclnodejs publisher test suite', function () {
     assert.strictEqual(publisher.subscriptionCount, 1);
   });
 
+  it('Test loggerName', function () {
+    const node = rclnodejs.createNode('publisher_node');
+    const publisher = node.createPublisher(String, 'topic');
+    assert.strictEqual(typeof publisher.loggerName, 'string');
+  });
+
   it('Wait for all acked', function () {
     const node = rclnodejs.createNode('publisher_node');
     const String = 'std_msgs/msg/String';
