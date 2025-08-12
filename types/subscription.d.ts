@@ -72,5 +72,10 @@ declare module 'rclnodejs' {
      * @returns The number of publishers
      */
     publisherCount(): number;
+
+    /**
+     * Get the logger name for this subscription.
+     */
+    readonly loggerName: string;
   }
 }
