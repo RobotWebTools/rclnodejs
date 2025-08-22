@@ -222,9 +222,15 @@ world → turtle2
    - Try restarting the Electron application
 
 5. **"electron: not found" or native module errors**
+
    - Make sure you ran `npm run rebuild` after `npm install`
    - Ensure Node.js version is compatible (16 or higher)
    - Try deleting `node_modules` and running `npm install && npm run rebuild` again
+
+6. **"THREE is not defined" or script loading errors**
+   - The demo uses CDN versions of Three.js which require internet connection
+   - If you see CSP (Content Security Policy) errors, ensure the CSP in index.html allows CDN domains
+   - For offline use, you can install Three.js locally: `npm install three@0.155.0` and update script paths in index.html
 
 ### Debugging Commands
 
