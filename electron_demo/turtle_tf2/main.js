@@ -286,7 +286,7 @@ async function createTurtleTf2Listener() {
   );
 
   // Create service client to spawn turtle2
-  const spawner = node.createClient('turtlesim/srv/Spawn', 'spawn');
+  const spawner = node.createClient('turtlesim/srv/Spawn', '/spawn');
 
   let turtleSpawned = false;
   let turtleSpawningServiceReady = false;
@@ -606,7 +606,7 @@ ipcMain.on('spawn-turtle-request', async (event, data) => {
 
       if (!spawner) {
         console.log('Creating new spawn service client...');
-        spawner = listenerNode.createClient('turtlesim/srv/Spawn', 'spawn');
+        spawner = listenerNode.createClient('turtlesim/srv/Spawn', '/spawn');
         listenerNode._spawner = spawner; // Cache it
 
         // Wait for service to be ready
