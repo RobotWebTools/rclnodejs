@@ -37,13 +37,8 @@ document.addEventListener('DOMContentLoaded', function () {
   setupROSListeners();
   updateStatus();
 
-  // Hide loading screen after initialization
-  setTimeout(() => {
-    document.getElementById('loading-screen').classList.add('hidden');
-  }, 2000);
-});
-
-// Initialize Three.js scene
+  // Don't automatically hide loading screen - wait for ROS2 initialization
+}); // Initialize Three.js scene
 function initializeScene() {
   const container = document.getElementById('visualization-container');
   const canvas = document.getElementById('three-canvas');
@@ -373,6 +368,38 @@ function setupEventListeners() {
 }
 
 function setupROSListeners() {
+  // Listen for ROS2 initialization status
+  ipcRenderer.on('ros-initialization-status', (event, data) => {
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingText = loadingScreen.querySelector('div:last-child');
+
+    switch (data.status) {
+      case 'initializing':
+        demoState.rosConnected = false;
+        loadingText.textContent = data.message;
+        break;
+      case 'progress':
+        demoState.rosConnected = false;
+        loadingText.textContent = data.message;
+        break;
+      case 'ready':
+        demoState.rosConnected = true;
+        demoState.activeNodes = 5;
+        loadingText.textContent = data.message;
+        // Hide loading screen after successful initialization
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+        }, 1000);
+        break;
+      case 'error':
+        demoState.rosConnected = false;
+        loadingText.textContent = data.message;
+        loadingText.style.color = '#ff4444';
+        break;
+    }
+    updateStatus();
+  });
+
   // Listen for turtle pose updates
   ipcRenderer.on('turtle-pose-update', (event, data) => {
     updateTurtlePose(data.name, data.pose);
@@ -416,7 +443,6 @@ function setupROSListeners() {
     console.log('Follow request received');
   });
 }
-
 function updateTransformList(transform) {
   activeTransforms.set(transform.child_frame_id, {
     ...transform,
@@ -534,9 +560,3 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(container.clientWidth, container.clientHeight);
 }
-
-// Initialize demo after a short delay
-setTimeout(() => {
-  demoState.rosConnected = true;
-  updateStatus();
-}, 1000);

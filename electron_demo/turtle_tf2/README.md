@@ -76,7 +76,15 @@ The demo uses the following key dependencies:
    npm install
    ```
 
-3. **Source ROS2 environment**:
+3. **Rebuild native modules**:
+
+   ```bash
+   npm run rebuild
+   ```
+
+   This step is crucial for ensuring that rclnodejs and other native dependencies are properly compiled for your system.
+
+4. **Source ROS2 environment**:
    ```bash
    source /opt/ros/$ROS_DISTRO/setup.bash
    ```
@@ -85,7 +93,7 @@ The demo uses the following key dependencies:
 
 ### Method 1: Complete Demo
 
-Start the full demo with all components:
+Start the full demo with all components (ensure you have run `npm install && npm run rebuild` first):
 
 ```bash
 npm start
@@ -208,9 +216,15 @@ world → turtle2
    - Check TF2 tree: `ros2 run tf2_tools view_frames`
 
 4. **"3D visualization not loading"**
+
    - Check browser console for WebGL errors
    - Ensure hardware acceleration is enabled
    - Try restarting the Electron application
+
+5. **"electron: not found" or native module errors**
+   - Make sure you ran `npm run rebuild` after `npm install`
+   - Ensure Node.js version is compatible (16 or higher)
+   - Try deleting `node_modules` and running `npm install && npm run rebuild` again
 
 ### Debugging Commands
 

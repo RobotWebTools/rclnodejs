@@ -54,33 +54,71 @@ function createWindow() {
   mainWindow.loadFile('index.html');
 
   // Open DevTools for debugging
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 }
 
 // Initialize ROS2 nodes for turtle TF2 demo
 async function initializeROS() {
   try {
+    console.log('Starting ROS2 initialization...');
+
+    // Notify renderer that initialization is starting
+    if (mainWindow) {
+      mainWindow.webContents.send('ros-initialization-status', {
+        status: 'initializing',
+        message: 'Initializing ROS2 context...',
+      });
+    }
+
     await rclnodejs.init();
     console.log('ROS2 initialized successfully');
 
+    if (mainWindow) {
+      mainWindow.webContents.send('ros-initialization-status', {
+        status: 'progress',
+        message: 'Creating TF2 nodes...',
+      });
+    }
+
     // Create turtle TF2 broadcaster node
+    console.log('Creating turtle TF2 broadcaster...');
     await createTurtleTf2Broadcaster();
 
     // Create turtle TF2 listener node
+    console.log('Creating turtle TF2 listener...');
     await createTurtleTf2Listener();
 
     // Create static turtle TF2 broadcaster
+    console.log('Creating static TF2 broadcaster...');
     await createStaticTurtleTf2Broadcaster();
 
     // Create dynamic frame TF2 broadcaster
+    console.log('Creating dynamic frame TF2 broadcaster...');
     await createDynamicFrameTf2Broadcaster();
 
     // Create fixed frame TF2 broadcaster
+    console.log('Creating fixed frame TF2 broadcaster...');
     await createFixedFrameTf2Broadcaster();
 
     console.log('All turtle TF2 nodes initialized successfully');
+
+    // Notify renderer that initialization is complete
+    if (mainWindow) {
+      mainWindow.webContents.send('ros-initialization-status', {
+        status: 'ready',
+        message: 'ROS2 TF2 Demo ready!',
+      });
+    }
   } catch (error) {
     console.error('Failed to initialize ROS2:', error);
+
+    // Notify renderer of initialization failure
+    if (mainWindow) {
+      mainWindow.webContents.send('ros-initialization-status', {
+        status: 'error',
+        message: `Failed to initialize ROS2: ${error.message}`,
+      });
+    }
   }
 }
 
@@ -425,7 +463,11 @@ ipcMain.on('spawn-turtle-request', async (event, data) => {
 
 app.whenReady().then(async () => {
   createWindow();
-  await initializeROS();
+
+  // Wait for window to be ready to receive messages
+  mainWindow.webContents.once('did-finish-load', async () => {
+    await initializeROS();
+  });
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
