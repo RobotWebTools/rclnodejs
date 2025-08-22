@@ -337,41 +337,8 @@ async function createTurtleTf2Listener() {
     // Wrap the async logic in a try-catch to handle promise rejections
     (async () => {
       try {
-        if (!turtleSpawningServiceReady) {
-          try {
-            if (spawner.isServiceServerAvailable()) {
-              // Spawn turtle2
-              const request = {
-                name: 'turtle2',
-                x: 4.0,
-                y: 2.0,
-                theta: 0.0,
-              };
-
-              try {
-                const response = await spawner.sendRequest(request);
-                if (response.name === 'turtle2') {
-                  turtleSpawned = true;
-                  turtleSpawningServiceReady = true;
-                  console.log('Successfully spawned turtle2');
-
-                  if (mainWindow) {
-                    mainWindow.webContents.send('turtle-spawned', {
-                      name: 'turtle2',
-                      x: 4.0,
-                      y: 2.0,
-                      theta: 0.0,
-                    });
-                  }
-                }
-              } catch (error) {
-                console.error('Failed to spawn turtle2:', error);
-              }
-            }
-          } catch (error) {
-            console.error('Error checking service readiness:', error);
-          }
-        }
+        // Don't automatically spawn turtle2 - let user control this via UI
+        // This prevents service call errors if turtlesim is not running
 
         // Simple following logic (in real implementation, this would use TF lookup)
         // For demo purposes, we'll simulate the transform lookup behavior
@@ -628,8 +595,56 @@ ipcMain.on('spawn-turtle-request', async (event, data) => {
   const { name, x, y, theta } = data;
 
   if (turtleTf2Nodes.listener) {
-    // Implementation would go here
-    console.log(`Spawning turtle: ${name} at (${x}, ${y}, ${theta})`);
+    try {
+      // Get the spawn service client from the listener node
+      const spawnerNode = turtleTf2Nodes.listener;
+      const spawner = spawnerNode.createClient('turtlesim/srv/Spawn', 'spawn');
+
+      if (spawner.isServiceServerAvailable()) {
+        const request = {
+          x: x || 4.0,
+          y: y || 2.0,
+          theta: theta || 0.0,
+          name: name || 'turtle2',
+        };
+
+        console.log(`Attempting to spawn ${name} with request:`, request);
+        const response = await spawner.sendRequest(request);
+        console.log('Spawn response:', response);
+
+        if (response && response.name) {
+          console.log(`Successfully spawned ${response.name}`);
+
+          if (mainWindow) {
+            mainWindow.webContents.send('turtle-spawned', {
+              name: response.name,
+              x: x || 4.0,
+              y: y || 2.0,
+              theta: theta || 0.0,
+            });
+          }
+        }
+      } else {
+        console.error(
+          'Turtlesim spawn service not available. Make sure turtlesim_node is running.'
+        );
+        if (mainWindow) {
+          mainWindow.webContents.send('spawn-error', {
+            message:
+              'Turtlesim service not available. Please start turtlesim_node first.',
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to spawn ${name}:`, error);
+      if (mainWindow) {
+        mainWindow.webContents.send('spawn-error', {
+          message: `Failed to spawn ${name}: ${error.message}`,
+        });
+      }
+    }
+  } else {
+    console.error('Listener node not initialized');
   }
 });
 
