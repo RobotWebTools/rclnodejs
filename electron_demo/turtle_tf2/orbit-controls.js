@@ -105,7 +105,7 @@ THREE.OrbitControls = function (object, domElement) {
       object.up,
       new THREE.Vector3(0, 1, 0)
     );
-    var quatInverse = quat.clone().inverse();
+    var quatInverse = new THREE.Quaternion().copy(quat).invert();
 
     var lastPosition = new THREE.Vector3();
     var lastQuaternion = new THREE.Quaternion();
