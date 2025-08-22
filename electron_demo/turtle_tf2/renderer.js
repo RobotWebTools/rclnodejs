@@ -17,6 +17,7 @@ let scene, camera, renderer, controls;
 let turtles = {};
 let frames = {};
 let coordinateFrames = {};
+let turtlePoses = {}; // Track turtle poses for following logic
 
 // Transform tracking
 let activeTransforms = new Map();
@@ -283,6 +284,9 @@ function createFrame(name, position, quaternion, color, scale = 0.5) {
 }
 
 function updateTurtlePose(name, pose) {
+  // Store the pose for following logic
+  turtlePoses[name] = pose;
+
   if (!turtles[name]) {
     // Create turtle if it doesn't exist
     const color = name === 'turtle1' ? 0x00ff00 : 0x0088ff;
@@ -507,8 +511,48 @@ function setupROSListeners() {
 
   // Listen for follow requests
   ipcRenderer.on('request-turtle-follow', (event) => {
-    // Implement turtle following logic if needed
-    console.log('Follow request received');
+    // Implement turtle2 following turtle1 logic
+    if (turtlePoses['turtle1'] && turtlePoses['turtle2']) {
+      const turtle1Pose = turtlePoses['turtle1'];
+      const turtle2Pose = turtlePoses['turtle2'];
+
+      // Calculate distance and angle to turtle1
+      const dx = turtle1Pose.x - turtle2Pose.x;
+      const dy = turtle1Pose.y - turtle2Pose.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Calculate angle to target
+      const targetAngle = Math.atan2(dy, dx);
+      const currentAngle = turtle2Pose.theta;
+
+      // Calculate angular difference (handling wrap-around)
+      let angleDiff = targetAngle - currentAngle;
+      while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+      while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+      // Calculate velocities
+      const linearVel = Math.min(2.0 * distance, 2.0); // Max linear velocity of 2.0
+      const angularVel = 4.0 * angleDiff; // Proportional angular velocity
+
+      // Only move if there's significant distance
+      if (distance > 0.5) {
+        // Send velocity command to turtle2
+        ipcRenderer.send('turtle2-cmd-vel', {
+          linear: { x: linearVel, y: 0.0, z: 0.0 },
+          angular: { x: 0.0, y: 0.0, z: angularVel },
+        });
+
+        console.log(
+          `Turtle2 following: distance=${distance.toFixed(2)}, linear=${linearVel.toFixed(2)}, angular=${angularVel.toFixed(2)}`
+        );
+      } else {
+        // Stop turtle2 when close enough
+        ipcRenderer.send('turtle2-cmd-vel', {
+          linear: { x: 0.0, y: 0.0, z: 0.0 },
+          angular: { x: 0.0, y: 0.0, z: 0.0 },
+        });
+      }
+    }
   });
 }
 function updateTransformList(transform) {

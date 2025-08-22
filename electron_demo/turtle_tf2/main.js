@@ -285,10 +285,12 @@ async function createTurtleTf2Listener() {
     '/turtle2/cmd_vel'
   );
 
+  // Store turtle2 velocity publisher
+  turtleTf2Nodes.turtle2VelocityPublisher = velocityPublisher;
+
   // Create service client to spawn turtle2
   const spawner = node.createClient('turtlesim/srv/Spawn', '/spawn');
 
-  let turtleSpawned = false;
   let turtleSpawningServiceReady = false;
 
   // Transform listener functionality
@@ -342,7 +344,7 @@ async function createTurtleTf2Listener() {
 
         // Simple following logic (in real implementation, this would use TF lookup)
         // For demo purposes, we'll simulate the transform lookup behavior
-        if (turtleSpawned) {
+        if (turtleTf2Nodes.turtle2Spawned) {
           // This is a simplified version - in real TF2, we'd lookup transforms
           // For the demo, we'll let the renderer handle the following logic
           if (mainWindow) {
@@ -591,38 +593,50 @@ ipcMain.on('turtle-velocity-command', (event, data) => {
 });
 
 // Handle spawning requests from renderer
-ipcMain.on('spawn-turtle-request', async (event, data) => {
+ipcMain.on('spawn-turtle-request', (event, data) => {
   const { name, x, y, theta } = data;
 
   if (turtleTf2Nodes.listener) {
-    try {
-      console.log(
-        `Spawn request received: ${name || 'turtle2'} at (${x || 4}, ${y || 2}, ${theta || 0})`
-      );
+    console.log(
+      `Spawn request received: ${name || 'turtle2'} at (${x || 4}, ${y || 2}, ${theta || 0})`
+    );
 
-      // Use the existing spawner from the listener node or create one
-      const listenerNode = turtleTf2Nodes.listener;
-      let spawner = listenerNode._spawner;
+    // Use the existing spawner from the listener node or create one
+    const listenerNode = turtleTf2Nodes.listener;
+    let spawner = listenerNode._spawner;
 
-      if (!spawner) {
-        console.log('Creating new spawn service client...');
-        spawner = listenerNode.createClient('turtlesim/srv/Spawn', '/spawn');
-        listenerNode._spawner = spawner; // Cache it
+    if (!spawner) {
+      console.log('Creating new spawn service client...');
+      spawner = listenerNode.createClient('turtlesim/srv/Spawn', '/spawn');
+      listenerNode._spawner = spawner; // Cache it
 
-        // Wait for service to be ready
-        let retries = 0;
-        while (!spawner.isServiceServerAvailable() && retries < 10) {
-          console.log(`Waiting for spawn service... (attempt ${retries + 1})`);
-          await new Promise((resolve) => setTimeout(resolve, 200));
+      // Wait for service to be ready with timeout
+      let retries = 0;
+      const maxRetries = 10;
+
+      const checkService = () => {
+        if (spawner.isServiceServerAvailable()) {
+          performSpawn();
+        } else if (retries < maxRetries) {
           retries++;
+          console.log(`Waiting for spawn service... (attempt ${retries})`);
+          setTimeout(checkService, 200);
+        } else {
+          console.error('Turtlesim spawn service not available after waiting');
+          if (mainWindow) {
+            mainWindow.webContents.send('spawn-error', {
+              message: 'Turtlesim spawn service not available after waiting',
+            });
+          }
         }
-      }
+      };
 
-      if (!spawner.isServiceServerAvailable()) {
-        throw new Error('Turtlesim spawn service not available after waiting');
-      }
+      checkService();
+    } else {
+      performSpawn();
+    }
 
-      // Use the simplest possible request format
+    function performSpawn() {
       const xPos = x || 4.0;
       const yPos = y || 2.0;
       const angle = theta || 0.0;
@@ -630,35 +644,52 @@ ipcMain.on('spawn-turtle-request', async (event, data) => {
 
       console.log(`Spawning ${turtleName} at (${xPos}, ${yPos}, ${angle})`);
 
-      // Try the most basic service call format
-      const response = await spawner.sendRequest({
-        x: xPos,
-        y: yPos,
-        theta: angle,
-        name: turtleName,
-      });
-
-      console.log('Spawn response:', response);
-
-      if (response) {
-        const spawnedName = response.name || response || turtleName;
-        console.log(`Successfully spawned ${spawnedName}`);
-
-        if (mainWindow) {
-          mainWindow.webContents.send('turtle-spawned', {
-            name: spawnedName,
+      // Use callback pattern as required by rclnodejs
+      try {
+        spawner.sendRequest(
+          {
             x: xPos,
             y: yPos,
             theta: angle,
+            name: turtleName,
+          },
+          (response) => {
+            console.log('Spawn response:', response);
+
+            if (response && response.name) {
+              const spawnedName = response.name;
+              console.log(`Successfully spawned ${spawnedName}`);
+
+              // Set turtle spawned flag for following logic
+              if (spawnedName === 'turtle2') {
+                turtleTf2Nodes.turtle2Spawned = true;
+              }
+
+              if (mainWindow) {
+                mainWindow.webContents.send('turtle-spawned', {
+                  name: spawnedName,
+                  x: xPos,
+                  y: yPos,
+                  theta: angle,
+                });
+              }
+            } else {
+              console.error('Invalid or empty response from spawn service');
+              if (mainWindow) {
+                mainWindow.webContents.send('spawn-error', {
+                  message: 'Invalid response from spawn service',
+                });
+              }
+            }
+          }
+        );
+      } catch (error) {
+        console.error(`Error sending spawn request: ${error.message}`);
+        if (mainWindow) {
+          mainWindow.webContents.send('spawn-error', {
+            message: `Error sending spawn request: ${error.message}`,
           });
         }
-      }
-    } catch (error) {
-      console.error(`Failed to spawn ${name || 'turtle2'}:`, error);
-      if (mainWindow) {
-        mainWindow.webContents.send('spawn-error', {
-          message: `Failed to spawn ${name || 'turtle2'}: ${error.message}`,
-        });
       }
     }
   } else {
@@ -680,6 +711,18 @@ ipcMain.on('turtle-cmd-vel', (event, data) => {
     };
     // Send velocity command to turtle1
     turtleTf2Nodes.velocityPublisher.publish(velocity);
+  }
+});
+
+// Handle turtle2 following commands
+ipcMain.on('turtle2-cmd-vel', (event, data) => {
+  if (turtleTf2Nodes.turtle2VelocityPublisher) {
+    const velocity = {
+      linear: data.linear,
+      angular: data.angular,
+    };
+    // Send velocity command to turtle2
+    turtleTf2Nodes.turtle2VelocityPublisher.publish(velocity);
   }
 });
 

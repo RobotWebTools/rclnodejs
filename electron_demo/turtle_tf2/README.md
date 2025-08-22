@@ -9,6 +9,7 @@ The turtle_tf2 demo showcases:
 - **Transform Broadcasting**: Multiple TF2 broadcasters publishing coordinate frame relationships
 - **Transform Listening**: Real-time monitoring and visualization of coordinate transformations
 - **Turtle Simulation**: Integration with turtlesim for turtle pose tracking and control
+- **Turtle Following**: Intelligent turtle2 behavior that automatically follows turtle1 using TF2 transforms
 - **3D Visualization**: WebGL-based rendering using Three.js for immersive coordinate frame visualization
 - **Interactive Controls**: Web interface for spawning turtles, controlling motion, and managing transforms
 
@@ -20,6 +21,13 @@ The turtle_tf2 demo showcases:
 - **Dynamic Frame Broadcaster**: Creates time-varying transforms with circular motion patterns
 - **Fixed Frame Broadcaster**: Maintains constant offset transforms
 - **Turtle Transform Broadcaster**: Converts turtle poses to TF2 transforms
+
+### Turtle Following System
+
+- **Real-time Following**: turtle2 automatically follows turtle1 using distance and angle calculations
+- **Smart Movement**: Proportional velocity control based on distance to target
+- **Collision Avoidance**: turtle2 stops when within optimal following distance (0.5 units)
+- **Transform Integration**: Following logic uses turtle pose data from TF2 coordinate frames
 
 ### Visualization
 
@@ -133,8 +141,9 @@ npm start
    ```
 
 4. **Use the web interface to**:
-   - Click "Spawn Turtle1" to create the first turtle
    - Click "Spawn Turtle2" to create the second turtle
+   - Use WASD keys to control turtle1 movement
+   - Watch turtle2 automatically follow turtle1
    - Click "Start Demo" to initialize all TF2 broadcasters
    - Use frame toggle buttons to show/hide specific transforms
 
@@ -146,15 +155,16 @@ npm start
 - **TF2 Dynamic Broadcaster**: Publishes time-varying `carrot1_static → carrot1_dynamic` transform
 - **Fixed Frame Broadcaster**: Publishes constant offset `turtle1 → carrot1_fixed` transform
 - **Turtle TF2 Broadcaster**: Converts turtle poses to `world → turtle1/turtle2` transforms
-- **Turtle TF2 Listener**: Controls turtle2 to follow turtle1 using transform lookups
+- **Turtle TF2 Listener**: Monitors turtle poses and controls turtle2 following behavior using real-time transform data
 
 ### Renderer Process (renderer.js)
 
 - **3D Scene Management**: Three.js scene setup with lighting and camera controls
 - **Coordinate Frame Visualization**: Colored axes representation (X=red, Y=green, Z=blue)
 - **Turtle Rendering**: 3D turtle models with real-time pose updates
+- **Following Logic**: Calculates distance, angle, and velocity commands for turtle2 following behavior
 - **Transform Monitoring**: Live display of transform data and frame relationships
-- **User Interaction**: Control buttons and visual feedback systems
+- **User Interaction**: Control buttons, keyboard handling, and visual feedback systems
 
 ### HTML Interface (index.html)
 
@@ -201,7 +211,7 @@ world → turtle2
 - **A**: Turn left
 - **D**: Turn right
 
-💡 **Tip**: Click on the 3D visualization area first to ensure keyboard focus, then use WASD keys to drive turtle1 around the turtlesim environment.
+💡 **Tip**: Click on the 3D visualization area first to ensure keyboard focus, then use WASD keys to drive turtle1 around the turtlesim environment. turtle2 will automatically follow turtle1!
 
 **Camera Controls**:
 
@@ -214,9 +224,29 @@ world → turtle2
 
 ### Turtle Management
 
-- **Spawn Turtle1**: Creates turtle1 at position (5.5, 5.5)
-- **Spawn Turtle2**: Creates turtle2 at position (4.0, 2.0)
+- **Spawn Turtle2**: Creates turtle2 at position (4.0, 2.0) - turtle1 is automatically spawned by turtlesim
 - **Stop All**: Halts all turtle motion commands
+
+### Turtle Following Behavior
+
+Once turtle2 is spawned, it will automatically follow turtle1 with the following intelligent behaviors:
+
+- **Distance-based Speed**: turtle2 moves faster when far from turtle1, slower when close
+- **Angle Correction**: turtle2 continuously adjusts its heading to face turtle1
+- **Smart Stopping**: turtle2 stops moving when within 0.5 units of turtle1 to avoid collision
+- **Real-time Updates**: Following commands are sent every second based on current turtle positions
+
+**Following Algorithm Details**:
+
+- **Linear Velocity**: Proportional to distance (max speed: 2.0 units/sec)
+- **Angular Velocity**: Proportional to angle difference (4.0 × angle error)
+- **Minimum Following Distance**: 0.5 units (prevents excessive oscillation)
+
+You can observe the following behavior by:
+
+1. Spawning turtle2 using the "Spawn Turtle2" button
+2. Using WASD keys to move turtle1 around
+3. Watching turtle2 chase turtle1 in both the turtlesim window and 3D visualization
 
 ### Demo Control
 
@@ -246,10 +276,12 @@ world → turtle2
    - Check if ROS2 daemon is running: `ros2 daemon status`
    - Verify ROS2 installation: `ros2 --version`
 
-2. **"Turtlesim not responding"**
+2. **"Turtlesim not responding" or "Failed to spawn turtle2"**
 
    - Verify turtlesim is running: `ros2 run turtlesim turtlesim_node`
    - Check available topics: `ros2 topic list`
+   - Ensure spawn service is available: `ros2 service list | grep spawn`
+   - Try restarting turtlesim_node if spawn calls fail
 
 3. **"No transforms detected"**
 
