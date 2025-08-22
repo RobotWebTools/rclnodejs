@@ -129,6 +129,13 @@ async function createTurtleTf2Broadcaster() {
   // Create transform broadcaster
   const tfBroadcaster = node.createPublisher('tf2_msgs/msg/TFMessage', '/tf');
 
+  // Create velocity publisher for turtle control
+  const velocityPublisher = node.createPublisher(
+    'geometry_msgs/msg/Twist',
+    '/turtle1/cmd_vel'
+  );
+  turtleTf2Nodes.velocityPublisher = velocityPublisher;
+
   // Subscribe to turtle1 pose
   node.createSubscription('turtlesim_msgs/msg/Pose', '/turtle1/pose', (msg) => {
     const now = node.now();
@@ -171,7 +178,29 @@ async function createTurtleTf2Broadcaster() {
           y: msg.y,
           theta: msg.theta,
         },
-        transform: transform,
+        transform: {
+          header: {
+            stamp: {
+              sec: now.sec,
+              nanosec: now.nanosec,
+            },
+            frame_id: 'world',
+          },
+          child_frame_id: 'turtle1',
+          transform: {
+            translation: {
+              x: msg.x,
+              y: msg.y,
+              z: 0.0,
+            },
+            rotation: {
+              x: 0.0,
+              y: 0.0,
+              z: Math.sin(msg.theta / 2.0),
+              w: Math.cos(msg.theta / 2.0),
+            },
+          },
+        },
       });
     }
   });
@@ -215,7 +244,29 @@ async function createTurtleTf2Broadcaster() {
           y: msg.y,
           theta: msg.theta,
         },
-        transform: transform,
+        transform: {
+          header: {
+            stamp: {
+              sec: now.sec,
+              nanosec: now.nanosec,
+            },
+            frame_id: 'world',
+          },
+          child_frame_id: 'turtle2',
+          transform: {
+            translation: {
+              x: msg.x,
+              y: msg.y,
+              z: 0.0,
+            },
+            rotation: {
+              x: 0.0,
+              y: 0.0,
+              z: Math.sin(msg.theta / 2.0),
+              w: Math.cos(msg.theta / 2.0),
+            },
+          },
+        },
       });
     }
   });
@@ -248,7 +299,34 @@ async function createTurtleTf2Listener() {
       // Process transforms for visualization
       msg.transforms.forEach((transform) => {
         if (mainWindow) {
-          mainWindow.webContents.send('tf-transform-update', transform);
+          // Create a serializable version of the transform
+          const serializableTransform = {
+            header: {
+              stamp: {
+                sec: transform.header.stamp.sec,
+                nanosec: transform.header.stamp.nanosec,
+              },
+              frame_id: transform.header.frame_id,
+            },
+            child_frame_id: transform.child_frame_id,
+            transform: {
+              translation: {
+                x: transform.transform.translation.x,
+                y: transform.transform.translation.y,
+                z: transform.transform.translation.z,
+              },
+              rotation: {
+                x: transform.transform.rotation.x,
+                y: transform.transform.rotation.y,
+                z: transform.transform.rotation.z,
+                w: transform.transform.rotation.w,
+              },
+            },
+          };
+          mainWindow.webContents.send(
+            'tf-transform-update',
+            serializableTransform
+          );
         }
       });
     }
@@ -313,9 +391,10 @@ async function createStaticTurtleTf2Broadcaster() {
   );
 
   // Broadcast a static transform (carrot frame relative to world)
+  const now = node.now();
   const staticTransform = {
     header: {
-      stamp: node.now(),
+      stamp: now,
       frame_id: 'world',
     },
     child_frame_id: 'carrot1_static',
@@ -342,7 +421,34 @@ async function createStaticTurtleTf2Broadcaster() {
   staticTfBroadcaster.publish(staticTfMessage);
 
   if (mainWindow) {
-    mainWindow.webContents.send('static-transform-update', staticTransform);
+    // Create serializable version
+    const serializableStaticTransform = {
+      header: {
+        stamp: {
+          sec: now.sec,
+          nanosec: now.nanosec,
+        },
+        frame_id: 'world',
+      },
+      child_frame_id: 'carrot1_static',
+      transform: {
+        translation: {
+          x: 2.0,
+          y: 3.0,
+          z: 0.0,
+        },
+        rotation: {
+          x: 0.0,
+          y: 0.0,
+          z: 0.0,
+          w: 1.0,
+        },
+      },
+    };
+    mainWindow.webContents.send(
+      'static-transform-update',
+      serializableStaticTransform
+    );
   }
 
   rclnodejs.spin(node);
@@ -389,7 +495,34 @@ async function createDynamicFrameTf2Broadcaster() {
     tfBroadcaster.publish(tfMessage);
 
     if (mainWindow) {
-      mainWindow.webContents.send('dynamic-transform-update', dynamicTransform);
+      // Create serializable version
+      const serializableDynamicTransform = {
+        header: {
+          stamp: {
+            sec: now.sec,
+            nanosec: now.nanosec,
+          },
+          frame_id: 'turtle1',
+        },
+        child_frame_id: 'carrot1_dynamic',
+        transform: {
+          translation: {
+            x: 2.0 * Math.sin(x),
+            y: 2.0 * Math.cos(x),
+            z: 0.0,
+          },
+          rotation: {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            w: 1.0,
+          },
+        },
+      };
+      mainWindow.webContents.send(
+        'dynamic-transform-update',
+        serializableDynamicTransform
+      );
     }
   });
 
@@ -405,9 +538,10 @@ async function createFixedFrameTf2Broadcaster() {
 
   // Timer to broadcast fixed transform
   const timer = node.createTimer(100, () => {
+    const now = node.now();
     const fixedTransform = {
       header: {
-        stamp: node.now(),
+        stamp: now,
         frame_id: 'turtle1',
       },
       child_frame_id: 'carrot1_fixed',
@@ -433,7 +567,34 @@ async function createFixedFrameTf2Broadcaster() {
     tfBroadcaster.publish(tfMessage);
 
     if (mainWindow) {
-      mainWindow.webContents.send('fixed-transform-update', fixedTransform);
+      // Create serializable version
+      const serializableFixedTransform = {
+        header: {
+          stamp: {
+            sec: now.sec,
+            nanosec: now.nanosec,
+          },
+          frame_id: 'turtle1',
+        },
+        child_frame_id: 'carrot1_fixed',
+        transform: {
+          translation: {
+            x: 0.0,
+            y: 2.0,
+            z: 0.0,
+          },
+          rotation: {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            w: 1.0,
+          },
+        },
+      };
+      mainWindow.webContents.send(
+        'fixed-transform-update',
+        serializableFixedTransform
+      );
     }
   });
 
@@ -458,6 +619,18 @@ ipcMain.on('spawn-turtle-request', async (event, data) => {
   if (turtleTf2Nodes.listener) {
     // Implementation would go here
     console.log(`Spawning turtle: ${name} at (${x}, ${y}, ${theta})`);
+  }
+});
+
+// Handle keyboard turtle control commands
+ipcMain.on('turtle-cmd-vel', (event, data) => {
+  if (turtleTf2Nodes.velocityPublisher) {
+    const velocity = {
+      linear: data.linear,
+      angular: data.angular,
+    };
+    // Send velocity command to turtle1
+    turtleTf2Nodes.velocityPublisher.publish(velocity);
   }
 });
 

@@ -214,6 +214,46 @@
       margin-right: 8px;
     }
 
+    .keyboard-legend {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 8px 0;
+    }
+
+    .key-combo {
+      display: flex;
+      align-items: center;
+      margin: 6px 0;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .key {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin: 0 4px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 12px;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .keyboard-note {
+      background: rgba(255, 193, 7, 0.1);
+      border-left: 3px solid #ffc107;
+      padding: 8px 12px;
+      margin: 8px 0;
+      font-size: 12px;
+      color: #856404;
+      border-radius: 0 4px 4px 0;
+    }
+
     .instructions {
       background: rgba(255, 255, 255, 0.3);
       border-radius: 8px;
@@ -338,6 +378,31 @@
           <label class="control-label">Demo Control</label>
           <button class="control-button" id="start-demo">Start Demo</button>
           <button class="control-button" id="reset-demo">Reset Demo</button>
+        </div>
+      </div>
+
+      <!-- Keyboard Controls -->
+      <div class="controls-section">
+        <div class="section-title">⌨️ Keyboard Controls</div>
+        <div class="control-group">
+          <label class="control-label">Move Turtle1</label>
+          <div class="keyboard-legend">
+            <div class="key-combo">
+              <span class="key">W</span> or <span class="key">↑</span> - Forward
+            </div>
+            <div class="key-combo">
+              <span class="key">S</span> or <span class="key">↓</span> - Backward
+            </div>
+            <div class="key-combo">
+              <span class="key">A</span> or <span class="key">←</span> - Turn Left
+            </div>
+            <div class="key-combo">
+              <span class="key">D</span> or <span class="key">→</span> - Turn Right
+            </div>
+          </div>
+          <div class="keyboard-note">
+            💡 Click on the 3D scene to focus, then use keyboard controls
+          </div>
         </div>
       </div>
 

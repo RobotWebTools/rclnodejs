@@ -30,10 +30,23 @@ let demoState = {
   totalNodes: 5,
 };
 
+// Keyboard control state
+let keyState = {
+  w: false,
+  a: false,
+  s: false,
+  d: false,
+  ArrowUp: false,
+  ArrowLeft: false,
+  ArrowDown: false,
+  ArrowRight: false,
+};
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
   initializeScene();
   setupEventListeners();
+  setupKeyboardControls();
   setupROSListeners();
   updateStatus();
 
@@ -365,6 +378,71 @@ function setupEventListeners() {
   document.getElementById('toggle-fixed').addEventListener('click', () => {
     toggleFrameVisibility('carrot1_fixed');
   });
+}
+
+// Setup keyboard controls for turtle movement
+function setupKeyboardControls() {
+  // Track key state
+  document.addEventListener('keydown', (event) => {
+    if (event.code in keyState) {
+      keyState[event.code] = true;
+      event.preventDefault();
+    }
+    // Also handle WASD
+    if (event.key.toLowerCase() in keyState) {
+      keyState[event.key.toLowerCase()] = true;
+      event.preventDefault();
+    }
+  });
+
+  document.addEventListener('keyup', (event) => {
+    if (event.code in keyState) {
+      keyState[event.code] = false;
+      event.preventDefault();
+    }
+    // Also handle WASD
+    if (event.key.toLowerCase() in keyState) {
+      keyState[event.key.toLowerCase()] = false;
+      event.preventDefault();
+    }
+  });
+
+  // Send movement commands based on key state
+  setInterval(() => {
+    if (demoState.rosConnected) {
+      sendTurtleCommand();
+    }
+  }, 100); // Send commands at 10Hz
+}
+
+// Send turtle movement command based on keyboard input
+function sendTurtleCommand() {
+  let linear_x = 0;
+  let angular_z = 0;
+  const speed = 2.0; // Linear speed
+  const turn_speed = 2.0; // Angular speed
+
+  // Check for forward/backward movement (W/S or Up/Down arrows)
+  if (keyState.w || keyState.ArrowUp) {
+    linear_x = speed;
+  } else if (keyState.s || keyState.ArrowDown) {
+    linear_x = -speed;
+  }
+
+  // Check for rotation (A/D or Left/Right arrows)
+  if (keyState.a || keyState.ArrowLeft) {
+    angular_z = turn_speed;
+  } else if (keyState.d || keyState.ArrowRight) {
+    angular_z = -turn_speed;
+  }
+
+  // Send command if any movement is detected
+  if (linear_x !== 0 || angular_z !== 0) {
+    ipcRenderer.send('turtle-cmd-vel', {
+      linear: { x: linear_x, y: 0.0, z: 0.0 },
+      angular: { x: 0.0, y: 0.0, z: angular_z },
+    });
+  }
 }
 
 function setupROSListeners() {

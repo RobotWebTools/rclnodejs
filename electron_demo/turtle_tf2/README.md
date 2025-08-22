@@ -192,6 +192,17 @@ world → turtle2
 
 ## Controls
 
+### Keyboard Controls (NEW!)
+
+**Turtle1 Movement**:
+
+- **W** or **↑** (Up Arrow): Move forward
+- **S** or **↓** (Down Arrow): Move backward
+- **A** or **←** (Left Arrow): Turn left
+- **D** or **→** (Right Arrow): Turn right
+
+💡 **Tip**: Click on the 3D visualization area first to ensure keyboard focus, then use the controls above to drive turtle1 around the turtlesim environment.
+
 ### Turtle Management
 
 - **Spawn Turtle1**: Creates turtle1 at position (5.5, 5.5)
