@@ -36,10 +36,6 @@ let keyState = {
   a: false,
   s: false,
   d: false,
-  ArrowUp: false,
-  ArrowLeft: false,
-  ArrowDown: false,
-  ArrowRight: false,
 };
 
 // Initialize when DOM is loaded
@@ -382,27 +378,21 @@ function setupEventListeners() {
 
 // Setup keyboard controls for turtle movement
 function setupKeyboardControls() {
-  // Track key state
+  // Track key state for WASD keys only
   document.addEventListener('keydown', (event) => {
-    if (event.code in keyState) {
-      keyState[event.code] = true;
-      event.preventDefault();
-    }
-    // Also handle WASD
-    if (event.key.toLowerCase() in keyState) {
-      keyState[event.key.toLowerCase()] = true;
+    // Only handle WASD keys (case-insensitive)
+    const key = event.key.toLowerCase();
+    if (key in keyState) {
+      keyState[key] = true;
       event.preventDefault();
     }
   });
 
   document.addEventListener('keyup', (event) => {
-    if (event.code in keyState) {
-      keyState[event.code] = false;
-      event.preventDefault();
-    }
-    // Also handle WASD
-    if (event.key.toLowerCase() in keyState) {
-      keyState[event.key.toLowerCase()] = false;
+    // Only handle WASD keys (case-insensitive)
+    const key = event.key.toLowerCase();
+    if (key in keyState) {
+      keyState[key] = false;
       event.preventDefault();
     }
   });
@@ -422,17 +412,17 @@ function sendTurtleCommand() {
   const speed = 2.0; // Linear speed
   const turn_speed = 2.0; // Angular speed
 
-  // Check for forward/backward movement (W/S or Up/Down arrows)
-  if (keyState.w || keyState.ArrowUp) {
+  // Check for forward/backward movement (W/S keys only)
+  if (keyState.w) {
     linear_x = speed;
-  } else if (keyState.s || keyState.ArrowDown) {
+  } else if (keyState.s) {
     linear_x = -speed;
   }
 
-  // Check for rotation (A/D or Left/Right arrows)
-  if (keyState.a || keyState.ArrowLeft) {
+  // Check for rotation (A/D keys only)
+  if (keyState.a) {
     angular_z = turn_speed;
-  } else if (keyState.d || keyState.ArrowRight) {
+  } else if (keyState.d) {
     angular_z = -turn_speed;
   }
 

@@ -196,12 +196,21 @@ world → turtle2
 
 **Turtle1 Movement**:
 
-- **W** or **↑** (Up Arrow): Move forward
-- **S** or **↓** (Down Arrow): Move backward
-- **A** or **←** (Left Arrow): Turn left
-- **D** or **→** (Right Arrow): Turn right
+- **W**: Move forward
+- **S**: Move backward
+- **A**: Turn left
+- **D**: Turn right
 
-💡 **Tip**: Click on the 3D visualization area first to ensure keyboard focus, then use the controls above to drive turtle1 around the turtlesim environment.
+💡 **Tip**: Click on the 3D visualization area first to ensure keyboard focus, then use WASD keys to drive turtle1 around the turtlesim environment.
+
+**Camera Controls**:
+
+- **Arrow Keys**: Move camera view
+- **Mouse Drag**: Rotate camera around scene
+- **Mouse Wheel**: Zoom in/out
+- **Right Click + Drag**: Pan camera view
+
+**Note**: Arrow keys are reserved for 3D camera navigation. Use WASD keys exclusively for turtle control to avoid conflicts.
 
 ### Turtle Management
 

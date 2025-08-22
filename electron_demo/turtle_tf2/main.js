@@ -53,8 +53,8 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  // Open DevTools for debugging
-  mainWindow.webContents.openDevTools();
+  // Open DevTools for debugging (commented out for production)
+  // mainWindow.webContents.openDevTools();
 }
 
 // Initialize ROS2 nodes for turtle TF2 demo
@@ -137,7 +137,7 @@ async function createTurtleTf2Broadcaster() {
   turtleTf2Nodes.velocityPublisher = velocityPublisher;
 
   // Subscribe to turtle1 pose
-  node.createSubscription('turtlesim_msgs/msg/Pose', '/turtle1/pose', (msg) => {
+  node.createSubscription('turtlesim/msg/Pose', '/turtle1/pose', (msg) => {
     const now = node.now();
 
     // Create transform message
@@ -206,7 +206,7 @@ async function createTurtleTf2Broadcaster() {
   });
 
   // Subscribe to turtle2 pose if it exists
-  node.createSubscription('turtlesim_msgs/msg/Pose', '/turtle2/pose', (msg) => {
+  node.createSubscription('turtlesim/msg/Pose', '/turtle2/pose', (msg) => {
     const now = node.now();
 
     const transform = {
@@ -286,7 +286,7 @@ async function createTurtleTf2Listener() {
   );
 
   // Create service client to spawn turtle2
-  const spawner = node.createClient('turtlesim_msgs/srv/Spawn', 'spawn');
+  const spawner = node.createClient('turtlesim/srv/Spawn', 'spawn');
 
   let turtleSpawned = false;
   let turtleSpawningServiceReady = false;
