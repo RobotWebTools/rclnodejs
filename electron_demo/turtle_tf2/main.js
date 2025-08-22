@@ -601,26 +601,36 @@ ipcMain.on('spawn-turtle-request', async (event, data) => {
       const spawner = spawnerNode.createClient('turtlesim/srv/Spawn', 'spawn');
 
       if (spawner.isServiceServerAvailable()) {
-        const request = {
-          x: x || 4.0,
-          y: y || 2.0,
-          theta: theta || 0.0,
-          name: name || 'turtle2',
-        };
+        // rclnodejs service calls expect individual arguments, not an object
+        // For turtlesim Spawn service: x, y, theta, name
+        const xPos = x || 4.0;
+        const yPos = y || 2.0;
+        const angle = theta || 0.0;
+        const turtleName = name || 'turtle2';
 
-        console.log(`Attempting to spawn ${name} with request:`, request);
-        const response = await spawner.sendRequest(request);
+        console.log(
+          `Attempting to spawn ${turtleName} at (${xPos}, ${yPos}, ${angle})`
+        );
+
+        // Pass arguments individually instead of as an object
+        const response = await spawner.sendRequest(
+          xPos,
+          yPos,
+          angle,
+          turtleName
+        );
         console.log('Spawn response:', response);
 
-        if (response && response.name) {
-          console.log(`Successfully spawned ${response.name}`);
+        if (response) {
+          const spawnedName = response.name || response || turtleName;
+          console.log(`Successfully spawned ${spawnedName}`);
 
           if (mainWindow) {
             mainWindow.webContents.send('turtle-spawned', {
-              name: response.name,
-              x: x || 4.0,
-              y: y || 2.0,
-              theta: theta || 0.0,
+              name: spawnedName,
+              x: xPos,
+              y: yPos,
+              theta: angle,
             });
           }
         }
