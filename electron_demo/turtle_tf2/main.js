@@ -333,48 +333,59 @@ async function createTurtleTf2Listener() {
   );
 
   // Timer to check for transforms and control turtle2
-  const timer = node.createTimer(1000, async () => {
-    if (!turtleSpawningServiceReady) {
-      if (await spawner.isServiceReady()) {
-        // Spawn turtle2
-        const request = {
-          name: 'turtle2',
-          x: 4.0,
-          y: 2.0,
-          theta: 0.0,
-        };
-
-        try {
-          const response = await spawner.sendRequest(request);
-          if (response.name === 'turtle2') {
-            turtleSpawned = true;
-            turtleSpawningServiceReady = true;
-            console.log('Successfully spawned turtle2');
-
-            if (mainWindow) {
-              mainWindow.webContents.send('turtle-spawned', {
+  const timer = node.createTimer(1000, () => {
+    // Wrap the async logic in a try-catch to handle promise rejections
+    (async () => {
+      try {
+        if (!turtleSpawningServiceReady) {
+          try {
+            if (spawner.isServiceServerAvailable()) {
+              // Spawn turtle2
+              const request = {
                 name: 'turtle2',
                 x: 4.0,
                 y: 2.0,
                 theta: 0.0,
-              });
-            }
-          }
-        } catch (error) {
-          console.error('Failed to spawn turtle2:', error);
-        }
-      }
-    }
+              };
 
-    // Simple following logic (in real implementation, this would use TF lookup)
-    // For demo purposes, we'll simulate the transform lookup behavior
-    if (turtleSpawned) {
-      // This is a simplified version - in real TF2, we'd lookup transforms
-      // For the demo, we'll let the renderer handle the following logic
-      if (mainWindow) {
-        mainWindow.webContents.send('request-turtle-follow');
+              try {
+                const response = await spawner.sendRequest(request);
+                if (response.name === 'turtle2') {
+                  turtleSpawned = true;
+                  turtleSpawningServiceReady = true;
+                  console.log('Successfully spawned turtle2');
+
+                  if (mainWindow) {
+                    mainWindow.webContents.send('turtle-spawned', {
+                      name: 'turtle2',
+                      x: 4.0,
+                      y: 2.0,
+                      theta: 0.0,
+                    });
+                  }
+                }
+              } catch (error) {
+                console.error('Failed to spawn turtle2:', error);
+              }
+            }
+          } catch (error) {
+            console.error('Error checking service readiness:', error);
+          }
+        }
+
+        // Simple following logic (in real implementation, this would use TF lookup)
+        // For demo purposes, we'll simulate the transform lookup behavior
+        if (turtleSpawned) {
+          // This is a simplified version - in real TF2, we'd lookup transforms
+          // For the demo, we'll let the renderer handle the following logic
+          if (mainWindow) {
+            mainWindow.webContents.send('request-turtle-follow');
+          }
+        }
+      } catch (error) {
+        console.error('Timer callback error:', error);
       }
-    }
+    })();
   });
 
   rclnodejs.spin(node);
