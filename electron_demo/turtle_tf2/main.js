@@ -596,65 +596,78 @@ ipcMain.on('spawn-turtle-request', async (event, data) => {
 
   if (turtleTf2Nodes.listener) {
     try {
-      // Get the spawn service client from the listener node
-      const spawnerNode = turtleTf2Nodes.listener;
-      const spawner = spawnerNode.createClient('turtlesim/srv/Spawn', 'spawn');
+      console.log(
+        `Spawn request received: ${name || 'turtle2'} at (${x || 4}, ${y || 2}, ${theta || 0})`
+      );
 
-      if (spawner.isServiceServerAvailable()) {
-        // rclnodejs service calls expect individual arguments, not an object
-        // For turtlesim Spawn service: x, y, theta, name
-        const xPos = x || 4.0;
-        const yPos = y || 2.0;
-        const angle = theta || 0.0;
-        const turtleName = name || 'turtle2';
+      // Use the existing spawner from the listener node or create one
+      const listenerNode = turtleTf2Nodes.listener;
+      let spawner = listenerNode._spawner;
 
-        console.log(
-          `Attempting to spawn ${turtleName} at (${xPos}, ${yPos}, ${angle})`
-        );
+      if (!spawner) {
+        console.log('Creating new spawn service client...');
+        spawner = listenerNode.createClient('turtlesim/srv/Spawn', 'spawn');
+        listenerNode._spawner = spawner; // Cache it
 
-        // Pass arguments individually instead of as an object
-        const response = await spawner.sendRequest(
-          xPos,
-          yPos,
-          angle,
-          turtleName
-        );
-        console.log('Spawn response:', response);
-
-        if (response) {
-          const spawnedName = response.name || response || turtleName;
-          console.log(`Successfully spawned ${spawnedName}`);
-
-          if (mainWindow) {
-            mainWindow.webContents.send('turtle-spawned', {
-              name: spawnedName,
-              x: xPos,
-              y: yPos,
-              theta: angle,
-            });
-          }
+        // Wait for service to be ready
+        let retries = 0;
+        while (!spawner.isServiceServerAvailable() && retries < 10) {
+          console.log(`Waiting for spawn service... (attempt ${retries + 1})`);
+          await new Promise((resolve) => setTimeout(resolve, 200));
+          retries++;
         }
-      } else {
-        console.error(
-          'Turtlesim spawn service not available. Make sure turtlesim_node is running.'
-        );
+      }
+
+      if (!spawner.isServiceServerAvailable()) {
+        throw new Error('Turtlesim spawn service not available after waiting');
+      }
+
+      // Use the simplest possible request format
+      const xPos = x || 4.0;
+      const yPos = y || 2.0;
+      const angle = theta || 0.0;
+      const turtleName = name || 'turtle2';
+
+      console.log(`Spawning ${turtleName} at (${xPos}, ${yPos}, ${angle})`);
+
+      // Try the most basic service call format
+      const response = await spawner.sendRequest({
+        x: xPos,
+        y: yPos,
+        theta: angle,
+        name: turtleName,
+      });
+
+      console.log('Spawn response:', response);
+
+      if (response) {
+        const spawnedName = response.name || response || turtleName;
+        console.log(`Successfully spawned ${spawnedName}`);
+
         if (mainWindow) {
-          mainWindow.webContents.send('spawn-error', {
-            message:
-              'Turtlesim service not available. Please start turtlesim_node first.',
+          mainWindow.webContents.send('turtle-spawned', {
+            name: spawnedName,
+            x: xPos,
+            y: yPos,
+            theta: angle,
           });
         }
       }
     } catch (error) {
-      console.error(`Failed to spawn ${name}:`, error);
+      console.error(`Failed to spawn ${name || 'turtle2'}:`, error);
       if (mainWindow) {
         mainWindow.webContents.send('spawn-error', {
-          message: `Failed to spawn ${name}: ${error.message}`,
+          message: `Failed to spawn ${name || 'turtle2'}: ${error.message}`,
         });
       }
     }
   } else {
     console.error('Listener node not initialized');
+    if (mainWindow) {
+      mainWindow.webContents.send('spawn-error', {
+        message: 'ROS2 listener node not ready',
+      });
+    }
   }
 });
 
