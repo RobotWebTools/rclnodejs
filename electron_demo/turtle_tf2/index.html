@@ -1,5 +1,5 @@
 <!DOC  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline';">PE html>
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">PE html>
 <html>
 
 <head>
@@ -428,8 +428,8 @@
   </div>
 
   <!-- Include Three.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r155/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="./node_modules/three/build/three.min.js"></script>
+  <script src="./orbit-controls.js"></script>
   
   <!-- Main renderer script -->
   <script src="./renderer.js"></script>

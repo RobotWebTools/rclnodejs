@@ -85,35 +85,54 @@ The demo uses the following key dependencies:
    This step is crucial for ensuring that rclnodejs and other native dependencies are properly compiled for your system.
 
 4. **Source ROS2 environment**:
+
    ```bash
    source /opt/ros/$ROS_DISTRO/setup.bash
    ```
 
+   **Important**: The ROS2 environment must be sourced in the same terminal session where you run `npm start`.
+
 ## Running the Demo
+
+**⚠️ Important Setup Note**: Before running the demo, make sure to:
+
+1. Source the ROS2 environment in your terminal: `source /opt/ros/$ROS_DISTRO/setup.bash`
+2. Keep this terminal session active for the entire demo run
 
 ### Method 1: Complete Demo
 
 Start the full demo with all components (ensure you have run `npm install && npm run rebuild` first):
 
 ```bash
+# Source ROS2 first
+source /opt/ros/$ROS_DISTRO/setup.bash
+
+# Then start the demo
 npm start
 ```
 
 ### Method 2: Step-by-Step Launch
 
-1. **Start turtlesim (in separate terminal)**:
+1. **Source ROS2 environment**:
 
    ```bash
+   source /opt/ros/$ROS_DISTRO/setup.bash
+   ```
+
+2. **Start turtlesim (in separate terminal, also sourced)**:
+
+   ```bash
+   source /opt/ros/$ROS_DISTRO/setup.bash
    ros2 run turtlesim turtlesim_node
    ```
 
-2. **Launch the Electron application**:
+3. **Launch the Electron application**:
 
    ```bash
    npm start
    ```
 
-3. **Use the web interface to**:
+4. **Use the web interface to**:
    - Click "Spawn Turtle1" to create the first turtle
    - Click "Spawn Turtle2" to create the second turtle
    - Click "Start Demo" to initialize all TF2 broadcasters
@@ -200,10 +219,12 @@ world → turtle2
 
 ### Common Issues
 
-1. **"Cannot connect to ROS2"**
+1. **"Cannot connect to ROS2" or "librcl.so: cannot open shared object file"**
 
    - Ensure ROS2 is sourced: `source /opt/ros/$ROS_DISTRO/setup.bash`
+   - **Critical**: Source ROS2 in the SAME terminal where you run `npm start`
    - Check if ROS2 daemon is running: `ros2 daemon status`
+   - Verify ROS2 installation: `ros2 --version`
 
 2. **"Turtlesim not responding"**
 
@@ -228,9 +249,15 @@ world → turtle2
    - Try deleting `node_modules` and running `npm install && npm run rebuild` again
 
 6. **"THREE is not defined" or script loading errors**
-   - The demo uses CDN versions of Three.js which require internet connection
-   - If you see CSP (Content Security Policy) errors, ensure the CSP in index.html allows CDN domains
-   - For offline use, you can install Three.js locally: `npm install three@0.155.0` and update script paths in index.html
+
+   - Ensure Three.js is properly installed: `npm install three@0.155.0`
+   - Check that `node_modules/three/build/three.min.js` exists
+   - If issues persist, try reinstalling: `rm -rf node_modules && npm install && npm run rebuild`
+
+7. **WSL (Windows Subsystem for Linux) specific issues**
+   - Install audio libraries: `sudo apt install libasound2t64 libasound2-dev`
+   - Enable X11 forwarding for GUI: Install VcXsrv or similar X server
+   - Some GUI features may be limited in WSL environment
 
 ### Debugging Commands
 
