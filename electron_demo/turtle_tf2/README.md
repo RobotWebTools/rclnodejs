@@ -141,11 +141,14 @@ npm start
    ```
 
 4. **Use the web interface to**:
+   - Click "Start Demo" to initialize all TF2 broadcasters
+   - Click "Spawn Turtle1" to create turtle1 (required for dynamic frame)
    - Click "Spawn Turtle2" to create the second turtle
    - Use WASD keys to control turtle1 movement
    - Watch turtle2 automatically follow turtle1
-   - Click "Start Demo" to initialize all TF2 broadcasters
    - Use frame toggle buttons to show/hide specific transforms
+
+**⚠️ Important**: The dynamic frame (`carrot1_dynamic`) is only visible when turtle1 exists, as it orbits around turtle1's position in a circular pattern. Make sure to spawn turtle1 first before trying to see the dynamic frame.
 
 ## Demo Components
 
@@ -255,9 +258,16 @@ You can observe the following behavior by:
 
 ### Frame Visibility
 
-- **Toggle Static**: Show/hide carrot1_static frame
-- **Toggle Dynamic**: Show/hide carrot1_dynamic frame
-- **Toggle Fixed**: Show/hide carrot1_fixed frame
+- **Toggle Static**: Show/hide carrot1_static frame (red sphere, fixed position)
+- **Toggle Dynamic**: Show/hide carrot1_dynamic frame (orange sphere, orbits around turtle1)
+- **Toggle Fixed**: Show/hide carrot1_fixed frame (purple sphere, fixed offset from turtle1)
+
+**Visual Guide**:
+
+- **Static Frame**: Red sphere at fixed world coordinates (2.0, 3.0, 0.0)
+- **Dynamic Frame**: Orange sphere that moves in a circular pattern around the static frame (2-unit radius)
+- **Fixed Frame**: Purple sphere that maintains a constant offset relative to turtle1
+- **Turtle Frames**: Coordinate axes (X=red, Y=green, Z=blue) attached to each turtle
 
 ### 3D Navigation
 
@@ -288,25 +298,33 @@ You can observe the following behavior by:
    - Ensure demo is started: Click "Start Demo" button
    - Check TF2 tree: `ros2 run tf2_tools view_frames`
 
-4. **"3D visualization not loading"**
+4. **"Dynamic frame not visible when toggling"**
+
+   - **Check if the demo is started**: Click "Start Demo" button first to initialize all broadcasters
+   - **Look for an orange sphere near coordinates (2,3)**: The dynamic frame appears as an orange sphere orbiting around the red static frame
+   - **Wait for circular motion**: The dynamic frame moves in a 2-unit radius circle, taking about 6 seconds for a full rotation
+   - **The orange sphere is now bigger**: The dynamic frame has been made 3x larger for better visibility
+   - **Check the transform list**: The dynamic frame should appear in the left panel's transform list with changing coordinates around (2±2, 3±2, 0)
+
+5. **"3D visualization not loading"**
 
    - Check browser console for WebGL errors
    - Ensure hardware acceleration is enabled
    - Try restarting the Electron application
 
-5. **"electron: not found" or native module errors**
+6. **"electron: not found" or native module errors**
 
    - Make sure you ran `npm run rebuild` after `npm install`
    - Ensure Node.js version is compatible (16 or higher)
    - Try deleting `node_modules` and running `npm install && npm run rebuild` again
 
-6. **"THREE is not defined" or script loading errors**
+7. **"THREE is not defined" or script loading errors**
 
    - Ensure Three.js is properly installed: `npm install three@0.155.0`
    - Check that `node_modules/three/build/three.min.js` exists
    - If issues persist, try reinstalling: `rm -rf node_modules && npm install && npm run rebuild`
 
-7. **WSL (Windows Subsystem for Linux) specific issues**
+8. **WSL (Windows Subsystem for Linux) specific issues**
    - Install audio libraries: `sudo apt install libasound2t64 libasound2-dev`
    - Enable X11 forwarding for GUI: Install VcXsrv or similar X server
    - Some GUI features may be limited in WSL environment

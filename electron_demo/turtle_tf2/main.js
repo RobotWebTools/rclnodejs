@@ -444,19 +444,28 @@ async function createDynamicFrameTf2Broadcaster() {
   // Timer to broadcast dynamic transform
   const timer = node.createTimer(100, () => {
     const now = node.now();
-    const seconds = now.sec + now.nanosec / 1e9;
-    const x = seconds * Math.PI;
+
+    // Use a more stable time calculation to avoid NaN
+    const timeInSeconds = Date.now() / 1000.0; // Use JavaScript Date for stable timing
+    const angle = timeInSeconds * 0.5; // Slower rotation (0.5 rad/sec instead of π rad/sec)
+
+    console.log(
+      '🕒 Dynamic frame time:',
+      timeInSeconds.toFixed(2),
+      'angle:',
+      angle.toFixed(2)
+    );
 
     const dynamicTransform = {
       header: {
         stamp: now,
-        frame_id: 'turtle1',
+        frame_id: 'carrot1_static',
       },
       child_frame_id: 'carrot1_dynamic',
       transform: {
         translation: {
-          x: 2.0 * Math.sin(x),
-          y: 2.0 * Math.cos(x),
+          x: 2.0 * Math.sin(angle),
+          y: 2.0 * Math.cos(angle),
           z: 0.0,
         },
         rotation: {
@@ -482,13 +491,13 @@ async function createDynamicFrameTf2Broadcaster() {
             sec: now.sec,
             nanosec: now.nanosec,
           },
-          frame_id: 'turtle1',
+          frame_id: 'carrot1_static',
         },
         child_frame_id: 'carrot1_dynamic',
         transform: {
           translation: {
-            x: 2.0 * Math.sin(x),
-            y: 2.0 * Math.cos(x),
+            x: 2.0 * Math.sin(angle),
+            y: 2.0 * Math.cos(angle),
             z: 0.0,
           },
           rotation: {
@@ -499,6 +508,15 @@ async function createDynamicFrameTf2Broadcaster() {
           },
         },
       };
+
+      console.log(
+        '📤 Sending dynamic transform:',
+        'x:',
+        (2.0 * Math.sin(angle)).toFixed(2),
+        'y:',
+        (2.0 * Math.cos(angle)).toFixed(2)
+      );
+
       mainWindow.webContents.send(
         'dynamic-transform-update',
         serializableDynamicTransform

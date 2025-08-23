@@ -84,6 +84,11 @@ function initializeScene() {
   controls.maxDistance = 50;
   controls.minDistance = 5;
 
+  // Reduce rotation sensitivity for better control
+  controls.rotateSpeed = 0.3; // Default is 1.0, lower = less sensitive
+  controls.panSpeed = 0.5; // Reduce pan sensitivity too
+  controls.zoomSpeed = 0.8; // Slightly reduce zoom sensitivity
+
   // Lighting
   const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
   scene.add(ambientLight);
@@ -311,14 +316,34 @@ function updateFrame(name, transform) {
   if (!frames[name]) {
     // Determine color based on frame name
     let color = 0xffffff;
-    if (name.includes('static')) color = 0xff4444;
-    else if (name.includes('dynamic')) color = 0xffaa00;
-    else if (name.includes('fixed')) color = 0xaa44ff;
+    let scale = 0.5; // Default scale
 
-    createFrame(name, position, rotation, color);
+    if (name.includes('static')) {
+      color = 0xff4444;
+      scale = 1.0; // Bigger for static frame
+    } else if (name.includes('dynamic')) {
+      color = 0xff6600; // Bright orange color
+      scale = 3.0; // MUCH bigger for dynamic frame - very easy to see!
+      console.log('🟠 Creating DYNAMIC FRAME at:', position);
+    } else if (name.includes('fixed')) {
+      color = 0xaa44ff;
+      scale = 1.2; // Bigger for fixed frame
+    }
+
+    createFrame(name, position, rotation, color, scale);
   } else {
     // Update existing frame
     frames[name].position.set(position.x, position.y, position.z);
+
+    // Log dynamic frame updates
+    if (name.includes('dynamic')) {
+      console.log(
+        '🟠 Dynamic frame updated at:',
+        position.x.toFixed(2),
+        position.y.toFixed(2),
+        position.z.toFixed(2)
+      );
+    }
 
     const euler = new THREE.Euler().setFromQuaternion(
       new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w)
@@ -372,6 +397,13 @@ function setupEventListeners() {
   });
 
   document.getElementById('toggle-dynamic').addEventListener('click', () => {
+    console.log('🔄 Dynamic Frame button clicked!');
+    console.log(
+      '🔍 Current dynamic frame visible:',
+      frames['carrot1_dynamic']
+        ? frames['carrot1_dynamic'].visible
+        : 'not created yet'
+    );
     toggleFrameVisibility('carrot1_dynamic');
   });
 
@@ -413,8 +445,8 @@ function setupKeyboardControls() {
 function sendTurtleCommand() {
   let linear_x = 0;
   let angular_z = 0;
-  const speed = 2.0; // Linear speed
-  const turn_speed = 2.0; // Angular speed
+  const speed = 0.8; // Linear speed - reduced from 2.0 for better control
+  const turn_speed = 0.6; // Angular speed - further reduced from 1.2 for precise rotation control
 
   // Check for forward/backward movement (W/S keys only)
   if (keyState.w) {
@@ -651,8 +683,19 @@ function resetDemo() {
 }
 
 function toggleFrameVisibility(frameName) {
+  console.log('🎯 Toggling frame:', frameName);
   if (frames[frameName]) {
     frames[frameName].visible = !frames[frameName].visible;
+    console.log(
+      '✅ Frame',
+      frameName,
+      'is now',
+      frames[frameName].visible ? 'VISIBLE' : 'HIDDEN'
+    );
+    console.log('📍 Frame position:', frames[frameName].position);
+  } else {
+    console.log('❌ Frame', frameName, 'does not exist yet!');
+    console.log('📋 Available frames:', Object.keys(frames));
   }
 }
 
