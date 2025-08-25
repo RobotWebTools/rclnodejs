@@ -13,6 +13,8 @@ The turtle_tf2 demo showcases:
 - **3D Visualization**: WebGL-based rendering using Three.js for immersive coordinate frame visualization
 - **Interactive Controls**: Web interface for spawning turtles, controlling motion, and managing transforms
 
+![demo screenshot](./turtle-tf2-demo.gif)
+
 ## Features
 
 ### TF2 Broadcasters
@@ -39,8 +41,8 @@ The turtle_tf2 demo showcases:
 
 ### Control Interface
 
-- **Turtle Spawning**: Create turtle1 and turtle2 instances
-- **Motion Control**: Start/stop turtle movements
+- **Turtle Spawning**: Create turtle2 instance (turtle1 spawns automatically with turtlesim)
+- **Motion Control**: WASD keyboard controls for turtle1 movement
 - **Demo Management**: Initialize and reset demo state
 - **Transform Filtering**: Toggle visibility of different frame types
 
@@ -49,7 +51,7 @@ The turtle_tf2 demo showcases:
 ### System Requirements
 
 - **ROS2**: Humble, Iron, or Rolling distribution
-- **Node.js**: Version 16 or higher
+- **Node.js**: Version 18 or higher (for compatibility with latest Electron)
 - **turtlesim**: ROS2 turtle simulation package
 - **Electron**: For desktop application framework
 
@@ -142,13 +144,12 @@ npm start
 
 4. **Use the web interface to**:
    - Click "Start Demo" to initialize all TF2 broadcasters
-   - Click "Spawn Turtle1" to create turtle1 (required for dynamic frame)
-   - Click "Spawn Turtle2" to create the second turtle
+   - Click "Spawn Turtle2" to create the second turtle (turtle1 spawns automatically)
    - Use WASD keys to control turtle1 movement
    - Watch turtle2 automatically follow turtle1
    - Use frame toggle buttons to show/hide specific transforms
 
-**⚠️ Important**: The dynamic frame (`carrot1_dynamic`) is only visible when turtle1 exists, as it orbits around turtle1's position in a circular pattern. Make sure to spawn turtle1 first before trying to see the dynamic frame.
+**⚠️ Important**: The dynamic frame (`carrot1_dynamic`) orbits around the static frame (`carrot1_static`) in a circular pattern with a 2-unit radius, regardless of turtle positions.
 
 ## Demo Components
 
@@ -183,7 +184,7 @@ npm start
 - **world**: Global reference frame (origin)
 - **turtle1/turtle2**: Turtle body frames following turtlesim poses
 - **carrot1_static**: Static frame with fixed relationship to world
-- **carrot1_dynamic**: Dynamic frame with time-varying circular motion
+- **carrot1_dynamic**: Dynamic frame with circular motion around carrot1_static (2-unit radius)
 - **carrot1_fixed**: Fixed offset frame relative to turtle1
 
 ### Transform Chain
@@ -259,7 +260,7 @@ You can observe the following behavior by:
 ### Frame Visibility
 
 - **Toggle Static**: Show/hide carrot1_static frame (red sphere, fixed position)
-- **Toggle Dynamic**: Show/hide carrot1_dynamic frame (orange sphere, orbits around turtle1)
+- **Toggle Dynamic**: Show/hide carrot1_dynamic frame (orange sphere, orbits around carrot1_static)
 - **Toggle Fixed**: Show/hide carrot1_fixed frame (purple sphere, fixed offset from turtle1)
 
 **Visual Guide**:
@@ -315,7 +316,7 @@ You can observe the following behavior by:
 6. **"electron: not found" or native module errors**
 
    - Make sure you ran `npm run rebuild` after `npm install`
-   - Ensure Node.js version is compatible (16 or higher)
+   - Ensure Node.js version is compatible (18 or higher)
    - Try deleting `node_modules` and running `npm install && npm run rebuild` again
 
 7. **"THREE is not defined" or script loading errors**

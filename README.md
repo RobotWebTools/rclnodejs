@@ -34,8 +34,6 @@ rclnodejs.init().then(() => {
 - [Electron-based Visualization](#electron-based-visualization)
 - [Using TypeScript](#using-rclnodejs-with-typescript)
 - [ROS2 Interface Message Generation](#ros2-interface-message-generation-important)
-- [Examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
-- [TypeScript Demo](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo)
 - [Efficient Usage Tips](./docs/EFFICIENCY.md)
 - [FAQ and Known Issues](./docs/FAQ.md)
 - [Building from Scratch](./docs/BUILDING.md)
@@ -70,17 +68,13 @@ npm i rclnodejs@x.y.z
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
 
+Please try with [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) once you're good to go.
+
 ## rclnodejs-cli
 
 [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) is a companion project we recently launched to provide a commandline interface to a set of developer tools for working with this `rclnodejs`. You may find `rclnodejs-cli` particularly useful if you plan to create ROS 2 node(s) and launch files for working with multiple node orchestrations.
 
 ```
-           _                 _       _
-  _ __ ___| |_ __   ___   __| | ___ (_)___
- | '__/ __| | '_ \ / _ \ / _` |/ _ \| / __|
- | | | (__| | | | | (_) | (_| |  __/| \__ \
- |_|  \___|_|_| |_|\___/ \__,_|\___|/ |___/
-                                  |__/
 Usage: rclnodejs [command] [options]
 
 Options:
@@ -102,6 +96,8 @@ rclnodejs enables the creation of rich, interactive desktop visualization applic
 
 To see this in action, try the `electron_demo/turtle_tf2` demo which demonstrates real-time coordinate frame visualization with dynamic transform broadcasting, interactive 3D navigation, and keyboard-controlled turtle movement - providing a hands-on way to understand ROS 2 TF2 concepts through visual feedback. You can find more Electron-based examples and demos in the [electron_demo](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo) directory.
 
+![demo screenshot](./electron_demo/turtle_tf2/turtle-tf2-demo.png)
+
 ## Using rclnodejs with TypeScript
 
 `rclnodejs` API can be used in TypeScript projects. You can find the TypeScript declaration files (\*.d.ts) in the `types/` folder.
@@ -113,7 +109,7 @@ Your `tsconfig.json` file should include the following compiler options:
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es6",
+    "target": "es2020",
     // your additional options here
   },
 }
@@ -131,7 +127,7 @@ rclnodejs.init().then(() => {
 });
 ```
 
-The benefits of using TypeScript become evident when working with more complex use-cases. ROS messages are defined in the `types/interfaces.d.ts` module. This module is updated as part of the `generate-ros-messages` process described in the next section.
+The benefits of using TypeScript become evident when working with more complex use-cases. ROS messages are defined in the `types/interfaces.d.ts` module. This module is updated as part of the `generate-ros-messages` process described in the next section, see more [demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo).
 
 ## ROS2 Interface Message Generation (important)
 
