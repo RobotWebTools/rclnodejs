@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+  <title>ROS2 Turtle TF2 Demo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 350px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .main-content {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header h1 {
+      margin: 0;
+      color: white;
+      font-size: 24px;
+      font-weight: 300;
+    }
+
+    .header .subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    #visualization-container {
+      flex: 1;
+      position: relative;
+      background: #000;
+    }
+
+    #three-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .controls-section {
+      margin-bottom: 25px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      margin-right: 10px;
+      border-radius: 2px;
+    }
+
+    .control-group {
+      margin-bottom: 15px;
+    }
+
+    .control-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .control-button {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      margin-right: 8px;
+      margin-bottom: 5px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .control-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .control-button:active {
+      transform: translateY(0);
+    }
+
+    .control-button.emergency {
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    }
+
+    .status-panel {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+
+    .status-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .status-value {
+      color: #333;
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+    }
+
+    .status-value.active {
+      color: #27ae60;
+    }
+
+    .transform-list {
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .transform-item {
+      background: white;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 5px;
+      font-size: 11px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .transform-item .frame-name {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 3px;
+    }
+
+    .transform-item .coordinates {
+      color: #666;
+      font-family: 'Courier New', monospace;
+    }
+
+    .legend {
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+      font-size: 11px;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 8px;
+    }
+
+    .keyboard-legend {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      padding: 12px;
+      margin: 8px 0;
+    }
+
+    .key-combo {
+      display: flex;
+      align-items: center;
+      margin: 6px 0;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .key {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin: 0 4px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 12px;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .keyboard-note {
+      background: rgba(255, 193, 7, 0.1);
+      border-left: 3px solid #ffc107;
+      padding: 8px 12px;
+      margin: 8px 0;
+      font-size: 12px;
+      color: #856404;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .instructions {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 15px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #555;
+    }
+
+    .instructions h4 {
+      margin: 0 0 8px 0;
+      color: #333;
+      font-size: 12px;
+    }
+
+    .instructions ul {
+      margin: 0;
+      padding-left: 15px;
+    }
+
+    .instructions li {
+      margin-bottom: 3px;
+    }
+
+    /* Loading screen */
+    .loading-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 18px;
+      z-index: 1000;
+    }
+
+    .loading-screen.hidden {
+      display: none;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin-right: 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive design */
+    @media (max-width: 1200px) {
+      .sidebar {
+        width: 300px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        height: 300px;
+      }
+      
+      .main-content {
+        height: calc(100vh - 300px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar with controls and status -->
+    <div class="sidebar">
+      <!-- Status Panel -->
+      <div class="controls-section">
+        <div class="section-title">📊 System Status</div>
+        <div class="status-panel">
+          <div class="status-item">
+            <span class="status-label">ROS2 Status:</span>
+            <span class="status-value" id="ros-status">Initializing...</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Turtlesim:</span>
+            <span class="status-value" id="turtlesim-status">Waiting...</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">TF2 Nodes:</span>
+            <span class="status-value" id="tf2-nodes-status">0/5</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Active Transforms:</span>
+            <span class="status-value" id="active-transforms">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Turtle Control -->
+      <div class="controls-section">
+        <div class="section-title">🐢 Turtle Control</div>
+        <div class="control-group">
+          <label class="control-label">Turtle1 Movement</label>
+          <button class="control-button" id="spawn-turtle1">Spawn Turtle1</button>
+          <button class="control-button" id="spawn-turtle2">Spawn Turtle2</button>
+          <button class="control-button emergency" id="stop-all">Emergency Stop</button>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Demo Control</label>
+          <button class="control-button" id="start-demo">Start Demo</button>
+          <button class="control-button" id="reset-demo">Reset Demo</button>
+        </div>
+      </div>
+
+      <!-- Keyboard Controls -->
+      <div class="controls-section">
+        <div class="section-title">⌨️ Keyboard Controls</div>
+        <div class="control-group">
+          <label class="control-label">Move Turtle1</label>
+          <div class="keyboard-legend">
+            <div class="key-combo">
+              <span class="key">W</span> - Forward
+            </div>
+            <div class="key-combo">
+              <span class="key">S</span> - Backward
+            </div>
+            <div class="key-combo">
+              <span class="key">A</span> - Turn Left
+            </div>
+            <div class="key-combo">
+              <span class="key">D</span> - Turn Right
+            </div>
+          </div>
+          <div class="keyboard-note">
+            💡 Click on the 3D scene to focus, then use WASD keys to control turtle1.<br>
+            🎥 Use arrow keys or mouse to navigate the 3D camera view.
+          </div>
+        </div>
+      </div>
+
+      <!-- Transform Broadcasters -->
+      <div class="controls-section">
+        <div class="section-title">📡 TF2 Broadcasters</div>
+        <div class="control-group">
+          <label class="control-label">Frame Broadcasters</label>
+          <button class="control-button" id="toggle-static">Static Frame</button>
+          <button class="control-button" id="toggle-dynamic">Dynamic Frame</button>
+          <button class="control-button" id="toggle-fixed">Fixed Frame</button>
+        </div>
+      </div>
+
+      <!-- Active Transforms -->
+      <div class="controls-section">
+        <div class="section-title">🔄 Active Transforms</div>
+        <div class="transform-list" id="transform-list">
+          <div class="transform-item">
+            <div class="frame-name">No transforms detected</div>
+            <div class="coordinates">Waiting for TF2 data...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="controls-section">
+        <div class="section-title">🎨 Visualization Legend</div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background: #00ff00;"></div>
+            <span>Turtle1 (Green)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #0088ff;"></div>
+            <span>Turtle2 (Blue)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #ff4444;"></div>
+            <span>Static Frame (Red)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #ffaa00;"></div>
+            <span>Dynamic Frame (Orange)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #aa44ff;"></div>
+            <span>Fixed Frame (Purple)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #ffffff;"></div>
+            <span>Coordinate Axes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="instructions">
+        <h4>📋 Instructions</h4>
+        <ul>
+          <li><strong>Start Demo:</strong> Click "Start Demo" to begin</li>
+          <li><strong>Turtle Control:</strong> Use turtlesim_node to control turtle1</li>
+          <li><strong>TF2 Frames:</strong> Toggle different frame broadcasters</li>
+          <li><strong>3D View:</strong> Drag to rotate, scroll to zoom</li>
+          <li><strong>Reset:</strong> Click "Reset Demo" to restart</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Main visualization area -->
+    <div class="main-content">
+      <div class="header">
+        <h1>🐢 Turtle TF2 Transformation Demo</h1>
+        <div class="subtitle">Real-time 3D visualization of ROS2 TF2 transforms using rclnodejs</div>
+      </div>
+      
+      <div id="visualization-container">
+        <canvas id="three-canvas"></canvas>
+        
+        <!-- Loading screen -->
+        <div class="loading-screen" id="loading-screen">
+          <div class="spinner"></div>
+          <div>Initializing ROS2 TF2 Demo...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include Three.js -->
+  <script src="./node_modules/three/build/three.min.js"></script>
+  <script src="./orbit-controls.js"></script>
+  
+  <!-- Main renderer script -->
+  <script src="./renderer.js"></script>
+</body>
+
+</html>
