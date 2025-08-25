@@ -27,7 +27,7 @@ rclnodejs.init().then(() => {
 - [API Documentation](#api-documentation)
 - [Electron-based Visualization](#electron-based-visualization)
 - [Using TypeScript](#using-rclnodejs-with-typescript)
-- [ROS2 Interface Message Generation](#ros2-interface-message-generation-important)
+- [ROS2 Interface Message Generation](#ros2-interface-message-generation)
 - [Efficient Usage Tips](./docs/EFFICIENCY.md)
 - [FAQ and Known Issues](./docs/FAQ.md)
 - [Building from Scratch](./docs/BUILDING.md)
