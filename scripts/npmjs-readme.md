@@ -2,6 +2,8 @@
 
 `rclnodejs` is a Node.js client for the Robot Operating System (ROS 2). It provides a simple and easy JavaScript API for ROS 2 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects.
 
+\* rclnodejs development and maintenance is limited to all active ROS 2 LTS releases and the Rolling development branch
+
 Here's an example for how to create a ROS 2 node that publishes a string message in a few lines of JavaScript.
 
 ```JavaScript
@@ -14,38 +16,20 @@ rclnodejs.init().then(() => {
 });
 ```
 
-## Prerequisites
+## Installation
 
-**Node.js**
+### Prerequisites
 
-- [Node.js](https://nodejs.org/en/) version >= 16.13.0.
+- [Node.js](https://nodejs.org/en/) version >= 16.13.0
+- [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html) - **Don't forget to [source the setup file](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#source-the-setup-files)**
 
-**ROS 2 SDK**
-
-- See the ROS 2 SDK [Installation Guide](https://docs.ros.org/en/kilted/Installation.html) for details.
-- **DON'T FORGET TO [SOURCE THE ROS 2 STARTUP FILES](https://docs.ros.org/en/kilted/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.htmls)**
-
-## Install rclnodejs
-
-Install the rclnodejs version that is compatible with your installed version of ROS 2 (see table below).
-
-Run the following command for the most current version of rclnodejs
+### Install rclnodejs
 
 ```bash
 npm i rclnodejs
 ```
 
-or to install a specific version of rclnodejs use
-
-```bash
-npm i rclnodejs@x.y.z
-```
-
-#### RCLNODEJS - ROS 2 Version Compatibility
-
-|                                     RCLNODEJS Version                                      |                                                                                               Compatible ROS 2 LTS                                                                                               |
-| :----------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| latest version (currently [v1.5.0](https://github.com/RobotWebTools/rclnodejs/tree/1.5.0)) | [Kilted](https://github.com/RobotWebTools/rclnodejs/tree/kilted)<br>[Jazzy](https://github.com/RobotWebTools/rclnodejs/tree/jazzy)<br>[Humble](https://github.com/RobotWebTools/rclnodejs/tree/humble-hawksbill) |
+- **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
 
 ## Documentation
 
@@ -53,124 +37,45 @@ API [documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html) i
 
 ## JavaScript Examples
 
-The source for the following examples and many others can be found [here](https://github.com/RobotWebTools/rclnodejs/tree/develop/example).
-
-Use complex message
-
-```JavaScript
-  const publisher = node.createPublisher('sensor_msgs/msg/JointState', 'topic');
-  publisher.publish({
-    header: {
-      stamp: {
-        sec: 123456,
-        nanosec: 789,
-      },
-      frame_id: 'main frame',
-    },
-    name: ['Tom', 'Jerry'],
-    position: [1, 2],
-    velocity: [2, 3],
-    effort: [4, 5, 6],
-  });
-
-```
-
-Create a subscription
-
-```JavaScript
-const rclnodejs = require('../index.js');
-
-// Create a ROS node and then print out the string message received from publishers
-rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('subscription_example_node');
-
-  node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-    console.log(`Received message: ${typeof msg}`, msg);
-  });
-
-  rclnodejs.spin(node);
-});
-```
-
-Create a service
-
-```JavaScript
-  node.createService('example_interfaces/srv/AddTwoInts', 'add_two_ints', (request, response) => {
-    console.log(`Incoming request: ${typeof request}`, request);
-    let result = response.template;
-    result.sum = request.a + request.b;
-    console.log(`Sending response: ${typeof result}`, result, '\n--');
-    response.send(result);
-  });
-
-```
-
-Send a request in a client
-
-```JavaScript
-  const client = node.createClient('example_interfaces/srv/AddTwoInts', 'add_two_ints');
-  const request = {
-    a: Math.floor(Math.random() * 100),
-    b: Math.floor(Math.random() * 100),
-  };
-
-  console.log(`Sending: ${typeof request}`, request);
-  client.sendRequest(request, (response) => {
-    console.log(`Result: ${typeof response}`, response);
-  });
-
-```
-
-Check out more [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example).
+Try the [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) to get started.
 
 ## Using rclnodejs with TypeScript
 
-In your node project install the rclnodejs package as described above. You will also need the TypeScript compiler and node typings installed.
-
-```
-  npm install typescript @types/node -D
-```
-
-In your project's tsconfig.json file include the following compiler options:
+TypeScript declaration files are included in the `types/` folder. Configure your `tsconfig.json`:
 
 ```jsonc
 {
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es6",
-    ...
-  }
+    "target": "es2020",
+  },
 }
 ```
 
-Here's an earlier JavaScript example reimplemented in TypeScript.
+TypeScript example:
 
 ```typescript
 import * as rclnodejs from 'rclnodejs';
 rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('publisher_example_node');
+  const node = new rclnodejs.Node('publisher_example_node');
   const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
   publisher.publish(`Hello ROS 2 from rclnodejs`);
-  rclnodejs.spin(node);
+  node.spin();
 });
 ```
 
-Type-aliases for the ROS2 messages can be found in the `types/interfaces.d.ts` file. To use a message type-alias follow the naming pattern <pkg_name>.[msg|srv].<type>, e.g., sensor_msgs.msg.LaserScan or the std_msgs.msg.String as shown below.
-
-```typescript
-const msg: rclnodejs.std_msgs.msg.String = {
-  data: 'hello ROS2 from rclnodejs',
-};
-```
-
-Check out more TypeScript [demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo).
+See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo) for more examples.
 
 **Note** that the interface.d.ts file is updated each time the generate_messages.js script is run.
 
-## Using rclnodejs with Electron
+## Electron-based Visualization
 
-Check out [demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo).
+Create rich, interactive desktop applications using Electron and web technologies like Three.js. Build 3D visualizations, monitoring dashboards, and control interfaces that run on Windows, macOS, and Linux.
+
+Try the `electron_demo/turtle_tf2` demo for real-time coordinate frame visualization with dynamic transforms and keyboard-controlled turtle movement. More examples in [electron_demo](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo).
+
+![demo screenshot](https://github.com/RobotWebTools/rclnodejs/blob/develop/electron_demo/turtle_tf2/turtle-tf2-demo.gif?raw=true)
 
 ## License
 
