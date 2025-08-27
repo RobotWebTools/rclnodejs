@@ -25,6 +25,7 @@ rclnodejs.init().then(() => {
 - [Installation](#installation)
 - [rclnodejs-cli](#rclnodejs-cli)
 - [API Documentation](#api-documentation)
+- [Tutorials](./tutorials/)
 - [Electron-based Visualization](#electron-based-visualization)
 - [Using TypeScript](#using-rclnodejs-with-typescript)
 - [ROS2 Interface Message Generation](#ros2-interface-message-generation)
