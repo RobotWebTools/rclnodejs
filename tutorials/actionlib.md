@@ -35,7 +35,7 @@ Defines the request parameters for the task to be performed.
 ```javascript
 // Example: Fibonacci.Goal
 {
-  order: 10; // Compute Fibonacci sequence up to order 10
+  order: 10 // Compute Fibonacci sequence up to order 10
 }
 ```
 
@@ -46,7 +46,7 @@ Provides periodic updates during task execution.
 ```javascript
 // Example: Fibonacci.Feedback
 {
-  sequence: [0, 1, 1, 2, 3, 5, 8]; // Current progress
+  sequence: [0, 1, 1, 2, 3, 5, 8] // Current progress
 }
 ```
 
@@ -57,7 +57,7 @@ Contains the final outcome when the task completes.
 ```javascript
 // Example: Fibonacci.Result
 {
-  sequence: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]; // Final result
+  sequence: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55] // Final result
 }
 ```
 
