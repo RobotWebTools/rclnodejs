@@ -348,7 +348,7 @@ class LifecycleRobotController {
     switch (msg.data.toLowerCase()) {
       case 'stop':
         console.log('🛑 Stop command received, shutting down...');
-        this.shutdown();
+        this.node.shutdown();
         break;
       case 'pause':
         console.log('⏸️ Pause command received, deactivating...');
@@ -384,7 +384,6 @@ class LifecycleRobotController {
 
   shutdown() {
     console.log('🔚 Initiating shutdown sequence...');
-    this.node.deactivate();
     this.node.shutdown();
     rclnodejs.shutdown();
     process.exit(0);
@@ -512,7 +511,7 @@ class SystemManager {
 
   async init() {
     await rclnodejs.init();
-    this.node = rclnodejs.create_node('system_manager');
+    this.node = rclnodejs.createNode('system_manager');
   }
 
   async startupSequence() {
