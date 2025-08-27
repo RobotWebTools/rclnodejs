@@ -48,7 +48,7 @@ npm i rclnodejs
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
 
-Try the [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) to get started.
+See the [features](./docs/FEATURES.md) and try the [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) to get started.
 
 ## rclnodejs-cli
 
