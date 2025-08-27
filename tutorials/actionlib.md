@@ -1,169 +1,536 @@
-# Introduction - Deprecated, please reference examples under /example for the usage based on the latest implementation.
+# ROS 2 Actions Tutorial
 
-Actionlib tutorial based on `rclnodejs`.
+This tutorial explains how to use ROS 2 actions in rclnodejs for implementing long-running, cancellable tasks with feedback.
 
-## Actionlib background
+## Table of Contents
 
-To continue the tutorial, you should have some basic understanding of the `action` term in ROS. If you're not familiar with it, please refer to the [description](http://wiki.ros.org/actionlib/DetailedDescription).
+- [What are ROS 2 Actions?](#what-are-ros-2-actions)
+- [Action Components](#action-components)
+- [Basic Implementation](#basic-implementation)
+- [Action Server Example](#action-server-example)
+- [Action Client Example](#action-client-example)
+- [Advanced Features](#advanced-features)
+- [Best Practices](#best-practices)
+- [Running the Examples](#running-the-examples)
 
-## Precondition
+## What are ROS 2 Actions?
 
-You should prepare an action text file. The content is like this:
+**ROS 2 Actions** are a communication pattern designed for **long-running, preemptable tasks** that provide periodic feedback. Unlike simple request-response services, actions allow clients to:
 
-```
-# Define the goal
-uint32 dishwasher_id  # Specify which dishwasher we want to use
----
-# Define the result
-uint32 total_dishes_cleaned
----
-# Define a feedback message
-float32 percent_complete
-# Use a message from another package, to prove that it works
-sensor_msgs/Image image
-```
+- 📤 **Send goals** to request task execution
+- 📊 **Receive feedback** during task execution
+- 🎯 **Get results** when tasks complete
+- ❌ **Cancel goals** before completion
 
-Fortunately, there is a `dodishes.action` file that is already available in the `test/ros1_actions` directory.
+Actions are built on top of topics and services, providing a higher-level abstraction for complex interactions.
 
-## Basic steps of processing action files for rclnodejs
+## Action Components
 
-For `rclnodejs`, the basic steps of process an action file is separated into 2 steps:
+An action consists of three message types:
 
-- Generate several msg files and the js message package from the action file.
-- Build the shared library from the msg files that will be used in running actionlib-feature-related code.
+### 1. Goal Message
 
-### Generate msg files from the action file
+Defines the request parameters for the task to be performed.
 
-The `generated` directory contains the generated js message package for `rclnodejs`. If you have run `npm install`, then it should
-exist after `npm install` was done. However, since your `AMENT_PREFIX_PATH` may not include the directory path of the action file, the `ros1_actions` package may not be generated. So you need remove the whole `generated` directory and regenerate them.
-
-```
-$ rm -fr generated
-$ export AMENT_PREFIX_PATH=$AMENT_PREFIX_PATH:$(pwd)/test/ros1_actions
-$ node scripts/generate_messages.js
+```javascript
+// Example: Fibonacci.Goal
+{
+  order: 10; // Compute Fibonacci sequence up to order 10
+}
 ```
 
-### Build the shared library from the msg files
+### 2. Feedback Message
 
-```
-$ cd test/ros1_actions
-$ colcon build
-```
+Provides periodic updates during task execution.
 
-## Run the action example
-
-After the build, you can run the action example. The action example contains two parts, one is the [action server](./example/action-server-example.js), another is the [action client](./example/action-client-example.js). When running the example, you should launch the server first, and then launch the client.
-
-- Launch a terminal session, load ROS2 environment and go to `rclnodejs` directory.
-
-```
-$ source test/ros1_actions/install/local_setup.bash
-$ node example/action-server-example.js
+```javascript
+// Example: Fibonacci.Feedback
+{
+  sequence: [0, 1, 1, 2, 3, 5, 8]; // Current progress
+}
 ```
 
-- Launch another terminal session, load ROS2 environment and go to `rclnodejs` directory.
+### 3. Result Message
 
-```
-$ source test/ros1_actions/install/local_setup.bash
-$ node example/action-client-example.js
-```
+Contains the final outcome when the task completes.
 
-Here is the action client output:
-
-```
-The goal was sent, the goal id is 7c28f24a-5ce8-4b13-a2aa-7aa62128fd03
-70% of the task has been completed.
-The goal, whose id is 7c28f24a-5ce8-4b13-a2aa-7aa62128fd03, has been executed successfully.
-10 dishes have been cleaned.
-The goal, whose id is 7c28f24a-5ce8-4b13-a2aa-7aa62128fd03, has been executed successfully.
+```javascript
+// Example: Fibonacci.Result
+{
+  sequence: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]; // Final result
+}
 ```
 
-And here is the action server output:
+## Basic Implementation
 
-```
-A goal, whose id is 7c28f24a-5ce8-4b13-a2aa-7aa62128fd03, was received.
-```
+### Action Types in rclnodejs
 
-## Explanation of the action example:
+rclnodejs provides two main classes for action communication:
 
-1. Action server
-   For the action server, the skeleton code is like this:
+- **`ActionServer`** - Handles incoming goals and executes tasks
+- **`ActionClient`** - Sends goals and receives feedback/results
 
-```
-rclnodejs.init().then(() => {
-  const as = new rclnodejs.ActionLib.ActionServer({
-    type: 'ros1_actions/msg/DoDishes',
-    actionServer: 'dishes',
-    rclnodejs: rclnodejs
-  });
+### Import Action Messages
 
-  as.on('goal', function(goal) {
-    goal.setAccepted('goal accepted');
-    goal.publishFeedback(feedback);
-    setTimeout(() => {
-      goal.setSucceeded({total_dishes_cleaned: 10}, 'done');
-    }, 500);
-  });
+```javascript
+const rclnodejs = require('rclnodejs');
 
-  as.on('cancel', (goalHandle) => {
-    // cancel handler code
-  });
-
-  as.start();
-}).catch((err) => {
-  console.error(err);
-});
+// Import action message types
+const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
 ```
 
-First, you should new an `ActionServer` with the `type` and the `actionServer`. The `type` is the action package name and the `actionServer` is the name of the action server, which should be the same as the action client request to in future.
+## Action Server Example
 
-The `ActionServer` can emit 2 type events: `goal` and `cancel` events.
+An action server receives goals, executes tasks, provides feedback, and returns results.
 
-- `goal` event: triggered when an action client sends an goal to the action server by calling its `sendGoal()` method. In the handler of the this event, you can accept the goal by calling `goal.setAccepted()`. During executing the goal, you can send a feedback to the action client by calling `goal.publishFeedback()`. Once the goal is completed, you should set the goal status by calling `goal.setSucceeded()`, which will trigger the `result` event for the action client.
-- `cancel` event: triggered when an action client cancels the the goal after a goal was sent to the action server but not completed yet.
+### Basic Action Server Structure
 
-The `start()` method must be called to start the action server.
+```javascript
+const rclnodejs = require('rclnodejs');
+const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
 
-2. Action client
-   For the action client, the skeleton code is like this:
+class FibonacciActionServer {
+  constructor(node) {
+    this._node = node;
 
-```
-rclnodejs.init().then(() => {
-  const GoalStatus = rclnodejs.require('actionlib_msgs/msg/GoalStatus');
+    // Create action server
+    this._actionServer = new rclnodejs.ActionServer(
+      node, // ROS 2 node
+      'test_msgs/action/Fibonacci', // Action type
+      'fibonacci', // Action name
+      this.executeCallback.bind(this), // Execute callback
+      this.goalCallback.bind(this), // Goal callback (optional)
+      null, // Handle accepted callback (optional)
+      this.cancelCallback.bind(this) // Cancel callback (optional)
+    );
+  }
 
-  const ac = new rclnodejs.ActionClientInterface({
-    type: 'ros1_actions/msg/DoDishes',
-    actionServer: 'dishes',
-    rclnodejs: rclnodejs
-  });
+  // Main execution logic
+  async executeCallback(goalHandle) {
+    this._node.getLogger().info('Executing goal...');
 
-  let goal = ac.sendGoal({ goal: {dishwasher_id: 1}});
+    const feedbackMessage = new Fibonacci.Feedback();
+    const sequence = [0, 1];
 
-  ac.on('feedback', (feedback) => {
-    // feedback handler
-  });
-
-  ac.on('status', (status) => {
-    status.status_list.forEach((s) =>{
-      if (s.goal_id.id === goal.goal_id.id &&
-          s.status === GoalStatus.SUCCEEDED) {
-        console.log(`The goal, whose id is ${s.goal_id.id}, has been executed successfully.`);
+    // Execute the task with feedback
+    for (let i = 1; i < goalHandle.request.order; i++) {
+      // Check if goal was canceled
+      if (goalHandle.isCancelRequested) {
+        goalHandle.canceled();
+        this._node.getLogger().info('Goal canceled');
+        return new Fibonacci.Result();
       }
-    });
-  });
 
-  ac.on('result', (result) => {
-    // result handler
-  });
-}).catch((err) => {
-  console.error(err);
-});
+      // Update sequence
+      sequence.push(sequence[i] + sequence[i - 1]);
+      feedbackMessage.sequence = sequence;
+
+      // Publish feedback
+      goalHandle.publishFeedback(feedbackMessage);
+      this._node
+        .getLogger()
+        .info(`Publishing feedback: ${feedbackMessage.sequence}`);
+
+      // Simulate work
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    // Mark goal as succeeded
+    goalHandle.succeed();
+
+    // Return final result
+    const result = new Fibonacci.Result();
+    result.sequence = sequence;
+    this._node.getLogger().info(`Returning result: ${result.sequence}`);
+
+    return result;
+  }
+
+  // Called when new goal is received
+  goalCallback(goalHandle) {
+    this._node.getLogger().info('Received goal request');
+    // Accept or reject the goal
+    return rclnodejs.GoalResponse.ACCEPT; // or REJECT
+  }
+
+  // Called when cancel is requested
+  cancelCallback(goalHandle) {
+    this._node.getLogger().info('Received cancel request');
+    // Accept or reject the cancellation
+    return rclnodejs.CancelResponse.ACCEPT; // or REJECT
+  }
+}
+
+// Initialize and run server
+rclnodejs
+  .init()
+  .then(() => {
+    const node = rclnodejs.createNode('fibonacci_action_server');
+    new FibonacciActionServer(node);
+    rclnodejs.spin(node);
+  })
+  .catch(console.error);
 ```
 
-To construct an action client, use `new rclnodejs.ActionClientInterface()`. The action client can emit 3 type events:
+## Action Client Example
 
-- `status` event: triggered when the action server sends messages to the action client during the goal is executing.
-- `feedback` event: triggered after the action server called `publishFeedback`.
-- `result` event: triggered after the action server called `setSucceeded`.
+An action client sends goals, receives feedback, and handles results.
 
-**Notice**, the action state transitions must obey some specific order, for more details please refer to [this article](http://wiki.ros.org/actionlib/DetailedDescription)
+### Basic Action Client Structure
+
+```javascript
+const rclnodejs = require('rclnodejs');
+const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
+
+class FibonacciActionClient {
+  constructor(node) {
+    this._node = node;
+
+    // Create action client
+    this._actionClient = new rclnodejs.ActionClient(
+      node, // ROS 2 node
+      'test_msgs/action/Fibonacci', // Action type
+      'fibonacci' // Action name
+    );
+  }
+
+  async sendGoal() {
+    // Wait for action server to be available
+    this._node.getLogger().info('Waiting for action server...');
+    await this._actionClient.waitForServer();
+
+    // Create goal message
+    const goal = new Fibonacci.Goal();
+    goal.order = 10;
+
+    this._node.getLogger().info('Sending goal request...');
+
+    // Send goal with feedback callback
+    const goalHandle = await this._actionClient.sendGoal(goal, (feedback) =>
+      this.feedbackCallback(feedback)
+    );
+
+    // Check if goal was accepted
+    if (!goalHandle.isAccepted()) {
+      this._node.getLogger().info('Goal rejected');
+      return;
+    }
+
+    this._node.getLogger().info('Goal accepted');
+
+    // Wait for result
+    const result = await goalHandle.getResult();
+
+    // Handle final result
+    if (goalHandle.isSucceeded()) {
+      this._node
+        .getLogger()
+        .info(`Goal succeeded with result: ${result.sequence}`);
+    } else {
+      this._node
+        .getLogger()
+        .info(`Goal failed with status: ${goalHandle.status}`);
+    }
+
+    rclnodejs.shutdown();
+  }
+
+  // Handle feedback during execution
+  feedbackCallback(feedback) {
+    this._node.getLogger().info(`Received feedback: ${feedback.sequence}`);
+  }
+}
+
+// Initialize and run client
+rclnodejs
+  .init()
+  .then(async () => {
+    const node = rclnodejs.createNode('fibonacci_action_client');
+    const client = new FibonacciActionClient(node);
+
+    rclnodejs.spin(node);
+    await client.sendGoal();
+  })
+  .catch(console.error);
+```
+
+## Advanced Features
+
+### Goal Cancellation
+
+Clients can cancel goals during execution:
+
+```javascript
+class CancelableActionClient {
+  async sendCancelableGoal() {
+    const goal = new Fibonacci.Goal();
+    goal.order = 20;
+
+    const goalHandle = await this._actionClient.sendGoal(goal, (feedback) => {
+      console.log(`Feedback: ${feedback.sequence}`);
+    });
+
+    if (goalHandle.isAccepted()) {
+      // Cancel after 3 seconds
+      setTimeout(async () => {
+        console.log('Canceling goal...');
+        const cancelResponse = await goalHandle.cancelGoal();
+
+        if (cancelResponse.goals_canceling.length > 0) {
+          console.log('Goal cancellation accepted');
+        }
+      }, 3000);
+
+      const result = await goalHandle.getResult();
+      console.log(`Final status: ${goalHandle.status}`);
+    }
+  }
+}
+```
+
+### Multiple Goals
+
+Action servers can handle multiple concurrent goals:
+
+```javascript
+class MultiGoalActionServer {
+  constructor(node) {
+    this._node = node;
+    this._activeGoals = new Map();
+
+    this._actionServer = new rclnodejs.ActionServer(
+      node,
+      'test_msgs/action/Fibonacci',
+      'fibonacci',
+      this.executeCallback.bind(this),
+      this.goalCallback.bind(this)
+    );
+  }
+
+  goalCallback(goalHandle) {
+    // Accept up to 3 concurrent goals
+    if (this._activeGoals.size >= 3) {
+      this._node.getLogger().info('Too many active goals, rejecting');
+      return rclnodejs.GoalResponse.REJECT;
+    }
+
+    this._node.getLogger().info(`Accepting goal ${goalHandle.goalId}`);
+    this._activeGoals.set(goalHandle.goalId, goalHandle);
+    return rclnodejs.GoalResponse.ACCEPT;
+  }
+
+  async executeCallback(goalHandle) {
+    try {
+      // Execute goal logic...
+      const result = await this.computeFibonacci(goalHandle);
+
+      goalHandle.succeed();
+      return result;
+    } finally {
+      // Clean up when done
+      this._activeGoals.delete(goalHandle.goalId);
+    }
+  }
+}
+```
+
+### Goal Status Monitoring
+
+Monitor goal status changes:
+
+```javascript
+const goalHandle = await this._actionClient.sendGoal(goal);
+
+// Check goal status
+if (goalHandle.isAccepted()) {
+  console.log('Goal accepted');
+} else {
+  console.log('Goal rejected');
+}
+
+const result = await goalHandle.getResult();
+
+// Check final status
+if (goalHandle.isSucceeded()) {
+  console.log('Goal succeeded');
+} else if (goalHandle.isCanceled()) {
+  console.log('Goal was canceled');
+} else if (goalHandle.isAborted()) {
+  console.log('Goal was aborted');
+}
+```
+
+## Best Practices
+
+### 1. Error Handling
+
+Always implement proper error handling:
+
+```javascript
+async executeCallback(goalHandle) {
+  try {
+    // Task execution logic
+    const result = await this.performTask(goalHandle.request);
+    goalHandle.succeed();
+    return result;
+  } catch (error) {
+    this._node.getLogger().error(`Task failed: ${error.message}`);
+    goalHandle.abort();
+    return new TaskResult();
+  }
+}
+```
+
+### 2. Responsive Cancellation
+
+Check for cancellation requests regularly:
+
+```javascript
+async executeCallback(goalHandle) {
+  for (let i = 0; i < longRunningTask.steps; i++) {
+    // Check for cancellation
+    if (goalHandle.isCancelRequested) {
+      goalHandle.canceled();
+      return new TaskResult();
+    }
+
+    // Perform one step
+    await this.performStep(i);
+
+    // Provide feedback
+    const feedback = new TaskFeedback();
+    feedback.progress = (i + 1) / longRunningTask.steps;
+    goalHandle.publishFeedback(feedback);
+  }
+
+  goalHandle.succeed();
+  return result;
+}
+```
+
+### 3. Server Availability
+
+Always wait for server availability:
+
+```javascript
+async sendGoal() {
+  try {
+    // Wait for server with timeout (5 seconds)
+    this._node.getLogger().info('Waiting for action server...');
+    await this._actionClient.waitForServer(5000);
+
+    this._node.getLogger().info('Action server available');
+
+    // Proceed with goal sending
+    const goal = new Fibonacci.Goal();
+    goal.order = 10;
+    const goalHandle = await this._actionClient.sendGoal(goal);
+  } catch (error) {
+    this._node.getLogger().error('Action server not available within timeout');
+    return;
+  }
+}
+```
+
+### 4. Resource Cleanup
+
+Properly clean up resources:
+
+```javascript
+class ActionNode {
+  constructor() {
+    this._node = rclnodejs.createNode('action_node');
+    this._client = new rclnodejs.ActionClient(
+      this._node,
+      'MyAction',
+      'my_action'
+    );
+
+    // Handle shutdown
+    process.on('SIGINT', () => this.shutdown());
+  }
+
+  shutdown() {
+    this._node.getLogger().info('Shutting down...');
+    rclnodejs.shutdown();
+  }
+}
+```
+
+## Running the Examples
+
+The rclnodejs repository includes complete action examples in the `example/actions/` directory.
+
+### Run Action Server
+
+```bash
+# Terminal 1 - Start the action server
+cd /path/to/rclnodejs
+node example/actions/action_server/action-server-example.js
+```
+
+### Run Action Client
+
+```bash
+# Terminal 2 - Run the action client
+cd /path/to/rclnodejs
+node example/actions/action_client/action-client-example.js
+```
+
+### Expected Output
+
+**Action Server Output:**
+
+```
+[INFO] [action_server_example_node]: Received goal request
+[INFO] [action_server_example_node]: Executing goal...
+[INFO] [action_server_example_node]: Publishing feedback: 0,1
+[INFO] [action_server_example_node]: Publishing feedback: 0,1,1
+[INFO] [action_server_example_node]: Publishing feedback: 0,1,1,2
+...
+[INFO] [action_server_example_node]: Returning result: 0,1,1,2,3,5,8,13,21,34,55
+```
+
+**Action Client Output:**
+
+```
+[INFO] [action_client_example_node]: Waiting for action server...
+[INFO] [action_client_example_node]: Sending goal request...
+[INFO] [action_client_example_node]: Goal accepted
+[INFO] [action_client_example_node]: Received feedback: 0,1
+[INFO] [action_client_example_node]: Received feedback: 0,1,1
+[INFO] [action_client_example_node]: Received feedback: 0,1,1,2
+...
+[INFO] [action_client_example_node]: Goal succeeded with result: 0,1,1,2,3,5,8,13,21,34,55
+```
+
+### Additional Examples
+
+Explore more examples in the `example/actions/` directory:
+
+- **`action-client-cancel-example.js`** - Demonstrates goal cancellation
+- **`action-server-defer-example.js`** - Shows deferred goal acceptance
+- **`action-server-single-goal-example.js`** - Single goal handling pattern
+
+## Action Message Creation
+
+For custom actions, create `.action` files with the following structure:
+
+```
+# Goal definition
+int32 order
+---
+# Result definition
+int32[] sequence
+---
+# Feedback definition
+int32[] partial_sequence
+```
+
+Generate JavaScript interfaces using:
+
+```bash
+npx generate-ros-messages
+```
+
+This tutorial provides a comprehensive guide to using ROS 2 actions with rclnodejs. Actions are powerful tools for implementing complex, long-running robotics tasks with proper feedback and cancellation support.
