@@ -210,8 +210,8 @@ class ParameterDemoNode {
 
   getParameterValues() {
     // Get individual parameter
-    const robotName = this.node.getParameter('enable_logging');
-    console.log(`Logging enabled: ${robotName.value}`);
+    const enableLogging = this.node.getParameter('enable_logging');
+    console.log(`Logging enabled: ${enableLogging.value}`);
 
     // Get multiple parameters at once
     const paramNames = ['max_connections', 'update_rate'];
@@ -430,7 +430,7 @@ class ValidatedParameterNode {
 
     // Add range validation for speed
     const FloatingPointRange = rclnodejs.FloatingPointRange;
-    descriptors[0].floatingPointRange = [new FloatingPointRange(0.0, 5.0, 0.1)];
+    descriptors[0].range = new FloatingPointRange(0.0, 5.0, 0.1);
 
     this.node.declareParameters(params, descriptors);
   }
