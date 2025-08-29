@@ -14,70 +14,88 @@
 # limitations under the License.
 
 import argparse
+
 import rclpy
-from std_srvs.srv import *
-from std_msgs.msg import *
-from nav_msgs.srv import *
-from nav_msgs.msg import *
-from builtin_interfaces.msg import *
-from sensor_msgs.msg import *
-from geometry_msgs.msg import *
+from rclpy.node import Node
+from rclpy.clock import Clock
+from nav_msgs.srv import GetMap
+from nav_msgs.msg import OccupancyGrid, MapMetaData
+from std_msgs.msg import Header
+from geometry_msgs.msg import Point, Quaternion, Pose
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-s", "--size", type=int, help="The block size[kb]")
-args = parser.parse_args()
-if args.size is None:
-  args.size = 1000
+class StressService(Node):
+    def __init__(self, size):
+        super().__init__('stress_service_rclpy')
+        self.size = size
+        
+        # Create service
+        self.service = self.create_service(GetMap, 'get_map', self.handle_get_map)
+        
+        # Prepare map data
+        self.map_data = self.create_map_data()
+        
+        self.get_logger().info(f'Service ready to serve GetMap requests with {size}KB data')
 
-map_data = OccupancyGrid()
-stamp = Time();
-stamp.sec = 123456
-stamp.nanosec = 789
-header = Header()
-header.stamp = stamp;
-header.frame_id = 'main_frame'
+    def create_map_data(self):
+        # Create timestamp
+        clock = Clock()
+        current_time = clock.now().to_msg()
+        
+        # Create header
+        header = Header()
+        header.stamp = current_time
+        header.frame_id = 'main_frame'
 
-info = MapMetaData()
-map_load_time = Time()
-map_load_time.sec = 123456
-map_load_time.nanosec = 789
-info.resolution = 1.0
-info.width = 1024
-info.height = 768
+        # Create map metadata
+        info = MapMetaData()
+        info.map_load_time = current_time
+        info.resolution = 1.0
+        info.width = 1024
+        info.height = 768
 
-position = Point()
-position.x = 0.0
-position.y = 0.0
-position.z = 0.0
+        # Create origin pose
+        position = Point()
+        position.x = 0.0
+        position.y = 0.0
+        position.z = 0.0
 
-orientation = Quaternion()
-orientation.x = 0.0
-orientation.y = 0.0
-orientation.z = 0.0
-orientation.w = 0.0
+        orientation = Quaternion()
+        orientation.x = 0.0
+        orientation.y = 0.0
+        orientation.z = 0.0
+        orientation.w = 1.0  # Valid quaternion
 
-origin = Pose()
-origin.position = position
-origin.orientation = orientation
-info.map_load_time = map_load_time
-info.origin = origin;
+        origin = Pose()
+        origin.position = position
+        origin.orientation = orientation
+        info.origin = origin
 
-map_data.header = header
-map_data.info = info
-map_data.data = [x & 0x7f for x in range(1024 * args.size)]
+        # Create occupancy grid
+        map_data = OccupancyGrid()
+        map_data.header = header
+        map_data.info = info
+        map_data.data = [x & 0x7f for x in range(1024 * self.size)]
+        
+        return map_data
 
-def callback(request, response):
-  global map_data
-  response.map = map_data
-  return response
+    def handle_get_map(self, request, response):
+        response.map = self.map_data
+        return response
 
 def main():
-  rclpy.init()
-  node = rclpy.create_node('stress_service_rclpy')
-  service = node.create_service(GetMap, 'get_map', callback)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--size", type=int, default=1000, help="The block size[kb]")
+    args = parser.parse_args()
 
-  while rclpy.ok():
-    rclpy.spin_once(node)
+    rclpy.init()
+    
+    try:
+        stress_service = StressService(args.size)
+        rclpy.spin(stress_service)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        rclpy.try_shutdown()
 
 if __name__ == '__main__':
-  main()
+    main()

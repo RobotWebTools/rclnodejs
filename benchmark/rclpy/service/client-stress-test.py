@@ -15,38 +15,63 @@
 
 import argparse
 import math
-from nav_msgs.srv import *
+import time
+
 import rclpy
-from time import time
+from rclpy.node import Node
+from nav_msgs.srv import GetMap
 
 def main():
-  parser = argparse.ArgumentParser()
-  parser.add_argument("-r", "--run", type=int, help="How many times to run")
-  args = parser.parse_args()
-  if args.run is None:
-    args.run = 1
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--run", type=int, default=1, help="How many times to run")
+    args = parser.parse_args()
 
-  rclpy.init()
-  print(
-    'The client will send a GetMap request continuously until receiving %s response times.' % args.run)
-  start = time();
-  node = rclpy.create_node('stress_client_rclpy')
-  client = node.create_client(GetMap, 'get_map')
-  request = GetMap.Request()
-  received_times = 0
-
-  while rclpy.ok():
-    if received_times > args.run:
-      node.destroy_node()
-      rclpy.shutdown()
-      diff = time() - start
-      milliseconds, seconds = math.modf(diff)
-      print('Benchmark took %d seconds and %d milliseconds.' % (seconds, round(milliseconds * 1000)))
-    else:
-      future = client.call_async(request)
-      rclpy.spin_until_future_complete(node, future)
-      if future.result() is not None:
-        received_times += 1
+    rclpy.init()
+    
+    try:
+        node = Node('stress_client_rclpy')
+        
+        # Create client
+        client = node.create_client(GetMap, 'get_map')
+        
+        # Wait for service to be available
+        node.get_logger().info('Waiting for service to be available...')
+        if not client.wait_for_service(timeout_sec=5.0):
+            node.get_logger().error('Service not available after waiting')
+            return
+        
+        node.get_logger().info(f'The client will send a GetMap request continuously '
+                              f'until receiving {args.run} response times.')
+        
+        start_time = time.time()
+        received_times = 0
+        
+        # Send requests synchronously
+        for i in range(args.run):
+            request = GetMap.Request()
+            try:
+                future = client.call_async(request)
+                rclpy.spin_until_future_complete(node, future, timeout_sec=5.0)
+                
+                if future.result() is not None:
+                    received_times += 1
+                else:
+                    node.get_logger().error(f'Request {i+1} failed')
+            except Exception as e:
+                node.get_logger().error(f'Service call {i+1} failed: {e}')
+        
+        # Log completion
+        diff = time.time() - start_time
+        milliseconds, seconds = math.modf(diff)
+        node.get_logger().info(f'Benchmark took {int(seconds)} seconds and '
+                              f'{round(milliseconds * 1000)} milliseconds.')
+        node.get_logger().info(f'Successfully received {received_times}/{args.run} responses')
+        
+        node.destroy_node()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        rclpy.try_shutdown()
 
 if __name__ == '__main__':
-  main()
+    main()

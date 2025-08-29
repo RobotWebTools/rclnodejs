@@ -14,17 +14,34 @@
 # limitations under the License.
 
 import rclpy
-from std_msgs.msg import *
+from rclpy.node import Node
+from std_msgs.msg import UInt8MultiArray
 
-def callback(msg):
-  pass
+class StressSubscriber(Node):
+    def __init__(self):
+        super().__init__('stress_subscription_rclpy')
+        self.subscription = self.create_subscription(
+            UInt8MultiArray,
+            'stress_topic',
+            self.listener_callback,
+            10)
+        self.subscription  # prevent unused variable warning
+        self.get_logger().info('Subscription node ready to receive messages')
+
+    def listener_callback(self, msg):
+        # Just consume the message for benchmarking
+        pass
 
 def main():
-  rclpy.init()
-  node = rclpy.create_node('stress_subscription_rclpy')
-  subscription = node.create_subscription(UInt8MultiArray, 'stress_topic', callback, 10)
-  while rclpy.ok():
-    rclpy.spin_once(node)
+    rclpy.init()
+    
+    try:
+        stress_subscriber = StressSubscriber()
+        rclpy.spin(stress_subscriber)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        rclpy.try_shutdown()
 
 if __name__ == '__main__':
-  main()
+    main()

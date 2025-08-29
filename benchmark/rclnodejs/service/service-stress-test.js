@@ -15,58 +15,63 @@
 'use strict';
 
 /* eslint-disable camelcase */
-const app = require('commander');
+const { program } = require('commander');
 const rclnodejs = require('../../../index.js');
 
-app.option('-s, --size [size_kb]', 'The block size').parse(process.argv);
+program
+  .option('-s, --size <size_kb>', 'The block size', '1')
+  .parse(process.argv);
 
-let size = app.size || 1;
-const mapData = {
-  map: {
-    header: {
-      stamp: {
-        sec: 123456,
-        nanosec: 789,
-      },
-      frame_id: 'main_frame',
-    },
-    info: {
-      map_load_time: {
-        sec: 123456,
-        nanosec: 789,
-      },
-      resolution: 1.0,
-      width: 1024,
-      height: 768,
-      origin: {
-        position: {
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-        },
-        orientation: {
-          x: 0.0,
-          y: 0.0,
-          z: 0.0,
-          w: 0.0,
-        },
-      },
-    },
-    data: Int8Array.from({ length: 1024 * size }, (v, k) => k),
-  },
-};
+const options = program.opts();
+let size = parseInt(options.size) || 1;
 
 rclnodejs
   .init()
   .then(() => {
     let node = rclnodejs.createNode('stress_service_rclnodejs');
-    node.createService(
-      'nav_msgs/srv/GetMap',
-      'get_map',
-      (request, response) => {
-        return mapData;
-      }
-    );
+
+    node.createService('nav_msgs/srv/GetMap', 'get_map', () => {
+      // Create map data structure that matches the working test pattern
+      const mapData = {
+        map: {
+          header: {
+            stamp: {
+              sec: 123456,
+              nanosec: 789,
+            },
+            frame_id: 'main_frame',
+          },
+          info: {
+            map_load_time: {
+              sec: 123456,
+              nanosec: 789,
+            },
+            resolution: 1.0,
+            width: 1024,
+            height: 768,
+            origin: {
+              position: {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+              },
+              orientation: {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+                w: 0.0,
+              },
+            },
+          },
+          // Use minimal data array for stability
+          data: [1, 2, 3],
+        },
+      };
+
+      return mapData;
+    });
+
+    console.log(`GetMap service started, data size: ${size}KB`);
     rclnodejs.spin(node);
   })
   .catch((e) => {

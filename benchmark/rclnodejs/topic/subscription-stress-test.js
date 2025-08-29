@@ -16,17 +16,35 @@
 
 const rclnodejs = require('../../../index.js');
 
-rclnodejs
-  .init()
-  .then(() => {
+async function main() {
+  try {
+    await rclnodejs.init();
+
     const node = rclnodejs.createNode('stress_subscription_rclnodejs');
+
     node.createSubscription(
       'std_msgs/msg/UInt8MultiArray',
       'stress_topic',
-      (array) => {}
+      (message) => {
+        // Just consume the message for benchmarking
+        // In a real scenario, you might process the message here
+      }
     );
-    rclnodejs.spin(node);
-  })
-  .catch((e) => {
-    console.log(e);
-  });
+
+    node.getLogger().info('Subscription node ready to receive messages');
+
+    // Set up graceful shutdown
+    process.on('SIGINT', async () => {
+      node.getLogger().info('Shutting down subscription node...');
+      await rclnodejs.shutdown();
+      process.exit(0);
+    });
+
+    await rclnodejs.spin(node);
+  } catch (error) {
+    console.error('Error in subscription stress test:', error);
+    process.exit(1);
+  }
+}
+
+main();
