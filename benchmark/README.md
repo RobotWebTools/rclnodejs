@@ -7,6 +7,7 @@ Performance benchmarks for comparing ROS 2 client libraries: C++ (rclcpp), Pytho
 1. **ROS 2**: Install from [ros.org](https://docs.ros.org/en/jazzy/Installation.html)
 2. **Node.js**: v16+ for rclnodejs (from [nodejs.org](https://nodejs.org/))
 3. **rclnodejs**: Follow [installation guide](https://github.com/RobotWebTools/rclnodejs#installation)
+4. **Build Dependencies**: For C++ benchmarks: `sudo apt install libssl-dev cmake build-essential`
 
 ## Benchmark Structure
 
@@ -16,7 +17,6 @@ Each client library has identical benchmark tests:
 | ----------- | ------------------------------------------- |
 | **topic**   | Publisher/subscriber performance            |
 | **service** | Client/service request-response performance |
-| **startup** | Node initialization time                    |
 
 ## Performance Results
 
@@ -24,15 +24,16 @@ Each client library has identical benchmark tests:
 
 **Hardware:**
 
-- **CPU:** Intel(R) Core(TM) i9-10900X @ 3.70GHz (10 cores, 20 threads)
-- **Memory:** 32GB RAM
+- **CPU:** 11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz (4 cores, 8 threads)
+- **Memory:** 8GB RAM
 - **Architecture:** x86_64
 
 **Software:**
 
 - **OS:** Ubuntu 24.04.3 LTS (WSL2)
+- **Kernel:** 6.6.87.2-microsoft-standard-WSL2
 - **ROS 2:** Jazzy distribution
-- **C++ Compiler:** GCC 13.3.0
+- **C++ Compiler:** GCC 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04)
 - **Python:** 3.12.3
 - **Node.js:** v22.18.0
 
@@ -40,21 +41,22 @@ Each client library has identical benchmark tests:
 
 Benchmark parameters: 1000 iterations, 1024KB message size
 
-| Client Library          | Topic (ms) | Service (ms) | Performance Ratio      |
-| ----------------------- | ---------- | ------------ | ---------------------- |
-| **rclcpp (C++)**        | 437        | 8,129        | Baseline (fastest)     |
-| **rclpy (Python)**      | 2,294      | 25,519       | 5.3x / 3.1x slower     |
-| **rclnodejs (Node.js)** | 2,075      | 3,420\*      | 4.7x / 2.4x faster\*\* |
+| Client Library          | Topic (ms) | Service (ms) | Performance Ratio   |
+| ----------------------- | ---------- | ------------ | ------------------- |
+| **rclcpp (C++)**        | 168        | 627          | Baseline (fastest)  |
+| **rclpy (Python)**      | 1,618      | 15,380       | 9.6x / 24.5x slower |
+| **rclnodejs (Node.js)** | 744        | 927          | 4.4x / 1.5x slower  |
 
-_Last updated: August 29, 2025_
+_Last updated: August 30, 2025_
 
 **Notes:**
 
 - Topic benchmarks: All libraries completed successfully with 1024KB messages
-- Service benchmarks: C++ and Python completed with 1024KB responses; Node.js completed with minimal data
-- \*Node.js service uses minimal response data due to serialization issues with large (1024KB) payloads
-- \*\*Node.js service performance is surprisingly good with small data, but not directly comparable due to different data sizes
+- Service benchmarks: All libraries completed successfully with 1024KB responses
 - Performance ratios are relative to C++ baseline
+- C++ shows excellent performance as expected for a compiled language
+- Node.js performs significantly better than Python, likely due to V8 optimizations
+- Python service performance shows significant overhead with large payloads compared to topics
 
 ## Running Benchmarks
 
@@ -62,9 +64,12 @@ _Last updated: August 29, 2025_
 
 ```bash
 cd benchmark/rclcpp/
-colcon build
-./build/rclcpp_benchmark/publisher-stress-test -r 1000 -s 1024
-./build/rclcpp_benchmark/client-stress-test -r 1000
+mkdir -p build && cd build
+source ~/Download/ros2-linux/local_setup.bash  # Adjust path
+cmake .. && make
+# Run from build directory:
+./publisher-stress-test -r 1000 -s 1024
+./client-stress-test -r 1000
 ```
 
 ### Python (rclpy)
@@ -94,12 +99,12 @@ For complete tests, run subscriber/service first, then publisher/client:
 ```bash
 # Terminal 1: Start subscriber (adjust for your language)
 python3 topic/subscription-stress-test.py          # Python
-./build/rclcpp_benchmark/subscription-stress-test  # C++
+./subscription-stress-test                          # C++ (from build dir)
 node benchmark/rclnodejs/topic/subscription-stress-test.js  # Node.js
 
 # Terminal 2: Run publisher benchmark
 python3 topic/publisher-stress-test.py -r 1000 -s 1024     # Python
-./build/rclcpp_benchmark/publisher-stress-test -r 1000 -s 1024  # C++
+./publisher-stress-test -r 1000 -s 1024                    # C++ (from build dir)
 node benchmark/rclnodejs/topic/publisher-stress-test.js -r 1000 -s 1024  # Node.js
 ```
 
@@ -107,13 +112,13 @@ node benchmark/rclnodejs/topic/publisher-stress-test.js -r 1000 -s 1024  # Node.
 
 ```bash
 # Terminal 1: Start service (adjust for your language)
-python3 service/service-stress-test.py             # Python
-./build/rclcpp_benchmark/service-stress-test       # C++
-node benchmark/rclnodejs/service/service-stress-test.js  # Node.js
+python3 service/service-stress-test.py -s 1024             # Python
+./service-stress-test -s 1024                              # C++ (from build dir)
+node benchmark/rclnodejs/service/service-stress-test.js -s 1024  # Node.js
 
 # Terminal 2: Run client benchmark
 python3 service/client-stress-test.py -r 1000      # Python
-./build/rclcpp_benchmark/client-stress-test -r 1000  # C++
+./client-stress-test -r 1000                       # C++ (from build dir)
 node benchmark/rclnodejs/service/client-stress-test.js -r 1000  # Node.js
 ```
 

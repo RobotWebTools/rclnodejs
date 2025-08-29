@@ -43,50 +43,61 @@ async function main() {
         `The client will send a GetMap request continuously until receiving response ${totalTimes} times.`
       );
 
-    // Wait for service to be available - simplified approach
+    // Wait for service to be available using client.waitForService()
     node.getLogger().info('Waiting for service to be available...');
 
-    // Simple wait with spinning
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        node.getLogger().info('Service should be available now');
-        resolve();
-      }, 2000); // Wait 2 seconds for service to start
-    });
+    const serviceAvailable = await client.waitForService(5000); // Wait up to 5 seconds
+    if (!serviceAvailable) {
+      throw new Error(
+        'GetMap service not available after 5 seconds. Make sure the service is running.'
+      );
+    }
+
+    node.getLogger().info('Service is available, starting benchmark...');
+
+    // Start spinning to handle callbacks
+    rclnodejs.spin(node);
 
     // Send requests sequentially using callback pattern
-    const sendRequests = async () => {
-      // Start spinning to handle callbacks
-      rclnodejs.spin(node);
+    let requestPromiseResolve, requestPromiseReject;
+    let currentRequestPromise = null;
 
-      for (let i = 0; i < totalTimes; i++) {
-        try {
-          const response = await new Promise((resolve, reject) => {
-            client.sendRequest({}, (response) => {
-              console.log('send+++');
-              console.log(response);
-              if (response) {
-                resolve(response.map.header);
-              } else {
-                reject(new Error('No response received'));
+    const sendRequests = () => {
+      return new Promise((resolve, reject) => {
+        let requestCount = 0;
+
+        const sendNextRequest = () => {
+          if (requestCount >= totalTimes) {
+            resolve();
+            return;
+          }
+
+          requestCount++;
+          client.sendRequest({}, (response) => {
+            if (response) {
+              receivedTimes++;
+              // Show progress every 100 requests or for small test runs
+              if (receivedTimes % 100 === 0 || totalTimes <= 10) {
+                node
+                  .getLogger()
+                  .info(
+                    `Progress: ${receivedTimes}/${totalTimes} requests completed`
+                  );
               }
-            });
-          });
-          if (response) {
-            receivedTimes++;
-            // Show progress every 100 requests
-            if (receivedTimes % 100 === 0) {
+            } else {
               node
                 .getLogger()
-                .info(
-                  `Progress: ${receivedTimes}/${totalTimes} requests completed`
-                );
+                .error(`Request ${requestCount} failed: No response received`);
             }
-          }
-        } catch (error) {
-          node.getLogger().error(`Request ${i + 1} failed: ${error.message}`);
-        }
-      }
+
+            // Send next request
+            setImmediate(sendNextRequest);
+          });
+        };
+
+        // Start the first request
+        sendNextRequest();
+      });
     };
 
     await sendRequests();
