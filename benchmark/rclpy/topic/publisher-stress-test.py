@@ -14,65 +14,72 @@
 # limitations under the License.
 
 import argparse
-import rclpy
-from builtin_interfaces.msg import *
 import math
-from std_msgs.msg import *
-import threading
-from time import time
+import time
+
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import UInt8MultiArray, MultiArrayDimension, MultiArrayLayout
 
 def main():
-  parser = argparse.ArgumentParser()
-  parser.add_argument("-s", "--size", type=int, help="The block size[kb]")
-  parser.add_argument("-r", "--run", type=int, help="How many times to run")
-  args = parser.parse_args()
-  rclpy.init()
-  if args.size is None:
-    args.size = 1
-  if args.run is None:
-    args.run = 1
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--size", type=int, default=1, help="The block size[kb]")
+    parser.add_argument("-r", "--run", type=int, default=1, help="How many times to run")
+    args = parser.parse_args()
 
-  amount = args.size
-  width_dim = MultiArrayDimension()
-  width_dim.label = 'width'
-  width_dim.size = 20;
-  width_dim.stride = 60;
+    rclpy.init()
+    
+    try:
+        node = Node('stress_publisher_rclpy')
+        
+        # Create publisher
+        publisher = node.create_publisher(UInt8MultiArray, 'stress_topic', 10)
+        
+        # Prepare message
+        width_dim = MultiArrayDimension()
+        width_dim.label = 'width'
+        width_dim.size = 20
+        width_dim.stride = 60
 
-  height_dim = MultiArrayDimension()
-  height_dim.label = 'height'
-  height_dim.size = 10;
-  height_dim.stride = 600;
+        height_dim = MultiArrayDimension()
+        height_dim.label = 'height'
+        height_dim.size = 10
+        height_dim.stride = 600
 
-  channel_dim = MultiArrayDimension()
-  channel_dim.label = 'channel'
-  channel_dim.size = 3;
-  channel_dim.stride = 4;
+        channel_dim = MultiArrayDimension()
+        channel_dim.label = 'channel'
+        channel_dim.size = 3
+        channel_dim.stride = 4
 
-  layout = MultiArrayLayout()
-  layout.dim = [width_dim, height_dim, channel_dim]
-  layout.data_offset = 0;
+        layout = MultiArrayLayout()
+        layout.dim = [width_dim, height_dim, channel_dim]
+        layout.data_offset = 0
 
-  msg = UInt8MultiArray()
-  msg.layout = layout
-  msg.data = [x & 0xff for x in range(1024 * amount)]
-
-  print('The publisher will publish a UInt8MultiArray topic(contains a size of %dKB array) %s times.' % (amount, args.run))
-  start = time()
-  node = rclpy.create_node('stress_publisher_rclpy')
-  publisher = node.create_publisher(UInt8MultiArray, 'stress_topic', 10)
-  total_times = args.run
-  sent_times = 0
-
-  while rclpy.ok():
-    if sent_times > total_times:
-      node.destroy_node()
-      rclpy.shutdown()
-      diff = time() - start
-      milliseconds, seconds = math.modf(diff)
-      print('Benchmark took %d seconds and %d milliseconds.' % (seconds, round(milliseconds * 1000)))
-    else:
-      publisher.publish(msg)
-      sent_times += 1
+        msg = UInt8MultiArray()
+        msg.layout = layout
+        msg.data = [x & 0xff for x in range(1024 * args.size)]
+        
+        node.get_logger().info(f'The publisher will publish a UInt8MultiArray topic '
+                              f'(contains a size of {args.size}KB array) {args.run} times.')
+        
+        start_time = time.time()
+        
+        # Publish messages
+        for i in range(args.run):
+            publisher.publish(msg)
+            rclpy.spin_once(node, timeout_sec=0.001)
+        
+        # Log completion
+        diff = time.time() - start_time
+        milliseconds, seconds = math.modf(diff)
+        node.get_logger().info(f'Benchmark took {int(seconds)} seconds and '
+                              f'{round(milliseconds * 1000)} milliseconds.')
+        
+        node.destroy_node()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        rclpy.try_shutdown()
 
 if __name__ == '__main__':
-  main()
+    main()

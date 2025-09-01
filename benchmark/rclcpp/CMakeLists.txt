@@ -1,10 +1,14 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 
 project(rclcpp_benchmark)
 
-# Default to C++14
+# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
+if(CMAKE_CXX_STANDARD LESS 17)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -39,6 +43,5 @@ custom_executable(publisher-stress-test topic/publisher-stress-test.cpp)
 custom_executable(subscription-stress-test topic/subscription-stress-test.cpp)
 custom_executable(client-stress-test service/client-stress-test.cpp)
 custom_executable(service-stress-test service/service-stress-test.cpp)
-custom_executable(startup-test startup/startup-test.cpp)
 
 ament_package()

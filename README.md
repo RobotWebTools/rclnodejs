@@ -29,6 +29,7 @@ rclnodejs.init().then(() => {
 - [Electron-based Visualization](#electron-based-visualization)
 - [Using TypeScript](#using-rclnodejs-with-typescript)
 - [ROS2 Interface Message Generation](#ros2-interface-message-generation)
+- [Performance Benchmarks](#performance-benchmarks)
 - [Efficient Usage Tips](./docs/EFFICIENCY.md)
 - [FAQ and Known Issues](./docs/FAQ.md)
 - [Building from Scratch](./docs/BUILDING.md)
@@ -138,6 +139,18 @@ To generate messages from IDL files, use the `generate-messages-idl` npm script:
 ```bash
 npm run generate-messages-idl
 ```
+
+## Performance Benchmarks
+
+Benchmark results for 1000 iterations with 1024KB messages (Ubuntu 24.04.3 WSL2, i7-1185G7):
+
+| Library                 | Topic (ms) | Service (ms) |
+| ----------------------- | ---------- | ------------ |
+| **rclcpp (C++)**        | 168        | 627          |
+| **rclnodejs (Node.js)** | 744        | 927          |
+| **rclpy (Python)**      | 1,618      | 15,380       |
+
+See [benchmark/README.md](benchmark/README.md) for details.
 
 ## Contributing
 

@@ -15,26 +15,31 @@
 'use strict';
 
 /* eslint-disable camelcase */
-const app = require('commander');
+const { program } = require('commander');
 const rclnodejs = require('../../../index.js');
 
-app
-  .option('-s, --size [size_kb]', 'The block size')
-  .option('-r, --run <n>', 'How many times to run')
+program
+  .option('-s, --size <size_kb>', 'The block size', '1')
+  .option('-r, --run <n>', 'How many times to run', '1')
   .parse(process.argv);
 
-rclnodejs
-  .init()
-  .then(() => {
-    const time = process.hrtime();
-    let node = rclnodejs.createNode('stress_publisher_rclnodejs');
+const options = program.opts();
+const size = parseInt(options.size) || 1;
+const totalTimes = parseInt(options.run) || 1;
+
+async function main() {
+  try {
+    await rclnodejs.init();
+
+    const startTime = process.hrtime.bigint();
+    const node = rclnodejs.createNode('stress_publisher_rclnodejs');
     const publisher = node.createPublisher(
       'std_msgs/msg/UInt8MultiArray',
       'stress_topic'
     );
+
     let sentTimes = 0;
-    let totalTimes = app.run || 1;
-    let size = app.size || 1;
+
     const message = {
       layout: {
         dim: [
@@ -44,28 +49,50 @@ rclnodejs
         ],
         data_offset: 0,
       },
-      data: Uint8Array.from({ length: 1024 * size }, (v, k) => k),
+      data: new Uint8Array(1024 * size).map((_, index) => index & 0xff),
     };
-    console.log(
-      `The publisher will publish a UInt8MultiArray topic(contains a size of ${size}KB array)` +
-        ` ${totalTimes} times.`
-    );
 
-    setImmediate(() => {
-      while (sentTimes++ < totalTimes) {
-        publisher.publish(message);
-      }
-      rclnodejs.shutdown();
-      const diff = process.hrtime(time);
-      console.log(
-        `Benchmark took ${diff[0]} seconds and ${Math.ceil(
-          diff[1] / 1000000
-        )} milliseconds.`
+    node
+      .getLogger()
+      .info(
+        `The publisher will publish a UInt8MultiArray topic (contains a size of ${size}KB array) ${totalTimes} times.`
       );
-    });
 
-    rclnodejs.spin(node);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+    // Publish messages in a controlled manner
+    const publishMessages = () => {
+      return new Promise((resolve) => {
+        const publishNext = () => {
+          if (sentTimes < totalTimes) {
+            publisher.publish(message);
+            sentTimes++;
+            setImmediate(publishNext);
+          } else {
+            resolve();
+          }
+        };
+        publishNext();
+      });
+    };
+
+    await publishMessages();
+
+    const endTime = process.hrtime.bigint();
+    const diffNanos = endTime - startTime;
+    const diffMillis = Number(diffNanos) / 1000000;
+    const seconds = Math.floor(diffMillis / 1000);
+    const milliseconds = Math.round(diffMillis % 1000);
+
+    node
+      .getLogger()
+      .info(
+        `Benchmark took ${seconds} seconds and ${milliseconds} milliseconds.`
+      );
+
+    await rclnodejs.shutdown();
+  } catch (error) {
+    console.error('Error in publisher stress test:', error);
+    process.exit(1);
+  }
+}
+
+main();
