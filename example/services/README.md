@@ -13,7 +13,9 @@ ROS 2 services provide a request-response communication pattern where clients se
 
 ## Service Examples
 
-### Service Server (`service/service-example.js`)
+### AddTwoInts Service
+
+#### Service Server (`service/service-example.js`)
 
 **Purpose**: Demonstrates creating a service server that adds two integers.
 
@@ -27,9 +29,9 @@ ROS 2 services provide a request-response communication pattern where clients se
 - **Features**:
   - Service introspection (ROS 2 Iron+) for monitoring service calls
   - Proper response handling using `response.template` and `response.send()`
-- **Run Command**: `node service/service-example.js`
+- **Run Command**: `node example/services/service/service-example.js`
 
-### Service Client (`client/client-example.js`)
+#### Service Client (`client/client-example.js`)
 
 **Purpose**: Demonstrates creating a service client that sends requests to the AddTwoInts service.
 
@@ -44,19 +46,57 @@ ROS 2 services provide a request-response communication pattern where clients se
   - Service availability checking with `waitForService()`
   - Service introspection configuration (ROS 2 Iron+)
   - Asynchronous request handling with callbacks
-- **Run Command**: `node client/client-example.js`
+- **Run Command**: `node example/services/client/client-example.js`
+
+### GetMap Service
+
+#### Service Server (`service/getmap-service-example.js`)
+
+**Purpose**: Demonstrates creating a service server that provides occupancy grid map data.
+
+- **Service Type**: `nav_msgs/srv/GetMap`
+- **Service Name**: `get_map`
+- **Functionality**:
+  - Provides a sample 10x10 occupancy grid map
+  - Returns map metadata including resolution, origin, and frame_id
+  - Includes realistic map data with free space and obstacles
+  - Updates timestamp on each request
+- **Features**:
+  - Complex message types (OccupancyGrid with nested structures)
+  - Realistic navigation map data for robotics applications
+  - Service introspection support (ROS 2 Iron+)
+  - Detailed logging of map properties
+- **Run Command**: `node example/services/service/getmap-service-example.js`
+
+#### Service Client (`client/getmap-client-example.js`)
+
+**Purpose**: Demonstrates creating a service client that requests map data from the GetMap service.
+
+- **Service Type**: `nav_msgs/srv/GetMap`
+- **Service Name**: `get_map`
+- **Functionality**:
+  - Sends empty request (GetMap requests have no parameters)
+  - Receives and analyzes occupancy grid map data
+  - Displays comprehensive map information and statistics
+  - Shows ASCII visualization for small maps
+- **Features**:
+  - Handling complex ROS 2 message types (OccupancyGrid)
+  - Map data analysis (cell distribution, metadata extraction)
+  - Educational output showing map properties
+  - Visual representation of map data
+- **Run Command**: `node example/services/client/getmap-client-example.js`
 
 ## How to Run the Examples
 
-### Running the Complete Service Example
+### Running the AddTwoInts Service Example
 
 1. **Prerequisites**: Ensure ROS 2 is installed and sourced
 
 2. **Start the Service Server**: In one terminal, run:
 
    ```bash
-   cd example/services
-   node service/service-example.js
+   cd /path/to/rclnodejs
+   node example/services/service/service-example.js
    ```
 
    You should see:
@@ -68,8 +108,8 @@ ROS 2 services provide a request-response communication pattern where clients se
 3. **Start the Client**: In another terminal, run:
 
    ```bash
-   cd example/services
-   node client/client-example.js
+   cd /path/to/rclnodejs
+   node example/services/client/client-example.js
    ```
 
 4. **Expected Output**:
@@ -89,6 +129,88 @@ ROS 2 services provide a request-response communication pattern where clients se
    Result: object { sum: 79n }
    ```
 
+### Running the GetMap Service Example
+
+1. **Prerequisites**: Ensure ROS 2 is installed and sourced
+
+2. **Start the GetMap Service Server**: In one terminal, run:
+
+   ```bash
+   cd /path/to/rclnodejs
+   node example/services/service/getmap-service-example.js
+   ```
+
+   You should see:
+
+   ```
+   Introspection configured
+   GetMap service is ready. Waiting for requests...
+   Service provides a 10x10 occupancy grid map
+   ```
+
+3. **Start the GetMap Client**: In another terminal, run:
+
+   ```bash
+   cd /path/to/rclnodejs
+   node example/services/client/getmap-client-example.js
+   ```
+
+4. **Expected Output**:
+
+   **Service Server Terminal**:
+
+   ```
+   Incoming GetMap request: object {}
+   Sending map with dimensions: 10 x 10
+   Map resolution: 0.05 meters/pixel
+   Number of occupied cells: 3
+   Sending response: object Map data size: 100
+   --
+   ```
+
+   **Client Terminal**:
+
+   ```
+   GetMap service found. Requesting map...
+   Sending: object {}
+   Response received: object
+   Map metadata:
+     Frame ID: map
+     Timestamp: 1756479378.889000000
+     Resolution: 0.05000000074505806 meters/pixel
+     Dimensions: 10x10
+     Origin position: x: -2.5 y: -2.5 z: 0
+     Map data size: 100 cells
+     Cell distribution:
+       Free cells (0): 97
+       Occupied cells (100): 3
+       Unknown cells (-1): 0
+
+   ASCII Map Representation:
+     . = free space, # = occupied, ? = unknown
+     ..........
+     ..........
+     ..#.......
+     ...#......
+     ....#.....
+     ..........
+     ..........
+     ..........
+     ..........
+     ..........
+   ```
+
+### Quick Test Script
+
+For convenience, you can test the GetMap examples using the provided test script from the project root:
+
+```bash
+cd /path/to/rclnodejs
+./test_getmap_examples.sh
+```
+
+This script automatically starts the service, tests the client, and cleans up.
+
 ### Single Run vs Continuous Operation
 
 - **Client**: Runs once, sends a request, receives response, then shuts down
@@ -101,30 +223,56 @@ ROS 2 services provide a request-response communication pattern where clients se
 - **Request-Response**: Synchronous communication where clients wait for responses
 - **Service Discovery**: Clients check if services are available before sending requests
 - **Error Handling**: Proper handling of service unavailability
+- **Empty Requests**: Services like GetMap that don't require input parameters
+- **Complex Responses**: Handling nested message structures like OccupancyGrid
 
 ### ROS 2 Service Features
 
 - **BigInt Support**: Using JavaScript BigInt for ROS 2 integer types
 - **Service Introspection**: Monitoring service calls and events (ROS 2 Iron+)
 - **Quality of Service**: Configurable QoS profiles for reliable communication
+- **Complex Message Types**: Working with navigation messages (nav_msgs)
+- **Nested Structures**: Handling messages with headers, metadata, and arrays
 
 ### Programming Patterns
 
 - **Async/Await**: Modern JavaScript patterns for asynchronous operations
 - **Callback Handling**: Response processing using callback functions
 - **Resource Management**: Proper node shutdown and cleanup
+- **Data Analysis**: Processing and interpreting received data
+- **Visualization**: Converting data to human-readable formats
+
+### Robotics Applications
+
+- **Navigation**: Map data retrieval for path planning and localization
+- **Occupancy Grids**: Understanding spatial data representation
+- **Coordinate Systems**: Working with map origins, resolutions, and frames
+- **Sensor Data**: Processing grid-based sensor information
 
 ## Service Introspection (ROS 2 Iron+)
 
-Both examples include service introspection capabilities for ROS 2 distributions newer than Humble:
+All examples include service introspection capabilities for ROS 2 distributions newer than Humble:
+
+### AddTwoInts Service
 
 - **Service Server**: Configured with `CONTENTS` introspection to log full request/response data
 - **Client**: Configured with `METADATA` introspection to log service call metadata
 
-To monitor service events, use:
+To monitor AddTwoInts service events:
 
 ```bash
 ros2 topic echo "/add_two_ints/_service_event"
+```
+
+### GetMap Service
+
+- **Service Server**: Configured with `CONTENTS` introspection to log full request/response data
+- **Client**: Configured with `METADATA` introspection to log service call metadata
+
+To monitor GetMap service events:
+
+```bash
+ros2 topic echo "/get_map/_service_event"
 ```
 
 ## Message Types and Data Handling
@@ -140,11 +288,43 @@ int64 b
 int64 sum
 ```
 
-### JavaScript Implementation Details
+**JavaScript Implementation Details**:
 
 - **BigInt Usage**: ROS 2 `int64` maps to JavaScript `BigInt` type
 - **Response Template**: Use `response.template` to get the proper response structure
 - **Response Sending**: Call `response.send(result)` to send the response back
+
+### GetMap Service Definition
+
+```
+# Request
+# Empty - no parameters needed
+---
+# Response
+nav_msgs/OccupancyGrid map
+```
+
+**OccupancyGrid Structure**:
+
+```
+std_msgs/Header header
+  builtin_interfaces/Time stamp
+  string frame_id
+MapMetaData info
+  builtin_interfaces/Time map_load_time
+  float32 resolution
+  uint32 width
+  uint32 height
+  geometry_msgs/Pose origin
+int8[] data
+```
+
+**JavaScript Implementation Details**:
+
+- **Empty Requests**: GetMap requests are empty objects `{}`
+- **Complex Responses**: OccupancyGrid contains nested headers, metadata, and data arrays
+- **Map Data**: Array of int8 values (0=free, 100=occupied, -1=unknown)
+- **Coordinate Systems**: Origin defines the real-world position of the map's (0,0) cell
 
 ## Troubleshooting
 
