@@ -32,10 +32,11 @@ Each client library has identical benchmark tests:
 
 - **OS:** Ubuntu 24.04.3 LTS (WSL2)
 - **Kernel:** 6.6.87.2-microsoft-standard-WSL2
-- **ROS 2:** Jazzy distribution
+- **ROS 2:** [Jazzy Patch Release 6](https://github.com/ros2/ros2/releases/tag/release-jazzy-20250820)
 - **C++ Compiler:** GCC 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04)
 - **Python:** 3.12.3
 - **Node.js:** v22.18.0
+- **rclnodejs:** [v1.5.0](https://www.npmjs.com/package/rclnodejs/v/1.5.0)
 
 ### Benchmark Results
 
