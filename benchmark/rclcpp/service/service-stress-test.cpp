@@ -21,11 +21,10 @@
 #include "rclcpp/rclcpp.hpp"
 
 void ShowUsage(const std::string name) {
-    std::cerr << "Usage: " << name << " [options]\n"
-              << "\nOptions:\n"
-              << "\n--size [size_kb]\tThe block size\n"
-              << "--help            \toutput usage information"
-              << std::endl;
+  std::cerr << "Usage: " << name << " [options]\n"
+            << "\nOptions:\n"
+            << "\n-s, --size [size_kb]\tThe block size\n"
+            << "-h, --help            \toutput usage information" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -35,26 +34,24 @@ int main(int argc, char* argv[]) {
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
     if ((arg == "-h") || (arg == "--help")) {
-        ShowUsage(argv[0]);
-        return 0;
+      ShowUsage(argv[0]);
+      return 0;
     } else if (arg.find("--size=") != std::string::npos) {
-        amount = std::stoi(arg.substr(arg.find("=") + 1));
+      amount = std::stoi(arg.substr(arg.find("=") + 1));
+    } else if (arg == "-s" && i + 1 < argc) {
+      amount = std::stoi(argv[++i]);
     }
   }
 
   auto node = rclcpp::Node::make_shared("stress_service_rclcpp");
-  auto sub = node->create_service<nav_msgs::srv::GetMap>(
+  auto service = node->create_service<nav_msgs::srv::GetMap>(
       "get_map",
-      [amount](const std::shared_ptr<rmw_request_id_t> request_header,
-         const std::shared_ptr<nav_msgs::srv::GetMap::Request> request,
-         const std::shared_ptr<nav_msgs::srv::GetMap::Response> response) {
-        (void)request_header;
+      [amount](const std::shared_ptr<nav_msgs::srv::GetMap::Request> request,
+               std::shared_ptr<nav_msgs::srv::GetMap::Response> response) {
         (void)request;
-        response->map.header.stamp.sec = 123456;
-        response->map.header.stamp.nanosec = 789;
+        response->map.header.stamp = rclcpp::Clock().now();
         response->map.header.frame_id = "main_frame";
-        response->map.info.map_load_time.sec = 123456;
-        response->map.info.map_load_time.nanosec = 789;
+        response->map.info.map_load_time = rclcpp::Clock().now();
         response->map.info.resolution = 1.0;
         response->map.info.width = 1024;
         response->map.info.height = 768;
@@ -64,7 +61,7 @@ int main(int argc, char* argv[]) {
         response->map.info.origin.orientation.x = 0.0;
         response->map.info.origin.orientation.y = 0.0;
         response->map.info.origin.orientation.z = 0.0;
-        response->map.info.origin.orientation.w = 0.0;
+        response->map.info.origin.orientation.w = 1.0;
         response->map.data = std::vector<int8_t>(1024 * amount, 125);
       });
   rclcpp::spin(node);

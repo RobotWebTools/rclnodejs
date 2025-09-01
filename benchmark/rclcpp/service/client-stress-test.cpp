@@ -22,11 +22,10 @@
 #include "utilities.hpp"
 
 void ShowUsage(const std::string name) {
-    std::cerr << "Usage: " << name << " [options]\n"
-              << "\nOptions:\n"
-              << "\n--run <n>     \tHow many times to run\n"
-              << "--help          \toutput usage information"
-              << std::endl;
+  std::cerr << "Usage: " << name << " [options]\n"
+            << "\nOptions:\n"
+            << "\n-r, --run <n>     \tHow many times to run\n"
+            << "-h, --help          \toutput usage information" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -36,15 +35,18 @@ int main(int argc, char* argv[]) {
   for (int i = 1; i < argc; i++) {
     std::string arg = argv[i];
     if ((arg == "-h") || (arg == "--help")) {
-        ShowUsage(argv[0]);
-        return 0;
+      ShowUsage(argv[0]);
+      return 0;
     } else if (arg.find("--run=") != std::string::npos) {
-        total_times = std::stoi(arg.substr(arg.find("=") + 1));
+      total_times = std::stoi(arg.substr(arg.find("=") + 1));
+    } else if (arg == "-r" && i + 1 < argc) {
+      total_times = std::stoi(argv[++i]);
     }
   }
   printf(
       "The client will send a GetMap request continuously until receiving "
-      "response %d times.\n", total_times);
+      "response %d times.\n",
+      total_times);
 
   auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("stress_client_rclcpp");
@@ -52,18 +54,35 @@ int main(int argc, char* argv[]) {
   auto request = std::make_shared<nav_msgs::srv::GetMap::Request>();
   auto received_times = 0;
 
+  // Wait for service to be available
+  while (!client->wait_for_service(std::chrono::seconds(1))) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
+                   "Interrupted while waiting for the service. Exiting.");
+      return 0;
+    }
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
+                "Service not available, waiting again...");
+  }
+
   while (rclcpp::ok()) {
-    if (received_times > total_times) {
+    if (received_times >= total_times) {
       rclcpp::shutdown();
       auto end = std::chrono::high_resolution_clock::now();
       LogTimeConsumption(start, end);
+      break;
     } else {
       auto result_future = client->async_send_request(request);
-      if (rclcpp::spin_until_future_complete(node, result_future) !=
-          rclcpp::executor::FutureReturnCode::SUCCESS) {
-        RCLCPP_ERROR(node->get_logger(), "service call failed.");
+
+      // Spin until future is ready using the node directly
+      auto future_status = rclcpp::spin_until_future_complete(
+          node, result_future, std::chrono::seconds(10));
+
+      if (future_status != rclcpp::FutureReturnCode::SUCCESS) {
+        RCLCPP_ERROR(node->get_logger(), "Service call failed or timed out.");
         return 1;
       }
+
       auto result = result_future.get();
       received_times++;
     }
