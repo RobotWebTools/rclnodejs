@@ -76,6 +76,7 @@ jobs:
         npm run clean
 
     - name: Coveralls Parallel
+      if: ${{ matrix.ros_distribution == 'rolling' && matrix['node-version'] == '24.X' }}
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -84,6 +85,7 @@ jobs:
 
   finish:
       needs: build
+      if: always()
       runs-on: ubuntu-latest
       steps:
       - name: Coveralls Finished
