@@ -1,19 +1,12 @@
-name: Windows
+name: Windows Build and Test (Reusable)
 
 on:
-  push:
-    branches:
-      - develop
-      - kilted
-      - jazzy
-      - humble-hawksbill
-  pull_request:
-    branches:
-      - develop
-      - kilted
-      - jazzy
-      - humble-hawksbill
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      trigger_type:
+        description: 'Type of trigger (pr or push)'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -57,7 +50,7 @@ jobs:
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
         npm i
 
-    # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround 
+    # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround
     # an error when loading the default fastrtps ddl
     - name: Test rclnodejs
       shell: cmd

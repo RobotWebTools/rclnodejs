@@ -1,0 +1,17 @@
+name: Linux x64 - Push to Branches
+
+on:
+  push:
+    branches:
+      - develop
+      - kilted
+      - jazzy
+      - humble-hawksbill
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    uses: ./.github/workflows/linux-x64-build-and-test.yml
+    with:
+      trigger_type: "push"
+    secrets: inherit

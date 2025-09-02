@@ -1,19 +1,12 @@
-name:  Linux arm64
+name: Linux ARM64 Build and Test (Reusable)
 
 on:
-  push:
-    branches:
-      - develop
-      - kilted
-      - jazzy
-      - humble-hawksbill
-  pull_request:
-    branches:
-      - develop
-      - kilted
-      - jazzy
-      - humble-hawksbill
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      trigger_type:
+        description: 'Type of trigger (pr or push)'
+        required: true
+        type: string
 
 defaults:
   run:

@@ -1,19 +1,12 @@
-name:  Linux x64
+name: Build and Test (Reusable)
 
 on:
-  push:
-    branches:
-      - develop
-      - kilted
-      - jazzy
-      - humble-hawksbill
-  pull_request:
-    branches:
-      - develop
-      - kilted
-      - jazzy
-      - humble-hawksbill
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      trigger_type:
+        description: 'Type of trigger (pr or push)'
+        required: true
+        type: string
 
 defaults:
   run:
@@ -86,7 +79,7 @@ jobs:
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        flag-name: run-${{ matrix.node-version }}-${{ matrix.architecture }}
+        flag-name: run-${{ inputs.trigger_type }}-${{ matrix.node-version }}-${{ matrix.architecture }}
         parallel: true
 
   finish:
