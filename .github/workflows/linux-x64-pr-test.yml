@@ -1,0 +1,17 @@
+name: Linux x64 - Pull Request
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - kilted
+      - jazzy
+      - humble-hawksbill
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    uses: ./.github/workflows/linux-x64-build-and-test.yml
+    with:
+      trigger_type: "pr"
+    secrets: inherit

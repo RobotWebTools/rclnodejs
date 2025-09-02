@@ -1,0 +1,17 @@
+name: Windows - Push to Branches
+
+on:
+  push:
+    branches:
+      - develop
+      - kilted
+      - jazzy
+      - humble-hawksbill
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    uses: ./.github/workflows/windows-build-and-test.yml
+    with:
+      trigger_type: "push"
+    secrets: inherit
