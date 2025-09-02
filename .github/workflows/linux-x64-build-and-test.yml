@@ -1,19 +1,12 @@
-name:  Linux x64
+name: Build and Test (Reusable)
 
 on:
-  push:
-    branches:
-      - develop
-      - kilted
-      - jazzy
-      - humble-hawksbill
-  pull_request:
-    branches:
-      - develop
-      - kilted
-      - jazzy
-      - humble-hawksbill
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      trigger_type:
+        description: 'Type of trigger (pr or push)'
+        required: true
+        type: string
 
 defaults:
   run:
@@ -83,14 +76,16 @@ jobs:
         npm run clean
 
     - name: Coveralls Parallel
+      if: ${{ matrix.ros_distribution == 'rolling' && matrix['node-version'] == '24.X' }}
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        flag-name: run-${{ matrix.node-version }}-${{ matrix.architecture }}
+        flag-name: run-${{ inputs.trigger_type }}-${{ matrix.node-version }}-${{ matrix.architecture }}
         parallel: true
 
   finish:
       needs: build
+      if: always()
       runs-on: ubuntu-latest
       steps:
       - name: Coveralls Finished
