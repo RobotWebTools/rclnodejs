@@ -1,4 +1,4 @@
-name: Linux ARM64 - Push to Branches
+name: Linux arm64
 
 on:
   push:

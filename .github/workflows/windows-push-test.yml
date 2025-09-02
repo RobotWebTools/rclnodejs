@@ -1,4 +1,4 @@
-name: Windows - Push to Branches
+name: Windows
 
 on:
   push:
