@@ -17,11 +17,77 @@
 const assert = require('assert');
 const os = require('os');
 const rclnodejs = require('../index.js');
+const path = require('path');
+
+function buildTestMessage() {
+  // Build the custom_msg_test package synchronously before running the test
+  const customMsgTestPath = path.join(__dirname, 'custom_msg_test');
+  const buildResult = require('child_process').spawnSync('colcon', ['build'], {
+    cwd: customMsgTestPath,
+    stdio: 'inherit',
+    timeout: 60000, // 60 second timeout
+  });
+
+  if (buildResult.error) {
+    throw new Error(
+      `Failed to build custom_msg_test package: ${buildResult.error.message}`
+    );
+  }
+
+  if (buildResult.status !== 0) {
+    throw new Error(`colcon build failed with exit code ${buildResult.status}`);
+  }
+
+  // Source the local_setup.sh to get environment variables
+  const setupScriptPath = path.join(
+    customMsgTestPath,
+    'install',
+    'local_setup.sh'
+  );
+  const sourceResult = require('child_process').spawnSync(
+    'bash',
+    ['-c', `source ${setupScriptPath} && env`],
+    {
+      encoding: 'utf8',
+      timeout: 10000, // 10 second timeout
+    }
+  );
+
+  if (sourceResult.error) {
+    throw new Error(
+      `Failed to source setup script: ${sourceResult.error.message}`
+    );
+  }
+
+  if (sourceResult.status !== 0) {
+    throw new Error(
+      `Failed to source setup script with exit code ${sourceResult.status}`
+    );
+  }
+
+  // Parse and apply environment variables to current process
+  const envOutput = sourceResult.stdout;
+  const envLines = envOutput.split('\n');
+
+  envLines.forEach((line) => {
+    const equalIndex = line.indexOf('=');
+    if (equalIndex > 0) {
+      const key = line.substring(0, equalIndex);
+      const value = line.substring(equalIndex + 1);
+
+      // Only update AMENT_PREFIX_PATH from the subprocess
+      if (key === 'AMENT_PREFIX_PATH') {
+        process.env[key] = value;
+      }
+    }
+  });
+}
 
 describe('ROSIDL Node.js message generator test suite', function () {
-  before(function () {
-    this.timeout(60 * 1000);
-    return rclnodejs.init();
+  this.timeout(60 * 1000);
+
+  before(async function () {
+    await rclnodejs.init();
   });
 
   after(function () {
@@ -219,5 +285,19 @@ describe('ROSIDL Node.js message generator test suite', function () {
     array.size = 6;
     assert.equal(array.size, 6);
     assert.equal(array.capacity, 6);
+  });
+
+  it('Generate message at runtime', function () {
+    const amentPrefixPathOriginal = process.env.AMENT_PREFIX_PATH;
+    buildTestMessage();
+
+    assert.doesNotThrow(() => {
+      const Testing = rclnodejs.require('custom_msg_test/msg/Testing');
+      const t = new Testing();
+      assert.equal(typeof t, 'object');
+      assert.equal(typeof t.x, 'number');
+      assert.equal(typeof t.data, 'string');
+    }, 'This function should not throw');
+    process.env.AMENT_PREFIX_PATH = amentPrefixPathOriginal;
   });
 });

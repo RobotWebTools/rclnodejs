@@ -53,6 +53,35 @@ async function generateInPath(path) {
   );
 }
 
+function generateInPathSyncWorker(targetPath) {
+  try {
+    // Use child_process.spawnSync for truly synchronous execution
+    const result = require('child_process').spawnSync(
+      'node',
+      [path.join(__dirname, 'generate_worker.js')],
+      {
+        env: { ...process.env, WORKER_TARGET_PATH: targetPath },
+        encoding: 'utf8',
+        timeout: 30000,
+      }
+    );
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    if (result.status !== 0) {
+      throw new Error(
+        `Worker process exited with code ${result.status}. stderr: ${result.stderr}`
+      );
+    }
+
+    return result.stdout;
+  } catch (error) {
+    throw error;
+  }
+}
+
 async function generateAll(forcedGenerating) {
   // If we want to create the JavaScript files compulsively (|forcedGenerating| equals to true)
   // or the JavaScript files have not been created (|exist| equals to false),
@@ -86,7 +115,9 @@ const generator = {
 
   generateAll,
   generateInPath,
+  generateInPathSyncWorker,
   generatedRoot,
+  getInstalledPackagePaths,
 };
 
 module.exports = generator;
