@@ -140,6 +140,8 @@ To generate messages from IDL files, use the `generate-messages-idl` npm script:
 npm run generate-messages-idl
 ```
 
+\* This step is not needed for rclnodejs > 1.5.0
+
 ## Performance Benchmarks
 
 Benchmark results for 1000 iterations with 1024KB messages (Ubuntu 24.04.3 WSL2, i7-1185G7):
