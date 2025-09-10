@@ -19,34 +19,11 @@ const os = require('os');
 const rclnodejs = require('../index.js');
 const path = require('path');
 
-function buildTestMessage() {
-  // Build the custom_msg_test package synchronously before running the test
-  const customMsgTestPath = path.join(__dirname, 'custom_msg_test');
-  const buildResult = require('child_process').spawnSync('colcon', ['build'], {
-    cwd: customMsgTestPath,
-    stdio: 'inherit',
-    timeout: 60000, // 60 second timeout
-  });
-
-  if (buildResult.error) {
-    throw new Error(
-      `Failed to build custom_msg_test package: ${buildResult.error.message}`
-    );
-  }
-
-  if (buildResult.status !== 0) {
-    throw new Error(`colcon build failed with exit code ${buildResult.status}`);
-  }
-
+function sourceSetupScript(setupPath) {
   // Source the local_setup.sh to get environment variables
-  const setupScriptPath = path.join(
-    customMsgTestPath,
-    'install',
-    'local_setup.sh'
-  );
   const sourceResult = require('child_process').spawnSync(
     'bash',
-    ['-c', `source ${setupScriptPath} && env`],
+    ['-c', `source ${setupPath} && env`],
     {
       encoding: 'utf8',
       timeout: 10000, // 10 second timeout
@@ -81,6 +58,34 @@ function buildTestMessage() {
       }
     }
   });
+}
+
+function buildTestMessage() {
+  // Build the custom_msg_test package synchronously before running the test
+  const customMsgTestPath = path.join(__dirname, 'custom_msg_test');
+  const buildResult = require('child_process').spawnSync('colcon', ['build'], {
+    cwd: customMsgTestPath,
+    stdio: 'inherit',
+    timeout: 60000, // 60 second timeout
+  });
+
+  if (buildResult.error) {
+    throw new Error(
+      `Failed to build custom_msg_test package: ${buildResult.error.message}`
+    );
+  }
+
+  if (buildResult.status !== 0) {
+    throw new Error(`colcon build failed with exit code ${buildResult.status}`);
+  }
+
+  // Source the local_setup.sh to get environment variables
+  const setupScriptPath = path.join(
+    customMsgTestPath,
+    'install',
+    'local_setup.sh'
+  );
+  sourceSetupScript(setupScriptPath);
 }
 
 describe('ROSIDL Node.js message generator test suite', function () {
@@ -289,15 +294,18 @@ describe('ROSIDL Node.js message generator test suite', function () {
 
   it('Generate message at runtime', function () {
     const amentPrefixPathOriginal = process.env.AMENT_PREFIX_PATH;
-    buildTestMessage();
+    try {
+      buildTestMessage();
 
-    assert.doesNotThrow(() => {
-      const Testing = rclnodejs.require('custom_msg_test/msg/Testing');
-      const t = new Testing();
-      assert.equal(typeof t, 'object');
-      assert.equal(typeof t.x, 'number');
-      assert.equal(typeof t.data, 'string');
-    }, 'This function should not throw');
-    process.env.AMENT_PREFIX_PATH = amentPrefixPathOriginal;
+      assert.doesNotThrow(() => {
+        const Testing = rclnodejs.require('custom_msg_test/msg/Testing');
+        const t = new Testing();
+        assert.equal(typeof t, 'object');
+        assert.equal(typeof t.x, 'number');
+        assert.equal(typeof t.data, 'string');
+      }, 'This function should not throw');
+    } finally {
+      process.env.AMENT_PREFIX_PATH = amentPrefixPathOriginal;
+    }
   });
 });
