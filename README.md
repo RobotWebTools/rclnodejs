@@ -1,16 +1,16 @@
 # rclnodejs - The ROS 2 Client Library for JavaScript
 
-[![npm](https://img.shields.io/npm/v/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs)[![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=develop)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=develop)[![npm](https://img.shields.io/npm/dm/rclnodejs)](https://www.npmjs.com/package/rclnodejs)[![GitHub license](https://img.shields.io/github/license/RobotWebTools/rclnodejs.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE)[![node](https://img.shields.io/node/v/rclnodejs.svg)](https://nodejs.org/en/download/releases/)[![npm type definitions](https://img.shields.io/npm/types/rclnodejs)](https://www.npmjs.com/package/rclnodejs)[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![npm](https://img.shields.io/npm/v/rclnodejs.svg)](https://www.npmjs.com/package/rclnodejs) [![Coverage Status](https://coveralls.io/repos/github/RobotWebTools/rclnodejs/badge.svg?branch=develop)](https://coveralls.io/github/RobotWebTools/rclnodejs?branch=develop) [![npm](https://img.shields.io/npm/dm/rclnodejs)](https://www.npmjs.com/package/rclnodejs) [![GitHub license](https://img.shields.io/github/license/RobotWebTools/rclnodejs.svg)](https://github.com/RobotWebTools/rclnodejs/blob/develop/LICENSE) [![node](https://img.shields.io/node/v/rclnodejs.svg)](https://nodejs.org/en/download/releases/) [![npm type definitions](https://img.shields.io/npm/types/rclnodejs)](https://www.npmjs.com/package/rclnodejs) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
-|           **ROS Distro\***           |                                                                                                                                                                                                                                                                                                                                                           **Status**                                                                                                                                                                                                                                                                                                                                                           |
-| :----------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| Rolling<br>Kilted<br>Jazzy<br>Humble | [![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml?query=branch%3Adevelop)<br> [![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml?query=branch%3Adevelop)<br> [![Windows](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml?query=branch%3Adevelop) |
+|           **ROS Distro\***           |                                                                                                                                                                                                                                                                                                                                                          **Status**                                                                                                                                                                                                                                                                                                                                                          |
+| :----------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| Rolling<br>Kilted<br>Jazzy<br>Humble | [![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml?query=branch%3Adevelop)<br>[![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml?query=branch%3Adevelop)<br>[![Windows](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml?query=branch%3Adevelop) |
 
-\* rclnodejs development and maintenance is limited to the ROS 2 LTS releases and the Rolling development branch
+> **Note:** rclnodejs development and maintenance is limited to the ROS 2 LTS releases and the Rolling development branch
 
 **rclnodejs** is a Node.js client library for [ROS 2](https://www.ros.org/) that provides comprehensive JavaScript and TypeScript APIs for developing ROS 2 solutions.
 
-```JavaScript
+```javascript
 const rclnodejs = require('rclnodejs');
 rclnodejs.init().then(() => {
   const node = new rclnodejs.Node('publisher_example_node');
@@ -48,7 +48,7 @@ rclnodejs.init().then(() => {
 npm i rclnodejs
 ```
 
-- **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
+> **Note:** To install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
 
 See the [features](./docs/FEATURES.md) and try the [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) to get started.
 
@@ -56,7 +56,7 @@ See the [features](./docs/FEATURES.md) and try the [examples](https://github.com
 
 [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) is a companion project we recently launched to provide a commandline interface to a set of developer tools for working with this `rclnodejs`. You may find `rclnodejs-cli` particularly useful if you plan to create ROS 2 node(s) and launch files for working with multiple node orchestrations.
 
-```
+```bash
 Usage: rclnodejs [command] [options]
 
 Options:
@@ -112,7 +112,7 @@ See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/t
 
 ROS client libraries convert IDL message descriptions into target language source code. rclnodejs provides the `generate-ros-messages` script to generate JavaScript message interface files and TypeScript declarations.
 
-Example usage:
+**Example usage:**
 
 ```javascript
 import * as rclnodejs from 'rclnodejs';
@@ -130,6 +130,8 @@ npx generate-ros-messages
 
 Generated files are located at `<yourproject>/node_modules/rclnodejs/generated/`.
 
+> **Note:** This step is not needed for rclnodejs > 1.5.0
+
 ### IDL Message Generation
 
 In addition to the standard ROS2 message generation (`.msg`, `.srv`, and `.action`), rclnodejs provides advanced support for generating JavaScript message files directly from IDL (Interface Definition Language) files. This feature is particularly useful when working with custom IDL files or when you need more control over the message generation process.
@@ -139,8 +141,6 @@ To generate messages from IDL files, use the `generate-messages-idl` npm script:
 ```bash
 npm run generate-messages-idl
 ```
-
-\* This step is not needed for rclnodejs > 1.5.0
 
 ## Performance Benchmarks
 
