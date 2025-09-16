@@ -23,6 +23,8 @@ rclnodejs.init().then(() => {
 - [Node.js](https://nodejs.org/en/) version >= 16.13.0
 - [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html) - **Don't forget to [source the setup file](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#source-the-setup-files)**
 
+> **Docker:** Use official ROS images from [hub.docker.com/\_/ros](https://hub.docker.com/_/ros) for containerized builds.
+
 ### Install rclnodejs
 
 ```bash
