@@ -50,6 +50,8 @@ npm i rclnodejs
 
 > **Note:** To install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
 
+> **Docker:** For containerized development, see the included [Dockerfile](./Dockerfile) for building and testing with different ROS distributions and Node.js versions.
+
 See the [features](./docs/FEATURES.md) and try the [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) to get started.
 
 ## rclnodejs-cli
