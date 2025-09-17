@@ -73,9 +73,12 @@ See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/t
 
 Create rich, interactive desktop applications using Electron and web technologies like Three.js. Build 3D visualizations, monitoring dashboards, and control interfaces that run on Windows, macOS, and Linux.
 
-Try the `electron_demo/turtle_tf2` demo for real-time coordinate frame visualization with dynamic transforms and keyboard-controlled turtle movement. More examples in [electron_demo](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo).
+|                                                  Demo                                                   |                                                              Description                                                              |                                                           Screenshot                                                            |
+| :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------: |
+|  **🐢 [turtle_tf2](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo/turtle_tf2)**  |  Real-time coordinate frame visualization with turtle control. Features TF2 transforms, keyboard control, and dynamic frame updates.  |  ![turtle_tf2](https://github.com/RobotWebTools/rclnodejs/blob/develop/electron_demo/turtle_tf2/turtle-tf2-demo.png?raw=true)   |
+| **🦾 [manipulator](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo/manipulator)** | Interactive two-joint robotic arm simulation. Features 3D joint visualization, manual/automatic control, and visual movement markers. | ![manipulator](https://github.com/RobotWebTools/rclnodejs/blob/develop/electron_demo/manipulator/manipulator-demo.png?raw=true) |
 
-![demo screenshot](https://github.com/RobotWebTools/rclnodejs/blob/develop/electron_demo/turtle_tf2/turtle-tf2-demo.gif?raw=true)
+Explore more examples in [electron_demo](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo).
 
 ## License
 
