@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Two-Joint Manipulator Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            overflow: hidden;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 250px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .control-group input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        .control-group .value {
+            float: right;
+            color: #00ff00;
+        }
+        
+        #status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 200px;
+        }
+        
+        #info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            max-width: 300px;
+        }
+        
+        .status-connected {
+            color: #00ff00;
+        }
+        
+        .status-disconnected {
+            color: #ff0000;
+        }
+        
+        .joint-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        
+        button {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        
+        button:hover {
+            background: #666;
+        }
+        
+        button:active {
+            background: #222;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-container"></div>
+        
+        <div id="controls">
+            <h3>Manipulator Control</h3>
+            
+            <div class="control-group">
+                <label>Joint 1 (Base): <span class="value" id="joint1-value">0.00°</span></label>
+                <small style="color: #ff4444;">🔴 Red markers - Rotates entire arm around vertical axis</small>
+                <input type="range" id="joint1-slider" min="-180" max="180" value="0" step="1">
+            </div>
+            
+            <div class="control-group">
+                <label>Joint 2 (Elbow): <span class="value" id="joint2-value">0.00°</span></label>
+                <small style="color: #44ff44;">🟢 Green markers - Bends upper arm segment</small>
+                <input type="range" id="joint2-slider" min="-135" max="135" value="0" step="1">
+            </div>
+            
+            <div class="control-group">
+                <button id="animate-btn">Start Animation</button>
+                <button id="reset-btn">Reset Position</button>
+            </div>
+        </div>
+        
+        <div id="status">
+            <h3>ROS2 Status</h3>
+            <div id="connection-status" class="status-disconnected">Disconnected</div>
+            <div id="topic-info">
+                <div>Topic: /joint_states</div>
+                <div>Frequency: <span id="frequency">0.0 Hz</span></div>
+                <div>Messages: <span id="msg-count">0</span></div>
+            </div>
+        </div>
+        
+        <div id="info">
+            <h4>Two-Joint Manipulator Demo</h4>
+            <p>This demo shows a simple 2-DOF robotic arm using:</p>
+            <ul>
+                <li><strong>Electron</strong> - Desktop application framework</li>
+                <li><strong>rclnodejs</strong> - ROS2 JavaScript client</li>
+                <li><strong>Three.js</strong> - 3D visualization</li>
+                <li><strong>JointState</strong> - ROS2 sensor_msgs</li>
+            </ul>
+            <p>Use the sliders to control joint angles or start automatic animation.</p>
+            <hr>
+            <h5>🎯 What to Look For:</h5>
+            <ul>
+                <li><strong style="color: #ff4444;">🔴 Red Ring</strong> - Joint 1 (Base) - Should rotate entire arm</li>
+                <li><strong style="color: #44ff44;">🟢 Green Ring</strong> - Joint 2 (Elbow) - Should bend upper arm</li>
+                <li><strong style="color: #ffffff;">⚪ White Ring</strong> - Fixed base reference</li>
+                <li><strong>🔺 Arrows</strong> - Show rotation directions</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>
