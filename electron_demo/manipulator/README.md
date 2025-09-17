@@ -42,7 +42,6 @@ An interactive Electron application demonstrating a two-joint robotic manipulato
 ## 📜 Available Scripts
 
 - **`npm start`** - Run demo (requires manual ROS2 environment setup)
-- **`npm run start-with-ros2`** - Run demo with automatic ROS2 environment setup (recommended)
 - **`npm run rebuild`** - Rebuild native modules after dependency changes
 
 ## 🚀 Quick Start
@@ -58,18 +57,7 @@ npm start
 - ✅ **Pure visualization and manual control**
 - ⚠️ No ROS2 topic publishing (local mode only)
 
-### Option 2: Full ROS2 Integration (Recommended)
-
-```bash
-npm run start-with-ros2
-```
-
-- ✅ **Automatically sources ROS2 environment**
-- ✅ **Publishes to `/joint_states` topic**
-- ✅ **Full ROS2 ecosystem integration**
-- ✅ **No manual environment setup needed**
-
-### Option 3: Manual ROS2 Setup
+### Option 2: Manual ROS2 Setup (Recommended for ROS2 Integration)
 
 1. **Source your ROS2 environment**:
 
@@ -81,6 +69,10 @@ npm run start-with-ros2
    ```bash
    npm start
    ```
+
+- ✅ **Publishes to `/joint_states` topic**
+- ✅ **Full ROS2 ecosystem integration**
+- ✅ **Real-time ROS2 message monitoring**
 
 ## 🎮 Usage
 
@@ -259,10 +251,7 @@ manipulator/
 1. **"librcl.so not found"**
 
    ```bash
-   # Use the convenient script (recommended)
-   npm run start-with-ros2
-
-   # Or manually source ROS2
+   # Source ROS2 environment manually
    source /opt/ros/humble/setup.bash  # or your ROS2 installation path
    npm start
    ```
