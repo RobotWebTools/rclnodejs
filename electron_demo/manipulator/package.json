@@ -1,0 +1,29 @@
+{
+  "name": "rclnodejs-manipulator-demo",
+  "version": "1.0.0",
+  "description": "Electron application demonstrating a two-joint manipulator visualization using rclnodejs and Three.js",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild"
+  },
+  "keywords": [
+    "Electron",
+    "rclnodejs",
+    "manipulator",
+    "robotics",
+    "joints",
+    "Three.js",
+    "3D",
+    "visualization",
+    "demo"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "rclnodejs": "^1.5.1"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
+    "electron": "^31.7.7"
+  }
+}
