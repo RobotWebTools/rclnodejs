@@ -549,7 +549,7 @@ class TypeDiscoveryTool {
   processTypeDescription(typeName, response) {
     const typeDesc = response.type_description.type_description;
 
-    console.log(`\\n=== Type: ${typeName} ===`);
+    console.log(`\n=== Type: ${typeName} ===`);
     console.log(`Fields (${typeDesc.fields.length}):`);
 
     typeDesc.fields.forEach((field) => {
@@ -615,7 +615,7 @@ class TypeDiscoveryTool {
   }
 
   printSummary() {
-    console.log(`\\n=== Discovery Summary ===`);
+    console.log(`\n=== Discovery Summary ===`);
     console.log(`Discovered ${this.discoveredTypes.size} types:`);
 
     Array.from(this.discoveredTypes.keys())
@@ -718,33 +718,33 @@ class TypeDocumentationGenerator {
   }
 
   generateMarkdown(nodeName) {
-    let markdown = `# Type Documentation for Node: ${nodeName}\\n\\n`;
-    markdown += `Generated on: ${new Date().toISOString()}\\n\\n`;
+    let markdown = `# Type Documentation for Node: ${nodeName}\n\n`;
+    markdown += `Generated on: ${new Date().toISOString()}\n\n`;
 
     this.documentation.forEach((doc) => {
-      markdown += `## ${doc.typeName}\\n\\n`;
-      markdown += `**Topic**: \`${doc.topicName}\`\\n\\n`;
+      markdown += `## ${doc.typeName}\n\n`;
+      markdown += `**Topic**: \`${doc.topicName}\`\n\n`;
 
       if (doc.description.fields.length > 0) {
-        markdown += `### Fields\\n\\n`;
-        markdown += `| Field Name | Type | Default Value |\\n`;
-        markdown += `|------------|------|---------------|\\n`;
+        markdown += `### Fields\n\n`;
+        markdown += `| Field Name | Type | Default Value |\n`;
+        markdown += `|------------|------|---------------|\n`;
 
         doc.description.fields.forEach((field) => {
           const typeStr = this.formatFieldTypeForDoc(field.type);
-          markdown += `| \`${field.name}\` | ${typeStr} | \`${field.default_value || 'N/A'}\` |\\n`;
+          markdown += `| \`${field.name}\` | ${typeStr} | \`${field.default_value || 'N/A'}\` |\n`;
         });
-        markdown += `\\n`;
+        markdown += `\n`;
       }
 
       if (doc.sources.length > 0) {
-        markdown += `### Source Definition\\n\\n`;
-        markdown += `\`\`\`${doc.sources[0].encoding}\\n`;
+        markdown += `### Source Definition\n\n`;
+        markdown += `\`\`\`${doc.sources[0].encoding}\n`;
         markdown += doc.sources[0].raw_file_contents;
-        markdown += `\`\`\`\\n\\n`;
+        markdown += `\`\`\`\n\n`;
       }
 
-      markdown += `---\\n\\n`;
+      markdown += `---\n\n`;
     });
 
     return markdown;
@@ -1008,9 +1008,9 @@ class RecursiveTypeAnalyzer {
   }
 
   printHierarchy() {
-    console.log('\\n=== Type Hierarchy ===');
+    console.log('\n=== Type Hierarchy ===');
     this.typeHierarchy.forEach((typeInfo, typeName) => {
-      console.log(`\\n${typeName}:`);
+      console.log(`\n${typeName}:`);
       typeInfo.fields.forEach((field) => {
         console.log(`  ${field.name}: ${field.type}`);
       });
@@ -1095,7 +1095,7 @@ class TypeServicePerformanceMonitor {
     const minTime = Math.min(...this.queryTimes);
     const maxTime = Math.max(...this.queryTimes);
 
-    console.log('\\n=== Performance Results ===');
+    console.log('\n=== Performance Results ===');
     console.log(`Total queries: ${totalQueries}`);
     console.log(`Successful: ${this.successCount}`);
     console.log(`Failed: ${this.failureCount}`);
