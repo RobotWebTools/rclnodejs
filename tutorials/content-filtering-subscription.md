@@ -25,7 +25,7 @@ The DDS middleware evaluates filter expressions for each published message and o
 
 The following animation illustrates how content filtering works with multiple publishers and a filtered subscriber:
 
-![Content Filtering Animation](https://docs.ros.org/en/kilted/_images/keyed-topics-cft.gif)
+![Content Filtering Animation](resource/keyed-topics-cft.gif)
 
 _This example shows sensors publishing data, with the controller (subscriber) only receiving messages that match the filter criteria. Note how unfiltered messages are dropped at the DDS level before reaching the subscriber._
 
