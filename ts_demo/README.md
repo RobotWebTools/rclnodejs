@@ -28,9 +28,7 @@ Asynchronous actions with progress feedback and cancellation
 - **Action Client**: Sends goals, monitors progress, handles results
 - **Features**: Goal cancellation, feedback processing, result handling
 
-## 📊 Complexity Progression
-
-## ️ TypeScript Features
+## 🛠️ TypeScript Features
 
 ### Type Safety
 
