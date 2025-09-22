@@ -111,16 +111,16 @@ options.contentFilter = {
 };
 ```
 
-````
-
 ## Troubleshooting
 
 **Filter Not Working:**
+
 - Check RMW compatibility (CycloneDDS not supported)
 - Verify parameter syntax (strings need quotes: `"'value'"`)
 - Test with simple expressions first
 
 **Common Mistakes:**
+
 ```javascript
 // ❌ Wrong - JavaScript comparison operator
 { expression: "data !== 0", parameters: [] }
@@ -133,7 +133,7 @@ options.contentFilter = {
 
 // ✅ Correct - string comparison with quotes in parameter
 { expression: "status = %0", parameters: ["'active'"] }
-````
+```
 
 ## RMW Compatibility
 
