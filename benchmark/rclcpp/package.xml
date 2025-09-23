@@ -4,7 +4,7 @@
   <name>rclcpp_benchmark</name>
   <version>0.0.1</version>
   <description>Benchmark for rclcpp</description>
-  <maintainer email="minggang.wang@intel.com">Minggang Wang</maintainer>
+  <maintainer email="minggangw@gmail.com">Minggang Wang</maintainer>
   <license>Apache License 2.0</license>
   
   <buildtool_depend>ament_cmake</buildtool_depend>
