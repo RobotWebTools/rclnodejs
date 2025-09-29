@@ -42,9 +42,11 @@
         './src/rcl_timer_bindings.cpp',
         './src/rcl_utilities.cpp',
         './src/shadow_node.cpp',
+        './third_party/ref-napi/src/ref_napi_bindings.cpp',
       ],
       'include_dirs': [
         '.',
+  './third_party/ref-napi/src',
         '<(ros_include_root)',
         "<!@(node -p \"require('node-addon-api').include\")",
       ],
