@@ -14,7 +14,7 @@
 
 'use strict';
 
-const rclnodejs = require('bindings')('rclnodejs');
+const rclnodejs = require('../lib/native_loader.js');
 
 let deallocator = {
   delayFreeStructMember(refObj, type, name) {
