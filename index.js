@@ -37,7 +37,7 @@ const {
 } = require('./lib/parameter.js');
 const path = require('path');
 const QoS = require('./lib/qos.js');
-const rclnodejs = require('bindings')('rclnodejs');
+const rclnodejs = require('./lib/native_loader.js');
 const tsdGenerator = require('./rostsd_gen/index.js');
 const validator = require('./lib/validator.js');
 const Time = require('./lib/time.js');
