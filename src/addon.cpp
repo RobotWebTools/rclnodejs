@@ -40,6 +40,7 @@
 #include "rcl_type_description_service_bindings.h"
 #endif
 #include "rcl_utilities.h"
+#include "ref_napi_bindings.h"
 #include "shadow_node.h"
 
 bool IsRunningInElectronRenderer(const Napi::Env& env) {
@@ -92,6 +93,8 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
   rclnodejs::InitSerializationBindings(env, exports);
   rclnodejs::ShadowNode::Init(env, exports);
   rclnodejs::RclHandle::Init(env, exports);
+
+  exports.Set("ref", rclnodejs::InitRefNapi(env));
 
 #ifdef DEBUG_ON
   int result = rcutils_logging_set_logger_level(PACKAGE_NAME,

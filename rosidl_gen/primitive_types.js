@@ -14,7 +14,7 @@
 
 'use strict';
 
-const ref = require('@rclnodejs/ref-napi');
+const ref = require('../third_party/ref-napi');
 const StructType = require('@rclnodejs/ref-struct-di')(ref);
 const rclnodejs = require('bindings')('rclnodejs');
 
