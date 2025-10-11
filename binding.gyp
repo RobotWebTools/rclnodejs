@@ -46,7 +46,7 @@
       ],
       'include_dirs': [
         '.',
-  './third_party/ref-napi/src',
+        './third_party/ref-napi/src',
         '<(ros_include_root)',
         "<!@(node -p \"require('node-addon-api').include\")",
       ],
