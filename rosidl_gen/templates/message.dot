@@ -226,7 +226,7 @@ function extractMemberNames(fields) {
 {{? willUseTypedArray}}
 const rclnodejs = require('bindings')('rclnodejs');
 {{?}}
-const ref = require('@rclnodejs/ref-napi');
+const ref = require('../../third_party/ref-napi');
 const StructType = require('@rclnodejs/ref-struct-di')(ref);
 const ArrayType = require('@rclnodejs/ref-array-di')(ref);
 const primitiveTypes = require('../../rosidl_gen/primitive_types.js');
