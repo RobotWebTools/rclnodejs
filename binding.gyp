@@ -104,6 +104,22 @@
             'defines': [
               'OS_WINDOWS'
             ],
+            'conditions': [
+              [
+                'node_major_version >= 23', {
+                  'cflags_cc': [
+                    '-std=c++20'
+                  ]
+                }
+              ],
+              [
+                'node_major_version < 23', {
+                  'cflags_cc': [
+                    '-std=c++17'
+                  ]
+                }
+              ]
+            ],
             'include_dirs': [
               './src/third_party/dlfcn-win32/',
             ],
@@ -113,7 +129,6 @@
             'msvs_settings': {
               'VCCLCompilerTool': {
                 'ExceptionHandling': '2', # /EHsc
-                'AdditionalOptions': ['/std:c++20']
               },
               'VCLinkerTool': {
                 'AdditionalDependencies': ['psapi.lib'],
@@ -132,7 +147,7 @@
               'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
               'CLANG_CXX_LIBRARY': 'libc++',
               'MACOS_DEPLOYMENT_TARGET': '10.12',
-              'CLANG_CXX_LANGUAGE_STANDARD': 'c++20'
+              'CLANG_CXX_LANGUAGE_STANDARD': 'c++17'
             }
           }
         ],

@@ -3,11 +3,6 @@ const assert = require('assert');
 const inspect = require('util').inspect;
 const debug = require('debug')('ref');
 const os = require('os');
-const path = require('path');
-// const addon = require('bindings')({
-//   bindings: 'rclnodejs',
-//   module_root: path.resolve(__dirname, '..', '..', '..'),
-// });
 const addon = require('../../../lib/native_loader.js');
 
 if (!addon || !addon.ref) {
