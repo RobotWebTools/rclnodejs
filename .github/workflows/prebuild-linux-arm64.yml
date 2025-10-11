@@ -49,11 +49,6 @@ jobs:
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
-    - name: Install test-msgs on Linux
-      shell: bash
-      run: |
-        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
-
     - uses: actions/checkout@v5
 
     - name: Install dependencies
