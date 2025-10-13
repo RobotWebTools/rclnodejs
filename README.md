@@ -54,6 +54,26 @@ npm i rclnodejs
 
 See the [features](./docs/FEATURES.md) and try the [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) to get started.
 
+### Prebuilt Binaries
+
+rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This significantly speeds up installation and reduces dependencies.
+
+**Supported Platforms:**
+
+- **Ubuntu 22.04 (Jammy)** - ROS 2 Humble
+- **Ubuntu 24.04 (Noble)** - ROS 2 Jazzy, Kilted, Rolling
+- **Architectures:** x64, arm64
+- **Node.js:** >= 16.20.2 (N-API compatible)
+
+**Force Building from Source:**
+
+If you need to build from source even when a prebuilt binary is available, set the environment variable:
+
+```bash
+export RCLNODEJS_FORCE_BUILD=1
+npm install rclnodejs
+```
+
 ## rclnodejs-cli
 
 [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) is a companion project we recently launched to provide a commandline interface to a set of developer tools for working with this `rclnodejs`. You may find `rclnodejs-cli` particularly useful if you plan to create ROS 2 node(s) and launch files for working with multiple node orchestrations.
