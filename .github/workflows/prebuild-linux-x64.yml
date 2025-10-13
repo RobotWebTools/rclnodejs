@@ -1,0 +1,79 @@
+name: Prebuild Linux x64
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  prebuild:
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.docker_image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22.X]
+        architecture: [x64]
+        ros_distribution:
+          - humble
+          - jazzy
+          - kilted
+        include:
+          # Humble Hawksbill (May 2022 - May 2027)
+          - docker_image: ubuntu:jammy
+            ros_distribution: humble
+            ubuntu_codename: jammy
+          # Jazzy Jalisco (May 2024 - May 2029)
+          - docker_image: ubuntu:noble
+            ros_distribution: jazzy
+            ubuntu_codename: noble
+          # Kilted Kaiju (May 2025 - Dec 2026)
+          - docker_image: ubuntu:noble
+            ros_distribution: kilted
+            ubuntu_codename: noble
+
+    steps:
+    - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
+      uses: actions/setup-node@v5
+      with:
+        node-version: ${{ matrix.node-version }}
+        architecture: ${{ matrix.architecture }}
+
+    - name: Setup ROS2
+      uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: ${{ matrix.ros_distribution }}
+
+    - uses: actions/checkout@v5
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+        npm i
+
+    - name: Generate prebuilt binary
+      shell: bash
+      run: |
+        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+        npm run prebuild
+
+    - name: Upload prebuilt binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: prebuilt-linux-x64-node${{ matrix.node-version }}-${{ matrix.ubuntu_codename }}-${{ matrix.ros_distribution }}
+        path: prebuilds/linux-x64/*.node
+        if-no-files-found: error
+
+    - name: Test loading prebuilt
+      shell: bash
+      run: |
+        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+        node -e "
+          const rclnodejs = require('./index.js');
+          console.log('Successfully loaded rclnodejs with prebuilt binary');
+          console.log('Platform:', process.platform, 'Arch:', process.arch);
+          console.log('ROS_DISTRO:', process.env.ROS_DISTRO);
+        "

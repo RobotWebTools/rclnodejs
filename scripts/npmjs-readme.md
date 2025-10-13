@@ -31,6 +31,26 @@ npm i rclnodejs
 
 - **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
 
+### Prebuilt Binaries
+
+rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This significantly speeds up installation and reduces dependencies.
+
+**Supported Platforms:**
+
+- **Ubuntu 22.04 (Jammy)** - ROS 2 Humble
+- **Ubuntu 24.04 (Noble)** - ROS 2 Jazzy, Kilted
+- **Architectures:** x64, arm64
+- **Node.js:** >= 16.20.2 (N-API compatible)
+
+**Force Building from Source:**
+
+If you need to build from source even when a prebuilt binary is available, set the environment variable:
+
+```bash
+export RCLNODEJS_FORCE_BUILD=1
+npm install rclnodejs
+```
+
 ## Documentation
 
 API [documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html) is available online.
