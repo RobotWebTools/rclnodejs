@@ -15,20 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-
-function detectUbuntuCodename() {
-  if (process.platform !== 'linux') {
-    return null;
-  }
-
-  try {
-    const osRelease = fs.readFileSync('/etc/os-release', 'utf8');
-    const match = osRelease.match(/^VERSION_CODENAME=(.*)$/m);
-    return match ? match[1].trim() : null;
-  } catch {
-    return null;
-  }
-}
+const { detectUbuntuCodename } = require('../lib/utils');
 
 function getRosDistro() {
   return process.env.ROS_DISTRO || null;

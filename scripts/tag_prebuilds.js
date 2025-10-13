@@ -14,16 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
-
-function detectUbuntuCodename() {
-  try {
-    const osRelease = fs.readFileSync('/etc/os-release', 'utf8');
-    const match = osRelease.match(/^VERSION_CODENAME=(.*)$/m);
-    return match ? match[1].trim() : null;
-  } catch (e) {
-    return null;
-  }
-}
+const { detectUbuntuCodename } = require('../lib/utils');
 
 function tagPrebuilds() {
   const rosDistro = process.env.ROS_DISTRO;
