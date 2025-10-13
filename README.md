@@ -61,7 +61,7 @@ rclnodejs ships with prebuilt native binaries for common Linux configurations si
 **Supported Platforms:**
 
 - **Ubuntu 22.04 (Jammy)** - ROS 2 Humble
-- **Ubuntu 24.04 (Noble)** - ROS 2 Jazzy, Kilted, Rolling
+- **Ubuntu 24.04 (Noble)** - ROS 2 Jazzy, Kilted
 - **Architectures:** x64, arm64
 - **Node.js:** >= 16.20.2 (N-API compatible)
 
