@@ -14,19 +14,17 @@
 
 'use strict';
 
-const dot = require('dot');
 const fse = require('fs-extra');
 const path = require('path');
 const parser = require('../rosidl_parser/rosidl_parser.js');
 const actionMsgs = require('./action_msgs.js');
 const DistroUtils = require('../lib/distro.js');
+const generateMessage = require('./templates/message-template.js');
+const generateService = require('./templates/service-template.js');
+const generateAction = require('./templates/action-template.js');
+const generateServiceEvent = require('./templates/service-event-template.js');
 
-dot.templateSettings.strip = false;
-dot.log = process.env.RCLNODEJS_LOG_VERBOSE || false;
 const isDebug = !!process.argv.find((arg) => arg === '--debug');
-const dots = dot.process({
-  path: path.join(__dirname, '../rosidl_gen/templates'),
-});
 
 /**
  * Output generated code to disk. Do not overwrite
@@ -53,7 +51,7 @@ async function generateServiceJSStruct(
     '__' +
     serviceInfo.interfaceName +
     '.js';
-  const generatedSrvCode = dots.service({ serviceInfo: serviceInfo });
+  const generatedSrvCode = generateService({ serviceInfo: serviceInfo });
 
   // We are going to only generate the service JavaScript file if it meets one
   // of the followings:
@@ -74,7 +72,7 @@ async function generateServiceJSStruct(
 
 async function generateServiceEventMsg(serviceInfo, dir) {
   const fileName = serviceInfo.interfaceName + '.msg';
-  const generatedEvent = dots.service_event({ serviceInfo: serviceInfo });
+  const generatedEvent = generateServiceEvent({ serviceInfo: serviceInfo });
 
   return writeGeneratedCode(dir, fileName, generatedEvent).then(() => {
     serviceInfo.interfaceName += '_Event';
@@ -107,7 +105,7 @@ async function generateServiceEventJSStruct(msgInfo, dir) {
   // const AddTwoInts_RequestWrapper = require('../../generated/example_interfaces/example_interfaces__srv__AddTwoInts_Request.js');
   // const AddTwoInts_ResponseWrapper = require('../../generated/example_interfaces/example_interfaces__srv__AddTwoInts_Response.js');
   msgInfo.isServiceEvent = true;
-  const generatedCode = dots.message({
+  const generatedCode = generateMessage({
     messageInfo: msgInfo,
     spec: spec,
     json: JSON.stringify(spec, null, '  '),
@@ -135,7 +133,7 @@ function generateMessageJSStructFromSpec(messageInfo, dir, spec) {
     spec.msgName +
     '.js';
 
-  const generatedCode = dots.message({
+  const generatedCode = generateMessage({
     messageInfo: messageInfo,
     spec: spec,
     json: JSON.stringify(spec, null, '  '),
@@ -275,7 +273,7 @@ async function generateActionJSStruct(actionInfo, dir) {
     '__' +
     actionInfo.interfaceName +
     '.js';
-  const generatedCode = dots.action({ actionInfo: actionInfo });
+  const generatedCode = generateAction({ actionInfo: actionInfo });
   dir = path.join(dir, actionInfo.pkgName);
   const action = writeGeneratedCode(dir, fileName, generatedCode);
 
