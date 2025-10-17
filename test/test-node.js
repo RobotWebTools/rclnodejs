@@ -14,7 +14,7 @@
 
 'use strict';
 
-const IsClose = require('is-close');
+const { isClose } = require('../lib/utils.js');
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertUtils = require('./utils.js');
@@ -387,7 +387,7 @@ describe('rcl node methods testing', function () {
 
     const seconds = Number(time.secondsAndNanoseconds.seconds);
     const dateSeconds = Date.now() / 1000;
-    assert.ok(IsClose.isClose(seconds, dateSeconds, 1));
+    assert.ok(isClose(seconds, dateSeconds, 1));
   });
 
   it('node.getNodeNames', function () {

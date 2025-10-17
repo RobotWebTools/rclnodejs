@@ -17,7 +17,7 @@
 const assert = require('assert');
 const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
-const IsClose = require('is-close');
+const { isClose } = require('../lib/utils.js');
 const rclnodejs = require('../index.js');
 const loader = require('../lib/interface_loader.js');
 
@@ -276,9 +276,9 @@ describe('rclnodejs parameters test suite', function () {
 
   describe('range tests', function () {
     it('Math IsClose test', function () {
-      assert.ok(IsClose.isClose(1.0, 1.0, DEFAULT_NUMERIC_RANGE_TOLERANCE));
-      assert.ok(!IsClose.isClose(1.0, 1.1, DEFAULT_NUMERIC_RANGE_TOLERANCE));
-      assert.ok(IsClose.isClose(1.0, 1.1, 0.11));
+      assert.ok(isClose(1.0, 1.0, DEFAULT_NUMERIC_RANGE_TOLERANCE));
+      assert.ok(!isClose(1.0, 1.1, DEFAULT_NUMERIC_RANGE_TOLERANCE));
+      assert.ok(isClose(1.0, 1.1, 0.11));
     });
 
     it('IntegerRange test', function () {
