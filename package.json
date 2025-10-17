@@ -19,7 +19,7 @@
     "rebuild:dev": "npm run clean && node-gyp -j 16 rebuild --debug",
     "generate-messages": "node scripts/generate_messages.js",
     "generate-messages-idl": "node scripts/generate_messages.js --idl",
-    "generate-messages:dev": "node scripts/generate_messages.js --debug && npx --yes prettier --ignore-path --write generated/**/*.js",
+    "generate-messages:dev": "node scripts/generate_messages.js --debug",
     "generate-tsd-messages": "node scripts/generate_tsd.js",
     "clean": "node-gyp clean && npx rimraf ./generated",
     "install": "node scripts/install.js",
@@ -83,7 +83,6 @@
     "is-close": "^1.3.3",
     "json-bigint": "^1.0.0",
     "node-addon-api": "^8.3.1",
-    "terser": "^5.39.0",
     "walk": "^2.3.15"
   },
   "husky": {
