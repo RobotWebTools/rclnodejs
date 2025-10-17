@@ -15,7 +15,6 @@
 'use strict';
 
 const dot = require('dot');
-const { minify } = require('terser');
 const fse = require('fs-extra');
 const path = require('path');
 const parser = require('../rosidl_parser/rosidl_parser.js');
@@ -37,18 +36,8 @@ const dots = dot.process({
  * @param {string} code
  */
 async function writeGeneratedCode(dir, fileName, code) {
-  let result = null;
-  if (!isDebug && fileName.endsWith('.js')) {
-    try {
-      result = await minify(code);
-    } catch (error) {
-      console.error(`Error minifying ${fileName}:`, error);
-      result = null;
-    }
-  }
-
   await fse.mkdirs(dir);
-  await fse.writeFile(path.join(dir, fileName), result ? result.code : code);
+  await fse.writeFile(path.join(dir, fileName), code.replace(/^\s*\n/gm, ''));
 }
 
 async function generateServiceJSStruct(
