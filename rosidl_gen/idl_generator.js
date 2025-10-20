@@ -14,7 +14,7 @@
 
 'use strict';
 
-const fse = require('fs-extra');
+const fse = require('../lib/utils.js');
 const path = require('path');
 const parser = require('../rosidl_parser/rosidl_parser.js');
 const actionMsgs = require('./action_msgs.js');
