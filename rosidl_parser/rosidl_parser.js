@@ -14,7 +14,7 @@
 
 'use strict';
 
-const compareVersions = require('compare-versions');
+const { compareVersions } = require('../lib/utils.js');
 const path = require('path');
 const execFile = require('child_process').execFile;
 
@@ -22,7 +22,7 @@ const pythonExecutable = require('./py_utils').getPythonExecutable('python3');
 
 const contextSupportedVersion = '21.0.0.0';
 const currentVersion = process.version;
-const isContextSupported = compareVersions.compare(
+const isContextSupported = compareVersions(
   currentVersion.substring(1, currentVersion.length),
   contextSupportedVersion,
   '>='

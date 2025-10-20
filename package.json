@@ -76,7 +76,6 @@
     "@rclnodejs/ref-array-di": "^1.2.2",
     "@rclnodejs/ref-struct-di": "^1.1.1",
     "bindings": "^1.5.0",
-    "compare-versions": "^6.1.1",
     "debug": "^4.4.0",
     "json-bigint": "^1.0.0",
     "node-addon-api": "^8.3.1",
