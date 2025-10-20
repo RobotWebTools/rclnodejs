@@ -18,7 +18,7 @@ const DistroUtils = require('./lib/distro.js');
 const RMWUtils = require('./lib/rmw.js');
 const { Clock, ROSClock } = require('./lib/clock.js');
 const ClockType = require('./lib/clock_type.js');
-const compareVersions = require('compare-versions');
+const { compareVersions } = require('./lib/utils.js');
 const Context = require('./lib/context.js');
 const debug = require('debug')('rclnodejs');
 const Duration = require('./lib/duration.js');
@@ -364,8 +364,7 @@ let rcl = {
 
     const version = await getCurrentGeneratorVersion();
     const forced =
-      version === null ||
-      compareVersions.compare(version, generator.version(), '<');
+      version === null || compareVersions(version, generator.version(), '<');
     if (forced) {
       debug(
         'The generator will begin to create JavaScript code from ROS IDL files...'
