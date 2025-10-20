@@ -14,13 +14,15 @@
 
 'use strict';
 
-const fs = require('fs-extra');
+const fs = require('fs');
+const utils = require('../lib/utils.js');
 const Mocha = require('mocha');
 const os = require('os');
 const path = require('path');
 
-fs.remove(path.join(path.dirname(__dirname), 'generated'), (err) => {
-  if (!err) {
+utils
+  .remove(path.join(path.dirname(__dirname), 'generated'))
+  .then(() => {
     let mocha = new Mocha();
     const testDir = path.join(__dirname, '../test/');
     // eslint-disable-next-line
@@ -45,5 +47,8 @@ fs.remove(path.join(path.dirname(__dirname), 'generated'), (err) => {
         process.exit(failures);
       });
     });
-  }
-});
+  })
+  .catch((err) => {
+    console.error('Failed to clean generated directory:', err);
+    process.exit(1);
+  });

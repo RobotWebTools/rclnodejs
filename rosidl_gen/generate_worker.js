@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const fse = require('fs-extra');
+const fse = require('../lib/utils.js');
 const generateJSStructFromIDL = require('./idl_generator.js');
 const packages = require('./packages.js');
 const path = require('path');
