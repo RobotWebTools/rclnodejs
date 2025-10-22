@@ -13,6 +13,11 @@ declare module 'rclnodejs' {
       };
 
   /**
+   * Valid serialization modes for message conversion
+   */
+  type SerializationMode = 'typed' | 'plain' | 'json';
+
+  /**
    * A filter description similar to a SQL WHERE clause that limits
    * the data wanted by a Subscription.
    *
@@ -57,6 +62,15 @@ declare module 'rclnodejs' {
     isRaw?: boolean;
 
     /**
+     * Controls message serialization format, default: 'typed'.
+     *
+     * - 'typed': Keep TypedArrays for performance
+     * - 'plain': Convert TypedArrays to regular arrays
+     * - 'json': Fully JSON-safe (handles TypedArrays, BigInt, etc.)
+     */
+    serializationMode?: SerializationMode;
+
+    /**
      * ROS Middleware "quality of service" setting, default: QoS.profileDefault.
      */
     qos?: T;
@@ -76,7 +90,8 @@ declare module 'rclnodejs' {
    *   enableTypedArray: true,
    *   qos: QoS.profileDefault,
    *   isRaw: false,
-   *   contentFilter: undefined
+   *   contentFilter: undefined,
+   *   serializationMode: 'typed'
    * }
    * ```
    */
