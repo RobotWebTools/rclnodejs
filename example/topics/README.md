@@ -152,7 +152,7 @@ The `subscriber/` directory contains examples of nodes that subscribe to topics:
 
 - **Message Type**: `sensor_msgs/msg/LaserScan`
 - **Topic**: `scan`
-- **Functionality**: Shows how 'typed', 'plain', and 'json' modes affect message serialization
+- **Functionality**: Shows how 'default', 'plain', and 'json' modes affect message serialization
 - **Features**: Message serialization control for web applications and JSON compatibility
 - **Run Command**: `node subscriber/subscription-serialization-modes-example.js`
 

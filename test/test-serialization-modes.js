@@ -1,4 +1,4 @@
-// Copyright (c) 2024 rclnodejs contributors. All rights reserved.
+// Copyright (c) 2025 Mahmoud Alghalayini. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ describe('Serialization Modes Tests', function () {
 
   it('Test serializationMode option validation', function () {
     assert.doesNotThrow(() => {
-      node._validateOptions({ serializationMode: 'typed' });
+      node._validateOptions({ serializationMode: 'default' });
       node._validateOptions({ serializationMode: 'plain' });
       node._validateOptions({ serializationMode: 'json' });
     });
@@ -105,7 +105,7 @@ describe('Serialization Modes Tests', function () {
       typedSubscription = node.createSubscription(
         'std_msgs/msg/String',
         '/test_topic_typed',
-        { serializationMode: 'typed' },
+        { serializationMode: 'default' },
         () => {}
       );
 
@@ -123,7 +123,7 @@ describe('Serialization Modes Tests', function () {
         () => {}
       );
 
-      assert.strictEqual(typedSubscription.serializationMode, 'typed');
+      assert.strictEqual(typedSubscription.serializationMode, 'default');
       assert.strictEqual(plainSubscription.serializationMode, 'plain');
       assert.strictEqual(jsonSubscription.serializationMode, 'json');
 
@@ -141,6 +141,6 @@ describe('Serialization Modes Tests', function () {
       () => {}
     );
 
-    assert.strictEqual(subscription.serializationMode, 'typed');
+    assert.strictEqual(subscription.serializationMode, 'default');
   });
 });

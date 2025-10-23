@@ -15,7 +15,7 @@ declare module 'rclnodejs' {
   /**
    * Valid serialization modes for message conversion
    */
-  type SerializationMode = 'typed' | 'plain' | 'json';
+  type SerializationMode = 'default' | 'plain' | 'json';
 
   /**
    * A filter description similar to a SQL WHERE clause that limits
@@ -62,9 +62,9 @@ declare module 'rclnodejs' {
     isRaw?: boolean;
 
     /**
-     * Controls message serialization format, default: 'typed'.
+     * Controls message serialization format, default: 'default'.
      *
-     * - 'typed': Keep TypedArrays for performance
+     * - 'default': Use native rclnodejs behavior (respects enableTypedArray setting)
      * - 'plain': Convert TypedArrays to regular arrays
      * - 'json': Fully JSON-safe (handles TypedArrays, BigInt, etc.)
      */
@@ -91,7 +91,7 @@ declare module 'rclnodejs' {
    *   qos: QoS.profileDefault,
    *   isRaw: false,
    *   contentFilter: undefined,
-   *   serializationMode: 'typed'
+   *   serializationMode: 'default'
    * }
    * ```
    */

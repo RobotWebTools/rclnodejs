@@ -1,4 +1,4 @@
-// Copyright (c) 2024 rclnodejs contributors. All rights reserved.
+// Copyright (c) 2025 Mahmoud Alghalayini. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ const rclnodejs = require('../../../index.js');
 /**
  * This example demonstrates the use of serialization modes for subscriptions.
  * Serialization modes allow you to control how TypedArrays are handled in messages:
- * - 'typed' (default): Keep TypedArrays for performance
+ * - 'default': Use native rclnodejs behavior (respects enableTypedArray setting)
  * - 'plain': Convert TypedArrays to regular arrays
  * - 'json': Fully JSON-safe (converts TypedArrays, BigInt, Infinity, etc.)
  */
@@ -27,11 +27,11 @@ async function main() {
   await rclnodejs.init();
   const node = new rclnodejs.Node('serialization_modes_example_node');
 
-  // Default mode: 'typed' - keeps TypedArrays
+  // Default mode: 'default' - uses native rclnodejs behavior
   node.createSubscription(
     'sensor_msgs/msg/LaserScan',
     '/laser_scan',
-    { serializationMode: 'typed' },
+    { serializationMode: 'default' },
     (msg) => {
       console.log(
         `[TYPED] ranges: ${msg.ranges ? msg.ranges.constructor.name : 'undefined'}`
