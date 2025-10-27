@@ -47,6 +47,7 @@ const ActionUuid = require('./lib/action/uuid.js');
 const ClientGoalHandle = require('./lib/action/client_goal_handle.js');
 const { CancelResponse, GoalResponse } = require('./lib/action/response.js');
 const ServerGoalHandle = require('./lib/action/server_goal_handle.js');
+const { toJSONSafe, toJSONString } = require('./lib/message_serialization.js');
 const {
   getActionClientNamesAndTypesByNode,
   getActionServerNamesAndTypesByNode,
@@ -538,6 +539,23 @@ let rcl = {
    * @return {Promise<{process: ChildProcess}>} A Promise that resolves with the process.
    */
   ros2Launch: ros2Launch,
+
+  /**
+   * Convert a message object to be JSON-safe by converting TypedArrays to regular arrays
+   * and handling BigInt, Infinity, NaN, etc. for JSON serialization.
+   * @param {*} obj - The message object to convert
+   * @returns {*} A JSON-safe version of the object
+   */
+  toJSONSafe: toJSONSafe,
+
+  /**
+   * Convert a message object to a JSON string with proper handling of TypedArrays,
+   * BigInt, and other non-JSON-serializable values.
+   * @param {*} obj - The message object to convert
+   * @param {number} [space] - Space parameter for JSON.stringify formatting
+   * @returns {string} The JSON string representation
+   */
+  toJSONString: toJSONString,
 };
 
 const _sigHandler = () => {

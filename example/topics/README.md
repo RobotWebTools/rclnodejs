@@ -146,6 +146,26 @@ The `subscriber/` directory contains examples of nodes that subscribe to topics:
 - **Features**: ROS 2 service introspection capabilities
 - **Run Command**: `node subscriber/subscription-service-event-example.js`
 
+### 8. Serialization Modes Subscriber (`subscription-serialization-modes-example.js`)
+
+**Purpose**: Demonstrates different serialization modes for message handling.
+
+- **Message Type**: `sensor_msgs/msg/LaserScan`
+- **Topic**: `scan`
+- **Functionality**: Shows how 'default', 'plain', and 'json' modes affect message serialization
+- **Features**: Message serialization control for web applications and JSON compatibility
+- **Run Command**: `node subscriber/subscription-serialization-modes-example.js`
+
+### 9. JSON Utilities Subscriber (`subscription-json-utilities-example.js`)
+
+**Purpose**: Demonstrates manual message conversion utilities.
+
+- **Message Type**: `sensor_msgs/msg/LaserScan`
+- **Topic**: `scan`
+- **Functionality**: Shows how to use toJSONSafe and toJSONString utilities for manual conversion
+- **Features**: Manual conversion of TypedArrays, BigInt, and special values for JSON serialization
+- **Run Command**: `node subscriber/subscription-json-utilities-example.js`
+
 ## Validator Example
 
 The `validator/` directory contains validation utilities:
@@ -193,6 +213,7 @@ Several examples work together to demonstrate complete communication:
 - **Raw Messages**: Binary data transmission
 - **Service Events**: Monitoring service interactions
 - **Multi-dimensional Arrays**: Complex data structures with layout information
+- **Message Serialization**: TypedArray handling and JSON-safe conversion for web applications
 - **Validation**: Name and topic validation utilities
 
 ## Notes

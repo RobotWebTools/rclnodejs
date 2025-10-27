@@ -235,4 +235,21 @@ declare module 'rclnodejs' {
     launchFile: string,
     args: string[]
   ): Promise<{ process: ChildProcess }>;
+
+  /**
+   * Convert a message object to be JSON-safe by converting TypedArrays to regular arrays
+   * and handling BigInt, Infinity, NaN, etc. for JSON serialization.
+   * @param obj - The message object to convert
+   * @returns A JSON-safe version of the object
+   */
+  function toJSONSafe(obj: any): any;
+
+  /**
+   * Convert a message object to a JSON string with proper handling of TypedArrays,
+   * BigInt, and other non-JSON-serializable values.
+   * @param obj - The message object to convert
+   * @param space - Space parameter for JSON.stringify formatting
+   * @returns The JSON string representation
+   */
+  function toJSONString(obj: any, space?: number): string;
 }
