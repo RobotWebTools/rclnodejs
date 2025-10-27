@@ -48,6 +48,63 @@ ROS 2 services provide a request-response communication pattern where clients se
   - Asynchronous request handling with callbacks
 - **Run Command**: `node example/services/client/client-example.js`
 
+#### Async Service Client (`client/async-client-example.js`)
+
+**Purpose**: Demonstrates modern async/await patterns for service communication, solving callback hell and providing cleaner error handling.
+
+- **Service Type**: `example_interfaces/srv/AddTwoInts`
+- **Service Name**: `add_two_ints`
+- **Functionality**:
+  - Multiple examples showing different async patterns
+  - Simple async/await calls without callbacks
+  - Timeout handling with configurable timeouts
+  - Request cancellation using AbortController
+  - Sequential and parallel service calls
+  - Comprehensive error handling
+- **Features**:
+  - **Modern JavaScript**: Clean async/await syntax instead of callback hell
+  - **Timeout Support**: Built-in timeout with `options.timeout` (uses `AbortSignal.timeout()` internally)
+  - **Cancellation**: Request cancellation using `AbortController` and `options.signal`
+  - **Error Types**: Specific error types (`TimeoutError`, `AbortError`) for better error handling (async only)
+  - **Backward Compatible**: Works alongside existing callback-based `sendRequest()`
+  - **TypeScript Ready**: Full type safety with comprehensive TypeScript definitions
+- **Run Command**: `node example/services/client/async-client-example.js`
+
+**Key API Differences**:
+
+```javascript
+client.sendRequest(request, (response) => {
+  console.log('Response:', response.sum);
+});
+
+try {
+  const response = await client.sendRequestAsync(request);
+
+  const response = await client.sendRequestAsync(request, { timeout: 5000 });
+
+  const controller = new AbortController();
+  const response = await client.sendRequestAsync(request, {
+    signal: controller.signal,
+  });
+
+  const controller = new AbortController();
+  const response = await client.sendRequestAsync(request, {
+    timeout: 5000,
+    signal: controller.signal,
+  });
+
+  console.log('Response:', response.sum);
+} catch (error) {
+  if (error.name === 'TimeoutError') {
+    console.log('Request timed out');
+  } else if (error.name === 'AbortError') {
+    console.log('Request was cancelled');
+  } else {
+    console.error('Service error:', error.message);
+  }
+}
+```
+
 ### GetMap Service
 
 #### Service Server (`service/getmap-service-example.js`)
@@ -123,6 +180,41 @@ ROS 2 services provide a request-response communication pattern where clients se
    ```
 
    **Client Terminal**:
+
+   ```
+   Sending: object { a: 42n, b: 37n }
+   Result: object { sum: 79n }
+   ```
+
+### Running the Async AddTwoInts Client Example
+
+1. **Prerequisites**: Ensure ROS 2 is installed and sourced
+
+2. **Start the Service Server**: Use the same service server as above:
+
+   ```bash
+   cd /path/to/rclnodejs
+   node example/services/service/service-example.js
+   ```
+
+3. **Start the Async Client**: In another terminal, run:
+
+   ```bash
+   cd /path/to/rclnodejs
+   node example/services/client/async-client-example.js
+   ```
+
+4. **Expected Output**:
+
+   **Service Server Terminal**: (Same as regular client)
+
+   ```
+   Incoming request: object { a: 42n, b: 37n }
+   Sending response: object { sum: 79n }
+   --
+   ```
+
+   **Async Client Terminal**:
 
    ```
    Sending: object { a: 42n, b: 37n }
@@ -236,8 +328,11 @@ This script automatically starts the service, tests the client, and cleans up.
 
 ### Programming Patterns
 
-- **Async/Await**: Modern JavaScript patterns for asynchronous operations
-- **Callback Handling**: Response processing using callback functions
+- **Modern Async/Await**: Clean Promise-based service calls with `sendRequestAsync()`
+- **Traditional Callbacks**: Response processing using callback functions with `sendRequest()`
+- **Error Handling**: Proper error handling with try/catch blocks and specific error types (async only)
+- **Timeout Management**: Built-in timeout support to prevent hanging requests (async only)
+- **Request Cancellation**: AbortController support for user-cancellable operations (async only)
 - **Resource Management**: Proper node shutdown and cleanup
 - **Data Analysis**: Processing and interpreting received data
 - **Visualization**: Converting data to human-readable formats
@@ -331,18 +426,23 @@ int8[] data
 ### Common Issues
 
 1. **Service Not Available**:
-
    - Ensure the service server is running before starting the client
    - Check that both use the same service name (`add_two_ints`)
 
 2. **Type Errors**:
-
    - Ensure you're using `BigInt()` for integer values, not regular numbers
    - Use `response.template` to get the correct response structure
 
 3. **Client Hangs**:
    - The client waits for service availability with a 1-second timeout
    - If the service isn't available, the client will log an error and shut down
+   - For async clients, use timeout options: `client.sendRequestAsync(request, { timeout: 5000 })`
+
+4. **Async/Await Issues** (applies only to `sendRequestAsync()`):
+   - **Unhandled Promise Rejections**: Always use try/catch blocks around `sendRequestAsync()`
+   - **Timeout Errors**: Handle `TimeoutError` specifically for timeout scenarios (async only)
+   - **Cancelled Requests**: Handle `AbortError` when using AbortController cancellation (async only)
+   - **Mixed Patterns**: You can use both `sendRequest()` and `sendRequestAsync()` in the same code
 
 ### Debugging Tips
 
@@ -354,6 +454,10 @@ int8[] data
 
 - Both examples use the standard rclnodejs initialization pattern
 - The service server runs continuously until manually terminated
-- The client performs a single request-response cycle then exits
+- The traditional client performs a single request-response cycle then exits
+- The async client demonstrates multiple patterns and then exits
+- **New async/await support**: Use `sendRequestAsync()` for modern Promise-based patterns
+- **Full backward compatibility**: Existing `sendRequest()` callback-based code continues to work unchanged
+- **TypeScript support**: Full type safety available for async methods
 - Service introspection is only available in ROS 2 Iron and later distributions
 - BigInt is required for integer message fields to maintain precision

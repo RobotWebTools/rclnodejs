@@ -15,6 +15,21 @@ declare module 'rclnodejs' {
     ): void;
 
     /**
+     * Make a service request and return a Promise that resolves with the response.
+     *
+     * @param request - Request to be submitted.
+     * @param options - Optional parameters for the request.
+     * @returns Promise that resolves with the service response.
+     * @throws TimeoutError if the request times out (when options.timeout is exceeded).
+     * @throws AbortError if the request is manually aborted (via options.signal).
+     * @throws Error if the request fails for other reasons.
+     */
+    sendRequestAsync(
+      request: ServiceRequestMessage<T>,
+      options?: Client.AsyncRequestOptions
+    ): Promise<ServiceResponseMessage<T>>;
+
+    /**
      * Checks if the service is ready.
      *
      * @returns true if the service is available.
@@ -74,5 +89,26 @@ declare module 'rclnodejs' {
     export type ResponseCallback<T extends TypeClass<ServiceTypeClassName>> = (
       response: ServiceResponseMessage<T>
     ) => void;
+
+    /**
+     * Options for async service requests
+     */
+    export interface AsyncRequestOptions {
+      /**
+       * Timeout in milliseconds for the request.
+       * Internally uses AbortSignal.timeout() for standards compliance.
+       */
+      timeout?: number;
+
+      /**
+       * AbortSignal to cancel the request.
+       * When the signal is aborted, the request will be cancelled
+       * and the promise will reject with an AbortError.
+       *
+       * Can be combined with timeout parameter - whichever happens first
+       * will abort the request.
+       */
+      signal?: AbortSignal;
+    }
   }
 }
