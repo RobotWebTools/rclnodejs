@@ -1471,51 +1471,6 @@ if (Buffer.prototype[inspectSym]) {
   Buffer.prototype[inspectSym] = overwriteInspect(Buffer.prototype[inspectSym]);
 }
 
-// does SlowBuffer inherit from Buffer? (node >= v0.7.9)
-if (!(exports.NULL instanceof Buffer)) {
-  debug(
-    "extending SlowBuffer's prototype since it doesn't inherit from Buffer.prototype"
-  );
-
-  /*!
-   * SlowBuffer convenience methods.
-   */
-
-  var SlowBuffer = require('buffer').SlowBuffer;
-
-  SlowBuffer.prototype.address = Buffer.prototype.address;
-  SlowBuffer.prototype.hexAddress = Buffer.prototype.hexAddress;
-  SlowBuffer.prototype.isNull = Buffer.prototype.isNull;
-  SlowBuffer.prototype.ref = Buffer.prototype.ref;
-  SlowBuffer.prototype.deref = Buffer.prototype.deref;
-  SlowBuffer.prototype.readObject = Buffer.prototype.readObject;
-  SlowBuffer.prototype.writeObject = Buffer.prototype.writeObject;
-  SlowBuffer.prototype.readPointer = Buffer.prototype.readPointer;
-  SlowBuffer.prototype.writePointer = Buffer.prototype.writePointer;
-  SlowBuffer.prototype.readCString = Buffer.prototype.readCString;
-  SlowBuffer.prototype.writeCString = Buffer.prototype.writeCString;
-  SlowBuffer.prototype.reinterpret = Buffer.prototype.reinterpret;
-  SlowBuffer.prototype.reinterpretUntilZeros =
-    Buffer.prototype.reinterpretUntilZeros;
-  SlowBuffer.prototype.readInt64BE = Buffer.prototype.readInt64BE;
-  SlowBuffer.prototype.writeInt64BE = Buffer.prototype.writeInt64BE;
-  SlowBuffer.prototype.readUInt64BE = Buffer.prototype.readUInt64BE;
-  SlowBuffer.prototype.writeUInt64BE = Buffer.prototype.writeUInt64BE;
-  SlowBuffer.prototype.readInt64LE = Buffer.prototype.readInt64LE;
-  SlowBuffer.prototype.writeInt64LE = Buffer.prototype.writeInt64LE;
-  SlowBuffer.prototype.readUInt64LE = Buffer.prototype.readUInt64LE;
-  SlowBuffer.prototype.writeUInt64LE = Buffer.prototype.writeUInt64LE;
-  /**
-   * in node 6.9.1, inspect.custom does not give a correct value; so in this case, don't torch the whole process.
-   * fixed in >6.9.2
-   */
-  if (SlowBuffer.prototype[inspectSym]) {
-    SlowBuffer.prototype[inspectSym] = overwriteInspect(
-      SlowBuffer.prototype[inspectSym]
-    );
-  }
-}
-
 /**
  * ...
  */
