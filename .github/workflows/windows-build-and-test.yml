@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [22.X]
+        node-version: [24.X]
         ros_distribution:
           - humble
           - jazzy
