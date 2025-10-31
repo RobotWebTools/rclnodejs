@@ -41,6 +41,7 @@
 - **[Mahmoud Alghalayini](https://github.com/mahmoud-ghalayini)**
   - JSON safe serialization improvements
   - Promise-based service calls implementation
+  - Add ParameterClient for external parameter access
 
 - **[Martins Mozeiko](https://github.com/martins-mozeiko)**
   - QoS new/delete fix

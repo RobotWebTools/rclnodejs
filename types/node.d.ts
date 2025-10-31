@@ -408,6 +408,18 @@ declare module 'rclnodejs' {
     ): ServiceType<T>;
 
     /**
+     * Create a ParameterClient for accessing parameters on a remote node.
+     *
+     * @param remoteNodeName - The name of the remote node whose parameters to access.
+     * @param options - Options for parameter client.
+     * @returns An instance of ParameterClient.
+     */
+    createParameterClient(
+      remoteNodeName: string,
+      options?: { timeout?: number }
+    ): ParameterClient;
+
+    /**
      * Create a guard condition.
      *
      * @param callback - The callback to be called when the guard condition is triggered.
@@ -453,6 +465,13 @@ declare module 'rclnodejs' {
      * @param service - Service to be destroyed.
      */
     destroyService(service: Service): void;
+
+    /**
+     * Destroy a ParameterClient.
+     *
+     * @param parameterClient - ParameterClient to be destroyed.
+     */
+    destroyParameterClient(parameterClient: ParameterClient): void;
 
     /**
      * Destroy a Timer.

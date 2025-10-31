@@ -20,7 +20,9 @@ Parameters are ideal for:
 
 ## Parameter Examples
 
-### 1. Parameter Declaration (`parameter-declaration-example.js`)
+### Local Parameters (On Current Node)
+
+#### 1. Parameter Declaration (`parameter-declaration-example.js`)
 
 **Purpose**: Demonstrates how to declare and use parameters in a ROS 2 node.
 
@@ -41,7 +43,7 @@ Parameters are ideal for:
   - **Default Value**: `"hello world"`
 - **Run Command**: `node parameter-declaration-example.js`
 
-### 2. Parameter Override (`parameter-override-example.js`)
+#### 2. Parameter Override (`parameter-override-example.js`)
 
 **Purpose**: Shows how to override parameter values using command-line arguments.
 
@@ -62,6 +64,74 @@ Parameters are ideal for:
   - **Default Value**: `"hello world"`
   - **Override Value**: `"hello ros2"` (via command line)
 - **Run Command**: `node parameter-override-example.js`
+
+### Remote Parameter Access (On Other Nodes)
+
+#### 3. ParameterClient Basic (`parameter-client-basic-example.js`)
+
+**Purpose**: Demonstrates accessing and modifying parameters on a remote node using `ParameterClient`.
+
+- **Functionality**:
+  - Creates a client node and ParameterClient
+  - Connects to turtlesim node's parameters
+  - Lists all available parameters
+  - Gets and sets individual parameters
+  - Retrieves multiple parameters at once
+- **Features**:
+  - Service availability checking with `waitForService()`
+  - Parameter listing with `listParameters()`
+  - Single parameter get/set operations
+  - Batch parameter retrieval
+  - Automatic type inference for parameter values
+- **Target Node**: `turtlesim` (run: `ros2 run turtlesim turtlesim_node`)
+- **Run Command**: `node parameter-client-basic-example.js`
+
+#### 4. ParameterClient Advanced (`parameter-client-advanced-example.js`)
+
+**Purpose**: Comprehensive example showing all ParameterClient features and capabilities.
+
+- **Functionality**:
+  - Creates target and client nodes
+  - Declares parameters on target node
+  - Demonstrates all ParameterClient operations:
+    - List parameters
+    - Get single/multiple parameters
+    - Set single/multiple parameters
+    - Describe parameters (get metadata)
+    - Get parameter types
+    - Timeout handling
+    - Request cancellation with AbortController
+- **Features**:
+  - Complete API coverage
+  - Error handling examples
+  - Timeout and cancellation patterns
+  - Automatic BigInt conversion for integers
+  - Type inference demonstrations
+  - Lifecycle management
+- **Run Command**: `node parameter-client-advanced-example.js`
+
+**ParameterClient Key Features**:
+
+- **Remote Access**: Query/modify parameters on any node
+- **Async/Await API**: Modern promise-based interface
+- **Type-Safe**: Automatic type inference and BigInt conversion
+- **Timeout Support**: Per-request or default timeout settings
+- **Cancellation**: AbortController integration for request cancellation
+- **Lifecycle Management**: Automatic cleanup when parent node is destroyed
+
+**Public API**:
+
+- `remoteNodeName` (getter) - Get the target node name
+- `waitForService(timeout?)` - Wait for remote services to be available
+- `getParameter(name, options?)` - Get a single parameter
+- `getParameters(names, options?)` - Get multiple parameters
+- `setParameter(name, value, options?)` - Set a single parameter
+- `setParameters(parameters, options?)` - Set multiple parameters
+- `listParameters(options?)` - List all parameters with optional filtering
+- `describeParameters(names, options?)` - Get parameter descriptors
+- `getParameterTypes(names, options?)` - Get parameter types
+- `isDestroyed()` - Check if client has been destroyed
+- `destroy()` - Clean up and destroy the client
 
 ## How to Run the Examples
 
@@ -127,6 +197,53 @@ ParameterDescriptor {
 ```
 
 Notice how the value changed from "hello world" to "hello ros2" due to the command-line override.
+
+### Running ParameterClient Basic Example
+
+First, in one terminal, run turtlesim:
+
+```bash
+ros2 run turtlesim turtlesim_node
+```
+
+Then in another terminal:
+
+```bash
+cd example/parameter
+node parameter-client-basic-example.js
+```
+
+**Expected Output**:
+
+```
+Current background_b: 255n
+Updated background_b: 200n
+```
+
+### Running ParameterClient Advanced Example
+
+```bash
+cd example/parameter
+node parameter-client-advanced-example.js
+```
+
+**Expected Output**:
+
+```
+Available parameters: [ 'use_sim_time', 'max_speed', 'debug_mode', 'retry_count' ]
+max_speed = 10.5
+Retrieved parameters: [ 'max_speed', 'debug_mode', 'retry_count' ]
+max_speed descriptor: {
+  name: 'max_speed',
+  type: 3,
+  description: 'Maximum speed in m/s',
+  additional_constraints: '',
+  read_only: false,
+  dynamic_typing: false,
+  floating_point_range: [],
+  integer_range: []
+}
+```
 
 ## Using ROS 2 Parameter Tools
 
@@ -276,19 +393,16 @@ const doubleParam = new Parameter(
 ### Common Issues
 
 1. **Parameter Not Found**:
-
    - Ensure parameter is declared before accessing
    - Check parameter name spelling
    - Verify node has been properly initialized
 
 2. **Type Mismatch**:
-
    - Ensure parameter type matches declaration
    - Check ParameterType constants are correct
    - Verify value type matches parameter type
 
 3. **Override Not Working**:
-
    - Check command-line syntax: `--ros-args -p node_name:param_name:=value`
    - Ensure node name matches exactly
    - Verify rclnodejs.init() is called with argv

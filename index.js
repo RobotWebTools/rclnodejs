@@ -58,6 +58,7 @@ const {
   serializeMessage,
   deserializeMessage,
 } = require('./lib/serialization.js');
+const ParameterClient = require('./lib/parameter_client.js');
 const { spawn } = require('child_process');
 
 /**
@@ -216,6 +217,9 @@ let rcl = {
 
   /** {@link ParameterType} */
   ParameterType: ParameterType,
+
+  /** {@link ParameterClient} class */
+  ParameterClient: ParameterClient,
 
   /** {@link QoS} class */
   QoS: QoS,
