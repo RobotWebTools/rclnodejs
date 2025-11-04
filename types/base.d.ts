@@ -8,6 +8,7 @@
 /// <reference path="./distro.d.ts" />
 /// <reference path="./duration.d.ts" />
 /// <reference path="./entity.d.ts" />
+/// <reference path="./errors.d.ts" />
 /// <reference path="./guard_condition.d.ts" />
 /// <reference path="./interfaces.d.ts" />
 /// <reference path="./lifecycle.d.ts" />

@@ -144,16 +144,14 @@ describe('ParameterClient tests', function () {
     it('should throw error if node is not provided', function () {
       assert.throws(
         () => new rclnodejs.ParameterClient(null, 'test_node'),
-        TypeError,
-        'Node is required'
+        rclnodejs.TypeValidationError
       );
     });
 
     it('should throw error if remote node name is empty', function () {
       assert.throws(
         () => new rclnodejs.ParameterClient(clientNode, ''),
-        TypeError,
-        'Remote node name must be a non-empty string'
+        rclnodejs.TypeValidationError
       );
     });
 
@@ -275,7 +273,7 @@ describe('ParameterClient tests', function () {
         await paramClient.getParameters('string_param');
         assert.fail('Should have thrown error');
       } catch (error) {
-        assert.ok(error instanceof TypeError);
+        assert.ok(error instanceof rclnodejs.TypeValidationError);
         assert.ok(error.message.includes('non-empty array'));
       }
     });
@@ -285,7 +283,7 @@ describe('ParameterClient tests', function () {
         await paramClient.getParameters([]);
         assert.fail('Should have thrown error');
       } catch (error) {
-        assert.ok(error instanceof TypeError);
+        assert.ok(error instanceof rclnodejs.TypeValidationError);
       }
     });
   });
@@ -360,7 +358,7 @@ describe('ParameterClient tests', function () {
         await paramClient.setParameters({ name: 'test', value: 'value' });
         assert.fail('Should have thrown error');
       } catch (error) {
-        assert.ok(error instanceof TypeError);
+        assert.ok(error instanceof rclnodejs.TypeValidationError);
       }
     });
 
@@ -369,7 +367,7 @@ describe('ParameterClient tests', function () {
         await paramClient.setParameters([]);
         assert.fail('Should have thrown error');
       } catch (error) {
-        assert.ok(error instanceof TypeError);
+        assert.ok(error instanceof rclnodejs.TypeValidationError);
       }
     });
   });
@@ -430,7 +428,7 @@ describe('ParameterClient tests', function () {
         await paramClient.describeParameters('string_param');
         assert.fail('Should have thrown error');
       } catch (error) {
-        assert.ok(error instanceof TypeError);
+        assert.ok(error instanceof rclnodejs.TypeValidationError);
       }
     });
   });

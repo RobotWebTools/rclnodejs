@@ -137,8 +137,8 @@ describe('rclnodejs node test suite', function () {
           () => {
             var node = rclnodejs.createNode(param[0], param[1]);
           },
-          TypeError,
-          'Invalid argument',
+          rclnodejs.TypeValidationError,
+          'Invalid type',
           'The parameters type is invalid!'
         );
       });

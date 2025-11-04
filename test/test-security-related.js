@@ -56,8 +56,8 @@ describe('Destroying non-existent objects testing', function () {
       () => {
         node.destroyPublisher(null);
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Trying to destroy an empty publisher!'
     );
 
@@ -75,8 +75,8 @@ describe('Destroying non-existent objects testing', function () {
       () => {
         node.destroySubscription(null);
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Trying to destroy an empty subscription!'
     );
 
@@ -94,8 +94,8 @@ describe('Destroying non-existent objects testing', function () {
       () => {
         node.destroyClient(null);
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Trying to destroy an empty client!'
     );
 
@@ -113,8 +113,8 @@ describe('Destroying non-existent objects testing', function () {
       () => {
         node.destroyService(null);
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Trying to destroy an empty service!'
     );
 
@@ -136,8 +136,8 @@ describe('Destroying non-existent objects testing', function () {
       () => {
         node.destroyTimer(null);
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Trying to destroy an empty timer!'
     );
 
@@ -239,8 +239,8 @@ describe('Fuzzing API calls testing', function () {
         () => {
           node.createTimer(param[0], param[1]);
         },
-        TypeError,
-        'Invalid argument',
+        rclnodejs.TypeValidationError,
+        'Invalid type',
         'Failed to createTimer!'
       );
     });

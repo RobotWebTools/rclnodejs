@@ -99,7 +99,10 @@ describe('rclnodejs parameters test suite', function () {
       param.value = 101n;
       assert.strictEqual(param.value, 101n);
 
-      assertThrowsError(() => (param.value = 'hello world'), TypeError);
+      assertThrowsError(
+        () => (param.value = 'hello world'),
+        rclnodejs.ParameterTypeError
+      );
     });
   });
 
@@ -358,10 +361,16 @@ describe('rclnodejs parameters test suite', function () {
       assert.ifError(descriptor.validateParameter(param));
 
       param.value = -1n;
-      assertThrowsError(() => descriptor.validateParameter(param), RangeError);
+      assertThrowsError(
+        () => descriptor.validateParameter(param),
+        rclnodejs.RangeValidationError
+      );
 
       param.value = 256n;
-      assertThrowsError(() => descriptor.validateParameter(param), RangeError);
+      assertThrowsError(
+        () => descriptor.validateParameter(param),
+        rclnodejs.RangeValidationError
+      );
     });
 
     it('Integer descriptor with [0-255], step=5 range test', function () {
@@ -382,10 +391,16 @@ describe('rclnodejs parameters test suite', function () {
       assert.ifError(descriptor.validateParameter(param));
 
       param.value = 1n;
-      assertThrowsError(() => descriptor.validateParameter(param), RangeError);
+      assertThrowsError(
+        () => descriptor.validateParameter(param),
+        rclnodejs.RangeValidationError
+      );
 
       param.value = 256n;
-      assertThrowsError(() => descriptor.validateParameter(param), RangeError);
+      assertThrowsError(
+        () => descriptor.validateParameter(param),
+        rclnodejs.RangeValidationError
+      );
     });
   });
 

@@ -58,10 +58,10 @@ describe('rclnodejs TimeSource testing', function () {
 
     assert.throws(() => {
       timeSource.attachClock(new Clock());
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
     assert.throws(() => {
       timeSource.attachClock(new Clock(Clock.ClockType.STEADY_TIME));
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
   });
 
   it('Test not using sim time', function () {
