@@ -59,6 +59,7 @@ const {
   deserializeMessage,
 } = require('./lib/serialization.js');
 const ParameterClient = require('./lib/parameter_client.js');
+const errors = require('./lib/errors.js');
 const { spawn } = require('child_process');
 
 /**
@@ -560,6 +561,56 @@ let rcl = {
    * @returns {string} The JSON string representation
    */
   toJSONString: toJSONString,
+
+  // Error classes for structured error handling
+  /** {@link RclNodeError} - Base error class for all rclnodejs errors */
+  RclNodeError: errors.RclNodeError,
+
+  /** {@link ValidationError} - Error thrown when validation fails */
+  ValidationError: errors.ValidationError,
+  /** {@link TypeValidationError} - Type validation error */
+  TypeValidationError: errors.TypeValidationError,
+  /** {@link RangeValidationError} - Range/value validation error */
+  RangeValidationError: errors.RangeValidationError,
+  /** {@link NameValidationError} - ROS name validation error */
+  NameValidationError: errors.NameValidationError,
+
+  /** {@link OperationError} - Base class for operation/runtime errors */
+  OperationError: errors.OperationError,
+  /** {@link TimeoutError} - Request timeout error */
+  TimeoutError: errors.TimeoutError,
+  /** {@link AbortError} - Request abortion error */
+  AbortError: errors.AbortError,
+  /** {@link ServiceNotFoundError} - Service not available error */
+  ServiceNotFoundError: errors.ServiceNotFoundError,
+  /** {@link NodeNotFoundError} - Remote node not found error */
+  NodeNotFoundError: errors.NodeNotFoundError,
+
+  /** {@link ParameterError} - Base error for parameter operations */
+  ParameterError: errors.ParameterError,
+  /** {@link ParameterNotFoundError} - Parameter not found error */
+  ParameterNotFoundError: errors.ParameterNotFoundError,
+  /** {@link ParameterTypeError} - Parameter type mismatch error */
+  ParameterTypeError: errors.ParameterTypeError,
+  /** {@link ReadOnlyParameterError} - Read-only parameter modification error */
+  ReadOnlyParameterError: errors.ReadOnlyParameterError,
+
+  /** {@link TopicError} - Base error for topic operations */
+  TopicError: errors.TopicError,
+  /** {@link PublisherError} - Publisher-specific error */
+  PublisherError: errors.PublisherError,
+  /** {@link SubscriptionError} - Subscription-specific error */
+  SubscriptionError: errors.SubscriptionError,
+
+  /** {@link ActionError} - Base error for action operations */
+  ActionError: errors.ActionError,
+  /** {@link GoalRejectedError} - Goal rejected by action server */
+  GoalRejectedError: errors.GoalRejectedError,
+  /** {@link ActionServerNotFoundError} - Action server not found */
+  ActionServerNotFoundError: errors.ActionServerNotFoundError,
+
+  /** {@link NativeError} - Wraps errors from native C++ layer */
+  NativeError: errors.NativeError,
 };
 
 const _sigHandler = () => {

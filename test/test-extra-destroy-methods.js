@@ -39,8 +39,8 @@ describe('Node extra destroy methods testing', function () {
       function () {
         node.destroyPublisher('publisher');
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Invalid type of parameter'
     );
 
@@ -58,8 +58,8 @@ describe('Node extra destroy methods testing', function () {
       function () {
         node.destroySubscription('subscription');
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Invalid type of parameter'
     );
 
@@ -77,8 +77,8 @@ describe('Node extra destroy methods testing', function () {
       function () {
         node.destroyClient('client');
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Invalid type of parameter'
     );
 
@@ -96,8 +96,8 @@ describe('Node extra destroy methods testing', function () {
       function () {
         node.destroyService('service');
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Invalid type of parameter'
     );
 
@@ -114,8 +114,8 @@ describe('Node extra destroy methods testing', function () {
       function () {
         node.destroyTimer('timer');
       },
-      TypeError,
-      'Invalid argument',
+      rclnodejs.TypeValidationError,
+      'Invalid type',
       'Invalid type of parameter'
     );
 

@@ -30,13 +30,13 @@ describe('Event handle test suite prior to jazzy', function () {
   it('Error expected when creating SubscriptionEventCallbacks', function () {
     assert.throws(() => {
       new SubscriptionEventCallbacks();
-    }, /SubscriptionEventCallbacks is only available in ROS 2 Jazzy and later.$/);
+    }, /SubscriptionEventCallbacks is only available in ROS 2 Jazzy and later/);
   });
 
   it('Error expected when creating PublisherEventCallbacks', function () {
     assert.throws(() => {
       new PublisherEventCallbacks();
-    }, /PublisherEventCallbacks is only available in ROS 2 Jazzy and later.$/);
+    }, /PublisherEventCallbacks is only available in ROS 2 Jazzy and later/);
   });
 });
 
