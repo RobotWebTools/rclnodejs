@@ -50,23 +50,23 @@ describe('rclnodejs Time/Clock testing', function () {
 
     assert.throws(() => {
       new Time(1n, 1n, 'SYSTEM_TIME');
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     assert.throws(() => {
       new Time({ seconds: 0n, nanoseconds: 0n });
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     assert.throws(() => {
       new Time(-1n, 0n);
-    }, RangeError);
+    }, rclnodejs.RangeValidationError);
 
     assert.throws(() => {
       new Time(0n, -9007199254740992n);
-    }, RangeError);
+    }, rclnodejs.RangeValidationError);
 
     assert.throws(() => {
       new Time(0n, -1n);
-    }, RangeError);
+    }, rclnodejs.RangeValidationError);
   });
 
   it('Construct duration object', function () {
@@ -111,27 +111,27 @@ describe('rclnodejs Time/Clock testing', function () {
 
     assert.throws(() => {
       left.eq(right);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     assert.throws(() => {
       left.ne(right);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     assert.throws(() => {
       left.lt(right);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     assert.throws(() => {
       left.lte(right);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     assert.throws(() => {
       left.gt(right);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     assert.throws(() => {
       left.gte(right);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     let time = new Time(0n, 1n, ClockType.STEADY_TIME);
     let duration = new Duration(0n, 1n);
@@ -150,7 +150,7 @@ describe('rclnodejs Time/Clock testing', function () {
     assert.strictEqual(diff.nanoseconds, 1n);
     assert.throws(() => {
       time.add(result);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     let nanos = time._nanoseconds;
     time.secondsAndNanoseconds;
@@ -173,27 +173,27 @@ describe('rclnodejs Time/Clock testing', function () {
 
     assert.throws(() => {
       left.eq(5n ** 9n);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
 
     let time = new Time();
     assert.throws(() => {
       left.eq(time);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
     assert.throws(() => {
       left.ne(time);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
     assert.throws(() => {
       left.gt(time);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
     assert.throws(() => {
       left.gte(time);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
     assert.throws(() => {
       left.lt(time);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
     assert.throws(() => {
       left.lte(time);
-    }, TypeError);
+    }, rclnodejs.TypeValidationError);
   });
 
   it('Conversion to Time message', function () {

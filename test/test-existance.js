@@ -415,8 +415,8 @@ describe('rclnodejs class existance testing', function () {
         () => {
           qos.avoidRosNameSpaceConventions = 1;
         },
-        TypeError,
-        'Invalid argument',
+        rclnodejs.TypeValidationError,
+        'Invalid type',
         'Failed to call setter'
       );
     });
@@ -429,8 +429,8 @@ describe('rclnodejs class existance testing', function () {
         () => {
           qos.depth = 'abc';
         },
-        TypeError,
-        'Invalid argument',
+        rclnodejs.TypeValidationError,
+        'Invalid type',
         'Failed to call setter'
       );
     });
@@ -443,8 +443,8 @@ describe('rclnodejs class existance testing', function () {
         () => {
           qos.durability = 'abc';
         },
-        TypeError,
-        'Invalid argument',
+        rclnodejs.TypeValidationError,
+        'Invalid type',
         'Failed to call setter'
       );
     });
@@ -457,8 +457,8 @@ describe('rclnodejs class existance testing', function () {
         () => {
           qos.history = 'abc';
         },
-        TypeError,
-        'Invalid argument',
+        rclnodejs.TypeValidationError,
+        'Invalid type',
         'Failed to call setter'
       );
     });
@@ -471,8 +471,8 @@ describe('rclnodejs class existance testing', function () {
         () => {
           qos.reliability = 'abc';
         },
-        TypeError,
-        'Invalid argument',
+        rclnodejs.TypeValidationError,
+        'Invalid type',
         'Failed to call setter'
       );
     });

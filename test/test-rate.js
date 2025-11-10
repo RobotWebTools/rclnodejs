@@ -52,14 +52,14 @@ describe('rclnodejs rate test suite', function () {
       await node.createRate(1001);
       assert.fail(false);
     } catch (err) {
-      assert.ok(err instanceof RangeError);
+      assert.ok(err instanceof rclnodejs.RangeValidationError);
     }
 
     try {
       await node.createRate(0);
       assert.fail(false);
     } catch (err) {
-      assert.ok(err instanceof RangeError);
+      assert.ok(err instanceof rclnodejs.RangeValidationError);
     }
   });
 
