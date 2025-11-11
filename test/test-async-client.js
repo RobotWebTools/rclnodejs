@@ -260,6 +260,12 @@ describe('Client async functionality', function () {
     });
 
     it('should handle zero and negative timeouts', async function () {
+      // Skip this test on Node.js < 18.20 where AbortSignal.timeout(0) throws RangeError
+      const [major, minor] = process.versions.node.split('.').map(Number);
+      if (major < 18 || (major === 18 && minor < 20)) {
+        this.skip();
+      }
+
       const request = { a: BigInt(1), b: BigInt(1) };
 
       try {
