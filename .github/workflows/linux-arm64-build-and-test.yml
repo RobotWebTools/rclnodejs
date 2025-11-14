@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [16.X]
+        node-version: [25.X]
         architecture: [arm64]
         ros_distribution:
           - humble
@@ -60,3 +60,4 @@ jobs:
         uname -a
         source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
         npm i
+        npm test
