@@ -293,6 +293,11 @@ describe('ROSIDL Node.js message generator test suite', function () {
   });
 
   it('Generate message at runtime', function () {
+    // Skip this test on ARM64 platform due to colcon build issues
+    if (os.arch() === 'arm64') {
+      this.skip();
+    }
+
     const amentPrefixPathOriginal = process.env.AMENT_PREFIX_PATH;
     try {
       buildTestMessage();
