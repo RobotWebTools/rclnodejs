@@ -55,6 +55,11 @@ jobs:
 
     - uses: actions/checkout@v5
 
+    - name: Fix permissions
+      run: |
+        # Fix ownership of the workspace to allow write access
+        sudo chown -R $(whoami):$(whoami) $GITHUB_WORKSPACE
+
     - name: Build and test rclnodejs
       run: |
         uname -a
