@@ -43,6 +43,7 @@
   - Promise-based service calls implementation
   - Add ParameterClient for external parameter access
   - Add structured error handling with class error hierarchy
+  - Add ParameterWatcher for real-time parameter monitoring
 
 - **[Martins Mozeiko](https://github.com/martins-mozeiko)**
   - QoS new/delete fix
