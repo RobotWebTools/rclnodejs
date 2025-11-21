@@ -420,6 +420,20 @@ declare module 'rclnodejs' {
     ): ParameterClient;
 
     /**
+     * Create a ParameterWatcher for watching parameter changes on a remote node.
+     *
+     * @param remoteNodeName - The name of the remote node whose parameters to watch.
+     * @param parameterNames - Array of parameter names to watch.
+     * @param options - Options for parameter watcher.
+     * @returns An instance of ParameterWatcher.
+     */
+    createParameterWatcher(
+      remoteNodeName: string,
+      parameterNames: string[],
+      options?: { timeout?: number }
+    ): ParameterWatcher;
+
+    /**
      * Create a guard condition.
      *
      * @param callback - The callback to be called when the guard condition is triggered.
@@ -472,6 +486,13 @@ declare module 'rclnodejs' {
      * @param parameterClient - ParameterClient to be destroyed.
      */
     destroyParameterClient(parameterClient: ParameterClient): void;
+
+    /**
+     * Destroy a ParameterWatcher.
+     *
+     * @param watcher - ParameterWatcher to be destroyed.
+     */
+    destroyParameterWatcher(watcher: ParameterWatcher): void;
 
     /**
      * Destroy a Timer.

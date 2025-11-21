@@ -110,6 +110,25 @@ Parameters are ideal for:
   - Lifecycle management
 - **Run Command**: `node parameter-client-advanced-example.js`
 
+#### 5. ParameterWatcher (`parameter-watcher-example.js`)
+
+**Purpose**: Demonstrates watching parameter changes on a remote node in real-time.
+
+- **Functionality**:
+  - Creates a watcher for turtlesim's background color parameters
+  - Listens for parameter change events
+  - Displays current parameter values
+  - Shows real-time updates when parameters change
+- **Features**:
+  - Event-driven parameter monitoring
+  - Automatic filtering by node and parameter names
+  - Real-time change notifications
+  - Built on top of ParameterClient
+  - Simple EventEmitter API
+- **Target Node**: `turtlesim` (run: `ros2 run turtlesim turtlesim_node`)
+- **Run Command**: `node parameter-watcher-example.js`
+- **Test Changes**: In another terminal, run `ros2 param set /turtlesim background_r 200`
+
 **ParameterClient Key Features**:
 
 - **Remote Access**: Query/modify parameters on any node
@@ -119,7 +138,7 @@ Parameters are ideal for:
 - **Cancellation**: AbortController integration for request cancellation
 - **Lifecycle Management**: Automatic cleanup when parent node is destroyed
 
-**Public API**:
+**ParameterClient Public API**:
 
 - `remoteNodeName` (getter) - Get the target node name
 - `waitForService(timeout?)` - Wait for remote services to be available
@@ -132,6 +151,27 @@ Parameters are ideal for:
 - `getParameterTypes(names, options?)` - Get parameter types
 - `isDestroyed()` - Check if client has been destroyed
 - `destroy()` - Clean up and destroy the client
+
+**ParameterWatcher Key Features**:
+
+- **Real-Time Monitoring**: Automatically notified when watched parameters change
+- **Event-Driven**: Uses EventEmitter pattern for clean async code
+- **Filtered**: Only notifies about relevant parameter changes
+- **Flexible**: Add/remove parameters from watch list dynamically
+- **Built on ParameterClient**: Can query current values at any time
+- **Lifecycle Management**: Automatic cleanup when parent node is destroyed
+
+**ParameterWatcher Public API**:
+
+- `remoteNodeName` (getter) - Get the target node name
+- `watchedParameters` (getter) - Get list of watched parameter names
+- `start(timeout?)` - Start watching for parameter changes
+- `getCurrentValues(options?)` - Get current values of all watched parameters
+- `addParameter(name)` - Add a parameter to the watch list
+- `removeParameter(name)` - Remove a parameter from the watch list
+- `on('change', callback)` - Listen for parameter change events
+- `isDestroyed()` - Check if watcher has been destroyed
+- `destroy()` - Clean up and destroy the watcher
 
 ## How to Run the Examples
 
@@ -244,6 +284,46 @@ max_speed descriptor: {
   integer_range: []
 }
 ```
+
+### Running ParameterWatcher Example
+
+First, in one terminal, run turtlesim:
+
+```bash
+ros2 run turtlesim turtlesim_node
+```
+
+Then in another terminal:
+
+```bash
+cd example/parameter
+node parameter-watcher-example.js
+```
+
+**Expected Output**:
+
+```
+Watching: [ 'background_r', 'background_g' ]
+Added background_b. Now watching: [ 'background_r', 'background_g', 'background_b' ]
+Removed background_g. Now watching: [ 'background_r', 'background_b' ]
+```
+
+Now in a third terminal, change a parameter to see real-time updates:
+
+```bash
+ros2 param set /turtlesim background_r 200
+ros2 param set /turtlesim background_b 100
+ros2 param set /turtlesim background_g 50  # This won't trigger (removed from watch list)
+```
+
+You'll see output like:
+
+```
+background_r changed to 200
+background_b changed to 100
+```
+
+Note: `background_g` changes won't be displayed since it was removed from the watch list.
 
 ## Using ROS 2 Parameter Tools
 
