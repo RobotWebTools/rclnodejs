@@ -60,6 +60,7 @@ const {
 } = require('./lib/serialization.js');
 const ParameterClient = require('./lib/parameter_client.js');
 const errors = require('./lib/errors.js');
+const ParameterWatcher = require('./lib/parameter_watcher.js');
 const { spawn } = require('child_process');
 
 /**
@@ -221,6 +222,9 @@ let rcl = {
 
   /** {@link ParameterClient} class */
   ParameterClient: ParameterClient,
+
+  /** {@link ParameterWatcher} class */
+  ParameterWatcher: ParameterWatcher,
 
   /** {@link QoS} class */
   QoS: QoS,

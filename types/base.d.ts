@@ -18,6 +18,7 @@
 /// <reference path="./node_options.d.ts" />
 /// <reference path="./parameter.d.ts" />
 /// <reference path="./parameter_client.d.ts" />
+/// <reference path="./parameter_watcher.d.ts" />
 /// <reference path="./publisher.d.ts" />
 /// <reference path="./qos.d.ts" />
 /// <reference path="./rate.d.ts" />
