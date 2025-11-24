@@ -41,7 +41,7 @@ jobs:
     - name: Prebuild - Setup VS Dev Environment
       uses: seanmiddleditch/gha-setup-vsdevenv@v4
 
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Build rclnodejs
       shell: cmd
