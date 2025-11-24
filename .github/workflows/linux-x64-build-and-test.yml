@@ -56,7 +56,7 @@ jobs:
       run: |
         sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
 
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Build and test rclnodejs
       run: |
