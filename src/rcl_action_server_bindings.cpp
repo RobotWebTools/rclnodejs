@@ -317,9 +317,27 @@ Napi::Value ActionPublishStatus(const Napi::CallbackInfo& info) {
       rcl_action_get_goal_status_array(action_server, &status_message),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      rcl_action_publish_status(action_server, &status_message), RCL_RET_OK,
-      rcl_get_error_string().str);
+  rcl_ret_t ret = rcl_action_publish_status(action_server, &status_message);
+
+  std::string publish_error_msg;
+  if (ret != RCL_RET_OK) {
+    publish_error_msg = rcl_get_error_string().str;
+    rcl_reset_error();
+  }
+
+  rcl_ret_t ret_fini = rcl_action_goal_status_array_fini(&status_message);
+
+  if (ret != RCL_RET_OK) {
+    Napi::Error::New(env, publish_error_msg).ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  if (ret_fini != RCL_RET_OK) {
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    rcl_reset_error();
+    return env.Undefined();
+  }
 
   return env.Undefined();
 }
