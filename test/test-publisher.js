@@ -69,4 +69,21 @@ describe('rclnodejs publisher test suite', function () {
     publisher.publish('Hello World');
     assert.strictEqual(publisher.waitForAllAcked(BigInt(1000000000)), true);
   });
+
+  it('Test assertLiveliness', function () {
+    const node = rclnodejs.createNode('publisher_node');
+    const String = 'std_msgs/msg/String';
+    const qos = new rclnodejs.QoS(
+      rclnodejs.QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT,
+      0,
+      rclnodejs.QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT,
+      rclnodejs.QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT,
+      rclnodejs.QoS.LivelinessPolicy.RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC
+    );
+    const publisher = node.createPublisher(String, 'topic', { qos: qos });
+    assert.doesNotThrow(() => {
+      publisher.assertLiveliness();
+    });
+    rclnodejs.spin(node);
+  });
 });

@@ -163,6 +163,7 @@ expectType<boolean>(publisher.waitForAllAcked(BigInt(1000)));
 node.createPublisher(TYPE_CLASS, TOPIC, publisher.options, (event: object) => {
   const receivedEvent = event;
 });
+expectType<void>(publisher.assertLiveliness());
 expectType<string>(publisher.loggerName);
 
 // ---- LifecyclePublisher ----
