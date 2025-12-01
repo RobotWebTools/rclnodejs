@@ -147,6 +147,17 @@ Napi::Value WaitForAllAcked(const Napi::CallbackInfo& info) {
   return env.Undefined();
 }
 
+Napi::Value AssertLiveliness(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  rcl_publisher_t* publisher = reinterpret_cast<rcl_publisher_t*>(
+      RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
+
+  THROW_ERROR_IF_NOT_EQUAL(rcl_publisher_assert_liveliness(publisher),
+                           RCL_RET_OK, rcl_get_error_string().str);
+
+  return env.Undefined();
+}
+
 Napi::Object InitPublisherBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createPublisher", Napi::Function::New(env, CreatePublisher));
   exports.Set("publish", Napi::Function::New(env, Publish));
@@ -155,6 +166,7 @@ Napi::Object InitPublisherBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getSubscriptionCount",
               Napi::Function::New(env, GetSubscriptionCount));
   exports.Set("waitForAllAcked", Napi::Function::New(env, WaitForAllAcked));
+  exports.Set("assertLiveliness", Napi::Function::New(env, AssertLiveliness));
   return exports;
 }
 

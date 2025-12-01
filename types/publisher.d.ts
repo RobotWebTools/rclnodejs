@@ -39,6 +39,11 @@ declare module 'rclnodejs' {
     waitForAllAcked(timeout: bigint): boolean;
 
     /**
+     * Manually assert that this Publisher is alive (for RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC).
+     */
+    assertLiveliness(): void;
+
+    /**
      * Get the logger name for this publisher.
      */
     readonly loggerName: string;

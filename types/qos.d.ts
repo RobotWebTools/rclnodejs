@@ -11,6 +11,7 @@ declare module 'rclnodejs' {
      * @param depth - The depth value, default = 0.
      * @param reliability - The reliability value, default = RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT
      * @param durability - The durability value, default = RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT
+     * @param liveliness - The liveliness value, default = RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT
      * @param avoidRosNameSpaceConventions - The avoidRosNameSpaceConventions value, default = false.
      */
     constructor(
@@ -18,6 +19,7 @@ declare module 'rclnodejs' {
       depth?: number,
       reliability?: QoS.ReliabilityPolicy,
       durability?: QoS.DurabilityPolicy,
+      liveliness?: QoS.LivelinessPolicy,
       avoidRosNameSpaceConventions?: boolean
     );
 
@@ -40,6 +42,11 @@ declare module 'rclnodejs' {
      * Get the durability value.
      */
     durability: QoS.DurabilityPolicy;
+
+    /**
+     * Get the liveliness value.
+     */
+    liveliness: QoS.LivelinessPolicy;
 
     /**
      * Get the avoidRosNameSpaceConventions value.
@@ -114,6 +121,17 @@ declare module 'rclnodejs' {
       RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT = 0,
       RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL = 1,
       RMW_QOS_POLICY_DURABILITY_VOLATILE = 2,
+    }
+
+    /**
+     * LivelinessPolicy
+     */
+    enum LivelinessPolicy {
+      RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT = 0,
+      RMW_QOS_POLICY_LIVELINESS_AUTOMATIC = 1,
+      RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC = 3,
+      RMW_QOS_POLICY_LIVELINESS_UNKNOWN = 4,
+      RMW_QOS_POLICY_LIVELINESS_BEST_AVAILABLE = 5,
     }
   }
 }

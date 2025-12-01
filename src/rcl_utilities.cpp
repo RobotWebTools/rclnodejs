@@ -55,6 +55,7 @@ std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
   auto depth = object.Get("depth");
   auto reliability = object.Get("reliability");
   auto durability = object.Get("durability");
+  auto liveliness = object.Get("liveliness");
   auto avoid_ros_namespace_conventions =
       object.Get("avoidRosNameSpaceConventions");
 
@@ -65,6 +66,8 @@ std::unique_ptr<rmw_qos_profile_t> GetQosProfileFromObject(
       reliability.As<Napi::Number>().Uint32Value());
   qos_profile->durability = static_cast<rmw_qos_durability_policy_t>(
       durability.As<Napi::Number>().Uint32Value());
+  qos_profile->liveliness = static_cast<rmw_qos_liveliness_policy_t>(
+      liveliness.As<Napi::Number>().Uint32Value());
   qos_profile->avoid_ros_namespace_conventions =
       avoid_ros_namespace_conventions.As<Napi::Boolean>();
 
