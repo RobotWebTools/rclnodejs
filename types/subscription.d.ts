@@ -62,6 +62,12 @@ declare module 'rclnodejs' {
     setContentFilter(filter: SubscriptionContentFilter): boolean;
 
     /**
+     * Get the current content-filter.
+     * @returns The content-filter description {expression: string, parameters: string[]} or undefined if not set/supported.
+     */
+    getContentFilter(): SubscriptionContentFilter | undefined;
+
+    /**
      * Clear the current content-filter. No filtering is to be applied.
      * @returns True if successful; false otherwise
      */

@@ -76,7 +76,6 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
     subscription_ops.qos = *qos_profile;
   }
 
-#if ROS_VERSION >= 2205  // 2205 => Humble+
   if (options.Has("contentFilter")) {
     // configure content-filter
     Napi::Value contentFilterVal = options.Get("contentFilter");
@@ -123,7 +122,6 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
       }
     }
   }
-#endif
 
   const rosidl_message_type_support_t* ts =
       GetMessageTypeSupport(package_name, message_sub_folder, message_name);
@@ -201,9 +199,6 @@ Napi::Value GetSubscriptionTopic(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value HasContentFilter(const Napi::CallbackInfo& info) {
-#if ROS_VERSION < 2205  // 2205 => Humble+
-  return Napi::Boolean::New(info.Env(), false);
-#else
   Napi::Env env = info.Env();
 
   RclHandle* subscription_handle =
@@ -213,13 +208,9 @@ Napi::Value HasContentFilter(const Napi::CallbackInfo& info) {
 
   bool is_valid = rcl_subscription_is_cft_enabled(subscription);
   return Napi::Boolean::New(env, is_valid);
-#endif
 }
 
 Napi::Value SetContentFilter(const Napi::CallbackInfo& info) {
-#if ROS_VERSION < 2205  // 2205 => Humble+
-  return Napi::Boolean::New(info.Env(), false);
-#else
   Napi::Env env = info.Env();
 
   RclHandle* subscription_handle =
@@ -272,13 +263,9 @@ Napi::Value SetContentFilter(const Napi::CallbackInfo& info) {
   }
 
   return Napi::Boolean::New(env, true);
-#endif
 }
 
 Napi::Value ClearContentFilter(const Napi::CallbackInfo& info) {
-#if ROS_VERSION < 2205  // 2205 => Humble+
-  return Napi::Boolean::New(info.Env(), false);
-#else
   Napi::Env env = info.Env();
 
   RclHandle* subscription_handle =
@@ -301,7 +288,56 @@ Napi::Value ClearContentFilter(const Napi::CallbackInfo& info) {
       rcl_get_error_string().str);
 
   return Napi::Boolean::New(env, true);
-#endif
+}
+
+Napi::Value GetContentFilter(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
+
+  rcl_subscription_content_filter_options_t options =
+      rcl_get_zero_initialized_subscription_content_filter_options();
+
+  rcl_ret_t ret = rcl_subscription_get_content_filter(subscription, &options);
+  if (ret != RCL_RET_OK) {
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    rcl_reset_error();
+    return env.Undefined();
+  }
+
+  // Create result object
+  Napi::Object result = Napi::Object::New(env);
+  result.Set(
+      "expression",
+      Napi::String::New(
+          env,
+          options.rmw_subscription_content_filter_options.filter_expression));
+
+  size_t param_count = options.rmw_subscription_content_filter_options
+                           .expression_parameters.size;
+  Napi::Array parameters = Napi::Array::New(env, param_count);
+  for (size_t i = 0; i < param_count; ++i) {
+    parameters[i] =
+        Napi::String::New(env, options.rmw_subscription_content_filter_options
+                                   .expression_parameters.data[i]);
+  }
+  result.Set("parameters", parameters);
+
+  // Cleanup
+  rcl_ret_t fini_ret =
+      rcl_subscription_content_filter_options_fini(subscription, &options);
+  if (fini_ret != RCL_RET_OK) {
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    rcl_reset_error();
+    return env.Undefined();
+  }
+
+  return result;
 }
 
 Napi::Value GetPublisherCount(const Napi::CallbackInfo& info) {
@@ -327,6 +363,7 @@ Napi::Object InitSubscriptionBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, GetSubscriptionTopic));
   exports.Set("hasContentFilter", Napi::Function::New(env, HasContentFilter));
   exports.Set("setContentFilter", Napi::Function::New(env, SetContentFilter));
+  exports.Set("getContentFilter", Napi::Function::New(env, GetContentFilter));
   exports.Set("clearContentFilter",
               Napi::Function::New(env, ClearContentFilter));
   exports.Set("getPublisherCount", Napi::Function::New(env, GetPublisherCount));
