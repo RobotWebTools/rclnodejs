@@ -403,6 +403,30 @@ describe('subscription content-filtering', function () {
     done();
   });
 
+  it('getContentFilter', function (done) {
+    const typeclass = 'std_msgs/msg/Int32';
+    let options = Node.getDefaultOptions();
+    options.contentFilter = {
+      expression: 'data = %0',
+      parameters: [5],
+    };
+
+    const subscription = this.subscriberNode.createSubscription(
+      typeclass,
+      TOPIC,
+      options,
+      (msg) => {}
+    );
+
+    assert.ok(subscription.hasContentFilter());
+    const filter = subscription.getContentFilter();
+    assert.strictEqual(filter.expression, 'data = %0');
+    assert.strictEqual(filter.parameters.length, 1);
+    assert.strictEqual(filter.parameters[0], '5');
+
+    done();
+  });
+
   it('multiple clearContentFilter', function (done) {
     const typeclass = 'std_msgs/msg/Int32';
     let options = Node.getDefaultOptions();
