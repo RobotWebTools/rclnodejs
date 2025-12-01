@@ -303,9 +303,9 @@ Napi::Value GetContentFilter(const Napi::CallbackInfo& info) {
 
   rcl_ret_t ret = rcl_subscription_get_content_filter(subscription, &options);
   if (ret != RCL_RET_OK) {
-    rcl_reset_error();
     Napi::Error::New(env, rcl_get_error_string().str)
         .ThrowAsJavaScriptException();
+    rcl_reset_error();
     return env.Undefined();
   }
 
@@ -331,9 +331,9 @@ Napi::Value GetContentFilter(const Napi::CallbackInfo& info) {
   rcl_ret_t fini_ret =
       rcl_subscription_content_filter_options_fini(subscription, &options);
   if (fini_ret != RCL_RET_OK) {
-    rcl_reset_error();
     Napi::Error::New(env, rcl_get_error_string().str)
         .ThrowAsJavaScriptException();
+    rcl_reset_error();
     return env.Undefined();
   }
 
