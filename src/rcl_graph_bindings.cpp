@@ -33,10 +33,12 @@ typedef rcl_ret_t (*rcl_get_info_by_topic_func_t)(
     const char* topic_name, bool no_mangle,
     rcl_topic_endpoint_info_array_t* info_array);
 
+#if ROS_VERSION > 2405
 typedef rcl_ret_t (*rcl_get_info_by_service_func_t)(
     const rcl_node_t* node, rcutils_allocator_t* allocator,
     const char* service_name, bool no_mangle,
     rcl_service_endpoint_info_array_t* info_array);
+#endif
 
 Napi::Value GetPublisherNamesAndTypesByNode(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -262,6 +264,7 @@ Napi::Value GetSubscriptionsInfoByTopic(const Napi::CallbackInfo& info) {
                         "subscriptions", rcl_get_subscriptions_info_by_topic);
 }
 
+#if ROS_VERSION > 2405
 Napi::Value GetInfoByService(
     Napi::Env env, rcl_node_t* node, const char* service_name, bool no_mangle,
     const char* type, rcl_get_info_by_service_func_t rcl_get_info_by_service) {
@@ -297,6 +300,7 @@ Napi::Value GetInfoByService(
 
   return ConvertToJSServiceEndpointInfoList(env, &info_array);
 }
+#endif
 
 #if ROS_VERSION > 2405
 Napi::Value GetClientsInfoByService(const Napi::CallbackInfo& info) {
