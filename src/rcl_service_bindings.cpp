@@ -77,11 +77,11 @@ Napi::Value RclTakeRequest(const Napi::CallbackInfo& info) {
 
   rcl_service_t* service = reinterpret_cast<rcl_service_t*>(
       RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
-  rmw_request_id_t* header =
-      reinterpret_cast<rmw_request_id_t*>(malloc(sizeof(rmw_request_id_t)));
+  rmw_service_info_t* header =
+      reinterpret_cast<rmw_service_info_t*>(malloc(sizeof(rmw_service_info_t)));
 
   void* taken_request = info[2].As<Napi::Buffer<char>>().Data();
-  rcl_ret_t ret = rcl_take_request(service, header, taken_request);
+  rcl_ret_t ret = rcl_take_request_with_info(service, header, taken_request);
   if (ret != RCL_RET_SERVICE_TAKE_FAILED) {
     auto js_obj = RclHandle::NewInstance(env, header, nullptr,
                                          [](void* ptr) { free(ptr); });
@@ -98,11 +98,12 @@ Napi::Value SendResponse(const Napi::CallbackInfo& info) {
       RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
   void* buffer = info[1].As<Napi::Buffer<char>>().Data();
 
-  rmw_request_id_t* header = reinterpret_cast<rmw_request_id_t*>(
+  rmw_service_info_t* header = reinterpret_cast<rmw_service_info_t*>(
       RclHandle::Unwrap(info[2].As<Napi::Object>())->ptr());
 
-  THROW_ERROR_IF_NOT_EQUAL(rcl_send_response(service, header, buffer),
-                           RCL_RET_OK, rcl_get_error_string().str);
+  THROW_ERROR_IF_NOT_EQUAL(
+      rcl_send_response(service, &(header->request_id), buffer), RCL_RET_OK,
+      rcl_get_error_string().str);
 
   return env.Undefined();
 }
