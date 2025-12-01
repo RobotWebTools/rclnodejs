@@ -51,6 +51,11 @@ void ExtractNamesAndTypes(rcl_names_and_types_t names_and_types,
 Napi::Array ConvertToJSTopicEndpointInfoList(
     Napi::Env env, const rmw_topic_endpoint_info_array_t* info_array);
 
+#if ROS_VERSION > 2405
+Napi::Array ConvertToJSServiceEndpointInfoList(
+    Napi::Env env, const rmw_service_endpoint_info_array_t* info_array);
+#endif
+
 Napi::Value ConvertToQoS(Napi::Env env, const rmw_qos_profile_t* qos_profile);
 
 // `AbstractArgsFromNapiArray` and `FreeArgs` must be called in pairs.

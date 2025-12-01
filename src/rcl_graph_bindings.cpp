@@ -33,6 +33,11 @@ typedef rcl_ret_t (*rcl_get_info_by_topic_func_t)(
     const char* topic_name, bool no_mangle,
     rcl_topic_endpoint_info_array_t* info_array);
 
+typedef rcl_ret_t (*rcl_get_info_by_service_func_t)(
+    const rcl_node_t* node, rcutils_allocator_t* allocator,
+    const char* service_name, bool no_mangle,
+    rcl_service_endpoint_info_array_t* info_array);
+
 Napi::Value GetPublisherNamesAndTypesByNode(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -257,6 +262,64 @@ Napi::Value GetSubscriptionsInfoByTopic(const Napi::CallbackInfo& info) {
                         "subscriptions", rcl_get_subscriptions_info_by_topic);
 }
 
+Napi::Value GetInfoByService(
+    Napi::Env env, rcl_node_t* node, const char* service_name, bool no_mangle,
+    const char* type, rcl_get_info_by_service_func_t rcl_get_info_by_service) {
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+  rcl_service_endpoint_info_array_t info_array =
+      rcl_get_zero_initialized_service_endpoint_info_array();
+
+  RCPPUTILS_SCOPE_EXIT({
+    rcl_ret_t fini_ret =
+        rcl_service_endpoint_info_array_fini(&info_array, &allocator);
+    if (RCL_RET_OK != fini_ret) {
+      Napi::Error::New(env, rcl_get_error_string().str)
+          .ThrowAsJavaScriptException();
+      rcl_reset_error();
+    }
+  });
+
+  rcl_ret_t ret = rcl_get_info_by_service(node, &allocator, service_name,
+                                          no_mangle, &info_array);
+  if (RCL_RET_OK != ret) {
+    if (RCL_RET_UNSUPPORTED == ret) {
+      Napi::Error::New(
+          env, std::string("Failed to get information by service for ") + type +
+                   ": function not supported by RMW_IMPLEMENTATION")
+          .ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+    Napi::Error::New(
+        env, std::string("Failed to get information by service for ") + type)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  return ConvertToJSServiceEndpointInfoList(env, &info_array);
+}
+
+#if ROS_VERSION > 2405
+Napi::Value GetClientsInfoByService(const Napi::CallbackInfo& info) {
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string service_name = info[1].As<Napi::String>().Utf8Value();
+  bool no_mangle = info[2].As<Napi::Boolean>();
+
+  return GetInfoByService(info.Env(), node, service_name.c_str(), no_mangle,
+                          "clients", rcl_get_clients_info_by_service);
+}
+
+Napi::Value GetServersInfoByService(const Napi::CallbackInfo& info) {
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string service_name = info[1].As<Napi::String>().Utf8Value();
+  bool no_mangle = info[2].As<Napi::Boolean>();
+
+  return GetInfoByService(info.Env(), node, service_name.c_str(), no_mangle,
+                          "servers", rcl_get_servers_info_by_service);
+}
+#endif
+
 Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getPublisherNamesAndTypesByNode",
               Napi::Function::New(env, GetPublisherNamesAndTypesByNode));
@@ -274,6 +337,12 @@ Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, GetPublishersInfoByTopic));
   exports.Set("getSubscriptionsInfoByTopic",
               Napi::Function::New(env, GetSubscriptionsInfoByTopic));
+#if ROS_VERSION > 2405
+  exports.Set("getClientsInfoByService",
+              Napi::Function::New(env, GetClientsInfoByService));
+  exports.Set("getServersInfoByService",
+              Napi::Function::New(env, GetServersInfoByService));
+#endif
   return exports;
 }
 
