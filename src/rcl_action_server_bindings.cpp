@@ -333,9 +333,9 @@ Napi::Value ActionPublishStatus(const Napi::CallbackInfo& info) {
   }
 
   if (ret_fini != RCL_RET_OK) {
-    rcl_reset_error();
     Napi::Error::New(env, rcl_get_error_string().str)
         .ThrowAsJavaScriptException();
+    rcl_reset_error();
     return env.Undefined();
   }
 
