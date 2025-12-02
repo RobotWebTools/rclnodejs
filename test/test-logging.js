@@ -91,6 +91,12 @@ describe('Test logging util', function () {
   });
 
   it('Test enableRosout option true', async function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <
+      rclnodejs.DistroUtils.getDistroId('jazzy')
+    ) {
+      this.skip();
+    }
     await rclnodejs.init();
     const options = new rclnodejs.NodeOptions();
     options.enableRosout = true;
