@@ -84,6 +84,13 @@ declare module 'rclnodejs' {
      * @returns New logger.
      */
     static getLogger(name: string): Logging;
+
+    /**
+     * Get the logging directory.
+     *
+     * @returns The logging directory.
+     */
+    static getLoggingDirectory(): string;
   }
 
   namespace Logging {

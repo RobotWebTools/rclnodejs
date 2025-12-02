@@ -16,6 +16,7 @@
 
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
+#include <rcl_logging_interface/rcl_logging_interface.h>
 
 #include <string>
 
@@ -84,12 +85,33 @@ Napi::Value IsEnableFor(const Napi::CallbackInfo& info) {
   return Napi::Boolean::New(env, enabled);
 }
 
+Napi::Value GetLoggingDirectory(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+  char* directory_path = nullptr;
+  rcl_logging_ret_t ret =
+      rcl_logging_get_logging_directory(allocator, &directory_path);
+
+  if (ret != RCL_LOGGING_RET_OK) {
+    Napi::Error::New(env, rcutils_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    rcutils_reset_error();
+    return env.Undefined();
+  }
+
+  Napi::String result = Napi::String::New(env, directory_path);
+  allocator.deallocate(directory_path, allocator.state);
+  return result;
+}
+
 Napi::Object InitLoggingBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("setLoggerLevel", Napi::Function::New(env, setLoggerLevel));
   exports.Set("getLoggerEffectiveLevel",
               Napi::Function::New(env, GetLoggerEffectiveLevel));
   exports.Set("log", Napi::Function::New(env, Log));
   exports.Set("isEnableFor", Napi::Function::New(env, IsEnableFor));
+  exports.Set("getLoggingDirectory",
+              Napi::Function::New(env, GetLoggingDirectory));
   return exports;
 }
 

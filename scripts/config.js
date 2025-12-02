@@ -33,6 +33,7 @@ const dependencies = [
   'rosidl_runtime_c',
   'rosidl_dynamic_typesupport',
   'type_description_interfaces',
+  'rcl_logging_interface',
 ];
 
 const command = os.type() === 'Windows_NT' ? 'where ros2' : 'which ros2';
