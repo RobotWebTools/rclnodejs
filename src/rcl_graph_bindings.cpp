@@ -38,7 +38,7 @@ typedef rcl_ret_t (*rcl_get_info_by_service_func_t)(
     const rcl_node_t* node, rcutils_allocator_t* allocator,
     const char* service_name, bool no_mangle,
     rcl_service_endpoint_info_array_t* info_array);
-#endif
+#endif  // ROS_VERSION > 2505
 
 Napi::Value GetPublisherNamesAndTypesByNode(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -300,7 +300,7 @@ Napi::Value GetInfoByService(
 
   return ConvertToJSServiceEndpointInfoList(env, &info_array);
 }
-#endif
+#endif  // ROS_VERSION > 2505
 
 #if ROS_VERSION > 2505
 Napi::Value GetClientsInfoByService(const Napi::CallbackInfo& info) {
@@ -322,7 +322,7 @@ Napi::Value GetServersInfoByService(const Napi::CallbackInfo& info) {
   return GetInfoByService(info.Env(), node, service_name.c_str(), no_mangle,
                           "servers", rcl_get_servers_info_by_service);
 }
-#endif
+#endif  // ROS_VERSION > 2505
 
 Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getPublisherNamesAndTypesByNode",
@@ -346,7 +346,7 @@ Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, GetClientsInfoByService));
   exports.Set("getServersInfoByService",
               Napi::Function::New(env, GetServersInfoByService));
-#endif
+#endif  // ROS_VERSION > 2505
   return exports;
 }
 
