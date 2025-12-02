@@ -78,6 +78,19 @@ declare module 'rclnodejs' {
     readonly name: string;
 
     /**
+     * Create a child logger.
+     *
+     * @param name - name of the child logger.
+     * @returns The child logger object.
+     */
+    getChild(name: string): Logging;
+
+    /**
+     * Destroy the logger and remove it from the parent logger if it is a child logger.
+     */
+    destroy(): void;
+
+    /**
      * Create a logger by name.
      *
      * @param  name - name of the logger.
