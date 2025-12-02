@@ -852,6 +852,56 @@ declare module 'rclnodejs' {
     ): Array<object>;
 
     /**
+     * Return a list of clients on a given service.
+     *
+     * The returned parameter is a list of ServiceEndpointInfo objects, where each will contain
+     * the node name, node namespace, service type, service endpoint's GID, and its QoS profile.
+     *
+     * When the `no_mangle` parameter is `true`, the provided `service` should be a valid
+     * service name for the middleware (useful when combining ROS with native middleware (e.g. DDS)
+     * apps).  When the `no_mangle` parameter is `false`, the provided `service` should
+     * follow ROS service name conventions.
+     *
+     * `service` may be a relative, private, or fully qualified service name.
+     *  A relative or private service will be expanded using this node's namespace and name.
+     *  The queried `service` is not remapped.
+     *
+     * @param service - The service on which to find the clients.
+     * @param [noDemangle=false] - If `true`, `service` needs to be a valid middleware service
+     *                               name, otherwise it should be a valid ROS service name. Defaults to `false`.
+     * @returns An array of clients.
+     */
+    getClientsInfoByService(
+      service: string,
+      noDemangle: boolean
+    ): Array<object>;
+
+    /**
+     * Return a list of servers on a given service.
+     *
+     * The returned parameter is a list of ServiceEndpointInfo objects, where each will contain
+     * the node name, node namespace, service type, service endpoint's GID, and its QoS profile.
+     *
+     * When the `no_mangle` parameter is `true`, the provided `service` should be a valid
+     * service name for the middleware (useful when combining ROS with native middleware (e.g. DDS)
+     * apps).  When the `no_mangle` parameter is `false`, the provided `service` should
+     * follow ROS service name conventions.
+     *
+     * `service` may be a relative, private, or fully qualified service name.
+     *  A relative or private service will be expanded using this node's namespace and name.
+     *  The queried `service` is not remapped.
+     *
+     * @param service - The service on which to find the servers.
+     * @param [noDemangle=false] - If `true`, `service` needs to be a valid middleware service
+     *                               name, otherwise it should be a valid ROS service name. Defaults to `false`.
+     * @returns An array of servers.
+     */
+    getServersInfoByService(
+      service: string,
+      noDemangle: boolean
+    ): Array<object>;
+
+    /**
      * Get the list of nodes discovered by the provided node.
      *
      * @returns An array of the node names.
