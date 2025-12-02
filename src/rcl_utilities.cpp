@@ -122,6 +122,48 @@ Napi::Value ConvertToJSTopicEndpoint(
   return endpoint;
 }
 
+#if ROS_VERSION > 2505
+Napi::Value ConvertToJSServiceEndpointInfo(
+    Napi::Env env, const rmw_service_endpoint_info_t* service_endpoint_info) {
+  Napi::Object endpoint = Napi::Object::New(env);
+  endpoint.Set("node_name",
+               Napi::String::New(env, service_endpoint_info->node_name));
+  endpoint.Set("node_namespace",
+               Napi::String::New(env, service_endpoint_info->node_namespace));
+  endpoint.Set("service_type",
+               Napi::String::New(env, service_endpoint_info->service_type));
+  endpoint.Set(
+      "service_type_hash",
+      ConvertToHashObject(env, &service_endpoint_info->service_type_hash));
+  endpoint.Set(
+      "endpoint_type",
+      Napi::Number::New(
+          env, static_cast<int>(service_endpoint_info->endpoint_type)));
+  endpoint.Set("endpoint_count",
+               Napi::Number::New(env, service_endpoint_info->endpoint_count));
+
+  Napi::Array endpoint_gids =
+      Napi::Array::New(env, service_endpoint_info->endpoint_count);
+  Napi::Array qos_profiles =
+      Napi::Array::New(env, service_endpoint_info->endpoint_count);
+
+  for (size_t i = 0; i < service_endpoint_info->endpoint_count; i++) {
+    Napi::Array gid = Napi::Array::New(env, RMW_GID_STORAGE_SIZE);
+    for (size_t j = 0; j < RMW_GID_STORAGE_SIZE; j++) {
+      gid.Set(j, Napi::Number::New(env,
+                                   service_endpoint_info->endpoint_gids[i][j]));
+    }
+    endpoint_gids.Set(i, gid);
+    qos_profiles.Set(i, rclnodejs::ConvertToQoS(
+                            env, &service_endpoint_info->qos_profiles[i]));
+  }
+  endpoint.Set("endpoint_gids", endpoint_gids);
+  endpoint.Set("qos_profiles", qos_profiles);
+
+  return endpoint;
+}
+#endif  // ROS_VERSION > 2505
+
 uv_lib_t g_lib;
 Napi::Env g_env = nullptr;
 
@@ -263,6 +305,19 @@ Napi::Array ConvertToJSTopicEndpointInfoList(
   }
   return list;
 }
+
+#if ROS_VERSION > 2505
+Napi::Array ConvertToJSServiceEndpointInfoList(
+    Napi::Env env, const rmw_service_endpoint_info_array_t* info_array) {
+  Napi::Array list = Napi::Array::New(env, info_array->size);
+  for (size_t i = 0; i < info_array->size; ++i) {
+    rmw_service_endpoint_info_t service_endpoint_info =
+        info_array->info_array[i];
+    list.Set(i, ConvertToJSServiceEndpointInfo(env, &service_endpoint_info));
+  }
+  return list;
+}
+#endif  // ROS_VERSION > 2505
 
 char** AbstractArgsFromNapiArray(const Napi::Array& jsArgv) {
   size_t argc = jsArgv.Length();

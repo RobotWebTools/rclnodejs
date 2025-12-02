@@ -60,4 +60,48 @@ describe('rclnodejs graph test suite', function () {
     assert.strictEqual(subscriptions[0].node_name, 'subscription_node');
     assert.strictEqual(subscriptions[0].topic_type, String);
   });
+
+  it('Get clients info by service', function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <
+      rclnodejs.DistroUtils.DistroId.ROLLING
+    ) {
+      this.skip();
+    }
+
+    const node = rclnodejs.createNode('client_node', '/my_ns');
+    assert.deepStrictEqual(
+      0,
+      node.getClientsInfoByService('/my_ns/service', false).length
+    );
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+    node.createClient(AddTwoInts, 'service');
+    const clients = node.getClientsInfoByService('/my_ns/service', false);
+    assert.strictEqual(clients.length, 1);
+    assert.strictEqual(clients[0].node_namespace, '/my_ns');
+    assert.strictEqual(clients[0].node_name, 'client_node');
+    assert.strictEqual(clients[0].service_type, AddTwoInts);
+  });
+
+  it('Get servers info by service', function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <
+      rclnodejs.DistroUtils.DistroId.ROLLING
+    ) {
+      this.skip();
+    }
+
+    const node = rclnodejs.createNode('server_node', '/my_ns');
+    assert.deepStrictEqual(
+      0,
+      node.getServersInfoByService('/my_ns/service', false).length
+    );
+    const AddTwoInts = 'example_interfaces/srv/AddTwoInts';
+    node.createService(AddTwoInts, 'service', (req, res) => {});
+    const servers = node.getServersInfoByService('/my_ns/service', false);
+    assert.strictEqual(servers.length, 1);
+    assert.strictEqual(servers[0].node_namespace, '/my_ns');
+    assert.strictEqual(servers[0].node_name, 'server_node');
+    assert.strictEqual(servers[0].service_type, AddTwoInts);
+  });
 });

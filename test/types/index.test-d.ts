@@ -80,6 +80,8 @@ expectType<rclnodejs.NodeNamesQueryResultWithEnclaves[]>(
 );
 expectType<Array<object>>(node.getPublishersInfoByTopic('topic', false));
 expectType<Array<object>>(node.getSubscriptionsInfoByTopic('topic', false));
+expectType<Array<object>>(node.getClientsInfoByService('service', false));
+expectType<Array<object>>(node.getServersInfoByService('service', false));
 expectType<number>(node.countPublishers(TOPIC));
 expectType<number>(node.countSubscribers(TOPIC));
 expectType<number>(node.countClients(SERVICE_NAME));
