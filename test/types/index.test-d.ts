@@ -347,6 +347,7 @@ expectType<boolean>(logger.debug('test msg'));
 expectType<boolean>(logger.warn('test msg'));
 expectType<boolean>(logger.error('test msg'));
 expectType<boolean>(logger.fatal('test msg'));
+expectType<string>(rclnodejs.Logging.getLoggingDirectory());
 
 // ---- ActionClient -----
 const Fibonacci = rclnodejs.require('example_interfaces/action/Fibonacci');

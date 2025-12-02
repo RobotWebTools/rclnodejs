@@ -67,6 +67,7 @@
         '-lrcl_action',
         '-lrcl_lifecycle',
         '-lrcutils',
+        '-lrcl_logging_interface',
         '-lrcl_yaml_param_parser',
         '-lrcpputils',
         '-lrmw',

@@ -83,4 +83,10 @@ describe('Test logging util', function () {
     );
     rclnodejs.shutdown();
   });
+
+  it('Test getLoggingDirectory', function () {
+    const logDir = rclnodejs.logging.getLoggingDirectory();
+    assert.strictEqual(typeof logDir, 'string');
+    assert.ok(logDir.length > 0);
+  });
 });
