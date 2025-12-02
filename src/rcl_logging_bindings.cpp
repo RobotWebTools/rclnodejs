@@ -93,9 +93,9 @@ Napi::Value GetLoggingDirectory(const Napi::CallbackInfo& info) {
       rcl_logging_get_logging_directory(allocator, &directory_path);
 
   if (ret != RCL_LOGGING_RET_OK) {
-    Napi::Error::New(env, rcl_get_error_string().str)
+    Napi::Error::New(env, rcutils_get_error_string().str)
         .ThrowAsJavaScriptException();
-    rcl_reset_error();
+    rcutils_reset_error();
     return env.Undefined();
   }
 
