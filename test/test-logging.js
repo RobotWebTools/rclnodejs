@@ -89,4 +89,89 @@ describe('Test logging util', function () {
     assert.strictEqual(typeof logDir, 'string');
     assert.ok(logDir.length > 0);
   });
+
+  it('Test enableRosout option true', async function () {
+    await rclnodejs.init();
+    const options = new rclnodejs.NodeOptions();
+    options.enableRosout = true;
+    const node = rclnodejs.createNode(
+      'node_with_rosout',
+      '',
+      rclnodejs.Context.defaultContext(),
+      options
+    );
+    const publishers = node.getPublisherNamesAndTypesByNode(
+      node.name(),
+      node.namespace()
+    );
+    const rosoutPublisher = publishers.find((pub) =>
+      pub.name.includes('rosout')
+    );
+    assert.notStrictEqual(rosoutPublisher, undefined);
+    rclnodejs.shutdown();
+  });
+
+  it('Test enableRosout option false', async function () {
+    await rclnodejs.init();
+    const options = new rclnodejs.NodeOptions();
+    options.enableRosout = false;
+    const node = rclnodejs.createNode(
+      'node_without_rosout',
+      '',
+      rclnodejs.Context.defaultContext(),
+      options
+    );
+    const publishers = node.getPublisherNamesAndTypesByNode(
+      node.name(),
+      node.namespace()
+    );
+    const rosoutPublisher = publishers.find((pub) =>
+      pub.name.includes('rosout')
+    );
+    assert.strictEqual(rosoutPublisher, undefined);
+    rclnodejs.shutdown();
+  });
+
+  it('Test rosoutQos option', async function () {
+    await rclnodejs.init();
+    const options = new rclnodejs.NodeOptions();
+    options.enableRosout = true;
+    options.rosoutQos = rclnodejs.QoS.profileSensorData;
+    const node = rclnodejs.createNode(
+      'node_with_rosout_qos',
+      '',
+      rclnodejs.Context.defaultContext(),
+      options
+    );
+
+    const publishers = node.getPublishersInfoByTopic('/rosout');
+    const myPub = publishers.find(
+      (p) => p.node_name === 'node_with_rosout_qos'
+    );
+
+    assert.notStrictEqual(myPub, undefined);
+    // SensorData profile: Reliability = BEST_EFFORT (2), Durability = VOLATILE (2)
+    // Default rosout profile: Reliability = RELIABLE (1), Durability = TRANSIENT_LOCAL (1)
+
+    // Check reliability
+    assert.strictEqual(
+      myPub.qos_profile.reliability,
+      rclnodejs.QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT
+    );
+
+    rclnodejs.shutdown();
+  });
+
+  it('Test child logger', function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <=
+      rclnodejs.DistroUtils.getDistroId('humble')
+    ) {
+      this.skip();
+    }
+    const logger = rclnodejs.logging.getLogger('parent_logger');
+    const childLogger = logger.getChild('child_logger');
+    assert.strictEqual(childLogger.name, 'parent_logger.child_logger');
+    childLogger.destroy();
+  });
 });

@@ -212,6 +212,11 @@ Napi::Value CreateNode(const Napi::CallbackInfo& info) {
   options.use_global_arguments = use_global_arguments;
   options.arguments = arguments;
 
+  if (info.Length() > 5 && !info[5].IsUndefined() && !info[5].IsNull()) {
+    std::unique_ptr<rmw_qos_profile_t> qos_profile = GetQoSProfile(info[5]);
+    options.rosout_qos = *qos_profile;
+  }
+
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
                            rcl_node_init(node, node_name.c_str(),
                                          name_space.c_str(), context, &options),

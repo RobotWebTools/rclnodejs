@@ -44,6 +44,8 @@ expectType<rclnodejs.NodeOptions>(nodeOptions);
 expectType<boolean>(nodeOptions.startParameterServices);
 expectType<boolean>(nodeOptions.automaticallyDeclareParametersFromOverrides);
 expectType<rclnodejs.Parameter[]>(nodeOptions.parameterOverrides);
+expectType<boolean>(nodeOptions.enableRosout);
+expectType<rclnodejs.QoS | rclnodejs.QoS.ProfileRef>(nodeOptions.rosoutQos);
 
 // ---- Node -----
 const node = rclnodejs.createNode(NODE_NAME);
