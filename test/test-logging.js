@@ -114,6 +114,7 @@ describe('Test logging util', function () {
       pub.name.includes('rosout')
     );
     assert.notStrictEqual(rosoutPublisher, undefined);
+    node.destroy();
     rclnodejs.shutdown();
   });
 
@@ -165,6 +166,7 @@ describe('Test logging util', function () {
       rclnodejs.QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT
     );
 
+    node.destroy();
     rclnodejs.shutdown();
   });
 
