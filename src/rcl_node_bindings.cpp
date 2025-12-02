@@ -26,8 +26,10 @@
 #include <rcl_yaml_param_parser/types.h>
 
 #include <rcpputils/scope_exit.hpp>
-// NOLINTNEXTLINE
+// NOLINTBEGIN
+#include <memory>
 #include <string>
+// NOLINTEND
 
 #include "macros.h"
 #include "rcl_handle.h"
