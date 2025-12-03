@@ -14,6 +14,9 @@ MSG.data = '';
 
 // ---- rclnodejs -----
 expectType<Promise<void>>(rclnodejs.init());
+expectType<string[]>(
+  rclnodejs.removeROSArgs(['--ros-args', '-r', '__node:=my_node'])
+);
 expectType<string | undefined>(rclnodejs.DistroUtils.getDistroName());
 expectType<boolean>(rclnodejs.isShutdown());
 expectType<void>(rclnodejs.shutdown());
