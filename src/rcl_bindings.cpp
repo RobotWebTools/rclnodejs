@@ -15,6 +15,11 @@
 #include "rcl_bindings.h"
 
 #include <node.h>
+#include <rcl/arguments.h>
+#include <rcl/rcl.h>
+
+#include <rcpputils/scope_exit.hpp>
+
 #if ROS_VERSION >= 2006
 #include <rosidl_runtime_c/string_functions.h>
 #else
@@ -23,10 +28,63 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "rcl_handle.h"
+#include "rcl_utilities.h"
 
 namespace rclnodejs {
+
+Napi::Value RemoveROSArgs(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  Napi::Array jsArgv = info[0].As<Napi::Array>();
+  size_t argc = jsArgv.Length();
+  char** argv = AbstractArgsFromNapiArray(jsArgv);
+
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  rcl_arguments_t parsed_args = rcl_get_zero_initialized_arguments();
+
+  rcl_ret_t ret = rcl_parse_arguments(argc, const_cast<const char**>(argv),
+                                      allocator, &parsed_args);
+
+  if (RCL_RET_OK != ret) {
+    FreeArgs(argv, argc);
+    Napi::Error::New(env, "Failed to parse arguments")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  RCPPUTILS_SCOPE_EXIT({
+    rcl_ret_t fini_ret = rcl_arguments_fini(&parsed_args);
+    if (RCL_RET_OK != fini_ret) {
+      // Log error but don't throw since we might be already throwing
+    }
+  });
+
+  int nonros_argc = 0;
+  const char** nonros_argv = nullptr;
+
+  ret = rcl_remove_ros_arguments(const_cast<const char**>(argv), &parsed_args,
+                                 allocator, &nonros_argc, &nonros_argv);
+
+  if (RCL_RET_OK != ret) {
+    FreeArgs(argv, argc);
+    Napi::Error::New(env, "Failed to remove ROS arguments")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  RCPPUTILS_SCOPE_EXIT({ allocator.deallocate(nonros_argv, allocator.state); });
+
+  Napi::Array result = Napi::Array::New(env, nonros_argc);
+  for (int i = 0; i < nonros_argc; ++i) {
+    result.Set(i, Napi::String::New(env, nonros_argv[i]));
+  }
+
+  FreeArgs(argv, argc);
+
+  return result;
+}
 
 Napi::Value InitString(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -110,6 +168,7 @@ Napi::Object InitBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, CreateArrayBufferFromAddress));
   exports.Set("createArrayBufferCleaner",
               Napi::Function::New(env, CreateArrayBufferCleaner));
+  exports.Set("removeROSArgs", Napi::Function::New(env, RemoveROSArgs));
   return exports;
 }
 

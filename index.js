@@ -387,6 +387,21 @@ let rcl = {
   },
 
   /**
+   * Remove ROS-specific arguments from the given argument list.
+   * @param {string[]} argv - The argument list to process.
+   * @return {string[]} The argument list with ROS arguments removed.
+   */
+  removeROSArgs(argv) {
+    if (!Array.isArray(argv)) {
+      throw new TypeError('argv must be an array.');
+    }
+    if (!argv.every((argument) => typeof argument === 'string')) {
+      throw new TypeError('argv elements must be strings (and not null).');
+    }
+    return rclnodejs.removeROSArgs(argv);
+  },
+
+  /**
    * Start detection and processing of units of work.
    * @param {Node} node - The node to be spun up.
    * @param {number} [timeout=10] - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.

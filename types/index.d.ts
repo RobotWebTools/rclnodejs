@@ -59,6 +59,13 @@ declare module 'rclnodejs' {
   function init(context?: Context, argv?: string[]): Promise<void>;
 
   /**
+   * Remove ROS-specific arguments from the given argument list.
+   * @param argv - The argument list to process.
+   * @returns The argument list with ROS arguments removed.
+   */
+  function removeROSArgs(argv: string[]): string[];
+
+  /**
    * Start detection and processing of units of work.
    *
    * @param node - The node to be spun.
