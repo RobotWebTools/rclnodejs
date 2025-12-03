@@ -15,15 +15,50 @@
 #include "rcl_logging_bindings.h"
 
 #include <rcl/error_handling.h>
+#include <rcl/logging.h>
+#include <rcl/logging_rosout.h>
 #include <rcl/rcl.h>
 #include <rcl_logging_interface/rcl_logging_interface.h>
 
 #include <string>
 
 #include "macros.h"
+#include "rcl_handle.h"
 #include "rcl_utilities.h"
 
 namespace rclnodejs {
+
+Napi::Value InitRosoutPublisherForNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+
+  if (rcl_logging_rosout_enabled()) {
+    rcl_ret_t ret = rcl_logging_rosout_init_publisher_for_node(node);
+    if (ret != RCL_RET_OK) {
+      Napi::Error::New(env, rcl_get_error_string().str)
+          .ThrowAsJavaScriptException();
+      rcl_reset_error();
+    }
+  }
+  return env.Undefined();
+}
+
+Napi::Value FiniRosoutPublisherForNode(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+
+  if (rcl_logging_rosout_enabled()) {
+    rcl_ret_t ret = rcl_logging_rosout_fini_publisher_for_node(node);
+    if (ret != RCL_RET_OK) {
+      Napi::Error::New(env, rcl_get_error_string().str)
+          .ThrowAsJavaScriptException();
+      rcl_reset_error();
+    }
+  }
+  return env.Undefined();
+}
 
 Napi::Value setLoggerLevel(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -104,6 +139,41 @@ Napi::Value GetLoggingDirectory(const Napi::CallbackInfo& info) {
   return result;
 }
 
+#if ROS_VERSION > 2205
+Napi::Value AddRosoutSublogger(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  std::string logger_name = info[0].As<Napi::String>().Utf8Value();
+  std::string sublogger_name = info[1].As<Napi::String>().Utf8Value();
+
+  rcl_ret_t ret = rcl_logging_rosout_add_sublogger(logger_name.c_str(),
+                                                   sublogger_name.c_str());
+  if (ret == RCL_RET_OK) {
+    return Napi::Boolean::New(env, true);
+  } else if (ret == RCL_RET_NOT_FOUND) {
+    rcl_reset_error();
+    return Napi::Boolean::New(env, false);
+  } else {
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    rcl_reset_error();
+    return env.Undefined();
+  }
+}
+
+Napi::Value RemoveRosoutSublogger(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  std::string logger_name = info[0].As<Napi::String>().Utf8Value();
+  std::string sublogger_name = info[1].As<Napi::String>().Utf8Value();
+
+  rcl_ret_t ret = rcl_logging_rosout_remove_sublogger(logger_name.c_str(),
+                                                      sublogger_name.c_str());
+  if (ret != RCL_RET_OK) {
+    rcl_reset_error();
+  }
+  return env.Undefined();
+}
+#endif
+
 Napi::Object InitLoggingBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("setLoggerLevel", Napi::Function::New(env, setLoggerLevel));
   exports.Set("getLoggerEffectiveLevel",
@@ -112,6 +182,16 @@ Napi::Object InitLoggingBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("isEnableFor", Napi::Function::New(env, IsEnableFor));
   exports.Set("getLoggingDirectory",
               Napi::Function::New(env, GetLoggingDirectory));
+  exports.Set("initRosoutPublisherForNode",
+              Napi::Function::New(env, InitRosoutPublisherForNode));
+  exports.Set("finiRosoutPublisherForNode",
+              Napi::Function::New(env, FiniRosoutPublisherForNode));
+#if ROS_VERSION > 2205
+  exports.Set("addRosoutSublogger",
+              Napi::Function::New(env, AddRosoutSublogger));
+  exports.Set("removeRosoutSublogger",
+              Napi::Function::New(env, RemoveRosoutSublogger));
+#endif
   return exports;
 }
 

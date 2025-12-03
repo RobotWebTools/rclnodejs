@@ -33,6 +33,19 @@ declare module 'rclnodejs' {
     automaticallyDeclareParametersFromOverrides: boolean;
 
     /**
+     * A flag controlling the startup of the rosout logging.
+     * When true a node will start the rosout logging.
+     * Default value = true;
+     * @returns {boolean} -
+     */
+    enableRosout: boolean;
+
+    /**
+     * The QoS profile for the rosout publisher.
+     */
+    rosoutQos: QoS | QoS.ProfileRef;
+
+    /**
      * An instance configured with default values.
      */
     static defaultOptions: NodeOptions;

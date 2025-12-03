@@ -44,6 +44,8 @@ expectType<rclnodejs.NodeOptions>(nodeOptions);
 expectType<boolean>(nodeOptions.startParameterServices);
 expectType<boolean>(nodeOptions.automaticallyDeclareParametersFromOverrides);
 expectType<rclnodejs.Parameter[]>(nodeOptions.parameterOverrides);
+expectType<boolean>(nodeOptions.enableRosout);
+expectType<rclnodejs.QoS | rclnodejs.QoS.ProfileRef>(nodeOptions.rosoutQos);
 
 // ---- Node -----
 const node = rclnodejs.createNode(NODE_NAME);
@@ -354,6 +356,8 @@ expectType<boolean>(logger.warn('test msg'));
 expectType<boolean>(logger.error('test msg'));
 expectType<boolean>(logger.fatal('test msg'));
 expectType<string>(rclnodejs.Logging.getLoggingDirectory());
+expectType<rclnodejs.Logging>(logger.getChild('child'));
+expectType<void>(logger.destroy());
 
 // ---- ActionClient -----
 const Fibonacci = rclnodejs.require('example_interfaces/action/Fibonacci');
