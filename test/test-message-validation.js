@@ -364,9 +364,13 @@ describe('Message Validation Tests', function () {
 
   describe('Publisher validation integration', function () {
     let node;
+    let testCounter = 0;
 
     beforeEach(function () {
-      node = new rclnodejs.Node('test_validation_node');
+      testCounter++;
+      node = new rclnodejs.Node(
+        `test_validation_node_${testCounter}_${Date.now()}`
+      );
     });
 
     afterEach(function () {
