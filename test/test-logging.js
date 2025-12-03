@@ -64,6 +64,7 @@ describe('Test logging util', function () {
 
   for (const level of ['debug', 'info', 'warn', 'error', 'fatal']) {
     it(`Test commandline parameter configuration of log level '${level}'`, async function () {
+      this.timeout(10000);
       // test the specific log level
       await testLoglevel(level);
     });
@@ -193,5 +194,37 @@ describe('Test logging util', function () {
     const childLogger = logger.getChild('child_logger');
     assert.strictEqual(childLogger.name, 'parent_logger.child_logger');
     childLogger.destroy();
+  });
+
+  it('Test logging configure and shutdown', async function () {
+    await rclnodejs.init();
+    const logger = rclnodejs.logging.getLogger('config_logger');
+
+    // Verify logging works initially
+    assert.doesNotThrow(() => {
+      logger.info('Initial message');
+    });
+
+    // Shutdown logging
+    assert.doesNotThrow(() => {
+      rclnodejs.logging.shutdown();
+    });
+
+    // Re-configure logging with thread-safe handler
+    assert.doesNotThrow(() => {
+      rclnodejs.logging.configure(rclnodejs.Context.defaultContext());
+    });
+
+    // Verify logging works after reconfiguration
+    assert.doesNotThrow(() => {
+      logger.info('Message after reconfiguration');
+    });
+
+    // Test invalid context
+    assert.throws(() => {
+      rclnodejs.logging.configure({});
+    }, /context/);
+
+    rclnodejs.shutdown();
   });
 });

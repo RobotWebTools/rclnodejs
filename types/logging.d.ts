@@ -99,6 +99,18 @@ declare module 'rclnodejs' {
     static getLogger(name: string): Logging;
 
     /**
+     * Configure the logging system with the given context.
+     *
+     * @param context - The context to configure logging for.
+     */
+    static configure(context: Context): void;
+
+    /**
+     * Shutdown the logging system.
+     */
+    static shutdown(): void;
+
+    /**
      * Get the logging directory.
      *
      * @returns The logging directory.
