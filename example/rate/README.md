@@ -332,19 +332,16 @@ while (running) {
 ### Common Issues
 
 1. **Rate Drift**:
-
    - Processing time exceeds rate period
    - Solution: Optimize processing or reduce rate frequency
    - Monitor actual vs. target frequency
 
 2. **Missed Messages**:
-
    - Rate limiting causes message drops
    - Expected behavior in the example (only every 200th message processed)
    - Use `ros2 topic echo` to see all messages
 
 3. **High CPU Usage**:
-
    - Rate loop running too fast for processing capacity
    - Solution: Reduce rate frequency or optimize processing
    - Monitor system resource usage

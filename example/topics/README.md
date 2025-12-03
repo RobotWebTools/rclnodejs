@@ -69,6 +69,27 @@ The `publisher/` directory contains examples of nodes that publish messages to t
 - **Run Command**: `node publisher/publisher-raw-message.js`
 - **Pair**: Works with `subscription-raw-message.js`
 
+### 7. Publisher Validation (`publisher-validation-example.js`)
+
+**Purpose**: Demonstrates message validation features for publishers.
+
+- **Message Type**: `std_msgs/msg/String`, `geometry_msgs/msg/Twist`
+- **Topics**: Various validation test topics
+- **Functionality**:
+  - Schema introspection with `getMessageSchema()`, `getFieldNames()`, `getFieldType()`
+  - Publisher-level validation with `validateMessages: true` option
+  - Per-publish validation override with `{ validate: true/false }`
+  - Strict mode validation for unknown fields
+  - Nested message validation (Twist with Vector3)
+  - Reusable validators with `createMessageValidator()`
+  - Error handling with `MessageValidationError`
+- **Features**:
+  - Catch invalid messages before publishing
+  - Dynamic validation toggle with `setValidation()`
+  - Detailed error reports with field-level issues
+- **Run Command**: `node publisher/publisher-validation-example.js`
+- **Note**: Standalone example - no subscriber required
+
 ## Subscriber Examples
 
 The `subscriber/` directory contains examples of nodes that subscribe to topics:
@@ -214,7 +235,8 @@ Several examples work together to demonstrate complete communication:
 - **Service Events**: Monitoring service interactions
 - **Multi-dimensional Arrays**: Complex data structures with layout information
 - **Message Serialization**: TypedArray handling and JSON-safe conversion for web applications
-- **Validation**: Name and topic validation utilities
+- **Name Validation**: Topic names, node names, and namespace validation utilities
+- **Message Validation**: Schema introspection and pre-publish message validation with detailed error reporting
 
 ## Notes
 

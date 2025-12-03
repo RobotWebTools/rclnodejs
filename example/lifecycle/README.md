@@ -355,19 +355,16 @@ Multiple lifecycle nodes can be coordinated using external lifecycle managers:
 ### Common Issues
 
 1. **Publisher Not Publishing**:
-
    - Ensure lifecycle publisher is activated in `onActivate()`
    - Check that node is in active state
    - Verify publisher is created in `onConfigure()`
 
 2. **Timer Not Working**:
-
    - Create timer in `onActivate()`, not `onConfigure()`
    - Cancel timer in `onDeactivate()`
    - Check timer interval format (BigInt nanoseconds)
 
 3. **State Transition Failures**:
-
    - Ensure callbacks return appropriate return codes
    - Check for exceptions in callback implementations
    - Verify resource cleanup in deactivate/shutdown

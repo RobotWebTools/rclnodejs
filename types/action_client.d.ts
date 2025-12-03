@@ -116,6 +116,14 @@ declare module 'rclnodejs' {
   }
 
   /**
+   * Options for sending a goal
+   */
+  interface SendGoalOptions {
+    /** Override validateGoals setting for this call */
+    validate?: boolean;
+  }
+
+  /**
    * ROS Action client.
    */
   class ActionClient<T extends TypeClass<ActionTypeClassName>> {
@@ -131,8 +139,23 @@ declare module 'rclnodejs' {
       node: Node,
       typeClass: T,
       actionName: string,
-      options?: Options<ActionQoS>
+      options?: Options<ActionQoS> & {
+        validateGoals?: boolean;
+        validationOptions?: MessageValidationOptions;
+      }
     );
+
+    /**
+     * Whether goal validation is enabled for this action client.
+     */
+    readonly validationEnabled: boolean;
+
+    /**
+     * Enable or disable goal validation for this action client
+     * @param enabled - Whether to validate goals before sending
+     * @param options - Validation options
+     */
+    setValidation(enabled: boolean, options?: MessageValidationOptions): void;
 
     /**
      * Send a goal and wait for the goal ACK asynchronously.
@@ -143,12 +166,15 @@ declare module 'rclnodejs' {
      * @param goal - The goal request.
      * @param feedbackCallback - Callback function for feedback associated with the goal.
      * @param goalUuid - Universally unique identifier for the goal. If None, then a random UUID is generated.
+     * @param options - Send options (e.g., { validate: true })
      * @returns A Promise to a goal handle that resolves when the goal request has been accepted or rejected.
+     * @throws MessageValidationError if validation is enabled and goal is invalid
      */
     sendGoal(
       goal: ActionGoal<T>,
       feedbackCallback?: (feedbackMessage: ActionFeedback<T>) => void,
-      goalUuid?: unique_identifier_msgs.msg.UUID
+      goalUuid?: unique_identifier_msgs.msg.UUID,
+      options?: SendGoalOptions
     ): Promise<ClientGoalHandle<T>>;
 
     /**

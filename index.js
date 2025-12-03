@@ -62,6 +62,15 @@ const ParameterClient = require('./lib/parameter_client.js');
 const errors = require('./lib/errors.js');
 const ParameterWatcher = require('./lib/parameter_watcher.js');
 const { spawn } = require('child_process');
+const {
+  ValidationProblem,
+  getMessageSchema,
+  getFieldNames,
+  getFieldType,
+  validateMessage,
+  assertValidMessage,
+  createMessageValidator,
+} = require('./lib/message_validation.js');
 
 /**
  * Get the version of the generator that was used for the currently present interfaces.
@@ -581,6 +590,57 @@ let rcl = {
    */
   toJSONString: toJSONString,
 
+  /** {@link ValidationProblem} - Enum of validation problem types */
+  ValidationProblem: ValidationProblem,
+
+  /**
+   * Get the schema definition for a message type
+   * @param {function|string|object} typeClass - Message type class or identifier
+   * @returns {object|null} Schema definition with fields and constants
+   */
+  getMessageSchema: getMessageSchema,
+
+  /**
+   * Get field names for a message type
+   * @param {function|string|object} typeClass - Message type class or identifier
+   * @returns {string[]} Array of field names
+   */
+  getFieldNames: getFieldNames,
+
+  /**
+   * Get type information for a specific field
+   * @param {function|string|object} typeClass - Message type class or identifier
+   * @param {string} fieldName - Name of the field
+   * @returns {object|null} Field type information or null if not found
+   */
+  getFieldType: getFieldType,
+
+  /**
+   * Validate a message object against its schema
+   * @param {object} obj - Plain object to validate
+   * @param {function|string|object} typeClass - Message type class or identifier
+   * @param {object} [options] - Validation options
+   * @returns {{valid: boolean, issues: Array<object>}} Validation result
+   */
+  validateMessage: validateMessage,
+
+  /**
+   * Validate a message and throw if invalid
+   * @param {object} obj - Plain object to validate
+   * @param {function|string|object} typeClass - Message type class or identifier
+   * @param {object} [options] - Validation options
+   * @throws {MessageValidationError} If validation fails
+   */
+  assertValidMessage: assertValidMessage,
+
+  /**
+   * Create a validator function for a specific message type
+   * @param {function|string|object} typeClass - Message type class or identifier
+   * @param {object} [defaultOptions] - Default validation options
+   * @returns {function} Validator function
+   */
+  createMessageValidator: createMessageValidator,
+
   // Error classes for structured error handling
   /** {@link RclNodeError} - Base error class for all rclnodejs errors */
   RclNodeError: errors.RclNodeError,
@@ -591,6 +651,8 @@ let rcl = {
   TypeValidationError: errors.TypeValidationError,
   /** {@link RangeValidationError} - Range/value validation error */
   RangeValidationError: errors.RangeValidationError,
+  /** {@link MessageValidationError} - Message structure/type validation error */
+  MessageValidationError: errors.MessageValidationError,
   /** {@link NameValidationError} - ROS name validation error */
   NameValidationError: errors.NameValidationError,
 

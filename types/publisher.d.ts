@@ -1,5 +1,13 @@
 declare module 'rclnodejs' {
   /**
+   * Options for publishing a message
+   */
+  interface PublishOptions {
+    /** Override validateMessages setting for this publish call */
+    validate?: boolean;
+  }
+
+  /**
    * A ROS Publisher that publishes messages on a topic.
    */
   interface Publisher<T extends TypeClass<MessageTypeClassName>>
@@ -8,12 +16,27 @@ declare module 'rclnodejs' {
      * Topic on which messages are published.
      */
     readonly topic: string;
+
+    /**
+     * Whether message validation is enabled for this publisher.
+     */
+    readonly validationEnabled: boolean;
+
     /**
      * Publish a message
      *
      * @param message - The message to be sent.
+     * @param options - Publish options (e.g., { validate: true })
+     * @throws MessageValidationError if validation is enabled and message is invalid
      */
-    publish(message: MessageType<T> | Buffer): void;
+    publish(message: MessageType<T> | Buffer, options?: PublishOptions): void;
+
+    /**
+     * Enable or disable message validation for this publisher
+     * @param enabled - Whether to validate messages before publishing
+     * @param options - Validation options
+     */
+    setValidation(enabled: boolean, options?: MessageValidationOptions): void;
 
     /**
      * Get the number of subscriptions to this publisher.

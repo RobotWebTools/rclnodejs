@@ -1,17 +1,40 @@
 declare module 'rclnodejs' {
   /**
+   * Options for sending a request
+   */
+  interface SendRequestOptions {
+    /** Override validateRequests setting for this call */
+    validate?: boolean;
+  }
+
+  /**
    * A ROS service client.
    */
   interface Client<T extends TypeClass<ServiceTypeClassName>> extends Entity {
+    /**
+     * Whether request validation is enabled for this client.
+     */
+    readonly validationEnabled: boolean;
+
+    /**
+     * Enable or disable request validation for this client
+     * @param enabled - Whether to validate requests before sending
+     * @param options - Validation options
+     */
+    setValidation(enabled: boolean, options?: MessageValidationOptions): void;
+
     /**
      * Make a service request and wait for to be notified asynchronously through a callback.
      *
      * @param request - Request to be submitted.
      * @param callback - Callback for receiving the server response.
+     * @param options - Send options (e.g., { validate: true })
+     * @throws MessageValidationError if validation is enabled and request is invalid
      */
     sendRequest(
       request: ServiceRequestMessage<T>,
-      callback: Client.ResponseCallback<T>
+      callback: Client.ResponseCallback<T>,
+      options?: SendRequestOptions
     ): void;
 
     /**
@@ -22,6 +45,7 @@ declare module 'rclnodejs' {
      * @returns Promise that resolves with the service response.
      * @throws TimeoutError if the request times out (when options.timeout is exceeded).
      * @throws AbortError if the request is manually aborted (via options.signal).
+     * @throws MessageValidationError if validation is enabled and request is invalid.
      * @throws Error if the request fails for other reasons.
      */
     sendRequestAsync(
@@ -109,6 +133,11 @@ declare module 'rclnodejs' {
        * will abort the request.
        */
       signal?: AbortSignal;
+
+      /**
+       * Override validateRequests setting for this call
+       */
+      validate?: boolean;
     }
   }
 }
