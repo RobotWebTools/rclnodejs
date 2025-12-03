@@ -20,6 +20,7 @@
 #include <rcl/rcl.h>
 #include <rcl_logging_interface/rcl_logging_interface.h>
 
+#include <mutex>
 #include <string>
 
 #include "macros.h"
@@ -40,6 +41,47 @@ Napi::Value InitRosoutPublisherForNode(const Napi::CallbackInfo& info) {
           .ThrowAsJavaScriptException();
       rcl_reset_error();
     }
+      }
+  return env.Undefined();
+}
+
+static std::recursive_mutex logging_mutex;
+
+static void rclnodejs_thread_safe_logging_output_handler(
+    const rcutils_log_location_t* location, int severity, const char* name,
+    rcutils_time_point_value_t timestamp, const char* format, va_list* args) {
+  try {
+    std::lock_guard<std::recursive_mutex> lock(logging_mutex);
+    rcl_logging_multiple_output_handler(location, severity, name, timestamp,
+                                        format, args);
+  } catch (const std::exception& ex) {
+    RCUTILS_SAFE_FWRITE_TO_STDERR(
+        "rclnodejs failed to get the global logging mutex: ");
+    RCUTILS_SAFE_FWRITE_TO_STDERR(ex.what());
+    RCUTILS_SAFE_FWRITE_TO_STDERR("\n");
+  } catch (...) {
+    RCUTILS_SAFE_FWRITE_TO_STDERR(
+        "rclnodejs failed to get the global logging mutex\n");
+  }
+}
+
+Napi::Value LoggingConfigure(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* context_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_context_t* context =
+      reinterpret_cast<rcl_context_t*>(context_handle->ptr());
+
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+
+  std::lock_guard<std::recursive_mutex> lock(logging_mutex);
+  rcl_ret_t ret = rcl_logging_configure_with_output_handler(
+      &context->global_arguments, &allocator,
+      rclnodejs_thread_safe_logging_output_handler);
+
+  if (ret != RCL_RET_OK) {
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    rcl_reset_error();
   }
   return env.Undefined();
 }
@@ -56,6 +98,18 @@ Napi::Value FiniRosoutPublisherForNode(const Napi::CallbackInfo& info) {
           .ThrowAsJavaScriptException();
       rcl_reset_error();
     }
+  }
+  return env.Undefined();
+}
+
+Napi::Value LoggingFini(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  std::lock_guard<std::recursive_mutex> lock(logging_mutex);
+  rcl_ret_t ret = rcl_logging_fini();
+  if (ret != RCL_RET_OK) {
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    rcl_reset_error();
   }
   return env.Undefined();
 }
@@ -192,6 +246,8 @@ Napi::Object InitLoggingBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("removeRosoutSublogger",
               Napi::Function::New(env, RemoveRosoutSublogger));
 #endif
+  exports.Set("loggingConfigure", Napi::Function::New(env, LoggingConfigure));
+  exports.Set("loggingFini", Napi::Function::New(env, LoggingFini));
   return exports;
 }
 
