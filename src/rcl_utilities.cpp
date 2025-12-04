@@ -369,8 +369,9 @@ void ThrowIfUnparsedROSArgs(Napi::Env env, const Napi::Array& jsArgv,
     return;
   }
 
-  RCPPUTILS_SCOPE_EXIT(
-      { allocator.deallocate(unparsed_indices_c, allocator.state); });
+  RCPPUTILS_SCOPE_EXIT({
+    allocator.deallocate(unparsed_indices_c, allocator.state);
+  });
 
   std::string unparsed_args_str = "[";
   for (int i = 0; i < unparsed_ros_args_count; ++i) {
