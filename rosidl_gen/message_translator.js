@@ -58,70 +58,6 @@ function copyMsgObject(msg, obj) {
   }
 }
 
-function verifyMessage(message, inputObj) {
-  if (message.constructor.isROSArray) {
-    // It's a ROS message array
-    // Note: there won't be any JavaScript array in message.
-    if (!Array.isArray(inputObj)) {
-      return false;
-    }
-    // TODO(Kenny): deal with TypedArray in the future
-    // TODO(Kenny): if the elements are objects, check the objects
-  } else {
-    // It's a ROS message
-    const def = message.constructor.ROSMessageDef;
-    for (let i in def.fields) {
-      const name = def.fields[i].name;
-      if (def.fields[i].type.isPrimitiveType) {
-        // check type/existence
-        switch (def.fields[i].type.type) {
-          case 'char':
-          case 'int16':
-          case 'int32':
-          case 'byte':
-          case 'uint16':
-          case 'uint32':
-          case 'float32':
-          case 'float64':
-            if (typeof inputObj[name] != 'number') {
-              return false;
-            }
-            break;
-          case 'int64':
-          case 'uint64':
-            if (
-              typeof inputObj[name] != 'bigint' &&
-              typeof inputObj[name] != 'number'
-            ) {
-              return false;
-            }
-            break;
-          case 'bool':
-            if (typeof inputObj[name] != 'boolean') {
-              return false;
-            }
-            break;
-          case 'string':
-          case 'wstring':
-            if (typeof inputObj[name] != 'string') {
-              return false;
-            }
-            break;
-        }
-      } else if (!verifyMessage(message[name], inputObj[name])) {
-        // Proceed further on this member
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-function verifyMessageStruct(MessageType, obj) {
-  const msg = new MessageType();
-  return verifyMessage(msg, obj);
-}
-
 function toPlainObject(message, enableTypedArray = true) {
   if (!message) return undefined;
 
@@ -190,7 +126,6 @@ function constructFromPlanObject(msg, obj) {
 }
 
 module.exports = {
-  verifyMessageStruct: verifyMessageStruct,
   toROSMessage: toROSMessage,
   toPlainObject: toPlainObject,
   constructFromPlanObject: constructFromPlanObject,
