@@ -18,9 +18,9 @@ declare module 'rclnodejs' {
     readonly topic: string;
 
     /**
-     * Whether message validation is enabled for this publisher.
+     * Whether messages will be validated before publishing.
      */
-    readonly validationEnabled: boolean;
+    willValidateMessage: boolean;
 
     /**
      * Publish a message
@@ -32,11 +32,10 @@ declare module 'rclnodejs' {
     publish(message: MessageType<T> | Buffer, options?: PublishOptions): void;
 
     /**
-     * Enable or disable message validation for this publisher
-     * @param enabled - Whether to validate messages before publishing
+     * Set validation options for this publisher.
      * @param options - Validation options
      */
-    setValidation(enabled: boolean, options?: MessageValidationOptions): void;
+    setValidation(options: MessageValidationOptions): void;
 
     /**
      * Get the number of subscriptions to this publisher.

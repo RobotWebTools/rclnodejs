@@ -86,7 +86,7 @@ ROS 2 services provide a request-response communication pattern where clients se
 - **Features**:
   - **Request Validation**: Catch invalid requests before sending to service
   - **Schema Introspection**: Use `getMessageSchema()` to inspect request structure
-  - **Dynamic Toggle**: Enable/disable validation with `setValidation()`
+  - **Dynamic Toggle**: Enable/disable validation with `willValidateRequest` property
   - **Detailed Errors**: Field-level validation issues with expected vs received types
   - **Strict Mode**: Detect extra fields that don't belong in the request
 - **Run Command**: `node example/services/client/client-validation-example.js`

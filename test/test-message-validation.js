@@ -382,7 +382,7 @@ describe('Message Validation Tests', function () {
         'std_msgs/msg/String',
         'test_topic'
       );
-      assert.strictEqual(publisher.validationEnabled, false);
+      assert.strictEqual(publisher.willValidateMessage, false);
 
       assert.doesNotThrow(() => {
         publisher.publish({ data: 'valid string' });
@@ -398,7 +398,7 @@ describe('Message Validation Tests', function () {
         }
       );
 
-      assert.strictEqual(publisher.validationEnabled, true);
+      assert.strictEqual(publisher.willValidateMessage, true);
 
       assert.doesNotThrow(() => {
         publisher.publish({ data: 'valid string' });
@@ -424,17 +424,17 @@ describe('Message Validation Tests', function () {
       });
     });
 
-    it('should toggle validation with setValidation', function () {
+    it('should toggle validation with willValidateMessage', function () {
       const publisher = node.createPublisher(
         'std_msgs/msg/String',
         'test_topic'
       );
 
-      publisher.setValidation(true);
-      assert.strictEqual(publisher.validationEnabled, true);
+      publisher.willValidateMessage = true;
+      assert.strictEqual(publisher.willValidateMessage, true);
 
-      publisher.setValidation(false);
-      assert.strictEqual(publisher.validationEnabled, false);
+      publisher.willValidateMessage = false;
+      assert.strictEqual(publisher.willValidateMessage, false);
     });
   });
 });

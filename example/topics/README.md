@@ -85,7 +85,7 @@ The `publisher/` directory contains examples of nodes that publish messages to t
   - Error handling with `MessageValidationError`
 - **Features**:
   - Catch invalid messages before publishing
-  - Dynamic validation toggle with `setValidation()`
+  - Dynamic validation toggle with `willValidateMessage` property
   - Detailed error reports with field-level issues
 - **Run Command**: `node publisher/publisher-validation-example.js`
 - **Note**: Standalone example - no subscriber required

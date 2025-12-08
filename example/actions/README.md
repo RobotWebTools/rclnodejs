@@ -76,7 +76,7 @@ The `action_client/` directory contains examples of nodes that send goals to act
 - **Features**:
   - **Goal Validation**: Catch invalid goals before sending to action server
   - **Schema Introspection**: Use `getMessageSchema()` to inspect goal structure
-  - **Dynamic Toggle**: Enable/disable validation with `setValidation()`
+  - **Dynamic Toggle**: Enable/disable validation with `willValidateGoal` property
   - **Detailed Errors**: Field-level validation issues with expected vs received types
   - **Strict Mode**: Detect extra fields that don't belong in the goal
   - **Reusable Validators**: Create validators for repeated goal validation

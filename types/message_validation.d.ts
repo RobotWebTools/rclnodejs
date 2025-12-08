@@ -107,8 +107,6 @@ declare module 'rclnodejs' {
     checkTypes?: boolean;
     /** If true, check for missing fields (default: false) */
     checkRequired?: boolean;
-    /** Interface loader function (internal use) */
-    loader?: (name: string) => any;
   }
 
   /**
@@ -124,36 +122,26 @@ declare module 'rclnodejs' {
   /**
    * Get the schema definition for a message type
    * @param typeClass - Message type class or identifier
-   * @param loader - Interface loader function (optional)
    * @returns Schema definition with fields and constants, or null if not found
    */
-  export function getMessageSchema(
-    typeClass: TypeClass,
-    loader?: (name: string) => any
-  ): MessageSchema | null;
+  export function getMessageSchema(typeClass: TypeClass): MessageSchema | null;
 
   /**
    * Get field names for a message type
    * @param typeClass - Message type class or identifier
-   * @param loader - Interface loader function (optional)
    * @returns Array of field names
    */
-  export function getFieldNames(
-    typeClass: TypeClass,
-    loader?: (name: string) => any
-  ): string[];
+  export function getFieldNames(typeClass: TypeClass): string[];
 
   /**
    * Get type information for a specific field
    * @param typeClass - Message type class or identifier
    * @param fieldName - Name of the field
-   * @param loader - Interface loader function (optional)
    * @returns Field type information or null if not found
    */
   export function getFieldType(
     typeClass: TypeClass,
-    fieldName: string,
-    loader?: (name: string) => any
+    fieldName: string
   ): MessageFieldType | null;
 
   /**
@@ -186,12 +174,10 @@ declare module 'rclnodejs' {
    * Create a validator function for a specific message type
    * @param typeClass - Message type class or identifier
    * @param defaultOptions - Default validation options
-   * @param loader - Interface loader function (optional)
    * @returns Validator function that takes (obj, options?) and returns validation result
    */
   export function createMessageValidator(
     typeClass: TypeClass,
-    defaultOptions?: MessageValidationOptions,
-    loader?: (name: string) => any
+    defaultOptions?: MessageValidationOptions
   ): (obj: any, options?: MessageValidationOptions) => MessageValidationResult;
 }

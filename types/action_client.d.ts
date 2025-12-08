@@ -146,16 +146,15 @@ declare module 'rclnodejs' {
     );
 
     /**
-     * Whether goal validation is enabled for this action client.
+     * Whether goals will be validated before sending.
      */
-    readonly validationEnabled: boolean;
+    willValidateGoal: boolean;
 
     /**
-     * Enable or disable goal validation for this action client
-     * @param enabled - Whether to validate goals before sending
+     * Set validation options for this action client.
      * @param options - Validation options
      */
-    setValidation(enabled: boolean, options?: MessageValidationOptions): void;
+    setValidation(options: MessageValidationOptions): void;
 
     /**
      * Send a goal and wait for the goal ACK asynchronously.

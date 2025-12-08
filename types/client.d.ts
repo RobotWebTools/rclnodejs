@@ -12,16 +12,15 @@ declare module 'rclnodejs' {
    */
   interface Client<T extends TypeClass<ServiceTypeClassName>> extends Entity {
     /**
-     * Whether request validation is enabled for this client.
+     * Whether requests will be validated before sending.
      */
-    readonly validationEnabled: boolean;
+    willValidateRequest: boolean;
 
     /**
-     * Enable or disable request validation for this client
-     * @param enabled - Whether to validate requests before sending
+     * Set validation options for this client.
      * @param options - Validation options
      */
-    setValidation(enabled: boolean, options?: MessageValidationOptions): void;
+    setValidation(options: MessageValidationOptions): void;
 
     /**
      * Make a service request and wait for to be notified asynchronously through a callback.
