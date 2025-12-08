@@ -21,6 +21,8 @@
 
 #include <cstdio>
 #include <memory>
+#include <rcpputils/scope_exit.hpp>
+// NOLINTNEXTLINE
 #include <string>
 
 namespace {
@@ -344,9 +346,51 @@ void FreeArgs(char** argv, size_t argc) {
   }
 }
 
-bool HasUnparsedROSArgs(const rcl_arguments_t& rcl_args) {
+void ThrowIfUnparsedROSArgs(Napi::Env env, const Napi::Array& jsArgv,
+                            const rcl_arguments_t& rcl_args) {
   int unparsed_ros_args_count = rcl_arguments_get_count_unparsed_ros(&rcl_args);
-  return unparsed_ros_args_count != 0;
+
+  if (unparsed_ros_args_count < 0) {
+    Napi::Error::New(env, "Failed to count unparsed arguments")
+        .ThrowAsJavaScriptException();
+    return;
+  }
+  if (0 == unparsed_ros_args_count) {
+    return;
+  }
+
+  rcl_allocator_t allocator = rcl_get_default_allocator();
+  int* unparsed_indices_c = nullptr;
+  rcl_ret_t ret =
+      rcl_arguments_get_unparsed_ros(&rcl_args, allocator, &unparsed_indices_c);
+  if (RCL_RET_OK != ret) {
+    Napi::Error::New(env, "Failed to get unparsed arguments")
+        .ThrowAsJavaScriptException();
+    return;
+  }
+
+  RCPPUTILS_SCOPE_EXIT({
+    allocator.deallocate(unparsed_indices_c, allocator.state);
+  });
+
+  std::string unparsed_args_str = "[";
+  for (int i = 0; i < unparsed_ros_args_count; ++i) {
+    int index = unparsed_indices_c[i];
+    if (index < 0 || static_cast<size_t>(index) >= jsArgv.Length()) {
+      Napi::Error::New(env, "Got invalid unparsed ROS arg index")
+          .ThrowAsJavaScriptException();
+      return;
+    }
+    std::string arg = jsArgv.Get(index).As<Napi::String>().Utf8Value();
+    unparsed_args_str += "'" + arg + "'";
+    if (i < unparsed_ros_args_count - 1) {
+      unparsed_args_str += ", ";
+    }
+  }
+  unparsed_args_str += "]";
+
+  Napi::Error::New(env, "Unknown ROS arguments: " + unparsed_args_str)
+      .ThrowAsJavaScriptException();
 }
 
 }  // namespace rclnodejs

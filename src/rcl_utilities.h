@@ -63,7 +63,8 @@ char** AbstractArgsFromNapiArray(const Napi::Array& jsArgv);
 // `AbstractArgsFromNapiArray` and `FreeArgs` must be called in pairs.
 void FreeArgs(char** argv, size_t argc);
 
-bool HasUnparsedROSArgs(const rcl_arguments_t& rcl_args);
+void ThrowIfUnparsedROSArgs(Napi::Env env, const Napi::Array& jsArgv,
+                            const rcl_arguments_t& rcl_args);
 
 }  // namespace rclnodejs
 

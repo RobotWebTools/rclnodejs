@@ -73,6 +73,11 @@ Napi::Value Init(const Napi::CallbackInfo& info) {
       rcl_init(argc, argc > 0 ? argv : nullptr, &init_options, context),
       rcl_get_error_string().str);
 
+  ThrowIfUnparsedROSArgs(env, jsArgv, context->global_arguments);
+  if (env.IsExceptionPending()) {
+    return env.Undefined();
+  }
+
   THROW_ERROR_IF_NOT_EQUAL(
       RCL_RET_OK, rcl_logging_configure(&context->global_arguments, &allocator),
       rcl_get_error_string().str);
