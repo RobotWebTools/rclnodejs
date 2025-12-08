@@ -178,4 +178,127 @@ describe('rclnodejs validator testing', function () {
       'invalid namespace!'
     );
   });
+
+  describe('isValidFullTopicName', function () {
+    it('should return true for valid fully-qualified topics', function () {
+      assert.strictEqual(
+        rclnodejs.validator.isValidFullTopicName('/chatter'),
+        true
+      );
+      assert.strictEqual(
+        rclnodejs.validator.isValidFullTopicName('/node_name/chatter'),
+        true
+      );
+      assert.strictEqual(
+        rclnodejs.validator.isValidFullTopicName('/ns/node_name/chatter'),
+        true
+      );
+    });
+
+    it('should return false for invalid topics', function () {
+      assert.strictEqual(
+        rclnodejs.validator.isValidFullTopicName('/invalid_topic?'),
+        false
+      );
+      assert.strictEqual(
+        rclnodejs.validator.isValidFullTopicName('relative_topic'),
+        false
+      );
+    });
+
+    it('should return false for non-string input', function () {
+      assert.strictEqual(rclnodejs.validator.isValidFullTopicName(123), false);
+      assert.strictEqual(rclnodejs.validator.isValidFullTopicName(null), false);
+      assert.strictEqual(
+        rclnodejs.validator.isValidFullTopicName(undefined),
+        false
+      );
+    });
+  });
+
+  describe('isValidNodeName', function () {
+    it('should return true for valid node names', function () {
+      assert.strictEqual(rclnodejs.validator.isValidNodeName('my_node'), true);
+      assert.strictEqual(rclnodejs.validator.isValidNodeName('node123'), true);
+    });
+
+    it('should return false for invalid node names', function () {
+      assert.strictEqual(rclnodejs.validator.isValidNodeName(''), false);
+      assert.strictEqual(
+        rclnodejs.validator.isValidNodeName('invalid_node?'),
+        false
+      );
+      assert.strictEqual(
+        rclnodejs.validator.isValidNodeName('/invalid_node'),
+        false
+      );
+    });
+
+    it('should return false for non-string input', function () {
+      assert.strictEqual(rclnodejs.validator.isValidNodeName(123), false);
+      assert.strictEqual(rclnodejs.validator.isValidNodeName(null), false);
+    });
+  });
+
+  describe('isValidTopicName', function () {
+    it('should return true for valid topic names', function () {
+      assert.strictEqual(rclnodejs.validator.isValidTopicName('chatter'), true);
+      assert.strictEqual(
+        rclnodejs.validator.isValidTopicName('{node}/chatter'),
+        true
+      );
+      assert.strictEqual(
+        rclnodejs.validator.isValidTopicName('~/chatter'),
+        true
+      );
+      assert.strictEqual(
+        rclnodejs.validator.isValidTopicName('/my/topic'),
+        true
+      );
+    });
+
+    it('should return false for invalid topic names', function () {
+      assert.strictEqual(rclnodejs.validator.isValidTopicName(''), false);
+      assert.strictEqual(
+        rclnodejs.validator.isValidTopicName('/invalid_topic?'),
+        false
+      );
+      assert.strictEqual(
+        rclnodejs.validator.isValidTopicName('invalid/42topic'),
+        false
+      );
+    });
+
+    it('should return false for non-string input', function () {
+      assert.strictEqual(rclnodejs.validator.isValidTopicName(123), false);
+    });
+  });
+
+  describe('isValidNamespace', function () {
+    it('should return true for valid namespaces', function () {
+      assert.strictEqual(rclnodejs.validator.isValidNamespace('/my_ns'), true);
+      assert.strictEqual(rclnodejs.validator.isValidNamespace('/'), true);
+      assert.strictEqual(
+        rclnodejs.validator.isValidNamespace('/deep/namespace'),
+        true
+      );
+    });
+
+    it('should return false for invalid namespaces', function () {
+      assert.strictEqual(rclnodejs.validator.isValidNamespace(''), false);
+      assert.strictEqual(
+        rclnodejs.validator.isValidNamespace('invalid_namespace'),
+        false
+      );
+      assert.strictEqual(
+        rclnodejs.validator.isValidNamespace('invalid namespace'),
+        false
+      );
+    });
+
+    it('should return false for non-string input', function () {
+      assert.strictEqual(rclnodejs.validator.isValidNamespace(123), false);
+      assert.strictEqual(rclnodejs.validator.isValidNamespace(null), false);
+    });
+  });
 });
