@@ -61,6 +61,7 @@ const {
 const ParameterClient = require('./lib/parameter_client.js');
 const errors = require('./lib/errors.js');
 const ParameterWatcher = require('./lib/parameter_watcher.js');
+const MessageIntrospector = require('./lib/message_introspector.js');
 const { spawn } = require('child_process');
 const {
   ValidationProblem,
@@ -721,3 +722,6 @@ const Lifecycle = require('./lib/lifecycle.js');
 
 /** Lifecycle namespace */
 rcl.lifecycle = Lifecycle;
+
+/** {@link MessageIntrospector} class */
+rcl.MessageIntrospector = MessageIntrospector;

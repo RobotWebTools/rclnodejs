@@ -45,6 +45,8 @@
   - Add structured error handling with class error hierarchy
   - Add ParameterWatcher for real-time parameter monitoring
   - Enhance Message Validation
+  - Add TypeScript definitions and non-throwing variants for validator
+  - add MessageIntrospector for message schema inspection
 
 - **[Martins Mozeiko](https://github.com/martins-mozeiko)**
   - QoS new/delete fix
