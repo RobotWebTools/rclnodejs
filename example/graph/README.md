@@ -31,7 +31,6 @@ Graph introspection allows you to:
 This example creates a complete ROS 2 system with multiple nodes and then introspects the graph to display:
 
 1. **Node Creation**: Creates several nodes with different communication patterns:
-
    - `publisher_node` (namespace: `ns1`) - publishes to a topic
    - `subscriber_node` (namespace: `ns1`) - subscribes to a topic
    - `service_node` (namespace: `ns1`) - provides a service

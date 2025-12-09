@@ -150,6 +150,55 @@ declare module 'rclnodejs' {
   }
 
   /**
+   * A single validation issue found during message validation
+   */
+  export interface MessageValidationIssue {
+    /** Field path where issue occurred (e.g., 'linear.x' or 'data') */
+    field: string;
+    /** Problem type (UNKNOWN_FIELD, TYPE_MISMATCH, etc.) */
+    problem: string;
+    /** Expected type or value */
+    expected?: string;
+    /** Actual value received */
+    received?: any;
+  }
+
+  /**
+   * Message validation error for ROS message structure/type issues
+   */
+  export class MessageValidationError extends ValidationError {
+    /** The ROS message type (e.g., 'std_msgs/msg/String') */
+    messageType: string;
+    /** Array of validation issues found */
+    issues: MessageValidationIssue[];
+
+    /**
+     * @param messageType - The ROS message type
+     * @param issues - Array of validation issues
+     * @param options - Additional options
+     */
+    constructor(
+      messageType: string,
+      issues: MessageValidationIssue[],
+      options?: RclNodeErrorOptions
+    );
+
+    /**
+     * Get issues filtered by problem type
+     * @param problemType - Problem type to filter by
+     * @returns Filtered issues
+     */
+    getIssuesByType(problemType: string): MessageValidationIssue[];
+
+    /**
+     * Check if a specific field has validation issues
+     * @param fieldPath - Field path to check
+     * @returns True if field has issues
+     */
+    hasFieldIssue(fieldPath: string): boolean;
+  }
+
+  /**
    * ROS name validation error (topics, nodes, services)
    */
   export class NameValidationError extends ValidationError {
