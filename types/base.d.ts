@@ -28,3 +28,4 @@
 /// <reference path="./time_source.d.ts" />
 /// <reference path="./time.d.ts" />
 /// <reference path="./timer.d.ts" />
+/// <reference path="./validator.d.ts" />
