@@ -60,6 +60,29 @@ The `action_client/` directory contains examples of nodes that send goals to act
   - Cleanup and shutdown handling
 - **Run Command**: `node action_client/action-client-cancel-example.js`
 
+#### 3. Action Client Validation (`action-client-validation-example.js`)
+
+**Purpose**: Demonstrates goal validation features for action clients.
+
+- **Action Type**: `action_tutorials_interfaces/action/Fibonacci`
+- **Action Name**: `fibonacci`
+- **Functionality**:
+  - Schema introspection for action goal types
+  - Client-level validation with `validateGoals: true` option
+  - Per-goal validation override with `{ validate: true/false }`
+  - Strict mode validation for detecting unknown fields
+  - Reusable goal validators with `createMessageValidator()`
+  - Error handling with `MessageValidationError`
+- **Features**:
+  - **Goal Validation**: Catch invalid goals before sending to action server
+  - **Schema Introspection**: Use `getMessageSchema()` to inspect goal structure
+  - **Dynamic Toggle**: Enable/disable validation with `willValidateGoal` property
+  - **Detailed Errors**: Field-level validation issues with expected vs received types
+  - **Strict Mode**: Detect extra fields that don't belong in the goal
+  - **Reusable Validators**: Create validators for repeated goal validation
+- **Run Command**: `node action_client/action-client-validation-example.js`
+- **Note**: Standalone example - demonstrates validation errors without requiring a running action server
+
 ### Action Server Examples
 
 The `action_server/` directory contains examples of nodes that provide action services:
@@ -216,6 +239,8 @@ int32[] sequence
 - **Feedback Handling**: Processing incremental updates during execution
 - **Result Processing**: Handling final results and status
 - **Goal Cancellation**: Canceling active goals with `cancelGoal()`
+- **Goal Validation**: Pre-send validation with `validateGoals` option and `MessageValidationError`
+- **Schema Introspection**: Programmatic access to action goal schemas
 
 #### Action Server Concepts
 
@@ -260,19 +285,16 @@ All examples use ES6 classes to encapsulate action functionality:
 ### Common Issues
 
 1. **Action Server Not Available**:
-
    - Ensure action server is running before starting client
    - Check that both use the same action name (`fibonacci`)
    - Verify action type matches (`test_msgs/action/Fibonacci`)
 
 2. **Goal Not Accepted**:
-
    - Check server's `goalCallback` return value
    - Verify goal message structure is correct
    - Ensure server is properly initialized
 
 3. **Missing Feedback**:
-
    - Confirm feedback callback is properly bound
    - Check server's `publishFeedback()` calls
    - Verify feedback message structure

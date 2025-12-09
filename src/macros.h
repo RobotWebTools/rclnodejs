@@ -23,8 +23,7 @@
   {                                                                 \
     if (lhs op rhs) {                                               \
       rcl_reset_error();                                            \
-      Napi::Error::New(env, message)                                \
-          .ThrowAsJavaScriptException();                            \
+      Napi::Error::New(env, message).ThrowAsJavaScriptException();  \
       return env.Undefined();                                       \
     }                                                               \
   }
@@ -33,8 +32,7 @@
   {                                                                           \
     if (lhs op rhs) {                                                         \
       rcl_reset_error();                                                      \
-      Napi::Error::New(env, message)                                          \
-          .ThrowAsJavaScriptException();                                      \
+      Napi::Error::New(env, message).ThrowAsJavaScriptException();            \
     }                                                                         \
   }
 

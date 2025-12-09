@@ -70,6 +70,28 @@ ROS 2 services provide a request-response communication pattern where clients se
   - **TypeScript Ready**: Full type safety with comprehensive TypeScript definitions
 - **Run Command**: `node example/services/client/async-client-example.js`
 
+#### Service Client Validation (`client/client-validation-example.js`)
+
+**Purpose**: Demonstrates request validation features for service clients.
+
+- **Service Type**: `example_interfaces/srv/AddTwoInts`
+- **Service Name**: `add_two_ints`
+- **Functionality**:
+  - Schema introspection for service request types
+  - Client-level validation with `validateRequests: true` option
+  - Per-request validation override with `{ validate: true/false }`
+  - Strict mode validation for detecting unknown fields
+  - Async request validation with `sendRequestAsync()`
+  - Error handling with `MessageValidationError`
+- **Features**:
+  - **Request Validation**: Catch invalid requests before sending to service
+  - **Schema Introspection**: Use `getMessageSchema()` to inspect request structure
+  - **Dynamic Toggle**: Enable/disable validation with `willValidateRequest` property
+  - **Detailed Errors**: Field-level validation issues with expected vs received types
+  - **Strict Mode**: Detect extra fields that don't belong in the request
+- **Run Command**: `node example/services/client/client-validation-example.js`
+- **Note**: Standalone example - demonstrates validation errors without requiring a running service
+
 **Key API Differences**:
 
 ```javascript
@@ -333,6 +355,8 @@ This script automatically starts the service, tests the client, and cleans up.
 - **Error Handling**: Proper error handling with try/catch blocks and specific error types (async only)
 - **Timeout Management**: Built-in timeout support to prevent hanging requests (async only)
 - **Request Cancellation**: AbortController support for user-cancellable operations (async only)
+- **Request Validation**: Pre-send validation with `validateRequests` option and `MessageValidationError`
+- **Schema Introspection**: Programmatic access to service request/response schemas
 - **Resource Management**: Proper node shutdown and cleanup
 - **Data Analysis**: Processing and interpreting received data
 - **Visualization**: Converting data to human-readable formats
