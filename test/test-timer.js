@@ -171,6 +171,8 @@ describe('rclnodejs Timer class testing', function () {
       var timer = node.createTimer(TIMER_INTERVAL, function () {});
       var called = false;
       timer.setOnResetCallback(function (events) {
+        assert.strictEqual(typeof events, 'number');
+        assert.ok(events >= 0);
         called = true;
       });
       timer.reset();
@@ -188,6 +190,8 @@ describe('rclnodejs Timer class testing', function () {
       var timer = node.createTimer(TIMER_INTERVAL, function () {});
       var called = false;
       timer.setOnResetCallback(function (events) {
+        assert.strictEqual(typeof events, 'number');
+        assert.ok(events >= 0);
         called = true;
       });
       timer.clearOnResetCallback();
