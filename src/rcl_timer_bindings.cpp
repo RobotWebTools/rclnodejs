@@ -98,9 +98,11 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
       RclHandle::NewInstance(env, timer, clock_handle, [env](void* ptr) {
         rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(ptr);
 
+#if ROS_VERSION > 2205
         // Clear the callback first to prevent any new callbacks from being
         // triggered
         rcl_timer_set_on_reset_callback(timer, nullptr, nullptr);
+#endif
 
         std::shared_ptr<TimerContext> context;
         {
