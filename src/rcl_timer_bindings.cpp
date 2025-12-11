@@ -17,6 +17,7 @@
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 

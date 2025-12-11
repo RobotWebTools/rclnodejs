@@ -168,6 +168,10 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.setOnResetCallback', function (done) {
+      if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+        this.skip();
+        return;
+      }
       var timer = node.createTimer(TIMER_INTERVAL, function () {});
       var called = false;
       timer.setOnResetCallback(function (events) {
@@ -187,6 +191,10 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.clearOnResetCallback', function (done) {
+      if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+        this.skip();
+        return;
+      }
       var timer = node.createTimer(TIMER_INTERVAL, function () {});
       var called = false;
       timer.setOnResetCallback(function (events) {
