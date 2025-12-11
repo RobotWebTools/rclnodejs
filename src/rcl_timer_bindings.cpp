@@ -17,11 +17,35 @@
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 
+#include <mutex>
+#include <unordered_map>
+
 #include "macros.h"
 #include "rcl_handle.h"
 #include "rcl_utilities.h"
 
 namespace rclnodejs {
+
+struct TimerContext {
+  Napi::ThreadSafeFunction on_reset_callback;
+};
+
+static std::unordered_map<rcl_timer_t*, TimerContext*> g_timer_contexts;
+static std::mutex g_timer_contexts_mutex;
+
+void TimerOnResetCallbackTrampoline(const void* user_data,
+                                    size_t number_of_events) {
+  const TimerContext* context = static_cast<const TimerContext*>(user_data);
+  if (context) {
+    auto callback = [](Napi::Env env, Napi::Function js_callback,
+                       size_t* events) {
+      js_callback.Call({Napi::Number::New(env, *events)});
+      delete events;
+    };
+    size_t* events_ptr = new size_t(number_of_events);
+    context->on_reset_callback.BlockingCall(events_ptr, callback);
+  }
+}
 
 Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -61,6 +85,17 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
   auto js_obj =
       RclHandle::NewInstance(env, timer, clock_handle, [env](void* ptr) {
         rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(ptr);
+
+        {
+          std::lock_guard<std::mutex> lock(g_timer_contexts_mutex);
+          auto it = g_timer_contexts.find(timer);
+          if (it != g_timer_contexts.end()) {
+            it->second->on_reset_callback.Release();
+            delete it->second;
+            g_timer_contexts.erase(it);
+          }
+        }
+
         rcl_ret_t ret = rcl_timer_fini(timer);
         free(ptr);
         THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
@@ -217,6 +252,61 @@ Napi::Value CallTimerWithInfo(const Napi::CallbackInfo& info) {
 }
 #endif
 
+Napi::Value SetTimerOnResetCallback(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
+
+  if (!info[1].IsFunction()) {
+    Napi::TypeError::New(env, "Callback must be a function")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  Napi::Function callback = info[1].As<Napi::Function>();
+
+  std::lock_guard<std::mutex> lock(g_timer_contexts_mutex);
+  TimerContext* context = nullptr;
+  auto it = g_timer_contexts.find(timer);
+  if (it == g_timer_contexts.end()) {
+    context = new TimerContext();
+    g_timer_contexts[timer] = context;
+  } else {
+    context = it->second;
+    context->on_reset_callback.Release();
+  }
+
+  context->on_reset_callback = Napi::ThreadSafeFunction::New(
+      env, callback, "TimerOnResetCallback", 0, 1);
+
+  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
+                           rcl_timer_set_on_reset_callback(
+                               timer, TimerOnResetCallbackTrampoline, context),
+                           rcl_get_error_string().str);
+
+  return env.Undefined();
+}
+
+Napi::Value ClearTimerOnResetCallback(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
+
+  std::lock_guard<std::mutex> lock(g_timer_contexts_mutex);
+  auto it = g_timer_contexts.find(timer);
+  if (it != g_timer_contexts.end()) {
+    it->second->on_reset_callback.Release();
+    delete it->second;
+    g_timer_contexts.erase(it);
+  }
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_timer_set_on_reset_callback(timer, nullptr, nullptr),
+      rcl_get_error_string().str);
+
+  return env.Undefined();
+}
+
 Napi::Object InitTimerBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createTimer", Napi::Function::New(env, CreateTimer));
   exports.Set("isTimerReady", Napi::Function::New(env, IsTimerReady));
@@ -230,6 +320,10 @@ Napi::Object InitTimerBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, TimerGetTimeUntilNextCall));
   exports.Set("changeTimerPeriod", Napi::Function::New(env, ChangeTimerPeriod));
   exports.Set("getTimerPeriod", Napi::Function::New(env, GetTimerPeriod));
+  exports.Set("setTimerOnResetCallback",
+              Napi::Function::New(env, SetTimerOnResetCallback));
+  exports.Set("clearTimerOnResetCallback",
+              Napi::Function::New(env, ClearTimerOnResetCallback));
 #if ROS_VERSION > 2205  // 2205 == Humble
   exports.Set("callTimerWithInfo", Napi::Function::New(env, CallTimerWithInfo));
 #endif

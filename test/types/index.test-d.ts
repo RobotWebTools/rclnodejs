@@ -289,6 +289,8 @@ expectType<boolean>(timer.isCanceled());
 expectType<void>(timer.cancel());
 expectType<void>(timer.changeTimerPeriod(BigInt(100000)));
 expectType<bigint>(timer.timerPeriod());
+expectType<void>(timer.setOnResetCallback((_events: number) => {}));
+expectType<void>(timer.clearOnResetCallback());
 expectType<object>(timer.callTimerWithInfo());
 
 // ---- Rate ----
