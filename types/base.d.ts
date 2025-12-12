@@ -14,6 +14,7 @@
 /// <reference path="./lifecycle.d.ts" />
 /// <reference path="./lifecycle_publisher.d.ts" />
 /// <reference path="./logging.d.ts" />
+/// <reference path="./message_introspector.d.ts" />
 /// <reference path="./node.d.ts" />
 /// <reference path="./node_options.d.ts" />
 /// <reference path="./parameter.d.ts" />
