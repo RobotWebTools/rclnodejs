@@ -41,7 +41,7 @@ Napi::Value InitRosoutPublisherForNode(const Napi::CallbackInfo& info) {
           .ThrowAsJavaScriptException();
       rcl_reset_error();
     }
-      }
+  }
   return env.Undefined();
 }
 
