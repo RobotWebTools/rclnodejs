@@ -19,20 +19,12 @@ node message-introspector-example.js
 ### Expected Output
 
 ```
-Type: geometry_msgs/msg/Twist
-Fields: [ 'linear', 'angular' ]
-Defaults: {
-  "linear": {
-    "x": 0,
-    "y": 0,
-    "z": 0
-  },
-  "angular": {
-    "x": 0,
-    "y": 0,
-    "z": 0
-  }
-}
+Twist fields: [ 'linear', 'angular' ]
+Twist defaults: { linear: { x: 0, y: 0, z: 0 }, angular: { x: 0, y: 0, z: 0 } }
+String fields: [ 'data' ]
+String defaults: { data: '' }
+JointState fields: [ 'header', 'name', 'position', 'velocity', 'effort' ]
+Twist schema msgName: Twist
 ```
 
 ## API
