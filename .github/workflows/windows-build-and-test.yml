@@ -19,7 +19,6 @@ jobs:
           - humble
           - jazzy
           - kilted
-          - rolling
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
