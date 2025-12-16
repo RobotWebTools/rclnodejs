@@ -166,5 +166,64 @@ describe('rclnodejs Timer class testing', function () {
       timer.cancel();
       done();
     });
+
+    it('timer.setOnResetCallback', function (done) {
+      if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+        this.skip();
+        return;
+      }
+      var timer = node.createTimer(TIMER_INTERVAL, function () {});
+      var called = false;
+      timer.setOnResetCallback(function (events) {
+        assert.strictEqual(typeof events, 'number');
+        assert.ok(events >= 0);
+        called = true;
+      });
+      timer.reset();
+
+      setTimeout(() => {
+        assert.ok(called);
+        timer.cancel();
+        done();
+      }, 100);
+
+      rclnodejs.spin(node);
+    });
+
+    it('timer.clearOnResetCallback', function (done) {
+      if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+        this.skip();
+        return;
+      }
+      var timer = node.createTimer(TIMER_INTERVAL, function () {});
+      var called = false;
+      timer.setOnResetCallback(function (events) {
+        assert.strictEqual(typeof events, 'number');
+        assert.ok(events >= 0);
+        called = true;
+      });
+      timer.clearOnResetCallback();
+      timer.reset();
+
+      setTimeout(() => {
+        assert.ok(!called);
+        timer.cancel();
+        done();
+      }, 100);
+
+      rclnodejs.spin(node);
+    });
+
+    it('timer callback should be called repeatedly', function (done) {
+      let count = 0;
+      const timer = node.createTimer(TIMER_INTERVAL, () => {
+        count++;
+        if (count >= 3) {
+          timer.cancel();
+          done();
+        }
+      });
+      rclnodejs.spin(node);
+    });
   });
 });
