@@ -18,6 +18,26 @@ declare module 'rclnodejs' {
     readonly clockType: ClockType;
 
     /**
+     * Add a clock callback.
+     * @param callbackObject - The object containing _pre_callback and _post_callback methods.
+     * @param onClockChange - Whether to call the callback on clock change.
+     * @param minForward - Minimum forward jump to trigger the callback.
+     * @param minBackward - Minimum backward jump to trigger the callback.
+     */
+    addClockCallback(
+      callbackObject: object,
+      onClockChange: boolean,
+      minForward: bigint,
+      minBackward: bigint
+    ): void;
+
+    /**
+     * Remove a clock callback.
+     * @param callbackObject - The object containing _pre_callback and _post_callback methods.
+     */
+    removeClockCallback(callbackObject: object): void;
+
+    /**
      * Return the current time.
      *
      * @returns The current time.
