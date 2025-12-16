@@ -28,6 +28,20 @@ expectType<Promise<{ process: ChildProcess }>>(
   rclnodejs.ros2Launch('package_name', 'launch_file', ['arg1', 'arg2'])
 );
 
+// ---- ClockEvent ----
+const clockEvent = new rclnodejs.ClockEvent();
+expectType<rclnodejs.ClockEvent>(clockEvent);
+expectType<Promise<void>>(
+  clockEvent.waitUntilSteady(new rclnodejs.Clock(), 100n)
+);
+expectType<Promise<void>>(
+  clockEvent.waitUntilSystem(new rclnodejs.Clock(), 100n)
+);
+expectType<Promise<void>>(clockEvent.waitUntilRos(new rclnodejs.Clock(), 100n));
+expectType<boolean>(clockEvent.isSet());
+expectType<void>(clockEvent.set());
+expectType<void>(clockEvent.clear());
+
 // ---- DistroUtil ----
 expectType<rclnodejs.DistroUtils.DistroId>(rclnodejs.DistroUtils.getDistroId());
 expectType<rclnodejs.DistroUtils.DistroId>(

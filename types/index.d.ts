@@ -1,4 +1,5 @@
 /// <reference path="./base.d.ts" />
+/// <reference path="./clock_event.d.ts" />
 /// <reference path="./message_validation.d.ts" />
 
 import { ChildProcess } from 'child_process';

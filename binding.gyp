@@ -26,6 +26,7 @@
         './src/rcl_action_server_bindings.cpp',
         './src/rcl_bindings.cpp',
         './src/rcl_client_bindings.cpp',
+        './src/clock_event.cpp',
         './src/rcl_context_bindings.cpp',
         './src/rcl_graph_bindings.cpp',
         './src/rcl_guard_condition_bindings.cpp',
