@@ -1,0 +1,154 @@
+'use strict';
+
+const assert = require('assert');
+const rclnodejs = require('../index.js');
+const rclnodejsNative = require('../lib/native_loader.js');
+const { Time, Clock } = rclnodejs;
+const { ClockType } = Clock;
+
+describe('rclnodejs Clock Callback testing', function () {
+  this.timeout(60 * 1000);
+
+  before(function () {
+    return rclnodejs.init();
+  });
+
+  after(function () {
+    rclnodejs.shutdown();
+  });
+
+  it('Test add and remove clock callback', function () {
+    const clock = new Clock(ClockType.ROS_TIME);
+
+    let preCallbackCalled = false;
+    let postCallbackCalled = false;
+    let lastJumpInfo = null;
+
+    const callbackObj = {
+      _pre_callback: function () {
+        preCallbackCalled = true;
+      },
+      _post_callback: function (jumpInfo) {
+        postCallbackCalled = true;
+        lastJumpInfo = jumpInfo;
+      },
+    };
+
+    // Add callback
+    clock.addClockCallback(callbackObj, true, 0n, 0n);
+
+    // Enable ROS time override
+    rclnodejsNative.setRosTimeOverrideIsEnabled(clock.handle, true);
+
+    // Create a time point for override
+    const timePoint = new Time(100n, 0n, ClockType.ROS_TIME);
+
+    // Set override (should trigger jump)
+    rclnodejsNative.setRosTimeOverride(clock.handle, timePoint._handle);
+
+    assert.strictEqual(
+      preCallbackCalled,
+      true,
+      'Pre callback should be called'
+    );
+    assert.strictEqual(
+      postCallbackCalled,
+      true,
+      'Post callback should be called'
+    );
+    assert.ok(lastJumpInfo, 'Jump info should be present');
+    assert.strictEqual(typeof lastJumpInfo.clock_change, 'number');
+    assert.strictEqual(typeof lastJumpInfo.delta, 'bigint');
+
+    // Reset flags
+    preCallbackCalled = false;
+    postCallbackCalled = false;
+    lastJumpInfo = null;
+
+    // Remove callback
+    clock.removeClockCallback(callbackObj);
+
+    // Trigger another jump
+    const timePoint2 = new Time(200n, 0n, ClockType.ROS_TIME);
+    rclnodejsNative.setRosTimeOverride(clock.handle, timePoint2._handle);
+
+    assert.strictEqual(
+      preCallbackCalled,
+      false,
+      'Pre callback should NOT be called after removal'
+    );
+    assert.strictEqual(
+      postCallbackCalled,
+      false,
+      'Post callback should NOT be called after removal'
+    );
+  });
+
+  it('Test clock callback thresholds', function () {
+    const clock = new Clock(ClockType.ROS_TIME);
+    let callbackCalled = false;
+
+    const callbackObj = {
+      _pre_callback: function () {},
+      _post_callback: function (jumpInfo) {
+        // console.log('Callback called with delta:', jumpInfo.delta);
+        callbackCalled = true;
+      },
+    };
+
+    // Add callback with threshold of 1 second (10^9 nanoseconds)
+    // Set onClockChange to false to ensure we are testing time jump threshold
+    clock.addClockCallback(callbackObj, false, 1000000000n, 0n);
+
+    rclnodejsNative.setRosTimeOverrideIsEnabled(clock.handle, true);
+
+    // Jump forward by 0.5 seconds (should NOT trigger)
+    let timePoint = new Time(0n, 500000000n, ClockType.ROS_TIME);
+    rclnodejsNative.setRosTimeOverride(clock.handle, timePoint._handle);
+    assert.strictEqual(
+      callbackCalled,
+      false,
+      'Callback should not be called for small jump'
+    );
+
+    // Jump forward by 1.5 seconds (total 2.0s) (should trigger)
+    // Current time is 0.5s. New time is 2.0s. Delta is 1.5s > 1.0s.
+    timePoint = new Time(2n, 0n, ClockType.ROS_TIME);
+    rclnodejsNative.setRosTimeOverride(clock.handle, timePoint._handle);
+    assert.strictEqual(
+      callbackCalled,
+      true,
+      'Callback should be called for large jump'
+    );
+  });
+
+  it('Test multiple clock callbacks', function () {
+    const clock = new Clock(ClockType.ROS_TIME);
+    let callback1Called = false;
+    let callback2Called = false;
+
+    const callbackObj1 = {
+      _pre_callback: () => {},
+      _post_callback: () => {
+        callback1Called = true;
+      },
+    };
+
+    const callbackObj2 = {
+      _pre_callback: () => {},
+      _post_callback: () => {
+        callback2Called = true;
+      },
+    };
+
+    clock.addClockCallback(callbackObj1, true, 0n, 0n);
+    clock.addClockCallback(callbackObj2, true, 0n, 0n);
+
+    rclnodejsNative.setRosTimeOverrideIsEnabled(clock.handle, true);
+    const timePoint = new Time(1n, 0n, ClockType.ROS_TIME);
+    rclnodejsNative.setRosTimeOverride(clock.handle, timePoint._handle);
+
+    assert.strictEqual(callback1Called, true);
+    assert.strictEqual(callback2Called, true);
+  });
+});

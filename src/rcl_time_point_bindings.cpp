@@ -175,9 +175,111 @@ Napi::Value ClockGetNow(const Napi::CallbackInfo& info) {
   return Napi::BigInt::New(env, time_point.nanoseconds);
 }
 
+struct JumpCallbackData {
+  Napi::ObjectReference ref;
+};
+
+void _rclnodejs_on_time_jump(const rcl_time_jump_t* time_jump, bool before_jump,
+                             void* user_data) {
+  JumpCallbackData* data = static_cast<JumpCallbackData*>(user_data);
+  Napi::Env env = data->ref.Env();
+  Napi::HandleScope scope(env);
+
+  Napi::Object callback_obj = data->ref.Value();
+
+  if (before_jump) {
+    Napi::Value pre_callback = callback_obj.Get("_pre_callback");
+    if (pre_callback.IsFunction()) {
+      pre_callback.As<Napi::Function>().Call(callback_obj, {});
+    }
+  } else {
+    Napi::Value post_callback = callback_obj.Get("_post_callback");
+    if (post_callback.IsFunction()) {
+      Napi::Object jump_info = Napi::Object::New(env);
+      jump_info.Set("clock_change",
+                    static_cast<int32_t>(time_jump->clock_change));
+      jump_info.Set("delta",
+                    Napi::BigInt::New(env, time_jump->delta.nanoseconds));
+      post_callback.As<Napi::Function>().Call(callback_obj, {jump_info});
+    }
+  }
+}
+
+Napi::Value ClockAddJumpCallback(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* clock_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
+
+  Napi::Object callback_obj = info[1].As<Napi::Object>();
+  bool on_clock_change = info[2].As<Napi::Boolean>();
+
+  bool lossless;
+  int64_t min_forward = info[3].As<Napi::BigInt>().Int64Value(&lossless);
+  int64_t min_backward = info[4].As<Napi::BigInt>().Int64Value(&lossless);
+
+  rcl_jump_threshold_t threshold;
+  threshold.on_clock_change = on_clock_change;
+  threshold.min_forward.nanoseconds = min_forward;
+  threshold.min_backward.nanoseconds = min_backward;
+
+  JumpCallbackData* data = new JumpCallbackData{Napi::Persistent(callback_obj)};
+  callback_obj.Set("_cpp_handle",
+                   Napi::External<JumpCallbackData>::New(env, data));
+
+  rcl_ret_t ret = rcl_clock_add_jump_callback(clock, threshold,
+                                              _rclnodejs_on_time_jump, data);
+
+  if (ret != RCL_RET_OK) {
+    data->ref.Reset();
+    delete data;
+    callback_obj.Set("_cpp_handle", env.Undefined());
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  }
+
+  return env.Undefined();
+}
+
+Napi::Value ClockRemoveJumpCallback(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* clock_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
+
+  Napi::Object callback_obj = info[1].As<Napi::Object>();
+  Napi::Value cpp_handle = callback_obj.Get("_cpp_handle");
+
+  if (cpp_handle.IsUndefined() || !cpp_handle.IsExternal()) {
+    Napi::Error::New(env,
+                     "Callback object was not registered or already removed")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  JumpCallbackData* data =
+      cpp_handle.As<Napi::External<JumpCallbackData>>().Data();
+
+  rcl_ret_t ret =
+      rcl_clock_remove_jump_callback(clock, _rclnodejs_on_time_jump, data);
+
+  if (ret == RCL_RET_OK) {
+    data->ref.Reset();
+    delete data;
+    callback_obj.Set("_cpp_handle", env.Undefined());
+  } else {
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  }
+
+  return env.Undefined();
+}
+
 Napi::Object InitTimePointBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createClock", Napi::Function::New(env, CreateClock));
   exports.Set("clockGetNow", Napi::Function::New(env, ClockGetNow));
+  exports.Set("clockAddJumpCallback",
+              Napi::Function::New(env, ClockAddJumpCallback));
+  exports.Set("clockRemoveJumpCallback",
+              Napi::Function::New(env, ClockRemoveJumpCallback));
   exports.Set("createTimePoint", Napi::Function::New(env, CreateTimePoint));
   exports.Set("getNanoseconds", Napi::Function::New(env, GetNanoseconds));
   exports.Set("createDuration", Napi::Function::New(env, CreateDuration));
