@@ -347,6 +347,8 @@ const clock = new rclnodejs.Clock(rclnodejs.ClockType.SYSTEM_TIME);
 expectType<rclnodejs.Clock>(clock);
 expectType<rclnodejs.ClockType>(clock.clockType);
 expectType<rclnodejs.Time>(clock.now());
+expectType<void>(clock.addClockCallback({}, true, 0n, 0n));
+expectType<void>(clock.removeClockCallback({}));
 
 // ---- Logging -----
 const logger = rclnodejs.Logging.getLogger('test_logger');

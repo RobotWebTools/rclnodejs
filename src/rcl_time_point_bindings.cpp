@@ -175,9 +175,144 @@ Napi::Value ClockGetNow(const Napi::CallbackInfo& info) {
   return Napi::BigInt::New(env, time_point.nanoseconds);
 }
 
+struct JumpCallbackData {
+  Napi::ThreadSafeFunction tsfn_pre;
+  Napi::ThreadSafeFunction tsfn_post;
+};
+
+struct JumpCallbackContext {
+  rcl_time_jump_t time_jump;
+  bool before_jump;
+};
+
+void _rclnodejs_on_time_jump(const rcl_time_jump_t* time_jump, bool before_jump,
+                             void* user_data) {
+  JumpCallbackData* data = static_cast<JumpCallbackData*>(user_data);
+
+  auto context = new JumpCallbackContext{*time_jump, before_jump};
+
+  if (before_jump) {
+    auto callback = [](Napi::Env env, Napi::Function js_callback,
+                       JumpCallbackContext* context) {
+      js_callback.Call({});
+      delete context;
+    };
+    data->tsfn_pre.NonBlockingCall(context, callback);
+  } else {
+    auto callback = [](Napi::Env env, Napi::Function js_callback,
+                       JumpCallbackContext* context) {
+      Napi::Object jump_info = Napi::Object::New(env);
+      jump_info.Set("clock_change",
+                    static_cast<int32_t>(context->time_jump.clock_change));
+      jump_info.Set("delta", Napi::BigInt::New(
+                                 env, context->time_jump.delta.nanoseconds));
+      js_callback.Call({jump_info});
+      delete context;
+    };
+    data->tsfn_post.NonBlockingCall(context, callback);
+  }
+}
+
+Napi::Value ClockAddJumpCallback(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* clock_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
+
+  Napi::Object callback_obj = info[1].As<Napi::Object>();
+  Napi::Function pre_callback =
+      callback_obj.Get("_pre_callback").As<Napi::Function>();
+  Napi::Function post_callback =
+      callback_obj.Get("_post_callback").As<Napi::Function>();
+
+  bool on_clock_change = info[2].As<Napi::Boolean>();
+
+  bool lossless;
+  int64_t min_forward = info[3].As<Napi::BigInt>().Int64Value(&lossless);
+  if (!lossless) {
+    Napi::TypeError::New(
+        env, "min_forward BigInt value cannot be represented as int64_t")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  int64_t min_backward = info[4].As<Napi::BigInt>().Int64Value(&lossless);
+  if (!lossless) {
+    Napi::TypeError::New(
+        env, "min_backward BigInt value cannot be represented as int64_t")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  rcl_jump_threshold_t threshold;
+  threshold.on_clock_change = on_clock_change;
+  threshold.min_forward.nanoseconds = min_forward;
+  threshold.min_backward.nanoseconds = min_backward;
+
+  JumpCallbackData* data = new JumpCallbackData();
+  data->tsfn_pre = Napi::ThreadSafeFunction::New(
+      env, pre_callback, "ClockJumpPreCallback", 10, 1, [](Napi::Env) {});
+  data->tsfn_post =
+      Napi::ThreadSafeFunction::New(env, post_callback, "ClockJumpPostCallback",
+                                    10, 1, [data](Napi::Env) { delete data; });
+
+  Napi::Object handle_obj = Napi::Object::New(env);
+  handle_obj.Set("_cpp_handle",
+                 Napi::External<JumpCallbackData>::New(env, data));
+
+  rcl_ret_t ret = rcl_clock_add_jump_callback(clock, threshold,
+                                              _rclnodejs_on_time_jump, data);
+
+  if (ret != RCL_RET_OK) {
+    data->tsfn_pre.Release();
+    data->tsfn_post.Release();
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  }
+
+  callback_obj.Set("_cpp_handle", handle_obj.Get("_cpp_handle"));
+
+  return env.Undefined();
+}
+
+Napi::Value ClockRemoveJumpCallback(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* clock_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
+
+  Napi::Object handle_obj = info[1].As<Napi::Object>();
+  Napi::Value cpp_handle = handle_obj.Get("_cpp_handle");
+
+  if (cpp_handle.IsUndefined() || !cpp_handle.IsExternal()) {
+    Napi::Error::New(env,
+                     "Callback object was not registered or already removed")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  JumpCallbackData* data =
+      cpp_handle.As<Napi::External<JumpCallbackData>>().Data();
+
+  rcl_ret_t ret =
+      rcl_clock_remove_jump_callback(clock, _rclnodejs_on_time_jump, data);
+
+  if (ret == RCL_RET_OK) {
+    data->tsfn_pre.Release();
+    data->tsfn_post.Release();
+    handle_obj.Set("_cpp_handle", env.Undefined());
+  } else {
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  }
+
+  return env.Undefined();
+}
+
 Napi::Object InitTimePointBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createClock", Napi::Function::New(env, CreateClock));
   exports.Set("clockGetNow", Napi::Function::New(env, ClockGetNow));
+  exports.Set("clockAddJumpCallback",
+              Napi::Function::New(env, ClockAddJumpCallback));
+  exports.Set("clockRemoveJumpCallback",
+              Napi::Function::New(env, ClockRemoveJumpCallback));
   exports.Set("createTimePoint", Napi::Function::New(env, CreateTimePoint));
   exports.Set("getNanoseconds", Napi::Function::New(env, GetNanoseconds));
   exports.Set("createDuration", Napi::Function::New(env, CreateDuration));
