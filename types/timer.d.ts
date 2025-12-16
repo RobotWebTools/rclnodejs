@@ -59,6 +59,17 @@ declare module 'rclnodejs' {
     timerPeriod(): bigint;
 
     /**
+     * Set the on reset callback.
+     * @param callback - The callback to be called when the timer is reset.
+     */
+    setOnResetCallback(callback: (events: number) => void): void;
+
+    /**
+     * Clear the on reset callback.
+     */
+    clearOnResetCallback(): void;
+
+    /**
      * Call a timer and starts counting again, retrieves actual and expected call time.
      * @return - The timer information.
      */
