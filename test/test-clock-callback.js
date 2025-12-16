@@ -17,8 +17,27 @@ describe('rclnodejs Clock Callback testing', function () {
     rclnodejs.shutdown();
   });
 
-  it('Test add and remove clock callback', function () {
+  let testClock = null;
+  let testCallbacks = [];
+
+  afterEach(function () {
+    // Clean up all registered callbacks
+    if (testClock && testCallbacks.length > 0) {
+      testCallbacks.forEach((callback) => {
+        try {
+          testClock.removeClockCallback(callback);
+        } catch (e) {
+          // Callback may already be removed
+        }
+      });
+    }
+    testClock = null;
+    testCallbacks = [];
+  });
+
+  it('Test add and remove clock callback', async function () {
     const clock = new Clock(ClockType.ROS_TIME);
+    testClock = clock;
 
     let preCallbackCalled = false;
     let postCallbackCalled = false;
@@ -36,6 +55,7 @@ describe('rclnodejs Clock Callback testing', function () {
 
     // Add callback
     clock.addClockCallback(callbackObj, true, 0n, 0n);
+    testCallbacks.push(callbackObj);
 
     // Enable ROS time override
     rclnodejsNative.setRosTimeOverrideIsEnabled(clock.handle, true);
@@ -45,6 +65,9 @@ describe('rclnodejs Clock Callback testing', function () {
 
     // Set override (should trigger jump)
     rclnodejsNative.setRosTimeOverride(clock.handle, timePoint._handle);
+
+    // Wait for callbacks to be processed
+    await new Promise((resolve) => setImmediate(resolve));
 
     assert.strictEqual(
       preCallbackCalled,
@@ -72,6 +95,9 @@ describe('rclnodejs Clock Callback testing', function () {
     const timePoint2 = new Time(200n, 0n, ClockType.ROS_TIME);
     rclnodejsNative.setRosTimeOverride(clock.handle, timePoint2._handle);
 
+    // Wait for any potential callbacks
+    await new Promise((resolve) => setImmediate(resolve));
+
     assert.strictEqual(
       preCallbackCalled,
       false,
@@ -84,8 +110,9 @@ describe('rclnodejs Clock Callback testing', function () {
     );
   });
 
-  it('Test clock callback thresholds', function () {
+  it('Test clock callback thresholds', async function () {
     const clock = new Clock(ClockType.ROS_TIME);
+    testClock = clock;
     let callbackCalled = false;
 
     const callbackObj = {
@@ -99,12 +126,17 @@ describe('rclnodejs Clock Callback testing', function () {
     // Add callback with threshold of 1 second (10^9 nanoseconds)
     // Set onClockChange to false to ensure we are testing time jump threshold
     clock.addClockCallback(callbackObj, false, 1000000000n, 0n);
+    testCallbacks.push(callbackObj);
 
     rclnodejsNative.setRosTimeOverrideIsEnabled(clock.handle, true);
 
     // Jump forward by 0.5 seconds (should NOT trigger)
     let timePoint = new Time(0n, 500000000n, ClockType.ROS_TIME);
     rclnodejsNative.setRosTimeOverride(clock.handle, timePoint._handle);
+
+    // Wait for callbacks to be processed
+    await new Promise((resolve) => setImmediate(resolve));
+
     assert.strictEqual(
       callbackCalled,
       false,
@@ -115,6 +147,10 @@ describe('rclnodejs Clock Callback testing', function () {
     // Current time is 0.5s. New time is 2.0s. Delta is 1.5s > 1.0s.
     timePoint = new Time(2n, 0n, ClockType.ROS_TIME);
     rclnodejsNative.setRosTimeOverride(clock.handle, timePoint._handle);
+
+    // Wait for callbacks to be processed
+    await new Promise((resolve) => setImmediate(resolve));
+
     assert.strictEqual(
       callbackCalled,
       true,
@@ -122,8 +158,9 @@ describe('rclnodejs Clock Callback testing', function () {
     );
   });
 
-  it('Test multiple clock callbacks', function () {
+  it('Test multiple clock callbacks', async function () {
     const clock = new Clock(ClockType.ROS_TIME);
+    testClock = clock;
     let callback1Called = false;
     let callback2Called = false;
 
@@ -142,11 +179,16 @@ describe('rclnodejs Clock Callback testing', function () {
     };
 
     clock.addClockCallback(callbackObj1, true, 0n, 0n);
+    testCallbacks.push(callbackObj1);
     clock.addClockCallback(callbackObj2, true, 0n, 0n);
+    testCallbacks.push(callbackObj2);
 
     rclnodejsNative.setRosTimeOverrideIsEnabled(clock.handle, true);
     const timePoint = new Time(1n, 0n, ClockType.ROS_TIME);
     rclnodejsNative.setRosTimeOverride(clock.handle, timePoint._handle);
+
+    // Wait for callbacks to be processed
+    await new Promise((resolve) => setImmediate(resolve));
 
     assert.strictEqual(callback1Called, true);
     assert.strictEqual(callback2Called, true);
