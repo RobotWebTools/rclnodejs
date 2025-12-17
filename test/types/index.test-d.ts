@@ -285,6 +285,7 @@ expectType<bigint>(timer.period);
 expectType<boolean>(timer.isReady());
 expectType<bigint>(timer.timeSinceLastCall());
 expectType<bigint>(timer.timeUntilNextCall());
+expectType<bigint | null>(timer.getNextCallTime());
 expectType<boolean>(timer.isCanceled());
 expectType<void>(timer.cancel());
 expectType<void>(timer.changeTimerPeriod(BigInt(100000)));
