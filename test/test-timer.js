@@ -139,6 +139,24 @@ describe('rclnodejs Timer class testing', function () {
       rclnodejs.spin(node);
     });
 
+    it('timer.getNextCallTime', function (done) {
+      // Skip test if ROS2 version is Humble or earlier (not supported)
+      if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+        this.skip();
+      }
+      var timer = node.createTimer(TIMER_INTERVAL, function () {
+        var nextCallTime = timer.getNextCallTime();
+        assert.deepStrictEqual(typeof nextCallTime, 'bigint');
+        assert.ok(nextCallTime > 0n);
+        timer.cancel();
+        // After cancellation, should return null
+        var canceledCallTime = timer.getNextCallTime();
+        assert.strictEqual(canceledCallTime, null);
+        done();
+      });
+      rclnodejs.spin(node);
+    });
+
     it('timer.timerPeriod', function (done) {
       const timer = node.createTimer(BigInt('100000000'), () => {});
       assert.deepStrictEqual(timer.timerPeriod, BigInt('100000000'));

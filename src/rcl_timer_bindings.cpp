@@ -101,7 +101,10 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
 #if ROS_VERSION > 2205
         // Clear the callback first to prevent any new callbacks from being
         // triggered
-        rcl_timer_set_on_reset_callback(timer, nullptr, nullptr);
+        rcl_ret_t callback_ret =
+            rcl_timer_set_on_reset_callback(timer, nullptr, nullptr);
+        THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, callback_ret,
+                                           rcl_get_error_string().str);
 #endif
 
         std::shared_ptr<TimerContext> context;
@@ -255,6 +258,25 @@ Napi::Value GetTimerPeriod(const Napi::CallbackInfo& info) {
 }
 
 #if ROS_VERSION > 2205  // 2205 == Humble
+Napi::Value GetTimerNextCallTime(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
+  int64_t next_call_time = 0;
+
+  rcl_ret_t ret = rcl_timer_get_next_call_time(timer, &next_call_time);
+
+  if (ret == RCL_RET_OK) {
+    return Napi::BigInt::New(env, next_call_time);
+  } else if (ret == RCL_RET_TIMER_CANCELED) {
+    return env.Null();
+  } else {
+    THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+  }
+}
+#endif
+
+#if ROS_VERSION > 2205  // 2205 == Humble
 Napi::Value CallTimerWithInfo(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
@@ -342,6 +364,8 @@ Napi::Object InitTimerBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("changeTimerPeriod", Napi::Function::New(env, ChangeTimerPeriod));
   exports.Set("getTimerPeriod", Napi::Function::New(env, GetTimerPeriod));
 #if ROS_VERSION > 2205  // 2205 == Humble
+  exports.Set("getTimerNextCallTime",
+              Napi::Function::New(env, GetTimerNextCallTime));
   exports.Set("setTimerOnResetCallback",
               Napi::Function::New(env, SetTimerOnResetCallback));
   exports.Set("clearTimerOnResetCallback",
