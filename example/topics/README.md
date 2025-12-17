@@ -187,6 +187,21 @@ The `subscriber/` directory contains examples of nodes that subscribe to topics:
 - **Features**: Manual conversion of TypedArrays, BigInt, and special values for JSON serialization
 - **Run Command**: `node subscriber/subscription-json-utilities-example.js`
 
+### 10. Observable Subscriber (`subscription-observable-example.js`)
+
+**Purpose**: Demonstrates RxJS Observable subscriptions for reactive programming.
+
+- **Message Type**: `std_msgs/msg/String`
+- **Topic**: `topic`
+- **Functionality**: Shows how to use `createObservableSubscription()` with RxJS operators
+- **Features**:
+  - Throttling with `throttleTime()` for rate limiting
+  - Message transformation with `map()`
+  - Content filtering with `filter()`
+  - Batching with `bufferCount()`
+- **Run Command**: `node subscriber/subscription-observable-example.js`
+- **Pair**: Works with `publisher-example.js`
+
 ## Validator Example
 
 The `validator/` directory contains validation utilities:
@@ -211,6 +226,7 @@ Several examples work together to demonstrate complete communication:
 | `publisher-multiarray-example.js`     | `subscription-multiarray-example.js`     | Multi-dimensional array data    |
 | `publisher-qos-example.js`            | `subscription-qos-example.js`            | QoS configuration               |
 | `publisher-raw-message.js`            | `subscription-raw-message.js`            | Raw binary data                 |
+| `publisher-example.js`                | `subscription-observable-example.js`     | RxJS Observable subscription    |
 
 ## How to Run Examples
 
@@ -237,6 +253,7 @@ Several examples work together to demonstrate complete communication:
 - **Message Serialization**: TypedArray handling and JSON-safe conversion for web applications
 - **Name Validation**: Topic names, node names, and namespace validation utilities
 - **Message Validation**: Schema introspection and pre-publish message validation with detailed error reporting
+- **Observable Subscriptions**: RxJS-based reactive programming with operators for throttling, filtering, and combining message streams
 
 ## Notes
 

@@ -3,6 +3,7 @@
 import { expectType, expectAssignable } from 'tsd';
 import * as rclnodejs from 'rclnodejs';
 import { ChildProcess } from 'child_process';
+import { Observable } from 'rxjs';
 
 const NODE_NAME = 'test_node';
 const LIFECYCLE_NODE_NAME = 'lifecycle_test_node';
@@ -234,6 +235,32 @@ expectType<rclnodejs.SubscriptionContentFilter | undefined>(
 expectType<boolean>(subscription.clearContentFilter());
 expectType<boolean>(subscription.hasContentFilter());
 expectType<string>(subscription.loggerName);
+
+// ---- ObservableSubscription ----
+const observableSubscription = node.createObservableSubscription(
+  TYPE_CLASS,
+  TOPIC
+);
+expectType<rclnodejs.ObservableSubscription<rclnodejs.std_msgs.msg.String>>(
+  observableSubscription
+);
+expectType<Observable<rclnodejs.std_msgs.msg.String>>(
+  observableSubscription.observable
+);
+expectType<rclnodejs.Subscription>(observableSubscription.subscription);
+expectType<string>(observableSubscription.topic);
+expectType<boolean>(observableSubscription.isDestroyed);
+expectType<void>(observableSubscription.complete());
+expectType<void>(observableSubscription.destroy());
+
+const observableSubscriptionWithOptions = node.createObservableSubscription(
+  TYPE_CLASS,
+  TOPIC,
+  { qos: rclnodejs.QoS.profileDefault }
+);
+expectType<rclnodejs.ObservableSubscription<rclnodejs.std_msgs.msg.String>>(
+  observableSubscriptionWithOptions
+);
 
 // ---- Service ----
 const service = node.createService(

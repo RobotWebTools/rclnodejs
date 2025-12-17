@@ -364,6 +364,23 @@ declare module 'rclnodejs' {
     ): Subscription;
 
     /**
+     * Create a Subscription that returns an RxJS Observable.
+     * This allows using reactive programming patterns with ROS 2 messages.
+     *
+     * @param typeClass - Type of ROS messages the subscription will subscribe to.
+     * @param topic - Name of the topic the subscription will subscribe to.
+     * @param options - Configuration options, see DEFAULT_OPTIONS.
+     * @param eventCallbacks - Optional event callbacks for the subscription.
+     * @returns An ObservableSubscription with an RxJS Observable.
+     */
+    createObservableSubscription<T extends TypeClass<MessageTypeClassName>>(
+      typeClass: T,
+      topic: string,
+      options?: Options,
+      eventCallbacks?: (event: object) => void
+    ): ObservableSubscription<MessageType<T>>;
+
+    /**
      * Create a Client for making server requests.
      *
      * @param typeClass -  Service type.
