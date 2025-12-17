@@ -257,6 +257,7 @@ Napi::Value GetTimerPeriod(const Napi::CallbackInfo& info) {
   return Napi::BigInt::New(env, period_nsec);
 }
 
+#if ROS_VERSION > 2205  // 2205 == Humble
 Napi::Value GetTimerNextCallTime(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
@@ -274,6 +275,7 @@ Napi::Value GetTimerNextCallTime(const Napi::CallbackInfo& info) {
     return env.Undefined();
   }
 }
+#endif
 
 #if ROS_VERSION > 2205  // 2205 == Humble
 Napi::Value CallTimerWithInfo(const Napi::CallbackInfo& info) {
@@ -362,9 +364,9 @@ Napi::Object InitTimerBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, TimerGetTimeUntilNextCall));
   exports.Set("changeTimerPeriod", Napi::Function::New(env, ChangeTimerPeriod));
   exports.Set("getTimerPeriod", Napi::Function::New(env, GetTimerPeriod));
+#if ROS_VERSION > 2205  // 2205 == Humble
   exports.Set("getTimerNextCallTime",
               Napi::Function::New(env, GetTimerNextCallTime));
-#if ROS_VERSION > 2205  // 2205 == Humble
   exports.Set("setTimerOnResetCallback",
               Napi::Function::New(env, SetTimerOnResetCallback));
   exports.Set("clearTimerOnResetCallback",

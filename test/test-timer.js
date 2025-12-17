@@ -140,6 +140,10 @@ describe('rclnodejs Timer class testing', function () {
     });
 
     it('timer.getNextCallTime', function (done) {
+      // Skip test if ROS2 version is Humble or earlier (not supported)
+      if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+        this.skip();
+      }
       var timer = node.createTimer(TIMER_INTERVAL, function () {
         var nextCallTime = timer.getNextCallTime();
         assert.deepStrictEqual(typeof nextCallTime, 'bigint');
