@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const { Clock, ClockType, Time, Duration } = rclnodejs;
+const { Clock, ClockType, Duration } = rclnodejs;
 
 describe('ClockEvent', function () {
   let node;
@@ -39,6 +39,19 @@ describe('ClockEvent', function () {
 
     const start = Date.now();
     await event.waitUntilSystem(clock, until.nanoseconds);
+    const end = Date.now();
+
+    assert(end - start >= 1000);
+  });
+
+  it('should wait until ros time', async function () {
+    const clock = new Clock(ClockType.ROS_TIME);
+    const event = new rclnodejs.ClockEvent();
+    const now = clock.now();
+    const until = now.add(new Duration(1n, 0n)); // 1 second later
+
+    const start = Date.now();
+    await event.waitUntilRos(clock, until.nanoseconds);
     const end = Date.now();
 
     assert(end - start >= 1000);
