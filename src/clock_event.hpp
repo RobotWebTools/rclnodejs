@@ -33,10 +33,9 @@ class ClockEvent {
   void wait_until(rcl_clock_t* clock, rcl_time_point_t until);
 
   /// Wait until a time specified by a ROS clock.
-  /// \warning the caller is responsible for creating a time jump callback to
-  /// set this event when the target ROS time is reached. when a given ROS time
-  /// is reached. \param clock the clock to use for time synchronization. \param
-  /// until this method will block until this time is reached.
+  /// \warning The caller is responsible for creating a time jump callback to set this event when the target ROS time is reached.
+  /// \param clock The clock to use for time synchronization.
+  /// \param until This method will block until this time is reached.
   void wait_until_ros(rcl_clock_t* clock, rcl_time_point_t until);
 
   /// Indicate if the ClockEvent is set.
