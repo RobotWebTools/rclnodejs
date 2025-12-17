@@ -103,8 +103,8 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
         // triggered
         rcl_ret_t callback_ret =
             rcl_timer_set_on_reset_callback(timer, nullptr, nullptr);
-        (void)callback_ret;  // Suppress unused variable warning if error
-                             // handling is not needed
+        THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, callback_ret,
+                                           rcl_get_error_string().str);
 #endif
 
         std::shared_ptr<TimerContext> context;
@@ -272,7 +272,6 @@ Napi::Value GetTimerNextCallTime(const Napi::CallbackInfo& info) {
     return env.Null();
   } else {
     THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
-    return env.Undefined();
   }
 }
 #endif
