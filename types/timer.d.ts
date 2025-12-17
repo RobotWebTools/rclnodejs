@@ -47,6 +47,13 @@ declare module 'rclnodejs' {
     timeUntilNextCall(): bigint;
 
     /**
+     * Get the absolute time in nanoseconds when the next callback is due.
+     *
+     * @returns The next call time in nanoseconds, or null if the timer is canceled.
+     */
+    getNextCallTime(): bigint | null;
+
+    /**
      * Change the timer period.
      * @param period - The new period in nanoseconds.
      */
