@@ -28,6 +28,7 @@ rclnodejs.init().then(() => {
 - [Tutorials](./tutorials/)
 - [Electron-based Visualization](#electron-based-visualization)
 - [Using TypeScript](#using-rclnodejs-with-typescript)
+- [Observable Subscriptions](#observable-subscriptions)
 - [ROS2 Interface Message Generation](#ros2-interface-message-generation)
 - [Performance Benchmarks](#performance-benchmarks)
 - [Efficient Usage Tips](./docs/EFFICIENCY.md)
@@ -132,6 +133,27 @@ rclnodejs.init().then(() => {
 ```
 
 See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo) for more examples.
+
+## Observable Subscriptions
+
+rclnodejs supports [RxJS](https://rxjs.dev/) Observable subscriptions for reactive programming with ROS 2 messages. Use operators like `throttleTime()`, `debounceTime()`, `map()`, and `combineLatest()` to build declarative message processing pipelines.
+
+```javascript
+const { throttleTime, map } = require('rxjs');
+
+const obsSub = node.createObservableSubscription(
+  'sensor_msgs/msg/LaserScan',
+  '/scan'
+);
+obsSub.observable
+  .pipe(
+    throttleTime(200),
+    map((msg) => msg.ranges)
+  )
+  .subscribe((ranges) => console.log('Ranges:', ranges.length));
+```
+
+See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions.md) for more details.
 
 ## ROS2 Interface Message Generation
 

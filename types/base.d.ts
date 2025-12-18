@@ -26,6 +26,7 @@
 /// <reference path="./service.d.ts" />
 /// <reference path="./service_introspection.d.ts" />
 /// <reference path="./subscription.d.ts" />
+/// <reference path="./observable_subscription.d.ts" />
 /// <reference path="./time_source.d.ts" />
 /// <reference path="./time.d.ts" />
 /// <reference path="./timer.d.ts" />
