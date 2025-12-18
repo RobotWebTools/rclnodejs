@@ -25,6 +25,8 @@ rclnodejs provides RxJS Observable support for subscriptions, enabling reactive 
 
 Observable subscriptions are ideal for complex message processing pipelines where you need to combine, filter, or transform data from multiple sources.
 
+> **Note:** RxJS `filter()` operates at the application level after messages are received. For simple content-based filtering that reduces network traffic, consider using [DDS Content Filtering](content-filtering-subscription.md) instead, which filters at the middleware level before messages reach your application. See [Example 6](#example-6-combining-dds-content-filtering-with-rxjs) for combined usage.
+
 ## Basic Usage
 
 ```javascript
@@ -178,6 +180,47 @@ tempSub.observable
     console.log('Average temperature:', avgTemp);
   });
 ```
+
+### Example 6: Combining DDS Content Filtering with RxJS
+
+For optimal performance, use DDS content filtering to reduce network traffic at the middleware level, then apply RxJS operators for additional processing:
+
+```javascript
+const { throttleTime, map } = require('rxjs');
+
+// DDS filters at middleware level - only temperatures > 30°C are delivered
+const tempSub = node.createObservableSubscription(
+  'sensor_msgs/msg/Temperature',
+  '/temperature',
+  {
+    contentFilter: {
+      expression: 'temperature > %0',
+      parameters: ['30.0'],
+    },
+  }
+);
+
+// RxJS processes the pre-filtered stream
+tempSub.observable
+  .pipe(
+    throttleTime(1000), // Rate limit to 1 msg/sec
+    map((msg) => ({
+      celsius: msg.temperature,
+      fahrenheit: msg.temperature * 1.8 + 32,
+    }))
+  )
+  .subscribe((temp) => {
+    console.log(`High temp alert: ${temp.celsius}°C (${temp.fahrenheit}°F)`);
+  });
+```
+
+This approach provides:
+
+- **Network efficiency**: DDS drops messages below 30°C before transmission
+- **CPU efficiency**: RxJS only processes relevant messages
+- **Flexibility**: RxJS handles rate limiting and transformation
+
+> See [Content Filtering Subscription](content-filtering-subscription.md) for more details on DDS content filtering.
 
 ## Cleanup
 

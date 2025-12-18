@@ -39,6 +39,9 @@ async function main() {
     });
 
   // Example 2: Filtered messages (only containing "ROS")
+  // Note: RxJS filter() operates at the application level after messages are received.
+  // For more efficient filtering at the DDS middleware level (reducing network traffic),
+  // use the contentFilter option. See: tutorials/content-filtering-subscription.md
   obsSub.observable
     .pipe(
       map((msg) => msg.data),
