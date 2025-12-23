@@ -272,6 +272,7 @@ Napi::Value GetTimerNextCallTime(const Napi::CallbackInfo& info) {
     return env.Null();
   } else {
     THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, ret, rcl_get_error_string().str);
+    return env.Undefined();  // Safeguard return, should not reach here
   }
 }
 #endif

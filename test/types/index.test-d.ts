@@ -365,6 +365,54 @@ expectType<rclnodejs.Time>(clock.now());
 expectType<void>(clock.addClockCallback({}, true, 0n, 0n));
 expectType<void>(clock.removeClockCallback({}));
 
+// Clock sleep methods
+const sleepDuration = new rclnodejs.Duration(1n, 0n);
+const sleepTargetTime = new rclnodejs.Time(
+  0n,
+  1000000000n,
+  rclnodejs.ClockType.SYSTEM_TIME
+);
+const sleepContext = rclnodejs.Context.defaultContext();
+
+// sleepFor signatures
+expectType<Promise<boolean>>(clock.sleepFor(sleepDuration));
+expectType<Promise<boolean>>(clock.sleepFor(sleepDuration, sleepContext));
+expectType<Promise<boolean>>(clock.sleepFor(sleepDuration, null));
+expectType<Promise<boolean>>(clock.sleepFor(sleepDuration, undefined));
+
+// sleepUntil signatures
+expectType<Promise<boolean>>(clock.sleepUntil(sleepTargetTime));
+expectType<Promise<boolean>>(clock.sleepUntil(sleepTargetTime, sleepContext));
+expectType<Promise<boolean>>(clock.sleepUntil(sleepTargetTime, null));
+expectType<Promise<boolean>>(clock.sleepUntil(sleepTargetTime, undefined));
+
+// ROSClock sleep methods
+const rosClock = new rclnodejs.ROSClock();
+expectType<Promise<boolean>>(rosClock.sleepFor(sleepDuration));
+expectType<Promise<boolean>>(rosClock.sleepUntil(sleepTargetTime));
+
+// ---- ClockChange -----
+expectAssignable<rclnodejs.ClockChange>(
+  rclnodejs.ClockChange.ROS_TIME_NO_CHANGE
+);
+expectAssignable<rclnodejs.ClockChange>(
+  rclnodejs.ClockChange.ROS_TIME_ACTIVATED
+);
+expectAssignable<rclnodejs.ClockChange>(
+  rclnodejs.ClockChange.ROS_TIME_DEACTIVATED
+);
+expectAssignable<rclnodejs.ClockChange>(
+  rclnodejs.ClockChange.SYSTEM_TIME_NO_CHANGE
+);
+
+// ClockChange in callback
+const clockCallback: rclnodejs.ClockCallbackObject = {
+  _post_callback: (jumpInfo) => {
+    expectType<rclnodejs.ClockChange>(jumpInfo.clock_change);
+    expectType<bigint>(jumpInfo.delta);
+  },
+};
+
 // ---- Logging -----
 const logger = rclnodejs.Logging.getLogger('test_logger');
 expectType<rclnodejs.Logging>(logger);
