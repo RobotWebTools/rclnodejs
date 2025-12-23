@@ -213,5 +213,87 @@ describe('Clock sleep methods', function () {
         `Elapsed time ${elapsed}ms should be approximately 100ms`
       );
     });
+
+    it('should work with ROSClock when ROS time is active', async function () {
+      // Create a node with use_sim_time parameter set to true
+      const options = new rclnodejs.NodeOptions();
+      options.parameterOverrides.push(
+        new rclnodejs.Parameter(
+          'use_sim_time',
+          rclnodejs.ParameterType.PARAMETER_BOOL,
+          true
+        )
+      );
+
+      const node = rclnodejs.createNode(
+        'TestClockSleepRosTime',
+        '',
+        rclnodejs.Context.defaultContext(),
+        options
+      );
+
+      try {
+        // Set up TimeSource to activate ROS time
+        const TimeSource = require('../lib/time_source.js');
+        const timeSource = new TimeSource(node);
+        const clock = new ROSClock();
+        timeSource.attachClock(clock);
+
+        // Start spinning the node to receive clock messages
+        rclnodejs.spin(node);
+
+        // Verify ROS time is active
+        assert.strictEqual(clock.isRosTimeActive, true);
+
+        // Create a clock publisher to simulate time
+        const clockPub = node.createPublisher(
+          'rosgraph_msgs/msg/Clock',
+          '/clock'
+        );
+
+        // Publish initial time: 10 seconds
+        const startSec = 10;
+        clockPub.publish({ clock: { sec: startSec, nanosec: 0 } });
+
+        // Wait a bit for the message to be processed
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Get current ROS time (should be 10 seconds)
+        const currentRosTime = clock.now();
+        assert.ok(
+          currentRosTime.nanoseconds >= BigInt(startSec) * 1000000000n,
+          'ROS time should be at least 10 seconds'
+        );
+
+        // Test sleepFor with simulated time
+        // We'll publish clock messages while sleeping to advance time
+        const sleepDuration = new Duration(2n, 0n); // 2 seconds of ROS time
+
+        const sleepPromise = clock.sleepFor(sleepDuration);
+
+        // Publish clock messages to advance time
+        let currentSimTime = startSec;
+        const publishInterval = setInterval(() => {
+          currentSimTime += 1; // Advance by 1 second each time
+          clockPub.publish({ clock: { sec: currentSimTime, nanosec: 0 } });
+        }, 100); // Publish every 100ms wall time
+
+        // Wait for sleep to complete
+        const result = await sleepPromise;
+        clearInterval(publishInterval);
+
+        assert.strictEqual(result, true, 'Sleep should complete successfully');
+
+        // Verify that ROS time advanced
+        const finalRosTime = clock.now();
+        assert.ok(
+          finalRosTime.nanoseconds >=
+            currentRosTime.nanoseconds + sleepDuration.nanoseconds,
+          'ROS time should have advanced by at least the sleep duration'
+        );
+      } finally {
+        node.destroy();
+      }
+    });
   });
 });
