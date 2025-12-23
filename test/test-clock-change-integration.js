@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
-const { Clock, ROSClock, ClockType, ClockChange, Duration, Time } = rclnodejs;
+const { Clock, ROSClock, ClockType, ClockChange, Time } = rclnodejs;
 
 describe('ClockChange integration with sleep methods', function () {
   this.timeout(5000);

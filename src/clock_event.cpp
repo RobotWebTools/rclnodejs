@@ -176,6 +176,11 @@ Napi::Value ClockEventWaitUntilSteady(const Napi::CallbackInfo& info) {
 
   bool lossless;
   int64_t until = info[2].As<Napi::BigInt>().Int64Value(&lossless);
+  if (!lossless) {
+    Napi::TypeError::New(env, "until value lost precision during conversion")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
 
   auto worker =
       new ClockEventWaitWorker(env, event, clock, until, WaitType::Steady);
@@ -193,6 +198,11 @@ Napi::Value ClockEventWaitUntilSystem(const Napi::CallbackInfo& info) {
 
   bool lossless;
   int64_t until = info[2].As<Napi::BigInt>().Int64Value(&lossless);
+  if (!lossless) {
+    Napi::TypeError::New(env, "until value lost precision during conversion")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
 
   auto worker =
       new ClockEventWaitWorker(env, event, clock, until, WaitType::System);
@@ -210,6 +220,11 @@ Napi::Value ClockEventWaitUntilRos(const Napi::CallbackInfo& info) {
 
   bool lossless;
   int64_t until = info[2].As<Napi::BigInt>().Int64Value(&lossless);
+  if (!lossless) {
+    Napi::TypeError::New(env, "until value lost precision during conversion")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
 
   auto worker =
       new ClockEventWaitWorker(env, event, clock, until, WaitType::Ros);

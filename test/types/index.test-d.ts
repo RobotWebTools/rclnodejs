@@ -406,7 +406,7 @@ expectAssignable<rclnodejs.ClockChange>(
 );
 
 // ClockChange in callback
-const clockCallback: rclnodejs.ClockCallbackObject = {
+const _clockCallback: rclnodejs.ClockCallbackObject = {
   _post_callback: (jumpInfo) => {
     expectType<rclnodejs.ClockChange>(jumpInfo.clock_change);
     expectType<bigint>(jumpInfo.delta);
