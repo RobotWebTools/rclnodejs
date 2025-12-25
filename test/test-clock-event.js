@@ -59,6 +59,10 @@ describe('ClockEvent', function () {
   });
 
   it('should wait until ros time', async function () {
+    // Note: This tests ROS_TIME clock when ROS time override is not enabled.
+    // In this case, waitUntilRos() falls back to system time behavior.
+    // For testing with active ROS time (TimeSource + published clock messages),
+    // see test-clock-sleep.js "should work with ROSClock when ROS time is active"
     const clock = new Clock(ClockType.ROS_TIME);
     const event = new rclnodejs.ClockEvent();
     const now = clock.now();
