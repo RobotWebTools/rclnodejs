@@ -17,7 +17,9 @@
 const DistroUtils = require('./lib/distro.js');
 const RMWUtils = require('./lib/rmw.js');
 const { Clock, ROSClock } = require('./lib/clock.js');
+const ClockEvent = require('./lib/clock_event.js');
 const ClockType = require('./lib/clock_type.js');
+const ClockChange = require('./lib/clock_change.js');
 const { compareVersions } = require('./lib/utils.js');
 const Context = require('./lib/context.js');
 const debug = require('debug')('rclnodejs');
@@ -189,8 +191,14 @@ let rcl = {
   /** {@link Clock} class */
   Clock: Clock,
 
+  /** {@link ClockEvent} class */
+  ClockEvent: ClockEvent,
+
   /** {@link ClockType} enum */
   ClockType: ClockType,
+
+  /** {@link ClockChange} enum */
+  ClockChange: ClockChange,
 
   /** {@link Context} class */
   Context: Context,
