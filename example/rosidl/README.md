@@ -289,7 +289,7 @@ Each parsed field contains these properties:
 ### Message Parsing
 
 ```javascript
-const parser = require('../rosidl_parser/rosidl_parser.js');
+const parser = require('../rosidl_parser/rosidl_parser.cjs');
 
 parser.parseMessageFile(packageName, packagePath).then((spec) => {
   console.log(`Message: ${spec.msgName}`);

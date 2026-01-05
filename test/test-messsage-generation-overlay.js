@@ -19,7 +19,7 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const rclnodejs = require('../index.js');
-const generator = require('../rosidl_gen/index.js');
+const generator = require('../rosidl_gen/index.cjs');
 
 const GENERATED_PATH = path.join(__dirname, '..', 'generated');
 const POINT_PATH = path.join(

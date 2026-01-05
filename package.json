@@ -2,7 +2,7 @@
   "name": "rclnodejs",
   "version": "1.7.0",
   "description": "ROS2.0 JavaScript client with Node.js",
-  "main": "index.js",
+  "main": "./index.js",
   "types": "types/index.d.ts",
   "keywords": [
     "rclnodejs",
@@ -17,24 +17,24 @@
     "build:dev": "node-gyp -j 16 build --debug",
     "rebuild": "npm run clean && node-gyp -j 16 rebuild",
     "rebuild:dev": "npm run clean && node-gyp -j 16 rebuild --debug",
-    "generate-messages": "node scripts/generate_messages.js",
-    "generate-messages-idl": "node scripts/generate_messages.js --idl",
-    "generate-messages:dev": "node scripts/generate_messages.js --debug",
-    "generate-tsd-messages": "node scripts/generate_tsd.js",
+    "generate-messages": "node scripts/generate_messages.cjs",
+    "generate-messages-idl": "node scripts/generate_messages.cjs --idl",
+    "generate-messages:dev": "node scripts/generate_messages.cjs --debug",
+    "generate-tsd-messages": "node scripts/generate_tsd.cjs",
     "clean": "node-gyp clean && npx rimraf ./generated",
-    "install": "node scripts/install.js",
+    "install": "node scripts/install.cjs",
     "postinstall": "npm run generate-messages",
     "docs": "cd docs && make",
-    "test": "nyc node --expose-gc ./scripts/run_test.js && tsd",
-    "test-idl": "nyc node --expose-gc ./scripts/run_test.js --idl",
-    "lint": "eslint && node ./scripts/cpplint.js",
+    "test": "nyc node --expose-gc ./scripts/run_test.cjs && tsd",
+    "test-idl": "nyc node --expose-gc ./scripts/run_test.cjs --idl",
+    "lint": "eslint && node ./scripts/cpplint.cjs",
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.h && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,md,ts}\" ./*.{js,md,ts}",
     "prepare": "husky",
     "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "prebuild": "prebuildify --napi --strip --target 16.20.2 --target electron@23.0.0 && node scripts/tag_prebuilds.js"
+    "prebuild": "prebuildify --napi --strip --target 16.20.2 --target electron@23.0.0 && node scripts/tag_prebuilds.cjs"
   },
   "bin": {
-    "generate-ros-messages": "./scripts/generate_messages.js"
+    "generate-ros-messages": "./scripts/generate_messages.cjs"
   },
   "authors": [
     "Minggang Wang <minggangw@gmail.com>",
@@ -100,6 +100,6 @@
     "directory": "test/types"
   },
   "engines": {
-    "node": ">= 16.13.0"
+    "node": ">= 18.0.0"
   }
 }

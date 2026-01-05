@@ -19,7 +19,7 @@ const path = require('path');
 const fse = require('../lib/utils.js');
 const execFile = require('child_process').execFile;
 const pythonExecutable =
-  require('../rosidl_parser/py_utils').getPythonExecutable('python3');
+  require('../rosidl_parser/py_utils.cjs').getPythonExecutable('python3');
 
 async function convertIDLToROS2IDL(pkgName, idlFilePath, outputDir) {
   const packagePath = path.join(outputDir, pkgName);

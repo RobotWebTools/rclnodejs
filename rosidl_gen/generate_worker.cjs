@@ -13,10 +13,10 @@
 // limitations under the License.
 
 const fse = require('../lib/utils.js');
-const generateJSStructFromIDL = require('./idl_generator.js');
-const packages = require('./packages.js');
+const generateJSStructFromIDL = require('./idl_generator.cjs');
+const packages = require('./packages.cjs');
 const path = require('path');
-const idlConvertor = require('../rosidl_convertor/idl_convertor.js');
+const idlConvertor = require('../rosidl_convertor/idl_convertor.cjs');
 
 const generatedRoot = path.join(__dirname, '../generated/');
 const idlPath = path.join(generatedRoot, 'share');

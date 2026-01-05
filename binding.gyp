@@ -8,10 +8,10 @@
     }
   },
   'variables': {
-    'ros_version': '<!(node scripts/ros_distro.js)',
+    'ros_version': '<!(node scripts/ros_distro.cjs)',
     'runtime%': 'node',
-    'ros_lib_dir': "<!(node -p \"require('./scripts/config.js').getROSLibPath()\")",
-    'ros_include_root': "<!(node -p \"require('./scripts/config.js').getROSIncludeRootPath()\")",
+    'ros_lib_dir': "<!(node -p \"require('./scripts/config.cjs').getROSLibPath()\")",
+    'ros_include_root': "<!(node -p \"require('./scripts/config.cjs').getROSIncludeRootPath()\")",
     'node_major_version': '<!(node -p \"process.versions.node.split(\'.\')[0]\")',
   },
   'targets': [
@@ -167,7 +167,7 @@
           # After Galactic, e.g., Humble, Jazzy, Rolling.
           'ros_version > 2105', {
             'include_dirs': [
-              "<!@(node -p \"require('./scripts/config.js').getIncludePaths().forEach(p => console.log(JSON.stringify(p)))\")"
+              "<!@(node -p \"require('./scripts/config.cjs').getIncludePaths().forEach(p => console.log(JSON.stringify(p)))\")"
             ],
             'library_dirs': [
               '<(ros_lib_dir)',
