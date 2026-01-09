@@ -15,6 +15,7 @@
 'use strict';
 
 const assert = require('assert');
+const sinon = require('sinon');
 const rclnodejs = require('../index.js');
 const { Clock, Parameter, ParameterType, ROSClock, TimeSource, Time } =
   rclnodejs;
@@ -147,5 +148,77 @@ describe('rclnodejs TimeSource testing', function () {
       clearInterval(timer);
       done();
     }, 3000);
+  });
+
+  it('Test isRosTimeActive setter optimization', function () {
+    let timeSource = new TimeSource(node);
+    timeSource.isRosTimeActive = true;
+
+    // Set to same value coverage check
+    timeSource.isRosTimeActive = true;
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+  });
+
+  it('Test onParameterEvent', function () {
+    let timeSource = new TimeSource(node);
+
+    // Correct update
+    const result = timeSource.onParameterEvent([
+      {
+        name: 'use_sim_time',
+        type: rclnodejs.ParameterType.PARAMETER_BOOL,
+        value: true,
+      },
+    ]);
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+    assert.ok(result.successful);
+
+    // Update with wrong type (should log error but not crash)
+    // Use stub to suppress output and verify call
+    const logger = node.getLogger();
+    const errorStub = sinon.stub(logger, 'error');
+
+    const result2 = timeSource.onParameterEvent([
+      {
+        name: 'use_sim_time',
+        type: rclnodejs.ParameterType.PARAMETER_INTEGER,
+        value: 123,
+      },
+    ]);
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+    assert.ok(result2.successful);
+    assert.ok(errorStub.calledOnce);
+    errorStub.restore();
+
+    // Update with unrelated parameter
+    timeSource.onParameterEvent([
+      {
+        name: 'other_param',
+        type: rclnodejs.ParameterType.PARAMETER_BOOL,
+        value: false,
+      },
+    ]);
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+  });
+
+  it('Test detachNode', function () {
+    let timeSource = new TimeSource(node);
+    timeSource.isRosTimeActive = true;
+    // This creates subscription
+    assert.notStrictEqual(timeSource._clockSubscription, undefined);
+
+    timeSource.detachNode();
+    assert.strictEqual(timeSource._node, undefined);
+    assert.strictEqual(timeSource._clockSubscription, undefined);
+  });
+
+  it('Test attachNode validations', function () {
+    let timeSource = new TimeSource(null);
+    assert.throws(() => {
+      timeSource.attachNode({});
+    }, rclnodejs.TypeValidationError);
+
+    timeSource.attachNode(node);
+    assert.strictEqual(timeSource._node, node);
   });
 });
