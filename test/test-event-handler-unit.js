@@ -13,13 +13,27 @@ const {
 
 describe('EventHandler unit testing', function () {
   let sandbox;
+  let addedProps = [];
+
+  function stubOptional(obj, method) {
+    if (!obj[method]) {
+      obj[method] = () => {};
+      addedProps.push({ obj, method });
+    }
+    return sandbox.stub(obj, method);
+  }
 
   beforeEach(function () {
     sandbox = sinon.createSandbox();
+    addedProps = [];
   });
 
   afterEach(function () {
     sandbox.restore();
+    addedProps.forEach(({ obj, method }) => {
+      delete obj[method];
+    });
+    addedProps = [];
   });
 
   describe('PublisherEventCallbacks', function () {
@@ -77,9 +91,10 @@ describe('EventHandler unit testing', function () {
         return 11;
       });
 
-      const createStub = sandbox
-        .stub(rclnodejsBinding, 'createPublisherEventHandle')
-        .returns('mock-event-handle');
+      const createStub = stubOptional(
+        rclnodejsBinding,
+        'createPublisherEventHandle'
+      ).returns('mock-event-handle');
 
       const cb = new PublisherEventCallbacks();
       cb.deadline = () => {};
@@ -136,9 +151,10 @@ describe('EventHandler unit testing', function () {
         return 11;
       });
 
-      const createStub = sandbox
-        .stub(rclnodejsBinding, 'createSubscriptionEventHandle')
-        .returns('mock-sub-event-handle');
+      const createStub = stubOptional(
+        rclnodejsBinding,
+        'createSubscriptionEventHandle'
+      ).returns('mock-sub-event-handle');
 
       const cb = new SubscriptionEventCallbacks();
       cb.messageLost = () => {};
@@ -159,17 +175,17 @@ describe('EventHandler unit testing', function () {
   describe('EventHandler interaction', function () {
     it('takeData calls callback', function () {
       sandbox.stub(DistroUtils, 'getDistroId').callsFake(() => 999);
-      const takeEventStub = sandbox
-        .stub(rclnodejsBinding, 'takeEvent')
-        .returns({ count: 1 });
+      const takeEventStub = stubOptional(rclnodejsBinding, 'takeEvent').returns(
+        { count: 1 }
+      );
 
       const cb = new PublisherEventCallbacks();
       const spy = sinon.spy();
       cb.deadline = spy;
 
-      sandbox
-        .stub(rclnodejsBinding, 'createPublisherEventHandle')
-        .returns('handle');
+      stubOptional(rclnodejsBinding, 'createPublisherEventHandle').returns(
+        'handle'
+      );
       cb.createEventHandlers('pub');
 
       const handler = cb.eventHandlers[0];
