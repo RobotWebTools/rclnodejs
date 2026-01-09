@@ -20,7 +20,7 @@ const readline = require('readline');
 const path = require('path');
 const walk = require('walk');
 const os = require('os');
-const pkgFilters = require('../rosidl_gen/filter.js');
+const pkgFilters = require('../rosidl_gen/filter.cjs');
 
 const fsp = fs.promises;
 

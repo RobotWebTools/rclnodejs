@@ -16,13 +16,13 @@
 
 const fse = require('../lib/utils.js');
 const path = require('path');
-const parser = require('../rosidl_parser/rosidl_parser.js');
-const actionMsgs = require('./action_msgs.js');
+const parser = require('../rosidl_parser/rosidl_parser.cjs');
+const actionMsgs = require('./action_msgs.cjs');
 const DistroUtils = require('../lib/distro.js');
-const generateMessage = require('./templates/message-template.js');
-const generateService = require('./templates/service-template.js');
-const generateAction = require('./templates/action-template.js');
-const generateServiceEvent = require('./templates/service-event-template.js');
+const generateMessage = require('./templates/message-template.cjs');
+const generateService = require('./templates/service-template.cjs');
+const generateAction = require('./templates/action-template.cjs');
+const generateServiceEvent = require('./templates/service-event-template.cjs');
 
 const isDebug = !!process.argv.find((arg) => arg === '--debug');
 

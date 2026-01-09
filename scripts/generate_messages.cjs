@@ -17,8 +17,8 @@
 /* eslint-disable camelcase */
 'use strict';
 
-const generator = require('../rosidl_gen/index.js');
-const tsdGenerator = require('../rostsd_gen/index.js');
+const generator = require('../rosidl_gen/index.cjs');
+const tsdGenerator = require('../rostsd_gen/index.cjs');
 const useIDL = !!process.argv.find((arg) => arg === '--idl');
 
 async function main() {
