@@ -46,9 +46,12 @@ describe('Client coverage testing', function () {
       .returns('test_service');
     sandbox.stub(rclnodejsBinding, 'createClient').returns(mockHandle);
     sandbox.stub(rclnodejsBinding, 'getNodeLoggerName').returns('node_logger');
-    sandbox
-      .stub(rclnodejsBinding, 'configureClientIntrospection')
-      .returns(undefined);
+
+    if (rclnodejsBinding.configureClientIntrospection) {
+      sandbox
+        .stub(rclnodejsBinding, 'configureClientIntrospection')
+        .returns(undefined);
+    }
   });
 
   afterEach(function () {
@@ -307,13 +310,19 @@ describe('Client coverage testing', function () {
     client.configureIntrospection(clockStub, qos, 'on');
 
     assert.ok(consoleSpy.calledWithMatch(/not supported/));
-    assert.strictEqual(
-      rclnodejsBinding.configureClientIntrospection.called,
-      false
-    );
+    if (rclnodejsBinding.configureClientIntrospection) {
+      assert.strictEqual(
+        rclnodejsBinding.configureClientIntrospection.called,
+        false
+      );
+    }
   });
 
   it('configureIntrospection calls binding on new distro', function () {
+    if (!rclnodejsBinding.configureClientIntrospection) {
+      this.skip();
+    }
+
     const client = new Client(
       mockHandle,
       mockNodeHandle,
