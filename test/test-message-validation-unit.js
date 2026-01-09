@@ -9,28 +9,14 @@ const {
 const {
   assertValidMessage,
   validateMessage,
+  createMessageValidator,
+  getFieldNames,
+  getMessageSchema,
+  ValidationProblem,
+  getMessageTypeString,
 } = require('../lib/message_validation.js');
 
-describe('MessageValidation coverage testing', function () {
-  before(async function () {
-    await rclnodejs.init();
-  });
-
-  after(function () {
-    rclnodejs.shutdown();
-  });
-
-  // NOTE: assertValidMessage is for internal use where the object passed is generally a request/response object or similar.
-  // The 'typeClass' argument needs to be the message class constructor.
-  // The implementation of validateMessage checks `resolveTypeClass(typeClass)`.
-  // If rclnodejs.createMessageObject() returns the wrapper class, then it should work logic wise.
-  // However, there seems to be a mismatch in how we retrieve the class in test environment vs runtime or how `loadInterface` works.
-
-  // To avoid stuck on this, we'll verify the logical functions in separate unit tests if possible,
-  // or use what works.
-
-  // Since `validateMessage` is exported, we can test it directly if we provide a mock class with `ROSMessageDef`.
-
+describe('MessageValidation unit testing', function () {
   const MockStringMsg = class {
     static get ROSMessageDef() {
       return {
@@ -46,13 +32,93 @@ describe('MessageValidation coverage testing', function () {
     }
   };
 
+  const MockArrayMsg = class {
+    static get ROSMessageDef() {
+      return {
+        fields: [
+          {
+            name: 'covariance',
+            type: {
+              type: 'float64',
+              isPrimitiveType: true,
+              isArray: true,
+              isFixedSizeArray: true,
+              arraySize: 3,
+            },
+          },
+          {
+            name: 'unbounded',
+            type: {
+              type: 'int32',
+              isPrimitiveType: true,
+              isArray: true,
+            },
+          },
+        ],
+        constants: [],
+      };
+    }
+    static type() {
+      return {
+        pkgName: 'test_pkg',
+        subFolder: 'msg',
+        interfaceName: 'ArrayTest',
+      };
+    }
+  };
+
+  describe('Utility functions', function () {
+    it('getMessageTypeString returns correct string', function () {
+      const str = getMessageTypeString(MockStringMsg);
+      assert.strictEqual(str, 'std_msgs/msg/String');
+    });
+
+    it('getMessageTypeString returns unknown for invalid input', function () {
+      const str = getMessageTypeString({});
+      assert.strictEqual(str, 'unknown');
+    });
+
+    it('getMessageSchema returns schema', function () {
+      const schema = getMessageSchema(MockStringMsg);
+      assert.strictEqual(schema.messageType, 'std_msgs/msg/String');
+      assert.ok(schema.fields.length > 0);
+    });
+
+    it('getFieldNames returns field names', function () {
+      const names = getFieldNames(MockStringMsg);
+      assert.deepStrictEqual(names, ['data']);
+    });
+  });
+
+  describe('createMessageValidator', function () {
+    it('creates a function', function () {
+      const validator = createMessageValidator(MockStringMsg);
+      assert.strictEqual(typeof validator, 'function');
+    });
+
+    it('throws on invalid type class', function () {
+      assert.throws(() => {
+        createMessageValidator(null);
+      }, TypeValidationError);
+    });
+
+    it('validator validates correctly', function () {
+      const validator = createMessageValidator(MockStringMsg);
+      const result = validator({ data: 'ok' });
+      assert.strictEqual(result.valid, true);
+
+      const resultFail = validator({ data: 123 });
+      assert.strictEqual(resultFail.valid, false);
+    });
+  });
+
   describe('assertValidMessage', function () {
     it('throws Validation Error when validation fails', function () {
       const msg = { data: 123 };
 
       assert.throws(() => {
         assertValidMessage(msg, MockStringMsg);
-      }, rclnodejs.MessageValidationError); // It actually throws MessageValidationError based on log
+      }, MessageValidationError);
     });
 
     it('passes for valid message', function () {
@@ -64,92 +130,78 @@ describe('MessageValidation coverage testing', function () {
     });
   });
 
-  describe('Validation logic coverage with validateMessage', function () {
-    it('detects unknown fields', function () {
+  describe('validateMessage', function () {
+    it('detects unknown fields (strict mode)', function () {
       const plainMsg = { data: 'hello', unknown: 1 };
 
       const result = validateMessage(plainMsg, MockStringMsg, { strict: true });
       assert.strictEqual(result.valid, false);
-      assert.strictEqual(result.issues[0].problem, 'UNKNOWN_FIELD');
+      assert.strictEqual(
+        result.issues[0].problem,
+        ValidationProblem.UNKNOWN_FIELD
+      );
     });
 
     it('detects type mismatch', function () {
-      const MockBoolMsg = class {
-        static get ROSMessageDef() {
-          return {
-            fields: [
-              { name: 'data', type: { type: 'bool', isPrimitiveType: true } },
-            ],
-            constants: [],
-          };
-        }
-        static type() {
-          return {
-            pkgName: 'std_msgs',
-            subFolder: 'msg',
-            interfaceName: 'Bool',
-          };
-        }
-      };
-
-      const plainMsg = { data: 'not bool' };
-
-      const result = validateMessage(plainMsg, MockBoolMsg, {
+      const plainMsg = { data: 123 };
+      const result = validateMessage(plainMsg, MockStringMsg, {
         checkTypes: true,
       });
       assert.strictEqual(result.valid, false);
-      assert.strictEqual(result.issues[0].problem, 'TYPE_MISMATCH');
+      assert.strictEqual(
+        result.issues[0].problem,
+        ValidationProblem.TYPE_MISMATCH
+      );
     });
 
-    it('validates array constraints', function () {
-      const MockArrayMsg = class {
-        static get ROSMessageDef() {
-          return {
-            fields: [
-              {
-                name: 'covariance',
-                type: {
-                  type: 'float64',
-                  isPrimitiveType: true,
-                  isArray: true,
-                  isFixedSizeArray: true,
-                  arraySize: 36,
-                },
-              },
-            ],
-            constants: [],
-          };
-        }
-        static type() {
-          return {
-            pkgName: 'geometry_msgs',
-            subFolder: 'msg',
-            interfaceName: 'PoseWithCovariance',
-          };
-        }
-      };
+    it('validates primitive wrapper check (single field optimization)', function () {
+      // Test single primitive value directly
+      const result = validateMessage('mystring', MockStringMsg);
+      assert.strictEqual(result.valid, true);
 
-      const plainMsg = { covariance: new Array(35).fill(0) }; // Wrong size
+      const resultFail = validateMessage(123, MockStringMsg);
+      assert.strictEqual(resultFail.valid, false);
+    });
+
+    it('validates array constraints (fixed size)', function () {
+      const plainMsg = { covariance: [1, 2] }; // Too short (needs 3)
+      // Note: We need to omit 'unbounded' or provide it validly
 
       const result = validateMessage(plainMsg, MockArrayMsg, {
         checkTypes: true,
       });
-      const issue = result.issues.find((i) => i.problem === 'ARRAY_LENGTH');
+      const issue = result.issues.find(
+        (i) => i.problem === ValidationProblem.ARRAY_LENGTH
+      );
       assert.ok(issue);
     });
 
-    it('checks nested messages', function () {
-      // We need simulate nested type resolution.
-      // getNestedTypeClass calls interfaceLoader.loadInterface
-      // We can mock the getter for nested type on message_validation context? No.
-      // Or we just rely on it returning null if not found -> invalid?
-      // Actually, if we use real classes it works better if we can load them.
-      // But since previous tests failed on type class resolution (maybe due to test environment setup),
-      // We can skip deep nested integration test here or mock it carefully if `getNestedTypeClass` was exposed/mockable.
-      // Alternatively, we skip this specific case if it relies on complex loading.
-      // Or we define getter behavior.
-      // `getNestedTypeClass` uses `resolveTypeClass` -> `interfaceLoader.loadInterface`.
-      // Let's rely on primitive validation as proof of coverage for now.
+    it('validates array constraints (type mismatch in array)', function () {
+      const plainMsg = { covariance: [1, 2, 'bad'] };
+      const result = validateMessage(plainMsg, MockArrayMsg, {
+        checkTypes: true,
+      });
+      const issue = result.issues.find(
+        (i) => i.problem === ValidationProblem.TYPE_MISMATCH
+      );
+      assert.ok(issue);
+    });
+
+    it('detects missing required fields', function () {
+      const plainMsg = {};
+      const result = validateMessage(plainMsg, MockStringMsg, {
+        checkRequired: true,
+      });
+      assert.strictEqual(result.valid, false);
+      assert.strictEqual(
+        result.issues[0].problem,
+        ValidationProblem.MISSING_FIELD
+      );
+    });
+
+    it('handles null/undefined object', function () {
+      const result = validateMessage(null, MockStringMsg);
+      assert.strictEqual(result.valid, false);
     });
   });
 });
