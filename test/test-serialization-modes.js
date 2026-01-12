@@ -226,7 +226,7 @@ describe('Message Serialization Unit Tests', function () {
     assert.strictEqual(output.inf, 'Infinity');
     assert.strictEqual(output.ninf, '-Infinity');
     assert.strictEqual(output.nan, 'NaN');
-    assert.strictEqual(output.undef, null);
+    assert.strictEqual(output.undef, undefined);
     assert.strictEqual(output.func, '[Function]');
     assert.strictEqual(output.nested.arr[0], '10n');
 
