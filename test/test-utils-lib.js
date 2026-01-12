@@ -33,7 +33,7 @@ describe('Utils testing', function () {
     );
   });
 
-  it('should valid ensureDir works correctly', async function () {
+  it('should verify ensureDir works correctly', async function () {
     const dir = path.join(tmpDir, 'nested/dir');
     await utils.ensureDir(dir);
 
@@ -45,7 +45,9 @@ describe('Utils testing', function () {
     await utils.ensureDir(dir);
   });
 
-  it('should valid ensureDirSync works correctly', function () {
+  it('should valid ensureDirSync works correctly', function () {});
+
+  it('should verify ensureDirSync works correctly', function () {
     const dir = path.join(tmpDir, 'nested/sync/dir');
     utils.ensureDirSync(dir);
 
@@ -77,7 +79,7 @@ describe('Utils testing', function () {
     assert.ok(!fs.existsSync(dir));
   });
 
-  it('should valid copy works correctly', async function () {
+  it('should verify copy works correctly', async function () {
     const src = path.join(tmpDir, 'src');
     const dest = path.join(tmpDir, 'dest');
 

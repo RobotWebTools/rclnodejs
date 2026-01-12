@@ -277,9 +277,7 @@ describe('Logging unit testing (Mocks)', function () {
     });
 
     it('loggerEffectiveLevel calls binding', function () {
-      const stub = sandbox
-        .stub(rclnodejsBinding, 'getLoggerEffectiveLevel')
-        .returns(20);
+      sandbox.stub(rclnodejsBinding, 'getLoggerEffectiveLevel').returns(20);
       const logger = new Logging('test');
       assert.strictEqual(logger.loggerEffectiveLevel, 20);
     });
@@ -403,9 +401,7 @@ describe('Logging unit testing (Mocks)', function () {
     });
 
     it('getLoggingDirectory calls binding', function () {
-      const stub = sandbox
-        .stub(rclnodejsBinding, 'getLoggingDirectory')
-        .returns('/logs');
+      sandbox.stub(rclnodejsBinding, 'getLoggingDirectory').returns('/logs');
       assert.strictEqual(Logging.getLoggingDirectory(), '/logs');
     });
   });

@@ -153,6 +153,7 @@ describe('rclnodejs TimeSource testing', function () {
   it('Test isRosTimeActive setter optimization', function () {
     let timeSource = new TimeSource(node);
     timeSource.isRosTimeActive = true;
+    assert.strictEqual(timeSource.isRosTimeActive, true);
 
     // Set to same value coverage check
     timeSource.isRosTimeActive = true;

@@ -10,7 +10,6 @@ describe('Client coverage testing', function () {
   let sandbox;
   let mockHandle = { _handle: 'mock-handle' };
   let mockNodeHandle = { _handle: 'mock-node-handle' };
-  let originalAbortSignalAny;
 
   const MockTypeClass = {
     type: () => ({

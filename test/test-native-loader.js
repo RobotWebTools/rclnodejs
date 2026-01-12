@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const path = require('path');
+
 const fs = require('fs');
 const child_process = require('child_process');
 
@@ -51,7 +51,7 @@ describe('NativeLoader testing', function () {
     Object.defineProperty(process, 'arch', { value: 'x64' });
     process.env.ROS_DISTRO = 'humble';
 
-    const existsSync = sandbox.stub(fs, 'existsSync').returns(false);
+    sandbox.stub(fs, 'existsSync').returns(false);
 
     const loader = getLoader();
     assert.strictEqual(loader.customFallbackLoader(), null);
@@ -92,7 +92,7 @@ describe('NativeLoader testing', function () {
     // But usually in dev env, the binding exists.
 
     try {
-      const loader = getLoader();
+      getLoader();
       // Wait, getLoader requires the file.
       // The file calls loadNativeAddon() immediately.
       // So valid test is just requiring the file.
