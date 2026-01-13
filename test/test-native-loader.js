@@ -65,12 +65,6 @@ describe('NativeLoader testing', function () {
     // Stub fs.existsSync to return true
     const existsSync = sandbox.stub(fs, 'existsSync').returns(true);
 
-    // It will try to require the file. since the file doesn't exist really, and we can't easily stub require() for that specific path
-    // It will likely throw (caught) or return null if we are lucky with how we configured stub.
-    // Actually the path is constructed dynamically.
-    // If it throws, customFallbackLoader returns null.
-    // We can verify valid behavior (returns null gracefully even if file "exists" but is invalid).
-
     const loader = getLoader();
     assert.strictEqual(loader.customFallbackLoader(), null);
 

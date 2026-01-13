@@ -224,7 +224,9 @@ describe('rclnodejs TimeSource testing', function () {
   });
 
   it('Test attachNode with invalid parameter type', function () {
-    // Create a node with the parameter already set to an integer
+    // Create a node with the parameter already set to an integer.
+    // The use_sim_time parameter is expected to be a boolean (PARAMETER_BOOL).
+    // This test intentionally uses an integer to verify the error handling logic.
     // We must use a new node because beforeEach node might already have default params or we want to ensure fresh state
     const options = new rclnodejs.NodeOptions();
     options.parameterOverrides.push(
@@ -235,7 +237,7 @@ describe('rclnodejs TimeSource testing', function () {
       )
     );
 
-    // Note: declaring parameter overrides automagically makes them available/declared on the node
+    // Note: declaring parameter overrides automatically makes them available/declared on the node
     const invalidParamNode = rclnodejs.createNode(
       'TestTimeSourceInvalidParam',
       '',
