@@ -127,11 +127,14 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
       GetMessageTypeSupport(package_name, message_sub_folder, message_name);
 
   if (ts) {
-    THROW_ERROR_IF_NOT_EQUAL(
-        RCL_RET_OK,
-        rcl_subscription_init(subscription, node, ts, topic.c_str(),
-                              &subscription_ops),
-        rcl_get_error_string().str);
+    rcl_ret_t ret = rcl_subscription_init(subscription, node, ts, topic.c_str(),
+                                          &subscription_ops);
+    if (ret != RCL_RET_OK) {
+      std::string error_msg = rcl_get_error_string().str;
+      rcl_reset_error();
+      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
 
     auto js_obj = RclHandle::NewInstance(
         env, subscription, node_handle, [node, env](void* ptr) {
@@ -139,8 +142,11 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
               reinterpret_cast<rcl_subscription_t*>(ptr);
           rcl_ret_t ret = rcl_subscription_fini(subscription, node);
           free(ptr);
-          THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
-                                             rcl_get_error_string().str);
+          if (ret != RCL_RET_OK) {
+            std::string error_msg = rcl_get_error_string().str;
+            rcl_reset_error();
+            Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+          }
         });
 
     return js_obj;
@@ -346,9 +352,9 @@ Napi::Value GetContentFilter(const Napi::CallbackInfo& info) {
 
   rcl_ret_t ret = rcl_subscription_get_content_filter(subscription, &options);
   if (ret != RCL_RET_OK) {
-    Napi::Error::New(env, rcl_get_error_string().str)
-        .ThrowAsJavaScriptException();
+    std::string error_msg = rcl_get_error_string().str;
     rcl_reset_error();
+    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
     return env.Undefined();
   }
 
@@ -374,9 +380,9 @@ Napi::Value GetContentFilter(const Napi::CallbackInfo& info) {
   rcl_ret_t fini_ret =
       rcl_subscription_content_filter_options_fini(subscription, &options);
   if (fini_ret != RCL_RET_OK) {
-    Napi::Error::New(env, rcl_get_error_string().str)
-        .ThrowAsJavaScriptException();
+    std::string error_msg = rcl_get_error_string().str;
     rcl_reset_error();
+    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
     return env.Undefined();
   }
 
@@ -390,9 +396,12 @@ Napi::Value GetPublisherCount(const Napi::CallbackInfo& info) {
       RclHandle::Unwrap(info[0].As<Napi::Object>())->ptr());
 
   size_t count = 0;
-  THROW_ERROR_IF_NOT_EQUAL(
-      rcl_subscription_get_publisher_count(subscription, &count), RCL_RET_OK,
-      rcl_get_error_string().str);
+  rcl_ret_t ret = rcl_subscription_get_publisher_count(subscription, &count);
+  if (ret != RCL_RET_OK) {
+    std::string error_msg = rcl_get_error_string().str;
+    rcl_reset_error();
+    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+  }
 
   return Napi::Number::New(env, count);
 }
