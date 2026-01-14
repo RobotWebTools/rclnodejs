@@ -15,6 +15,7 @@
 'use strict';
 
 const assert = require('assert');
+const sinon = require('sinon');
 const rclnodejs = require('../index.js');
 const { Clock, Parameter, ParameterType, ROSClock, TimeSource, Time } =
   rclnodejs;
@@ -147,5 +148,169 @@ describe('rclnodejs TimeSource testing', function () {
       clearInterval(timer);
       done();
     }, 3000);
+  });
+
+  it('Test isRosTimeActive setter optimization', function () {
+    let timeSource = new TimeSource(node);
+    timeSource.isRosTimeActive = true;
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+
+    // Set to same value coverage check
+    timeSource.isRosTimeActive = true;
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+  });
+
+  it('Test onParameterEvent', function () {
+    let timeSource = new TimeSource(node);
+
+    // Correct update
+    const result = timeSource.onParameterEvent([
+      {
+        name: 'use_sim_time',
+        type: rclnodejs.ParameterType.PARAMETER_BOOL,
+        value: true,
+      },
+    ]);
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+    assert.ok(result.successful);
+
+    // Update with wrong type (should log error but not crash)
+    // Use stub to suppress output and verify call
+    const logger = node.getLogger();
+    const errorStub = sinon.stub(logger, 'error');
+
+    const result2 = timeSource.onParameterEvent([
+      {
+        name: 'use_sim_time',
+        type: rclnodejs.ParameterType.PARAMETER_INTEGER,
+        value: 123,
+      },
+    ]);
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+    assert.ok(result2.successful);
+    assert.ok(errorStub.calledOnce);
+    errorStub.restore();
+
+    // Update with unrelated parameter
+    timeSource.onParameterEvent([
+      {
+        name: 'other_param',
+        type: rclnodejs.ParameterType.PARAMETER_BOOL,
+        value: false,
+      },
+    ]);
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+  });
+
+  it('Test detachNode', function () {
+    let timeSource = new TimeSource(node);
+    timeSource.isRosTimeActive = true;
+    // This creates subscription
+    assert.notStrictEqual(timeSource._clockSubscription, undefined);
+
+    timeSource.detachNode();
+    assert.strictEqual(timeSource._node, undefined);
+    assert.strictEqual(timeSource._clockSubscription, undefined);
+  });
+
+  it('Test attachNode validations', function () {
+    let timeSource = new TimeSource(null);
+    assert.throws(() => {
+      timeSource.attachNode({});
+    }, rclnodejs.TypeValidationError);
+
+    timeSource.attachNode(node);
+    assert.strictEqual(timeSource._node, node);
+  });
+
+  it('Test attachNode with invalid parameter type', function () {
+    // Create a node with the parameter already set to an integer.
+    // The use_sim_time parameter is expected to be a boolean (PARAMETER_BOOL).
+    // This test intentionally uses an integer to verify the error handling logic.
+    // We must use a new node because beforeEach node might already have default params or we want to ensure fresh state
+    const options = new rclnodejs.NodeOptions();
+    options.parameterOverrides.push(
+      new rclnodejs.Parameter(
+        'use_sim_time',
+        rclnodejs.ParameterType.PARAMETER_INTEGER,
+        123
+      )
+    );
+
+    // Note: declaring parameter overrides automatically makes them available/declared on the node
+    const invalidParamNode = rclnodejs.createNode(
+      'TestTimeSourceInvalidParam',
+      '',
+      rclnodejs.Context.defaultContext(),
+      options
+    );
+
+    const logger = invalidParamNode.getLogger();
+    const errorStub = sinon.stub(logger, 'error');
+
+    let timeSource = new TimeSource(null);
+    timeSource.attachNode(invalidParamNode);
+
+    assert.ok(errorStub.calledOnce);
+    assert.ok(
+      errorStub.firstCall.args[0].includes('Invalid type for parameter')
+    );
+
+    errorStub.restore();
+    invalidParamNode.destroy();
+  });
+
+  it('Test detachNode internal error state', function () {
+    let timeSource = new TimeSource(node);
+
+    // Simulate broken state: subscription exists but node is gone
+    // We can't easily get a real subscription object without being active,
+    // but detachNode just checks if it's truthy before calling destroySubscription
+    timeSource._clockSubscription = { _handle: {} };
+    timeSource._node = undefined;
+
+    assert.throws(
+      () => {
+        timeSource.detachNode();
+      },
+      (err) => {
+        return (
+          err instanceof rclnodejs.OperationError &&
+          err.code === 'NO_NODE_ATTACHED'
+        );
+      }
+    );
+  });
+
+  it('Test re-attaching node', function () {
+    let timeSource = new TimeSource(node);
+    assert.strictEqual(timeSource._node, node);
+
+    // Create a second node
+    let node2 = rclnodejs.createNode('TestTimeSource2');
+
+    // Attach should detach first node
+    timeSource.attachNode(node2);
+
+    assert.strictEqual(timeSource._node, node2);
+
+    node2.destroy();
+  });
+
+  it('Test toggling isRosTimeActive', function () {
+    let timeSource = new TimeSource(node);
+    assert.strictEqual(timeSource.isRosTimeActive, false);
+    assert.strictEqual(timeSource._clockSubscription, undefined);
+
+    // Enable
+    timeSource.isRosTimeActive = true;
+    assert.strictEqual(timeSource.isRosTimeActive, true);
+    assert.notStrictEqual(timeSource._clockSubscription, undefined);
+
+    // Disable - currently the implementation does NOT destroy subscription on disable
+    // This test verifies current behavior (even if it might be considered a bug it ensures stability)
+    timeSource.isRosTimeActive = false;
+    assert.strictEqual(timeSource.isRosTimeActive, false);
+    assert.notStrictEqual(timeSource._clockSubscription, undefined);
   });
 });
