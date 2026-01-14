@@ -91,9 +91,10 @@ describe('type description service test suite', function () {
         if (error || stderr) {
           done(
             new Error(
-              'Test type description service configured by parameter failed.'
+              `Test type description service configured by parameter failed. Error: ${error}, Stderr: ${stderr}`
             )
           );
+          return;
         }
         if (stdout.includes('start_type_description_service')) {
           done();
@@ -113,9 +114,10 @@ describe('type description service test suite', function () {
         if (error || stderr) {
           done(
             new Error(
-              'Test type description service configured by parameter failed.'
+              `Test type description service configured by parameter failed. Error: ${error}, Stderr: ${stderr}`
             )
           );
+          return;
         }
         if (stdout.includes('Boolean value is: True')) {
           done();
