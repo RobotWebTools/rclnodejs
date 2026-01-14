@@ -99,7 +99,7 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
           for (int i = 0; i < argc; i++) {
             std::string arg = jsArgv.Get(i).As<Napi::String>().Utf8Value();
             int len = arg.length() + 1;
-            argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
+            argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char)));
             snprintf(argv[i], len, "%s", arg.c_str());
           }
         }
@@ -235,7 +235,7 @@ Napi::Value SetContentFilter(const Napi::CallbackInfo& info) {
       for (int i = 0; i < argc; i++) {
         std::string arg = jsArgv.Get(i).As<Napi::String>().Utf8Value();
         int len = arg.length() + 1;
-        argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char*)));
+        argv[i] = reinterpret_cast<char*>(malloc(len * sizeof(char)));
         snprintf(argv[i], len, "%s", arg.c_str());
       }
     }
@@ -245,21 +245,46 @@ Napi::Value SetContentFilter(const Napi::CallbackInfo& info) {
   rcl_subscription_content_filter_options_t options =
       rcl_get_zero_initialized_subscription_content_filter_options();
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_subscription_content_filter_options_set(
-          subscription, expression.c_str(), argc, (const char**)argv, &options),
-      rcl_get_error_string().str);
+  rcl_ret_t ret = rcl_subscription_content_filter_options_set(
+      subscription, expression.c_str(), argc, (const char**)argv, &options);
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK, rcl_subscription_set_content_filter(subscription, &options),
-      rcl_get_error_string().str);
+  if (ret != RCL_RET_OK) {
+    if (argc) {
+      for (int i = 0; i < argc; i++) {
+        free(argv[i]);
+      }
+      free(argv);
+    }
+    rcl_reset_error();
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  ret = rcl_subscription_set_content_filter(subscription, &options);
 
   if (argc) {
     for (int i = 0; i < argc; i++) {
       free(argv[i]);
     }
     free(argv);
+  }
+
+  rcl_ret_t fini_ret =
+      rcl_subscription_content_filter_options_fini(subscription, &options);
+
+  if (ret != RCL_RET_OK) {
+    rcl_reset_error();
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  if (fini_ret != RCL_RET_OK) {
+    rcl_reset_error();
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   return Napi::Boolean::New(env, true);
@@ -277,15 +302,33 @@ Napi::Value ClearContentFilter(const Napi::CallbackInfo& info) {
   rcl_subscription_content_filter_options_t options =
       rcl_get_zero_initialized_subscription_content_filter_options();
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_subscription_content_filter_options_init(
-          subscription, "", 0, (const char**)nullptr, &options),
-      rcl_get_error_string().str);
+  rcl_ret_t ret = rcl_subscription_content_filter_options_init(
+      subscription, "", 0, (const char**)nullptr, &options);
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK, rcl_subscription_set_content_filter(subscription, &options),
-      rcl_get_error_string().str);
+  if (ret != RCL_RET_OK) {
+    rcl_reset_error();
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  ret = rcl_subscription_set_content_filter(subscription, &options);
+  rcl_ret_t fini_ret =
+      rcl_subscription_content_filter_options_fini(subscription, &options);
+
+  if (ret != RCL_RET_OK) {
+    rcl_reset_error();
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  if (fini_ret != RCL_RET_OK) {
+    rcl_reset_error();
+    Napi::Error::New(env, rcl_get_error_string().str)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
 
   return Napi::Boolean::New(env, true);
 }
