@@ -120,6 +120,11 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
         }
         free(argv);
       }
+
+      if (ret != RCL_RET_OK) {
+        free(subscription);
+        return env.Undefined();
+      }
     }
   }
 
@@ -133,6 +138,7 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
       std::string error_msg = rcl_get_error_string().str;
       rcl_reset_error();
       Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+      free(subscription);
       return env.Undefined();
     }
 
@@ -153,6 +159,7 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
   } else {
     Napi::Error::New(env, GetErrorMessageAndClear())
         .ThrowAsJavaScriptException();
+    free(subscription);
     return env.Undefined();
   }
 }
