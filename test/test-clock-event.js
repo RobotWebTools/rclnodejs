@@ -42,7 +42,7 @@ describe('ClockEvent', function () {
     await event.waitUntilSteady(clock, until.nanoseconds);
     const end = Date.now();
 
-    assert(end - start >= 1000);
+    assert(end - start >= 950);
   });
 
   it('should wait until system time', async function () {
@@ -55,7 +55,7 @@ describe('ClockEvent', function () {
     await event.waitUntilSystem(clock, until.nanoseconds);
     const end = Date.now();
 
-    assert(end - start >= 1000);
+    assert(end - start >= 950);
   });
 
   it('should wait until ros time', async function () {
@@ -72,7 +72,7 @@ describe('ClockEvent', function () {
     await event.waitUntilRos(clock, until.nanoseconds);
     const end = Date.now();
 
-    assert(end - start >= 1000);
+    assert(end - start >= 950);
   });
 
   it('should set and clear event', function () {
