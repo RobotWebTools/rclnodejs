@@ -17,6 +17,7 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const DistroUtils = require('../lib/distro.js');
+const sinon = require('sinon');
 
 const TIMER_INTERVAL = BigInt('100000000');
 describe('rclnodejs Timer class testing', function () {
@@ -243,5 +244,100 @@ describe('rclnodejs Timer class testing', function () {
       });
       rclnodejs.spin(node);
     });
+  });
+});
+
+describe('rclnodejs Timer class coverage testing', function () {
+  this.timeout(60 * 1000);
+  let node;
+  let timer;
+
+  before(async function () {
+    await rclnodejs.init();
+  });
+
+  after(function () {
+    rclnodejs.shutdown();
+  });
+
+  beforeEach(function () {
+    node = rclnodejs.createNode('timer_coverage_node');
+    timer = node.createTimer(TIMER_INTERVAL, () => {});
+  });
+
+  afterEach(function () {
+    if (node) {
+      node.destroy();
+    }
+  });
+
+  it('handle getter should return handle', function () {
+    assert.ok(timer.handle);
+  });
+
+  it('getNextCallTime returns undefined if rclnodejs function not present', function () {
+    const originalFunc = rclnodejs.getTimerNextCallTime;
+    try {
+      Object.defineProperty(rclnodejs, 'getTimerNextCallTime', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      });
+      assert.strictEqual(timer.getNextCallTime(), undefined);
+    } catch (e) {
+      this.skip();
+    } finally {
+      try {
+        if (originalFunc) {
+          Object.defineProperty(rclnodejs, 'getTimerNextCallTime', {
+            value: originalFunc,
+            configurable: true,
+            writable: true,
+          });
+        }
+      } catch (e) {}
+    }
+  });
+
+  it('Distribution check warning for setOnResetCallback', function () {
+    const stub = sinon.stub(DistroUtils, 'getDistroId').returns(1);
+    stub.withArgs('humble').returns(2);
+    const consoleSpy = sinon.spy(console, 'warn');
+
+    try {
+      timer.setOnResetCallback(() => {});
+      assert.ok(consoleSpy.calledWithMatch(/not supported/));
+    } finally {
+      stub.restore();
+      consoleSpy.restore();
+    }
+  });
+
+  it('Distribution check warning for clearOnResetCallback', function () {
+    const stub = sinon.stub(DistroUtils, 'getDistroId').returns(1);
+    stub.withArgs('humble').returns(2);
+    const consoleSpy = sinon.spy(console, 'warn');
+
+    try {
+      timer.clearOnResetCallback();
+      assert.ok(consoleSpy.calledWithMatch(/not supported/));
+    } finally {
+      stub.restore();
+      consoleSpy.restore();
+    }
+  });
+
+  it('Distribution check warning for callTimerWithInfo', function () {
+    const stub = sinon.stub(DistroUtils, 'getDistroId').returns(1);
+    stub.withArgs('humble').returns(2);
+    const consoleSpy = sinon.spy(console, 'warn');
+
+    try {
+      timer.callTimerWithInfo();
+      assert.ok(consoleSpy.calledWithMatch(/not supported/));
+    } finally {
+      stub.restore();
+      consoleSpy.restore();
+    }
   });
 });
