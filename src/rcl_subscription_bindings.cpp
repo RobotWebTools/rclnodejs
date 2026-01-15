@@ -283,18 +283,22 @@ Napi::Value SetContentFilter(const Napi::CallbackInfo& info) {
     free(argv);
   }
 
+  std::string error_string;
+  if (ret != RCL_RET_OK) {
+    error_string = rcl_get_error_string().str;
+    rcl_reset_error();
+  }
+
   rcl_ret_t fini_ret =
       rcl_subscription_content_filter_options_fini(subscription, &options);
 
   if (ret != RCL_RET_OK) {
-    std::string error_string = rcl_get_error_string().str;
-    rcl_reset_error();
     Napi::Error::New(env, error_string).ThrowAsJavaScriptException();
     return env.Undefined();
   }
 
   if (fini_ret != RCL_RET_OK) {
-    std::string error_string = rcl_get_error_string().str;
+    error_string = rcl_get_error_string().str;
     rcl_reset_error();
     Napi::Error::New(env, error_string).ThrowAsJavaScriptException();
     return env.Undefined();

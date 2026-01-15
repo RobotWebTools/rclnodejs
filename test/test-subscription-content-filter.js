@@ -295,7 +295,10 @@ describe('subscription content-filtering', function () {
         const contentFilter5 = {
           expression: 'data = 5',
         };
+        // Stop spinning before changing content filter to avoid race condition
+        this.subscriberNode.stop();
         subscription.setContentFilter(contentFilter5);
+        this.subscriberNode.spin();
         resolve(msgCnt);
       }, SUBSCRIBER_WAIT_TIME)
     );
@@ -304,6 +307,7 @@ describe('subscription content-filtering', function () {
 
     const p2 = new Promise((resolve) =>
       setTimeout(() => {
+        this.subscriberNode.stop();
         resolve(!fail && msgCnt5 && !msgCnt0);
       }, SUBSCRIBER_WAIT_TIME)
     );
@@ -364,7 +368,10 @@ describe('subscription content-filtering', function () {
     const p1 = new Promise((resolve) =>
       setTimeout(() => {
         const result = !msgCnt0 && msgCnt5 && !fail;
+        // Stop spinning before changing content filter to avoid race condition
+        this.subscriberNode.stop();
         subscription.setContentFilter();
+        this.subscriberNode.spin();
         resolve(result);
       }, SUBSCRIBER_WAIT_TIME)
     );
@@ -374,6 +381,7 @@ describe('subscription content-filtering', function () {
 
     const p2 = new Promise((resolve) =>
       setTimeout(() => {
+        this.subscriberNode.stop();
         resolve(msgCnt0 && msgCnt5 && !fail);
       }, SUBSCRIBER_WAIT_TIME)
     );
