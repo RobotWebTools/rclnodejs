@@ -48,6 +48,11 @@ describe('rclnodejs Time/Clock testing', function () {
     assert.strictEqual(time.nanoseconds, 1000000064n);
     assert.strictEqual(time.clockType, ClockType.ROS_TIME);
 
+    // Test with number types (compatible with updated interface)
+    time = Time.fromMsg({ sec: 1, nanosec: 64 });
+    assert.strictEqual(time.nanoseconds, 1000000064n);
+    assert.strictEqual(time.clockType, ClockType.ROS_TIME);
+
     assert.throws(() => {
       new Time(1n, 1n, 'SYSTEM_TIME');
     }, rclnodejs.TypeValidationError);
@@ -200,7 +205,9 @@ describe('rclnodejs Time/Clock testing', function () {
     let time = new Time(100n, 200n);
     let msg = time.toMsg();
 
-    assert.strictEqual(msg.sec, 100n);
-    assert.strictEqual(msg.nanosec, 200n);
+    assert.strictEqual(msg.sec, 100);
+    assert.strictEqual(msg.nanosec, 200);
+    assert.strictEqual(typeof msg.sec, 'number');
+    assert.strictEqual(typeof msg.nanosec, 'number');
   });
 });
