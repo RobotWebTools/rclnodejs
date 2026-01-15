@@ -283,7 +283,7 @@ Napi::Value SetContentFilter(const Napi::CallbackInfo& info) {
     free(argv);
   }
 
-  std::string error_string;
+  std::string error_string = "";
   if (ret != RCL_RET_OK) {
     error_string = rcl_get_error_string().str;
     rcl_reset_error();

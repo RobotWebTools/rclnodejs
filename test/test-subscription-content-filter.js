@@ -307,7 +307,6 @@ describe('subscription content-filtering', function () {
 
     const p2 = new Promise((resolve) =>
       setTimeout(() => {
-        this.subscriberNode.stop();
         resolve(!fail && msgCnt5 && !msgCnt0);
       }, SUBSCRIBER_WAIT_TIME)
     );
@@ -381,7 +380,6 @@ describe('subscription content-filtering', function () {
 
     const p2 = new Promise((resolve) =>
       setTimeout(() => {
-        this.subscriberNode.stop();
         resolve(msgCnt0 && msgCnt5 && !fail);
       }, SUBSCRIBER_WAIT_TIME)
     );
