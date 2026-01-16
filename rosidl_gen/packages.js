@@ -223,7 +223,7 @@ async function findPackagesInDirectory(dir, useIDL) {
 
     // If there is a folder named 'share' under the root path, we consider that
     // the ament build tool has been executed and |amentExecuted| will be true.
-    fs.access(path.join(dir, 'share'), (err) => {
+    fs.stat(path.join(dir, 'share'), (err) => {
       if (err) {
         amentExecuted = false;
       }
