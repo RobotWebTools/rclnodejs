@@ -11,13 +11,16 @@
 // limitations under the License.
 
 const { ipcRenderer } = require('electron');
+const process = require('process');
 
-const versionDiv = document.createElement('div');
-versionDiv.style.position = 'fixed';
-versionDiv.style.bottom = '10px';
-versionDiv.style.left = '10px';
-versionDiv.innerText = 'Electron version: ' + process.versions.electron;
-document.body.appendChild(versionDiv);
+document.addEventListener('DOMContentLoaded', () => {
+  const versionDiv = document.createElement('div');
+  versionDiv.style.position = 'fixed';
+  versionDiv.style.bottom = '10px';
+  versionDiv.style.left = '10px';
+  versionDiv.innerText = 'Electron version: ' + process.versions.electron;
+  document.body.appendChild(versionDiv);
+});
 
 ipcRenderer.on('topic-received', function (event, response) {
   document.getElementById('received-topic').innerText = response;

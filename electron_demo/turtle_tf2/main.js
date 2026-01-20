@@ -335,7 +335,7 @@ async function createTurtleTf2Listener() {
   );
 
   // Timer to check for transforms and control turtle2
-  const timer = node.createTimer(1000n, () => {
+  node.createTimer(1000n, () => {
     // Wrap the async logic in a try-catch to handle promise rejections
     (async () => {
       try {
@@ -442,7 +442,7 @@ async function createDynamicFrameTf2Broadcaster() {
   const tfBroadcaster = node.createPublisher('tf2_msgs/msg/TFMessage', '/tf');
 
   // Timer to broadcast dynamic transform
-  const timer = node.createTimer(100n, () => {
+  node.createTimer(100n, () => {
     const now = node.now();
 
     // Use a more stable time calculation to avoid NaN
@@ -535,7 +535,7 @@ async function createFixedFrameTf2Broadcaster() {
   const tfBroadcaster = node.createPublisher('tf2_msgs/msg/TFMessage', '/tf');
 
   // Timer to broadcast fixed transform
-  const timer = node.createTimer(100n, () => {
+  node.createTimer(100n, () => {
     const now = node.now();
     const fixedTransform = {
       header: {

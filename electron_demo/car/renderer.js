@@ -11,6 +11,7 @@
 // limitations under the License.
 
 const { ipcRenderer } = require('electron');
+const process = require('process');
 
 // DOM elements
 let currentCommandEl, linearXEl, angularZEl, topicNameEl;
