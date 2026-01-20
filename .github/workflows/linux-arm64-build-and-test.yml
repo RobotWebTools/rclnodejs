@@ -52,6 +52,7 @@ jobs:
     - name: Install test-msgs on Linux
       run: |
         sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
+        sudo apt install -y xvfb libgtk-3-0 libnss3 libasound2 libgbm-dev
 
     - uses: actions/checkout@v6
 
