@@ -25,7 +25,7 @@
     "install": "node scripts/install.js",
     "postinstall": "npm run generate-messages",
     "docs": "cd docs && make",
-    "test": "nyc node --expose-gc ./scripts/run_test.js && tsd",
+    "test": "nyc node --expose-gc ./scripts/run_test.js && tsd && npm install --no-save electron && node test/electron/run_test.js",
     "test-idl": "nyc node --expose-gc ./scripts/run_test.js --idl",
     "lint": "eslint && node ./scripts/cpplint.js",
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.h && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,md,ts}\" ./*.{js,md,ts}",

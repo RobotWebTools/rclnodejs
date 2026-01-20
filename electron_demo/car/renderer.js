@@ -27,6 +27,13 @@ document.addEventListener('DOMContentLoaded', function () {
   initializeElements();
   setupEventListeners();
   setupROSListeners();
+
+  const versionDiv = document.createElement('div');
+  versionDiv.style.textAlign = 'center';
+  versionDiv.style.padding = '10px';
+  versionDiv.style.marginTop = '20px';
+  versionDiv.innerText = 'Electron version: ' + process.versions.electron;
+  document.querySelector('.container').appendChild(versionDiv);
 });
 
 function initializeElements() {
