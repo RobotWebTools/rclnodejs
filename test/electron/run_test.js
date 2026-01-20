@@ -14,10 +14,14 @@ try {
 }
 
 console.log('Launching Electron to run test_usability.js...');
-const child = spawn(electron, [path.join(__dirname, 'test_usability.js')], {
-  stdio: 'inherit',
-  env: { ...process.env, ELECTRON_ENABLE_LOGGING: true },
-});
+const child = spawn(
+  electron,
+  [path.join(__dirname, 'test_usability.js'), '--no-sandbox'],
+  {
+    stdio: 'inherit',
+    env: { ...process.env, ELECTRON_ENABLE_LOGGING: true },
+  }
+);
 
 child.on('close', (code) => {
   console.log(`Electron process exited with code ${code}`);
