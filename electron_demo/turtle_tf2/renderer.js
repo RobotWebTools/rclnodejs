@@ -11,6 +11,7 @@
 // limitations under the License.
 
 const { ipcRenderer } = require('electron');
+const process = require('process');
 
 // 3D Scene variables
 let scene, camera, renderer, controls;
@@ -41,10 +42,24 @@ let keyState = {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
+  // Display Electron Version
+  const versionDiv = document.createElement('div');
+  versionDiv.style.position = 'fixed';
+  versionDiv.style.top = '25px';
+  versionDiv.style.right = '20px';
+  versionDiv.style.color = 'rgba(255, 255, 255, 0.9)';
+  versionDiv.style.fontSize = '14px';
+  versionDiv.style.fontWeight = 'bold';
+  versionDiv.style.zIndex = '999999';
+  versionDiv.style.pointerEvents = 'none';
+  versionDiv.innerText = 'Electron: ' + process.versions.electron;
+  document.body.appendChild(versionDiv);
+
   initializeScene();
   setupEventListeners();
   setupKeyboardControls();
   setupROSListeners();
+
   updateStatus();
 
   // Don't automatically hide loading screen - wait for ROS2 initialization

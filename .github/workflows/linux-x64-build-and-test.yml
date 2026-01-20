@@ -56,6 +56,12 @@ jobs:
     - name: Install test-msgs on Linux
       run: |
         sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
+        # Adjust dependencies based on Ubuntu version
+        LIBASOUND_PKG="libasound2"
+        if grep -q "24.04" /etc/os-release; then
+          LIBASOUND_PKG="libasound2t64"
+        fi
+        sudo apt install -y xvfb libgtk-3-0 libnss3 $LIBASOUND_PKG libgbm-dev
 
     - uses: actions/checkout@v6
 
