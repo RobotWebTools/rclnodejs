@@ -13,15 +13,22 @@ try {
   process.exit(1);
 }
 
+let command = electron;
+let args = [path.join(__dirname, 'test_usability.js'), '--no-sandbox'];
+
+// Handle headless Linux environments (like CI) by using xvfb-run
+if (process.platform === 'linux' && !process.env.DISPLAY) {
+  console.log('No DISPLAY detected. Attempting to use xvfb-run...');
+  command = 'xvfb-run';
+  // -a: --auto-servernum (use explicit server number to avoid conflicts)
+  args = ['-a', electron, ...args];
+}
+
 console.log('Launching Electron to run test_usability.js...');
-const child = spawn(
-  electron,
-  [path.join(__dirname, 'test_usability.js'), '--no-sandbox'],
-  {
-    stdio: 'inherit',
-    env: { ...process.env, ELECTRON_ENABLE_LOGGING: true },
-  }
-);
+const child = spawn(command, args, {
+  stdio: 'inherit',
+  env: { ...process.env, ELECTRON_ENABLE_LOGGING: true },
+});
 
 child.on('close', (code) => {
   console.log(`Electron process exited with code ${code}`);
