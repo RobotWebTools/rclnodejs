@@ -19,6 +19,7 @@ jobs:
           - humble
           - jazzy
           - kilted
+          - rolling
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
@@ -39,7 +40,7 @@ jobs:
       if: ${{ matrix.ros_distribution == 'rolling' }}
       shell: bash
       run: |
-        wget --quiet https://ci.ros2.org/view/packaging/job/packaging_windows/lastSuccessfulBuild/artifact/ws/ros2-package-windows-AMD64.zip -O rolling.zip
+        wget --quiet https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip -O rolling.zip
         7z x rolling.zip -y -o/c/dev/rolling
 
     - name: Prebuild - Setup VS Dev Environment
