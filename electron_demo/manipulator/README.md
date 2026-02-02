@@ -188,13 +188,13 @@ The output will be located in the `out/` directory, for example: `out/rclnodejs-
 
 ### 2. Create Installers (Optional)
 
-To create a `.zip` file or other platform-specific installers (deb/rpm), run:
+To create a `.zip` file for distribution, run:
 
 ```bash
 npm run make
 ```
 
-**Note**: Creating DEB/RPM installers requires system tools like `dpkg` and `fakeroot`. For ZIP files, you need `zip`.
+**Note**: This will generate a ZIP archive containing the packaged application.
 
 ### 3. Running the Standalone Application
 

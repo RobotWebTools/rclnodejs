@@ -65,7 +65,7 @@ The demo window will open with:
 - **Message display area** showing received messages
 - **Counters** for published and received messages
 
-## � Packaging for Distribution
+## 📦 Packaging for Distribution
 
 You can package the application into a standalone folder using **Electron Forge**.
 
@@ -115,7 +115,7 @@ source /opt/ros/<your-ros-distro>/setup.bash
 ./out/rclnodejs-electron-demo-linux-x64/rclnodejs-electron-demo
 ```
 
-## �📁 Project Structure
+## 📁 Project Structure
 
 - **`package.json`** - Project configuration and dependencies
 - **`main.js`** - Electron main process with rclnodejs integration
