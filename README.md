@@ -97,7 +97,7 @@ API documentation is available [online](https://robotwebtools.github.io/rclnodej
 
 ## Electron-based Visualization
 
-Create rich, interactive desktop applications using Electron and web technologies like Three.js. Build 3D visualizations, monitoring dashboards, and control interfaces that run on Windows, macOS, and Linux.
+Create rich, interactive desktop applications using Electron and web technologies like Three.js. Demos leverage **Electron Forge** for easy packaging on Windows, macOS, and Linux.
 
 |                       Demo                        |                                                              Description                                                              |                            Screenshot                            |
 | :-----------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------: |

@@ -151,6 +151,42 @@ npm start
 
 **⚠️ Important**: The dynamic frame (`carrot1_dynamic`) orbits around the static frame (`carrot1_static`) in a circular pattern with a 2-unit radius, regardless of turtle positions.
 
+## 📦 Packaging for Distribution
+
+You can package the application into a standalone folder using **Electron Forge**.
+
+### 1. Build the Package
+
+Run the following command to create a distributable executable:
+
+```bash
+npm run package
+```
+
+The output will be located in the `out/` directory.
+
+### 2. Create Installers (Optional)
+
+To create a `.zip` file or other platform-specific installers (deb/rpm), run:
+
+```bash
+npm run make
+```
+
+**Note**: Creating DEB/RPM installers requires system tools like `dpkg` and `fakeroot`. For ZIP files, you need `zip`.
+
+### 3. Running the Standalone Application
+
+Even as a standalone application, **ROS 2 must be installed and sourced on the target machine** because `rclnodejs` links dynamically to the ROS 2 shared libraries.
+
+```bash
+# Source ROS2 environment
+source /opt/ros/$ROS_DISTRO/setup.bash
+
+# Run the packaged executable
+./out/rclnodejs-turtle-tf2-demo-linux-x64/rclnodejs-turtle-tf2-demo
+```
+
 ## Demo Components
 
 ### Main Process (main.js)
