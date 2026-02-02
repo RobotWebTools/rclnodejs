@@ -13,6 +13,11 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const rclnodejs = require('rclnodejs');
 
+// Fix for WebGL/GPU rendering issues on Linux environment
+// Forces software rendering (SwiftShader) if hardware acceleration fails
+app.commandLine.appendSwitch('ignore-gpu-blocklist');
+app.commandLine.appendSwitch('disable-gpu-sandbox');
+
 let mainWindow;
 let manipulatorNode;
 let jointStatePublisher;

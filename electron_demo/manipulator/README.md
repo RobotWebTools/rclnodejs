@@ -41,7 +41,9 @@ An interactive Electron application demonstrating a two-joint robotic manipulato
 
 ## 📜 Available Scripts
 
-- **`npm start`** - Run demo (requires manual ROS2 environment setup)
+- **`npm start`** - Launch the application in development mode
+- **`npm run package`** - Package the application into a standalone executable folder
+- **`npm run make`** - Create platform-specific installers (requires system tools like `zip`, `dpkg`)
 - **`npm run rebuild`** - Rebuild native modules after dependency changes
 
 ## 🚀 Quick Start
@@ -154,6 +156,56 @@ ros2 topic hz /joint_states
 
 # View topic info
 ros2 topic info /joint_states
+```
+
+## 📦 Packaging for Distribution
+
+You can package the application into a standalone folder using **Electron Forge**.
+
+### 1. Build the Package
+
+Run the following command to create a distributable executable:
+
+```bash
+npm run package
+```
+
+The output will be located in the `out/` directory, for example: `out/rclnodejs-manipulator-demo-linux-x64/`.
+
+**Technical Note on ASAR:** We enable ASAR but configure it to **unpack** the `rclnodejs` module. `rclnodejs` (v1.8.1+) requires file system access to generated code and native bindings, so we use the `asar.unpack` configuration in `package.json` to keep `rclnodejs` files accessible on disk while packing the rest of the application.
+
+```json
+"config": {
+  "forge": {
+    "packagerConfig": {
+      "asar": {
+        "unpack": "**/node_modules/rclnodejs/**"
+      }
+    }
+  }
+}
+```
+
+### 2. Create Installers (Optional)
+
+To create a `.zip` file or other platform-specific installers (deb/rpm), run:
+
+```bash
+npm run make
+```
+
+**Note**: Creating DEB/RPM installers requires system tools like `dpkg` and `fakeroot`. For ZIP files, you need `zip`.
+
+### 3. Running the Standalone Application
+
+Even as a standalone application, **ROS 2 must be installed and sourced on the target machine** because `rclnodejs` links dynamically to the ROS 2 shared libraries.
+
+```bash
+# Source ROS2 environment
+source /opt/ros/humble/setup.bash
+
+# Run the packaged executable
+./out/rclnodejs-manipulator-demo-linux-x64/rclnodejs-manipulator-demo
 ```
 
 ## 🏗️ Architecture
