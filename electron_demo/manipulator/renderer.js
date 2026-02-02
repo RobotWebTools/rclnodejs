@@ -12,6 +12,7 @@
 
 const { ipcRenderer } = require('electron');
 const process = require('process');
+const THREE = require('three');
 
 // Three.js scene components
 let scene, camera, renderer, controls;
