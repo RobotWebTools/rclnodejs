@@ -51,12 +51,21 @@ function getSubFolder(filePath, amentExecuted) {
     filePath = filePath.replace(/\\/g, '/');
   }
 
+  const subFolder = filePath.match(/\w+\/share\/\w+\/(\w+)\//)[1];
+  const ext = path.parse(filePath).ext.substr(1);
+
   if (amentExecuted) {
-    return filePath.match(/\w+\/share\/\w+\/(\w+)\//)[1];
+    // If the .msg file is in a subdirectory of msg/,
+    // the |subFolder| will neither msg/srv/action
+    // so the file extension should be used instead.
+    if (!['msg', 'srv', 'action'].includes(subFolder)) {
+      return ext;
+    }
+    return subFolder;
   }
   // If the |amentExecuted| equals to false, the file's extension will be assigned as
   // the name of sub folder.
-  return path.parse(filePath).ext.substr(1);
+  return ext;
 }
 
 function grabInterfaceInfo(filePath, amentExecuted) {
