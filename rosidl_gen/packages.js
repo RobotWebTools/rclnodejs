@@ -33,7 +33,7 @@ function getPackageName(filePath, amentExecuted) {
   }
 
   if (amentExecuted) {
-    return filePath.match(/\w+\/share\/(\w+)\//)[1];
+    return filePath.match(/[^/]+\/share\/([^/]+)\//)[1];
   }
 
   let folders = path.parse(filePath).dir.split('/');
@@ -52,7 +52,7 @@ function getSubFolder(filePath, amentExecuted) {
   }
 
   if (amentExecuted) {
-    return filePath.match(/\w+\/share\/\w+\/(\w+)\//)[1];
+    return filePath.match(/[^/]+\/share\/[^/]+\/([^/]+)\//)[1];
   }
   // If the |amentExecuted| equals to false, the file's extension will be assigned as
   // the name of sub folder.
