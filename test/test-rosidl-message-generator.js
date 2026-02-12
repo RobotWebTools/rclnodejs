@@ -308,4 +308,46 @@ describe('ROSIDL Node.js message generator test suite', function () {
       process.env.AMENT_PREFIX_PATH = amentPrefixPathOriginal;
     }
   });
+
+  it('Testing mrpt_msgs/msg/GraphSlamAgents from non-standard msg subfolder', function () {
+    // GraphSlamAgents.msg lives under msg-common/ (non-standard subfolder name)
+    // and references GraphSlamAgent.msg from msg-ros2/. This verifies that
+    // packages with hyphenated subfolder names are generated and loadable.
+    const GraphSlamAgents = rclnodejs.require('mrpt_msgs/msg/GraphSlamAgents');
+    const GraphSlamAgent = rclnodejs.require('mrpt_msgs/msg/GraphSlamAgent');
+
+    // Verify GraphSlamAgents can be instantiated with an empty list
+    const agents = new GraphSlamAgents();
+    assert.ok(agents.list);
+    assert.equal(agents.list.size, 0);
+
+    // Verify GraphSlamAgent fields and defaults
+    const agent = new GraphSlamAgent();
+    assert.equal(agent.name.data, '');
+    assert.equal(agent.hostname.data, '');
+    assert.equal(agent.ip_addr.data, '');
+    assert.equal(agent.port, 0);
+    assert.equal(agent.is_online.data, false);
+    assert.equal(agent.last_seen_time.sec, 0);
+    assert.equal(agent.last_seen_time.nanosec, 0);
+    assert.equal(agent.topic_namespace.data, '');
+    assert.equal(agent.agent_id, 0);
+
+    // Verify field assignment
+    agent.name.data = 'robot_1';
+    agent.hostname.data = 'host1';
+    agent.ip_addr.data = '192.168.1.17';
+    agent.port = 11311;
+    agent.is_online.data = true;
+    agent.topic_namespace.data = 'robot_1';
+    agent.agent_id = 17;
+
+    assert.equal(agent.name.data, 'robot_1');
+    assert.equal(agent.hostname.data, 'host1');
+    assert.equal(agent.ip_addr.data, '192.168.1.17');
+    assert.equal(agent.port, 11311);
+    assert.equal(agent.is_online.data, true);
+    assert.equal(agent.topic_namespace.data, 'robot_1');
+    assert.equal(agent.agent_id, 17);
+  });
 });

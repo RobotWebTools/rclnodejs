@@ -52,7 +52,12 @@ function getSubFolder(filePath, amentExecuted) {
   }
 
   if (amentExecuted) {
-    return filePath.match(/\w+\/share\/\w+\/(\w+)\//)[1];
+    const match = filePath.match(/\w+\/share\/\w+\/([\w-]+)\//);
+    if (match) {
+      // Handle non-standard subfolder names (e.g., msg-common, msg-ros2)
+      // by extracting only the base interface type before any hyphen.
+      return match[1].split('-')[0];
+    }
   }
   // If the |amentExecuted| equals to false, the file's extension will be assigned as
   // the name of sub folder.

@@ -6,20 +6,35 @@ const sinon = require('sinon');
 const fs = require('fs');
 const child_process = require('child_process');
 
+// Require the module once without clearing cache to avoid triggering
+// loadNativeAddon() repeatedly. The TestHelpers functions read process
+// state at call time, so they can be tested with platform/env changes
+// without re-requiring the module.
+// NOTE: The module may have been loaded by other tests before NODE_ENV was set,
+// so TestHelpers might not be present. We clear cache and re-require with
+// NODE_ENV='test' to ensure TestHelpers is exported.
+const nativeLoaderPath = require.resolve('../lib/native_loader.js');
+if (
+  !require.cache[nativeLoaderPath] ||
+  !require.cache[nativeLoaderPath].exports.TestHelpers
+) {
+  delete require.cache[nativeLoaderPath];
+  process.env.NODE_ENV = 'test';
+}
+const nativeLoader = require('../lib/native_loader.js');
+
 describe('NativeLoader testing', function () {
   const sandbox = sinon.createSandbox();
   let originalPlatform;
   let originalArch;
   let originalEnv;
+  let loader;
 
   beforeEach(function () {
     originalPlatform = process.platform;
     originalArch = process.arch;
     originalEnv = { ...process.env };
-    process.env.NODE_ENV = 'test';
-
-    // Clear cache to reload module
-    delete require.cache[require.resolve('../lib/native_loader.js')];
+    loader = nativeLoader.TestHelpers;
   });
 
   afterEach(function () {
@@ -29,20 +44,14 @@ describe('NativeLoader testing', function () {
     process.env = originalEnv;
   });
 
-  function getLoader() {
-    return require('../lib/native_loader.js').TestHelpers;
-  }
-
   it('customFallbackLoader returns null on non-linux', function () {
     Object.defineProperty(process, 'platform', { value: 'win32' });
-    const loader = getLoader();
     assert.strictEqual(loader.customFallbackLoader(), null);
   });
 
   it('customFallbackLoader returns null if env info missing', function () {
     Object.defineProperty(process, 'platform', { value: 'linux' });
     process.env.ROS_DISTRO = '';
-    const loader = getLoader();
     assert.strictEqual(loader.customFallbackLoader(), null);
   });
 
@@ -52,8 +61,6 @@ describe('NativeLoader testing', function () {
     process.env.ROS_DISTRO = 'humble';
 
     sandbox.stub(fs, 'existsSync').returns(false);
-
-    const loader = getLoader();
     assert.strictEqual(loader.customFallbackLoader(), null);
   });
 
@@ -64,8 +71,6 @@ describe('NativeLoader testing', function () {
 
     // Stub fs.existsSync to return true
     const existsSync = sandbox.stub(fs, 'existsSync').returns(true);
-
-    const loader = getLoader();
     assert.strictEqual(loader.customFallbackLoader(), null);
 
     // Verify it checked for the file
@@ -79,17 +84,12 @@ describe('NativeLoader testing', function () {
     process.env.RCLNODEJS_FORCE_BUILD = '1';
     const execSync = sandbox.stub(child_process, 'execSync');
 
-    // We expect it to try loading bindings after build
-    // Since we don't mock bindings, it will load the real one (if present) or fail.
-    // If it loads real one, test passes.
-    // If it fails, loadNativeAddon throws. We might need to handle that.
-    // But usually in dev env, the binding exists.
+    // Clear cache and re-require to trigger loadNativeAddon with RCLNODEJS_FORCE_BUILD.
+    // execSync is stubbed so no real rebuild (which deletes generated/) occurs.
+    delete require.cache[require.resolve('../lib/native_loader.js')];
 
     try {
-      getLoader();
-      // Wait, getLoader requires the file.
-      // The file calls loadNativeAddon() immediately.
-      // So valid test is just requiring the file.
+      require('../lib/native_loader.js');
     } catch (e) {
       // Ignore if loading binding fails, as long as execSync was called
     }
