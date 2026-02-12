@@ -71,7 +71,30 @@ Napi::Value CreateLifecycleStateMachine(const Napi::CallbackInfo& info) {
   const rosidl_service_type_support_t* gs =
       GetServiceTypeSupport("lifecycle_msgs", "GetState");
 
-#if ROS_VERSION >= 2105
+#if ROS_VERSION >= 5000  // ROS2 Rolling
+  rcl_lifecycle_state_machine_options_t options =
+      rcl_lifecycle_get_default_state_machine_options();
+  options.enable_com_interface = info[1].As<Napi::Boolean>().Value();
+
+  RclHandle* clock_handle = RclHandle::Unwrap(info[2].As<Napi::Object>());
+  rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK,
+      rcl_lifecycle_state_machine_init(state_machine, node, clock, pn, cs, gs,
+                                       gas, gat, gtg, &options),
+      rcl_get_error_string().str);
+
+  auto js_obj = RclHandle::NewInstance(
+      env, state_machine, node_handle, [node, env](void* ptr) {
+        rcl_lifecycle_state_machine_t* state_machine =
+            reinterpret_cast<rcl_lifecycle_state_machine_t*>(ptr);
+        rcl_ret_t ret = rcl_lifecycle_state_machine_fini(state_machine, node);
+        free(ptr);
+        THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                           rcl_get_error_string().str);
+      });
+#elif ROS_VERSION >= 2105
   rcl_lifecycle_state_machine_options_t options =
       rcl_lifecycle_get_default_state_machine_options();
   options.enable_com_interface = info[1].As<Napi::Boolean>().Value();
