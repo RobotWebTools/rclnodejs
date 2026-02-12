@@ -43,9 +43,8 @@ utils
     });
 
     mocha.run(function (failures) {
-      process.on('exit', () => {
-        process.exit(failures);
-      });
+      process.exitCode = failures ? 1 : 0;
+      process.exit(process.exitCode);
     });
   })
   .catch((err) => {
