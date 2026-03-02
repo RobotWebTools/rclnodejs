@@ -31,14 +31,10 @@ from rosidl_parser.definition import (
     BoundedSequence,
     BoundedString,
     BoundedWString,
-    Constant,
-    Include,
-    Member,
     Message,
     NamedType,
     NamespacedType,
     Service,
-    Structure,
     UnboundedSequence,
     UnboundedString,
     UnboundedWString,
@@ -67,14 +63,6 @@ IDL_TYPE_TO_ROS2 = {
     'unsigned short': 'uint16',
     'unsigned long': 'uint32',
     'unsigned long long': 'uint64',
-}
-
-# ROS2 primitive types recognized by the templates
-ROS2_PRIMITIVE_TYPES = {
-    'bool', 'byte', 'char', 'wchar',
-    'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32', 'int64', 'uint64',
-    'float32', 'float64',
-    'string', 'wstring',
 }
 
 
@@ -179,7 +167,7 @@ def _get_type_json(member_type):
             'arraySize': None,
             'isUpperBound': False,
             'isDynamicArray': True,
-            'isFixedSizeArray': None,
+            'isFixedSizeArray': False,
             **inner_info,
         }
     else:
