@@ -41,6 +41,33 @@ const rosidlParser = {
     return this._parseFile('parse_action_file', packageName, filePath);
   },
 
+  /**
+   * Parse an .idl file directly using rosidl_parser (no .msg conversion needed).
+   * Returns an object with { type: 'message'|'service'|'action', spec: ... }
+   * where spec matches the same format as parseMessageFile/parseServiceFile/parseActionFile.
+   */
+  parseIdlFile(filePath) {
+    return new Promise((resolve, reject) => {
+      const args = [path.join(__dirname, 'idl_parser.py'), filePath];
+      const [pythonExecutableFile, pythonExecutableArgs] = pythonExecutable;
+      execFile(
+        pythonExecutableFile,
+        pythonExecutableArgs.concat(args),
+        (err, stdout, stderr) => {
+          if (err) {
+            reject(
+              new Error(
+                `There was an error parsing IDL file "${filePath}": "${err}"; stderr was: ${stderr}`
+              )
+            );
+          } else {
+            resolve(this._parseJSONObject(stdout));
+          }
+        }
+      );
+    });
+  },
+
   _parseJSONObject(str) {
     // For nodejs >= `contextSupportedVersion`, we leverage context parameter to
     // convert unsafe integer to string, otherwise, json-bigint is used.
