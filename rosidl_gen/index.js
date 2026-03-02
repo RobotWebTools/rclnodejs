@@ -18,10 +18,8 @@ const fse = require('../lib/utils.js');
 const generateJSStructFromIDL = require('./idl_generator.js');
 const packages = require('./packages.js');
 const path = require('path');
-const idlConvertor = require('../rosidl_convertor/idl_convertor.js');
 const generatedRoot = path.join(__dirname, '../generated/');
 const serviceMsgPath = path.join(generatedRoot, 'srv_msg');
-const idlPath = path.join(generatedRoot, 'share');
 const useIDL = !!process.argv.find((arg) => arg === '--idl');
 
 function getInstalledPackagePaths() {
@@ -35,17 +33,10 @@ async function generateInPath(path) {
       (await packages.findPackagesInDirectory(path)).values()
     );
   } else {
+    // Direct IDL parsing: pass .idl files to the generator which uses
+    // rosidl_parser to parse them directly (no .msg/.srv/.action conversion).
     const idlPkgs = await packages.findPackagesInDirectory(path, useIDL);
-    await fse.ensureDir(idlPath);
-    const promises = [];
-    idlPkgs.forEach((pkg) => {
-      pkg.idls.forEach((idl) => {
-        promises.push(idlConvertor(idl.pkgName, idl.filePath, idlPath));
-      });
-    });
-    await Promise.all(promises);
-    const pkgsFromIdl = await packages.findPackagesInDirectory(idlPath, false);
-    pkgsInfo = Array.from(pkgsFromIdl.values());
+    pkgsInfo = Array.from(idlPkgs.values());
   }
 
   await Promise.all(

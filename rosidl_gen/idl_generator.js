@@ -305,7 +305,217 @@ async function generateJSStructFromIDL(pkg, dir) {
   pkg.actions.forEach((actionInfo) => {
     results.push(generateActionJSStruct(actionInfo, dir));
   });
+
+  // Handle .idl files directly (parsed via rosidl_parser, no .msg conversion)
+  if (pkg.idls) {
+    pkg.idls.forEach((idlInfo) => {
+      results.push(generateJSStructFromIdlFile(idlInfo, dir));
+    });
+  }
+
   await Promise.all(results);
+}
+
+/**
+ * Parse an .idl file directly and generate the appropriate JS struct.
+ * This uses rosidl_parser to parse the IDL and produces the same JSON
+ * spec format, so the same templates can be used.
+ */
+async function generateJSStructFromIdlFile(idlInfo, dir) {
+  const result = await parser.parseIdlFile(idlInfo.filePath);
+  const { type, spec } = result;
+
+  if (type === 'message') {
+    await generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: idlInfo.interfaceName,
+      },
+      dir,
+      spec
+    );
+  } else if (type === 'service') {
+    // Generate request and response message JS structs
+    const requestMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_Request`,
+      },
+      dir,
+      spec.request
+    );
+
+    const responseMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_Response`,
+      },
+      dir,
+      spec.response
+    );
+
+    // Generate service JS struct
+    const serviceInfo = {
+      pkgName: idlInfo.pkgName,
+      subFolder: idlInfo.subFolder,
+      interfaceName: idlInfo.interfaceName,
+    };
+    const srv = generateServiceJSStruct(
+      serviceInfo,
+      dir,
+      /*isActionService=*/ false
+    );
+
+    await Promise.all([requestMsg, responseMsg, srv]);
+  } else if (type === 'action') {
+    // Generate goal, result, feedback message JS structs
+    const goalMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_Goal`,
+      },
+      dir,
+      spec.goal
+    );
+
+    const resultMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_Result`,
+      },
+      dir,
+      spec.result
+    );
+
+    const feedbackMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_Feedback`,
+      },
+      dir,
+      spec.feedback
+    );
+
+    // Generate derived action messages (SendGoal, GetResult, FeedbackMessage)
+    const sendGoalRequestSpec = actionMsgs.createSendGoalRequestSpec(
+      idlInfo.pkgName,
+      idlInfo.interfaceName
+    );
+    const sendGoalRequestMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_SendGoal_Request`,
+      },
+      dir,
+      sendGoalRequestSpec
+    );
+
+    const sendGoalResponseSpec = actionMsgs.createSendGoalResponseSpec(
+      idlInfo.pkgName,
+      idlInfo.interfaceName
+    );
+    const sendGoalResponseMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_SendGoal_Response`,
+      },
+      dir,
+      sendGoalResponseSpec
+    );
+
+    const sendGoalSrv = generateServiceJSStruct(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_SendGoal`,
+      },
+      dir
+    );
+
+    const getResultRequestSpec = actionMsgs.createGetResultRequestSpec(
+      idlInfo.pkgName,
+      idlInfo.interfaceName
+    );
+    const getResultRequestMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_GetResult_Request`,
+      },
+      dir,
+      getResultRequestSpec
+    );
+
+    const getResultResponseSpec = actionMsgs.createGetResultResponseSpec(
+      idlInfo.pkgName,
+      idlInfo.interfaceName
+    );
+    const getResultResponseMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_GetResult_Response`,
+      },
+      dir,
+      getResultResponseSpec
+    );
+
+    const getResultSrv = generateServiceJSStruct(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_GetResult`,
+      },
+      dir
+    );
+
+    const feedbackMessageSpec = actionMsgs.createFeedbackMessageSpec(
+      idlInfo.pkgName,
+      idlInfo.interfaceName
+    );
+    const feedbackMessageMsg = generateMessageJSStructFromSpec(
+      {
+        pkgName: idlInfo.pkgName,
+        subFolder: idlInfo.subFolder,
+        interfaceName: `${idlInfo.interfaceName}_FeedbackMessage`,
+      },
+      dir,
+      feedbackMessageSpec
+    );
+
+    const fileName =
+      idlInfo.pkgName +
+      '__' +
+      idlInfo.subFolder +
+      '__' +
+      idlInfo.interfaceName +
+      '.js';
+    const generatedCode = generateAction({ actionInfo: idlInfo });
+    const actionDir = path.join(dir, idlInfo.pkgName);
+    const action = writeGeneratedCode(actionDir, fileName, generatedCode);
+
+    await Promise.all([
+      goalMsg,
+      resultMsg,
+      feedbackMsg,
+      sendGoalRequestMsg,
+      sendGoalResponseMsg,
+      sendGoalSrv,
+      getResultRequestMsg,
+      getResultResponseMsg,
+      getResultSrv,
+      feedbackMessageMsg,
+      action,
+    ]);
+  }
 }
 
 module.exports = generateJSStructFromIDL;
