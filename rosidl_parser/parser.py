@@ -15,7 +15,6 @@
 import sys
 import json
 
-import rosidl_parser
 from rosidl_adapter import parser
 
 def get_json_object_from_base_type_object(base_type_obj):
@@ -41,15 +40,14 @@ def get_json_object_from_msg_spec_object(msg_spec_object):
     for constant in msg_spec_object.constants:
         constants.append({'type': constant.type, 'name': constant.name, 'value': constant.value})
 
-    msg_name = {'msgName': msg_spec_object.msg_name}
     json_obj = {'constants': constants, 'fields': fields, 'baseType': get_json_object_from_base_type_object(msg_spec_object.base_type),
         'msgName': msg_spec_object.msg_name}
 
     return json_obj
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print('Wrong number of argments')
+    if len(sys.argv) < 4:
+        print('Usage: {} <command> <packageName> <filePath>'.format(sys.argv[0]), file=sys.stderr)
         sys.exit(1)
     try:
         parser_method = getattr(parser, sys.argv[1])
