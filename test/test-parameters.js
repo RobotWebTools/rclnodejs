@@ -748,4 +748,84 @@ describe('rclnodejs parameters test suite', function () {
       assert.ok(paramFoundInParamList);
     });
   });
+
+  describe('parameterOverrides validation', function () {
+    const NODE_NAME = 'test_node';
+    let node;
+    this.timeout(60 * 1000);
+
+    afterEach(function () {
+      if (node) node.destroy();
+      rclnodejs.shutdown();
+    });
+
+    it('should reject non-Parameter objects in parameterOverrides', async function () {
+      await rclnodejs.init();
+      const options = new NodeOptions();
+      options.parameterOverrides = [{ name: 'p1', value: 'not a Parameter' }];
+      assert.throws(
+        () =>
+          rclnodejs.createNode(
+            NODE_NAME,
+            '',
+            Context.defaultContext(),
+            options
+          ),
+        (err) => err instanceof rclnodejs.TypeValidationError,
+        'Expected TypeValidationError for non-Parameter parameterOverride'
+      );
+    });
+  });
+
+  describe('parameter type validation', function () {
+    it('validType should reject invalid numeric types', function () {
+      // A Parameter with an out-of-range type should throw on validate()
+      assert.throws(() => {
+        new Parameter('bad', 999, 'value').validate();
+      });
+    });
+
+    it('validType should accept all known ParameterTypes', function () {
+      // NOT_SET type
+      assert.doesNotThrow(() => {
+        new Parameter('p', ParameterType.PARAMETER_NOT_SET).validate();
+      });
+      // BOOL type
+      assert.doesNotThrow(() => {
+        new Parameter('p', ParameterType.PARAMETER_BOOL, true).validate();
+      });
+      // STRING type
+      assert.doesNotThrow(() => {
+        new Parameter('p', ParameterType.PARAMETER_STRING, 'hello').validate();
+      });
+    });
+
+    it('array parameter validation', function () {
+      assert.doesNotThrow(() => {
+        new Parameter('p', ParameterType.PARAMETER_STRING_ARRAY, [
+          'a',
+          'b',
+        ]).validate();
+      });
+      assert.doesNotThrow(() => {
+        new Parameter('p', ParameterType.PARAMETER_INTEGER_ARRAY, [
+          1n,
+          2n,
+        ]).validate();
+      });
+      assert.doesNotThrow(() => {
+        new Parameter(
+          'p',
+          ParameterType.PARAMETER_DOUBLE_ARRAY,
+          [1.0, 2.0]
+        ).validate();
+      });
+      assert.doesNotThrow(() => {
+        new Parameter('p', ParameterType.PARAMETER_BOOL_ARRAY, [
+          true,
+          false,
+        ]).validate();
+      });
+    });
+  });
 });
