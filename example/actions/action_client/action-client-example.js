@@ -53,7 +53,7 @@ class FibonacciActionClient {
     if (goalHandle.isSucceeded()) {
       this._node
         .getLogger()
-        .info(`Goal suceeded with result: ${result.sequence}`);
+        .info(`Goal succeeded with result: ${result.sequence}`);
     } else {
       this._node
         .getLogger()
