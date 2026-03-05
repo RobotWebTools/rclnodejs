@@ -21,7 +21,7 @@ rclnodejs.init().then(() => {
   const node = rclnodejs.createNode('publisher_qos_example_node');
 
   let qos = new QoS();
-  qos.hitory = QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT;
+  qos.history = QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT;
   qos.reliability =
     QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT;
   qos.durability =
