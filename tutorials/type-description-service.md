@@ -39,17 +39,17 @@ Each node automatically creates a service at:
 
 The Type Description Service is available in:
 
-- **ROS 2 Iron** and newer distributions (officially supported starting from Iron)
+- **ROS 2 Jazzy** and newer distributions (officially supported starting from Jazzy)
 - **rclnodejs** with compatible ROS 2 installation
 
-**Note**: Type Description Service is **not available** in ROS 2 Humble and earlier versions.
+**Note**: Type Description Service is **not available** in ROS 2 Iron and earlier versions.
 
 ```javascript
 const rclnodejs = require('rclnodejs');
 const DistroUtils = require('rclnodejs/lib/distro');
 
 // Check if Type Description Service is supported
-if (DistroUtils.getDistroId() > DistroUtils.getDistroId('humble')) {
+if (DistroUtils.getDistroId() >= DistroUtils.getDistroId('jazzy')) {
   console.log('Type Description Service is supported');
 } else {
   console.warn(
@@ -288,7 +288,7 @@ const DistroUtils = require('rclnodejs/lib/distro');
 
 async function testTypeDescriptionService() {
   // Check if Type Description Service is supported
-  if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+  if (DistroUtils.getDistroId() < DistroUtils.getDistroId('jazzy')) {
     console.log(
       'Type Description Service is not supported in this ROS 2 version'
     );
