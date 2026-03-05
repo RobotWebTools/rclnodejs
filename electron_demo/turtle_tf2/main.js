@@ -759,24 +759,19 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
-    // Clean up ROS2 nodes
-    Object.values(turtleTf2Nodes).forEach((node) => {
-      try {
-        rclnodejs.shutdown();
-      } catch (error) {
-        console.error('Error shutting down node:', error);
-      }
-    });
+    try {
+      rclnodejs.shutdown();
+    } catch (error) {
+      console.error('Error shutting down ROS2:', error);
+    }
     app.quit();
   }
 });
 
 app.on('before-quit', () => {
-  Object.values(turtleTf2Nodes).forEach((node) => {
-    try {
-      rclnodejs.shutdown();
-    } catch (error) {
-      console.error('Error shutting down node:', error);
-    }
-  });
+  try {
+    rclnodejs.shutdown();
+  } catch (error) {
+    console.error('Error shutting down ROS2:', error);
+  }
 });
