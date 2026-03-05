@@ -446,7 +446,7 @@ describe('rclnodejs action server', function () {
 
     let result = await handle.getResult();
     assert.ok(result);
-    assert.ok(handle.status, GoalStatus.STATUS_SUCCEEDED);
+    assert.strictEqual(handle.status, GoalStatus.STATUS_SUCCEEDED);
     assert.ok(deepEqual(result.sequence, Int32Array.from(testSequence)));
 
     server.destroy();
@@ -480,7 +480,7 @@ describe('rclnodejs action server', function () {
 
     let result = await handle.getResult();
     assert.ok(result);
-    assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
+    assert.strictEqual(handle.status, GoalStatus.STATUS_ABORTED);
     assert.ok(deepEqual(result.sequence, Int32Array.from(testSequence)));
 
     server.destroy();
@@ -515,7 +515,7 @@ describe('rclnodejs action server', function () {
     let result = await handle.getResult();
     assert.ok(result);
     // Goal status should default to aborted
-    assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
+    assert.strictEqual(handle.status, GoalStatus.STATUS_ABORTED);
     assert.ok(deepEqual(result.sequence, Int32Array.from(testSequence)));
 
     server.destroy();
@@ -543,7 +543,7 @@ describe('rclnodejs action server', function () {
     let result = await handle.getResult();
     assert.ok(result);
     // Goal status should default to aborted
-    assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
+    assert.strictEqual(handle.status, GoalStatus.STATUS_ABORTED);
     assert.ok(deepEqual(result.sequence, Int32Array.from([])));
 
     server.destroy();
@@ -567,7 +567,7 @@ describe('rclnodejs action server', function () {
     await client.sendGoal(goal);
 
     await assertUtils.createDelay(500);
-    assert.ok(server._goalHandles.size, 1);
+    assert.strictEqual(server._goalHandles.size, 1);
 
     server.destroy();
   });
@@ -590,10 +590,10 @@ describe('rclnodejs action server', function () {
     await client.sendGoal(goal);
 
     await assertUtils.createDelay(500);
-    assert.ok(server._goalHandles.size, 1);
+    assert.strictEqual(server._goalHandles.size, 1);
 
-    await assertUtils.createDelay(1000);
-    assert.ok(server._goalHandles.size, 0);
+    await assertUtils.createDelay(3000);
+    assert.strictEqual(server._goalHandles.size, 0);
 
     server.destroy();
   });
@@ -620,10 +620,10 @@ describe('rclnodejs action server', function () {
     ]);
 
     await assertUtils.createDelay(500);
-    assert.ok(server._goalHandles.size, 3);
+    assert.strictEqual(server._goalHandles.size, 3);
 
-    await assertUtils.createDelay(1000);
-    assert.ok(server._goalHandles.size, 0);
+    await assertUtils.createDelay(3000);
+    assert.strictEqual(server._goalHandles.size, 0);
 
     server.destroy();
   });
