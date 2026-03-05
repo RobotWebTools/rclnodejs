@@ -85,7 +85,7 @@ async function getCurrentGeneratorVersion() {
   const jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
 
   return new Promise((resolve, reject) => {
-    fs.open(jsonFilePath, 'r', (err) => {
+    fs.readFile(jsonFilePath, 'utf8', (err, data) => {
       if (err) {
         if (err.code === 'ENOENT') {
           resolve(null);
@@ -93,13 +93,11 @@ async function getCurrentGeneratorVersion() {
           reject(err);
         }
       } else {
-        fs.readFile(jsonFilePath, 'utf8', (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(JSON.parse(data).version);
-          }
-        });
+        try {
+          resolve(JSON.parse(data).version);
+        } catch (parseErr) {
+          reject(parseErr);
+        }
       }
     });
   });
