@@ -70,10 +70,17 @@ Napi::Value ActionCreateClient(const Napi::CallbackInfo& info) {
         malloc(sizeof(rcl_action_client_t)));
     *action_client = rcl_action_get_zero_initialized_client();
 
-    THROW_ERROR_IF_NOT_EQUAL(
-        rcl_action_client_init(action_client, node, ts, action_name.c_str(),
-                               &action_client_ops),
-        RCL_RET_OK, rcl_get_error_string().str);
+    {
+      rcl_ret_t ret = rcl_action_client_init(
+          action_client, node, ts, action_name.c_str(), &action_client_ops);
+      if (RCL_RET_OK != ret) {
+        std::string error_msg = rcl_get_error_string().str;
+        rcl_reset_error();
+        free(action_client);
+        Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+        return env.Undefined();
+      }
+    }
     auto js_obj = RclHandle::NewInstance(
         env, action_client, node_handle, [node, env](void* ptr) {
           rcl_action_client_t* action_client =

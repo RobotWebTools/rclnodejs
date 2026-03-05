@@ -110,6 +110,7 @@ void Executor::Stop() {
 
     if (uv_is_active(reinterpret_cast<uv_handle_t*>(async_))) {
       static bool handle_closed = false;
+      handle_closed = false;
       uv_close(reinterpret_cast<uv_handle_t*>(async_),
                [](uv_handle_t* async) -> void {
                  // Important Notice:

@@ -15,8 +15,11 @@
 #include "rcl_type_description_service_bindings.h"
 
 #include <napi.h>
+#include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 #include <rmw/types.h>
+
+#include <string>
 
 #include "rcl_handle.h"
 
@@ -31,8 +34,13 @@ Napi::Value InitTypeDescriptionService(const Napi::CallbackInfo& info) {
   *service = rcl_get_zero_initialized_service();
   rcl_ret_t ret = rcl_node_type_description_service_init(service, node);
   if (RCL_RET_OK != ret) {
-    Napi::Error::New(env, "Failed to initialize type description service")
+    std::string error_msg = rcl_get_error_string().str;
+    rcl_reset_error();
+    free(service);
+    Napi::Error::New(
+        env, "Failed to initialize type description service: " + error_msg)
         .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   auto service_handle =

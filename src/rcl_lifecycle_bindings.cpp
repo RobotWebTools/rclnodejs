@@ -79,11 +79,17 @@ Napi::Value CreateLifecycleStateMachine(const Napi::CallbackInfo& info) {
   RclHandle* clock_handle = RclHandle::Unwrap(info[2].As<Napi::Object>());
   rcl_clock_t* clock = reinterpret_cast<rcl_clock_t*>(clock_handle->ptr());
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_lifecycle_state_machine_init(state_machine, node, clock, pn, cs, gs,
-                                       gas, gat, gtg, &options),
-      rcl_get_error_string().str);
+  {
+    rcl_ret_t ret = rcl_lifecycle_state_machine_init(
+        state_machine, node, clock, pn, cs, gs, gas, gat, gtg, &options);
+    if (RCL_RET_OK != ret) {
+      std::string error_msg = rcl_get_error_string().str;
+      rcl_reset_error();
+      free(state_machine);
+      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+  }
 
   auto js_obj = RclHandle::NewInstance(
       env, state_machine, node_handle, [node, env](void* ptr) {
@@ -99,11 +105,17 @@ Napi::Value CreateLifecycleStateMachine(const Napi::CallbackInfo& info) {
       rcl_lifecycle_get_default_state_machine_options();
   options.enable_com_interface = info[1].As<Napi::Boolean>().Value();
 
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_lifecycle_state_machine_init(state_machine, node, pn, cs, gs, gas,
-                                       gat, gtg, &options),
-      rcl_get_error_string().str);
+  {
+    rcl_ret_t ret = rcl_lifecycle_state_machine_init(
+        state_machine, node, pn, cs, gs, gas, gat, gtg, &options);
+    if (RCL_RET_OK != ret) {
+      std::string error_msg = rcl_get_error_string().str;
+      rcl_reset_error();
+      free(state_machine);
+      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+  }
 
   auto js_obj = RclHandle::NewInstance(
       env, state_machine, node_handle, [node, env](void* ptr) {
@@ -118,11 +130,18 @@ Napi::Value CreateLifecycleStateMachine(const Napi::CallbackInfo& info) {
   const rcl_node_options_t* node_options =
       reinterpret_cast<const rcl_node_options_t*>(rcl_node_get_options(node));
 
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_lifecycle_state_machine_init(
-                               state_machine, node, pn, cs, gs, gas, gat, gtg,
-                               true, &node_options->allocator),
-                           rcl_get_error_string().str);
+  {
+    rcl_ret_t ret = rcl_lifecycle_state_machine_init(
+        state_machine, node, pn, cs, gs, gas, gat, gtg, true,
+        &node_options->allocator);
+    if (RCL_RET_OK != ret) {
+      std::string error_msg = rcl_get_error_string().str;
+      rcl_reset_error();
+      free(state_machine);
+      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+  }
 
   auto js_obj = RclHandle::NewInstance(
       env, state_machine, node_handle, [node, node_options, env](void* ptr) {
