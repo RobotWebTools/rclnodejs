@@ -307,10 +307,9 @@ describe('rclnodejs TimeSource testing', function () {
     assert.strictEqual(timeSource.isRosTimeActive, true);
     assert.notStrictEqual(timeSource._clockSubscription, undefined);
 
-    // Disable - currently the implementation does NOT destroy subscription on disable
-    // This test verifies current behavior (even if it might be considered a bug it ensures stability)
+    // Disable - subscription should be destroyed and cleared
     timeSource.isRosTimeActive = false;
     assert.strictEqual(timeSource.isRosTimeActive, false);
-    assert.notStrictEqual(timeSource._clockSubscription, undefined);
+    assert.strictEqual(timeSource._clockSubscription, undefined);
   });
 });
