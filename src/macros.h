@@ -22,8 +22,8 @@
 #define CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE(op, lhs, rhs, message) \
   {                                                                 \
     if (lhs op rhs) {                                               \
-      rcl_reset_error();                                            \
       Napi::Error::New(env, message).ThrowAsJavaScriptException();  \
+      rcl_reset_error();                                            \
       return env.Undefined();                                       \
     }                                                               \
   }
@@ -31,8 +31,8 @@
 #define CHECK_OP_AND_THROW_ERROR_IF_NOT_TRUE_NO_RETURN(op, lhs, rhs, message) \
   {                                                                           \
     if (lhs op rhs) {                                                         \
-      rcl_reset_error();                                                      \
       Napi::Error::New(env, message).ThrowAsJavaScriptException();            \
+      rcl_reset_error();                                                      \
     }                                                                         \
   }
 
