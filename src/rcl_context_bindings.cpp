@@ -120,14 +120,13 @@ Napi::Value CreateContext(const Napi::CallbackInfo& info) {
   rcl_context_t* context =
       reinterpret_cast<rcl_context_t*>(malloc(sizeof(rcl_context_t)));
   *context = rcl_get_zero_initialized_context();
-  auto js_obj =
-      RclHandle::NewInstance(env, context, nullptr, [&env](void* ptr) {
-        rcl_context_t* context = reinterpret_cast<rcl_context_t*>(ptr);
-        rcl_ret_t ret = DestroyContext(env, context);
-        free(ptr);
-        THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
-                                           rcl_get_error_string().str);
-      });
+  auto js_obj = RclHandle::NewInstance(env, context, nullptr, [env](void* ptr) {
+    rcl_context_t* context = reinterpret_cast<rcl_context_t*>(ptr);
+    rcl_ret_t ret = DestroyContext(env, context);
+    free(ptr);
+    THROW_ERROR_IF_NOT_EQUAL_NO_RETURN(RCL_RET_OK, ret,
+                                       rcl_get_error_string().str);
+  });
 
   return js_obj;
 }

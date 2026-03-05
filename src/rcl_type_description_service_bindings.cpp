@@ -31,8 +31,10 @@ Napi::Value InitTypeDescriptionService(const Napi::CallbackInfo& info) {
   *service = rcl_get_zero_initialized_service();
   rcl_ret_t ret = rcl_node_type_description_service_init(service, node);
   if (RCL_RET_OK != ret) {
+    free(service);
     Napi::Error::New(env, "Failed to initialize type description service")
         .ThrowAsJavaScriptException();
+    return env.Undefined();
   }
 
   auto service_handle =
