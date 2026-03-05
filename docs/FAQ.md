@@ -20,10 +20,10 @@ ros2 pkg list
 
 If the package containing your target message is not listed then install it.
 
-Next, inspect the generated JavaScript message files by viewing the `./node_modules/rclnodejs/generated/` folder of your project for your target message. If you are unable to locate the message file then use the `generate-messages` script:
+Next, inspect the generated JavaScript message files by viewing the `./node_modules/rclnodejs/generated/` folder of your project for your target message. If you are unable to locate the message file then use the `generate-ros-messages` script:
 
 ```
-<your_project>/node_modules/.bin/generate-messages
+<your_project>/node_modules/.bin/generate-ros-messages
 ```
 
 ## Maximum call stack size exceeded error when running in Jest

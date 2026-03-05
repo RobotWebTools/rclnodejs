@@ -35,7 +35,7 @@ Defines the request parameters for the task to be performed.
 ```javascript
 // Example: Fibonacci.Goal
 {
-  order: 10 // Compute Fibonacci sequence up to order 10
+  order: 10; // Compute Fibonacci sequence up to order 10
 }
 ```
 
@@ -46,7 +46,7 @@ Provides periodic updates during task execution.
 ```javascript
 // Example: Fibonacci.Feedback
 {
-  sequence: [0, 1, 1, 2, 3, 5, 8] // Current progress
+  sequence: [0, 1, 1, 2, 3, 5, 8]; // Current progress
 }
 ```
 
@@ -57,7 +57,7 @@ Contains the final outcome when the task completes.
 ```javascript
 // Example: Fibonacci.Result
 {
-  sequence: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55] // Final result
+  sequence: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]; // Final result
 }
 ```
 
@@ -147,7 +147,7 @@ class FibonacciActionServer {
   }
 
   // Called when new goal is received
-  goalCallback(goalHandle) {
+  goalCallback(goal) {
     this._node.getLogger().info('Received goal request');
     // Accept or reject the goal
     return rclnodejs.GoalResponse.ACCEPT; // or REJECT
@@ -307,19 +307,19 @@ class MultiGoalActionServer {
     );
   }
 
-  goalCallback(goalHandle) {
+  goalCallback(goal) {
     // Accept up to 3 concurrent goals
     if (this._activeGoals.size >= 3) {
       this._node.getLogger().info('Too many active goals, rejecting');
       return rclnodejs.GoalResponse.REJECT;
     }
 
-    this._node.getLogger().info(`Accepting goal ${goalHandle.goalId}`);
-    this._activeGoals.set(goalHandle.goalId, goalHandle);
+    this._node.getLogger().info(`Accepting goal with order=${goal.order}`);
     return rclnodejs.GoalResponse.ACCEPT;
   }
 
   async executeCallback(goalHandle) {
+    this._activeGoals.set(goalHandle.goalId, goalHandle);
     try {
       // Execute goal logic...
       const result = await this.computeFibonacci(goalHandle);

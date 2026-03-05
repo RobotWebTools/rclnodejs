@@ -24,7 +24,7 @@ let enableLifecycleCommInterface = false;
 let node = new LifecycleNode(
   nodeName,
   namespace,
-  Context.defaultContext,
+  Context.defaultContext(),
   NodeOptions.defaultOptions,
   enableLifecycleCommInterface
 );

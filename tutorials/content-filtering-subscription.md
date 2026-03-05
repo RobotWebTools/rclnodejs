@@ -261,7 +261,7 @@ class SensorDataProcessor {
       parameters: [0.1, 5.0, 0.1], // Valid range and FOV
     };
 
-    const subscription = this.node.createSubscription(
+    this.subscription = this.node.createSubscription(
       'sensor_msgs/msg/Range',
       'sensor_data',
       options,
