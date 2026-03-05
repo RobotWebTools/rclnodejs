@@ -76,10 +76,18 @@ Napi::Value ActionCreateServer(const Napi::CallbackInfo& info) {
         malloc(sizeof(rcl_action_server_t)));
     *action_server = rcl_action_get_zero_initialized_server();
 
-    THROW_ERROR_IF_NOT_EQUAL(
-        rcl_action_server_init(action_server, node, clock, ts,
-                               action_name.c_str(), &action_server_ops),
-        RCL_RET_OK, rcl_get_error_string().str);
+    {
+      rcl_ret_t ret =
+          rcl_action_server_init(action_server, node, clock, ts,
+                                 action_name.c_str(), &action_server_ops);
+      if (RCL_RET_OK != ret) {
+        std::string error_msg = rcl_get_error_string().str;
+        rcl_reset_error();
+        free(action_server);
+        Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+        return env.Undefined();
+      }
+    }
     auto js_obj = RclHandle::NewInstance(
         env, action_server, node_handle, [node, env](void* ptr) {
           rcl_action_server_t* action_server =

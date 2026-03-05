@@ -17,6 +17,8 @@
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
 
+#include <string>
+
 #include "macros.h"
 #include "rcl_handle.h"
 #include "rcl_utilities.h"
@@ -37,9 +39,16 @@ Napi::Value CreateGuardCondition(const Napi::CallbackInfo& info) {
   rcl_guard_condition_options_t gc_options =
       rcl_guard_condition_get_default_options();
 
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_guard_condition_init(gc, context, gc_options),
-                           rcl_get_error_string().str);
+  {
+    rcl_ret_t ret = rcl_guard_condition_init(gc, context, gc_options);
+    if (RCL_RET_OK != ret) {
+      std::string error_msg = rcl_get_error_string().str;
+      rcl_reset_error();
+      free(gc);
+      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+  }
 
   auto handle = RclHandle::NewInstance(env, gc, nullptr, [env](void* ptr) {
     rcl_guard_condition_t* gc = reinterpret_cast<rcl_guard_condition_t*>(ptr);

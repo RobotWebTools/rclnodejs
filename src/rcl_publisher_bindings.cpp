@@ -51,9 +51,17 @@ Napi::Value CreatePublisher(const Napi::CallbackInfo& info) {
       publisher_ops.qos = *qos_profile;
     }
 
-    THROW_ERROR_IF_NOT_EQUAL(
-        rcl_publisher_init(publisher, node, ts, topic.c_str(), &publisher_ops),
-        RCL_RET_OK, rcl_get_error_string().str);
+    {
+      rcl_ret_t ret = rcl_publisher_init(publisher, node, ts, topic.c_str(),
+                                         &publisher_ops);
+      if (RCL_RET_OK != ret) {
+        std::string error_msg = rcl_get_error_string().str;
+        rcl_reset_error();
+        free(publisher);
+        Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+        return env.Undefined();
+      }
+    }
 
     auto js_obj = RclHandle::NewInstance(
         env, publisher, node_handle, [node, env](void* ptr) {
@@ -66,6 +74,7 @@ Napi::Value CreatePublisher(const Napi::CallbackInfo& info) {
 
     return js_obj;
   } else {
+    free(publisher);
     Napi::Error::New(env, GetErrorMessageAndClear())
         .ThrowAsJavaScriptException();
     return env.Undefined();

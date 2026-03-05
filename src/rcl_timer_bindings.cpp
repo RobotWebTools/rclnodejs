@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <mutex>
+#include <string>
 #include <unordered_map>
 
 #include "macros.h"
@@ -82,16 +83,30 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
   *timer = rcl_get_zero_initialized_timer();
 
 #if ROS_VERSION > 2305  // After Iron.
-  THROW_ERROR_IF_NOT_EQUAL(
-      RCL_RET_OK,
-      rcl_timer_init2(timer, clock, context, period_nsec, nullptr,
-                      rcl_get_default_allocator(), /*autostart=*/true),
-      rcl_get_error_string().str);
+  {
+    rcl_ret_t ret = rcl_timer_init2(timer, clock, context, period_nsec, nullptr,
+                                    rcl_get_default_allocator(),
+                                    /*autostart=*/true);
+    if (RCL_RET_OK != ret) {
+      std::string error_msg = rcl_get_error_string().str;
+      rcl_reset_error();
+      free(timer);
+      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+  }
 #else
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_timer_init(timer, clock, context, period_nsec,
-                                          nullptr, rcl_get_default_allocator()),
-                           rcl_get_error_string().str);
+  {
+    rcl_ret_t ret = rcl_timer_init(timer, clock, context, period_nsec, nullptr,
+                                   rcl_get_default_allocator());
+    if (RCL_RET_OK != ret) {
+      std::string error_msg = rcl_get_error_string().str;
+      rcl_reset_error();
+      free(timer);
+      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+  }
 #endif
 
   auto js_obj =
