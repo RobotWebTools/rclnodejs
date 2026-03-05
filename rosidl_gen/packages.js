@@ -150,9 +150,7 @@ async function generateMsgForSrv(filePath, interfaceInfo, pkgMap) {
   const arr = data.split(/-{3,}/);
   if (arr.length == 2) {
     const packagePath = path.join(serviceMsgPath, interfaceInfo.pkgName);
-    if (!fs.existsSync(packagePath)) {
-      fs.mkdirSync(packagePath);
-    }
+    fs.mkdirSync(packagePath, { recursive: true });
 
     await fsp.writeFile(path.join(packagePath, requestMsgName), arr[0]);
     await fsp.writeFile(path.join(packagePath, responseMsgName), arr[1]);
