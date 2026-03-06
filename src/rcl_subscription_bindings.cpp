@@ -19,6 +19,7 @@
 
 #include <cstdio>
 #include <memory>
+#include <rcpputils/scope_exit.hpp>
 #include <string>
 
 #include "macros.h"
@@ -108,12 +109,6 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
       rcl_ret_t ret = rcl_subscription_options_set_content_filter_options(
           expression.c_str(), argc, (const char**)argv, &subscription_ops);
 
-      if (ret != RCL_RET_OK) {
-        std::string error_string = rcl_get_error_string().str;
-        rcl_reset_error();
-        Napi::Error::New(env, error_string).ThrowAsJavaScriptException();
-      }
-
       if (argc) {
         for (int i = 0; i < argc; i++) {
           free(argv[i]);
@@ -122,7 +117,10 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
       }
 
       if (ret != RCL_RET_OK) {
+        std::string error_string = rcl_get_error_string().str;
+        rcl_reset_error();
         free(subscription);
+        Napi::Error::New(env, error_string).ThrowAsJavaScriptException();
         return env.Undefined();
       }
     }
@@ -137,8 +135,8 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
     if (ret != RCL_RET_OK) {
       std::string error_msg = rcl_get_error_string().str;
       rcl_reset_error();
-      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
       free(subscription);
+      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
       return env.Undefined();
     }
 
@@ -157,9 +155,9 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
 
     return js_obj;
   } else {
-    Napi::Error::New(env, GetErrorMessageAndClear())
-        .ThrowAsJavaScriptException();
+    std::string error_msg = GetErrorMessageAndClear();
     free(subscription);
+    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
     return env.Undefined();
   }
 }
@@ -194,10 +192,11 @@ Napi::Value RclTakeRaw(const Napi::CallbackInfo& info) {
     return env.Undefined();
   }
 
+  RCPPUTILS_SCOPE_EXIT({ rmw_serialized_message_fini(&msg); });
+
   Napi::Buffer<char> buffer = Napi::Buffer<char>::Copy(
       env, reinterpret_cast<char*>(msg.buffer), msg.buffer_length);
-  THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
-                           "Failed to deallocate message buffer");
+
   return buffer;
 }
 
@@ -369,6 +368,10 @@ Napi::Value GetContentFilter(const Napi::CallbackInfo& info) {
     return env.Undefined();
   }
 
+  RCPPUTILS_SCOPE_EXIT({
+    rcl_subscription_content_filter_options_fini(subscription, &options);
+  });
+
   // Create result object
   Napi::Object result = Napi::Object::New(env);
   result.Set(
@@ -386,16 +389,6 @@ Napi::Value GetContentFilter(const Napi::CallbackInfo& info) {
                                    .expression_parameters.data[i]);
   }
   result.Set("parameters", parameters);
-
-  // Cleanup
-  rcl_ret_t fini_ret =
-      rcl_subscription_content_filter_options_fini(subscription, &options);
-  if (fini_ret != RCL_RET_OK) {
-    std::string error_msg = rcl_get_error_string().str;
-    rcl_reset_error();
-    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
-    return env.Undefined();
-  }
 
   return result;
 }

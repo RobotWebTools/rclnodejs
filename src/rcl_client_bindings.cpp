@@ -88,7 +88,7 @@ Napi::Value SendRequest(const Napi::CallbackInfo& info) {
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_request(client, buffer, &sequence_number),
                            RCL_RET_OK, rcl_get_error_string().str);
 
-  return Napi::Number::New(env, static_cast<uint32_t>(sequence_number));
+  return Napi::Number::New(env, static_cast<double>(sequence_number));
 }
 
 Napi::Value RclTakeResponse(const Napi::CallbackInfo& info) {
@@ -104,7 +104,7 @@ Napi::Value RclTakeResponse(const Napi::CallbackInfo& info) {
   int64_t sequence_number = header.request_id.sequence_number;
 
   if (ret == RCL_RET_OK) {
-    return Napi::Number::New(env, static_cast<uint32_t>(sequence_number));
+    return Napi::Number::New(env, static_cast<double>(sequence_number));
   }
 
   rcl_reset_error();
