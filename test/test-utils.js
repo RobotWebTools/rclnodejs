@@ -45,8 +45,6 @@ describe('Utils testing', function () {
     await utils.ensureDir(dir);
   });
 
-  it('should valid ensureDirSync works correctly', function () {});
-
   it('should verify ensureDirSync works correctly', function () {
     const dir = path.join(tmpDir, 'nested/sync/dir');
     utils.ensureDirSync(dir);

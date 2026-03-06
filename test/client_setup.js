@@ -37,7 +37,6 @@ rclnodejs
     rclnodejs.spin(node);
 
     process.on('SIGINT', function () {
-      timer.cancel();
       node.destroy();
       rclnodejs.shutdown();
       process.exit(0);

@@ -260,9 +260,9 @@ describe('LifecycleNode test suite', function () {
         transitions[1].transition.id === 6
     ); // shutdown
     assert.ok(
-      transitions[1].transition.id === 2 || // cleanup
-        transitions[1].transition.id === 3 || // activate
-        transitions[1].transition.id === 6
+      transitions[2].transition.id === 2 || // cleanup
+        transitions[2].transition.id === 3 || // activate
+        transitions[2].transition.id === 6
     ); // shutdown
   });
 

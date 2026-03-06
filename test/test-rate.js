@@ -107,5 +107,12 @@ describe('rclnodejs rate test suite', function () {
       arr.reduce((prev, cur) => {
         return prev + cur;
       }, 0) / dataSize;
+
+    // avg sleep time should be within a reasonable range of the expected period
+    const expectedPeriod = 1000 / hz; // 1ms
+    assert.ok(
+      avg < expectedPeriod * 5,
+      `Average sleep time ${avg}ms exceeded 5x the expected period ${expectedPeriod}ms`
+    );
   });
 });

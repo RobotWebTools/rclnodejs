@@ -251,7 +251,7 @@ describe('Parameter_server tests', function () {
 
       // A.p3 value
       const p3 = Parameter.fromParameterMessage({
-        name: 'p1',
+        name: 'A.p3',
         value: response.values[1],
       });
       assert.equal(p3.type, ParameterType.PARAMETER_BOOL);
