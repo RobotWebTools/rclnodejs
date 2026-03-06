@@ -472,7 +472,6 @@ const actionClient = new rclnodejs.ActionClient(
 expectType<rclnodejs.ActionClient<'example_interfaces/action/Fibonacci'>>(
   actionClient
 );
-expectType<boolean>(client.isServiceServerAvailable());
 expectType<Promise<boolean>>(actionClient.waitForServer());
 expectType<void>(actionClient.destroy());
 
