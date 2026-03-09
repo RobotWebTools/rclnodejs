@@ -132,7 +132,7 @@ Napi::Value ActionSendGoalRequest(const Napi::CallbackInfo& info) {
       rcl_action_send_goal_request(action_client, buffer, &sequence_number),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
+  return Napi::Number::New(env, static_cast<double>(sequence_number));
 }
 
 Napi::Value ActionSendResultRequest(const Napi::CallbackInfo& info) {
@@ -149,7 +149,7 @@ Napi::Value ActionSendResultRequest(const Napi::CallbackInfo& info) {
       rcl_action_send_result_request(action_client, buffer, &sequence_number),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
+  return Napi::Number::New(env, static_cast<double>(sequence_number));
 }
 
 Napi::Value ActionTakeFeedback(const Napi::CallbackInfo& info) {
@@ -163,9 +163,9 @@ Napi::Value ActionTakeFeedback(const Napi::CallbackInfo& info) {
 
   rcl_ret_t ret = rcl_action_take_feedback(action_client, buffer);
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    Napi::Error::New(env, rcl_get_error_string().str)
-        .ThrowAsJavaScriptException();
+    std::string error_msg = rcl_get_error_string().str;
     rcl_reset_error();
+    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
     return Napi::Boolean::New(env, false);
   }
 
@@ -186,9 +186,9 @@ Napi::Value ActionTakeStatus(const Napi::CallbackInfo& info) {
 
   rcl_ret_t ret = rcl_action_take_status(action_client, buffer);
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
+    std::string error_msg = rcl_get_error_string().str;
     rcl_reset_error();
-    Napi::Error::New(env, rcl_get_error_string().str)
-        .ThrowAsJavaScriptException();
+    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
     return Napi::Boolean::New(env, false);
   }
 
@@ -247,7 +247,7 @@ Napi::Value ActionSendCancelRequest(const Napi::CallbackInfo& info) {
       rcl_action_send_cancel_request(action_client, buffer, &sequence_number),
       RCL_RET_OK, rcl_get_error_string().str);
 
-  return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
+  return Napi::Number::New(env, static_cast<double>(sequence_number));
 }
 
 #if ROS_VERSION >= 2505  // ROS2 >= Kilted

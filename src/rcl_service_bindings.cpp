@@ -96,6 +96,7 @@ Napi::Value RclTakeRequest(const Napi::CallbackInfo& info) {
     return js_obj;
   }
 
+  free(header);
   return env.Undefined();
 }
 

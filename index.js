@@ -387,23 +387,35 @@ let rcl = {
 
     rclnodejs.init(context.handle, argv, context._domainId);
 
-    if (_rosVersionChecked) {
-      // no further processing required
-      return;
-    }
+    try {
+      if (_rosVersionChecked) {
+        // no further processing required
+        return;
+      }
 
-    const version = await getCurrentGeneratorVersion();
-    const forced =
-      version === null || compareVersions(version, generator.version(), '<');
-    if (forced) {
-      debug(
-        'The generator will begin to create JavaScript code from ROS IDL files...'
-      );
-    }
+      const version = await getCurrentGeneratorVersion();
+      const forced =
+        version === null || compareVersions(version, generator.version(), '<');
+      if (forced) {
+        debug(
+          'The generator will begin to create JavaScript code from ROS IDL files...'
+        );
+      }
 
-    await generator.generateAll(forced);
-    // TODO determine if tsd generateAll() should be here
-    _rosVersionChecked = true;
+      await generator.generateAll(forced);
+      // TODO determine if tsd generateAll() should be here
+      _rosVersionChecked = true;
+    } catch (error) {
+      try {
+        context.tryShutdown();
+      } catch (shutdownError) {
+        const initError =
+          error instanceof Error ? error : new Error(String(error));
+        initError.message += ` (rollback also failed: ${shutdownError.message})`;
+        throw initError;
+      }
+      throw error;
+    }
   },
 
   /**
