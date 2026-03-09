@@ -145,26 +145,22 @@ describe('rclnodejs node test suite', function () {
     });
 
     it('Create a node with a plain object as options', function () {
-      assert.doesNotThrow(() => {
-        const node = new rclnodejs.Node('plain_opts_node', '/ns', undefined, {
-          enableRosout: false,
-        });
-        assert.strictEqual(node.name(), 'plain_opts_node');
-        node.destroy();
+      const node = new rclnodejs.Node('plain_opts_node', '/ns', undefined, {
+        enableRosout: false,
       });
+      assert.strictEqual(node.name(), 'plain_opts_node');
+      node.destroy();
     });
 
     it('Create a node with options missing parameterOverrides', function () {
-      assert.doesNotThrow(() => {
-        const node = new rclnodejs.Node(
-          'partial_opts_node',
-          '/ns',
-          undefined,
-          {}
-        );
-        assert.strictEqual(node.name(), 'partial_opts_node');
-        node.destroy();
-      });
+      const node = new rclnodejs.Node(
+        'partial_opts_node',
+        '/ns',
+        undefined,
+        {}
+      );
+      assert.strictEqual(node.name(), 'partial_opts_node');
+      node.destroy();
     });
   });
 });
