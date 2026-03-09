@@ -126,6 +126,7 @@ Napi::Value ActionTakeResultRequest(const Napi::CallbackInfo& info) {
     return js_obj;
   }
 
+  free(header);
   return env.Undefined();
 }
 
@@ -148,6 +149,7 @@ Napi::Value ActionTakeGoalRequest(const Napi::CallbackInfo& info) {
     return js_obj;
   }
 
+  free(header);
   return env.Undefined();
 }
 
@@ -221,14 +223,14 @@ Napi::Value ActionTakeGoalResponse(const Napi::CallbackInfo& info) {
   free(header);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
+    std::string error_msg = rcl_get_error_string().str;
     rcl_reset_error();
-    Napi::Error::New(env, rcl_get_error_string().str)
-        .ThrowAsJavaScriptException();
+    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
     return env.Undefined();
   }
 
   if (ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
+    return Napi::Number::New(env, static_cast<double>(sequence_number));
   }
   return env.Undefined();
 }
@@ -250,14 +252,14 @@ Napi::Value ActionTakeCancelResponse(const Napi::CallbackInfo& info) {
   free(header);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
+    std::string error_msg = rcl_get_error_string().str;
     rcl_reset_error();
-    Napi::Error::New(env, rcl_get_error_string().str)
-        .ThrowAsJavaScriptException();
+    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
     return env.Undefined();
   }
 
   if (ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
+    return Napi::Number::New(env, static_cast<double>(sequence_number));
   }
   return env.Undefined();
 }
@@ -279,14 +281,14 @@ Napi::Value ActionTakeResultResponse(const Napi::CallbackInfo& info) {
   free(header);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
+    std::string error_msg = rcl_get_error_string().str;
     rcl_reset_error();
-    Napi::Error::New(env, rcl_get_error_string().str)
-        .ThrowAsJavaScriptException();
+    Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
     return env.Undefined();
   }
 
   if (ret != RCL_RET_ACTION_CLIENT_TAKE_FAILED) {
-    return Napi::Number::New(env, static_cast<int32_t>(sequence_number));
+    return Napi::Number::New(env, static_cast<double>(sequence_number));
   }
   return env.Undefined();
 }
@@ -463,6 +465,7 @@ Napi::Value ActionTakeCancelRequest(const Napi::CallbackInfo& info) {
     return js_obj;
   }
 
+  free(header);
   return env.Undefined();
 }
 
