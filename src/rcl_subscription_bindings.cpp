@@ -193,7 +193,12 @@ Napi::Value RclTakeRaw(const Napi::CallbackInfo& info) {
     return env.Undefined();
   }
 
-  RCPPUTILS_SCOPE_EXIT({ rmw_serialized_message_fini(&msg); });
+  RCPPUTILS_SCOPE_EXIT({
+    rcl_ret_t fini_ret = rmw_serialized_message_fini(&msg);
+    if (fini_ret != RCL_RET_OK) {
+      rcl_reset_error();
+    }
+  });
 
   Napi::Buffer<char> buffer = Napi::Buffer<char>::Copy(
       env, reinterpret_cast<char*>(msg.buffer), msg.buffer_length);
@@ -370,7 +375,11 @@ Napi::Value GetContentFilter(const Napi::CallbackInfo& info) {
   }
 
   RCPPUTILS_SCOPE_EXIT({
-    rcl_subscription_content_filter_options_fini(subscription, &options);
+    rcl_ret_t fini_ret =
+        rcl_subscription_content_filter_options_fini(subscription, &options);
+    if (fini_ret != RCL_RET_OK) {
+      rcl_reset_error();
+    }
   });
 
   // Create result object

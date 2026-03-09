@@ -108,25 +108,31 @@ describe('rclnodejs init and shutdown test suite', function () {
       .stub(generator, 'generateAll')
       .rejects(new Error('generator failed'));
 
-    const indexPath = require.resolve('../index.js');
-    delete require.cache[indexPath];
-    const freshRclnodejs = require('../index.js');
+    try {
+      const indexPath = require.resolve('../index.js');
+      delete require.cache[indexPath];
+      const freshRclnodejs = require('../index.js');
 
-    const failedContext = new freshRclnodejs.Context();
+      const failedContext = new freshRclnodejs.Context();
 
-    await assert.rejects(async () => {
-      await freshRclnodejs.init(failedContext);
-    }, /generator failed/);
-    assert.ok(freshRclnodejs.isShutdown(failedContext));
+      await assert.rejects(async () => {
+        await freshRclnodejs.init(failedContext);
+      }, /generator failed/);
+      assert.ok(freshRclnodejs.isShutdown(failedContext));
 
-    generateAllStub.restore();
+      generateAllStub.restore();
 
-    const recoveredContext = new freshRclnodejs.Context();
-    await assert.doesNotReject(async () => {
-      await freshRclnodejs.init(recoveredContext);
-    });
-    freshRclnodejs.shutdown(recoveredContext);
-    freshRclnodejs.removeSignalHandlers();
+      const recoveredContext = new freshRclnodejs.Context();
+      await assert.doesNotReject(async () => {
+        await freshRclnodejs.init(recoveredContext);
+      });
+      freshRclnodejs.shutdown(recoveredContext);
+      freshRclnodejs.removeSignalHandlers();
+    } finally {
+      if (generateAllStub.restore) {
+        generateAllStub.restore();
+      }
+    }
   });
 
   it('rclnodejs create node without init should fail', async function () {

@@ -409,7 +409,10 @@ let rcl = {
       try {
         context.tryShutdown();
       } catch (shutdownError) {
-        error.message += ` Failed to roll back context after init failure: ${shutdownError.message}`;
+        const initError =
+          error instanceof Error ? error : new Error(String(error));
+        initError.message += ` (rollback also failed: ${shutdownError.message})`;
+        throw initError;
       }
       throw error;
     }
