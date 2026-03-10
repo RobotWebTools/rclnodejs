@@ -78,4 +78,12 @@ describe('rclnodejs distro utils', function () {
     process.env.ROS_DISTRO = backupEnvar;
     done();
   });
+
+  it('getDistroName with unknown id returns undefined', function () {
+    assert.strictEqual(
+      DistroUtils.getDistroName(99999),
+      undefined,
+      'getDistroName(99999) should return undefined, not throw'
+    );
+  });
 });

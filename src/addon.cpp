@@ -15,6 +15,7 @@
 #include <node_api.h>
 #include <rcutils/logging.h>
 
+#include "clock_event.hpp"
 #include "macros.h"
 #include "rcl_action_client_bindings.h"
 #include "rcl_action_goal_bindings.h"
@@ -74,6 +75,7 @@ Napi::Object InitModule(Napi::Env env, Napi::Object exports) {
   rclnodejs::InitActionGoalBindings(env, exports);
   rclnodejs::InitActionServerBindings(env, exports);
   rclnodejs::InitClientBindings(env, exports);
+  rclnodejs::InitClockEventBindings(env, exports);
   rclnodejs::InitContextBindings(env, exports);
   rclnodejs::InitGraphBindings(env, exports);
   rclnodejs::InitGuardConditionBindings(env, exports);

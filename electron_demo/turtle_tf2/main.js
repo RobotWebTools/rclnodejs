@@ -335,7 +335,7 @@ async function createTurtleTf2Listener() {
   );
 
   // Timer to check for transforms and control turtle2
-  const timer = node.createTimer(1000, () => {
+  node.createTimer(1000n, () => {
     // Wrap the async logic in a try-catch to handle promise rejections
     (async () => {
       try {
@@ -442,7 +442,7 @@ async function createDynamicFrameTf2Broadcaster() {
   const tfBroadcaster = node.createPublisher('tf2_msgs/msg/TFMessage', '/tf');
 
   // Timer to broadcast dynamic transform
-  const timer = node.createTimer(100, () => {
+  node.createTimer(100n, () => {
     const now = node.now();
 
     // Use a more stable time calculation to avoid NaN
@@ -535,7 +535,7 @@ async function createFixedFrameTf2Broadcaster() {
   const tfBroadcaster = node.createPublisher('tf2_msgs/msg/TFMessage', '/tf');
 
   // Timer to broadcast fixed transform
-  const timer = node.createTimer(100, () => {
+  node.createTimer(100n, () => {
     const now = node.now();
     const fixedTransform = {
       header: {
@@ -759,24 +759,19 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
-    // Clean up ROS2 nodes
-    Object.values(turtleTf2Nodes).forEach((node) => {
-      try {
-        rclnodejs.shutdown();
-      } catch (error) {
-        console.error('Error shutting down node:', error);
-      }
-    });
+    try {
+      rclnodejs.shutdown();
+    } catch (error) {
+      console.error('Error shutting down ROS2:', error);
+    }
     app.quit();
   }
 });
 
 app.on('before-quit', () => {
-  Object.values(turtleTf2Nodes).forEach((node) => {
-    try {
-      rclnodejs.shutdown();
-    } catch (error) {
-      console.error('Error shutting down node:', error);
-    }
-  });
+  try {
+    rclnodejs.shutdown();
+  } catch (error) {
+    console.error('Error shutting down ROS2:', error);
+  }
 });

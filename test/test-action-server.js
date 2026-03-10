@@ -446,7 +446,7 @@ describe('rclnodejs action server', function () {
 
     let result = await handle.getResult();
     assert.ok(result);
-    assert.ok(handle.status, GoalStatus.STATUS_SUCCEEDED);
+    assert.strictEqual(handle.status, GoalStatus.STATUS_SUCCEEDED);
     assert.ok(deepEqual(result.sequence, Int32Array.from(testSequence)));
 
     server.destroy();
@@ -480,7 +480,7 @@ describe('rclnodejs action server', function () {
 
     let result = await handle.getResult();
     assert.ok(result);
-    assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
+    assert.strictEqual(handle.status, GoalStatus.STATUS_ABORTED);
     assert.ok(deepEqual(result.sequence, Int32Array.from(testSequence)));
 
     server.destroy();
@@ -515,7 +515,7 @@ describe('rclnodejs action server', function () {
     let result = await handle.getResult();
     assert.ok(result);
     // Goal status should default to aborted
-    assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
+    assert.strictEqual(handle.status, GoalStatus.STATUS_ABORTED);
     assert.ok(deepEqual(result.sequence, Int32Array.from(testSequence)));
 
     server.destroy();
@@ -543,7 +543,7 @@ describe('rclnodejs action server', function () {
     let result = await handle.getResult();
     assert.ok(result);
     // Goal status should default to aborted
-    assert.ok(handle.status, GoalStatus.STATUS_ABORTED);
+    assert.strictEqual(handle.status, GoalStatus.STATUS_ABORTED);
     assert.ok(deepEqual(result.sequence, Int32Array.from([])));
 
     server.destroy();
@@ -567,7 +567,7 @@ describe('rclnodejs action server', function () {
     await client.sendGoal(goal);
 
     await assertUtils.createDelay(500);
-    assert.ok(server._goalHandles.size, 1);
+    assert.strictEqual(server._goalHandles.size, 1);
 
     server.destroy();
   });
@@ -590,10 +590,10 @@ describe('rclnodejs action server', function () {
     await client.sendGoal(goal);
 
     await assertUtils.createDelay(500);
-    assert.ok(server._goalHandles.size, 1);
+    assert.strictEqual(server._goalHandles.size, 1);
 
-    await assertUtils.createDelay(1000);
-    assert.ok(server._goalHandles.size, 0);
+    await assertUtils.createDelay(3000);
+    assert.strictEqual(server._goalHandles.size, 0);
 
     server.destroy();
   });
@@ -610,6 +610,24 @@ describe('rclnodejs action server', function () {
       { resultTimeout: 1 }
     );
 
+    // Wrap _executeExpiredGoals to capture the goalInfo deserialized from the
+    // native buffer, so we can verify they match the accepted goals.
+    const expiredGoalInfos = [];
+    const origExecuteExpiredGoals = server._executeExpiredGoals.bind(server);
+    server._executeExpiredGoals = function (result, count) {
+      const ActionInterfaces = require('../lib/action/interfaces.js');
+      const ActionUuid = require('../lib/action/uuid.js');
+      for (let i = 0; i < count; i++) {
+        const goalInfo = new ActionInterfaces.GoalInfo();
+        goalInfo.deserialize(result._refArray[i]);
+        expiredGoalInfos.push({
+          uuid: ActionUuid.fromBytes(goalInfo.goal_id.uuid).toString(),
+          stamp: goalInfo.stamp,
+        });
+      }
+      origExecuteExpiredGoals(result, count);
+    };
+
     let goal = new Fibonacci.Goal();
 
     await client.waitForServer(1000);
@@ -620,10 +638,37 @@ describe('rclnodejs action server', function () {
     ]);
 
     await assertUtils.createDelay(500);
-    assert.ok(server._goalHandles.size, 3);
+    assert.strictEqual(server._goalHandles.size, 3);
 
-    await assertUtils.createDelay(1000);
-    assert.ok(server._goalHandles.size, 0);
+    // Snapshot the accepted goal UUIDs before expiration
+    const acceptedUuids = Array.from(server._goalHandles.keys()).sort();
+
+    await assertUtils.createDelay(3000);
+    assert.strictEqual(server._goalHandles.size, 0);
+
+    // Verify the expired goal info deserialized from the native buffer
+    assert.strictEqual(expiredGoalInfos.length, 3);
+
+    const expiredUuids = expiredGoalInfos.map((g) => g.uuid).sort();
+
+    // Each UUID must be non-zero (the original bug produced all-zero UUIDs)
+    for (const info of expiredGoalInfos) {
+      assert.notStrictEqual(info.uuid, Array(16).fill(0).join(','));
+    }
+
+    // All 3 UUIDs must be unique (3 distinct goals)
+    assert.strictEqual(new Set(expiredUuids).size, 3);
+
+    // The expired UUIDs must match the originally accepted ones
+    assert.deepStrictEqual(expiredUuids, acceptedUuids);
+
+    // Each expired goal must have a non-zero acceptance stamp
+    for (const info of expiredGoalInfos) {
+      assert.ok(
+        info.stamp.sec > 0 || info.stamp.nanosec > 0,
+        `Expected non-zero stamp, got sec=${info.stamp.sec} nanosec=${info.stamp.nanosec}`
+      );
+    }
 
     server.destroy();
   });

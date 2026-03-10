@@ -49,9 +49,15 @@ jobs:
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
-    - name: Install test-msgs on Linux
+    - name: Install test-msgs and mrpt_msgs on Linux
       run: |
-        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
+        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs ros-${{ matrix.ros_distribution }}-mrpt-msgs
+        # Adjust dependencies based on Ubuntu version
+        LIBASOUND_PKG="libasound2"
+        if grep -q "24.04" /etc/os-release; then
+          LIBASOUND_PKG="libasound2t64"
+        fi
+        sudo apt install -y xvfb libgtk-3-0 libnss3 $LIBASOUND_PKG libgbm-dev
 
     - uses: actions/checkout@v6
 

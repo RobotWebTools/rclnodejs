@@ -85,49 +85,55 @@ describe('type description service test suite', function () {
   });
 
   it('Test type description service configured by parameter', function (done) {
-    exec(
-      'ros2 param list /test_type_description_service',
-      (error, stdout, stderr) => {
-        if (error || stderr) {
-          done(
-            new Error(
-              'Test type description service configured by parameter failed.'
-            )
-          );
+    setTimeout(() => {
+      exec(
+        'ros2 param list /test_type_description_service',
+        (error, stdout, stderr) => {
+          if (error || stderr) {
+            done(
+              new Error(
+                `Test type description service configured by parameter failed. Error: ${error}, Stderr: ${stderr}`
+              )
+            );
+            return;
+          }
+          if (stdout.includes('start_type_description_service')) {
+            done();
+          } else {
+            done(
+              new Error("'start_type_description_service' not found in stdout.")
+            );
+          }
         }
-        if (stdout.includes('start_type_description_service')) {
-          done();
-        } else {
-          done(
-            new Error("'start_type_description_service' not found in stdout.")
-          );
-        }
-      }
-    );
+      );
+    }, 1000);
   });
 
   it('Test start_type_description_service parameter value', function (done) {
-    exec(
-      'ros2 param get /test_type_description_service start_type_description_service',
-      (error, stdout, stderr) => {
-        if (error || stderr) {
-          done(
-            new Error(
-              'Test type description service configured by parameter failed.'
-            )
-          );
+    setTimeout(() => {
+      exec(
+        'ros2 param get /test_type_description_service start_type_description_service',
+        (error, stdout, stderr) => {
+          if (error || stderr) {
+            done(
+              new Error(
+                `Test type description service configured by parameter failed. Error: ${error}, Stderr: ${stderr}`
+              )
+            );
+            return;
+          }
+          if (stdout.includes('Boolean value is: True')) {
+            done();
+          } else {
+            console.log(stdout);
+            done(
+              new Error(
+                "'start_type_description_service param value' not found in stdout."
+              )
+            );
+          }
         }
-        if (stdout.includes('Boolean value is: True')) {
-          done();
-        } else {
-          console.log(stdout);
-          done(
-            new Error(
-              "'start_type_description_service param value' not found in stdout."
-            )
-          );
-        }
-      }
-    );
+      );
+    }, 1000);
   });
 });

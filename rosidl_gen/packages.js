@@ -52,7 +52,12 @@ function getSubFolder(filePath, amentExecuted) {
   }
 
   if (amentExecuted) {
-    return filePath.match(/\w+\/share\/\w+\/(\w+)\//)[1];
+    const match = filePath.match(/\w+\/share\/\w+\/([\w-]+)\//);
+    if (match) {
+      // Handle non-standard subfolder names (e.g., msg-common, msg-ros2)
+      // by extracting only the base interface type before any hyphen.
+      return match[1].split('-')[0];
+    }
   }
   // If the |amentExecuted| equals to false, the file's extension will be assigned as
   // the name of sub folder.
@@ -145,9 +150,7 @@ async function generateMsgForSrv(filePath, interfaceInfo, pkgMap) {
   const arr = data.split(/-{3,}/);
   if (arr.length == 2) {
     const packagePath = path.join(serviceMsgPath, interfaceInfo.pkgName);
-    if (!fs.existsSync(packagePath)) {
-      fs.mkdirSync(packagePath);
-    }
+    fs.mkdirSync(packagePath, { recursive: true });
 
     await fsp.writeFile(path.join(packagePath, requestMsgName), arr[0]);
     await fsp.writeFile(path.join(packagePath, responseMsgName), arr[1]);
@@ -223,7 +226,7 @@ async function findPackagesInDirectory(dir, useIDL) {
 
     // If there is a folder named 'share' under the root path, we consider that
     // the ament build tool has been executed and |amentExecuted| will be true.
-    fs.access(path.join(dir, 'share'), (err) => {
+    fs.stat(path.join(dir, 'share'), (err) => {
       if (err) {
         amentExecuted = false;
       }

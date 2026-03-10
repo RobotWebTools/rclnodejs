@@ -14,7 +14,7 @@
 
 #include "rcl_bindings.h"
 
-#include <node.h>
+#include <node_version.h>
 #include <rcl/arguments.h>
 #include <rcl/rcl.h>
 

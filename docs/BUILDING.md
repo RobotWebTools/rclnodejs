@@ -4,7 +4,7 @@
 
 1.Install ROS 2 from binary package.
 
-ROS 2 is a cross-platform system, which covers Linux, macOS and Windows, and the `rclnodejs` module is developed against the [`master`](https://github.com/ros2/ros2/blob/master/ros2.repos) branch of ROS 2. You can download the latest binary packages from [ROS 2 build farm](http://ci.ros2.org/view/packaging/) and follow the instructions of [Linux](https://docs.ros.org/en/rolling/Installation/Ubuntu-Install-Debians.html)/[Windows](https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html) to setup the environment (If you want to run your apps on a stable release of ROS 2, e.g. crystal-clemmys, please see the section `Running on Stable Release of ROS 2).
+ROS 2 is a cross-platform system, which covers Linux, macOS and Windows, and the `rclnodejs` module is developed against the [`master`](https://github.com/ros2/ros2/blob/master/ros2.repos) branch of ROS 2. You can download the latest binary packages from [ROS 2 build farm](http://ci.ros2.org/view/packaging/) and follow the instructions of [Linux](https://docs.ros.org/en/rolling/Installation/Ubuntu-Install-Debians.html)/[Windows](https://docs.ros.org/en/rolling/Installation/Windows-Install-Binary.html) to setup the environment. Supported ROS 2 distributions: Rolling, Kilted, Jazzy, and Humble.
 
 2.Build ROS 2 from scratch.
 
@@ -13,7 +13,7 @@ Alternatively, you can build ROS 2 from scratch. Please select the platform you 
 ### Install `Node.js`
 
 **Notice:**
-`rclnodejs` should only be used with node versions between 10.23.1 - 19.x. The lowest LTS Node.js we used to verify the unit tests is `10.23.1`.
+`rclnodejs` requires Node.js version >= 16.13.0.
 
 I install Nodejs from either:
 
@@ -56,11 +56,7 @@ This `Node.js` module is built by [node-gyp](https://www.npmjs.com/package/node-
 npm install
 ```
 
-**Windows-specific**: make sure Python 2.x interpreter is first searched in your `PATH` before running the command. You can change it temporarily by:
-
-```bash
-  set PATH=<path\to\python 2.x>;%PATH%
-```
+**Windows-specific**: make sure a Python 3.x interpreter is available in your `PATH` before running the command, as required by [node-gyp](https://github.com/nodejs/node-gyp#on-windows).
 
 ## Run Unit Tests
 

@@ -3,6 +3,7 @@
 import { expectType, expectAssignable } from 'tsd';
 import * as rclnodejs from 'rclnodejs';
 import { ChildProcess } from 'child_process';
+import { Observable } from 'rxjs';
 
 const NODE_NAME = 'test_node';
 const LIFECYCLE_NODE_NAME = 'lifecycle_test_node';
@@ -27,6 +28,20 @@ expectType<Promise<{ process: ChildProcess }>>(
 expectType<Promise<{ process: ChildProcess }>>(
   rclnodejs.ros2Launch('package_name', 'launch_file', ['arg1', 'arg2'])
 );
+
+// ---- ClockEvent ----
+const clockEvent = new rclnodejs.ClockEvent();
+expectType<rclnodejs.ClockEvent>(clockEvent);
+expectType<Promise<void>>(
+  clockEvent.waitUntilSteady(new rclnodejs.Clock(), 100n)
+);
+expectType<Promise<void>>(
+  clockEvent.waitUntilSystem(new rclnodejs.Clock(), 100n)
+);
+expectType<Promise<void>>(clockEvent.waitUntilRos(new rclnodejs.Clock(), 100n));
+expectType<boolean>(clockEvent.isSet());
+expectType<void>(clockEvent.set());
+expectType<void>(clockEvent.clear());
 
 // ---- DistroUtil ----
 expectType<rclnodejs.DistroUtils.DistroId>(rclnodejs.DistroUtils.getDistroId());
@@ -235,6 +250,32 @@ expectType<boolean>(subscription.clearContentFilter());
 expectType<boolean>(subscription.hasContentFilter());
 expectType<string>(subscription.loggerName);
 
+// ---- ObservableSubscription ----
+const observableSubscription = node.createObservableSubscription(
+  TYPE_CLASS,
+  TOPIC
+);
+expectType<rclnodejs.ObservableSubscription<rclnodejs.std_msgs.msg.String>>(
+  observableSubscription
+);
+expectType<Observable<rclnodejs.std_msgs.msg.String>>(
+  observableSubscription.observable
+);
+expectType<rclnodejs.Subscription>(observableSubscription.subscription);
+expectType<string>(observableSubscription.topic);
+expectType<boolean>(observableSubscription.isDestroyed);
+expectType<void>(observableSubscription.complete());
+expectType<void>(observableSubscription.destroy());
+
+const observableSubscriptionWithOptions = node.createObservableSubscription(
+  TYPE_CLASS,
+  TOPIC,
+  { qos: rclnodejs.QoS.profileDefault }
+);
+expectType<rclnodejs.ObservableSubscription<rclnodejs.std_msgs.msg.String>>(
+  observableSubscriptionWithOptions
+);
+
 // ---- Service ----
 const service = node.createService(
   'example_interfaces/srv/AddTwoInts',
@@ -285,10 +326,13 @@ expectType<bigint>(timer.period);
 expectType<boolean>(timer.isReady());
 expectType<bigint>(timer.timeSinceLastCall());
 expectType<bigint>(timer.timeUntilNextCall());
+expectType<bigint | null>(timer.getNextCallTime());
 expectType<boolean>(timer.isCanceled());
 expectType<void>(timer.cancel());
 expectType<void>(timer.changeTimerPeriod(BigInt(100000)));
 expectType<bigint>(timer.timerPeriod());
+expectType<void>(timer.setOnResetCallback((_events: number) => {}));
+expectType<void>(timer.clearOnResetCallback());
 expectType<object>(timer.callTimerWithInfo());
 
 // ---- Rate ----
@@ -345,6 +389,56 @@ const clock = new rclnodejs.Clock(rclnodejs.ClockType.SYSTEM_TIME);
 expectType<rclnodejs.Clock>(clock);
 expectType<rclnodejs.ClockType>(clock.clockType);
 expectType<rclnodejs.Time>(clock.now());
+expectType<void>(clock.addClockCallback({}, true, 0n, 0n));
+expectType<void>(clock.removeClockCallback({}));
+
+// Clock sleep methods
+const sleepDuration = new rclnodejs.Duration(1n, 0n);
+const sleepTargetTime = new rclnodejs.Time(
+  0n,
+  1000000000n,
+  rclnodejs.ClockType.SYSTEM_TIME
+);
+const sleepContext = rclnodejs.Context.defaultContext();
+
+// sleepFor signatures
+expectType<Promise<boolean>>(clock.sleepFor(sleepDuration));
+expectType<Promise<boolean>>(clock.sleepFor(sleepDuration, sleepContext));
+expectType<Promise<boolean>>(clock.sleepFor(sleepDuration, null));
+expectType<Promise<boolean>>(clock.sleepFor(sleepDuration, undefined));
+
+// sleepUntil signatures
+expectType<Promise<boolean>>(clock.sleepUntil(sleepTargetTime));
+expectType<Promise<boolean>>(clock.sleepUntil(sleepTargetTime, sleepContext));
+expectType<Promise<boolean>>(clock.sleepUntil(sleepTargetTime, null));
+expectType<Promise<boolean>>(clock.sleepUntil(sleepTargetTime, undefined));
+
+// ROSClock sleep methods
+const rosClock = new rclnodejs.ROSClock();
+expectType<Promise<boolean>>(rosClock.sleepFor(sleepDuration));
+expectType<Promise<boolean>>(rosClock.sleepUntil(sleepTargetTime));
+
+// ---- ClockChange -----
+expectAssignable<rclnodejs.ClockChange>(
+  rclnodejs.ClockChange.ROS_TIME_NO_CHANGE
+);
+expectAssignable<rclnodejs.ClockChange>(
+  rclnodejs.ClockChange.ROS_TIME_ACTIVATED
+);
+expectAssignable<rclnodejs.ClockChange>(
+  rclnodejs.ClockChange.ROS_TIME_DEACTIVATED
+);
+expectAssignable<rclnodejs.ClockChange>(
+  rclnodejs.ClockChange.SYSTEM_TIME_NO_CHANGE
+);
+
+// ClockChange in callback
+const _clockCallback: rclnodejs.ClockCallbackObject = {
+  _post_callback: (jumpInfo) => {
+    expectType<rclnodejs.ClockChange>(jumpInfo.clock_change);
+    expectType<bigint>(jumpInfo.delta);
+  },
+};
 
 // ---- Logging -----
 const logger = rclnodejs.Logging.getLogger('test_logger');
@@ -378,7 +472,6 @@ const actionClient = new rclnodejs.ActionClient(
 expectType<rclnodejs.ActionClient<'example_interfaces/action/Fibonacci'>>(
   actionClient
 );
-expectType<boolean>(client.isServiceServerAvailable());
 expectType<Promise<boolean>>(actionClient.waitForServer());
 expectType<void>(actionClient.destroy());
 

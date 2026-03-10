@@ -49,9 +49,17 @@ Napi::Value CreateClient(const Napi::CallbackInfo& info) {
       client_ops.qos = *qos_profile;
     }
 
-    THROW_ERROR_IF_NOT_EQUAL(
-        rcl_client_init(client, node, ts, service_name.c_str(), &client_ops),
-        RCL_RET_OK, rcl_get_error_string().str);
+    {
+      rcl_ret_t ret =
+          rcl_client_init(client, node, ts, service_name.c_str(), &client_ops);
+      if (RCL_RET_OK != ret) {
+        std::string error_msg = rcl_get_error_string().str;
+        rcl_reset_error();
+        free(client);
+        Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+        return env.Undefined();
+      }
+    }
 
     auto js_obj = RclHandle::NewInstance(
         env, client, node_handle, [node, env](void* ptr) {
@@ -80,7 +88,7 @@ Napi::Value SendRequest(const Napi::CallbackInfo& info) {
   THROW_ERROR_IF_NOT_EQUAL(rcl_send_request(client, buffer, &sequence_number),
                            RCL_RET_OK, rcl_get_error_string().str);
 
-  return Napi::Number::New(env, static_cast<uint32_t>(sequence_number));
+  return Napi::Number::New(env, static_cast<double>(sequence_number));
 }
 
 Napi::Value RclTakeResponse(const Napi::CallbackInfo& info) {
@@ -96,7 +104,7 @@ Napi::Value RclTakeResponse(const Napi::CallbackInfo& info) {
   int64_t sequence_number = header.request_id.sequence_number;
 
   if (ret == RCL_RET_OK) {
-    return Napi::Number::New(env, static_cast<uint32_t>(sequence_number));
+    return Napi::Number::New(env, static_cast<double>(sequence_number));
   }
 
   rcl_reset_error();

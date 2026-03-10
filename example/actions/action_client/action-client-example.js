@@ -53,9 +53,11 @@ class FibonacciActionClient {
     if (goalHandle.isSucceeded()) {
       this._node
         .getLogger()
-        .info(`Goal suceeded with result: ${result.sequence}`);
+        .info(`Goal succeeded with result: ${result.sequence}`);
     } else {
-      this._node.getLogger().info(`Goal failed with status: ${status}`);
+      this._node
+        .getLogger()
+        .info(`Goal failed with status: ${goalHandle.status}`);
     }
 
     rclnodejs.shutdown();

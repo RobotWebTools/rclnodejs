@@ -224,10 +224,17 @@ Napi::Value CreateNode(const Napi::CallbackInfo& info) {
     options.rosout_qos = *qos_profile;
   }
 
-  THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK,
-                           rcl_node_init(node, node_name.c_str(),
-                                         name_space.c_str(), context, &options),
-                           rcl_get_error_string().str);
+  {
+    rcl_ret_t ret = rcl_node_init(node, node_name.c_str(), name_space.c_str(),
+                                  context, &options);
+    if (RCL_RET_OK != ret) {
+      std::string error_msg = rcl_get_error_string().str;
+      rcl_reset_error();
+      free(node);
+      Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+  }
 
   auto handle = RclHandle::NewInstance(env, node, nullptr, [env](void* ptr) {
     rcl_node_t* node = reinterpret_cast<rcl_node_t*>(ptr);

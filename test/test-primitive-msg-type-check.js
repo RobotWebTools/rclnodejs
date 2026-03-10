@@ -18,6 +18,9 @@ const assert = require('assert');
 const rclnodejs = require('../index.js');
 const assertThrowsError = require('./utils.js').assertThrowsError;
 
+// In IDL mode, .msg 'char' type is mapped to 'uint8' (they are identical in IDL spec)
+const useIDL = process.argv.includes('--idl');
+
 describe('Rclnodejs message type data testing', function () {
   this.timeout(60 * 1000);
 
@@ -60,22 +63,42 @@ describe('Rclnodejs message type data testing', function () {
     assert.deepStrictEqual(typeof msg.data, 'number');
     assert.deepStrictEqual(msg.data, 65);
 
-    assertThrowsError(
-      () => {
-        msg.data = -129;
-      },
-      [TypeError, RangeError],
-      'out of bounds',
-      'Char should be in [-128, 127]'
-    );
-    assertThrowsError(
-      () => {
-        msg.data = 128;
-      },
-      [TypeError, RangeError],
-      'out of bounds',
-      'Char should be in [-128, 127]'
-    );
+    if (useIDL) {
+      // In IDL mode, Char is uint8 [0, 255]
+      assertThrowsError(
+        () => {
+          msg.data = -1;
+        },
+        [TypeError, RangeError],
+        'out of range',
+        'Char (uint8) should be in [0, 255]'
+      );
+      assertThrowsError(
+        () => {
+          msg.data = 256;
+        },
+        [TypeError, RangeError],
+        'out of range',
+        'Char (uint8) should be in [0, 255]'
+      );
+    } else {
+      assertThrowsError(
+        () => {
+          msg.data = -129;
+        },
+        [TypeError, RangeError],
+        'out of bounds',
+        'Char should be in [-128, 127]'
+      );
+      assertThrowsError(
+        () => {
+          msg.data = 128;
+        },
+        [TypeError, RangeError],
+        'out of bounds',
+        'Char should be in [-128, 127]'
+      );
+    }
   });
 
   it('Byte data checking', function () {

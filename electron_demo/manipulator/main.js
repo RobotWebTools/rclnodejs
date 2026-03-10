@@ -13,12 +13,18 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const rclnodejs = require('rclnodejs');
 
+// Fix for WebGL/GPU rendering issues on Linux environment
+// Forces software rendering (SwiftShader) if hardware acceleration fails
+app.commandLine.appendSwitch('ignore-gpu-blocklist');
+app.commandLine.appendSwitch('disable-gpu-sandbox');
+
 let mainWindow;
 let manipulatorNode;
 let jointStatePublisher;
 let jointStateSubscriber;
 let isAnimating = false;
 let animationInterval;
+let publishingInterval;
 
 // Current joint positions (in radians)
 let currentJointPositions = {
@@ -74,6 +80,9 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     // Clean up ROS2 resources
+    if (publishingInterval) {
+      clearInterval(publishingInterval);
+    }
     if (animationInterval) {
       clearInterval(animationInterval);
     }
@@ -126,7 +135,7 @@ async function initializeROS2() {
 
 function startJointStatePublishing() {
   // Publish joint states at 10 Hz
-  setInterval(() => {
+  publishingInterval = setInterval(() => {
     publishJointStates();
   }, 100); // 100ms = 10 Hz
 }

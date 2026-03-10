@@ -53,9 +53,15 @@ jobs:
         required-ros-distributions: ${{ matrix.ros_distribution }}
         use-ros2-testing: ${{ matrix.ros_distribution == 'rolling' }}
 
-    - name: Install test-msgs on Linux
+    - name: Install test-msgs and mrpt_msgs on Linux
       run: |
-        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs
+        sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs ros-${{ matrix.ros_distribution }}-mrpt-msgs
+        # Adjust dependencies based on Ubuntu version
+        LIBASOUND_PKG="libasound2"
+        if grep -q "24.04" /etc/os-release; then
+          LIBASOUND_PKG="libasound2t64"
+        fi
+        sudo apt install -y xvfb libgtk-3-0 libnss3 $LIBASOUND_PKG libgbm-dev
 
     - uses: actions/checkout@v6
 
@@ -76,21 +82,8 @@ jobs:
         npm run test-idl
         npm run clean
 
-    - name: Coveralls Parallel
+    - name: Coveralls
       if: ${{ matrix.ros_distribution == 'rolling' && matrix['node-version'] == '24.X' }}
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        flag-name: run-${{ inputs.trigger_type }}-${{ matrix.node-version }}-${{ matrix.architecture }}
-        parallel: true
-
-  finish:
-      needs: build
-      if: always()
-      runs-on: ubuntu-latest
-      steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true

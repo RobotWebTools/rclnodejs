@@ -17,7 +17,9 @@
 const DistroUtils = require('./lib/distro.js');
 const RMWUtils = require('./lib/rmw.js');
 const { Clock, ROSClock } = require('./lib/clock.js');
+const ClockEvent = require('./lib/clock_event.js');
 const ClockType = require('./lib/clock_type.js');
+const ClockChange = require('./lib/clock_change.js');
 const { compareVersions } = require('./lib/utils.js');
 const Context = require('./lib/context.js');
 const debug = require('debug')('rclnodejs');
@@ -61,6 +63,8 @@ const {
 const ParameterClient = require('./lib/parameter_client.js');
 const errors = require('./lib/errors.js');
 const ParameterWatcher = require('./lib/parameter_watcher.js');
+const MessageIntrospector = require('./lib/message_introspector.js');
+const ObservableSubscription = require('./lib/observable_subscription.js');
 const { spawn } = require('child_process');
 const {
   ValidationProblem,
@@ -81,7 +85,7 @@ async function getCurrentGeneratorVersion() {
   const jsonFilePath = path.join(generator.generatedRoot, 'generator.json');
 
   return new Promise((resolve, reject) => {
-    fs.open(jsonFilePath, 'r', (err) => {
+    fs.readFile(jsonFilePath, 'utf8', (err, data) => {
       if (err) {
         if (err.code === 'ENOENT') {
           resolve(null);
@@ -89,13 +93,11 @@ async function getCurrentGeneratorVersion() {
           reject(err);
         }
       } else {
-        fs.readFile(jsonFilePath, 'utf8', (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(JSON.parse(data).version);
-          }
-        });
+        try {
+          resolve(JSON.parse(data).version);
+        } catch (parseErr) {
+          reject(parseErr);
+        }
       }
     });
   });
@@ -187,8 +189,14 @@ let rcl = {
   /** {@link Clock} class */
   Clock: Clock,
 
+  /** {@link ClockEvent} class */
+  ClockEvent: ClockEvent,
+
   /** {@link ClockType} enum */
   ClockType: ClockType,
+
+  /** {@link ClockChange} enum */
+  ClockChange: ClockChange,
 
   /** {@link Context} class */
   Context: Context,
@@ -234,6 +242,9 @@ let rcl = {
 
   /** {@link ParameterWatcher} class */
   ParameterWatcher: ParameterWatcher,
+
+  /** {@link ObservableSubscription} class */
+  ObservableSubscription: ObservableSubscription,
 
   /** {@link QoS} class */
   QoS: QoS,
@@ -376,23 +387,35 @@ let rcl = {
 
     rclnodejs.init(context.handle, argv, context._domainId);
 
-    if (_rosVersionChecked) {
-      // no further processing required
-      return;
-    }
+    try {
+      if (_rosVersionChecked) {
+        // no further processing required
+        return;
+      }
 
-    const version = await getCurrentGeneratorVersion();
-    const forced =
-      version === null || compareVersions(version, generator.version(), '<');
-    if (forced) {
-      debug(
-        'The generator will begin to create JavaScript code from ROS IDL files...'
-      );
-    }
+      const version = await getCurrentGeneratorVersion();
+      const forced =
+        version === null || compareVersions(version, generator.version(), '<');
+      if (forced) {
+        debug(
+          'The generator will begin to create JavaScript code from ROS IDL files...'
+        );
+      }
 
-    await generator.generateAll(forced);
-    // TODO determine if tsd generateAll() should be here
-    _rosVersionChecked = true;
+      await generator.generateAll(forced);
+      // TODO determine if tsd generateAll() should be here
+      _rosVersionChecked = true;
+    } catch (error) {
+      try {
+        context.tryShutdown();
+      } catch (shutdownError) {
+        const initError =
+          error instanceof Error ? error : new Error(String(error));
+        initError.message += ` (rollback also failed: ${shutdownError.message})`;
+        throw initError;
+      }
+      throw error;
+    }
   },
 
   /**
@@ -721,3 +744,6 @@ const Lifecycle = require('./lib/lifecycle.js');
 
 /** Lifecycle namespace */
 rcl.lifecycle = Lifecycle;
+
+/** {@link MessageIntrospector} class */
+rcl.MessageIntrospector = MessageIntrospector;

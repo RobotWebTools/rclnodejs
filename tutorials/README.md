@@ -38,6 +38,10 @@ Debug and monitor service interactions in real-time. Learn to observe service ca
 
 Reduce network traffic and improve performance by filtering messages at the DDS middleware level using SQL-like expressions. Essential for high-frequency data streams.
 
+#### [Observable Subscriptions with RxJS](observable-subscriptions.md)
+
+Use RxJS Observables for reactive programming with ROS 2 subscriptions. Apply operators like `throttleTime()`, `combineLatest()`, and `filter()` to process message streams declaratively.
+
 ### 🔍 Introspection & Debugging
 
 #### [Type Description Service](type-description-service.md)

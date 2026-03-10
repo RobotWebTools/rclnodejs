@@ -17,6 +17,10 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
+// In IDL mode, .msg 'char' type is mapped to 'uint8' (they are identical in IDL spec)
+const useIDL = process.argv.includes('--idl');
+const CharArrayType = useIDL ? Uint8Array : Int8Array;
+
 describe('Test bounded sequeces', function () {
   this.timeout(60 * 1000);
 
@@ -39,7 +43,7 @@ describe('Test bounded sequeces', function () {
   const msg = {
     bool_values: [true, false],
     byte_values: Uint8Array.from([127, 125]),
-    char_values: Int8Array.from([127, 125]),
+    char_values: CharArrayType.from([127, 125]),
     float32_values: Float32Array.from([1.1, 2.2, 3.3]),
     float64_values: Float64Array.from([1.1, 2.2]),
     int8_values: Int8Array.from([1, 2]),
@@ -60,7 +64,7 @@ describe('Test bounded sequeces', function () {
   const expected = {
     bool_values: [true, false],
     byte_values: Uint8Array.from([127, 125]),
-    char_values: Int8Array.from([127, 125]),
+    char_values: CharArrayType.from([127, 125]),
     float32_values: Float32Array.from([1.1, 2.2, 3.3]),
     float64_values: Float64Array.from([1.1, 2.2]),
     int8_values: Int8Array.from([1, 2]),
@@ -77,7 +81,7 @@ describe('Test bounded sequeces', function () {
     basic_types_values: [primitives, primitives],
     bool_values_default: [false, true, false],
     byte_values_default: Uint8Array.from([0, 1, 255]),
-    char_values_default: Int8Array.from([0, 1, 127]),
+    char_values_default: CharArrayType.from([0, 1, 127]),
     float32_values_default: Float32Array.from([1.125, 0, -1.125]),
     float64_values_default: Float64Array.from([3.1415, 0, -3.1415]),
     int16_values_default: Int16Array.from([0, 32767, -32768]),

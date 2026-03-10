@@ -11,6 +11,8 @@
 // limitations under the License.
 
 const { ipcRenderer } = require('electron');
+const process = require('process');
+const THREE = require('three');
 
 // Three.js scene components
 let scene, camera, renderer, controls;
@@ -28,6 +30,16 @@ let jointAngles = {
 
 // Initialize the 3D scene
 function initScene() {
+  const versionDiv = document.createElement('div');
+  versionDiv.style.position = 'absolute';
+  versionDiv.style.bottom = '10px';
+  versionDiv.style.right = '10px';
+  versionDiv.style.color = 'white';
+  versionDiv.style.fontFamily = 'Arial, sans-serif';
+  versionDiv.style.zIndex = '1000';
+  versionDiv.innerText = 'Electron version: ' + process.versions.electron;
+  document.body.appendChild(versionDiv);
+
   const container = document.getElementById('canvas-container');
 
   // Scene setup
@@ -358,6 +370,15 @@ window.addEventListener('resize', () => {
 
 // UI event handlers
 document.addEventListener('DOMContentLoaded', () => {
+  const replaceText = (selector, text) => {
+    const element = document.getElementById(selector);
+    if (element) element.innerText = text;
+  };
+
+  for (const type of ['chrome', 'node', 'electron']) {
+    replaceText(`${type}-version`, process.versions[type] || 'Unavailable');
+  }
+
   initScene();
   setupUIEventHandlers();
   startFrequencyMeasurement();
