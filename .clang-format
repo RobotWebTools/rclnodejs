@@ -1,2 +1,14 @@
 BasedOnStyle: Google
-Standard: Cpp11
+Standard: c++17
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:    '^<ext/.*\.h>'
+    Priority: 2
+  - Regex:    '^<.*\.h>'
+    Priority: 1
+  - Regex:    '^<[^./]+>'
+    Priority: 2
+  - Regex:    '^<.*'
+    Priority: 3
+  - Regex:    '.*'
+    Priority: 4
