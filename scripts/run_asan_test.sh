@@ -34,6 +34,12 @@ for arg in "$@"; do
   fi
 done
 
+if [[ $NEXT_IS_EXCLUDE -eq 1 ]]; then
+  echo "Error: --exclude requires a test file argument"
+  echo "Usage: bash scripts/run_asan_test.sh --exclude test/test-foo.js"
+  exit 1
+fi
+
 # Step 1: Build with ASan
 if [[ $DO_BUILD -eq 1 ]]; then
   echo "=== Building with AddressSanitizer ==="
@@ -64,6 +70,11 @@ PREBUILDS_DIR="$PROJECT_DIR/prebuilds"
 PREBUILDS_BAK="$PROJECT_DIR/.prebuilds_asan_bak"
 MOVED_PREBUILDS=0
 if [[ -d "$PREBUILDS_DIR" ]]; then
+  if [[ -d "$PREBUILDS_BAK" ]]; then
+    echo "Error: $PREBUILDS_BAK already exists (previous interrupted run?)."
+    echo "Please remove it manually and retry: rm -rf $PREBUILDS_BAK"
+    exit 1
+  fi
   mv "$PREBUILDS_DIR" "$PREBUILDS_BAK"
   MOVED_PREBUILDS=1
 fi
