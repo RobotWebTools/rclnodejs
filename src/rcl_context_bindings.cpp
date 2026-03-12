@@ -54,6 +54,7 @@ Napi::Value Init(const Napi::CallbackInfo& info) {
   Napi::Array jsArgv = info[1].As<Napi::Array>();
   size_t argc = jsArgv.Length();
   char** argv = AbstractArgsFromNapiArray(jsArgv);
+  RCPPUTILS_SCOPE_EXIT({ FreeArgs(argv, argc); });
 
   // Set up the domain id.
   size_t domain_id = RCL_DEFAULT_DOMAIN_ID;
@@ -82,7 +83,6 @@ Napi::Value Init(const Napi::CallbackInfo& info) {
       RCL_RET_OK, rcl_logging_configure(&context->global_arguments, &allocator),
       rcl_get_error_string().str);
 
-  RCPPUTILS_SCOPE_EXIT({ FreeArgs(argv, argc); });
   return env.Undefined();
 }
 
