@@ -116,7 +116,7 @@ void Executor::Stop() {
                  // Important Notice:
                  //  This might be called after Executor::~Executor()
                  //  Don't free Executor::async_ in Executor's dtor
-                 delete async;
+                 delete reinterpret_cast<uv_async_t*>(async);
                  handle_closed = true;
                });
       while (!handle_closed) uv_run(uv_default_loop(), UV_RUN_ONCE);

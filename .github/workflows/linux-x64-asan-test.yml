@@ -1,0 +1,47 @@
+name: ASan Memory Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  asan:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:noble
+    steps:
+    - name: Setup Node.js 24.X
+      uses: actions/setup-node@v6
+      with:
+        node-version: 24.X
+        architecture: x64
+
+    - name: Setup ROS2 Jazzy
+      uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: jazzy
+
+    - name: Install test dependencies
+      run: |
+        sudo apt install -y ros-jazzy-test-msgs ros-jazzy-mrpt-msgs
+
+    - uses: actions/checkout@v6
+
+    - name: Install npm dependencies
+      run: |
+        source /opt/ros/jazzy/setup.bash
+        npm i
+
+    - name: Build and test with AddressSanitizer
+      run: |
+        source /opt/ros/jazzy/setup.bash
+        npm run test:asan
