@@ -33,6 +33,39 @@ function getNodeVersionInfo() {
     .map((x) => parseInt(x));
 }
 
+function runCommand(command, args, options) {
+  const result = childProcess.spawnSync(command, args, options);
+  if (
+    result.error ||
+    (typeof result.status === 'number' && result.status !== 0)
+  ) {
+    const parts = [
+      `Failed to run: ${command} ${Array.isArray(args) ? args.join(' ') : ''}`,
+    ];
+    if (
+      result.error &&
+      result.error.code === 'ETIMEDOUT' &&
+      options &&
+      options.timeout
+    ) {
+      parts.push(`Command timed out after ${options.timeout} ms`);
+    } else if (result.error) {
+      parts.push(`Error: ${result.error.message}`);
+    }
+    if (typeof result.status === 'number' && result.status !== 0) {
+      parts.push(`Exit status: ${result.status}`);
+    }
+    if (result.stdout) {
+      parts.push(`stdout:\n${result.stdout.toString()}`);
+    }
+    if (result.stderr) {
+      parts.push(`stderr:\n${result.stderr.toString()}`);
+    }
+    throw new Error(parts.join('\n'));
+  }
+  return result;
+}
+
 describe('rclnodejs generate-messages binary-script tests', function () {
   let cwd;
   let tmpPkg;
@@ -62,7 +95,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
       cwd: this.tmpPkg,
       timeout: 60 * 1000,
     });
-    childProcess.spawnSync('npm', ['pack', this.cwd], {
+    runCommand('npm', ['pack', this.cwd], {
       // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
@@ -82,7 +115,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
       return;
     }
     let tgzPath = path.join(this.tmpPkg, tgz);
-    childProcess.spawnSync('npm', ['install', tgzPath], {
+    runCommand('npm', ['install', tgzPath], {
       // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
@@ -117,7 +150,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
 
   it('test generate-ros-messages script operation', function (done) {
     let script = createScriptFolderPath(this.tmpPkg);
-    childProcess.spawnSync(script, args, {
+    runCommand(script, args, {
       // stdio: 'inherit',
       shell: true,
       timeout: 120 * 1000,
@@ -136,7 +169,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
   });
 
   it('test npx generate-ros-messages script operation', function (done) {
-    childProcess.spawnSync('npx', [SCRIPT_NAME, ...args], {
+    runCommand('npx', [SCRIPT_NAME, ...args], {
       // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
