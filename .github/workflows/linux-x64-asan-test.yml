@@ -1,4 +1,4 @@
-name: ASan Memory Test
+name: ASan
 
 on:
   push:
