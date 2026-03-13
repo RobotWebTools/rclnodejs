@@ -28,10 +28,32 @@ console.log('Launching Electron to run test_usability.js...');
 const child = spawn(command, args, {
   stdio: 'inherit',
   env: { ...process.env, ELECTRON_ENABLE_LOGGING: true },
+  detached: true,
 });
 
-child.on('close', (code) => {
-  console.log(`Electron process exited with code ${code}`);
+// Kill the child process tree if it doesn't exit within 30 seconds
+const killTimeout = setTimeout(() => {
+  console.error('Electron process did not exit in time, killing...');
+  try {
+    process.kill(-child.pid, 'SIGKILL');
+  } catch (err) {
+    try {
+      child.kill('SIGKILL');
+    } catch (e) {
+      // Process already dead
+    }
+  }
+}, 30 * 1000);
+
+child.on('close', (code, signal) => {
+  clearTimeout(killTimeout);
+  if (code !== null) {
+    console.log(`Electron process exited with code ${code}`);
+  } else {
+    console.log(
+      `Electron process was terminated by signal ${signal || 'unknown'}`
+    );
+  }
   if (code === 0) {
     console.log('Test Passed!');
     process.exit(0);
