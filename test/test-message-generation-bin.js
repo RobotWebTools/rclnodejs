@@ -60,11 +60,13 @@ describe('rclnodejs generate-messages binary-script tests', function () {
       // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
+      timeout: 60 * 1000,
     });
     childProcess.spawnSync('npm', ['pack', this.cwd], {
       // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
+      timeout: 120 * 1000,
     });
 
     let tgz;
@@ -84,6 +86,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
       // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
+      timeout: 300 * 1000,
     });
 
     let generatedFolderPath = createGeneratedFolderPath(this.tmpPkg);
@@ -117,6 +120,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
     childProcess.spawnSync(script, args, {
       // stdio: 'inherit',
       shell: true,
+      timeout: 120 * 1000,
     });
 
     let generatedFolderPath = createGeneratedFolderPath(this.tmpPkg);
@@ -136,6 +140,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
       // stdio: 'inherit',
       shell: true,
       cwd: this.tmpPkg,
+      timeout: 120 * 1000,
     });
 
     let generatedFolderPath = createGeneratedFolderPath(this.tmpPkg);

@@ -30,7 +30,14 @@ const child = spawn(command, args, {
   env: { ...process.env, ELECTRON_ENABLE_LOGGING: true },
 });
 
+// Kill the child process if it doesn't exit within 30 seconds
+const killTimeout = setTimeout(() => {
+  console.error('Electron process did not exit in time, killing...');
+  child.kill('SIGKILL');
+}, 30 * 1000);
+
 child.on('close', (code) => {
+  clearTimeout(killTimeout);
   console.log(`Electron process exited with code ${code}`);
   if (code === 0) {
     console.log('Test Passed!');
