@@ -20,9 +20,6 @@ jobs:
           - jazzy
           - kilted
           - rolling
-        include:
-          - ros_distribution: jazzy
-            ros_binary_url: https://github.com/ros2/ros2/releases/download/release-jazzy-20260128/ros2-jazzy-20260128-windows-release-amd64.zip
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
@@ -39,19 +36,6 @@ jobs:
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
-    - name: Install 7-Zip and wget
-      if: ${{ matrix.ros_distribution == 'jazzy' }}
-      shell: powershell
-      run: |
-        choco install 7zip wget -y
-
-    - name: Download ROS2 Jazzy binary
-      if: ${{ matrix.ros_distribution == 'jazzy' }}
-      shell: bash
-      run: |
-        wget --quiet ${{ matrix.ros_binary_url }} -O jazzy.zip
-        7z x jazzy.zip -y -o/c/dev/jazzy
-
     - name: Prebuild - Setup VS Dev Environment
       uses: seanmiddleditch/gha-setup-vsdevenv@v4
 
@@ -67,5 +51,5 @@ jobs:
       if: ${{ matrix.ros_distribution == 'jazzy' }}
       shell: cmd
       run: |
-        call "c:\dev\jazzy\ros2-windows\setup.bat"
+        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
         npm test
