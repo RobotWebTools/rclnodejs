@@ -67,5 +67,5 @@ jobs:
       if: ${{ matrix.ros_distribution == 'jazzy' }}
       shell: cmd
       run: |
-        call "c:\dev\jazzy\ros2-windows\local_setup.bat"
+        call "c:\dev\jazzy\ros2-windows\setup.bat"
         npm test
