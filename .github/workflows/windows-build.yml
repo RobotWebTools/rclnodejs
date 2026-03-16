@@ -53,4 +53,3 @@ jobs:
         set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
         npm i
-
