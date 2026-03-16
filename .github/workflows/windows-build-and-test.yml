@@ -20,6 +20,9 @@ jobs:
           - jazzy
           - kilted
           - rolling
+        include:
+          - ros_distribution: jazzy
+            ros_binary_url: https://github.com/ros2/ros2/releases/download/release-jazzy-20260128/ros2-jazzy-20260128-windows-release-amd64.zip
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
@@ -36,12 +39,18 @@ jobs:
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
-    - name: Install ROS2 Rolling (Conditional)
-      if: ${{ matrix.ros_distribution == 'rolling' }}
+    - name: Install 7-Zip and wget
+      if: ${{ matrix.ros_distribution == 'jazzy' }}
+      shell: powershell
+      run: |
+        choco install 7zip wget -y
+
+    - name: Download ROS2 Jazzy binary
+      if: ${{ matrix.ros_distribution == 'jazzy' }}
       shell: bash
       run: |
-        wget --quiet https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip -O rolling.zip
-        7z x rolling.zip -y -o/c/dev/rolling
+        wget --quiet ${{ matrix.ros_binary_url }} -O jazzy.zip
+        7z x jazzy.zip -y -o/c/dev/jazzy
 
     - name: Prebuild - Setup VS Dev Environment
       uses: seanmiddleditch/gha-setup-vsdevenv@v4
@@ -51,14 +60,12 @@ jobs:
     - name: Build rclnodejs
       shell: cmd
       run: |
-        set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
         npm i
 
-    # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround
-    # an error when loading the default fastrtps ddl
     - name: Test rclnodejs
+      if: ${{ matrix.ros_distribution == 'jazzy' }}
       shell: cmd
       run: |
-        set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
+        call "c:\dev\jazzy\ros2-windows\local_setup.bat"
+        npm test
