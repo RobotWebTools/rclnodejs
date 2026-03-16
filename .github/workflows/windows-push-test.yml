@@ -15,3 +15,9 @@ jobs:
     with:
       trigger_type: "push"
     secrets: inherit
+
+  jazzy-build-and-test:
+    uses: ./.github/workflows/windows-jazzy-build-and-test.yml
+    with:
+      trigger_type: "push"
+    secrets: inherit

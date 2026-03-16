@@ -1,0 +1,57 @@
+name: Windows Jazzy Build and Test (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      trigger_type:
+        description: 'Type of trigger (pr or push)'
+        required: true
+        type: string
+
+jobs:
+  build-and-test:
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [24.X]
+    steps:
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install pixi
+      shell: powershell
+      run: |
+        irm -useb https://pixi.sh/install.ps1 | iex
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","User") + ";" + [System.Environment]::GetEnvironmentVariable("Path","Machine")
+        Write-Host "Pixi installed at: $(where.exe pixi)"
+
+    - name: Install ROS2 Jazzy dependencies
+      shell: powershell
+      run: |
+        choco install 7zip wget -y
+        wget --quiet https://github.com/ros2/ros2/releases/download/release-jazzy-20260128/ros2-jazzy-20260128-windows-release-amd64.zip -O jazzy.zip
+        7z x jazzy.zip -y -oC:\pixi_ws\ros2-windows
+        irm https://raw.githubusercontent.com/ros2/ros2/refs/heads/jazzy/pixi.toml -OutFile C:\pixi_ws\pixi.toml
+        Push-Location C:\pixi_ws
+        & "$env:USERPROFILE\.pixi\bin\pixi.exe" install
+        Pop-Location
+
+    - name: Prebuild - Setup VS Dev Environment
+      uses: seanmiddleditch/gha-setup-vsdevenv@v4
+
+    - uses: actions/checkout@v6
+
+    - name: Build rclnodejs
+      shell: cmd
+      run: |
+        cd /d C:\pixi_ws
+        %USERPROFILE%\.pixi\bin\pixi.exe run cmd /c "call C:\pixi_ws\ros2-windows\local_setup.bat && cd /d %GITHUB_WORKSPACE% && npm i"
+
+    - name: Test rclnodejs
+      shell: cmd
+      run: |
+        cd /d C:\pixi_ws
+        %USERPROFILE%\.pixi\bin\pixi.exe run cmd /c "call C:\pixi_ws\ros2-windows\local_setup.bat && cd /d %GITHUB_WORKSPACE% && npm test"

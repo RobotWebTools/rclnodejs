@@ -17,7 +17,6 @@ jobs:
         node-version: [24.X]
         ros_distribution:
           - humble
-          - jazzy
           - kilted
           - rolling
     steps:
@@ -36,48 +35,29 @@ jobs:
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
-    - name: Install pixi and ROS2 dependencies
-      if: ${{ matrix.ros_distribution == 'jazzy' }}
-      shell: powershell
+    - name: Install ROS2 Rolling (Conditional)
+      if: ${{ matrix.ros_distribution == 'rolling' }}
+      shell: bash
       run: |
-        irm -useb https://pixi.sh/install.ps1 | iex
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","User") + ";" + [System.Environment]::GetEnvironmentVariable("Path","Machine")
-        choco install 7zip wget -y
-        wget --quiet https://github.com/ros2/ros2/releases/download/release-jazzy-20260128/ros2-jazzy-20260128-windows-release-amd64.zip -O jazzy.zip
-        7z x jazzy.zip -y -oC:\pixi_ws\ros2-windows
-        irm https://raw.githubusercontent.com/ros2/ros2/refs/heads/jazzy/pixi.toml -OutFile C:\pixi_ws\pixi.toml
-        Push-Location C:\pixi_ws
-        & "$env:USERPROFILE\.pixi\bin\pixi.exe" install
-        Pop-Location
+        wget --quiet https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip -O rolling.zip
+        7z x rolling.zip -y -o/c/dev/rolling
 
     - name: Prebuild - Setup VS Dev Environment
       uses: seanmiddleditch/gha-setup-vsdevenv@v4
 
     - uses: actions/checkout@v6
 
-    - name: Build rclnodejs (non-Jazzy)
-      if: ${{ matrix.ros_distribution != 'jazzy' }}
+    - name: Build rclnodejs
       shell: cmd
       run: |
+        set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
         call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
         npm i
 
-    - name: Build rclnodejs (Jazzy)
-      if: ${{ matrix.ros_distribution == 'jazzy' }}
-      shell: cmd
-      run: |
-        cd /d C:\pixi_ws
-        for /f "tokens=*" %%i in ('%USERPROFILE%\.pixi\bin\pixi.exe shell-hook') do call %%i
-        call C:\pixi_ws\ros2-windows\local_setup.bat
-        cd /d %GITHUB_WORKSPACE%
-        npm i
-
+    # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround
+    # an error when loading the default fastrtps ddl
     - name: Test rclnodejs
-      if: ${{ matrix.ros_distribution == 'jazzy' }}
       shell: cmd
       run: |
-        cd /d C:\pixi_ws
-        for /f "tokens=*" %%i in ('%USERPROFILE%\.pixi\bin\pixi.exe shell-hook') do call %%i
-        call C:\pixi_ws\ros2-windows\local_setup.bat
-        cd /d %GITHUB_WORKSPACE%
-        npm test
+        set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
