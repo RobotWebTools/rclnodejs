@@ -1,0 +1,56 @@
+name: Windows Build (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      trigger_type:
+        description: 'Type of trigger (pr or push)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: windows-2025
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [24.X]
+        ros_distribution:
+          - humble
+          - kilted
+          - rolling
+    steps:
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Setup Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Setup ROS2
+      uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: ${{ matrix.ros_distribution }}
+
+    - name: Install ROS2 Rolling (Conditional)
+      if: ${{ matrix.ros_distribution == 'rolling' }}
+      shell: bash
+      run: |
+        wget --quiet https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip -O rolling.zip
+        7z x rolling.zip -y -o/c/dev/rolling
+
+    - name: Prebuild - Setup VS Dev Environment
+      uses: seanmiddleditch/gha-setup-vsdevenv@v4
+
+    - uses: actions/checkout@v6
+
+    - name: Build rclnodejs
+      shell: cmd
+      run: |
+        set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
+        npm i
+
