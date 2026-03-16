@@ -53,6 +53,7 @@ jobs:
     - name: Build rclnodejs
       shell: cmd
       run: |
+        set PATH=C:\pixi_ws\.pixi\envs\default\Library\bin;C:\pixi_ws\.pixi\envs\default\Scripts;C:\pixi_ws\.pixi\envs\default\bin;%PATH%
         set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
         call "C:\pixi_ws\ros2-windows\setup.bat"
         npm i
@@ -60,6 +61,7 @@ jobs:
     - name: Test rclnodejs
       shell: cmd
       run: |
+        set PATH=C:\pixi_ws\.pixi\envs\default\Library\bin;C:\pixi_ws\.pixi\envs\default\Scripts;C:\pixi_ws\.pixi\envs\default\bin;%PATH%
         set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
         call "C:\pixi_ws\ros2-windows\setup.bat"
         npm test
