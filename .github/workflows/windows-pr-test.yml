@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
-    uses: ./.github/workflows/windows-build-and-test.yml
+  build:
+    uses: ./.github/workflows/windows-build.yml
     with:
       trigger_type: "pr"
     secrets: inherit

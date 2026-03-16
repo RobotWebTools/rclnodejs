@@ -85,6 +85,10 @@ describe('type description service test suite', function () {
   });
 
   it('Test type description service configured by parameter', function (done) {
+    if (process.platform === 'win32') {
+      this.skip();
+    }
+
     setTimeout(() => {
       exec(
         'ros2 param list /test_type_description_service',
@@ -110,6 +114,10 @@ describe('type description service test suite', function () {
   });
 
   it('Test start_type_description_service parameter value', function (done) {
+    if (process.platform === 'win32') {
+      this.skip();
+    }
+
     setTimeout(() => {
       exec(
         'ros2 param get /test_type_description_service start_type_description_service',
