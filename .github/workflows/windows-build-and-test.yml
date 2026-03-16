@@ -16,8 +16,6 @@ jobs:
       matrix:
         node-version: [24.X]
         ros_distribution:
-          - humble
-          - kilted
           - rolling
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
