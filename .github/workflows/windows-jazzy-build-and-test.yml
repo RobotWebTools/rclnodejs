@@ -54,10 +54,10 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\pixi_ws
-        %USERPROFILE%\.pixi\bin\pixi.exe run cmd /c "call C:\pixi_ws\ros2-windows\local_setup.bat && set ROS_DISTRO=jazzy && set RMW_IMPLEMENTATION=rmw_fastrtps_cpp && cd /d %GITHUB_WORKSPACE% && npm i"
+        %USERPROFILE%\.pixi\bin\pixi.exe run cmd /c "call C:\pixi_ws\ros2-windows\setup.bat && set ROS_DISTRO=jazzy && set RMW_IMPLEMENTATION=rmw_fastrtps_cpp && cd /d %GITHUB_WORKSPACE% && npm i"
 
     - name: Test rclnodejs
       shell: cmd
       run: |
         cd /d C:\pixi_ws
-        %USERPROFILE%\.pixi\bin\pixi.exe run cmd /c "call C:\pixi_ws\ros2-windows\local_setup.bat && set ROS_DISTRO=jazzy && set RMW_IMPLEMENTATION=rmw_fastrtps_cpp && cd /d %GITHUB_WORKSPACE% && npm test"
+        %USERPROFILE%\.pixi\bin\pixi.exe run cmd /c "call C:\pixi_ws\ros2-windows\setup.bat && set ROS_DISTRO=jazzy && set RMW_IMPLEMENTATION=rmw_fastrtps_cpp && cd /d %GITHUB_WORKSPACE% && npm test"
