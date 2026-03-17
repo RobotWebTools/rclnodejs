@@ -41,11 +41,9 @@ jobs:
         python-version: '3.11'
 
     - name: Install pixi
-      shell: powershell
-      run: |
-        irm -useb https://pixi.sh/install.ps1 | iex
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","User") + ";" + [System.Environment]::GetEnvironmentVariable("Path","Machine")
-        Write-Host "Pixi installed at: $(where.exe pixi)"
+      uses: prefix-dev/setup-pixi@v0.9.4
+      with:
+        run-install: false
 
     - name: Install ROS2 ${{ matrix.ros_distribution }}
       shell: powershell
@@ -56,7 +54,7 @@ jobs:
         7z x ros2.zip -y -oC:\pixi_ws
         Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ros2/ros2/refs/heads/${{ matrix.ros_distribution }}/pixi.toml" -OutFile C:\pixi_ws\pixi.toml
         Push-Location C:\pixi_ws
-        & "$env:USERPROFILE\.pixi\bin\pixi.exe" install
+        pixi install
         Pop-Location
 
     - name: Prebuild - Setup VS Dev Environment

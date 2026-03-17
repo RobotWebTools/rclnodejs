@@ -16,6 +16,7 @@ app.on('ready', () => {
       );
 
       let testDone = false;
+      let interval;
 
       const subscription = node.createSubscription(
         'std_msgs/msg/String',
@@ -36,7 +37,7 @@ app.on('ready', () => {
       console.log('Publisher and Subscriber created.');
 
       // Publish repeatedly until received
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         if (!testDone) {
           publisher.publish('Hello from Electron');
           console.log('Published message...');
