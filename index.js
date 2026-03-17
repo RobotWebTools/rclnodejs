@@ -63,6 +63,7 @@ const {
 const ParameterClient = require('./lib/parameter_client.js');
 const errors = require('./lib/errors.js');
 const ParameterWatcher = require('./lib/parameter_watcher.js');
+const ParameterEventHandler = require('./lib/parameter_event_handler.js');
 const MessageIntrospector = require('./lib/message_introspector.js');
 const ObservableSubscription = require('./lib/observable_subscription.js');
 const { spawn } = require('child_process');
@@ -242,6 +243,9 @@ let rcl = {
 
   /** {@link ParameterWatcher} class */
   ParameterWatcher: ParameterWatcher,
+
+  /** {@link ParameterEventHandler} class */
+  ParameterEventHandler: ParameterEventHandler,
 
   /** {@link ObservableSubscription} class */
   ObservableSubscription: ObservableSubscription,
