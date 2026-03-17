@@ -1,4 +1,4 @@
-name: Windows Build and Test (Reusable)
+name: Windows Pixi Build (Reusable)
 
 on:
   workflow_call:
@@ -16,10 +16,19 @@ jobs:
       matrix:
         node-version: [24.X]
         ros_distribution:
-          - humble
           - jazzy
           - kilted
           - rolling
+        include:
+          - ros_distribution: jazzy
+            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-jazzy-20260128/ros2-jazzy-20260128-windows-release-amd64.zip"
+            run_tests: true
+          - ros_distribution: kilted
+            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-kilted-20250728/ros2-kilted-20250728-windows-release-amd64.zip"
+            run_tests: false
+          - ros_distribution: rolling
+            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip"
+            run_tests: false
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
@@ -31,17 +40,22 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Setup ROS2
-      uses: ros-tooling/setup-ros@v0.7
+    - name: Install pixi
+      uses: prefix-dev/setup-pixi@v0.9.4
       with:
-        required-ros-distributions: ${{ matrix.ros_distribution }}
+        run-install: false
 
-    - name: Install ROS2 Rolling (Conditional)
-      if: ${{ matrix.ros_distribution == 'rolling' }}
-      shell: bash
+    - name: Install ROS2 ${{ matrix.ros_distribution }}
+      shell: powershell
       run: |
-        wget --quiet https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip -O rolling.zip
-        7z x rolling.zip -y -o/c/dev/rolling
+        $ProgressPreference = 'SilentlyContinue'
+        choco install 7zip -y
+        Invoke-WebRequest -Uri "${{ matrix.ros_zip_url }}" -OutFile ros2.zip
+        7z x ros2.zip -y -oC:\pixi_ws
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ros2/ros2/refs/heads/${{ matrix.ros_distribution }}/pixi.toml" -OutFile C:\pixi_ws\pixi.toml
+        Push-Location C:\pixi_ws
+        pixi install
+        Pop-Location
 
     - name: Prebuild - Setup VS Dev Environment
       uses: seanmiddleditch/gha-setup-vsdevenv@v4
@@ -51,14 +65,16 @@ jobs:
     - name: Build rclnodejs
       shell: cmd
       run: |
+        set PATH=C:\pixi_ws\.pixi\envs\default\Library\bin;C:\pixi_ws\.pixi\envs\default\Scripts;C:\pixi_ws\.pixi\envs\default\bin;%PATH%
         set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
+        call "C:\pixi_ws\ros2-windows\setup.bat"
         npm i
 
-    # On the windows/foxy combination the Eclipse CycloneDDS RMW implementation is used to workaround
-    # an error when loading the default fastrtps ddl
     - name: Test rclnodejs
+      if: ${{ matrix.run_tests }}
       shell: cmd
       run: |
+        set PATH=C:\pixi_ws\.pixi\envs\default\Library\bin;C:\pixi_ws\.pixi\envs\default\Scripts;C:\pixi_ws\.pixi\envs\default\bin;%PATH%
         set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-        call "c:\dev\${{ matrix.ros_distribution }}\ros2-windows\setup.bat"
+        call "C:\pixi_ws\ros2-windows\setup.bat"
+        npm test

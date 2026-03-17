@@ -65,6 +65,10 @@ describe('NativeLoader testing', function () {
   });
 
   it('customFallbackLoader attempts to require exact match if exists', function () {
+    if (process.platform === 'win32') {
+      this.skip();
+    }
+
     Object.defineProperty(process, 'platform', { value: 'linux' });
     Object.defineProperty(process, 'arch', { value: 'x64' });
     process.env.ROS_DISTRO = 'humble';

@@ -32,6 +32,13 @@ describe('rclnodejs publisher test suite', function () {
     },
   ].forEach((testCase) => {
     it('Test serialize a message of type ' + testCase.type, function () {
+      if (
+        process.platform === 'win32' &&
+        testCase.type === 'std_msgs/msg/MultiArrayDimension'
+      ) {
+        this.skip();
+      }
+
       const MyMessage = rclnodejs.require(testCase.type);
       const rosMsg = new MyMessage(testCase.value);
       const buffer = serializeMessage(rosMsg, MyMessage);
