@@ -86,6 +86,22 @@ declare module 'rclnodejs' {
   function spinOnce(node: Node, timeout?: number): void;
 
   /**
+   * Spin the node until a Promise resolves, rejects, or a timeout expires.
+   *
+   * This is the rclnodejs equivalent of rclpy's `spin_until_future_complete`.
+   *
+   * @param node - The node to spin.
+   * @param promise - The Promise to wait for.
+   * @param timeoutMs - Optional timeout in milliseconds.
+   * @returns Resolves with the value of the input promise.
+   */
+  function spinUntilFutureComplete<T>(
+    node: Node,
+    promise: Promise<T>,
+    timeoutMs?: number
+  ): Promise<T>;
+
+  /**
    * Stop all activity, destroy all nodes and node components.
    *
    * @param context - The context, default is Context.defaultContext()

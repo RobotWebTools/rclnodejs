@@ -459,6 +459,30 @@ let rcl = {
   },
 
   /**
+   * Spin the node until a Promise resolves, rejects, or a timeout expires.
+   *
+   * This is the rclnodejs equivalent of rclpy's `spin_until_future_complete`.
+   * Starts spinning the node (if not already), waits for the promise to settle,
+   * and stops spinning when done (if it started it).
+   *
+   * @param {Node} node - The node to spin.
+   * @param {Promise} promise - The Promise to wait for.
+   * @param {number} [timeoutMs] - Optional timeout in milliseconds.
+   * @returns {Promise<*>} - Resolves with the value of the input promise.
+   * @throws {Error} If the promise rejects or the timeout expires.
+   *
+   * @example
+   * const response = await rclnodejs.spinUntilFutureComplete(
+   *   node,
+   *   client.sendRequest(request),
+   *   5000
+   * );
+   */
+  spinUntilFutureComplete(node, promise, timeoutMs) {
+    return node.spinUntilFutureComplete(promise, timeoutMs);
+  },
+
+  /**
    * Shutdown an RCL environment identified by a context. The shutdown process will
    * destroy all nodes and related resources in the context. If no context is
    * explicitly given, the default context will be shut down.
