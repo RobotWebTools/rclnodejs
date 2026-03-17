@@ -60,7 +60,10 @@ describe('spinUntilFutureComplete tests', function () {
     const neverResolves = new Promise(() => {});
     await assert.rejects(
       () => node.spinUntilFutureComplete(neverResolves, 500),
-      { message: /timed out/ }
+      (error) => {
+        assert.strictEqual(error.name, 'TimeoutError');
+        return true;
+      }
     );
     assert.strictEqual(node.spinning, false);
   });
