@@ -1,4 +1,4 @@
-name: Windows Jazzy Build and Test (Reusable)
+name: Windows Pixi Build (Reusable)
 
 on:
   workflow_call:
@@ -9,12 +9,26 @@ on:
         type: string
 
 jobs:
-  build-and-test:
+  build:
     runs-on: windows-2025
     strategy:
       fail-fast: false
       matrix:
         node-version: [24.X]
+        ros_distribution:
+          - jazzy
+          - kilted
+          - rolling
+        include:
+          - ros_distribution: jazzy
+            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-jazzy-20260128/ros2-jazzy-20260128-windows-release-amd64.zip"
+            run_tests: true
+          - ros_distribution: kilted
+            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-kilted-20250728/ros2-kilted-20250728-windows-release-amd64.zip"
+            run_tests: false
+          - ros_distribution: rolling
+            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip"
+            run_tests: false
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
@@ -33,14 +47,14 @@ jobs:
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","User") + ";" + [System.Environment]::GetEnvironmentVariable("Path","Machine")
         Write-Host "Pixi installed at: $(where.exe pixi)"
 
-    - name: Install ROS2 Jazzy dependencies
+    - name: Install ROS2 ${{ matrix.ros_distribution }}
       shell: powershell
       run: |
         $ProgressPreference = 'SilentlyContinue'
         choco install 7zip -y
-        Invoke-WebRequest -Uri "https://github.com/ros2/ros2/releases/download/release-jazzy-20260128/ros2-jazzy-20260128-windows-release-amd64.zip" -OutFile jazzy.zip
-        7z x jazzy.zip -y -oC:\pixi_ws
-        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ros2/ros2/refs/heads/jazzy/pixi.toml" -OutFile C:\pixi_ws\pixi.toml
+        Invoke-WebRequest -Uri "${{ matrix.ros_zip_url }}" -OutFile ros2.zip
+        7z x ros2.zip -y -oC:\pixi_ws
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ros2/ros2/refs/heads/${{ matrix.ros_distribution }}/pixi.toml" -OutFile C:\pixi_ws\pixi.toml
         Push-Location C:\pixi_ws
         & "$env:USERPROFILE\.pixi\bin\pixi.exe" install
         Pop-Location
@@ -59,6 +73,7 @@ jobs:
         npm i
 
     - name: Test rclnodejs
+      if: ${{ matrix.run_tests }}
       shell: cmd
       run: |
         set PATH=C:\pixi_ws\.pixi\envs\default\Library\bin;C:\pixi_ws\.pixi\envs\default\Scripts;C:\pixi_ws\.pixi\envs\default\bin;%PATH%

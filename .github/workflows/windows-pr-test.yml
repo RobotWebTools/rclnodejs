@@ -10,14 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    uses: ./.github/workflows/windows-build.yml
-    with:
-      trigger_type: "pr"
-    secrets: inherit
-
-  jazzy-build-and-test:
-    uses: ./.github/workflows/windows-jazzy-build-and-test.yml
+  pixi-build:
+    uses: ./.github/workflows/windows-build-and-test.yml
     with:
       trigger_type: "pr"
     secrets: inherit

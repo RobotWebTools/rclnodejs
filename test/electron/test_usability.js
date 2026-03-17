@@ -15,17 +15,20 @@ app.on('ready', () => {
         'electron_test_topic'
       );
 
+      let testDone = false;
+
       const subscription = node.createSubscription(
         'std_msgs/msg/String',
         'electron_test_topic',
         (msg) => {
-          if (msg.data === 'Hello from Electron') {
+          if (!testDone && msg.data === 'Hello from Electron') {
+            testDone = true;
             console.log(
               'Successfully received message in Electron environment.'
             );
+            clearInterval(interval);
             rclnodejs.shutdown();
-            app.quit();
-            process.exit(0);
+            app.exit(0);
           }
         }
       );
@@ -34,24 +37,26 @@ app.on('ready', () => {
 
       // Publish repeatedly until received
       const interval = setInterval(() => {
-        publisher.publish('Hello from Electron');
-        console.log('Published message...');
+        if (!testDone) {
+          publisher.publish('Hello from Electron');
+          console.log('Published message...');
+        }
       }, 100);
 
       // Set a timeout to fail the test
       setTimeout(() => {
-        console.error('Test Failed: Timeout waiting for message.');
-        clearInterval(interval);
-        rclnodejs.shutdown();
-        app.quit();
-        process.exit(1);
+        if (!testDone) {
+          console.error('Test Failed: Timeout waiting for message.');
+          clearInterval(interval);
+          rclnodejs.shutdown();
+          app.exit(1);
+        }
       }, 10000);
 
       rclnodejs.spin(node);
     })
     .catch((e) => {
       console.error('Initialization failed:', e);
-      app.quit();
-      process.exit(1);
+      app.exit(1);
     });
 });
