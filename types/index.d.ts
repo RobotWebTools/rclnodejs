@@ -2,6 +2,7 @@
 /// <reference path="./clock_event.d.ts" />
 /// <reference path="./clock_change.d.ts" />
 /// <reference path="./message_validation.d.ts" />
+/// <reference path="./parameter_event_handler.d.ts" />
 
 import { ChildProcess } from 'child_process';
 
