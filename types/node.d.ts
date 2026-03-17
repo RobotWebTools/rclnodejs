@@ -512,6 +512,27 @@ declare module 'rclnodejs' {
     destroyParameterWatcher(watcher: ParameterWatcher): void;
 
     /**
+     * Create a ParameterEventHandler that monitors parameter changes on any node.
+     *
+     * Unlike ParameterWatcher which watches specific parameters on a single
+     * remote node, ParameterEventHandler can register callbacks for parameters
+     * on any node in the ROS 2 graph by subscribing to /parameter_events.
+     *
+     * @param options - Options for the handler.
+     * @returns An instance of ParameterEventHandler.
+     */
+    createParameterEventHandler(
+      options?: ParameterEventHandlerOptions
+    ): ParameterEventHandler;
+
+    /**
+     * Destroy a ParameterEventHandler.
+     *
+     * @param handler - ParameterEventHandler to be destroyed.
+     */
+    destroyParameterEventHandler(handler: ParameterEventHandler): void;
+
+    /**
      * Destroy a Timer.
      *
      * @param timer - Timer to be destroyed.
