@@ -70,7 +70,10 @@ describe('waitForMessage tests', function () {
           'wfm_nonexistent_topic',
           { timeout: 500 }
         ),
-      { message: /timed out/ }
+      (error) => {
+        assert.strictEqual(error.name, 'TimeoutError');
+        return true;
+      }
     );
   });
 
@@ -79,8 +82,6 @@ describe('waitForMessage tests', function () {
       'std_msgs/msg/String',
       'wfm_test_topic_2'
     );
-
-    let receiveCount = 0;
 
     setTimeout(() => {
       publisher.publish('first');
