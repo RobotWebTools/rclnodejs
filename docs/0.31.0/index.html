@@ -2,64 +2,257 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JSDoc: Home</title>
 
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
+    <script src="../_static/scripts/prettify/prettify.js"> </script>
+    <script src="../_static/scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="../_static/styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="../_static/styles/jsdoc-default.css">
 </head>
 
+
 <body>
+<div class="site-backdrop"></div>
+<div class="site-grid"></div>
+<div class="app-shell">
+    <aside class="site-sidebar">
+        <div class="brand-card">
+            <a class="brand-link" href="index.html">
+                <span class="brand-kicker">ROS 2 JavaScript Client</span>
+                <strong class="brand-title">rclnodejs</strong>
+                
+                <span class="brand-version">v0.31.0</span>
+                
+            </a>
+            <p class="brand-description">ROS2.0 JavaScript client with Node.js</p>
+        </div>
 
-<div id="main">
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+            Browse API
+        </button>
 
-    <h1 class="page-title">Home</h1>
+        <nav class="site-nav" id="site-nav">
+            <div class="nav-home"><a href="index.html">Overview</a></div><section class="nav-section"><h3>Modules</h3><ul class="nav-list"><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul></section><section class="nav-section"><h3>Classes</h3><ul class="nav-list"><li><a href="ActionClient.html">ActionClient</a></li><li><a href="ActionServer.html">ActionServer</a></li><li><a href="CallbackReturnValue.html">CallbackReturnValue</a></li><li><a href="Client.html">Client</a></li><li><a href="ClientGoalHandle.html">ClientGoalHandle</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Context.html">Context</a></li><li><a href="Duration.html">Duration</a></li><li><a href="FloatingPointRange.html">FloatingPointRange</a></li><li><a href="GuardCondition.html">GuardCondition</a></li><li><a href="IntegerRange.html">IntegerRange</a></li><li><a href="LifecycleNode.html">LifecycleNode</a></li><li><a href="LifecyclePublisher.html">LifecyclePublisher</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeOptions.html">NodeOptions</a></li><li><a href="Parameter.html">Parameter</a></li><li><a href="ParameterDescriptor.html">ParameterDescriptor</a></li><li><a href="ParameterService.html">ParameterService</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="Range.html">Range</a></li><li><a href="Rate.html">Rate</a></li><li><a href="RateTimerServer.html">RateTimerServer</a></li><li><a href="Response.html">Response</a></li><li><a href="ServerGoalHandle.html">ServerGoalHandle</a></li><li><a href="Service.html">Service</a></li><li><a href="State.html">State</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="TimeSource.html">TimeSource</a></li><li><a href="Timer.html">Timer</a></li><li><a href="Transition.html">Transition</a></li><li><a href="TransitionDescription.html">TransitionDescription</a></li></ul></section><section class="nav-section"><h3>Global</h3><ul class="nav-list"><li><a href="global.html#CallbackReturnCode">CallbackReturnCode</a></li><li><a href="global.html#CancelResponse">CancelResponse</a></li><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DEFAULT_NUMERIC_RANGE_TOLERANCE">DEFAULT_NUMERIC_RANGE_TOLERANCE</a></li><li><a href="global.html#DistroId">DistroId</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#GoalResponse">GoalResponse</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ParameterType">ParameterType</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li><li><a href="global.html#ServiceIntrospectionStates">ServiceIntrospectionStates</a></li><li><a href="global.html#defaultCancelCallback">defaultCancelCallback</a></li><li><a href="global.html#defaultGoalCallback">defaultGoalCallback</a></li><li><a href="global.html#defaultHandleAcceptedCallback">defaultHandleAcceptedCallback</a></li><li><a href="global.html#getActionClientNamesAndTypesByNode">getActionClientNamesAndTypesByNode</a></li><li><a href="global.html#getActionNamesAndTypes">getActionNamesAndTypes</a></li><li><a href="global.html#getActionServerNamesAndTypesByNode">getActionServerNamesAndTypesByNode</a></li><li><a href="global.html#getCurrentGeneratorVersion">getCurrentGeneratorVersion</a></li><li><a href="global.html#parameterTypeFromValue">parameterTypeFromValue</a></li><li><a href="global.html#validType">validType</a></li><li><a href="global.html#validValue">validValue</a></li></ul></section>
+        </nav>
+    </aside>
+
+    <div class="site-main">
+        <header class="site-header">
+            <p class="page-eyebrow">Documentation</p>
+            <h1 class="page-title">Home</h1>
+            <p class="page-subtitle">ROS2.0 JavaScript client with Node.js</p>
+        </header>
+
+        <main id="main">
+            
+
+
+    
+
+
+    <section class="hero-card">
+        <div class="hero-layout">
+            <div class="hero-copy">
+                <p class="hero-kicker">JavaScript and TypeScript ROS 2 API</p>
+                <h2>rclnodejs <span>0.31.0</span></h2>
+                
+                <p class="hero-description">ROS2.0 JavaScript client with Node.js</p>
+                
+                <p class="hero-lead">Build ROS 2 nodes with a Node.js-native workflow, generated message bindings, and TypeScript-friendly APIs.</p>
+                <div class="hero-actions">
+                    <a class="hero-action primary" href="#guide-installation">Get Started</a>
+                    <a class="hero-action" href="module-rclnodejs.html">Browse Core API</a>
+                    <a class="hero-action" href="#guide-typescript">TypeScript Guide</a>
+                </div>
+                <div class="hero-tags">
+                    <span>ROS 2</span>
+                    <span>Node.js</span>
+                    <span>TypeScript</span>
+                </div>
+            </div>
+
+            <div class="hero-panel">
+                <p class="hero-panel-title">Quick Start</p>
+                <pre class="prettyprint hero-snippet"><code>npm i rclnodejs</code></pre>
+                <ul class="hero-points">
+                    <li>Works with sourced ROS 2 environments</li>
+                    <li>Supports generated message and IDL workflows</li>
+                    <li>Covers topics, services, actions, lifecycle, and time</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="homepage-strip stats-strip">
+        
+        <article class="stats-card">
+            <strong>2</strong>
+            <span>Modules</span>
+            <p>Primary entry points and supporting package surfaces</p>
+        </article>
+        
+        <article class="stats-card">
+            <strong>37</strong>
+            <span>Classes</span>
+            <p>Runtime building blocks for nodes, services, actions, and time</p>
+        </article>
+        
+        <article class="stats-card">
+            <strong>29</strong>
+            <span>Globals</span>
+            <p>Enums, constants, policies, and top-level helpers</p>
+        </article>
+        
+    </section>
+
+
+
+
+
+
+
+
 
     
 
 
 
-    
+
+    <section class="homepage-grid">
+        <article class="homepage-card homepage-card-wide">
+            <p class="section-kicker">Why rclnodejs</p>
+            <h3>Engineering ergonomics for robotics teams using JavaScript</h3>
+            <p>rclnodejs lets teams build ROS 2 software in Node.js without losing alignment with the broader ROS ecosystem. The API stays close to core ROS concepts while fitting JavaScript and TypeScript workflows.</p>
+        </article>
+
+        <article class="homepage-card">
+            <p class="section-kicker">Core API</p>
+            <h3><a href="module-rclnodejs.html">Start with the runtime module</a></h3>
+            <p>Move from the package entry point into Node, Publisher, Subscription, Client, Service, and Action primitives.</p>
+        </article>
+
+        <article class="homepage-card">
+            <p class="section-kicker">Reference</p>
+            <h3><a href="global.html">Inspect globals and enums</a></h3>
+            <p>Policies, event types, clock kinds, return codes, and shared constants are collected in one place for fast lookup.</p>
+        </article>
+    </section>
+
+    <section class="homepage-guides">
+        <header class="doc-page-header compact-header">
+            <p class="section-kicker">Guides</p>
+            <h3>Get productive without leaving the entry page</h3>
+            <p>These short guides cover the main README workflows: setup, typed development, and interface generation.</p>
+        </header>
+
+        <div class="guide-grid">
+            <article class="guide-card" id="guide-installation">
+                <p class="section-kicker">Setup</p>
+                <h3>Installation and environment</h3>
+                <p>Install Node.js 16.13.0 or newer, install a compatible ROS 2 distribution, then source the ROS 2 setup file before using the package.</p>
+                <pre class="prettyprint"><code>source /opt/ros/&lt;distro&gt;/setup.bash
+npm i rclnodejs</code></pre>
+                <ul class="guide-list">
+                    <li>Use <code>npm i rclnodejs@x.y.z</code> when you need a specific package version.</li>
+                    <li>Generate a local reference site at any time with <code>npm run docs</code>.</li>
+                    <li>Start exploring the runtime surface in <a href="module-rclnodejs.html">the core API module</a>.</li>
+                </ul>
+            </article>
+
+            <article class="guide-card" id="guide-typescript">
+                <p class="section-kicker">TypeScript</p>
+                <h3>Typed project setup</h3>
+                <p>rclnodejs ships declaration files in the <code>types/</code> folder so projects get editor assistance, generated message types, and compile-time checks.</p>
+                <pre class="prettyprint"><code>{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es6"
+  }
+}</code></pre>
+                <ul class="guide-list">
+                    <li>Use the generated declarations for message interfaces after running the message generator.</li>
+                    <li>Follow the <a href="#guide-typescript">TypeScript workflow</a> here before moving into application code.</li>
+                    <li>Pair typed code with the class docs for Node, Publisher, Subscription, Service, and Action primitives.</li>
+                </ul>
+            </article>
+
+            <article class="guide-card" id="guide-message-generation">
+                <p class="section-kicker">Interfaces</p>
+                <h3>Message and IDL generation</h3>
+                <p>When your ROS installation changes or your project depends on additional message packages, regenerate the JavaScript and TypeScript bindings from the current environment.</p>
+                <pre class="prettyprint"><code>npx generate-ros-messages
+npm run generate-messages-idl</code></pre>
+                <ul class="guide-list">
+                    <li>Use <code>npx generate-ros-messages</code> for standard ROS interfaces available in the sourced environment.</li>
+                    <li>Use <code>npm run generate-messages-idl</code> when you need IDL-driven generation.</li>
+                    <li>Generated JavaScript files are written under your installed package's <code>generated/</code> directory.</li>
+                </ul>
+            </article>
+        </div>
+
+        <div class="guide-grid guide-grid-secondary">
+            <article class="guide-card">
+                <p class="section-kicker">First Node</p>
+                <h3>Publish a message in a few lines</h3>
+                <p>The package stays close to ROS 2 concepts while keeping the Node.js workflow straightforward.</p>
+                <pre class="prettyprint"><code>const rclnodejs = require('rclnodejs');
+rclnodejs.init().then(() =&gt; {
+  const node = new rclnodejs.Node('publisher_example_node');
+  const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
+  publisher.publish('Hello ROS 2 from rclnodejs');
+  node.spin();
+});</code></pre>
+            </article>
+
+            <article class="guide-card">
+                <p class="section-kicker">Further Reading</p>
+                <h3>Keep moving from overview to implementation</h3>
+                <ul class="guide-list guide-list-tight">
+                    <li><a href="module-rclnodejs.html">Core module reference</a></li>
+                    <li><a href="global.html">Globals and enums</a></li>
+                    <li><a href="module-validator.html">Validation helpers</a></li>
+                    <li><a href="https://github.com/RobotWebTools/rclnodejs/tree/develop/example">Examples in the repository</a></li>
+                </ul>
+            </article>
+        </div>
+    </section>
 
 
-    <h3>rclnodejs 0.31.0</h3>
 
 
 
 
 
 
+        </main>
 
-
-
-
-    
-
-
-
-
-
-
-
-
-
+        <footer class="site-footer">
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Thu Mar 19 2026 18:05:45 GMT+0800 (China Standard Time)
+        </footer>
+    </div>
 </div>
 
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="ActionClient.html">ActionClient</a></li><li><a href="ActionServer.html">ActionServer</a></li><li><a href="CallbackReturnValue.html">CallbackReturnValue</a></li><li><a href="Client.html">Client</a></li><li><a href="ClientGoalHandle.html">ClientGoalHandle</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Context.html">Context</a></li><li><a href="Duration.html">Duration</a></li><li><a href="FloatingPointRange.html">FloatingPointRange</a></li><li><a href="GuardCondition.html">GuardCondition</a></li><li><a href="IntegerRange.html">IntegerRange</a></li><li><a href="LifecycleNode.html">LifecycleNode</a></li><li><a href="LifecyclePublisher.html">LifecyclePublisher</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeOptions.html">NodeOptions</a></li><li><a href="Parameter.html">Parameter</a></li><li><a href="ParameterDescriptor.html">ParameterDescriptor</a></li><li><a href="ParameterService.html">ParameterService</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="Range.html">Range</a></li><li><a href="Rate.html">Rate</a></li><li><a href="RateTimerServer.html">RateTimerServer</a></li><li><a href="Response.html">Response</a></li><li><a href="ServerGoalHandle.html">ServerGoalHandle</a></li><li><a href="Service.html">Service</a></li><li><a href="State.html">State</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="TimeSource.html">TimeSource</a></li><li><a href="Timer.html">Timer</a></li><li><a href="Transition.html">Transition</a></li><li><a href="TransitionDescription.html">TransitionDescription</a></li></ul><h3>Global</h3><ul><li><a href="global.html#CallbackReturnCode">CallbackReturnCode</a></li><li><a href="global.html#CancelResponse">CancelResponse</a></li><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DEFAULT_NUMERIC_RANGE_TOLERANCE">DEFAULT_NUMERIC_RANGE_TOLERANCE</a></li><li><a href="global.html#DistroId">DistroId</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#GoalResponse">GoalResponse</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ParameterType">ParameterType</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li><li><a href="global.html#ServiceIntrospectionStates">ServiceIntrospectionStates</a></li><li><a href="global.html#defaultCancelCallback">defaultCancelCallback</a></li><li><a href="global.html#defaultGoalCallback">defaultGoalCallback</a></li><li><a href="global.html#defaultHandleAcceptedCallback">defaultHandleAcceptedCallback</a></li><li><a href="global.html#getActionClientNamesAndTypesByNode">getActionClientNamesAndTypesByNode</a></li><li><a href="global.html#getActionNamesAndTypes">getActionNamesAndTypes</a></li><li><a href="global.html#getActionServerNamesAndTypesByNode">getActionServerNamesAndTypesByNode</a></li><li><a href="global.html#getCurrentGeneratorVersion">getCurrentGeneratorVersion</a></li><li><a href="global.html#parameterTypeFromValue">parameterTypeFromValue</a></li><li><a href="global.html#validType">validType</a></li><li><a href="global.html#validValue">validValue</a></li></ul>
-</nav>
+<script>
+    prettyPrint();
+    (function() {
+        var button = document.querySelector('.nav-toggle');
+        var shell = document.querySelector('.app-shell');
 
-<br class="clear">
+        if (!button || !shell) {
+            return;
+        }
 
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Tue Feb 25 2025 13:22:13 GMT+0800 (China Standard Time)
-</footer>
-
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+        button.addEventListener('click', function() {
+            var isOpen = shell.classList.toggle('nav-open');
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    }());
+</script>
+<script src="../_static/scripts/linenumber.js"> </script>
 </body>
 </html>

@@ -2,50 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JSDoc: Class: Node</title>
 
-    <script src="scripts/prettify/prettify.js"> </script>
-    <script src="scripts/prettify/lang-css.js"> </script>
+    <script src="../_static/scripts/prettify/prettify.js"> </script>
+    <script src="../_static/scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+    <link type="text/css" rel="stylesheet" href="../_static/styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="../_static/styles/jsdoc-default.css">
 </head>
 
+
 <body>
+<div class="site-backdrop"></div>
+<div class="site-grid"></div>
+<div class="app-shell">
+    <aside class="site-sidebar">
+        <div class="brand-card">
+            <a class="brand-link" href="index.html">
+                <span class="brand-kicker">ROS 2 JavaScript Client</span>
+                <strong class="brand-title">rclnodejs</strong>
+                
+                <span class="brand-version">v0.20.0</span>
+                
+            </a>
+            <p class="brand-description">ROS2.0 JavaScript client with Node.js</p>
+        </div>
 
-<div id="main">
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+            Browse API
+        </button>
 
-    <h1 class="page-title">Class: Node</h1>
+        <nav class="site-nav" id="site-nav">
+            <div class="nav-home"><a href="index.html">Overview</a></div><section class="nav-section"><h3>Modules</h3><ul class="nav-list"><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul></section><section class="nav-section"><h3>Classes</h3><ul class="nav-list"><li><a href="ActionClient.html">ActionClient</a></li><li><a href="ActionServer.html">ActionServer</a></li><li><a href="CallbackReturnValue.html">CallbackReturnValue</a></li><li><a href="Client.html">Client</a></li><li><a href="ClientGoalHandle.html">ClientGoalHandle</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Context.html">Context</a></li><li><a href="Duration.html">Duration</a></li><li><a href="FloatingPointRange.html">FloatingPointRange</a></li><li><a href="GuardCondition.html">GuardCondition</a></li><li><a href="IntegerRange.html">IntegerRange</a></li><li><a href="LifecycleNode.html">LifecycleNode</a></li><li><a href="LifecyclePublisher.html">LifecyclePublisher</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeOptions.html">NodeOptions</a></li><li><a href="Parameter.html">Parameter</a></li><li><a href="ParameterDescriptor.html">ParameterDescriptor</a></li><li><a href="ParameterService.html">ParameterService</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="Range.html">Range</a></li><li><a href="Rate.html">Rate</a></li><li><a href="RateTimerServer.html">RateTimerServer</a></li><li><a href="Response.html">Response</a></li><li><a href="ServerGoalHandle.html">ServerGoalHandle</a></li><li><a href="Service.html">Service</a></li><li><a href="State.html">State</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="TimeSource.html">TimeSource</a></li><li><a href="Timer.html">Timer</a></li><li><a href="Transition.html">Transition</a></li><li><a href="TransitionDescription.html">TransitionDescription</a></li></ul></section><section class="nav-section"><h3>Global</h3><ul class="nav-list"><li><a href="global.html#CallbackReturnCode">CallbackReturnCode</a></li><li><a href="global.html#CancelResponse">CancelResponse</a></li><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DEFAULT_NUMERIC_RANGE_TOLERANCE">DEFAULT_NUMERIC_RANGE_TOLERANCE</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#GoalResponse">GoalResponse</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ParameterType">ParameterType</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li><li><a href="global.html#defaultCancelCallback">defaultCancelCallback</a></li><li><a href="global.html#defaultGoalCallback">defaultGoalCallback</a></li><li><a href="global.html#defaultHandleAcceptedCallback">defaultHandleAcceptedCallback</a></li><li><a href="global.html#getActionClientNamesAndTypesByNode">getActionClientNamesAndTypesByNode</a></li><li><a href="global.html#getActionNamesAndTypes">getActionNamesAndTypes</a></li><li><a href="global.html#getActionServerNamesAndTypesByNode">getActionServerNamesAndTypesByNode</a></li><li><a href="global.html#getCurrentGeneratorVersion">getCurrentGeneratorVersion</a></li><li><a href="global.html#parameterTypeFromValue">parameterTypeFromValue</a></li><li><a href="global.html#validType">validType</a></li><li><a href="global.html#validValue">validValue</a></li></ul></section>
+        </nav>
+    </aside>
 
+    <div class="site-main">
+        <header class="site-header">
+            <p class="page-eyebrow">API Reference</p>
+            <h1 class="page-title">Class: Node</h1>
+            <p class="page-subtitle">ROS2.0 JavaScript client with Node.js</p>
+        </header>
+
+        <main id="main">
+            
+
+
+
+<section class="doc-section doc-kind-class">
+
+<header class="doc-page-header">
     
-
-
-
-
-<section>
-
-<header>
-    
-        <h2><span class="attribs"><span class="type-signature"></span></span>Node<span class="signature">(nodeName, namespace<span class="signature-attributes">opt</span>, context<span class="signature-attributes">opt</span>, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
+        <div class="doc-heading-meta">
+            <span class="doc-kind-label">class</span>
+        </div>
+        <h2 class="doc-heading"><span class="attribs"><span class="type-signature"></span></span>Node<span class="signature">(nodeName, namespace<span class="signature-attributes">opt</span>, context<span class="signature-attributes">opt</span>, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
         
             <div class="class-description">- Class representing a Node in ROS</div>
         
     
 </header>
 
-<article>
-    <div class="container-overview">
+<article class="doc-article">
+    <div class="container-overview doc-overview">
     
         
+<section class="symbol-card symbol-kind-class">
 
     
-    <h2>Constructor</h2>
+    <p class="section-kicker">Constructor</p>
     
 
     
-    <h4 class="name" id="Node"><span class="type-signature"></span>new Node<span class="signature">(nodeName, namespace<span class="signature-attributes">opt</span>, context<span class="signature-attributes">opt</span>, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">class</span>
+        <h4 class="name" id="Node"><span class="type-signature"></span>new Node<span class="signature">(nodeName, namespace<span class="signature-attributes">opt</span>, context<span class="signature-attributes">opt</span>, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    </div>
     
 
     
@@ -68,6 +103,7 @@ model using the <a href="https://github.com/ros2/rcl/tree/master/rcl_lifecycle">
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -245,6 +281,7 @@ model using the <a href="https://github.com/ros2/rcl/tree/master/rcl_lifecycle">
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -305,28 +342,13 @@ model using the <a href="https://github.com/ros2/rcl/tree/master/rcl_lifecycle">
 
         
 
-<dl>
-    <dt>
-        <div class="param-desc">
-        If the given context is not registered.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
+<div class="exception-block">
+    <div class="param-desc">If the given context is not registered.</div>
+    <div class="returns-type"><span>Type</span> 
 <span class="param-type">Error</span>
 
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+</div>
+</div>
 
 
     
@@ -336,6 +358,7 @@ model using the <a href="https://github.com/ros2/rcl/tree/master/rcl_lifecycle">
 
 
 
+</section>
 
     
     </div>
@@ -353,9 +376,14 @@ model using the <a href="https://github.com/ros2/rcl/tree/master/rcl_lifecycle">
     
         <h3 class="subsection-title">Members</h3>
 
+        <div class="symbol-list">
         
             
-<h4 class="name" id="context"><span class="type-signature"></span>context<span class="type-signature"></span></h4>
+<section class="symbol-card symbol-kind-member">
+<div class="symbol-heading">
+    <span class="symbol-kind">member</span>
+    <h4 class="name" id="context"><span class="type-signature"></span>context<span class="type-signature"></span></h4>
+</div>
 
 
 
@@ -414,20 +442,27 @@ model using the <a href="https://github.com/ros2/rcl/tree/master/rcl_lifecycle">
 
 
 
+</section>
 
         
+        </div>
     
 
     
         <h3 class="subsection-title">Methods</h3>
 
+        <div class="symbol-list">
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="_runWithMessageType"><span class="type-signature"></span>_runWithMessageType<span class="signature">(Type, callback)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="_runWithMessageType"><span class="type-signature"></span>_runWithMessageType<span class="signature">(Type, callback)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -450,6 +485,7 @@ the message will be destroyed.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -518,6 +554,7 @@ and the second is a function to retrieve the deserialized message.</td>
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -581,31 +618,29 @@ and the second is a function to retrieve the deserialized message.</td>
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="_setParametersAtomically"><span class="type-signature"></span>_setParametersAtomically<span class="signature">(parameters, declareParameterMode)</span><span class="type-signature"> &rarr; {SetParameterResult}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="_setParametersAtomically"><span class="type-signature"></span>_setParametersAtomically<span class="signature">(parameters, declareParameterMode)</span><span class="type-signature"> &rarr; {SetParameterResult}</span></h4>
+    </div>
     
 
     
@@ -634,6 +669,7 @@ list of parameters is updated.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -714,6 +750,7 @@ list of parameters is updated.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -781,31 +818,29 @@ list of parameters is updated.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">SetParameterResult</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="addOnSetParametersCallback"><span class="type-signature"></span>addOnSetParametersCallback<span class="signature">(callback)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="addOnSetParametersCallback"><span class="type-signature"></span>addOnSetParametersCallback<span class="signature">(callback)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -828,6 +863,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -872,6 +908,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -935,31 +972,29 @@ and setting. No checks are made for duplicate callbacks.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="countPublishers"><span class="type-signature"></span>countPublishers<span class="signature">(topic)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="countPublishers"><span class="type-signature"></span>countPublishers<span class="signature">(topic)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    </div>
     
 
     
@@ -981,6 +1016,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -1025,6 +1061,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -1092,31 +1129,29 @@ and setting. No checks are made for duplicate callbacks.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">number</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="countSubscribers"><span class="type-signature"></span>countSubscribers<span class="signature">(topic)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="countSubscribers"><span class="type-signature"></span>countSubscribers<span class="signature">(topic)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    </div>
     
 
     
@@ -1138,6 +1173,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -1182,6 +1218,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -1249,31 +1286,29 @@ and setting. No checks are made for duplicate callbacks.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">number</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="createClient"><span class="type-signature"></span>createClient<span class="signature">(typeClass, serviceName, options)</span><span class="type-signature"> &rarr; {<a href="Client.html">Client</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="createClient"><span class="type-signature"></span>createClient<span class="signature">(typeClass, serviceName, options)</span><span class="type-signature"> &rarr; {<a href="Client.html">Client</a>}</span></h4>
+    </div>
     
 
     
@@ -1295,6 +1330,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -1391,6 +1427,7 @@ and setting. No checks are made for duplicate callbacks.
                 <h6>Properties</h6>
                 
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -1458,6 +1495,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
             </td>
         </tr>
@@ -1465,6 +1503,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -1532,31 +1571,29 @@ and setting. No checks are made for duplicate callbacks.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="Client.html">Client</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="createGuardCondition"><span class="type-signature"></span>createGuardCondition<span class="signature">(callback)</span><span class="type-signature"> &rarr; {<a href="GuardCondition.html">GuardCondition</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="createGuardCondition"><span class="type-signature"></span>createGuardCondition<span class="signature">(callback)</span><span class="type-signature"> &rarr; {<a href="GuardCondition.html">GuardCondition</a>}</span></h4>
+    </div>
     
 
     
@@ -1578,6 +1615,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -1622,6 +1660,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -1689,31 +1728,29 @@ and setting. No checks are made for duplicate callbacks.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="GuardCondition.html">GuardCondition</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="createPublisher"><span class="type-signature"></span>createPublisher<span class="signature">(typeClass, topic, options)</span><span class="type-signature"> &rarr; {<a href="Publisher.html">Publisher</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="createPublisher"><span class="type-signature"></span>createPublisher<span class="signature">(typeClass, topic, options)</span><span class="type-signature"> &rarr; {<a href="Publisher.html">Publisher</a>}</span></h4>
+    </div>
     
 
     
@@ -1735,6 +1772,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -1831,6 +1869,7 @@ and setting. No checks are made for duplicate callbacks.
                 <h6>Properties</h6>
                 
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -1898,6 +1937,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
             </td>
         </tr>
@@ -1905,6 +1945,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -1972,31 +2013,29 @@ and setting. No checks are made for duplicate callbacks.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="Publisher.html">Publisher</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="createRate"><span class="type-signature">(async) </span>createRate<span class="signature">(hz)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Rate.html">Rate</a>>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="createRate"><span class="type-signature">(async) </span>createRate<span class="signature">(hz)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Rate.html">Rate</a>>}</span></h4>
+    </div>
     
 
     
@@ -2018,6 +2057,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -2070,6 +2110,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -2137,31 +2178,29 @@ and setting. No checks are made for duplicate callbacks.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Promise.&lt;<a href="Rate.html">Rate</a>></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="createService"><span class="type-signature"></span>createService<span class="signature">(typeClass, serviceName, options, callback)</span><span class="type-signature"> &rarr; {<a href="Service.html">Service</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="createService"><span class="type-signature"></span>createService<span class="signature">(typeClass, serviceName, options, callback)</span><span class="type-signature"> &rarr; {<a href="Service.html">Service</a>}</span></h4>
+    </div>
     
 
     
@@ -2183,6 +2222,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -2279,6 +2319,7 @@ and setting. No checks are made for duplicate callbacks.
                 <h6>Properties</h6>
                 
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -2346,6 +2387,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
             </td>
         </tr>
@@ -2376,6 +2418,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -2450,31 +2493,29 @@ and setting. No checks are made for duplicate callbacks.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="Service.html">Service</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="createSubscription"><span class="type-signature"></span>createSubscription<span class="signature">(typeClass, topic, options, callback)</span><span class="type-signature"> &rarr; {<a href="Subscription.html">Subscription</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="createSubscription"><span class="type-signature"></span>createSubscription<span class="signature">(typeClass, topic, options, callback)</span><span class="type-signature"> &rarr; {<a href="Subscription.html">Subscription</a>}</span></h4>
+    </div>
     
 
     
@@ -2496,6 +2537,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -2592,6 +2634,7 @@ and setting. No checks are made for duplicate callbacks.
                 <h6>Properties</h6>
                 
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -2682,6 +2725,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
             </td>
         </tr>
@@ -2712,6 +2756,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -2786,31 +2831,29 @@ and setting. No checks are made for duplicate callbacks.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="Subscription.html">Subscription</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="createTimer"><span class="type-signature"></span>createTimer<span class="signature">(period, callback, clock<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Timer.html">Timer</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="createTimer"><span class="type-signature"></span>createTimer<span class="signature">(period, callback, clock<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Timer.html">Timer</a>}</span></h4>
+    </div>
     
 
     
@@ -2832,6 +2875,7 @@ and setting. No checks are made for duplicate callbacks.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -2966,6 +3010,7 @@ and setting. No checks are made for duplicate callbacks.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -3033,31 +3078,29 @@ and setting. No checks are made for duplicate callbacks.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="Timer.html">Timer</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="declareParameter"><span class="type-signature"></span>declareParameter<span class="signature">(parameter, descriptor<span class="signature-attributes">opt</span>, ignoreOveride<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Parameter.html">Parameter</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="declareParameter"><span class="type-signature"></span>declareParameter<span class="signature">(parameter, descriptor<span class="signature-attributes">opt</span>, ignoreOveride<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Parameter.html">Parameter</a>}</span></h4>
+    </div>
     
 
     
@@ -3088,6 +3131,7 @@ A parameter must be undeclared before attempting to redeclare it.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -3224,6 +3268,7 @@ A parameter must be undeclared before attempting to redeclare it.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -3291,31 +3336,29 @@ A parameter must be undeclared before attempting to redeclare it.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="Parameter.html">Parameter</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="declareParameters"><span class="type-signature"></span>declareParameters<span class="signature">(parameters, descriptors<span class="signature-attributes">opt</span>, ignoreOverrides)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parameter.html">Parameter</a>>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="declareParameters"><span class="type-signature"></span>declareParameters<span class="signature">(parameters, descriptors<span class="signature-attributes">opt</span>, ignoreOverrides)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parameter.html">Parameter</a>>}</span></h4>
+    </div>
     
 
     
@@ -3361,6 +3404,7 @@ list of parameters is updated.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -3497,6 +3541,7 @@ list of parameters is updated.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -3564,31 +3609,29 @@ list of parameters is updated.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;<a href="Parameter.html">Parameter</a>></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="destroy"><span class="type-signature"></span>destroy<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="destroy"><span class="type-signature"></span>destroy<span class="signature">()</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -3670,31 +3713,29 @@ list of parameters is updated.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="destroyClient"><span class="type-signature"></span>destroyClient<span class="signature">(client)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="destroyClient"><span class="type-signature"></span>destroyClient<span class="signature">(client)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -3716,6 +3757,7 @@ list of parameters is updated.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -3760,6 +3802,7 @@ list of parameters is updated.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -3823,31 +3866,29 @@ list of parameters is updated.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="destroyGuardCondition"><span class="type-signature"></span>destroyGuardCondition<span class="signature">(guard)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="destroyGuardCondition"><span class="type-signature"></span>destroyGuardCondition<span class="signature">(guard)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -3869,6 +3910,7 @@ list of parameters is updated.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -3913,6 +3955,7 @@ list of parameters is updated.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -3976,31 +4019,29 @@ list of parameters is updated.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="destroyPublisher"><span class="type-signature"></span>destroyPublisher<span class="signature">(publisher)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="destroyPublisher"><span class="type-signature"></span>destroyPublisher<span class="signature">(publisher)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -4022,6 +4063,7 @@ list of parameters is updated.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -4066,6 +4108,7 @@ list of parameters is updated.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -4129,31 +4172,29 @@ list of parameters is updated.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="destroyService"><span class="type-signature"></span>destroyService<span class="signature">(service)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="destroyService"><span class="type-signature"></span>destroyService<span class="signature">(service)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -4175,6 +4216,7 @@ list of parameters is updated.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -4219,6 +4261,7 @@ list of parameters is updated.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -4282,31 +4325,29 @@ list of parameters is updated.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="destroySubscription"><span class="type-signature"></span>destroySubscription<span class="signature">(subscription)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="destroySubscription"><span class="type-signature"></span>destroySubscription<span class="signature">(subscription)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -4328,6 +4369,7 @@ list of parameters is updated.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -4372,6 +4414,7 @@ list of parameters is updated.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -4435,31 +4478,29 @@ list of parameters is updated.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="destroyTimer"><span class="type-signature"></span>destroyTimer<span class="signature">(timer)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="destroyTimer"><span class="type-signature"></span>destroyTimer<span class="signature">(timer)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -4481,6 +4522,7 @@ list of parameters is updated.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -4525,6 +4567,7 @@ list of parameters is updated.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -4588,31 +4631,29 @@ list of parameters is updated.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getClock"><span class="type-signature"></span>getClock<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Clock.html">Clock</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getClock"><span class="type-signature"></span>getClock<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Clock.html">Clock</a>}</span></h4>
+    </div>
     
 
     
@@ -4696,31 +4737,29 @@ list of parameters is updated.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="Clock.html">Clock</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getLogger"><span class="type-signature"></span>getLogger<span class="signature">()</span><span class="type-signature"> &rarr; {Logger}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getLogger"><span class="type-signature"></span>getLogger<span class="signature">()</span><span class="type-signature"> &rarr; {Logger}</span></h4>
+    </div>
     
 
     
@@ -4804,31 +4843,29 @@ list of parameters is updated.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Logger</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getNodeNames"><span class="type-signature"></span>getNodeNames<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getNodeNames"><span class="type-signature"></span>getNodeNames<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    </div>
     
 
     
@@ -4912,31 +4949,29 @@ list of parameters is updated.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;string></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getNodeNamesAndNamespaces"><span class="type-signature"></span>getNodeNamesAndNamespaces<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, namespace: string}>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getNodeNamesAndNamespaces"><span class="type-signature"></span>getNodeNamesAndNamespaces<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, namespace: string}>}</span></h4>
+    </div>
     
 
     
@@ -5020,31 +5055,29 @@ list of parameters is updated.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;{name: string, namespace: string}></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getParameter"><span class="type-signature"></span>getParameter<span class="signature">(name)</span><span class="type-signature"> &rarr; {<a href="Parameter.html">Parameter</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getParameter"><span class="type-signature"></span>getParameter<span class="signature">(name)</span><span class="type-signature"> &rarr; {<a href="Parameter.html">Parameter</a>}</span></h4>
+    </div>
     
 
     
@@ -5069,6 +5102,7 @@ parameter with type == PARAMETER_NOT_SET is returned.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -5113,6 +5147,7 @@ parameter with type == PARAMETER_NOT_SET is returned.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -5180,31 +5215,29 @@ parameter with type == PARAMETER_NOT_SET is returned.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="Parameter.html">Parameter</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getParameterDescriptor"><span class="type-signature"></span>getParameterDescriptor<span class="signature">(name)</span><span class="type-signature"> &rarr; {<a href="ParameterDescriptor.html">ParameterDescriptor</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getParameterDescriptor"><span class="type-signature"></span>getParameterDescriptor<span class="signature">(name)</span><span class="type-signature"> &rarr; {<a href="ParameterDescriptor.html">ParameterDescriptor</a>}</span></h4>
+    </div>
     
 
     
@@ -5229,6 +5262,7 @@ descriptor with type == PARAMETER_NOT_SET is returned.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -5273,6 +5307,7 @@ descriptor with type == PARAMETER_NOT_SET is returned.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -5340,31 +5375,29 @@ descriptor with type == PARAMETER_NOT_SET is returned.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="ParameterDescriptor.html">ParameterDescriptor</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getParameterDescriptors"><span class="type-signature"></span>getParameterDescriptors<span class="signature">(names<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="ParameterDescriptor.html">ParameterDescriptor</a>>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getParameterDescriptors"><span class="type-signature"></span>getParameterDescriptors<span class="signature">(names<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="ParameterDescriptor.html">ParameterDescriptor</a>>}</span></h4>
+    </div>
     
 
     
@@ -5392,6 +5425,7 @@ it's place.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -5449,6 +5483,7 @@ it's place.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -5516,31 +5551,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;<a href="ParameterDescriptor.html">ParameterDescriptor</a>></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getParameterNames"><span class="type-signature"></span>getParameterNames<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getParameterNames"><span class="type-signature"></span>getParameterNames<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;string>}</span></h4>
+    </div>
     
 
     
@@ -5625,31 +5658,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;string></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getParameterOverrides"><span class="type-signature"></span>getParameterOverrides<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parameter.html">Parameter</a>>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getParameterOverrides"><span class="type-signature"></span>getParameterOverrides<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parameter.html">Parameter</a>>}</span></h4>
+    </div>
     
 
     
@@ -5734,31 +5765,29 @@ in the NodeOptions.parameter_overrides property.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;<a href="Parameter.html">Parameter</a>></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getParameters"><span class="type-signature"></span>getParameters<span class="signature">(names<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parameter.html">Parameter</a>>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getParameters"><span class="type-signature"></span>getParameters<span class="signature">(names<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Parameter.html">Parameter</a>>}</span></h4>
+    </div>
     
 
     
@@ -5787,6 +5816,7 @@ it's place.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -5844,6 +5874,7 @@ it's place.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -5911,31 +5942,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;<a href="Parameter.html">Parameter</a>></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getPublisherNamesAndTypesByNode"><span class="type-signature"></span>getPublisherNamesAndTypesByNode<span class="signature">(nodeName, namespace, noDemangle)</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getPublisherNamesAndTypesByNode"><span class="type-signature"></span>getPublisherNamesAndTypesByNode<span class="signature">(nodeName, namespace, noDemangle)</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    </div>
     
 
     
@@ -5957,6 +5986,7 @@ it's place.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -6063,6 +6093,7 @@ it's place.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -6130,31 +6161,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;{name: string, types: Array.&lt;string>}></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getServiceNamesAndTypes"><span class="type-signature"></span>getServiceNamesAndTypes<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getServiceNamesAndTypes"><span class="type-signature"></span>getServiceNamesAndTypes<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    </div>
     
 
     
@@ -6238,31 +6267,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;{name: string, types: Array.&lt;string>}></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getServiceNamesAndTypesByNode"><span class="type-signature"></span>getServiceNamesAndTypesByNode<span class="signature">(nodeName, namespace)</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getServiceNamesAndTypesByNode"><span class="type-signature"></span>getServiceNamesAndTypesByNode<span class="signature">(nodeName, namespace)</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    </div>
     
 
     
@@ -6284,6 +6311,7 @@ it's place.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -6351,6 +6379,7 @@ it's place.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -6418,31 +6447,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;{name: string, types: Array.&lt;string>}></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getSubscriptionNamesAndTypesByNode"><span class="type-signature"></span>getSubscriptionNamesAndTypesByNode<span class="signature">(nodeName, namespace, noDemangle)</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getSubscriptionNamesAndTypesByNode"><span class="type-signature"></span>getSubscriptionNamesAndTypesByNode<span class="signature">(nodeName, namespace, noDemangle)</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    </div>
     
 
     
@@ -6464,6 +6491,7 @@ it's place.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -6570,6 +6598,7 @@ it's place.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -6637,31 +6666,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;{name: string, types: Array.&lt;string>}></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="getTopicNamesAndTypes"><span class="type-signature"></span>getTopicNamesAndTypes<span class="signature">(noDemangle)</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="getTopicNamesAndTypes"><span class="type-signature"></span>getTopicNamesAndTypes<span class="signature">(noDemangle)</span><span class="type-signature"> &rarr; {Array.&lt;{name: string, types: Array.&lt;string>}>}</span></h4>
+    </div>
     
 
     
@@ -6683,6 +6710,7 @@ it's place.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -6735,6 +6763,7 @@ it's place.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -6802,31 +6831,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;{name: string, types: Array.&lt;string>}></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="hasParameter"><span class="type-signature"></span>hasParameter<span class="signature">(name)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="hasParameter"><span class="type-signature"></span>hasParameter<span class="signature">(name)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    </div>
     
 
     
@@ -6848,6 +6875,7 @@ it's place.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -6892,6 +6920,7 @@ it's place.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -6959,31 +6988,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">boolean</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="hasParameterDescriptor"><span class="type-signature"></span>hasParameterDescriptor<span class="signature">(name)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="hasParameterDescriptor"><span class="type-signature"></span>hasParameterDescriptor<span class="signature">(name)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    </div>
     
 
     
@@ -7005,6 +7032,7 @@ it's place.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -7049,6 +7077,7 @@ it's place.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -7116,31 +7145,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">boolean</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="name"><span class="type-signature"></span>name<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="name"><span class="type-signature"></span>name<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    </div>
     
 
     
@@ -7220,31 +7247,29 @@ it's place.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">string</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="namespace"><span class="type-signature"></span>namespace<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="namespace"><span class="type-signature"></span>namespace<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    </div>
     
 
     
@@ -7324,31 +7349,29 @@ it's place.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">string</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="now"><span class="type-signature"></span>now<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Time.html">Time</a>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="now"><span class="type-signature"></span>now<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Time.html">Time</a>}</span></h4>
+    </div>
     
 
     
@@ -7432,31 +7455,29 @@ it's place.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type"><a href="Time.html">Time</a></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="removeOnSetParametersCallback"><span class="type-signature"></span>removeOnSetParametersCallback<span class="signature">(callback)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="removeOnSetParametersCallback"><span class="type-signature"></span>removeOnSetParametersCallback<span class="signature">(callback)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -7479,6 +7500,7 @@ If the callback is not found the process is a nop.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -7523,6 +7545,7 @@ If the callback is not found the process is a nop.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -7586,31 +7609,29 @@ If the callback is not found the process is a nop.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="setParameter"><span class="type-signature"></span>setParameter<span class="signature">(parameter)</span><span class="type-signature"> &rarr; {rclnodejs.rcl_interfaces.msg.SetParameterResult}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="setParameter"><span class="type-signature"></span>setParameter<span class="signature">(parameter)</span><span class="type-signature"> &rarr; {rclnodejs.rcl_interfaces.msg.SetParameterResult}</span></h4>
+    </div>
     
 
     
@@ -7635,6 +7656,7 @@ is not readOnly; otherwise an Error is thrown.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -7679,6 +7701,7 @@ is not readOnly; otherwise an Error is thrown.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -7746,31 +7769,29 @@ is not readOnly; otherwise an Error is thrown.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">rclnodejs.rcl_interfaces.msg.SetParameterResult</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="setParameters"><span class="type-signature"></span>setParameters<span class="signature">(parameters)</span><span class="type-signature"> &rarr; {Array.&lt;rclnodejs.rcl_interfaces.msg.SetParameterResult>}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="setParameters"><span class="type-signature"></span>setParameters<span class="signature">(parameters)</span><span class="type-signature"> &rarr; {Array.&lt;rclnodejs.rcl_interfaces.msg.SetParameterResult>}</span></h4>
+    </div>
     
 
     
@@ -7805,6 +7826,7 @@ set before an error remain unchanged.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -7849,6 +7871,7 @@ set before an error remain unchanged.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -7916,31 +7939,29 @@ set before an error remain unchanged.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">Array.&lt;rclnodejs.rcl_interfaces.msg.SetParameterResult></span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="setParametersAtomically"><span class="type-signature"></span>setParametersAtomically<span class="signature">(parameters)</span><span class="type-signature"> &rarr; {rclnodejs.rcl_interfaces.msg.SetParameterResult}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="setParametersAtomically"><span class="type-signature"></span>setParametersAtomically<span class="signature">(parameters)</span><span class="type-signature"> &rarr; {rclnodejs.rcl_interfaces.msg.SetParameterResult}</span></h4>
+    </div>
     
 
     
@@ -7976,6 +7997,7 @@ the point of the error are reverted to their previous state.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -8020,6 +8042,7 @@ the point of the error are reverted to their previous state.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -8087,31 +8110,29 @@ the point of the error are reverted to their previous state.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">rclnodejs.rcl_interfaces.msg.SetParameterResult</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="spin"><span class="type-signature"></span>spin<span class="signature">(node, timeout<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="spin"><span class="type-signature"></span>spin<span class="signature">(node, timeout<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -8134,6 +8155,7 @@ incoming events.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -8233,6 +8255,7 @@ incoming events.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -8293,28 +8316,13 @@ incoming events.
 
         
 
-<dl>
-    <dt>
-        <div class="param-desc">
-        If the node is already spinning.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
+<div class="exception-block">
+    <div class="param-desc">If the node is already spinning.</div>
+    <div class="returns-type"><span>Type</span> 
 <span class="param-type">Error</span>
 
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+</div>
+</div>
 
 
     
@@ -8325,31 +8333,29 @@ incoming events.
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="spinOnce"><span class="type-signature"></span>spinOnce<span class="signature">(node, timeout<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="spinOnce"><span class="type-signature"></span>spinOnce<span class="signature">(node, timeout<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -8372,6 +8378,7 @@ will not received additional events until running additional calls to spin() or 
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -8471,6 +8478,7 @@ will not received additional events until running additional calls to spin() or 
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -8531,28 +8539,13 @@ will not received additional events until running additional calls to spin() or 
 
         
 
-<dl>
-    <dt>
-        <div class="param-desc">
-        If the node is already spinning.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
+<div class="exception-block">
+    <div class="param-desc">If the node is already spinning.</div>
+    <div class="returns-type"><span>Type</span> 
 <span class="param-type">Error</span>
 
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
+</div>
+</div>
 
 
     
@@ -8563,31 +8556,29 @@ will not received additional events until running additional calls to spin() or 
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="startSpinning"><span class="type-signature"></span>startSpinning<span class="signature">()</span><span class="type-signature"></span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="startSpinning"><span class="type-signature"></span>startSpinning<span class="signature">()</span><span class="type-signature"></span></h4>
+    </div>
     
 
     
@@ -8666,14 +8657,19 @@ will not received additional events until running additional calls to spin() or 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="stop"><span class="type-signature"></span>stop<span class="signature">()</span><span class="type-signature"> &rarr; {undfined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="stop"><span class="type-signature"></span>stop<span class="signature">()</span><span class="type-signature"> &rarr; {undfined}</span></h4>
+    </div>
     
 
     
@@ -8753,31 +8749,29 @@ will not received additional events until running additional calls to spin() or 
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undfined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="stopSpinning"><span class="type-signature"></span>stopSpinning<span class="signature">()</span><span class="type-signature"> &rarr; {undfined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="stopSpinning"><span class="type-signature"></span>stopSpinning<span class="signature">()</span><span class="type-signature"> &rarr; {undfined}</span></h4>
+    </div>
     
 
     
@@ -8859,31 +8853,29 @@ will not received additional events until running additional calls to spin() or 
         
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undfined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
             
+<section class="symbol-card symbol-kind-function">
 
     
 
     
-    <h4 class="name" id="undeclareParameter"><span class="type-signature"></span>undeclareParameter<span class="signature">(name)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="undeclareParameter"><span class="type-signature"></span>undeclareParameter<span class="signature">(name)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
+    </div>
     
 
     
@@ -8907,6 +8899,7 @@ Readonly parameters can not be undeclared or updated.
     <h5>Parameters:</h5>
     
 
+<div class="table-wrap">
 <table class="params">
     <thead>
     <tr>
@@ -8951,6 +8944,7 @@ Readonly parameters can not be undeclared or updated.
     
     </tbody>
 </table>
+</div>
 
 
 
@@ -9018,25 +9012,20 @@ Readonly parameters can not be undeclared or updated.
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
+<div class="returns-type"><span>Type</span> 
 <span class="param-type">undefined</span>
 
-
-    </dd>
-</dl>
+</div>
 
     
 
 
 
 
+</section>
 
         
+        </div>
     
 
     
@@ -9049,19 +9038,30 @@ Readonly parameters can not be undeclared or updated.
 
 
 
+        </main>
+
+        <footer class="site-footer">
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Thu Mar 19 2026 18:05:06 GMT+0800 (China Standard Time)
+        </footer>
+    </div>
 </div>
 
-<nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="ActionClient.html">ActionClient</a></li><li><a href="ActionServer.html">ActionServer</a></li><li><a href="CallbackReturnValue.html">CallbackReturnValue</a></li><li><a href="Client.html">Client</a></li><li><a href="ClientGoalHandle.html">ClientGoalHandle</a></li><li><a href="Clock.html">Clock</a></li><li><a href="Context.html">Context</a></li><li><a href="Duration.html">Duration</a></li><li><a href="FloatingPointRange.html">FloatingPointRange</a></li><li><a href="GuardCondition.html">GuardCondition</a></li><li><a href="IntegerRange.html">IntegerRange</a></li><li><a href="LifecycleNode.html">LifecycleNode</a></li><li><a href="LifecyclePublisher.html">LifecyclePublisher</a></li><li><a href="Logging.html">Logging</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeOptions.html">NodeOptions</a></li><li><a href="Parameter.html">Parameter</a></li><li><a href="ParameterDescriptor.html">ParameterDescriptor</a></li><li><a href="ParameterService.html">ParameterService</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="QoS.html">QoS</a></li><li><a href="Range.html">Range</a></li><li><a href="Rate.html">Rate</a></li><li><a href="RateTimerServer.html">RateTimerServer</a></li><li><a href="Response.html">Response</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="ServerGoalHandle.html">ServerGoalHandle</a></li><li><a href="Service.html">Service</a></li><li><a href="State.html">State</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="Time.html">Time</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TimeSource.html">TimeSource</a></li><li><a href="Transition.html">Transition</a></li><li><a href="TransitionDescription.html">TransitionDescription</a></li></ul><h3>Global</h3><ul><li><a href="global.html#CallbackReturnCode">CallbackReturnCode</a></li><li><a href="global.html#CancelResponse">CancelResponse</a></li><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DEFAULT_NUMERIC_RANGE_TOLERANCE">DEFAULT_NUMERIC_RANGE_TOLERANCE</a></li><li><a href="global.html#defaultCancelCallback">defaultCancelCallback</a></li><li><a href="global.html#defaultGoalCallback">defaultGoalCallback</a></li><li><a href="global.html#defaultHandleAcceptedCallback">defaultHandleAcceptedCallback</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#getActionClientNamesAndTypesByNode">getActionClientNamesAndTypesByNode</a></li><li><a href="global.html#getActionNamesAndTypes">getActionNamesAndTypes</a></li><li><a href="global.html#getActionServerNamesAndTypesByNode">getActionServerNamesAndTypesByNode</a></li><li><a href="global.html#getCurrentGeneratorVersion">getCurrentGeneratorVersion</a></li><li><a href="global.html#GoalResponse">GoalResponse</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#ParameterType">ParameterType</a></li><li><a href="global.html#parameterTypeFromValue">parameterTypeFromValue</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li><li><a href="global.html#validType">validType</a></li><li><a href="global.html#validValue">validValue</a></li></ul>
-</nav>
+<script>
+    prettyPrint();
+    (function() {
+        var button = document.querySelector('.nav-toggle');
+        var shell = document.querySelector('.app-shell');
 
-<br class="clear">
+        if (!button || !shell) {
+            return;
+        }
 
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Jul 21 2021 12:39:15 GMT+0800 (China Standard Time)
-</footer>
-
-<script> prettyPrint(); </script>
-<script src="scripts/linenumber.js"> </script>
+        button.addEventListener('click', function() {
+            var isOpen = shell.classList.toggle('nav-open');
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    }());
+</script>
+<script src="../_static/scripts/linenumber.js"> </script>
 </body>
 </html>
