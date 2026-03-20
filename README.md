@@ -80,13 +80,13 @@ npm install rclnodejs
 source /opt/ros/<distro>/setup.bash
 ```
 
-2. Install the package.
+2. Install the repository dependencies.
 
 ```bash
-npm i rclnodejs
+npm install
 ```
 
-3. Run a publisher example.
+3. Run a publisher example from this checkout.
 
 ```bash
 node example/topics/publisher/publisher-example.js
