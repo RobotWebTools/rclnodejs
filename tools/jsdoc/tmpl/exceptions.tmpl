@@ -1,0 +1,17 @@
+<?js
+    var data = obj;
+?>
+<?js if (data.description && data.type && data.type.names) { ?>
+<div class="exception-block">
+    <div class="param-desc"><?js= data.description ?></div>
+    <div class="returns-type"><span>Type</span> <?js= this.partial('type.tmpl', data.type.names) ?></div>
+</div>
+<?js } else { ?>
+    <div class="param-desc">
+    <?js if (data.description) { ?>
+        <?js= data.description ?>
+    <?js } else if (data.type && data.type.names) { ?>
+        <?js= this.partial('type.tmpl', data.type.names) ?>
+    <?js } ?>
+    </div>
+<?js } ?>

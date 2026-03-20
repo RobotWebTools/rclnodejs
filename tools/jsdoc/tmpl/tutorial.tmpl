@@ -1,0 +1,19 @@
+<section class="doc-section prose-section tutorial-section">
+
+<header class="doc-page-header">
+    <?js if (children.length > 0) { ?>
+    <ul class="tutorial-children"><?js
+        var self = this;
+        children.forEach(function(t) { ?>
+        <li><?js= self.tutoriallink(t.name) ?></li>
+    <?js }); ?></ul>
+    <?js } ?>
+
+    <h2 class="doc-heading"><?js= header ?></h2>
+</header>
+
+<article class="prose-card">
+    <?js= content ?>
+</article>
+
+</section>
