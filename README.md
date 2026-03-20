@@ -6,7 +6,7 @@
 | :----------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | Rolling<br>Kilted<br>Jazzy<br>Humble | [![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml?query=branch%3Adevelop)<br>[![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml?query=branch%3Adevelop)<br>[![Windows](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml?query=branch%3Adevelop)<br>[![ASan](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml?query=branch%3Adevelop) |
 
-> **Note:** rclnodejs development and maintenance is limited to the ROS 2 LTS releases and the Rolling development branch
+> **Note:** Supported ROS 2 distributions include Humble, Jazzy, Kilted, and Rolling.
 
 **rclnodejs** is a Node.js client library for [ROS 2](https://www.ros.org/) that provides comprehensive JavaScript and TypeScript APIs for developing ROS 2 solutions.
 
@@ -22,19 +22,14 @@ rclnodejs.init().then(() => {
 
 ## Documentation
 
-- [Installation](#installation)
-- [rclnodejs-cli](#rclnodejs-cli)
-- [API Documentation](#api-documentation)
-- [Tutorials](./tutorials/)
-- [Electron-based Visualization](#electron-based-visualization)
-- [Using TypeScript](#using-rclnodejs-with-typescript)
-- [Observable Subscriptions](#observable-subscriptions)
-- [ROS2 Interface Message Generation](#ros2-interface-message-generation)
-- [Performance Benchmarks](#performance-benchmarks)
-- [Efficient Usage Tips](./docs/EFFICIENCY.md)
-- [FAQ and Known Issues](./docs/FAQ.md)
-- [Building from Scratch](./docs/BUILDING.md)
-- [Contributing](./docs/CONTRIBUTING.md)
+- Get started:
+  [Installation](#installation), [Quick Start](#quick-start), [Tutorials](./tutorials/)
+- Reference:
+  [API Documentation](#api-documentation), [Using TypeScript](#using-rclnodejs-with-typescript), [ROS2 Interface Message Generation](#ros2-interface-message-generation)
+- Features and examples:
+  [rclnodejs-cli](#rclnodejs-cli), [Electron-based Visualization](#electron-based-visualization), [Observable Subscriptions](#observable-subscriptions), [Performance Benchmarks](#performance-benchmarks)
+- Project docs:
+  [Efficient Usage Tips](./docs/EFFICIENCY.md), [FAQ and Known Issues](./docs/FAQ.md), [Building from Scratch](./docs/BUILDING.md), [Contributing](./docs/CONTRIBUTING.md)
 
 ## Installation
 
@@ -66,6 +61,8 @@ rclnodejs ships with prebuilt native binaries for common Linux configurations si
 - **Architectures:** x64, arm64
 - **Node.js:** >= 16.20.2 (N-API compatible)
 
+Installations outside this prebuilt matrix automatically fall back to building from source.
+
 **Force Building from Source:**
 
 If you need to build from source even when a prebuilt binary is available, set the environment variable:
@@ -75,21 +72,33 @@ export RCLNODEJS_FORCE_BUILD=1
 npm install rclnodejs
 ```
 
-## rclnodejs-cli
+## Quick Start
 
-[rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) is a companion project we recently launched to provide a commandline interface to a set of developer tools for working with this `rclnodejs`. You may find `rclnodejs-cli` particularly useful if you plan to create ROS 2 node(s) and launch files for working with multiple node orchestrations.
+1. Source your ROS 2 environment.
 
 ```bash
-Usage: rclnodejs [command] [options]
-
-Options:
-  -h, --help                               display help for command
-
-Commands:
-  create-package [options] <package-name>  Create a ROS2 package for Nodejs development.
-  generate-ros-messages                    Generate JavaScript code from ROS2 IDL interfaces
-  help [command]                           display help for command
+source /opt/ros/<distro>/setup.bash
 ```
+
+2. Install the package.
+
+```bash
+npm i rclnodejs
+```
+
+3. Run a publisher example.
+
+```bash
+node example/topics/publisher/publisher-example.js
+```
+
+You should see messages being published once per second. Explore more runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
+
+## rclnodejs-cli
+
+[rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) is a separate companion project that provides command-line tooling for working with rclnodejs-based ROS 2 applications. It is particularly useful for creating ROS 2 Node.js packages and working with launch files for multi-node orchestration.
+
+See the rclnodejs-cli repository for installation instructions and the current command set.
 
 ## API Documentation
 
@@ -108,7 +117,7 @@ Explore more examples in [electron_demo](https://github.com/RobotWebTools/rclnod
 
 ## Using rclnodejs with TypeScript
 
-TypeScript declaration files are included in the `types/` folder. Configure your `tsconfig.json`:
+TypeScript declaration files are included in the package and exposed through the `types` entry in `package.json`. In most projects, configuring your `tsconfig.json` is sufficient:
 
 ```jsonc
 {
@@ -177,7 +186,7 @@ npx generate-ros-messages
 
 Generated files are located at `<yourproject>/node_modules/rclnodejs/generated/`.
 
-> **Note:** This step is not needed for rclnodejs > 1.5.0
+> **Note:** rclnodejs already generates bundled interfaces during installation. Rerun this command only after adding new ROS packages to your environment.
 
 ### IDL Message Generation
 
@@ -193,13 +202,13 @@ npm run generate-messages-idl
 
 Benchmark results for 1000 iterations with 1024KB messages (Ubuntu 24.04.3 WSL2, i7-1185G7):
 
+These numbers are workload- and environment-specific. See [benchmark/README.md](./benchmark/README.md) for the full setup and methodology.
+
 | Library                 | Topic (ms) | Service (ms) |
 | ----------------------- | ---------- | ------------ |
 | **rclcpp (C++)**        | 168        | 627          |
 | **rclnodejs (Node.js)** | 744        | 927          |
 | **rclpy (Python)**      | 1,618      | 15,380       |
-
-See [benchmark/README.md](benchmark/README.md) for details.
 
 ## Contributing
 
