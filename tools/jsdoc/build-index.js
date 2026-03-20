@@ -1,3 +1,17 @@
+// Copyright (c) 2026 The Robot Web Tools Contributors. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 'use strict';
 
 const childProcess = require('child_process');
@@ -13,9 +27,7 @@ const packageJsonPath = path.resolve(
 );
 const localIndexPath = process.env.RCLNODEJS_LOCAL_INDEX_PATH
   ? path.resolve(process.env.RCLNODEJS_LOCAL_INDEX_PATH)
-  : process.env.RCLNODEJS_LOCAL_INDEX_PATH === ''
-    ? null
-    : path.join(__dirname, 'index.html');
+  : null;
 const docsIndexPath = path.resolve(
   process.env.RCLNODEJS_DOCS_INDEX_PATH || path.join(docsRoot, 'index.html')
 );
