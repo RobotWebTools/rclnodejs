@@ -1,18 +1,16 @@
-# rclnodejs [![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml?query=branch%3Adevelop)[![Linux](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml?query=branch%3Adevelop)
+# rclnodejs
 
-`rclnodejs` is a Node.js client for the Robot Operating System (ROS 2). It provides a simple and easy JavaScript API for ROS 2 programming. TypeScript declarations are included to support use of rclnodejs in TypeScript projects.
+`rclnodejs` is a Node.js client library for ROS 2 that provides JavaScript and TypeScript APIs for building ROS 2 applications.
 
-\* rclnodejs development and maintenance is limited to all active ROS 2 LTS releases and the Rolling development branch
+Supported ROS 2 distributions include Humble, Jazzy, Kilted, and Rolling.
 
-Here's an example for how to create a ROS 2 node that publishes a string message in a few lines of JavaScript.
-
-```JavaScript
+```javascript
 const rclnodejs = require('rclnodejs');
 rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('publisher_example_node');
+  const node = new rclnodejs.Node('publisher_example_node');
   const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
   publisher.publish(`Hello ROS 2 from rclnodejs`);
-  rclnodejs.spin(node);
+  node.spin();
 });
 ```
 
@@ -29,11 +27,11 @@ rclnodejs.init().then(() => {
 npm i rclnodejs
 ```
 
-- **Note:** to install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
+- **Note:** To install rclnodejs from GitHub, add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependencies.
 
 ### Prebuilt Binaries
 
-rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This significantly speeds up installation and reduces dependencies.
+rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation.
 
 **Supported Platforms:**
 
@@ -42,26 +40,36 @@ rclnodejs ships with prebuilt native binaries for common Linux configurations si
 - **Architectures:** x64, arm64
 - **Node.js:** >= 16.20.2 (N-API compatible)
 
-**Force Building from Source:**
+Installations outside this prebuilt matrix automatically fall back to building from source.
 
-If you need to build from source even when a prebuilt binary is available, set the environment variable:
+**Force Building from Source:**
 
 ```bash
 export RCLNODEJS_FORCE_BUILD=1
 npm install rclnodejs
 ```
 
-## Documentation
+## Documentation and Examples
 
-API [documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html) is available online.
+- API documentation: [robotwebtools.github.io/rclnodejs/docs](https://robotwebtools.github.io/rclnodejs/docs/index.html)
+- JavaScript examples: [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
+- TypeScript demos: [ts_demo/](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo)
+- Electron demos: [electron_demo/](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo)
+- Companion CLI: [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/)
 
-## JavaScript Examples
+## Message Generation
 
-Try the [examples](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) to get started.
+rclnodejs generates JavaScript message interfaces and TypeScript declarations during installation for `rclnodejs > 1.5.0`. If you install additional ROS packages later, rerun:
+
+```bash
+npx generate-ros-messages
+```
+
+Generated files are written to `<your-project>/node_modules/rclnodejs/generated/`.
 
 ## Using rclnodejs with TypeScript
 
-TypeScript declaration files are included in the `types/` folder. Configure your `tsconfig.json`:
+TypeScript declaration files are included in the package. In most projects, configuring your `tsconfig.json` is sufficient:
 
 ```jsonc
 {
@@ -73,32 +81,16 @@ TypeScript declaration files are included in the `types/` folder. Configure your
 }
 ```
 
-TypeScript example:
-
 ```typescript
 import * as rclnodejs from 'rclnodejs';
+
 rclnodejs.init().then(() => {
-  const node = rclnodejs.createNode('publisher_example_node');
+  const node = new rclnodejs.Node('publisher_example_node');
   const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
   publisher.publish(`Hello ROS 2 from rclnodejs`);
-  rclnodejs.spin(node);
+  node.spin();
 });
 ```
-
-See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo) for more examples.
-
-**Note** that the interface.d.ts file is updated each time the generate_messages.js script is run.
-
-## Electron-based Visualization
-
-Create rich, interactive desktop applications using Electron and web technologies like Three.js. Build 3D visualizations, monitoring dashboards, and control interfaces that run on Windows, macOS, and Linux.
-
-|                                                  Demo                                                   |                                                              Description                                                              |                                                           Screenshot                                                            |
-| :-----------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------: |
-|  **🐢 [turtle_tf2](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo/turtle_tf2)**  |  Real-time coordinate frame visualization with turtle control. Features TF2 transforms, keyboard control, and dynamic frame updates.  |  ![turtle_tf2](https://github.com/RobotWebTools/rclnodejs/blob/develop/electron_demo/turtle_tf2/turtle-tf2-demo.png?raw=true)   |
-| **🦾 [manipulator](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo/manipulator)** | Interactive two-joint robotic arm simulation. Features 3D joint visualization, manual/automatic control, and visual movement markers. | ![manipulator](https://github.com/RobotWebTools/rclnodejs/blob/develop/electron_demo/manipulator/manipulator-demo.png?raw=true) |
-
-Explore more examples in [electron_demo](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo).
 
 ## License
 
