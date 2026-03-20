@@ -186,7 +186,7 @@ npx generate-ros-messages
 
 Generated files are located at `<yourproject>/node_modules/rclnodejs/generated/`.
 
-> **Note:** rclnodejs already generates bundled interfaces during installation. Rerun this command only after adding new ROS packages to your environment.
+> **Note:** This step is not needed for `rclnodejs > 1.5.0` because bundled interfaces are generated during installation. Rerun this command only after adding new ROS packages to your environment.
 
 ### IDL Message Generation
 

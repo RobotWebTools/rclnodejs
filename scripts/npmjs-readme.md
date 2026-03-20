@@ -59,7 +59,7 @@ npm install rclnodejs
 
 ## Message Generation
 
-rclnodejs generates JavaScript message interfaces and TypeScript declarations during installation. If you install additional ROS packages later, rerun:
+rclnodejs generates JavaScript message interfaces and TypeScript declarations during installation for `rclnodejs > 1.5.0`. If you install additional ROS packages later, rerun:
 
 ```bash
 npx generate-ros-messages
