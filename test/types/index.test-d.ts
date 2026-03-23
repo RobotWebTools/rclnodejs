@@ -245,6 +245,7 @@ expectType<rclnodejs.SubscriptionWithRawMessageCallback>(rawMessageCallback);
 
 expectType<string>(subscription.topic);
 expectType<boolean>(subscription.isDestroyed());
+expectType<boolean>(subscription.isContentFilterSupported());
 expectType<boolean>(subscription.setContentFilter(contentFilter));
 expectType<rclnodejs.SubscriptionContentFilter | undefined>(
   subscription.getContentFilter()

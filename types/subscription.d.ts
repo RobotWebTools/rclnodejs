@@ -52,6 +52,12 @@ declare module 'rclnodejs' {
     readonly isRaw: boolean;
 
     /**
+     * Check if content filtering is supported for this subscription.
+     * @returns True if the subscription instance supports content filtering; otherwise false.
+     */
+    isContentFilterSupported(): boolean;
+
+    /**
      * Test if the RMW supports content-filtered topics and that this subscription
      * is configured with a well formed content-filter.
      * @returns {boolean} True if content-filtering will be applied; otherwise false.

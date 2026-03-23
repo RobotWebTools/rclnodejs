@@ -264,6 +264,18 @@ Napi::Value GetSubscriptionTopic(const Napi::CallbackInfo& info) {
   return Napi::String::New(env, topic);
 }
 
+Napi::Value IsContentFilterSupported(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
+
+  bool is_supported = rcl_subscription_is_cft_supported(subscription);
+  return Napi::Boolean::New(env, is_supported);
+}
+
 Napi::Value HasContentFilter(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -476,6 +488,8 @@ Napi::Object InitSubscriptionBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("rclTakeRaw", Napi::Function::New(env, RclTakeRaw));
   exports.Set("getSubscriptionTopic",
               Napi::Function::New(env, GetSubscriptionTopic));
+  exports.Set("isContentFilterSupported",
+              Napi::Function::New(env, IsContentFilterSupported));
   exports.Set("hasContentFilter", Napi::Function::New(env, HasContentFilter));
   exports.Set("setContentFilter", Napi::Function::New(env, SetContentFilter));
   exports.Set("getContentFilter", Napi::Function::New(env, GetContentFilter));
