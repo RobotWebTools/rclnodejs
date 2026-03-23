@@ -52,6 +52,7 @@ if __name__ == '__main__':
     try:
         parser_method = getattr(parser, sys.argv[1])
         spec = parser_method(sys.argv[2], sys.argv[3])
+
         if sys.argv[1] == 'parse_message_file':
             json_obj = get_json_object_from_msg_spec_object(spec)
         elif sys.argv[1] == 'parse_service_file':
