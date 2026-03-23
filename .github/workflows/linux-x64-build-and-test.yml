@@ -49,23 +49,37 @@ jobs:
         architecture: ${{ matrix.architecture }}
 
     - name: Setup ROS2
-      if: ${{ !matrix.ros_tar_url }}
+      if: ${{ matrix.ros_distribution != 'rolling' }}
       uses: ros-tooling/setup-ros@v0.7
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
     - name: Install ROS2 Rolling Nightly
-      if: ${{ matrix.ros_tar_url }}
+      if: ${{ matrix.ros_distribution == 'rolling' }}
+      env:
+        ROS2_ROLLING_DIR: /opt/ros2_rolling
       run: |
-        apt-get update
-        apt-get install -y build-essential cmake curl tar bzip2 python3
-        curl -sL "${{ matrix.ros_tar_url }}" -o /tmp/ros2-nightly.tar.bz2
-        mkdir -p /opt/ros2_nightly
-        tar xjf /tmp/ros2-nightly.tar.bz2 -C /opt/ros2_nightly
-        rm /tmp/ros2-nightly.tar.bz2
+        apt-get update && apt-get install -y locales
+        locale-gen en_US en_US.UTF-8
+        update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+        export LANG=en_US.UTF-8
+
+        apt-get install -y build-essential cmake curl tar bzip2 wget python3 python3-rosdep
+
+        # Download and extract nightly binary
+        mkdir -p $ROS2_ROLLING_DIR
+        cd $ROS2_ROLLING_DIR
+        curl -sL "${{ matrix.ros_tar_url }}" -o ros2-nightly.tar.bz2
+        tar xf ros2-nightly.tar.bz2
+        rm ros2-nightly.tar.bz2
+
+        # Install dependencies using rosdep
+        rosdep init || true
+        rosdep update
+        rosdep install --from-paths $ROS2_ROLLING_DIR/ros2-linux/share --ignore-src -y --skip-keys "cyclonedds fastcdr fastdds iceoryx_binding_c rmw_connextdds rti-connext-dds-7.3.0 urdfdom_headers"
 
     - name: Install test-msgs and mrpt_msgs on Linux
-      if: ${{ !matrix.ros_tar_url }}
+      if: ${{ matrix.ros_distribution != 'rolling' }}
       run: |
         sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs ros-${{ matrix.ros_distribution }}-mrpt-msgs
         # Adjust dependencies based on Ubuntu version
@@ -77,15 +91,18 @@ jobs:
 
     - uses: actions/checkout@v6
 
-    - name: Build rclnodejs (nightly)
-      if: ${{ matrix.ros_tar_url }}
+    - name: Build and test rclnodejs (nightly)
+      if: ${{ matrix.ros_distribution == 'rolling' }}
       run: |
         uname -a
-        source /opt/ros2_nightly/ros2-linux/setup.bash
+        source /opt/ros2_rolling/ros2-linux/setup.bash
         npm i
+        npm run lint
+        npm test
+        npm run clean
 
     - name: Build and test rclnodejs
-      if: ${{ !matrix.ros_tar_url }}
+      if: ${{ matrix.ros_distribution != 'rolling' }}
       run: |
         uname -a
         source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
@@ -95,15 +112,15 @@ jobs:
         npm run clean
 
     - name: Test with IDL ROS messages against rolling
-      if: ${{ !matrix.ros_tar_url && matrix.ros_distribution == 'rolling' }}
+      if: ${{ matrix.ros_distribution == 'rolling' }}
       run: |
-        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+        source /opt/ros2_rolling/ros2-linux/setup.bash
         npm i
         npm run test-idl
         npm run clean
 
     - name: Coveralls
-      if: ${{ !matrix.ros_tar_url && matrix.ros_distribution == 'rolling' && matrix['node-version'] == '24.X' }}
+      if: ${{ matrix.ros_distribution == 'rolling' && matrix['node-version'] == '24.X' }}
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
