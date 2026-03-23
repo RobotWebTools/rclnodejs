@@ -265,6 +265,7 @@ Napi::Value GetSubscriptionTopic(const Napi::CallbackInfo& info) {
   return Napi::String::New(env, topic);
 }
 
+#if ROS_VERSION > 2505  // Rolling only
 Napi::Value IsContentFilterSupported(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -276,6 +277,7 @@ Napi::Value IsContentFilterSupported(const Napi::CallbackInfo& info) {
   bool is_supported = rcl_subscription_is_cft_supported(subscription);
   return Napi::Boolean::New(env, is_supported);
 }
+#endif
 
 Napi::Value HasContentFilter(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -489,8 +491,10 @@ Napi::Object InitSubscriptionBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("rclTakeRaw", Napi::Function::New(env, RclTakeRaw));
   exports.Set("getSubscriptionTopic",
               Napi::Function::New(env, GetSubscriptionTopic));
+#if ROS_VERSION > 2505  // Rolling only
   exports.Set("isContentFilterSupported",
               Napi::Function::New(env, IsContentFilterSupported));
+#endif
   exports.Set("hasContentFilter", Napi::Function::New(env, HasContentFilter));
   exports.Set("setContentFilter", Napi::Function::New(env, SetContentFilter));
   exports.Set("getContentFilter", Napi::Function::New(env, GetContentFilter));

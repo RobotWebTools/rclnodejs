@@ -505,8 +505,9 @@ describe('subscription isContentFilterSupported', function () {
     const supported = subscription.isContentFilterSupported();
     assert.strictEqual(typeof supported, 'boolean');
 
-    // Validate against known RMW capabilities
-    const expectedSupported = isContentFilteringSupported();
+    // isContentFilterSupported requires rolling; on older distros it returns false
+    const isRolling = DistroUtils.getDistroId() >= DistroUtils.DistroId.ROLLING;
+    const expectedSupported = isRolling && isContentFilteringSupported();
     assert.strictEqual(supported, expectedSupported);
 
     done();

@@ -47,7 +47,7 @@ def get_json_object_from_msg_spec_object(msg_spec_object):
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
-        print('Wrong number of argments')
+        print('Usage: {} <command> <packageName> <filePath>'.format(sys.argv[0]), file=sys.stderr)
         sys.exit(1)
     try:
         parser_method = getattr(parser, sys.argv[1])
