@@ -56,27 +56,13 @@ jobs:
 
     - name: Install ROS2 Rolling Nightly
       if: ${{ matrix.ros_distribution == 'rolling' }}
-      env:
-        ROS2_ROLLING_DIR: /opt/ros2_rolling
       run: |
-        apt-get update && apt-get install -y locales
-        locale-gen en_US en_US.UTF-8
-        update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-        export LANG=en_US.UTF-8
-
-        apt-get install -y build-essential cmake curl tar bzip2 wget python3 python3-rosdep
-
-        # Download and extract nightly binary
-        mkdir -p $ROS2_ROLLING_DIR
-        cd $ROS2_ROLLING_DIR
-        curl -sL "${{ matrix.ros_tar_url }}" -o ros2-nightly.tar.bz2
-        tar xf ros2-nightly.tar.bz2
-        rm ros2-nightly.tar.bz2
-
-        # Install dependencies using rosdep
-        rosdep init || true
-        rosdep update
-        rosdep install --from-paths $ROS2_ROLLING_DIR/ros2-linux/share --ignore-src -y --skip-keys "cyclonedds fastcdr fastdds iceoryx_binding_c rmw_connextdds rti-connext-dds-7.3.0 urdfdom_headers"
+        apt-get update
+        apt-get install -y build-essential cmake curl tar bzip2 python3
+        mkdir -p /opt/ros2_rolling
+        curl -sL "${{ matrix.ros_tar_url }}" -o /tmp/ros2-nightly.tar.bz2
+        tar xf /tmp/ros2-nightly.tar.bz2 -C /opt/ros2_rolling
+        rm /tmp/ros2-nightly.tar.bz2
 
     - name: Install test-msgs and mrpt_msgs on Linux
       if: ${{ matrix.ros_distribution != 'rolling' }}
