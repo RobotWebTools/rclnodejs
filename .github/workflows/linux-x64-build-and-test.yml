@@ -40,6 +40,7 @@ jobs:
           # Rolling Ridley (No End-Of-Life)
           - docker_image: ubuntu:noble
             ros_distribution: rolling
+            ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-linux-amd64.tar.bz2"
     steps:
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v6
@@ -48,12 +49,23 @@ jobs:
         architecture: ${{ matrix.architecture }}
 
     - name: Setup ROS2
+      if: ${{ !matrix.ros_tar_url }}
       uses: ros-tooling/setup-ros@v0.7
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
-        use-ros2-testing: ${{ matrix.ros_distribution == 'rolling' }}
+
+    - name: Install ROS2 Rolling Nightly
+      if: ${{ matrix.ros_tar_url }}
+      run: |
+        apt-get update
+        apt-get install -y build-essential cmake curl tar bzip2 python3
+        curl -sL "${{ matrix.ros_tar_url }}" -o /tmp/ros2-nightly.tar.bz2
+        mkdir -p /opt/ros2_nightly
+        tar xjf /tmp/ros2-nightly.tar.bz2 -C /opt/ros2_nightly
+        rm /tmp/ros2-nightly.tar.bz2
 
     - name: Install test-msgs and mrpt_msgs on Linux
+      if: ${{ !matrix.ros_tar_url }}
       run: |
         sudo apt install ros-${{ matrix.ros_distribution }}-test-msgs ros-${{ matrix.ros_distribution }}-mrpt-msgs
         # Adjust dependencies based on Ubuntu version
@@ -65,7 +77,15 @@ jobs:
 
     - uses: actions/checkout@v6
 
+    - name: Build rclnodejs (nightly)
+      if: ${{ matrix.ros_tar_url }}
+      run: |
+        uname -a
+        source /opt/ros2_nightly/ros2-linux/setup.bash
+        npm i
+
     - name: Build and test rclnodejs
+      if: ${{ !matrix.ros_tar_url }}
       run: |
         uname -a
         source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
@@ -75,7 +95,7 @@ jobs:
         npm run clean
 
     - name: Test with IDL ROS messages against rolling
-      if: ${{ matrix.ros_distribution == 'rolling' }}
+      if: ${{ !matrix.ros_tar_url && matrix.ros_distribution == 'rolling' }}
       run: |
         source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
         npm i
@@ -83,7 +103,7 @@ jobs:
         npm run clean
 
     - name: Coveralls
-      if: ${{ matrix.ros_distribution == 'rolling' && matrix['node-version'] == '24.X' }}
+      if: ${{ !matrix.ros_tar_url && matrix.ros_distribution == 'rolling' && matrix['node-version'] == '24.X' }}
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
