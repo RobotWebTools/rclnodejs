@@ -68,7 +68,7 @@ jobs:
 
         # Install prerequisites
         apt-get update
-        apt-get install -y build-essential cmake tar bzip2 python3 python3-rosdep
+        apt-get install -y build-essential cmake tar bzip2 python3 python3-rosdep python3-colcon-common-extensions
 
         # Download and extract nightly binary
         mkdir -p /opt/ros2_rolling
@@ -97,8 +97,8 @@ jobs:
       if: ${{ matrix.ros_distribution == 'rolling' }}
       run: |
         uname -a
-        source /opt/ros2_rolling/ros2-linux/setup.bash
-        source /opt/ros/rolling/local_setup.bash
+        source /opt/ros/rolling/setup.bash
+        source /opt/ros2_rolling/ros2-linux/local_setup.bash
         npm i
         npm run lint
         npm test
@@ -117,8 +117,8 @@ jobs:
     - name: Test with IDL ROS messages against rolling
       if: ${{ matrix.ros_distribution == 'rolling' }}
       run: |
-        source /opt/ros2_rolling/ros2-linux/setup.bash
-        source /opt/ros/rolling/local_setup.bash
+        source /opt/ros/rolling/setup.bash
+        source /opt/ros2_rolling/ros2-linux/local_setup.bash
         npm i
         npm run test-idl
         npm run clean
