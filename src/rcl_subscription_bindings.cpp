@@ -16,6 +16,7 @@
 
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
+#include <rcl/subscription.h>
 #include <rmw/types.h>
 
 #include <cstdio>
