@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
+  pixi-build:
     uses: ./.github/workflows/windows-build-and-test.yml
     with:
       trigger_type: "push"

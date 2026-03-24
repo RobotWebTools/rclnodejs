@@ -235,7 +235,10 @@ subscription = node.createSubscription(
   }
 );
 
-const rawMessageCallback = (message: Buffer) => {
+const rawMessageCallback = (
+  message: Buffer,
+  _messageInfo?: rclnodejs.MessageInfo
+) => {
   const receivedRawMessage = message;
 };
 expectType<rclnodejs.SubscriptionWithRawMessageCallback>(rawMessageCallback);

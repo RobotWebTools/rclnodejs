@@ -2,6 +2,8 @@
 /// <reference path="./clock_event.d.ts" />
 /// <reference path="./clock_change.d.ts" />
 /// <reference path="./message_validation.d.ts" />
+/// <reference path="./parameter_event_handler.d.ts" />
+/// <reference path="./message_info.d.ts" />
 
 import { ChildProcess } from 'child_process';
 
@@ -84,6 +86,38 @@ declare module 'rclnodejs' {
    * @param timeout - ms to wait, block forever if negative, return immediately when 0, default is 10.
    * @deprecated since 0.18.0, Use Node.spinOnce(timeout)*/
   function spinOnce(node: Node, timeout?: number): void;
+
+  /**
+   * Options for waitForMessage.
+   */
+  interface WaitForMessageOptions {
+    /** Timeout in milliseconds. If omitted, waits indefinitely. */
+    timeout?: number;
+    /** QoS profile for the temporary subscription. */
+    qos?: QoS;
+  }
+
+  /**
+   * Wait for a single message on a topic.
+   *
+   * Creates a temporary subscription, waits for the first message to arrive,
+   * and returns it. The node must be spinning before calling this function.
+   *
+   * This is the rclnodejs equivalent of rclpy's `wait_for_message`.
+   *
+   * @param typeClass - The ROS message type class.
+   * @param node - The node to create the temporary subscription on.
+   * @param topic - The topic name to listen on.
+   * @param options - Options including timeout and QoS.
+   * @returns Resolves with the received message.
+   * @throws Error if timeout expires before a message arrives.
+   */
+  function waitForMessage<T extends TypeClass<MessageTypeClassName>>(
+    typeClass: T,
+    node: Node,
+    topic: string,
+    options?: WaitForMessageOptions
+  ): Promise<MessageType<T>>;
 
   /**
    * Stop all activity, destroy all nodes and node components.

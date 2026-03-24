@@ -1,0 +1,6 @@
+[
+  "test-serialization.js",
+  "test-message-generation-bin.js",
+  "test-rosidl-message-generator.js",
+  "test-type-description-service.js"
+]

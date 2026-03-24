@@ -87,6 +87,10 @@ describe('rclnodejs rate test suite', function () {
   });
 
   it('rate sleep accuracy test, 1000 hz for 3 seconds', async function () {
+    if (process.platform === 'win32') {
+      this.skip();
+    }
+
     // run 3 * hz,
     //   collect and average the sleep intervals
     //   compare average sleep interval with the period of the timer

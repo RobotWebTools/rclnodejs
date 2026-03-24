@@ -63,7 +63,10 @@ const {
 const ParameterClient = require('./lib/parameter_client.js');
 const errors = require('./lib/errors.js');
 const ParameterWatcher = require('./lib/parameter_watcher.js');
+const ParameterEventHandler = require('./lib/parameter_event_handler.js');
+const waitForMessage = require('./lib/wait_for_message.js');
 const MessageIntrospector = require('./lib/message_introspector.js');
+const MessageInfo = require('./lib/message_info.js');
 const ObservableSubscription = require('./lib/observable_subscription.js');
 const { spawn } = require('child_process');
 const {
@@ -242,6 +245,12 @@ let rcl = {
 
   /** {@link ParameterWatcher} class */
   ParameterWatcher: ParameterWatcher,
+
+  /** {@link ParameterEventHandler} class */
+  ParameterEventHandler: ParameterEventHandler,
+
+  /** {@link MessageInfo} class */
+  MessageInfo: MessageInfo,
 
   /** {@link ObservableSubscription} class */
   ObservableSubscription: ObservableSubscription,
@@ -457,6 +466,26 @@ let rcl = {
   spinOnce(node, timeout = 10) {
     node.spinOnce(timeout);
   },
+
+  /**
+   * Wait for a single message on a topic.
+   *
+   * Creates a temporary subscription, waits for the first message to arrive,
+   * and returns it. The temporary subscription is always cleaned up, even on
+   * timeout or error. The node must be spinning before calling this function.
+   *
+   * This is the rclnodejs equivalent of rclpy's `wait_for_message`.
+   *
+   * @param {function|string|object} typeClass - The ROS message type class.
+   * @param {Node} node - The node to create the temporary subscription on.
+   * @param {string} topic - The topic name to listen on.
+   * @param {object} [options] - Options.
+   * @param {number} [options.timeout] - Timeout in milliseconds. If omitted, waits indefinitely.
+   * @param {object} [options.qos] - QoS profile for the subscription.
+   * @returns {Promise<object>} - Resolves with the received message.
+   * @throws {Error} If timeout expires before a message arrives.
+   */
+  waitForMessage: waitForMessage,
 
   /**
    * Shutdown an RCL environment identified by a context. The shutdown process will

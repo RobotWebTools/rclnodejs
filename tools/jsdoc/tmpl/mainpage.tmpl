@@ -1,0 +1,163 @@
+<?js
+var data = obj;
+var self = this;
+var homepage = this.homepage || {};
+?>
+
+<?js if (data.kind === 'package') { ?>
+    <section class="hero-card">
+        <div class="hero-layout">
+            <div class="hero-copy">
+                <p class="hero-kicker">JavaScript and TypeScript ROS 2 API</p>
+                <h2><?js= data.name ?> <span><?js= data.version ?></span></h2>
+                <?js if (data.description) { ?>
+                <p class="hero-description"><?js= data.description ?></p>
+                <?js } ?>
+                <p class="hero-lead">Build ROS 2 nodes with a Node.js-native workflow, generated message bindings, and TypeScript-friendly APIs.</p>
+                <div class="hero-actions">
+                    <a class="hero-action primary" href="<?js= homepage.installUrl || '#installation' ?>">Get Started</a>
+                    <a class="hero-action" href="<?js= homepage.coreModuleUrl || 'module-rclnodejs.html' ?>">Browse Core API</a>
+                    <a class="hero-action" href="<?js= homepage.typescriptUrl || '#using-rclnodejs-with-typescript' ?>">TypeScript Guide</a>
+                </div>
+                <div class="hero-tags">
+                    <span>ROS 2</span>
+                    <span>Node.js</span>
+                    <span>TypeScript</span>
+                </div>
+            </div>
+
+            <div class="hero-panel">
+                <p class="hero-panel-title">Quick Start</p>
+                <pre class="prettyprint hero-snippet"><code>npm i rclnodejs</code></pre>
+                <ul class="hero-points">
+                    <li>Works with sourced ROS 2 environments</li>
+                    <li>Supports generated message and IDL workflows</li>
+                    <li>Covers topics, services, actions, lifecycle, and time</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="homepage-strip stats-strip">
+        <?js (homepage.stats || []).forEach(function(stat) { ?>
+        <article class="stats-card">
+            <strong><?js= stat.value ?></strong>
+            <span><?js= stat.label ?></span>
+            <p><?js= stat.detail ?></p>
+        </article>
+        <?js }); ?>
+    </section>
+<?js } ?>
+
+<?js if (data.kind === 'mainpage') { ?>
+    <section class="homepage-grid">
+        <article class="homepage-card homepage-card-wide">
+            <p class="section-kicker">Why rclnodejs</p>
+            <h3>Engineering ergonomics for robotics teams using JavaScript</h3>
+            <p>rclnodejs lets teams build ROS 2 software in Node.js without losing alignment with the broader ROS ecosystem. The API stays close to core ROS concepts while fitting JavaScript and TypeScript workflows.</p>
+        </article>
+
+        <article class="homepage-card">
+            <p class="section-kicker">Core API</p>
+            <h3><a href="<?js= homepage.coreModuleUrl || 'module-rclnodejs.html' ?>">Start with the runtime module</a></h3>
+            <p>Move from the package entry point into Node, Publisher, Subscription, Client, Service, and Action primitives.</p>
+        </article>
+
+        <article class="homepage-card">
+            <p class="section-kicker">Reference</p>
+            <h3><a href="<?js= homepage.globalUrl || 'global.html' ?>">Inspect globals and enums</a></h3>
+            <p>Policies, event types, clock kinds, return codes, and shared constants are collected in one place for fast lookup.</p>
+        </article>
+    </section>
+
+    <section class="homepage-guides">
+        <header class="doc-page-header compact-header">
+            <p class="section-kicker">Guides</p>
+            <h3>Get productive without leaving the entry page</h3>
+            <p>These short guides cover the main README workflows: setup, typed development, and interface generation.</p>
+        </header>
+
+        <div class="guide-grid">
+            <article class="guide-card" id="guide-installation">
+                <p class="section-kicker">Setup</p>
+                <h3>Installation and environment</h3>
+                <p>Install Node.js 16.13.0 or newer, install a compatible ROS 2 distribution, then source the ROS 2 setup file before using the package.</p>
+                <pre class="prettyprint"><code>source /opt/ros/&lt;distro&gt;/setup.bash
+npm i rclnodejs</code></pre>
+                <ul class="guide-list">
+                    <li>Use <code>npm i rclnodejs@x.y.z</code> when you need a specific package version.</li>
+                    <li>Generate a local reference site at any time with <code>npm run docs</code>.</li>
+                    <li>Start exploring the runtime surface in <a href="<?js= homepage.coreModuleUrl || 'module-rclnodejs.html' ?>">the core API module</a>.</li>
+                </ul>
+            </article>
+
+            <article class="guide-card" id="guide-typescript">
+                <p class="section-kicker">TypeScript</p>
+                <h3>Typed project setup</h3>
+                <p>rclnodejs ships declaration files in the <code>types/</code> folder so projects get editor assistance, generated message types, and compile-time checks.</p>
+                <pre class="prettyprint"><code>{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es6"
+  }
+}</code></pre>
+                <ul class="guide-list">
+                    <li>Use the generated declarations for message interfaces after running the message generator.</li>
+                    <li>Follow the <a href="<?js= homepage.typescriptUrl || '#guide-typescript' ?>">TypeScript workflow</a> here before moving into application code.</li>
+                    <li>Pair typed code with the class docs for Node, Publisher, Subscription, Service, and Action primitives.</li>
+                </ul>
+            </article>
+
+            <article class="guide-card" id="guide-message-generation">
+                <p class="section-kicker">Interfaces</p>
+                <h3>Message and IDL generation</h3>
+                <p>When your ROS installation changes or your project depends on additional message packages, regenerate the JavaScript and TypeScript bindings from the current environment.</p>
+                <pre class="prettyprint"><code>npx generate-ros-messages
+npm run generate-messages-idl</code></pre>
+                <ul class="guide-list">
+                    <li>Use <code>npx generate-ros-messages</code> for standard ROS interfaces available in the sourced environment.</li>
+                    <li>Use <code>npm run generate-messages-idl</code> when you need IDL-driven generation.</li>
+                    <li>Generated JavaScript files are written under your installed package's <code>generated/</code> directory.</li>
+                </ul>
+            </article>
+        </div>
+
+        <div class="guide-grid guide-grid-secondary">
+            <article class="guide-card">
+                <p class="section-kicker">First Node</p>
+                <h3>Publish a message in a few lines</h3>
+                <p>The package stays close to ROS 2 concepts while keeping the Node.js workflow straightforward.</p>
+                <pre class="prettyprint"><code>const rclnodejs = require('rclnodejs');
+rclnodejs.init().then(() =&gt; {
+  const node = new rclnodejs.Node('publisher_example_node');
+  const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
+  publisher.publish('Hello ROS 2 from rclnodejs');
+  node.spin();
+});</code></pre>
+            </article>
+
+            <article class="guide-card">
+                <p class="section-kicker">Further Reading</p>
+                <h3>Keep moving from overview to implementation</h3>
+                <ul class="guide-list guide-list-tight">
+                    <li><a href="<?js= homepage.coreModuleUrl || 'module-rclnodejs.html' ?>">Core module reference</a></li>
+                    <li><a href="<?js= homepage.globalUrl || 'global.html' ?>">Globals and enums</a></li>
+                    <li><a href="module-validator.html">Validation helpers</a></li>
+                    <li><a href="https://github.com/RobotWebTools/rclnodejs/tree/develop/example">Examples in the repository</a></li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+<?js if (data.readme) { ?>
+    <section class="doc-section prose-section readme-section">
+        <header class="doc-page-header compact-header">
+            <p class="section-kicker">Manual</p>
+            <h3>Full project guide</h3>
+            <p>The complete README remains below for installation details, CLI workflows, TypeScript usage, and message-generation procedures.</p>
+        </header>
+        <article class="prose-card"><?js= data.readme ?></article>
+    </section>
+<?js } ?>
+<?js } ?>

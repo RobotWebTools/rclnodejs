@@ -16,12 +16,13 @@
 
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
+#include <rmw/types.h>
 
 #include <cstdio>
 #include <memory>
-#include <rcpputils/scope_exit.hpp>
-// NOLINTNEXTLINE
 #include <string>
+
+#include <rcpputils/scope_exit.hpp>
 
 #include "macros.h"
 #include "rcl_handle.h"
@@ -51,6 +52,53 @@ Napi::Value RclTake(const Napi::CallbackInfo& info) {
   }
 
   return env.Undefined();
+}
+
+Napi::Value RclTakeWithInfo(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
+  void* msg_taken = info[1].As<Napi::Buffer<char>>().Data();
+
+  rmw_message_info_t message_info = rmw_get_zero_initialized_message_info();
+  rcl_ret_t ret = rcl_take(subscription, msg_taken, &message_info, nullptr);
+
+  if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    std::string error_string = rcl_get_error_string().str;
+    rcl_reset_error();
+    Napi::Error::New(env, error_string).ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  if (ret == RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    return env.Undefined();
+  }
+
+  // Build JS object with message info fields
+  Napi::Object js_info = Napi::Object::New(env);
+  js_info.Set("source_timestamp",
+              Napi::BigInt::New(env, message_info.source_timestamp));
+  js_info.Set("received_timestamp",
+              Napi::BigInt::New(env, message_info.received_timestamp));
+  js_info.Set(
+      "publication_sequence_number",
+      Napi::BigInt::New(
+          env, static_cast<int64_t>(message_info.publication_sequence_number)));
+  js_info.Set(
+      "reception_sequence_number",
+      Napi::BigInt::New(
+          env, static_cast<int64_t>(message_info.reception_sequence_number)));
+
+  // Publisher GID as Buffer
+  auto gid_buf =
+      Napi::Buffer<uint8_t>::Copy(env, message_info.publisher_gid.data,
+                                  sizeof(message_info.publisher_gid.data));
+  js_info.Set("publisher_gid", gid_buf);
+
+  return js_info;
 }
 
 Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
@@ -422,6 +470,7 @@ Napi::Value GetPublisherCount(const Napi::CallbackInfo& info) {
 
 Napi::Object InitSubscriptionBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("rclTake", Napi::Function::New(env, RclTake));
+  exports.Set("rclTakeWithInfo", Napi::Function::New(env, RclTakeWithInfo));
   exports.Set("createSubscription",
               Napi::Function::New(env, CreateSubscription));
   exports.Set("rclTakeRaw", Napi::Function::New(env, RclTakeRaw));
