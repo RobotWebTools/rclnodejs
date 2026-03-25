@@ -14,12 +14,20 @@ rclnodejs.init().then(() => {
 });
 ```
 
+This example assumes your ROS 2 environment is already sourced.
+
 ## Installation
 
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/) version >= 16.13.0
-- [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html) - **Don't forget to [source the setup file](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#source-the-setup-files)**
+- [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html)
+
+Before installing or running rclnodejs, source your ROS 2 environment:
+
+```bash
+source /opt/ros/<distro>/setup.bash
+```
 
 ### Install rclnodejs
 
@@ -27,11 +35,17 @@ rclnodejs.init().then(() => {
 npm i rclnodejs
 ```
 
-- **Note:** To install rclnodejs from GitHub, add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependencies.
+To install from GitHub instead of npm, run:
+
+```bash
+npm install RobotWebTools/rclnodejs#<branch>
+```
+
+Or add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependencies.
 
 ### Prebuilt Binaries
 
-rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation.
+rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This applies to supported Linux environments when installing from npm or GitHub.
 
 **Supported Platforms:**
 
@@ -52,6 +66,7 @@ npm install rclnodejs
 ## Documentation and Examples
 
 - API documentation: [robotwebtools.github.io/rclnodejs/docs](https://robotwebtools.github.io/rclnodejs/docs/index.html)
+- Tutorials: [tutorials/](https://github.com/RobotWebTools/rclnodejs/tree/develop/tutorials)
 - JavaScript examples: [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
 - TypeScript demos: [ts_demo/](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo)
 - Electron demos: [electron_demo/](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo)
@@ -59,13 +74,15 @@ npm install rclnodejs
 
 ## Message Generation
 
-rclnodejs generates JavaScript message interfaces and TypeScript declarations during installation for `rclnodejs > 1.5.0`. If you install additional ROS packages later, rerun:
+rclnodejs generates JavaScript message interfaces and TypeScript declarations during installation for `rclnodejs > 1.5.0`. If you install additional ROS packages later, rerun the generator in your project:
 
 ```bash
 npx generate-ros-messages
 ```
 
 Generated files are written to `<your-project>/node_modules/rclnodejs/generated/`.
+
+This step is only needed after adding ROS packages that were not present when rclnodejs was installed.
 
 ## Using rclnodejs with TypeScript
 

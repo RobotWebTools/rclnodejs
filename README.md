@@ -20,12 +20,14 @@ rclnodejs.init().then(() => {
 });
 ```
 
+This example assumes your ROS 2 environment is already sourced.
+
 ## Documentation
 
 - Get started:
   [Installation](#installation), [Quick Start](#quick-start), [Tutorials](./tutorials/)
 - Reference:
-  [API Documentation](#api-documentation), [Using TypeScript](#using-rclnodejs-with-typescript), [ROS2 Interface Message Generation](#ros2-interface-message-generation)
+  [API Documentation](#api-documentation), [Using TypeScript](#using-rclnodejs-with-typescript), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation)
 - Features and examples:
   [rclnodejs-cli](#rclnodejs-cli), [Electron-based Visualization](#electron-based-visualization), [Observable Subscriptions](#observable-subscriptions), [Performance Benchmarks](#performance-benchmarks)
 - Project docs:
@@ -33,18 +35,41 @@ rclnodejs.init().then(() => {
 
 ## Installation
 
+Choose the path that matches how you plan to use rclnodejs:
+
+- Install from npm: add rclnodejs to your own application.
+- Quick Start: run the examples from this repository checkout.
+
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/) version >= 16.13.0
-- [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html) - **Don't forget to [source the setup file](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html#source-the-setup-files)**
+- [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html)
 
-### Install rclnodejs
+Before installing, building, or running rclnodejs, source your ROS 2 environment:
+
+```bash
+source /opt/ros/<distro>/setup.bash
+```
+
+### Install from npm
+
+Use this path if you want to depend on rclnodejs from your own ROS 2 Node.js application.
 
 ```bash
 npm i rclnodejs
 ```
 
-> **Note:** To install rclnodejs from GitHub: add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
+After installation, use the example at the top of this README as a minimal publisher, or continue with [Quick Start](#quick-start) to run the examples in this repository.
+
+### Install from GitHub
+
+Use this path only if you need a branch or commit that is not yet published to npm.
+
+```bash
+npm install RobotWebTools/rclnodejs#<branch>
+```
+
+Or add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
 
 > **Docker:** For containerized development, see the included [Dockerfile](./Dockerfile) for building and testing with different ROS distributions and Node.js versions.
 
@@ -52,7 +77,7 @@ See the [features](./docs/FEATURES.md) and try the [examples](https://github.com
 
 ### Prebuilt Binaries
 
-rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This significantly speeds up installation and reduces dependencies.
+rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This applies to supported Linux environments when installing from npm or GitHub.
 
 **Supported Platforms:**
 
@@ -74,25 +99,27 @@ npm install rclnodejs
 
 ## Quick Start
 
-1. Source your ROS 2 environment.
+Use these steps if you are working from this repository checkout and want to run one of the included examples.
 
-```bash
-source /opt/ros/<distro>/setup.bash
-```
+These steps assume the [installation prerequisites](#prerequisites) are already satisfied and your ROS 2 environment has been sourced.
 
-2. Install the repository dependencies.
+1. Install the repository dependencies from the project root.
 
 ```bash
 npm install
 ```
 
-3. Run a publisher example from this checkout.
+2. Run a publisher example from this checkout.
 
 ```bash
 node example/topics/publisher/publisher-example.js
 ```
 
-You should see messages being published once per second. Explore more runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
+You should see messages being published once per second.
+
+If you want to build an application instead of running the repository examples, install rclnodejs into your own project with [Install from npm](#install-from-npm) and start from the sample code near the top of this README.
+
+Explore more runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
 
 ## rclnodejs-cli
 
@@ -102,7 +129,7 @@ See the rclnodejs-cli repository for installation instructions and the current c
 
 ## API Documentation
 
-API documentation is available [online](https://robotwebtools.github.io/rclnodejs/docs/index.html) or generate locally with `npm run docs`.
+API documentation is available [online](https://robotwebtools.github.io/rclnodejs/docs/index.html). To generate it locally from this repository checkout, run `npm run docs`.
 
 ## Electron-based Visualization
 
@@ -164,7 +191,7 @@ obsSub.observable
 
 See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions.md) for more details.
 
-## ROS2 Interface Message Generation
+## ROS 2 Interface Message Generation
 
 ROS client libraries convert IDL message descriptions into target language source code. rclnodejs provides the `generate-ros-messages` script to generate JavaScript message interface files and TypeScript declarations.
 
@@ -178,7 +205,7 @@ stringMsgObject.data = 'hello world';
 
 ### Running Message Generation
 
-Run the message generation script when new ROS packages are installed:
+Run the message generation script in your project when new ROS packages are installed:
 
 ```bash
 npx generate-ros-messages
