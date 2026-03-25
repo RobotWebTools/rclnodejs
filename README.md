@@ -65,6 +65,8 @@ After installation, use the example at the top of this README as a minimal publi
 
 Use this path only if you need a branch or commit that is not yet published to npm.
 
+GitHub installs normally build from source. The published npm package includes prebuilt binaries for supported Linux targets, but this repository does not track those prebuilt artifacts.
+
 ```bash
 npm install RobotWebTools/rclnodejs#<branch>
 ```
@@ -77,7 +79,7 @@ See the [features](./docs/FEATURES.md) and try the [examples](https://github.com
 
 ### Prebuilt Binaries
 
-rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This applies to supported Linux environments when installing from npm or GitHub.
+rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This applies to supported Linux environments when installing the published npm package.
 
 **Supported Platforms:**
 

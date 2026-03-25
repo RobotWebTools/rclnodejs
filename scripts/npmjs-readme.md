@@ -45,7 +45,7 @@ Or add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` d
 
 ### Prebuilt Binaries
 
-rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This applies to supported Linux environments when installing from npm or GitHub.
+rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This applies to supported Linux environments when installing the published npm package.
 
 **Supported Platforms:**
 
