@@ -74,7 +74,7 @@
     "sinon": "^21.0.0",
     "tree-kill": "^1.2.2",
     "tsd": "^0.33.0",
-    "typescript": "^5.7.2"
+    "typescript": "^6.0.2"
   },
   "dependencies": {
     "@rclnodejs/ref-array-di": "^1.2.2",
