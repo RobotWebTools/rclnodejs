@@ -480,3 +480,36 @@ describe('subscription content-filtering', function () {
     done();
   });
 });
+
+describe('subscription isContentFilterSupported', function () {
+  this.timeout(30 * 1000);
+
+  beforeEach(async function () {
+    await rclnodejs.init();
+    this.node = new Node('cft_support_test_node');
+  });
+
+  afterEach(function () {
+    this.node.destroy();
+    rclnodejs.shutdown();
+  });
+
+  it('isContentFilterSupported returns boolean matching RMW capability', function (done) {
+    const typeclass = 'std_msgs/msg/Int16';
+    const subscription = this.node.createSubscription(
+      typeclass,
+      TOPIC,
+      (msg) => {}
+    );
+
+    const supported = subscription.isContentFilterSupported();
+    assert.strictEqual(typeof supported, 'boolean');
+
+    // isContentFilterSupported requires rolling; on older distros it returns false
+    const isRolling = DistroUtils.getDistroId() >= DistroUtils.DistroId.ROLLING;
+    const expectedSupported = isRolling && isContentFilteringSupported();
+    assert.strictEqual(supported, expectedSupported);
+
+    done();
+  });
+});
