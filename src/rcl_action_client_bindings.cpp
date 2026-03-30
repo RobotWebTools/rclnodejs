@@ -250,6 +250,67 @@ Napi::Value ActionSendCancelRequest(const Napi::CallbackInfo& info) {
   return Napi::Number::New(env, static_cast<double>(sequence_number));
 }
 
+#if ROS_VERSION >= 5000  // ROS2 Rolling
+Napi::Value ActionConfigureFeedbackSubFilterAddGoalId(
+    const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_action_client_t* action_client =
+      reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
+
+  auto goal_id_buffer = info[1].As<Napi::Buffer<uint8_t>>();
+  const uint8_t* goal_id_array = goal_id_buffer.Data();
+  size_t goal_id_size = goal_id_buffer.Length();
+
+  rcl_ret_t ret =
+      rcl_action_client_configure_feedback_subscription_filter_add_goal_id(
+          action_client, goal_id_array, goal_id_size);
+
+  if (RCL_RET_OK != ret) {
+    std::string error_text{
+        "Failed to add goal id to feedback subscription content filter: "};
+    error_text += rcl_get_error_string().str;
+    rcl_reset_error();
+    Napi::Error::New(env, error_text).ThrowAsJavaScriptException();
+    return Napi::Boolean::New(env, false);
+  }
+
+  return Napi::Boolean::New(env, true);
+}
+
+Napi::Value ActionConfigureFeedbackSubFilterRemoveGoalId(
+    const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* action_client_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_action_client_t* action_client =
+      reinterpret_cast<rcl_action_client_t*>(action_client_handle->ptr());
+
+  auto goal_id_buffer = info[1].As<Napi::Buffer<uint8_t>>();
+  const uint8_t* goal_id_array = goal_id_buffer.Data();
+  size_t goal_id_size = goal_id_buffer.Length();
+
+  rcl_ret_t ret =
+      rcl_action_client_configure_feedback_subscription_filter_remove_goal_id(
+          action_client, goal_id_array, goal_id_size);
+
+  if (RCL_RET_OK != ret) {
+    std::string error_text{
+        "Failed to remove goal id from feedback subscription content "
+        "filter: "};
+    error_text += rcl_get_error_string().str;
+    rcl_reset_error();
+    Napi::Error::New(env, error_text).ThrowAsJavaScriptException();
+    return Napi::Boolean::New(env, false);
+  }
+
+  return Napi::Boolean::New(env, true);
+}
+#endif  // ROS_VERSION >= 5000
+
 #if ROS_VERSION >= 2505  // ROS2 >= Kilted
 Napi::Value ConfigureActionClientIntrospection(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -307,7 +368,15 @@ Napi::Object InitActionClientBindings(Napi::Env env, Napi::Object exports) {
 #if ROS_VERSION >= 2505  // ROS2 >= Kilted
   exports.Set("configureActionClientIntrospection",
               Napi::Function::New(env, ConfigureActionClientIntrospection));
-#endif  // ROS_VERSION >= 2505
+#endif                   // ROS_VERSION >= 2505
+#if ROS_VERSION >= 5000  // ROS2 Rolling
+  exports.Set(
+      "actionConfigureFeedbackSubFilterAddGoalId",
+      Napi::Function::New(env, ActionConfigureFeedbackSubFilterAddGoalId));
+  exports.Set(
+      "actionConfigureFeedbackSubFilterRemoveGoalId",
+      Napi::Function::New(env, ActionConfigureFeedbackSubFilterRemoveGoalId));
+#endif  // ROS_VERSION >= 5000
   return exports;
 }
 

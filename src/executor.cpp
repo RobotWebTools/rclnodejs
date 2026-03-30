@@ -48,7 +48,8 @@ Executor::Executor(Napi::Env env, HandleManager* handle_manager,
       handle_manager_(handle_manager),
       delegate_(delegate),
       context_(nullptr),
-      env_(env) {
+      env_(env),
+      work_pending_(false) {
   running_.store(false);
 }
 
@@ -105,6 +106,8 @@ void Executor::Stop() {
     // Stop thread first, and then uv_close
     // Make sure async_ is not used anymore
     running_.store(false);
+    // Wake the background thread in case it is waiting on the condvar.
+    work_done_cv_.notify_all();
     handle_manager_->StopWaitingHandles();
     uv_thread_join(&background_thread_);
 
@@ -133,6 +136,21 @@ bool Executor::IsMainThread() {
 
 void Executor::DoWork(uv_async_t* handle) {
   Executor* executor = reinterpret_cast<Executor*>(handle->data);
+
+  // RAII guard: always clear work_pending_ and notify the background thread,
+  // even if ExecuteReadyHandles() throws (e.g. from N-API callbacks).
+  // Without this, the background thread would block forever on work_done_cv_.
+  struct WorkDoneGuard {
+    Executor* exec;
+    ~WorkDoneGuard() {
+      {
+        std::lock_guard<std::mutex> lock(exec->work_done_mutex_);
+        exec->work_pending_ = false;
+      }
+      exec->work_done_cv_.notify_one();
+    }
+  } guard{executor};
+
   executor->ExecuteReadyHandles();
 }
 
@@ -159,7 +177,23 @@ void Executor::Run(void* arg) {
 
       if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(executor->async_)) &&
           handle_manager->ready_handles_count() > 0) {
+        // Tell the main thread there is work to do, then wait for it to
+        // finish before re-entering rcl_wait.  This prevents a data race
+        // where the background thread holds subscriptions in the wait set
+        // while the main thread modifies their state (e.g. content filter).
+        {
+          std::lock_guard<std::mutex> lock(executor->work_done_mutex_);
+          executor->work_pending_ = true;
+        }
         uv_async_send(executor->async_);
+
+        // Wait until DoWork() signals completion.
+        {
+          std::unique_lock<std::mutex> lock(executor->work_done_mutex_);
+          executor->work_done_cv_.wait(lock, [executor] {
+            return !executor->work_pending_ || !executor->running_.load();
+          });
+        }
       }
     }
 
