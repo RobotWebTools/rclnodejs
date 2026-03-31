@@ -369,7 +369,9 @@ describe('rclnodejs action client', function () {
       client.destroy();
     });
 
-    it('Test handles multiple goals with selective feedback', async function () {
+    // Verify that enabling the content filter optimization does not break
+    // feedback delivery when multiple goals are active concurrently.
+    it('Test multiple goals with optimization enabled still receive feedback correctly', async function () {
       let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci', {
         enableFeedbackMsgOptimization: true,
       });
