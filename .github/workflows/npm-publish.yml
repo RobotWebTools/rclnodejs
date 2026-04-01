@@ -72,21 +72,29 @@ jobs:
       - name: Determine dist-tag
         id: dist-tag
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          if [[ "$VERSION" == *-* ]]; then
-            # Pre-release version (e.g. 1.9.0-alpha.0) — extract pre-release label
-            TAG=$(echo "$VERSION" | sed 's/.*-\([a-zA-Z]*\).*/\1/')
-            echo "tag=$TAG" >> $GITHUB_OUTPUT
-          else
-            echo "tag=latest" >> $GITHUB_OUTPUT
+          TAG=$(node -p "
+            const v = require('./package.json').version;
+            const pre = v.split('-')[1];
+            if (!pre) { 'latest' }
+            else { pre.split('.')[0].replace(/[0-9]+$/, '') || 'next' }
+          ")
+          if [[ -z "$TAG" ]]; then
+            echo "::error::Failed to determine dist-tag"
+            exit 1
           fi
-          echo "Version: $VERSION, Tag: $(cat $GITHUB_OUTPUT | grep tag | cut -d= -f2)"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved dist-tag: $TAG"
 
       - name: Publish
         run: |
+          TAG="${{ steps.dist-tag.outputs.tag }}"
+          if [[ -z "$TAG" ]]; then
+            echo "::error::dist-tag is empty, aborting publish"
+            exit 1
+          fi
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
             echo "=== DRY RUN ==="
-            npm publish --provenance --access public --tag ${{ steps.dist-tag.outputs.tag }} --dry-run ./dist/rclnodejs-*.tgz
+            npm publish --provenance --access public --tag "$TAG" --dry-run ./dist/rclnodejs-*.tgz
           else
-            npm publish --provenance --access public --tag ${{ steps.dist-tag.outputs.tag }} ./dist/rclnodejs-*.tgz
+            npm publish --provenance --access public --tag "$TAG" ./dist/rclnodejs-*.tgz
           fi
