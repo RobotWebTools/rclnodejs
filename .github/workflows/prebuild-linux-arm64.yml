@@ -44,7 +44,7 @@ jobs:
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Install dependencies
       shell: bash
@@ -59,7 +59,7 @@ jobs:
         npm run prebuild
 
     - name: Upload prebuilt binary
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: prebuilt-linux-arm64-node${{ matrix.node-version }}-${{ matrix.ubuntu_codename }}-${{ matrix.ros_distribution }}
         path: prebuilds/linux-arm64/*.node
