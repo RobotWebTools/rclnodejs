@@ -69,11 +69,24 @@ jobs:
       - name: Pack
         run: ./scripts/npm-pack.sh
 
+      - name: Determine dist-tag
+        id: dist-tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ "$VERSION" == *-* ]]; then
+            # Pre-release version (e.g. 1.9.0-alpha.0) — extract pre-release label
+            TAG=$(echo "$VERSION" | sed 's/.*-\([a-zA-Z]*\).*/\1/')
+            echo "tag=$TAG" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          fi
+          echo "Version: $VERSION, Tag: $(cat $GITHUB_OUTPUT | grep tag | cut -d= -f2)"
+
       - name: Publish
         run: |
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
             echo "=== DRY RUN ==="
-            npm publish --provenance --access public --dry-run ./dist/rclnodejs-*.tgz
+            npm publish --provenance --access public --tag ${{ steps.dist-tag.outputs.tag }} --dry-run ./dist/rclnodejs-*.tgz
           else
-            npm publish --provenance --access public ./dist/rclnodejs-*.tgz
+            npm publish --provenance --access public --tag ${{ steps.dist-tag.outputs.tag }} ./dist/rclnodejs-*.tgz
           fi
