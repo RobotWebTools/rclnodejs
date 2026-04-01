@@ -22,15 +22,15 @@ permissions:
 
 jobs:
   prebuild-x64:
+    if: github.repository == 'RobotWebTools/rclnodejs'
     uses: ./.github/workflows/prebuild-linux-x64.yml
 
   prebuild-arm64:
+    if: github.repository == 'RobotWebTools/rclnodejs'
     uses: ./.github/workflows/prebuild-linux-arm64.yml
 
   publish:
     needs: [prebuild-x64, prebuild-arm64]
-    # Only publish from the official repository, not forks
-    if: github.repository == 'RobotWebTools/rclnodejs'
     runs-on: ubuntu-latest
     environment: npm-publish
     permissions:
