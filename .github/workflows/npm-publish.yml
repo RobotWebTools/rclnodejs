@@ -70,13 +70,12 @@ jobs:
         run: ./scripts/npm-pack.sh
 
       - name: Determine dist-tag
-        id: dist-tag
+        id: dist_tag
         run: |
           TAG=$(node -p "
             const v = require('./package.json').version;
             const pre = v.split('-')[1];
-            if (!pre) { 'latest' }
-            else { pre.split('.')[0].replace(/[0-9]+$/, '') || 'next' }
+            !pre ? 'latest' : (pre.split('.')[0].replace(/[0-9]+$/, '') || 'next')
           ")
           if [[ -z "$TAG" ]]; then
             echo "::error::Failed to determine dist-tag"
@@ -87,7 +86,7 @@ jobs:
 
       - name: Publish
         run: |
-          TAG="${{ steps.dist-tag.outputs.tag }}"
+          TAG="${{ steps.dist_tag.outputs.tag }}"
           if [[ -z "$TAG" ]]; then
             echo "::error::dist-tag is empty, aborting publish"
             exit 1
