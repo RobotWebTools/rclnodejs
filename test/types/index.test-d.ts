@@ -473,6 +473,13 @@ const actionClient = new rclnodejs.ActionClient(
   'example_interfaces/action/Fibonacci',
   'fibonnaci'
 );
+
+const actionClientWithOptimization = new rclnodejs.ActionClient(
+  node,
+  'example_interfaces/action/Fibonacci',
+  'fibonnaci',
+  { enableFeedbackMsgOptimization: true }
+);
 expectType<rclnodejs.ActionClient<'example_interfaces/action/Fibonacci'>>(
   actionClient
 );

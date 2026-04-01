@@ -142,6 +142,14 @@ declare module 'rclnodejs' {
       options?: Options<ActionQoS> & {
         validateGoals?: boolean;
         validationOptions?: MessageValidationOptions;
+        /**
+         * Enable feedback subscription content filter to optimize the handling
+         * of feedback messages. When enabled, the content filter is used to
+         * configure the goal ID for the subscription, avoiding reception of
+         * irrelevant feedback messages. An action client can handle up to 6
+         * goals simultaneously with this optimization. Default: false.
+         */
+        enableFeedbackMsgOptimization?: boolean;
       }
     );
 

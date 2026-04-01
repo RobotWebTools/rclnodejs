@@ -20,7 +20,9 @@
 #include <uv.h>
 
 #include <atomic>
+#include <condition_variable>
 #include <exception>
+#include <mutex>
 #include <vector>
 
 #include "rcl_handle.h"
@@ -72,6 +74,15 @@ class Executor {
   Napi::Env env_;
 
   std::atomic_bool running_;
+
+  // Synchronization: the background thread waits after uv_async_send until
+  // the main thread finishes ExecuteReadyHandles.  This prevents the
+  // background thread from re-entering rcl_wait (which holds a reference to
+  // subscriptions) while the main thread modifies subscription state (e.g.
+  // content filter changes).
+  std::mutex work_done_mutex_;
+  std::condition_variable work_done_cv_;
+  bool work_pending_;  // true while the main thread is processing handles
 };
 
 }  // namespace rclnodejs

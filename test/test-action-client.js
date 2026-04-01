@@ -31,6 +31,10 @@ describe('rclnodejs action client', function () {
   let publishFeedback = null;
 
   async function executeCallback(goalHandle) {
+    // Delay before publishing feedback to allow the client time to process
+    // the goal response and set up the content filter (if enabled).
+    await assertUtils.createDelay(50);
+
     if (
       publishFeedback &&
       ActionUuid.fromMessage(publishFeedback).toString() ===
@@ -309,5 +313,187 @@ describe('rclnodejs action client', function () {
       QOS,
       ServiceIntrospectionStates.CONTENTS
     );
+  });
+
+  describe('enableFeedbackMsgOptimization', function () {
+    const nativeLoader = require('../lib/native_loader.js');
+    const isFeedbackFilterSupported = () =>
+      typeof nativeLoader.actionConfigureFeedbackSubFilterAddGoalId ===
+      'function';
+
+    it('Test option defaults to false', function () {
+      let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci');
+      assert.strictEqual(client._enableFeedbackMsgOptimization, false);
+      client.destroy();
+    });
+
+    it('Test option can be set to true', function () {
+      let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci', {
+        enableFeedbackMsgOptimization: true,
+      });
+      // Only enabled when native API exists
+      if (isFeedbackFilterSupported()) {
+        assert.strictEqual(client._enableFeedbackMsgOptimization, true);
+      } else {
+        assert.strictEqual(client._enableFeedbackMsgOptimization, false);
+      }
+      client.destroy();
+    });
+
+    it('Test does not affect normal feedback reception', async function () {
+      let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci', {
+        enableFeedbackMsgOptimization: true,
+      });
+
+      let feedbackCallback = sinon.spy(function (feedback) {
+        assert.ok(feedback);
+      });
+
+      let goalUuid = ActionUuid.randomMessage();
+      publishFeedback = goalUuid;
+
+      let result = await client.waitForServer(2000);
+      assert.ok(result);
+
+      let goalHandle = await client.sendGoal(
+        new Fibonacci.Goal(),
+        feedbackCallback,
+        goalUuid
+      );
+      assert.ok(goalHandle.isAccepted());
+
+      await goalHandle.getResult();
+      assert.ok(goalHandle.isSucceeded());
+      assert.ok(feedbackCallback.calledOnce);
+
+      client.destroy();
+    });
+
+    // Verify that enabling the content filter optimization does not break
+    // feedback delivery when multiple goals are active concurrently.
+    it('Test multiple goals with optimization enabled still receive feedback correctly', async function () {
+      let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci', {
+        enableFeedbackMsgOptimization: true,
+      });
+
+      let goal1Uuid = ActionUuid.randomMessage();
+      let goal2Uuid = ActionUuid.randomMessage();
+
+      let feedback1Callback = sinon.spy();
+      let feedback2Callback = sinon.spy();
+
+      // Only publish feedback for the first goal
+      publishFeedback = goal1Uuid;
+
+      let result = await client.waitForServer(2000);
+      assert.ok(result);
+
+      const [goal1Handle, goal2Handle] = await Promise.all([
+        client.sendGoal(new Fibonacci.Goal(), feedback1Callback, goal1Uuid),
+        client.sendGoal(new Fibonacci.Goal(), feedback2Callback, goal2Uuid),
+      ]);
+
+      await goal1Handle.getResult();
+      await goal2Handle.getResult();
+
+      // Only first goal should have received feedback
+      assert.ok(feedback1Callback.calledOnce);
+      assert.ok(feedback2Callback.notCalled);
+
+      client.destroy();
+    });
+
+    it('Test cancel goal then send new goal', async function () {
+      let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci', {
+        enableFeedbackMsgOptimization: true,
+      });
+
+      let result = await client.waitForServer(2000);
+      assert.ok(result);
+
+      let goalHandle = await client.sendGoal(new Fibonacci.Goal());
+      assert.ok(goalHandle.isAccepted());
+
+      result = await goalHandle.cancelGoal();
+      assert.ok(result);
+
+      assert.strictEqual(
+        ActionUuid.fromMessage(result.goals_canceling[0].goal_id).toString(),
+        ActionUuid.fromMessage(goalHandle.goalId).toString()
+      );
+
+      // Send another goal after cancel - should still work
+      let goalHandle2 = await client.sendGoal(new Fibonacci.Goal());
+      assert.ok(goalHandle2.isAccepted());
+
+      let result2 = await goalHandle2.getResult();
+      assert.ok(result2);
+
+      client.destroy();
+    });
+
+    it('Test send multiple goals (3)', async function () {
+      let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci', {
+        enableFeedbackMsgOptimization: true,
+      });
+
+      let result = await client.waitForServer(2000);
+      assert.ok(result);
+
+      const [goal1Handle, goal2Handle, goal3Handle] = await Promise.all([
+        client.sendGoal(new Fibonacci.Goal()),
+        client.sendGoal(new Fibonacci.Goal()),
+        client.sendGoal(new Fibonacci.Goal()),
+      ]);
+
+      assert.ok(goal1Handle.accepted);
+      assert.ok(goal2Handle.accepted);
+      assert.ok(goal3Handle.accepted);
+
+      const [result1, result2, result3] = await Promise.all([
+        goal1Handle.getResult(),
+        goal2Handle.getResult(),
+        goal3Handle.getResult(),
+      ]);
+
+      assert.ok(result1);
+      assert.ok(result2);
+      assert.ok(result3);
+
+      client.destroy();
+    });
+
+    it('Test handles more than 6 goals gracefully', async function () {
+      // The DDS content filter limit is 6 concurrent goals (100 params / 16 per goal).
+      // When exceeded, optimization auto-disables but goals should still work.
+      let client = new rclnodejs.ActionClient(node, fibonacci, 'fibonacci', {
+        enableFeedbackMsgOptimization: true,
+      });
+
+      let feedbackCallback = sinon.spy();
+      let goalUuid = ActionUuid.randomMessage();
+      publishFeedback = goalUuid;
+
+      let result = await client.waitForServer(2000);
+      assert.ok(result);
+
+      // Send 7 goals sequentially - exceeds the 6 goal content filter limit
+      let handles = [];
+      for (let i = 0; i < 7; i++) {
+        let uuid = i === 0 ? goalUuid : undefined;
+        let cb = i === 0 ? feedbackCallback : undefined;
+        let h = await client.sendGoal(new Fibonacci.Goal(), cb, uuid);
+        assert.ok(h.isAccepted());
+        handles.push(h);
+      }
+
+      // Wait for all results
+      for (const h of handles) {
+        let r = await h.getResult();
+        assert.ok(r);
+      }
+
+      client.destroy();
+    });
   });
 });
