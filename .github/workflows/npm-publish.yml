@@ -1,0 +1,79 @@
+name: NPM Publish
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Perform a dry run (skip actual publish)'
+        required: true
+        type: boolean
+        default: true
+
+# Ensure only one publish runs at a time
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  prebuild-x64:
+    if: github.repository == 'RobotWebTools/rclnodejs'
+    uses: ./.github/workflows/prebuild-linux-x64.yml
+
+  prebuild-arm64:
+    if: github.repository == 'RobotWebTools/rclnodejs'
+    uses: ./.github/workflows/prebuild-linux-arm64.yml
+
+  publish:
+    needs: [prebuild-x64, prebuild-arm64]
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download x64 prebuilds
+        uses: actions/download-artifact@v7
+        with:
+          pattern: prebuilt-linux-x64-*
+          path: prebuilds/linux-x64
+          merge-multiple: true
+
+      - name: Download arm64 prebuilds
+        uses: actions/download-artifact@v7
+        with:
+          pattern: prebuilt-linux-arm64-*
+          path: prebuilds/linux-arm64
+          merge-multiple: true
+
+      - name: List prebuilds
+        run: |
+          echo "=== x64 prebuilds ==="
+          ls -la prebuilds/linux-x64/
+          echo "=== arm64 prebuilds ==="
+          ls -la prebuilds/linux-arm64/
+
+      - name: Pack
+        run: ./scripts/npm-pack.sh
+
+      - name: Publish
+        run: |
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "=== DRY RUN ==="
+            npm publish --provenance --access public --dry-run ./dist/rclnodejs-*.tgz
+          else
+            npm publish --provenance --access public ./dist/rclnodejs-*.tgz
+          fi
