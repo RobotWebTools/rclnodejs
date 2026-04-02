@@ -808,7 +808,7 @@ describe('rclnodejs action server', function () {
     feedback.sequence = [1, 1, 2, 3];
     serverGoalHandle.publishFeedback(feedback);
 
-    await assertUtils.createDelay(200);
+    await assertUtils.createDelay(50);
     assert.strictEqual(feedbackReceived, false);
 
     // Clean up: execute and succeed
@@ -848,7 +848,7 @@ describe('rclnodejs action server', function () {
     );
     assert.ok(handle.accepted);
 
-    await assertUtils.createDelay(200);
+    await assertUtils.createDelay(50);
     assert.ok(feedbackMessage);
     assert.ok(deepEqual(Int32Array.from(sequence), feedbackMessage.sequence));
 
@@ -888,7 +888,7 @@ describe('rclnodejs action server', function () {
     feedback.sequence = [1, 1, 2, 3];
     serverGoalHandle.publishFeedback(feedback);
 
-    await assertUtils.createDelay(200);
+    await assertUtils.createDelay(50);
     assert.strictEqual(feedbackCount, 0);
 
     server.destroy();
