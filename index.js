@@ -39,6 +39,10 @@ const {
 } = require('./lib/parameter.js');
 const path = require('path');
 const QoS = require('./lib/qos.js');
+const {
+  QoSPolicyKind,
+  QoSOverridingOptions,
+} = require('./lib/qos_overriding_options.js');
 const rclnodejs = require('./lib/native_loader.js');
 const tsdGenerator = require('./rostsd_gen/index.js');
 const validator = require('./lib/validator.js');
@@ -257,6 +261,12 @@ let rcl = {
 
   /** {@link QoS} class */
   QoS: QoS,
+
+  /** {@link QoSPolicyKind} enum */
+  QoSPolicyKind: QoSPolicyKind,
+
+  /** {@link QoSOverridingOptions} class */
+  QoSOverridingOptions: QoSOverridingOptions,
 
   /** {@link RMWUtils} */
   RMWUtils: RMWUtils,

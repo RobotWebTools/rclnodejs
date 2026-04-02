@@ -627,3 +627,35 @@ expectType<rclnodejs.action_msgs.srv.descriptor.CancelGoal_Request>(
 expectAssignable<'action_msgs/msg/GoalInfo'>(
   cancelGoalRequestDescriptor.goal_info
 );
+
+// ---- QoSOverridingOptions ----
+expectType<rclnodejs.QoSOverridingOptions>(
+  rclnodejs.QoSOverridingOptions.withDefaultPolicies()
+);
+expectType<rclnodejs.QoSOverridingOptions>(
+  new rclnodejs.QoSOverridingOptions([rclnodejs.QoSPolicyKind.DEPTH], {
+    entityId: 'camera',
+    callback: (_qos: rclnodejs.QoS) => ({ successful: true }),
+  })
+);
+
+// QoSOverridingOptions in createPublisher
+const pubWithOverrides = node.createPublisher(TYPE_CLASS, TOPIC, {
+  qos: rclnodejs.QoS.profileDefault,
+  qosOverridingOptions: rclnodejs.QoSOverridingOptions.withDefaultPolicies(),
+});
+
+// QoSOverridingOptions in createSubscription
+const subWithOverrides = node.createSubscription(
+  TYPE_CLASS,
+  TOPIC,
+  {
+    qos: new rclnodejs.QoS(),
+    qosOverridingOptions: new rclnodejs.QoSOverridingOptions([
+      rclnodejs.QoSPolicyKind.HISTORY,
+      rclnodejs.QoSPolicyKind.DEPTH,
+      rclnodejs.QoSPolicyKind.RELIABILITY,
+    ]),
+  },
+  (_msg: rclnodejs.std_msgs.msg.String) => {}
+);

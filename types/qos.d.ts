@@ -134,4 +134,59 @@ declare module 'rclnodejs' {
       RMW_QOS_POLICY_LIVELINESS_BEST_AVAILABLE = 5,
     }
   }
+
+  /**
+   * Enum of overridable QoS policy kinds.
+   */
+  enum QoSPolicyKind {
+    HISTORY = 1,
+    DEPTH = 2,
+    RELIABILITY = 3,
+    DURABILITY = 4,
+    LIVELINESS = 5,
+    AVOID_ROS_NAMESPACE_CONVENTIONS = 6,
+  }
+
+  /**
+   * Options for overriding QoS policies via ROS parameters.
+   *
+   * When passed to `createPublisher()` or `createSubscription()`, the node
+   * declares read-only parameters for each specified policy kind. These
+   * parameters can be overridden at startup via `--ros-args -p` or `--params-file`.
+   *
+   * Parameter naming convention:
+   *   `qos_overrides.<topic>.<publisher|subscription>[_<entityId>].<policy>`
+   */
+  class QoSOverridingOptions {
+    /**
+     * @param policyKinds - Which QoS policies to expose as parameters.
+     * @param opts - Optional callback and entityId.
+     */
+    constructor(
+      policyKinds: QoSPolicyKind[],
+      opts?: {
+        callback?: (qos: QoS) => { successful: boolean; reason?: string };
+        entityId?: string;
+      }
+    );
+
+    /** Which QoS policies are exposed as parameters. */
+    readonly policyKinds: QoSPolicyKind[];
+
+    /** Optional validation callback. */
+    readonly callback:
+      | ((qos: QoS) => { successful: boolean; reason?: string })
+      | null;
+
+    /** Optional entity disambiguation suffix. */
+    readonly entityId: string | null;
+
+    /**
+     * Create options that override history, depth, and reliability.
+     */
+    static withDefaultPolicies(opts?: {
+      callback?: (qos: QoS) => { successful: boolean; reason?: string };
+      entityId?: string;
+    }): QoSOverridingOptions;
+  }
 }
