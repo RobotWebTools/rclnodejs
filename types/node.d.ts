@@ -131,6 +131,19 @@ declare module 'rclnodejs' {
   ) => rcl_interfaces.msg.SetParametersResult;
 
   /**
+   * Callback invoked before parameter validation and setting.
+   * Receives the parameter list, must return a (possibly modified) parameter list.
+   * Returning an empty list rejects the set.
+   */
+  type PreSetParametersCallback = (parameters: Parameter[]) => Parameter[];
+
+  /**
+   * Callback invoked after parameters have been successfully set.
+   * For side effects only (return value is ignored).
+   */
+  type PostSetParametersCallback = (parameters: Parameter[]) => void;
+
+  /**
    * Standard result of Node.getXXXNamesAndTypes() queries
    *
    * @example
@@ -755,6 +768,37 @@ declare module 'rclnodejs' {
      * @param callback - The callback to be removed
      */
     removeOnSetParametersCallback(call: SetParametersCallback): void;
+
+    /**
+     * Add a callback invoked before parameter validation.
+     * The callback receives the parameter list and must return a (possibly modified)
+     * parameter list. Returning an empty list rejects the set.
+     *
+     * @param callback - The callback to add.
+     */
+    addPreSetParametersCallback(callback: PreSetParametersCallback): void;
+
+    /**
+     * Remove a pre-set parameters callback.
+     *
+     * @param callback - The callback to remove.
+     */
+    removePreSetParametersCallback(callback: PreSetParametersCallback): void;
+
+    /**
+     * Add a callback invoked after parameters are successfully set.
+     * Useful for triggering side effects (e.g., reconfiguring a component).
+     *
+     * @param callback - The callback to add.
+     */
+    addPostSetParametersCallback(callback: PostSetParametersCallback): void;
+
+    /**
+     * Remove a post-set parameters callback.
+     *
+     * @param callback - The callback to remove.
+     */
+    removePostSetParametersCallback(callback: PostSetParametersCallback): void;
 
     /**
      * Get a remote node's published topics.
