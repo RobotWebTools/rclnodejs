@@ -84,27 +84,39 @@ describe('Pre/Post set parameters callbacks', function () {
       assert.strictEqual(Number(param.value), 10);
     });
 
-    it('multiple pre-set callbacks all contribute to the list', function () {
+    it('multiple pre-set callbacks chain as a pipeline', function () {
       let callOrder = [];
+
+      // First registered: multiply value by 3
       node.addPreSetParametersCallback((params) => {
         callOrder.push('first');
-        return params;
+        return params.map(
+          (p) => new rclnodejs.Parameter(p.name, p.type, Number(p.value) * 3)
+        );
       });
+
+      // Second registered (runs first due to LIFO): add 1 to value
       node.addPreSetParametersCallback((params) => {
         callOrder.push('second');
-        return params;
+        return params.map(
+          (p) => new rclnodejs.Parameter(p.name, p.type, Number(p.value) + 1)
+        );
       });
 
       node.setParameter(
         new rclnodejs.Parameter(
           'test_param',
           rclnodejs.ParameterType.PARAMETER_INTEGER,
-          42
+          5
         )
       );
 
-      // Newest callback runs first (LIFO via unshift)
+      // LIFO order: second runs first, then first
       assert.deepStrictEqual(callOrder, ['second', 'first']);
+
+      // Pipeline: input=5 → second: 5+1=6 → first: 6*3=18
+      const param = node.getParameter('test_param');
+      assert.strictEqual(Number(param.value), 18);
     });
 
     it('removePreSetParametersCallback removes the callback', function () {
