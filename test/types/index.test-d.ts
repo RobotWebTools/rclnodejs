@@ -659,3 +659,16 @@ const subWithOverrides = node.createSubscription(
   },
   (_msg: rclnodejs.std_msgs.msg.String) => {}
 );
+
+// ---- Pre/Post Set Parameters Callbacks ----
+const preCallback: rclnodejs.PreSetParametersCallback = (
+  _params: rclnodejs.Parameter[]
+) => _params;
+const postCallback: rclnodejs.PostSetParametersCallback = (
+  _params: rclnodejs.Parameter[]
+) => {};
+
+node.addPreSetParametersCallback(preCallback);
+node.removePreSetParametersCallback(preCallback);
+node.addPostSetParametersCallback(postCallback);
+node.removePostSetParametersCallback(postCallback);
