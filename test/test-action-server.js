@@ -773,4 +773,160 @@ describe('rclnodejs action server', function () {
       ServiceIntrospectionStates.CONTENTS
     );
   });
+
+  it('publishFeedback on accepted (not executing) goal should be ignored', async function () {
+    let serverGoalHandle;
+
+    function handleAcceptedCallback(goalHandle) {
+      serverGoalHandle = goalHandle;
+    }
+
+    let server = new rclnodejs.ActionServer(
+      node,
+      fibonacci,
+      'fibonacci',
+      (goalHandle) => {
+        goalHandle.succeed();
+        return new Fibonacci.Result();
+      },
+      null,
+      handleAcceptedCallback
+    );
+
+    let goal = new Fibonacci.Goal();
+    await client.waitForServer(1000);
+
+    let feedbackReceived = false;
+    const handle = await client.sendGoal(goal, () => {
+      feedbackReceived = true;
+    });
+    assert.ok(handle.accepted);
+    assert.strictEqual(serverGoalHandle.status, GoalStatus.STATUS_ACCEPTED);
+
+    // publishFeedback on accepted goal should not publish
+    const feedback = new Fibonacci.Feedback();
+    feedback.sequence = [1, 1, 2, 3];
+    serverGoalHandle.publishFeedback(feedback);
+
+    await assertUtils.createDelay(50);
+    assert.strictEqual(feedbackReceived, false);
+
+    // Clean up: execute and succeed
+    serverGoalHandle.execute();
+    await handle.getResult();
+    server.destroy();
+  });
+
+  it('publishFeedback on executing goal should publish normally', async function () {
+    const sequence = [1, 1, 2, 3];
+
+    function executeFeedbackCallback(goalHandle) {
+      assert.strictEqual(goalHandle.status, GoalStatus.STATUS_EXECUTING);
+
+      const feedback = new Fibonacci.Feedback();
+      feedback.sequence = sequence;
+      goalHandle.publishFeedback(feedback);
+      goalHandle.succeed();
+
+      return new Fibonacci.Result();
+    }
+
+    let server = new rclnodejs.ActionServer(
+      node,
+      fibonacci,
+      'fibonacci',
+      executeFeedbackCallback
+    );
+
+    let goal = new Fibonacci.Goal();
+    await client.waitForServer(1000);
+
+    let feedbackMessage;
+    const handle = await client.sendGoal(
+      goal,
+      (feedback) => (feedbackMessage = feedback)
+    );
+    assert.ok(handle.accepted);
+
+    await assertUtils.createDelay(50);
+    assert.ok(feedbackMessage);
+    assert.ok(deepEqual(Int32Array.from(sequence), feedbackMessage.sequence));
+
+    server.destroy();
+  });
+
+  it('publishFeedback after succeed should be ignored', async function () {
+    let serverGoalHandle;
+
+    function executeCallback(goalHandle) {
+      serverGoalHandle = goalHandle;
+      goalHandle.succeed();
+      return new Fibonacci.Result();
+    }
+
+    let server = new rclnodejs.ActionServer(
+      node,
+      fibonacci,
+      'fibonacci',
+      executeCallback
+    );
+
+    let goal = new Fibonacci.Goal();
+    await client.waitForServer(1000);
+
+    let feedbackCount = 0;
+    const handle = await client.sendGoal(goal, () => {
+      feedbackCount++;
+    });
+    assert.ok(handle.accepted);
+
+    await handle.getResult();
+    assert.strictEqual(serverGoalHandle.status, GoalStatus.STATUS_SUCCEEDED);
+
+    // publishFeedback after terminal state should not publish
+    const feedback = new Fibonacci.Feedback();
+    feedback.sequence = [1, 1, 2, 3];
+    serverGoalHandle.publishFeedback(feedback);
+
+    await assertUtils.createDelay(50);
+    assert.strictEqual(feedbackCount, 0);
+
+    server.destroy();
+  });
+
+  it('execute() on already executing goal should be a no-op', async function () {
+    let executeCalled = 0;
+
+    function handleAcceptedCallback(goalHandle) {
+      goalHandle.execute();
+      // Call execute again — should be a no-op
+      goalHandle.execute();
+    }
+
+    function executeCallback(goalHandle) {
+      executeCalled++;
+      goalHandle.succeed();
+      return new Fibonacci.Result();
+    }
+
+    let server = new rclnodejs.ActionServer(
+      node,
+      fibonacci,
+      'fibonacci',
+      executeCallback,
+      null,
+      handleAcceptedCallback
+    );
+
+    let goal = new Fibonacci.Goal();
+    await client.waitForServer(1000);
+
+    const handle = await client.sendGoal(goal);
+    assert.ok(handle.accepted);
+
+    await handle.getResult();
+    assert.strictEqual(executeCalled, 1);
+
+    server.destroy();
+  });
 });

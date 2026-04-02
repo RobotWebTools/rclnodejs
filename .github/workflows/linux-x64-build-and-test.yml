@@ -80,7 +80,7 @@ jobs:
         # Install any remaining runtime dependencies using rosdep
         rosdep init || true
         rosdep update
-        rosdep install --rosdistro rolling --from-paths /opt/ros/rolling/share --ignore-src -y --skip-keys "cyclonedds fastcdr fastdds iceoryx_binding_c rmw_connextdds rti-connext-dds-7.3.0 urdfdom_headers"
+        rosdep install --rosdistro rolling --from-paths /opt/ros/rolling/share --ignore-src -y --skip-keys "cyclonedds fastcdr fastdds iceoryx_binding_c rmw_connextdds rti-connext-dds-7.3.0 urdfdom_headers python3-pyqt6.qtsvg"
 
     - name: Install test-msgs and mrpt_msgs on Linux
       if: ${{ matrix.ros_distribution != 'rolling' }}
