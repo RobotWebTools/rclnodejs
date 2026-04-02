@@ -80,6 +80,13 @@ declare module 'rclnodejs' {
      * inspect and limit messages that it accepts.
      */
     contentFilter?: SubscriptionContentFilter;
+
+    /**
+     * If provided, declares read-only ROS parameters for the specified QoS policies.
+     * These can be overridden at startup via `--ros-args -p` or `--params-file`.
+     * If qos is a profile string, it will be resolved to a mutable QoS object.
+     */
+    qosOverridingOptions?: QoSOverridingOptions;
   }
 
   /**

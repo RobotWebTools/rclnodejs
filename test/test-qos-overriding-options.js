@@ -235,4 +235,56 @@ describe('QoS overriding options', function () {
 
     node.destroyPublisher(pub);
   });
+
+  it('Parameter override changes the actual QoS used', function () {
+    // Equivalent to running: node my_app.js --ros-args -p "qos_overrides./test_override_applied.subscription.depth:=1"
+    // In tests, we use NodeOptions.parameterOverrides since rclnodejs.init()
+    // (which processes --ros-args from process.argv) is already called.
+    // Both mechanisms populate the same _parameterOverrides map on the node.
+    const overrideNode = new rclnodejs.Node(
+      'qos_override_applied_node',
+      '',
+      rclnodejs.Context.defaultContext(),
+      {
+        startParameterServices: false,
+        parameterOverrides: [
+          new rclnodejs.Parameter(
+            'qos_overrides./test_override_applied.subscription.depth',
+            rclnodejs.ParameterType.PARAMETER_INTEGER,
+            1
+          ),
+        ],
+      }
+    );
+
+    const qos = new rclnodejs.QoS(
+      rclnodejs.QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+      10, // code default: depth=10
+      rclnodejs.QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE,
+      rclnodejs.QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_VOLATILE
+    );
+
+    const sub = overrideNode.createSubscription(
+      'std_msgs/msg/String',
+      'test_override_applied',
+      {
+        qos: qos,
+        qosOverridingOptions:
+          rclnodejs.QoSOverridingOptions.withDefaultPolicies(),
+      },
+      () => {}
+    );
+
+    // The parameter override (depth=1) should have been applied to the QoS
+    const depthParam = overrideNode.getParameter(
+      'qos_overrides./test_override_applied.subscription.depth'
+    );
+    assert.strictEqual(Number(depthParam.value), 1);
+
+    // The QoS object should have been mutated in-place
+    assert.strictEqual(qos.depth, 1);
+
+    overrideNode.destroySubscription(sub);
+    overrideNode.destroy();
+  });
 });
