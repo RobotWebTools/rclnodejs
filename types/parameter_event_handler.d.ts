@@ -98,6 +98,17 @@ declare module 'rclnodejs' {
     ): ParameterEventCallbackHandle;
 
     /**
+     * Configure which node parameter events will be received.
+     *
+     * If nodeNames is omitted or empty, the node filter is cleared.
+     * Relative names are resolved against the handler node namespace.
+     *
+     * @param nodeNames - Node names to filter parameter events from.
+     * @returns True if the filter is active or was successfully cleared.
+     */
+    configureNodesFilter(nodeNames?: string[]): boolean;
+
+    /**
      * Remove a previously added parameter event callback.
      *
      * @param handle - The handle returned by addParameterEventCallback.
