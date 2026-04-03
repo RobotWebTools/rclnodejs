@@ -418,6 +418,12 @@ describe('ParameterEventHandler tests', function () {
       assert.throws(() => {
         handler.configureNodesFilter([1]);
       });
+      assert.throws(() => {
+        handler.configureNodesFilter(["bad'node"]);
+      });
+      assert.throws(() => {
+        handler.configureNodesFilter(['/invalid_node?']);
+      });
     });
   });
 
