@@ -111,6 +111,28 @@ expectType<rclnodejs.Options<string | rclnodejs.QoS>>(
 );
 expectType<string>(node.getFullyQualifiedName());
 expectType<string>(node.getRMWImplementationIdentifier());
+const parameterEventHandler = node.createParameterEventHandler();
+expectType<rclnodejs.ParameterEventHandler>(parameterEventHandler);
+expectType<boolean>(parameterEventHandler.configureNodesFilter());
+expectType<boolean>(parameterEventHandler.configureNodesFilter(['/test_node']));
+
+const parameterCallbackHandle = parameterEventHandler.addParameterCallback(
+  'test_param',
+  '/test_node',
+  (parameter: any) => {
+    const receivedParameter = parameter;
+  }
+);
+expectType<rclnodejs.ParameterCallbackHandle>(parameterCallbackHandle);
+
+const parameterEventCallbackHandle =
+  parameterEventHandler.addParameterEventCallback((event: any) => {
+    const receivedEvent = event;
+  });
+expectType<rclnodejs.ParameterEventCallbackHandle>(
+  parameterEventCallbackHandle
+);
+
 const nodeWithArgs = rclnodejs.createNode(
   NODE_NAME,
   'topic',
