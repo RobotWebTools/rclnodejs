@@ -16,6 +16,7 @@
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
+const rclnodejsNative = require('../lib/native_loader.js');
 const DistroUtils = require('../lib/distro.js');
 const sinon = require('sinon');
 
@@ -222,6 +223,39 @@ describe('rclnodejs Timer class testing', function () {
       rclnodejs.spin(node);
     });
 
+    it('timer callback preserves zero arguments when TimerInfo is unavailable', function (done) {
+      const originalFunc = rclnodejsNative.callTimerWithInfo;
+
+      try {
+        Object.defineProperty(rclnodejsNative, 'callTimerWithInfo', {
+          value: undefined,
+          configurable: true,
+          writable: true,
+        });
+      } catch (e) {
+        this.skip();
+        return;
+      }
+
+      const timer = node.createTimer(TIMER_INTERVAL, function () {
+        try {
+          assert.strictEqual(arguments.length, 0);
+          timer.cancel();
+          done();
+        } finally {
+          try {
+            Object.defineProperty(rclnodejsNative, 'callTimerWithInfo', {
+              value: originalFunc,
+              configurable: true,
+              writable: true,
+            });
+          } catch (e) {}
+        }
+      });
+
+      rclnodejs.spin(node);
+    });
+
     it('timer.setOnResetCallback', function (done) {
       if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
         this.skip();
@@ -381,5 +415,16 @@ describe('rclnodejs Timer class coverage testing', function () {
     assert.throws(() => {
       node.createTimer(TIMER_INTERVAL, () => {}, { autostart: 'false' });
     }, /options\.autostart/);
+  });
+
+  it('native createTimer validates autostart argument type', function () {
+    assert.throws(() => {
+      rclnodejsNative.createTimer(
+        node.getClock().handle,
+        node.context.handle,
+        TIMER_INTERVAL,
+        'false'
+      );
+    }, /Timer autostart must be a boolean/);
   });
 });

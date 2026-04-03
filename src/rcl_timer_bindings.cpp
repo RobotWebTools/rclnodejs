@@ -79,7 +79,12 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
   bool lossless;
   int64_t period_nsec = info[2].As<Napi::BigInt>().Int64Value(&lossless);
   bool autostart = true;
-  if (info.Length() > 3 && info[3].IsBoolean()) {
+  if (info.Length() > 3) {
+    if (!info[3].IsBoolean()) {
+      Napi::TypeError::New(env, "Timer autostart must be a boolean")
+          .ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
     autostart = info[3].As<Napi::Boolean>().Value();
   }
   rcl_timer_t* timer =
