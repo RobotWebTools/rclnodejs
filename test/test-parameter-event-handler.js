@@ -17,6 +17,16 @@
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 
+function createFakeHandlerNode(subscription) {
+  return {
+    createSubscription: () => subscription,
+    destroySubscription: () => {},
+    getFullyQualifiedName: () => '/test_ns/peh_handler_node',
+    name: () => 'peh_handler_node',
+    namespace: () => '/test_ns',
+  };
+}
+
 describe('ParameterEventHandler tests', function () {
   this.timeout(60 * 1000);
 
@@ -293,6 +303,154 @@ describe('ParameterEventHandler tests', function () {
 
       assert.throws(() => {
         handler.removeParameterEventCallback(handle);
+      });
+    });
+  });
+
+  describe('configureNodesFilter', function () {
+    it('should apply a content filter for absolute node names', function () {
+      let hasFilter = false;
+      let lastFilter;
+      const subscription = {
+        setContentFilter: (filter) => {
+          lastFilter = filter;
+          hasFilter = true;
+          return true;
+        },
+        clearContentFilter: () => {
+          hasFilter = false;
+          return true;
+        },
+        hasContentFilter: () => hasFilter,
+      };
+
+      handler = new rclnodejs.ParameterEventHandler(
+        createFakeHandlerNode(subscription)
+      );
+
+      assert.strictEqual(
+        handler.configureNodesFilter(['/remote_node_1', '/remote_node_2']),
+        true
+      );
+      assert.deepStrictEqual(lastFilter, {
+        expression: 'node = %0 OR node = %1',
+        parameters: ["'/remote_node_1'", "'/remote_node_2'"],
+      });
+    });
+
+    it('should resolve relative node names against the handler namespace', function () {
+      let lastFilter;
+      const subscription = {
+        setContentFilter: (filter) => {
+          lastFilter = filter;
+          return true;
+        },
+        clearContentFilter: () => true,
+        hasContentFilter: () => true,
+      };
+
+      handler = new rclnodejs.ParameterEventHandler(
+        createFakeHandlerNode(subscription)
+      );
+
+      assert.strictEqual(handler.configureNodesFilter(['remote_node']), true);
+      assert.deepStrictEqual(lastFilter, {
+        expression: 'node = %0',
+        parameters: ["'/test_ns/remote_node'"],
+      });
+    });
+
+    it('should normalize repeated and trailing slashes in node names', function () {
+      let lastFilter;
+      const subscription = {
+        setContentFilter: (filter) => {
+          lastFilter = filter;
+          return true;
+        },
+        clearContentFilter: () => true,
+        hasContentFilter: () => true,
+      };
+
+      handler = new rclnodejs.ParameterEventHandler(
+        createFakeHandlerNode(subscription)
+      );
+
+      assert.strictEqual(
+        handler.configureNodesFilter([
+          '/test_ns//remote_node/',
+          'nested//node/',
+        ]),
+        true
+      );
+      assert.deepStrictEqual(lastFilter, {
+        expression: 'node = %0 OR node = %1',
+        parameters: ["'/test_ns/remote_node'", "'/test_ns/nested/node'"],
+      });
+    });
+
+    it('should clear the content filter when nodeNames is omitted', function () {
+      let hasFilter = true;
+      const subscription = {
+        setContentFilter: () => true,
+        clearContentFilter: () => {
+          hasFilter = false;
+          return true;
+        },
+        hasContentFilter: () => hasFilter,
+      };
+
+      handler = new rclnodejs.ParameterEventHandler(
+        createFakeHandlerNode(subscription)
+      );
+
+      assert.strictEqual(handler.configureNodesFilter(), true);
+      assert.strictEqual(hasFilter, false);
+    });
+
+    it('should clear the content filter when nodeNames is empty', function () {
+      let hasFilter = true;
+      const subscription = {
+        setContentFilter: () => true,
+        clearContentFilter: () => {
+          hasFilter = false;
+          return true;
+        },
+        hasContentFilter: () => hasFilter,
+      };
+
+      handler = new rclnodejs.ParameterEventHandler(
+        createFakeHandlerNode(subscription)
+      );
+
+      assert.strictEqual(handler.configureNodesFilter([]), true);
+      assert.strictEqual(hasFilter, false);
+    });
+
+    it('should throw for invalid nodeNames', function () {
+      const subscription = {
+        setContentFilter: () => true,
+        clearContentFilter: () => true,
+        hasContentFilter: () => false,
+      };
+
+      handler = new rclnodejs.ParameterEventHandler(
+        createFakeHandlerNode(subscription)
+      );
+
+      assert.throws(() => {
+        handler.configureNodesFilter('not-an-array');
+      });
+      assert.throws(() => {
+        handler.configureNodesFilter(['']);
+      });
+      assert.throws(() => {
+        handler.configureNodesFilter([1]);
+      });
+      assert.throws(() => {
+        handler.configureNodesFilter(["bad'node"]);
+      });
+      assert.throws(() => {
+        handler.configureNodesFilter(['/invalid_node?']);
       });
     });
   });
