@@ -78,8 +78,9 @@ declare module 'rclnodejs' {
 
     /**
      * Call a timer and starts counting again, retrieves actual and expected call time.
-     * @return - The timer information.
+     *
+     * @return The timer information with expected and actual call timestamps.
      */
-    callTimerWithInfo(): object;
+    callTimerWithInfo(): TimerInfo;
   }
 }

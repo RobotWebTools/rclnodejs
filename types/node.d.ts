@@ -104,14 +104,24 @@ declare module 'rclnodejs' {
    */
   const DEFAULT_OPTIONS: Options;
 
+  interface TimerInfo {
+    expectedCallTime: bigint;
+    actualCallTime: bigint;
+  }
+
+  interface TimerOptions {
+    autostart?: boolean;
+  }
+
   /**
    * Callback for receiving periodic interrupts from a Timer.
+   * Receives timer metadata when the underlying ROS distro exposes it.
    *
    * @remarks
    * See {@link Node.createTimer | Node.createTimer}
    * See {@link Timer}
    */
-  type TimerRequestCallback = () => void;
+  type TimerRequestCallback = (timerInfo?: TimerInfo) => void;
 
   /**
    * Callback indicating parameters are about to be declared or set.
@@ -313,15 +323,18 @@ declare module 'rclnodejs' {
     /**
      * Create a Timer.
      *
-     * @param period - Elapsed time between interrupt events (milliseconds).
-     * @param callback - Called on timeout interrupt.
-     * @param clock - Optional clock to use for the timer.
+     * @param period - Elapsed time between interrupt events in nanoseconds.
+     * @param callback - Called when the timer fires. Receives a `TimerInfo` argument when available.
+     * @param optionsOrClock - Optional timer options or clock to use for the timer.
+     *   Supports `{ autostart?: boolean }` when an options object is provided.
+     * @param clock - Optional clock to use for the timer when options are provided.
      * @returns New instance of Timer.
      */
     createTimer(
       period: bigint,
       callback: TimerRequestCallback,
-      clock?: Clock
+      optionsOrClock?: TimerOptions | Clock | null,
+      clock?: Clock | null
     ): Timer;
 
     /**
