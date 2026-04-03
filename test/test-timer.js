@@ -186,6 +186,42 @@ describe('rclnodejs Timer class testing', function () {
       done();
     });
 
+    it('node.createTimer supports autostart false', function (done) {
+      let called = false;
+      const timer = node.createTimer(
+        TIMER_INTERVAL,
+        () => {
+          called = true;
+          timer.cancel();
+          done();
+        },
+        { autostart: false }
+      );
+
+      rclnodejs.spin(node);
+
+      setTimeout(() => {
+        assert.strictEqual(called, false);
+        timer.reset();
+      }, 150);
+    });
+
+    it('timer callback receives TimerInfo when available', function (done) {
+      if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+        this.skip();
+        return;
+      }
+
+      const timer = node.createTimer(TIMER_INTERVAL, (info) => {
+        assert.deepStrictEqual(typeof info.expectedCallTime, 'bigint');
+        assert.deepStrictEqual(typeof info.actualCallTime, 'bigint');
+        timer.cancel();
+        done();
+      });
+
+      rclnodejs.spin(node);
+    });
+
     it('timer.setOnResetCallback', function (done) {
       if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
         this.skip();
@@ -339,5 +375,11 @@ describe('rclnodejs Timer class coverage testing', function () {
       stub.restore();
       consoleSpy.restore();
     }
+  });
+
+  it('node.createTimer validates autostart option type', function () {
+    assert.throws(() => {
+      node.createTimer(TIMER_INTERVAL, () => {}, { autostart: 'false' });
+    }, /options\.autostart/);
   });
 });

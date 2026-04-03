@@ -78,6 +78,10 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
 
   bool lossless;
   int64_t period_nsec = info[2].As<Napi::BigInt>().Int64Value(&lossless);
+  bool autostart = true;
+  if (info.Length() > 3 && info[3].IsBoolean()) {
+    autostart = info[3].As<Napi::Boolean>().Value();
+  }
   rcl_timer_t* timer =
       reinterpret_cast<rcl_timer_t*>(malloc(sizeof(rcl_timer_t)));
   *timer = rcl_get_zero_initialized_timer();
@@ -85,8 +89,7 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
 #if ROS_VERSION > 2305  // After Iron.
   {
     rcl_ret_t ret = rcl_timer_init2(timer, clock, context, period_nsec, nullptr,
-                                    rcl_get_default_allocator(),
-                                    /*autostart=*/true);
+                                    rcl_get_default_allocator(), autostart);
     if (RCL_RET_OK != ret) {
       std::string error_msg = rcl_get_error_string().str;
       rcl_reset_error();
@@ -105,6 +108,17 @@ Napi::Value CreateTimer(const Napi::CallbackInfo& info) {
       free(timer);
       Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
       return env.Undefined();
+    }
+    if (!autostart) {
+      rcl_ret_t cancel_ret = rcl_timer_cancel(timer);
+      if (RCL_RET_OK != cancel_ret) {
+        std::string error_msg = rcl_get_error_string().str;
+        rcl_reset_error();
+        rcl_timer_fini(timer);
+        free(timer);
+        Napi::Error::New(env, error_msg).ThrowAsJavaScriptException();
+        return env.Undefined();
+      }
     }
   }
 #endif
