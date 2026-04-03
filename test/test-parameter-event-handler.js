@@ -360,6 +360,34 @@ describe('ParameterEventHandler tests', function () {
       });
     });
 
+    it('should normalize repeated and trailing slashes in node names', function () {
+      let lastFilter;
+      const subscription = {
+        setContentFilter: (filter) => {
+          lastFilter = filter;
+          return true;
+        },
+        clearContentFilter: () => true,
+        hasContentFilter: () => true,
+      };
+
+      handler = new rclnodejs.ParameterEventHandler(
+        createFakeHandlerNode(subscription)
+      );
+
+      assert.strictEqual(
+        handler.configureNodesFilter([
+          '/test_ns//remote_node/',
+          'nested//node/',
+        ]),
+        true
+      );
+      assert.deepStrictEqual(lastFilter, {
+        expression: 'node = %0 OR node = %1',
+        parameters: ["'/test_ns/remote_node'", "'/test_ns/nested/node'"],
+      });
+    });
+
     it('should clear the content filter when nodeNames is omitted', function () {
       let hasFilter = true;
       const subscription = {
