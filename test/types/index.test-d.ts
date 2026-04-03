@@ -321,11 +321,20 @@ expectType<boolean>(client.isDestroyed());
 expectType<string>(client.loggerName);
 
 // ---- Timer ----
-const timerCallback = () => {};
+const timerCallback: rclnodejs.TimerRequestCallback = (timerInfo) => {
+  if (timerInfo) {
+    expectType<bigint>(timerInfo.expectedCallTime);
+    expectType<bigint>(timerInfo.actualCallTime);
+  }
+};
 expectType<rclnodejs.TimerRequestCallback>(timerCallback);
 
 const timer = node.createTimer(BigInt(100000), timerCallback);
+const delayedTimer = node.createTimer(BigInt(100000), timerCallback, {
+  autostart: false,
+});
 expectType<rclnodejs.Timer>(timer);
+expectType<rclnodejs.Timer>(delayedTimer);
 expectType<bigint>(timer.period);
 expectType<boolean>(timer.isReady());
 expectType<bigint>(timer.timeSinceLastCall());
@@ -337,7 +346,7 @@ expectType<void>(timer.changeTimerPeriod(BigInt(100000)));
 expectType<bigint>(timer.timerPeriod());
 expectType<void>(timer.setOnResetCallback((_events: number) => {}));
 expectType<void>(timer.clearOnResetCallback());
-expectType<object>(timer.callTimerWithInfo());
+expectType<rclnodejs.TimerInfo>(timer.callTimerWithInfo());
 
 // ---- Rate ----
 const rate = await node.createRate(1);
