@@ -30,7 +30,7 @@ This demo showcases how to use **rclnodejs** with **Electron** to create an inte
 Before running this demo, ensure you have:
 
 1. **ROS2 installed** (Humble, Jazzy, Kilted, or Rolling)
-2. **Node.js** (version 16 or higher)
+2. **Node.js** (version 20.20.2 or higher)
 3. **rclnodejs built** and working
 
 ### ROS2 Setup
@@ -288,7 +288,6 @@ Extend the joystick commands by modifying the switch statement in `main.js` and 
 ### Common Issues
 
 1. **"Failed to initialize ROS2" Error**
-
    - Ensure ROS2 is properly sourced before running npm start
    - Check that rclnodejs is built correctly
 
@@ -301,7 +300,6 @@ Extend the joystick commands by modifying the switch statement in `main.js` and 
    ```
 
 3. **Topic Not Appearing**
-
    - Verify ROS2 daemon is running: `ros2 daemon status`
    - Check topic list: `ros2 topic list`
 

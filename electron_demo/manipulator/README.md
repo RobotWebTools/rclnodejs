@@ -16,7 +16,7 @@ An interactive Electron application demonstrating a two-joint robotic manipulato
 
 ## 📋 Prerequisites
 
-- **Node.js** (>= 16.13.0) - JavaScript runtime
+- **Node.js** (>= 20.20.2) - JavaScript runtime
 - **ROS 2** (Humble, Jazzy, or newer) - Robot Operating System 2
 - **rclnodejs compatible environment** - Linux recommended (tested on Ubuntu/WSL)
 
@@ -81,7 +81,6 @@ npm start
 ### Interactive Controls
 
 - **Joint Sliders**: Use the sliders in the control panel to manually adjust joint angles
-
   - **Joint 1 (Base)**: Rotates the entire arm around the vertical axis (±180°)
   - **Joint 2 (Elbow)**: Bends the upper arm segment (±135°)
 
@@ -105,13 +104,11 @@ npm start
 The demo includes visual indicators to help identify joint movements:
 
 - **🔴 Red Markers**: Joint 1 (Base rotation)
-
   - Red ring around the base joint
   - Red arrow showing rotation direction
   - "Joint1" text label
 
 - **🟢 Green Markers**: Joint 2 (Elbow)
-
   - Green ring around the elbow joint
   - Green arrow showing rotation direction
   - "Joint2" text label
@@ -309,13 +306,11 @@ manipulator/
    ```
 
 2. **Build errors with latest Electron**
-
    - This demo uses Electron 31.7.7 for rclnodejs compatibility
    - Electron 38+ requires C++20, which rclnodejs doesn't support yet
    - The current versions are tested and stable
 
 3. **No ROS2 messages received**
-
    - Check if ROS2 daemon is running: `ros2 daemon start`
    - Verify topic exists: `ros2 topic list`
    - Check message flow: `ros2 topic echo /joint_states`

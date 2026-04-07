@@ -5,7 +5,7 @@ Performance benchmarks for comparing ROS 2 client libraries: C++ (rclcpp), Pytho
 ## Prerequisites
 
 1. **ROS 2**: Install from [ros.org](https://docs.ros.org/en/jazzy/Installation.html)
-2. **Node.js**: v16+ for rclnodejs (from [nodejs.org](https://nodejs.org/))
+2. **Node.js**: v20.20.2+ for rclnodejs (from [nodejs.org](https://nodejs.org/))
 3. **rclnodejs**: Follow [installation guide](https://github.com/RobotWebTools/rclnodejs#installation)
 4. **Build Dependencies**: For C++ benchmarks: `sudo apt install libssl-dev cmake build-essential`
 

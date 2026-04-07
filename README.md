@@ -42,7 +42,7 @@ Choose the path that matches how you plan to use rclnodejs:
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/en/) version >= 16.13.0
+- [Node.js](https://nodejs.org/en/) version >= 20.20.2
 - [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html)
 
 Before installing, building, or running rclnodejs, source your ROS 2 environment:
@@ -86,7 +86,7 @@ rclnodejs ships with prebuilt native binaries for common Linux configurations si
 - **Ubuntu 22.04 (Jammy)** - ROS 2 Humble
 - **Ubuntu 24.04 (Noble)** - ROS 2 Jazzy, Kilted
 - **Architectures:** x64, arm64
-- **Node.js:** >= 16.20.2 (N-API compatible)
+- **Node.js:** >= 20.20.2 (N-API compatible)
 
 Installations outside this prebuilt matrix automatically fall back to building from source.
 

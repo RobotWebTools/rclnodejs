@@ -21,7 +21,7 @@ A minimal Electron application demonstrating basic ROS2 topic communication usin
 
 ## 📋 Prerequisites
 
-- **Node.js** (>= 16.13.0) - JavaScript runtime
+- **Node.js** (>= 20.20.2) - JavaScript runtime
 - **ROS 2** (Humble, Jazzy, or newer) - Robot Operating System 2
 - **rclnodejs compatible environment** - Linux recommended (tested on Ubuntu/WSL)
 

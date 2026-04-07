@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [16.X]
+        node-version: [20.20.2]
         architecture: [arm64]
         ros_distribution:
           - humble
