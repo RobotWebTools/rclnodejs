@@ -81,6 +81,27 @@ describe('NativeLoader testing', function () {
     assert.ok(existsSync.called);
     const args = existsSync.lastCall.args[0];
     assert.ok(args.includes('humble'));
+    assert.ok(args.includes('-node-'));
+    assert.ok(args.includes('rclnodejs.node'));
+  });
+
+  it('customFallbackLoader includes electron runtime in exact match path', function () {
+    if (process.platform === 'win32') {
+      this.skip();
+    }
+
+    Object.defineProperty(process, 'platform', { value: 'linux' });
+    Object.defineProperty(process, 'arch', { value: 'x64' });
+    process.env.ROS_DISTRO = 'humble';
+    process.env.npm_config_runtime = 'electron';
+
+    const existsSync = sandbox.stub(fs, 'existsSync').returns(true);
+    assert.strictEqual(loader.customFallbackLoader(), null);
+
+    assert.ok(existsSync.called);
+    const args = existsSync.lastCall.args[0];
+    assert.ok(args.includes('humble'));
+    assert.ok(args.includes('-electron-'));
     assert.ok(args.includes('rclnodejs.node'));
   });
 
