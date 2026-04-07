@@ -12,7 +12,6 @@
     'runtime%': 'node',
     'ros_lib_dir': "<!(node -p \"require('./scripts/config.js').getROSLibPath()\")",
     'ros_include_root': "<!(node -p \"require('./scripts/config.js').getROSIncludeRootPath()\")",
-    'node_major_version': '<!(node -p \"process.versions.node.split(\'.\')[0]\")',
   },
   'targets': [
     {
@@ -85,14 +84,15 @@
             ],
             'conditions': [
               [
-                'node_major_version >= 23', {
+                # Post-Kilted ROS distros require C++20.
+                'ros_version > 2505', {
                   'cflags_cc': [
                     '-std=c++20'
                   ]
                 }
               ],
               [
-                'node_major_version < 23', {
+                'ros_version <= 2505', {
                   'cflags_cc': [
                     '-std=c++17'
                   ]
@@ -108,14 +108,15 @@
             ],
             'conditions': [
               [
-                'node_major_version >= 23', {
+                # Post-Kilted ROS distros require C++20.
+                'ros_version > 2505', {
                   'cflags_cc': [
                     '-std=c++20'
                   ]
                 }
               ],
               [
-                'node_major_version < 23', {
+                'ros_version <= 2505', {
                   'cflags_cc': [
                     '-std=c++17'
                   ]
