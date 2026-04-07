@@ -20,6 +20,15 @@ I install Nodejs from either:
 - Node.js official [website](https://nodejs.org/en/)
 - Node Version Manager ([nvm](https://github.com/creationix/nvm))
 
+### C++ Toolchain Requirements
+
+The native addon follows the ROS 2 distro toolchain requirement:
+
+- Humble, Jazzy, and Kilted build with C++17.
+- Post-Kilted distros, including Lyrical and newer Rolling snapshots, build with C++20.
+
+If no prebuilt binary is available for your target, make sure your local compiler matches the required C++ standard before running `npm install`.
+
 ### Get Code
 
 Open a terminal, and input:
