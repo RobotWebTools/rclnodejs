@@ -282,10 +282,10 @@ manipulator/
 
 ### Key Dependencies
 
-- **electron**: `^31.7.7` - Desktop application framework
-- **rclnodejs**: `^1.5.1` - ROS2 JavaScript client library (latest compatible)
-- **@electron/rebuild**: `^3.7.2` - Native module rebuilding tool
-- **three.js**: `r128` - 3D graphics library (loaded via CDN)
+- **electron**: `^40.1.0` - Desktop application framework
+- **rclnodejs**: `^1.8.1` - ROS2 JavaScript client library
+- **@electron/rebuild**: `^4.0.3` - Native module rebuilding tool
+- **three**: `^0.182.0` - 3D graphics library
 
 ### Debugging
 
@@ -305,10 +305,11 @@ manipulator/
    npm start
    ```
 
-2. **Build errors with latest Electron**
-   - This demo uses Electron 31.7.7 for rclnodejs compatibility
-   - Electron 38+ requires C++20, which rclnodejs doesn't support yet
-   - The current versions are tested and stable
+2. **Build errors with Electron**
+
+- This demo currently uses Electron 40.1.0
+- If you change Electron or other native-module dependencies, rerun `npm run rebuild`
+- The versions recorded in `package.json` and `package-lock.json` are the tested baseline for this demo
 
 3. **No ROS2 messages received**
    - Check if ROS2 daemon is running: `ros2 daemon start`
