@@ -13,10 +13,10 @@
     "typescript"
   ],
   "scripts": {
-    "build": "node-gyp -j 16 build",
-    "build:dev": "node-gyp -j 16 build --debug",
-    "rebuild": "npm run clean && node-gyp -j 16 rebuild",
-    "rebuild:dev": "npm run clean && node-gyp -j 16 rebuild --debug",
+    "build": "node-gyp -j 20 build",
+    "build:dev": "node-gyp -j 20 build --debug",
+    "rebuild": "npm run clean && node-gyp -j 20 rebuild",
+    "rebuild:dev": "npm run clean && node-gyp -j 20 rebuild --debug",
     "generate-messages": "node scripts/generate_messages.js",
     "generate-messages-idl": "node scripts/generate_messages.js --idl",
     "generate-messages:dev": "node scripts/generate_messages.js --debug",
@@ -34,7 +34,7 @@
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.h && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,md,ts}\" ./*.{js,md,ts}",
     "prepare": "husky",
     "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "prebuild": "prebuildify --napi --strip --target 16.20.2 --target electron@23.0.0 && node scripts/tag_prebuilds.js"
+    "prebuild": "prebuildify --napi --strip --target 20.19.1 --target electron@35.0.0 && node scripts/tag_prebuilds.js"
   },
   "bin": {
     "generate-ros-messages": "./scripts/generate_messages.js"
