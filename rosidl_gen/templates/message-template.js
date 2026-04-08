@@ -265,6 +265,14 @@ function generateMessage(data) {
   const currentTypedArray = getTypedArrayName(spec.baseType);
   const currentTypedArrayElementType = getTypedArrayElementName(spec.baseType);
 
+  // ROS 2 Rolling (ros2/rosidl#941) added is_rosidl_buffer / owns_rosidl_buffer
+  // to every primitive sequence struct.  Emit the extra fields only for
+  // primitive-package types on Rolling+.
+  const DistroUtils = require('../../lib/distro.js');
+  const needsRosidlBufferFields =
+    isPrimitivePackage(spec.baseType) &&
+    DistroUtils.getDistroId() >= DistroUtils.getDistroId('rolling');
+
   // Track required modules
   let existedModules = [];
   function shouldRequire(baseType, fieldType) {
@@ -347,7 +355,13 @@ ${
     : `  data: ${refArrayType},`
 }
   size: ref.types.size_t,
-  capacity: ref.types.size_t
+  capacity: ref.types.size_t,
+${
+  needsRosidlBufferFields
+    ? `  is_rosidl_buffer: ref.types.bool,
+  owns_rosidl_buffer: ref.types.bool,`
+    : ''
+}
 });
 
 ${generateWrapperClass()}
