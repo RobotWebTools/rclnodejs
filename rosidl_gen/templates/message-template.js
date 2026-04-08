@@ -156,15 +156,15 @@ const typedArrayType = [
 ];
 
 function isPrimitivePackage(baseType) {
-  return primitiveBaseType.indexOf(baseType.type) !== -1;
+  return primitiveBaseType.includes(baseType.type);
 }
 
 function isTypedArrayType(type) {
-  return typedArrayType.indexOf(type.type.toLowerCase()) !== -1;
+  return typedArrayType.includes(type.type.toLowerCase());
 }
 
 function isBigInt(type) {
-  return ['int64', 'uint64'].indexOf(type.type.toLowerCase()) !== -1;
+  return ['int64', 'uint64'].includes(type.type.toLowerCase());
 }
 
 function getWrapperNameByType(type) {
@@ -283,7 +283,7 @@ function generateMessage(data) {
         !fieldType.isPrimitiveType ||
         fieldType.type === 'string');
 
-    if (shouldReq && existedModules.indexOf(requiredModule) === -1) {
+    if (shouldReq && !existedModules.includes(requiredModule)) {
       existedModules.push(requiredModule);
       return true;
     } else {
@@ -692,7 +692,7 @@ ${spec.fields
 
   hasMember(name) {
     let memberNames = ${extractMemberNames(spec.fields)};
-    return memberNames.indexOf(name) !== -1;
+    return memberNames.includes(name);
   }
 }`;
   }

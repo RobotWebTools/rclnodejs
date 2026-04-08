@@ -27,7 +27,7 @@ utils
     const testDir = path.join(__dirname, '../test/');
     // eslint-disable-next-line
     const tests = fs.readdirSync(testDir).filter((file) => {
-      return file.substr(0, 5) === 'test-';
+      return file.startsWith('test-');
     });
 
     // eslint-disable-next-line
@@ -37,7 +37,7 @@ utils
     let ignoredCases = blocklist[os.type()];
 
     tests.forEach((test) => {
-      if (ignoredCases.indexOf(test) === -1) {
+      if (!ignoredCases.includes(test)) {
         mocha.addFile(path.join(testDir, test));
       }
     });
