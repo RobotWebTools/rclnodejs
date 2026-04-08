@@ -347,7 +347,14 @@ ${
     : `  data: ${refArrayType},`
 }
   size: ref.types.size_t,
-  capacity: ref.types.size_t
+  capacity: ref.types.size_t,
+${
+  isPrimitivePackage(spec.baseType)
+    ? `  ...require('../../lib/distro.js').getDistroId() >= require('../../lib/distro.js').getDistroId('rolling')
+    ? { is_rosidl_buffer: ref.types.bool, owns_rosidl_buffer: ref.types.bool }
+    : {}`
+    : ''
+}
 });
 
 ${generateWrapperClass()}
