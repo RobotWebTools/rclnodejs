@@ -13,7 +13,7 @@ Alternatively, you can build ROS 2 from scratch. Please select the platform you 
 ### Install `Node.js`
 
 **Notice:**
-`rclnodejs` requires Node.js version >= 16.13.0.
+`rclnodejs` requires Node.js version >= 20.20.2.
 
 I install Nodejs from either:
 

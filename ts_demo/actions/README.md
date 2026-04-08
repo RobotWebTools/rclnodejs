@@ -49,7 +49,7 @@ ts_demo/actions/
 Before running this demo, ensure you have:
 
 1. **ROS2** installed (tested with ROS2 Humble/Iron/Jazzy)
-2. **Node.js** (version 16 or higher)
+2. **Node.js** (version 20.20.2 or higher)
 3. **rclnodejs** built and configured in the parent directory (`../../`)
 4. **test_msgs** package available (usually included with ROS2)
 
@@ -250,17 +250,14 @@ You can modify the demo to:
 ### Common Issues
 
 1. **"Cannot find module 'rclnodejs'"**:
-
    - Ensure rclnodejs is properly built in the parent directory
    - Run `npm install` in the main rclnodejs directory
 
 2. **"Action server not available"**:
-
    - Make sure the action server is running before starting the client
    - Check that both nodes are using the same action name
 
 3. **TypeScript compilation errors**:
-
    - Run `npm run check-types` to see detailed type errors
    - Ensure all dependencies are installed: `npm install`
 

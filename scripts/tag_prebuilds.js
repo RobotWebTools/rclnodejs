@@ -14,6 +14,10 @@
 
 const fs = require('fs');
 const path = require('path');
+const {
+  getRuntimeFromGeneratedPrebuild,
+  getTaggedPrebuildFilename,
+} = require('../lib/prebuilds');
 const { detectUbuntuCodename } = require('../lib/utils');
 
 function tagPrebuilds() {
@@ -38,23 +42,36 @@ function tagPrebuilds() {
     return;
   }
 
-  const files = fs.readdirSync(prebuildDir).filter((f) => f.endsWith('.node'));
+  const files = fs
+    .readdirSync(prebuildDir)
+    .filter(
+      (file) => file.endsWith('.node') && getRuntimeFromGeneratedPrebuild(file)
+    );
 
   for (const file of files) {
     const filePath = path.join(prebuildDir, file);
+    const runtime = getRuntimeFromGeneratedPrebuild(file);
 
-    // Create tagged version with format: {ros_distro}-{linux-codename}-{cpu-arch}-rclnodejs.node
-    if (rosDistro && ubuntuCodename) {
-      const taggedName = `${rosDistro}-${ubuntuCodename}-${arch}-rclnodejs.node`;
+    // Create tagged version with format:
+    // {ros_distro}-{linux-codename}-{cpu-arch}-{runtime}-rclnodejs.node
+    if (rosDistro && ubuntuCodename && runtime) {
+      const taggedName = getTaggedPrebuildFilename({
+        rosDistro,
+        ubuntuCodename,
+        arch,
+        runtime,
+      });
       const taggedPath = path.join(prebuildDir, taggedName);
+
+      if (fs.existsSync(taggedPath)) {
+        fs.unlinkSync(taggedPath);
+      }
+
       fs.copyFileSync(filePath, taggedPath);
       console.log(`Created tagged binary: ${taggedName}`);
 
-      // Remove the original generic binary file if it's the basic rclnodejs.node
-      if (file === 'rclnodejs.node') {
-        fs.unlinkSync(filePath);
-        console.log(`Removed generic binary: ${file}`);
-      }
+      fs.unlinkSync(filePath);
+      console.log(`Removed generated binary: ${file}`);
     } else {
       console.log(
         `Skipping tagging for ${file} - missing ROS_DISTRO or Ubuntu codename`

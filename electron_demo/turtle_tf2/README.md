@@ -51,7 +51,7 @@ The turtle_tf2 demo showcases:
 ### System Requirements
 
 - **ROS2**: Humble, Iron, or Rolling distribution
-- **Node.js**: Version 18 or higher (for compatibility with latest Electron)
+- **Node.js**: Version 20.20.2 or higher
 - **turtlesim**: ROS2 turtle simulation package
 - **Electron**: For desktop application framework
 
@@ -317,26 +317,22 @@ You can observe the following behavior by:
 ### Common Issues
 
 1. **"Cannot connect to ROS2" or "librcl.so: cannot open shared object file"**
-
    - Ensure ROS2 is sourced: `source /opt/ros/$ROS_DISTRO/setup.bash`
    - **Critical**: Source ROS2 in the SAME terminal where you run `npm start`
    - Check if ROS2 daemon is running: `ros2 daemon status`
    - Verify ROS2 installation: `ros2 --version`
 
 2. **"Turtlesim not responding" or "Failed to spawn turtle2"**
-
    - Verify turtlesim is running: `ros2 run turtlesim turtlesim_node`
    - Check available topics: `ros2 topic list`
    - Ensure spawn service is available: `ros2 service list | grep spawn`
    - Try restarting turtlesim_node if spawn calls fail
 
 3. **"No transforms detected"**
-
    - Ensure demo is started: Click "Start Demo" button
    - Check TF2 tree: `ros2 run tf2_tools view_frames`
 
 4. **"Dynamic frame not visible when toggling"**
-
    - **Check if the demo is started**: Click "Start Demo" button first to initialize all broadcasters
    - **Look for an orange sphere near coordinates (2,3)**: The dynamic frame appears as an orange sphere orbiting around the red static frame
    - **Wait for circular motion**: The dynamic frame moves in a 2-unit radius circle, taking about 6 seconds for a full rotation
@@ -344,19 +340,16 @@ You can observe the following behavior by:
    - **Check the transform list**: The dynamic frame should appear in the left panel's transform list with changing coordinates around (2±2, 3±2, 0)
 
 5. **"3D visualization not loading"**
-
    - Check browser console for WebGL errors
    - Ensure hardware acceleration is enabled
    - Try restarting the Electron application
 
 6. **"electron: not found" or native module errors**
-
    - Make sure you ran `npm run rebuild` after `npm install`
-   - Ensure Node.js version is compatible (18 or higher)
+   - Ensure Node.js version is compatible (20.20.2 or higher)
    - Try deleting `node_modules` and running `npm install && npm run rebuild` again
 
 7. **"THREE is not defined" or script loading errors**
-
    - Ensure Three.js is properly installed: `npm install three@0.155.0`
    - Check that `node_modules/three/build/three.min.js` exists
    - If issues persist, try reinstalling: `rm -rf node_modules && npm install && npm run rebuild`

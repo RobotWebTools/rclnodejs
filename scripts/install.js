@@ -15,6 +15,10 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const {
+  detectPrebuildRuntime,
+  getTaggedPrebuildFilename,
+} = require('../lib/prebuilds');
 const { detectUbuntuCodename } = require('../lib/utils');
 
 function getRosDistro() {
@@ -24,6 +28,7 @@ function getRosDistro() {
 function checkPrebuiltBinary() {
   const platform = process.platform;
   const arch = process.arch;
+  const runtime = detectPrebuildRuntime();
 
   // Only Linux has prebuilt binaries
   if (platform !== 'linux') {
@@ -50,18 +55,24 @@ function checkPrebuiltBinary() {
     'prebuilds',
     `${platform}-${arch}`
   );
-  const expectedBinary = `${rosDistro}-${ubuntuCodename}-${arch}-rclnodejs.node`;
+  const expectedBinary = getTaggedPrebuildFilename({
+    rosDistro,
+    ubuntuCodename,
+    arch,
+    runtime,
+  });
+
   const binaryPath = path.join(prebuildDir, expectedBinary);
 
   if (fs.existsSync(binaryPath)) {
     console.log(`✓ Found prebuilt binary: ${expectedBinary}`);
-    console.log(`  Platform: ${platform}, Arch: ${arch}`);
+    console.log(`  Platform: ${platform}, Arch: ${arch}, Runtime: ${runtime}`);
     console.log(`  Ubuntu: ${ubuntuCodename}, ROS: ${rosDistro}`);
     return true;
   }
 
   console.log(
-    `✗ No prebuilt binary found for ${rosDistro}-${ubuntuCodename}-${arch}`
+    `✗ No ${runtime} prebuilt binary found for ${rosDistro}-${ubuntuCodename}-${arch}`
   );
 
   // List available binaries for debugging

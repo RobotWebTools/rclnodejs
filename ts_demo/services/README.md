@@ -17,7 +17,7 @@ This demo demonstrates how to use **rclnodejs** with TypeScript to create ROS2 s
 
 Before running this demo, ensure you have:
 
-1. **Node.js** (>= 16.13.0)
+1. **Node.js** (>= 20.20.2)
 2. **ROS 2** installed and sourced
 3. **rclnodejs** built and available
 
