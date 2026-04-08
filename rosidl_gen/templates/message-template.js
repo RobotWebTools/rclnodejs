@@ -268,7 +268,7 @@ function generateMessage(data) {
   // ROS 2 Rolling (ros2/rosidl#941) added is_rosidl_buffer / owns_rosidl_buffer
   // to every primitive sequence struct.  Emit the extra fields only for
   // primitive-package types on Rolling+.
-  const DistroUtils = require('../lib/distro.js');
+  const DistroUtils = require('../../lib/distro.js');
   const needsRosidlBufferFields =
     isPrimitivePackage(spec.baseType) &&
     DistroUtils.getDistroId() >= DistroUtils.getDistroId('rolling');
