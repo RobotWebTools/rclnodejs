@@ -61,7 +61,7 @@ function getSubFolder(filePath, amentExecuted) {
   }
   // If the |amentExecuted| equals to false, the file's extension will be assigned as
   // the name of sub folder.
-  return path.parse(filePath).ext.substr(1);
+  return path.parse(filePath).ext.substring(1);
 }
 
 function grabInterfaceInfo(filePath, amentExecuted) {

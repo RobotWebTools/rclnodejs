@@ -164,7 +164,7 @@ function isTypedArrayType(type) {
 }
 
 function isBigInt(type) {
-  return ['int64', 'uint64'].indexOf(type.type.toLowerCase()) !== -1;
+  return ['int64', 'uint64'].includes(type.type.toLowerCase());
 }
 
 function getWrapperNameByType(type) {
@@ -283,7 +283,7 @@ function generateMessage(data) {
         !fieldType.isPrimitiveType ||
         fieldType.type === 'string');
 
-    if (shouldReq && existedModules.indexOf(requiredModule) === -1) {
+    if (shouldReq && !existedModules.includes(requiredModule)) {
       existedModules.push(requiredModule);
       return true;
     } else {
@@ -692,7 +692,7 @@ ${spec.fields
 
   hasMember(name) {
     let memberNames = ${extractMemberNames(spec.fields)};
-    return memberNames.indexOf(name) !== -1;
+    return memberNames.includes(name);
   }
 }`;
   }
