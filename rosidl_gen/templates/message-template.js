@@ -156,11 +156,11 @@ const typedArrayType = [
 ];
 
 function isPrimitivePackage(baseType) {
-  return primitiveBaseType.indexOf(baseType.type) !== -1;
+  return primitiveBaseType.includes(baseType.type);
 }
 
 function isTypedArrayType(type) {
-  return typedArrayType.indexOf(type.type.toLowerCase()) !== -1;
+  return typedArrayType.includes(type.type.toLowerCase());
 }
 
 function isBigInt(type) {

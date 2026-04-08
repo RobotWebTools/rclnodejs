@@ -29,7 +29,7 @@ const serviceMsgPath = path.join(generatedRoot, 'srv_msg');
 
 function getPackageName(filePath, amentExecuted) {
   if (os.type() === 'Windows_NT') {
-    filePath = filePath.replace(/\\/g, '/');
+    filePath = filePath.replaceAll('\\', '/');
   }
 
   if (amentExecuted) {
@@ -41,14 +41,14 @@ function getPackageName(filePath, amentExecuted) {
 
   // If |packageName| equals to the file's extension, e.g. msg/srv, one level
   // up directory will be used as the package name.
-  return packageName === path.parse(filePath).ext.substr(1)
+  return packageName === path.parse(filePath).ext.substring(1)
     ? folders.pop()
     : packageName;
 }
 
 function getSubFolder(filePath, amentExecuted) {
   if (os.type() === 'Windows_NT') {
-    filePath = filePath.replace(/\\/g, '/');
+    filePath = filePath.replaceAll('\\', '/');
   }
 
   if (amentExecuted) {
