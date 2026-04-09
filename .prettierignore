@@ -1,0 +1,4 @@
+# Prettier pads Markdown table separators to match cell width, which bloats
+# long-URL badge tables.  Exclude root READMEs to keep them minimal.
+README.md
+scripts/npmjs-readme.md
