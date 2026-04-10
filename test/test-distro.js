@@ -60,7 +60,8 @@ describe('rclnodejs distro utils', function () {
   it('unknown distro', function (done) {
     let backupEnvar = process.env.ROS_DISTRO;
 
-    // test unknown distro
+    // test unknown distro — when ROS_DISTRO is set but unrecognized,
+    // assume it is a future distro (newer than Rolling)
     process.env.ROS_DISTRO = 'xxx';
     assert.equal(
       'xxx',
@@ -68,14 +69,20 @@ describe('rclnodejs distro utils', function () {
       `Failed unknown distro name`
     );
     let id = DistroUtils.getDistroId();
-    assert.equal(id, DistroUtils.DistroId.UNKNOWN);
+    assert.equal(id, DistroUtils.DistroId.FUTURE);
     assert.equal(
-      DistroUtils.DistroId.UNKNOWN,
+      DistroUtils.DistroId.FUTURE,
       DistroUtils.getDistroId('xxx'),
       "getDistroId('xxx') failed"
     );
 
-    process.env.ROS_DISTRO = backupEnvar;
+    // test truly unknown — ROS_DISTRO unset
+    delete process.env.ROS_DISTRO;
+    assert.equal(DistroUtils.getDistroId(), DistroUtils.DistroId.UNKNOWN);
+
+    if (backupEnvar !== undefined) {
+      process.env.ROS_DISTRO = backupEnvar;
+    }
     done();
   });
 
