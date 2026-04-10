@@ -80,7 +80,9 @@ describe('rclnodejs distro utils', function () {
     delete process.env.ROS_DISTRO;
     assert.equal(DistroUtils.getDistroId(), DistroUtils.DistroId.UNKNOWN);
 
-    process.env.ROS_DISTRO = backupEnvar;
+    if (backupEnvar !== undefined) {
+      process.env.ROS_DISTRO = backupEnvar;
+    }
     done();
   });
 
