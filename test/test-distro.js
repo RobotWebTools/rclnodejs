@@ -23,14 +23,27 @@ describe('rclnodejs distro utils', function () {
 
     const distroNames = DistroUtils.getKnownDistroNames();
     assert.ok(
-      distroNames,
+      distroNames && distroNames.length > 0,
       'DistroUtils.getKnownDistroNames() did not return any distro names'
     );
-    assert.equal(
-      distroNames.length,
-      9,
-      'Incorrect number of known distro names'
-    );
+
+    const expectedDistros = [
+      'eloquent',
+      'foxy',
+      'galactic',
+      'humble',
+      'iron',
+      'jazzy',
+      'kilted',
+      'lyrical',
+      'rolling',
+    ];
+    for (const name of expectedDistros) {
+      assert.ok(
+        distroNames.includes(name),
+        `Expected distro '${name}' not found in known distro names`
+      );
+    }
 
     distroNames.forEach((distroName) => {
       let id = DistroUtils.getDistroId(distroName);
