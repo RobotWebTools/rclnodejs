@@ -15,7 +15,8 @@ const SUBSCRIBER_WAIT_TIME = 1000;
 function isContentFilteringSupported() {
   return (
     DistroUtils.getDistroId() >= DistroUtils.getDistroId('humble') &&
-    RMWUtils.getRMWName() != RMWUtils.RMWNames.CYCLONEDDS
+    RMWUtils.getRMWName() != RMWUtils.RMWNames.CYCLONEDDS &&
+    RMWUtils.getRMWName() != RMWUtils.RMWNames.ZENOH
   );
 }
 
