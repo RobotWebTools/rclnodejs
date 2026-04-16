@@ -76,6 +76,10 @@ building and deploying docs to GitHub Pages.
 - **Manual dispatch** from the Actions tab — includes a `dry_run` toggle
   (defaults to `true`). Set it to `false` to deploy.
 
+These workflow runs only execute in the upstream `RobotWebTools/rclnodejs`
+repository. If you trigger the workflow from a fork, the build job is skipped,
+so manual dispatches and `docs-*` tag pushes there will not run the docs build.
+
 ### What it does
 
 1. Full checkout with all tags and the `origin/gh-pages` branch.
@@ -85,9 +89,11 @@ building and deploying docs to GitHub Pages.
 
 ### Testing
 
-- Run the workflow manually with `dry_run` enabled to verify the build
+- Run the workflow manually with `dry_run` enabled first to verify the build
   succeeds without deploying.
-- Push a `docs-test` tag to trigger a full build + deploy, then clean up:
+- Only push a `docs-test` tag when it is acceptable to update the published
+  GitHub Pages site: `docs-*` tags perform a real production deploy.
+  Afterward, clean up the tag with:
   `git tag -d docs-test && git push origin :refs/tags/docs-test`.
 
 ## Manual Landing Page Rebuild
