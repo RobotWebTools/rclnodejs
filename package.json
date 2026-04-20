@@ -35,7 +35,7 @@
     "prepare": "husky",
     "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "prebuild:node": "prebuildify --napi --strip --name node --target 20.20.2",
-    "prebuild:electron": "prebuildify --napi --strip --name electron --target electron@23.0.0",
+    "prebuild:electron": "prebuildify --napi --strip --name electron --target electron@34.0.0",
     "prebuild": "npm run prebuild:node && npm run prebuild:electron && node scripts/tag_prebuilds.js"
   },
   "bin": {
