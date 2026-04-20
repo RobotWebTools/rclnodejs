@@ -65,6 +65,37 @@ For a new release such as `1.9.0`:
    - `build/gh-pages-docs/.nojekyll`
 6. Publish the contents of `build/gh-pages-docs/` to the `gh-pages` branch.
 
+## GitHub Actions Deployment
+
+The `deploy-docs.yml` workflow (`.github/workflows/deploy-docs.yml`) automates
+building and deploying docs to GitHub Pages.
+
+### Triggers
+
+- **Tag push** matching `docs-*` (e.g. `git tag docs-1.9.0 && git push origin docs-1.9.0`) — builds and deploys automatically.
+- **Manual dispatch** from the Actions tab — includes a `dry_run` toggle
+  (defaults to `true`). Set it to `false` to deploy.
+
+These workflow runs only execute in the upstream `RobotWebTools/rclnodejs`
+repository. If you trigger the workflow from a fork, the build job is skipped,
+so manual dispatches and `docs-*` tag pushes there will not run the docs build.
+
+### What it does
+
+1. Full checkout with all tags and the `origin/gh-pages` branch.
+2. Runs `npm run docs:gh-pages` to stage the docs tree.
+3. Uploads the staged output as a Pages artifact.
+4. Deploys to GitHub Pages (skipped when `dry_run` is `true`).
+
+### Testing
+
+- Run the workflow manually with `dry_run` enabled first to verify the build
+  succeeds without deploying.
+- Only push a `docs-test` tag when it is acceptable to update the published
+  GitHub Pages site: `docs-*` tags perform a real production deploy.
+  Afterward, clean up the tag with:
+  `git tag -d docs-test && git push origin :refs/tags/docs-test`.
+
 ## Manual Landing Page Rebuild
 
 If the staged docs tree already exists and you only want to rebuild

@@ -1,0 +1,63 @@
+name: Deploy JSDoc to GitHub Pages
+
+on:
+  push:
+    tags:
+      - 'docs-*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Build docs only (skip deploy to Pages)'
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    if: github.repository == 'RobotWebTools/rclnodejs'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Fetch gh-pages branch
+        run: git fetch origin gh-pages:refs/remotes/origin/gh-pages
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build docs
+        run: npm run docs:gh-pages
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: build/gh-pages-docs
+
+  deploy:
+    needs: build
+    if: ${{ !(inputs.dry_run == true) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
