@@ -10,16 +10,16 @@
 'use strict';
 
 const rclnodejs = require('../index.js');
-const { startWebBridge } = require('./bridge.js');
+const { startRosocket } = require('./index.js');
 
-const USAGE = `Usage: rclnodejs-web-bridge [options]
+const USAGE = `Usage: rosocket [options]
 
-Expose ROS 2 topics and services as resource-style WebSocket URLs.
+rosocket — expose ROS 2 topics and services as resource-style WebSocket URLs.
 
 Options:
   -p, --port <port>             Port to listen on (default: 9000)
   -H, --host <host>             Host/interface to bind (default: 0.0.0.0)
-  -n, --node-name <name>        ROS 2 node name (default: web_bridge)
+  -n, --node-name <name>        ROS 2 node name (default: rosocket)
   -t, --topic <name>:<type>     Pre-declare a topic type (repeatable)
                                 e.g. --topic /chatter:std_msgs/msg/String
   -s, --service <name>:<type>   Pre-declare a service type (repeatable)
@@ -37,7 +37,7 @@ function parseArgs(argv) {
   const opts = {
     port: 9000,
     host: '0.0.0.0',
-    nodeName: 'web_bridge',
+    nodeName: 'rosocket',
     topicTypes: {},
     serviceTypes: {},
   };
@@ -118,7 +118,7 @@ async function main() {
   const node = rclnodejs.createNode(opts.nodeName);
   rclnodejs.spin(node);
 
-  const bridge = await startWebBridge({
+  const bridge = await startRosocket({
     node,
     port: opts.port,
     host: opts.host,
@@ -133,7 +133,7 @@ async function main() {
       ? '127.0.0.1'
       : opts.host;
   console.log(
-    `[rclnodejs-web-bridge] node="${opts.nodeName}" listening on ws://${displayHost}:${bridge.port} (bind=${opts.host})`
+    `[rosocket] node="${opts.nodeName}" listening on ws://${displayHost}:${bridge.port} (bind=${opts.host})`
   );
   for (const [name, type] of Object.entries(opts.topicTypes)) {
     console.log(`  topic   ${name}\t-> ${type}`);
@@ -143,7 +143,7 @@ async function main() {
   }
 
   const shutdown = (sig) => {
-    console.log(`[rclnodejs-web-bridge] received ${sig}, shutting down`);
+    console.log(`[rosocket] received ${sig}, shutting down`);
     // Hard-exit fallback in case ws/rcl close callbacks don't fire
     // (e.g. due to in-flight rclnodejs.spin loop keeping the event loop busy).
     const hard = setTimeout(() => process.exit(0), 1500);

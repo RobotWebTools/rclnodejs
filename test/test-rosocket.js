@@ -11,19 +11,24 @@
 const assert = require('assert');
 const WebSocket = require('ws');
 const rclnodejs = require('../index.js');
-const { startWebBridge } = require('../web_bridge');
+const { startRosocket } = require('../rosocket');
+const rosocket = require('../rosocket');
 
-describe('web_bridge resource-style WebSocket bridge', function () {
+describe('rosocket resource-style WebSocket bridge', function () {
   this.timeout(60 * 1000);
+
+  it('exports startRosocket', function () {
+    assert.strictEqual(rosocket.startRosocket, startRosocket);
+  });
 
   let node;
   let bridge;
 
   before(async function () {
     await rclnodejs.init();
-    node = rclnodejs.createNode('web_bridge_test_node');
+    node = rclnodejs.createNode('rosocket_test_node');
     rclnodejs.spin(node);
-    bridge = await startWebBridge({
+    bridge = await startRosocket({
       node,
       port: 0, // ephemeral
       topicTypes: { '/wb_chatter': 'std_msgs/msg/String' },

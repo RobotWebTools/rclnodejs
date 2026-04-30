@@ -9,7 +9,7 @@
 'use strict';
 
 const { WebSocketServer } = require('ws');
-const debug = require('debug')('rclnodejs:web_bridge');
+const debug = require('debug')('rclnodejs:rosocket');
 const { toJSONSafe } = require('../lib/message_serialization.js');
 
 // Convert a JSON value coming from the browser into shapes rclnodejs understands.
@@ -75,7 +75,7 @@ function parseResourcePath(pathname) {
  * @param {(req: import('http').IncomingMessage) => boolean} [options.verifyClient] - Optional auth hook called with the raw HTTP upgrade request; return `false` to reject the connection.
  * @returns {Promise<{wss: WebSocketServer, close: () => Promise<void>, port: number}>}
  */
-function startWebBridge(options = {}) {
+function startRosocket(options = {}) {
   const {
     node,
     port = 9000,
@@ -85,7 +85,7 @@ function startWebBridge(options = {}) {
     verifyClient,
   } = options;
 
-  if (!node) throw new TypeError('startWebBridge: options.node is required');
+  if (!node) throw new TypeError('startRosocket: options.node is required');
 
   // ws's verifyClient is invoked with `info = { origin, secure, req }`,
   // not the raw IncomingMessage. Wrap it so users can write a simple
@@ -141,7 +141,7 @@ function startWebBridge(options = {}) {
 
     wss.on('listening', () => {
       const addr = wss.address();
-      debug('web_bridge listening on %s:%d', addr.address, addr.port);
+      debug('rosocket listening on %s:%d', addr.address, addr.port);
       resolve({
         wss,
         port: addr.port,
@@ -242,4 +242,4 @@ function handleService(ws, node, serviceName, typeName) {
   });
 }
 
-module.exports = { startWebBridge };
+module.exports = { startRosocket };

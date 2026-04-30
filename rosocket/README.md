@@ -1,4 +1,6 @@
-# rclnodejs Web Bridge
+# rosocket — ROS 2 in the browser, no library required
+
+> A tiny WebSocket gateway to ROS 2 — built into `rclnodejs`.
 
 > **Availability:** experimental; currently only on the `develop` branch of
 > `rclnodejs` and not yet part of any published release. Install from GitHub
@@ -8,24 +10,23 @@
 > npm install RobotWebTools/rclnodejs#develop
 > ```
 
-A **lightweight** WebSocket bridge that lets a **plain web browser** (or any
-WebSocket-capable client) talk to ROS 2 through `rclnodejs`, with **no extra
-JavaScript library** required on the client side. Browsers only need the
-built-in `WebSocket` and `JSON` APIs.
+**rosocket** is a **lightweight** WebSocket bridge that lets a **plain web
+browser** (or any WebSocket-capable client) talk to ROS 2 through `rclnodejs`,
+with **no extra JavaScript library** required on the client side. Browsers
+only need the built-in `WebSocket` and `JSON` APIs.
 
-Compared with the classic [rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite)
-+ [roslibjs](https://github.com/RobotWebTools/roslibjs) stack, this bridge:
+How it compares with the classic
+[rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite) +
+[roslibjs](https://github.com/RobotWebTools/roslibjs) stack:
 
-- runs **in the same Node.js process** as your `rclnodejs` app — no extra
-  Python service to deploy or version-match against ROS distros;
-- ships **zero** code to the browser (no library to bundle or load);
-- uses **resource-style URLs** (`/topic/<name>`, `/service/<name>`) carrying
-  bare ROS messages as JSON, instead of a custom envelope protocol.
-
-It is intentionally minimal: only **publish / subscribe** and
-**service client** are supported. For the full feature set
-(actions, tf, parameters, compression, …) use a full-featured stack such as
-rosbridge_suite.
+| | **rosocket (rclnodejs)** | **rosbridge_suite + roslibjs** |
+| --- | --- | --- |
+| Server process | same Node.js process as your `rclnodejs` app | separate Python ROS 2 node |
+| Client-side library | none — built-in `WebSocket` + `JSON` | `roslibjs` (must be bundled/loaded) |
+| Wire protocol | resource-style URLs (`/topic/<name>`, `/service/<name>`); frame = bare ROS message as JSON | custom JSON envelope (`op: "publish" / "subscribe" / "call_service"`, …) |
+| Type discovery | URL `?type=` query, or server-side default map | advertised at runtime via envelope ops |
+| Features | publish / subscribe, service client | pub/sub, services, **actions, tf, parameters, compression, PNG/CBOR, auth, …** |
+| Deployment | one `npm` dep, runs anywhere Node runs | extra ROS package; version must match ROS distro |
 
 ## URL scheme
 
@@ -59,13 +60,13 @@ Notes:
 
 ```js
 const rclnodejs = require('rclnodejs');
-const { startWebBridge } = require('rclnodejs/web_bridge');
+const { startRosocket } = require('rclnodejs/rosocket');
 
 await rclnodejs.init();
-const node = new rclnodejs.Node('web_bridge_node');
+const node = new rclnodejs.Node('rosocket_node');
 rclnodejs.spin(node);
 
-await startWebBridge({
+await startRosocket({
   node,
   port: 9000,
   // optional: pre-declare types so clients can omit ?type=
@@ -82,7 +83,7 @@ themselves via the `?type=` query parameter on each connection:
 
 ```js
 // server – open to any topic/service the node is allowed to access
-await startWebBridge({ node, port: 9000 });
+await startRosocket({ node, port: 9000 });
 ```
 
 ```js
@@ -96,21 +97,21 @@ const cli = new WebSocket(
 ```
 
 The same applies to the CLI — drop `--topic` / `--service` to run a generic
-bridge: `npx rclnodejs-web-bridge --port 9000`.
+bridge: `npx rosocket --port 9000`.
 
-## CLI
+## CLI (`rosocket`)
 
 A ready-to-run command is shipped as a `bin` entry, so users do not need to
 write any server code:
 
 ```bash
 # from inside this repo
-npm run web-bridge -- --port 9000 \
+npm run rosocket -- --port 9000 \
   --topic   /chatter:std_msgs/msg/String \
   --service /add_two_ints:example_interfaces/srv/AddTwoInts
 
 # anywhere after `npm i rclnodejs` (or via npx)
-npx rclnodejs-web-bridge --port 9000 \
+npx rosocket --port 9000 \
   --topic   /chatter:std_msgs/msg/String \
   --service /add_two_ints:example_interfaces/srv/AddTwoInts
 ```
