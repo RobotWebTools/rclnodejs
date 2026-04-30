@@ -51,9 +51,9 @@ Notes:
   echo the same shape (`{"id":"c1","response":{...}}`).
 - Errors are reported as `{"error":"<message>"}` frames; fatal protocol errors
   cause the socket to close with a `1008`/`1011` code.
-- 64-bit integer fields may be sent as JSON numbers, BigInt-encoded strings
-  (`"12n"`), or decimal strings; responses use the rclnodejs `toJSONSafe`
-  encoding (BigInts become `"<n>n"` strings).
+- 64-bit integer fields may be sent as JSON numbers or BigInt-encoded
+  strings (`"12n"`); responses use the rclnodejs `toJSONSafe` encoding
+  (BigInts become `"<n>n"` strings).
 
 ## Server side
 

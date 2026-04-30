@@ -72,7 +72,7 @@ function parseResourcePath(pathname) {
  * @param {string} [options.host='0.0.0.0'] - Host to bind to.
  * @param {Object<string,string>} [options.topicTypes] - Optional default type per topic name (e.g. {"/chatter":"std_msgs/msg/String"}).
  * @param {Object<string,string>} [options.serviceTypes] - Optional default type per service name.
- * @param {(req: import('http').IncomingMessage) => boolean} [options.verifyClient] - Optional auth hook.
+ * @param {(req: import('http').IncomingMessage) => boolean} [options.verifyClient] - Optional auth hook called with the raw HTTP upgrade request; return `false` to reject the connection.
  * @returns {Promise<{wss: WebSocketServer, close: () => Promise<void>, port: number}>}
  */
 function startWebBridge(options = {}) {
@@ -87,8 +87,19 @@ function startWebBridge(options = {}) {
 
   if (!node) throw new TypeError('startWebBridge: options.node is required');
 
+  // ws's verifyClient is invoked with `info = { origin, secure, req }`,
+  // not the raw IncomingMessage. Wrap it so users can write a simple
+  // `(req) => boolean` hook as documented above.
+  const wsVerifyClient = verifyClient
+    ? (info) => verifyClient(info.req)
+    : undefined;
+
   return new Promise((resolve, reject) => {
-    const wss = new WebSocketServer({ host, port, verifyClient });
+    const wss = new WebSocketServer({
+      host,
+      port,
+      verifyClient: wsVerifyClient,
+    });
 
     wss.on('error', reject);
 

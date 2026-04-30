@@ -69,10 +69,19 @@ function parseArgs(argv) {
         process.exit(0);
         break;
       case '-p':
-      case '--port':
-        opts.port = Number(need(i, a));
+      case '--port': {
+        const raw = need(i, a);
+        const p = Number(raw);
+        if (!Number.isInteger(p) || p < 0 || p > 65535) {
+          console.error(
+            `error: ${a} expects an integer in 0–65535, got "${raw}"`
+          );
+          process.exit(2);
+        }
+        opts.port = p;
         i++;
         break;
+      }
       case '-H':
       case '--host':
         opts.host = need(i, a);
