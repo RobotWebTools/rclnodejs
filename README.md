@@ -34,7 +34,7 @@ This example assumes your ROS 2 environment is already sourced.
 - Reference:
   [API Documentation](#api-documentation), [Using TypeScript](#using-rclnodejs-with-typescript), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation)
 - Features and examples:
-  [rclnodejs-cli](#rclnodejs-cli), [Electron-based Visualization](#electron-based-visualization), [Observable Subscriptions](#observable-subscriptions), [Performance Benchmarks](#performance-benchmarks)
+  [rclnodejs-cli](#rclnodejs-cli), [Electron-based Visualization](#electron-based-visualization), [Observable Subscriptions](#observable-subscriptions), [Web Bridge](#web-bridge-for-browser-access), [Performance Benchmarks](#performance-benchmarks)
 - Project docs:
   [Efficient Usage Tips](./docs/EFFICIENCY.md), [FAQ and Known Issues](./docs/FAQ.md), [Building from Scratch](./docs/BUILDING.md), [Contributing](./docs/CONTRIBUTING.md)
 
@@ -197,6 +197,26 @@ obsSub.observable
 ```
 
 See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions.md) for more details.
+
+## Web Bridge for browser access
+
+> **Availability:** experimental; currently only on the `develop` branch and not yet part of any published `rclnodejs` release.
+
+Expose ROS 2 topics/services as plain WebSocket URLs — a **lightweight**
+alternative to the rosbridge + roslibjs stack: zero browser code, one Node.js
+process. Browsers use only built-in `WebSocket` + `JSON`, no JavaScript library required.
+
+```bash
+npx rclnodejs-web-bridge --port 9000 --topic /chatter:std_msgs/msg/String
+```
+
+```js
+const ws = new WebSocket('ws://host:9000/topic/chatter');
+ws.onmessage = (e) => console.log(JSON.parse(e.data).data);
+ws.onopen    = () => ws.send(JSON.stringify({ data: 'hi' }));
+```
+
+See [web_bridge/README.md](./web_bridge/README.md) for the URL scheme, service calls, and the programmatic `startWebBridge()` API.
 
 ## ROS 2 Interface Message Generation
 

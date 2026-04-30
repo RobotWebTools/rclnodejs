@@ -36,10 +36,12 @@
     "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "prebuild:node": "prebuildify --napi --strip --name node --target 20.20.2",
     "prebuild:electron": "prebuildify --napi --strip --name electron --target electron@34.0.0",
-    "prebuild": "npm run prebuild:node && npm run prebuild:electron && node scripts/tag_prebuilds.js"
+    "prebuild": "npm run prebuild:node && npm run prebuild:electron && node scripts/tag_prebuilds.js",
+    "web-bridge": "node ./web_bridge/cli.js"
   },
   "bin": {
-    "generate-ros-messages": "./scripts/generate_messages.js"
+    "generate-ros-messages": "./scripts/generate_messages.js",
+    "rclnodejs-web-bridge": "./web_bridge/cli.js"
   },
   "authors": [
     "Minggang Wang <minggangw@gmail.com>",
@@ -86,7 +88,8 @@
     "json-bigint": "^1.0.0",
     "node-addon-api": "^8.3.1",
     "rxjs": "^7.8.1",
-    "walk": "^2.3.15"
+    "walk": "^2.3.15",
+    "ws": "^8.18.0"
   },
   "husky": {
     "hooks": {
