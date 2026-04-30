@@ -34,7 +34,7 @@ This example assumes your ROS 2 environment is already sourced.
 - Reference:
   [API Documentation](#api-documentation), [Using TypeScript](#using-rclnodejs-with-typescript), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation)
 - Features and examples:
-  [rclnodejs-cli](#rclnodejs-cli), [Electron-based Visualization](#electron-based-visualization), [Observable Subscriptions](#observable-subscriptions), [Performance Benchmarks](#performance-benchmarks)
+  [rclnodejs-cli](#rclnodejs-cli), [Electron-based Visualization](#electron-based-visualization), [Observable Subscriptions](#observable-subscriptions), [rosocket](#rosocket--ros-2-in-the-browser-no-library-required), [Performance Benchmarks](#performance-benchmarks)
 - Project docs:
   [Efficient Usage Tips](./docs/EFFICIENCY.md), [FAQ and Known Issues](./docs/FAQ.md), [Building from Scratch](./docs/BUILDING.md), [Contributing](./docs/CONTRIBUTING.md)
 
@@ -197,6 +197,29 @@ obsSub.observable
 ```
 
 See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions.md) for more details.
+
+## rosocket — ROS 2 in the browser, no library required
+
+> A tiny WebSocket gateway to ROS 2 — built into `rclnodejs`.
+
+> **Availability:** experimental; currently only on the `develop` branch and not yet part of any published `rclnodejs` release.
+
+**rosocket** exposes ROS 2 topics/services as plain WebSocket URLs — a
+**lightweight** alternative to the rosbridge + roslibjs stack. Zero browser
+code, one Node.js process; browsers use only built-in `WebSocket` + `JSON`,
+no JavaScript library required.
+
+```bash
+npx rosocket --port 9000 --topic /chatter:std_msgs/msg/String
+```
+
+```js
+const ws = new WebSocket('ws://host:9000/topic/chatter');
+ws.onmessage = (e) => console.log(JSON.parse(e.data).data);
+ws.onopen    = () => ws.send(JSON.stringify({ data: 'hi' }));
+```
+
+See [rosocket/README.md](./rosocket/README.md) for the URL scheme, service calls, and the programmatic `startRosocket()` API.
 
 ## ROS 2 Interface Message Generation
 
