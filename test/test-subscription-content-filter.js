@@ -506,9 +506,11 @@ describe('subscription isContentFilterSupported', function () {
     const supported = subscription.isContentFilterSupported();
     assert.strictEqual(typeof supported, 'boolean');
 
-    // isContentFilterSupported requires rolling; on older distros it returns false
-    const isRolling = DistroUtils.getDistroId() >= DistroUtils.DistroId.ROLLING;
-    const expectedSupported = isRolling && isContentFilteringSupported();
+    // isContentFilterSupported requires Lyrical or newer; on older distros it
+    // returns false.
+    const isLyricalOrNewer =
+      DistroUtils.getDistroId() >= DistroUtils.DistroId.LYRICAL;
+    const expectedSupported = isLyricalOrNewer && isContentFilteringSupported();
     assert.strictEqual(supported, expectedSupported);
 
     done();
