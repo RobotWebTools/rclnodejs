@@ -250,7 +250,7 @@ Napi::Value ActionSendCancelRequest(const Napi::CallbackInfo& info) {
   return Napi::Number::New(env, static_cast<double>(sequence_number));
 }
 
-#if ROS_VERSION >= 5000  // ROS2 Rolling
+#if ROS_VERSION >= 2605  // ROS2 Lyrical or newer
 Napi::Value ActionConfigureFeedbackSubFilterAddGoalId(
     const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -309,7 +309,7 @@ Napi::Value ActionConfigureFeedbackSubFilterRemoveGoalId(
 
   return Napi::Boolean::New(env, true);
 }
-#endif  // ROS_VERSION >= 5000
+#endif  // ROS_VERSION >= 2605
 
 #if ROS_VERSION >= 2505  // ROS2 >= Kilted
 Napi::Value ConfigureActionClientIntrospection(const Napi::CallbackInfo& info) {
@@ -369,14 +369,14 @@ Napi::Object InitActionClientBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("configureActionClientIntrospection",
               Napi::Function::New(env, ConfigureActionClientIntrospection));
 #endif                   // ROS_VERSION >= 2505
-#if ROS_VERSION >= 5000  // ROS2 Rolling
+#if ROS_VERSION >= 2605  // ROS2 Lyrical or newer
   exports.Set(
       "actionConfigureFeedbackSubFilterAddGoalId",
       Napi::Function::New(env, ActionConfigureFeedbackSubFilterAddGoalId));
   exports.Set(
       "actionConfigureFeedbackSubFilterRemoveGoalId",
       Napi::Function::New(env, ActionConfigureFeedbackSubFilterRemoveGoalId));
-#endif  // ROS_VERSION >= 5000
+#endif  // ROS_VERSION >= 2605
   return exports;
 }
 
