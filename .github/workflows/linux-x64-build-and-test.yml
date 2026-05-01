@@ -80,10 +80,12 @@ jobs:
     - name: Install ROS2 from binary tarball (rolling / lyrical)
       if: ${{ matrix.ros_distribution == 'rolling' || matrix.ros_distribution == 'lyrical' }}
       run: |
-        # Install apt packages BEFORE the binary tarball
-        apt-get install -y ros-${{ matrix.ros_distribution }}-test-msgs
-        # mrpt_msgs may not be available for newer/beta distros (e.g. lyrical); install best-effort
-        apt-get install -y ros-${{ matrix.ros_distribution }}-mrpt-msgs || echo "ros-${{ matrix.ros_distribution }}-mrpt-msgs not yet available, skipping"
+        # Install apt packages BEFORE the binary tarball (rolling only;
+        # test-msgs / mrpt-msgs are not yet published for lyrical and
+        # test_msgs is bundled in the lyrical tarball itself).
+        if [ "${{ matrix.ros_distribution }}" = "rolling" ]; then
+          apt-get install -y ros-rolling-test-msgs ros-rolling-mrpt-msgs
+        fi
 
         # Extract binary tarball AFTER apt packages so its newer libs overwrite apt's older ones
         curl -sL "${{ matrix.ros_tar_url }}" -o /tmp/ros2-${{ matrix.ros_distribution }}.tar.bz2
