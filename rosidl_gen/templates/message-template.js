@@ -266,12 +266,12 @@ function generateMessage(data) {
   const currentTypedArrayElementType = getTypedArrayElementName(spec.baseType);
 
   // ROS 2 Rolling (ros2/rosidl#941) added is_rosidl_buffer / owns_rosidl_buffer
-  // to every primitive sequence struct.  Emit the extra fields only for
-  // primitive-package types on Rolling+.
+  // to every primitive sequence struct. Lyrical inherits the same ABI change.
+  // Emit the extra fields only for primitive-package types on Lyrical+.
   const DistroUtils = require('../../lib/distro.js');
   const needsRosidlBufferFields =
     isPrimitivePackage(spec.baseType) &&
-    DistroUtils.getDistroId() >= DistroUtils.getDistroId('rolling');
+    DistroUtils.getDistroId() >= DistroUtils.DistroId.LYRICAL;
 
   // Track required modules
   let existedModules = [];
