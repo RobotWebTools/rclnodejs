@@ -64,7 +64,7 @@ describe('rclnodejs graph test suite', function () {
   it('Get clients info by service', function () {
     if (
       rclnodejs.DistroUtils.getDistroId() <
-      rclnodejs.DistroUtils.DistroId.ROLLING
+      rclnodejs.DistroUtils.DistroId.LYRICAL
     ) {
       this.skip();
     }
@@ -86,7 +86,7 @@ describe('rclnodejs graph test suite', function () {
   it('Get servers info by service', function () {
     if (
       rclnodejs.DistroUtils.getDistroId() <
-      rclnodejs.DistroUtils.DistroId.ROLLING
+      rclnodejs.DistroUtils.DistroId.LYRICAL
     ) {
       this.skip();
     }

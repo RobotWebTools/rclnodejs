@@ -39,7 +39,11 @@ jobs:
           # Kilted Kaiju (May 2025 - Dec 2026)
           - docker_image: ubuntu:noble
             ros_distribution: kilted
-          # Lyrical Luth (May 2026 - May 2031, beta) - allow-failure until packages stabilize
+          # Lyrical Luth (May 2026 - May 2031, beta) - allow-failure until packages stabilize.
+          # NOTE: the tarball URL below is a date-stamped beta snapshot and must
+          # be refreshed manually until upstream publishes a stable "latest"
+          # download (or until GA), at which point it can be replaced with the
+          # stable URL similar to the rolling nightly redirect.
           - docker_image: ubuntu:26.04
             ros_distribution: lyrical
             experimental: true
@@ -69,7 +73,11 @@ jobs:
         apt-get update
         apt-get install -y software-properties-common curl
 
-        # Enable required repositories (per https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html)
+        # Enable required repositories. The same setup applies to both the
+        # rolling nightly tarball and the lyrical beta tarball; see the
+        # per-distro install docs for reference:
+        #   rolling: https://docs.ros.org/en/rolling/Installation/Alternatives/Ubuntu-Install-Binary.html
+        #   lyrical: https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
         add-apt-repository universe
         ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F'"' '{print $4}')
         curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
