@@ -37,8 +37,10 @@ jobs:
           # Kilted Kaiju (May 2025 - Dec 2026)
           - docker_image: ubuntu:noble
             ros_distribution: kilted
-          # Rolling Ridley (No End-Of-Life)
-          - docker_image: ubuntu:noble
+          # Rolling Ridley (No End-Of-Life) - migrated to Ubuntu 26.04 (resolute)
+          # to follow the Lyrical Luth target platform.
+          # See: https://docs.ros.org/en/jazzy/Releases/Release-Lyrical-Luth.html
+          - docker_image: ubuntu:resolute
             ros_distribution: rolling
             ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-linux-amd64.tar.bz2"
     steps:
@@ -69,7 +71,6 @@ jobs:
         # Install prerequisites and apt packages BEFORE nightly tarball
         apt-get update
         apt-get install -y build-essential cmake tar bzip2 python3 python3-rosdep python3-colcon-common-extensions
-        apt-get install -y ros-rolling-test-msgs ros-rolling-mrpt-msgs
 
         # Extract nightly binary AFTER apt packages so nightly's newer libs overwrite apt's older ones
         curl -sL "${{ matrix.ros_tar_url }}" -o /tmp/ros2-nightly.tar.bz2
@@ -89,9 +90,11 @@ jobs:
 
     - name: Install Electron test dependencies
       run: |
-        # Adjust dependencies based on Ubuntu version
+        # Adjust dependencies based on Ubuntu version.
+        # 22.04 (jammy) uses libasound2; 24.04 (noble) and 26.04 (resolute) use the
+        # t64 ABI transition package libasound2t64.
         LIBASOUND_PKG="libasound2"
-        if grep -q "24.04" /etc/os-release; then
+        if grep -Eq "VERSION_ID=\"(24\\.04|26\\.04)\"" /etc/os-release; then
           LIBASOUND_PKG="libasound2t64"
         fi
         sudo apt install -y xvfb libgtk-3-0 libnss3 $LIBASOUND_PKG libgbm-dev
