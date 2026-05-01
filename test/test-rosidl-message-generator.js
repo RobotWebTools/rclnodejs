@@ -318,6 +318,15 @@ describe('ROSIDL Node.js message generator test suite', function () {
       this.skip();
     }
 
+    // mrpt_msgs is an optional system package. When the apt package is
+    // unavailable on the host (e.g. ros-rolling-mrpt-msgs is not yet
+    // published for Ubuntu 26.04 / resolute), skip rather than fail.
+    const fs = require('fs');
+    const mrptGenerated = path.join(__dirname, '..', 'generated', 'mrpt_msgs');
+    if (!fs.existsSync(mrptGenerated)) {
+      this.skip();
+    }
+
     // GraphSlamAgents.msg lives under msg-common/ (non-standard subfolder name)
     // and references GraphSlamAgent.msg from msg-ros2/. This verifies that
     // packages with hyphenated subfolder names are generated and loadable.
