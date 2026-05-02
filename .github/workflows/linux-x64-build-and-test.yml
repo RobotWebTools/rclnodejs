@@ -47,7 +47,7 @@ jobs:
           - docker_image: ubuntu:26.04
             ros_distribution: lyrical
             experimental: true
-            ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-beta-20260429-1/ros2-lyrical-2026-04-29-1-resolute-x86_64.tar.bz2"
+            ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-beta-20260430/ros2-lyrical-2026-04-30-resolute-x86_64.tar.bz2"
           # Rolling Ridley (No End-Of-Life) - migrated to Ubuntu 26.04 (resolute)
           # to follow the Lyrical Luth target platform.
           # See: https://docs.ros.org/en/jazzy/Releases/Release-Lyrical-Luth.html
