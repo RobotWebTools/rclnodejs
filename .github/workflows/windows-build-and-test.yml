@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: windows-2025
+    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       fail-fast: false
       matrix:
@@ -18,6 +19,7 @@ jobs:
         ros_distribution:
           - jazzy
           - kilted
+          - lyrical
           - rolling
         include:
           - ros_distribution: jazzy
@@ -26,6 +28,12 @@ jobs:
           - ros_distribution: kilted
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-kilted-20250728/ros2-kilted-20250728-windows-release-amd64.zip"
             run_tests: false
+          # Lyrical Luth (May 2026 - May 2031, beta) - allow-failure until packages stabilize.
+          # Reference: https://docs.ros.org/en/lyrical/Installation/Windows-Install-Binary.html
+          - ros_distribution: lyrical
+            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-beta-20260430/ros2-lyrical-2026-04-30-windows-AMD64.zip"
+            run_tests: false
+            experimental: true
           - ros_distribution: rolling
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip"
             run_tests: false
@@ -52,9 +60,21 @@ jobs:
         choco install 7zip -y
         Invoke-WebRequest -Uri "${{ matrix.ros_zip_url }}" -OutFile ros2.zip
         7z x ros2.zip -y -oC:\pixi_ws
+        if (!(Test-Path C:\pixi_ws\ros2-windows\setup.bat)) {
+          $setupScript = Get-ChildItem -Path C:\pixi_ws -Recurse -Filter setup.bat | Select-Object -First 1
+          if ($null -eq $setupScript) {
+            throw "Unable to find ROS 2 setup.bat after extracting ${{ matrix.ros_zip_url }}"
+          }
+          Move-Item -Path $setupScript.Directory.FullName -Destination C:\pixi_ws\ros2-windows
+        }
         Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ros2/ros2/refs/heads/${{ matrix.ros_distribution }}/pixi.toml" -OutFile C:\pixi_ws\pixi.toml
         Push-Location C:\pixi_ws
         pixi install
+        if (Test-Path C:\pixi_ws\ros2-windows\preinstall_setup_windows.py) {
+          Push-Location C:\pixi_ws\ros2-windows
+          pixi run python preinstall_setup_windows.py
+          Pop-Location
+        }
         Pop-Location
 
     - name: Prebuild - Setup VS Dev Environment
