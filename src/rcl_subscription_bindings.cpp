@@ -265,7 +265,7 @@ Napi::Value GetSubscriptionTopic(const Napi::CallbackInfo& info) {
   return Napi::String::New(env, topic);
 }
 
-#if ROS_VERSION > 2505  // Rolling only
+#if ROS_VERSION >= 2605  // ROS2 Lyrical or newer
 Napi::Value IsContentFilterSupported(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -491,7 +491,7 @@ Napi::Object InitSubscriptionBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("rclTakeRaw", Napi::Function::New(env, RclTakeRaw));
   exports.Set("getSubscriptionTopic",
               Napi::Function::New(env, GetSubscriptionTopic));
-#if ROS_VERSION > 2505  // Rolling only
+#if ROS_VERSION >= 2605  // ROS2 Lyrical or newer
   exports.Set("isContentFilterSupported",
               Napi::Function::New(env, IsContentFilterSupported));
 #endif

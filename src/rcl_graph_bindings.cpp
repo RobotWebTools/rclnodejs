@@ -33,12 +33,12 @@ typedef rcl_ret_t (*rcl_get_info_by_topic_func_t)(
     const char* topic_name, bool no_mangle,
     rcl_topic_endpoint_info_array_t* info_array);
 
-#if ROS_VERSION > 2505
+#if ROS_VERSION >= 2605
 typedef rcl_ret_t (*rcl_get_info_by_service_func_t)(
     const rcl_node_t* node, rcutils_allocator_t* allocator,
     const char* service_name, bool no_mangle,
     rcl_service_endpoint_info_array_t* info_array);
-#endif  // ROS_VERSION > 2505
+#endif  // ROS_VERSION >= 2605
 
 Napi::Value GetPublisherNamesAndTypesByNode(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -264,7 +264,7 @@ Napi::Value GetSubscriptionsInfoByTopic(const Napi::CallbackInfo& info) {
                         "subscriptions", rcl_get_subscriptions_info_by_topic);
 }
 
-#if ROS_VERSION > 2505
+#if ROS_VERSION >= 2605
 Napi::Value GetInfoByService(
     Napi::Env env, rcl_node_t* node, const char* service_name, bool no_mangle,
     const char* type, rcl_get_info_by_service_func_t rcl_get_info_by_service) {
@@ -300,9 +300,9 @@ Napi::Value GetInfoByService(
 
   return ConvertToJSServiceEndpointInfoList(env, &info_array);
 }
-#endif  // ROS_VERSION > 2505
+#endif  // ROS_VERSION >= 2605
 
-#if ROS_VERSION > 2505
+#if ROS_VERSION >= 2605
 Napi::Value GetClientsInfoByService(const Napi::CallbackInfo& info) {
   RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
@@ -322,7 +322,7 @@ Napi::Value GetServersInfoByService(const Napi::CallbackInfo& info) {
   return GetInfoByService(info.Env(), node, service_name.c_str(), no_mangle,
                           "servers", rcl_get_servers_info_by_service);
 }
-#endif  // ROS_VERSION > 2505
+#endif  // ROS_VERSION >= 2605
 
 Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getPublisherNamesAndTypesByNode",
@@ -341,12 +341,12 @@ Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
               Napi::Function::New(env, GetPublishersInfoByTopic));
   exports.Set("getSubscriptionsInfoByTopic",
               Napi::Function::New(env, GetSubscriptionsInfoByTopic));
-#if ROS_VERSION > 2505
+#if ROS_VERSION >= 2605
   exports.Set("getClientsInfoByService",
               Napi::Function::New(env, GetClientsInfoByService));
   exports.Set("getServersInfoByService",
               Napi::Function::New(env, GetServersInfoByService));
-#endif  // ROS_VERSION > 2505
+#endif  // ROS_VERSION >= 2605
   return exports;
 }
 

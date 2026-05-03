@@ -11,7 +11,6 @@ on:
 jobs:
   build:
     runs-on: windows-2025
-    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       fail-fast: false
       matrix:
@@ -28,12 +27,11 @@ jobs:
           - ros_distribution: kilted
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-kilted-20250728/ros2-kilted-20250728-windows-release-amd64.zip"
             run_tests: false
-          # Lyrical Luth (May 2026 - May 2031, beta) - allow-failure until packages stabilize.
+          # Lyrical Luth (May 2026 - May 2031, beta)
           # Reference: https://docs.ros.org/en/lyrical/Installation/Windows-Install-Binary.html
           - ros_distribution: lyrical
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-beta-20260430/ros2-lyrical-2026-04-30-windows-AMD64.zip"
             run_tests: false
-            experimental: true
           - ros_distribution: rolling
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip"
             run_tests: false

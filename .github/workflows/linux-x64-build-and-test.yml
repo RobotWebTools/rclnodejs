@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.docker_image }}
-    continue-on-error: ${{ matrix.experimental == true }}
     strategy:
       fail-fast: false
       matrix:
@@ -39,14 +38,13 @@ jobs:
           # Kilted Kaiju (May 2025 - Dec 2026)
           - docker_image: ubuntu:noble
             ros_distribution: kilted
-          # Lyrical Luth (May 2026 - May 2031, beta) - allow-failure until packages stabilize.
+          # Lyrical Luth (May 2026 - May 2031, beta)
           # NOTE: the tarball URL below is a date-stamped beta snapshot and must
           # be refreshed manually until upstream publishes a stable "latest"
           # download (or until GA), at which point it can be replaced with the
           # stable URL similar to the rolling nightly redirect.
           - docker_image: ubuntu:26.04
             ros_distribution: lyrical
-            experimental: true
             ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-beta-20260430/ros2-lyrical-2026-04-30-resolute-x86_64.tar.bz2"
           # Rolling Ridley (No End-Of-Life) - migrated to Ubuntu 26.04 (resolute)
           # to follow the Lyrical Luth target platform.
