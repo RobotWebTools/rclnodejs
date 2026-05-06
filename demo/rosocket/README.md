@@ -1,10 +1,10 @@
 # rosocket demo (browser ↔ ROS 2)
 
 A minimal end-to-end example of the
-[`rosocket`](../../rosocket/README.md) WebSocket bridge added in
-commit `3176aca`. The Node server runs anywhere ROS 2 is sourced;
-the HTML page runs in any modern browser and talks to it over plain
-`WebSocket` — no client library required.
+[`rosocket`](../../rosocket/README.md) WebSocket bridge. The Node
+server runs anywhere ROS 2 is sourced; the HTML page runs in any
+modern browser and talks to it over plain `WebSocket` — no client
+library required.
 
 ## What it shows
 

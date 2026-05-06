@@ -50,12 +50,14 @@ async function main() {
     },
   });
 
+  const displayHost = HOST === '0.0.0.0' || HOST === '::' ? 'localhost' : HOST;
+  const baseUrl = `ws://${displayHost}:${bridge.port}`;
   console.log(
-    `[rosocket-demo] listening on ws://localhost:${bridge.port} (bind=${HOST})`
+    `[rosocket-demo] listening on ${baseUrl} (bind=${HOST}:${bridge.port})`
   );
   console.log('[rosocket-demo] endpoints:');
-  console.log('  ws://localhost:9000/topic/chatter');
-  console.log('  ws://localhost:9000/service/add_two_ints');
+  console.log(`  ${baseUrl}/topic/chatter`);
+  console.log(`  ${baseUrl}/service/add_two_ints`);
   console.log('Open demo/rosocket/index.html in the host browser to try it.');
 
   const shutdown = () => {

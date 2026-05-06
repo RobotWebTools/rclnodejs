@@ -37,6 +37,14 @@
         overflow: auto;
         white-space: pre-wrap;
       }
+      .log {
+        background: #f4f4f4;
+        padding: 0.5em;
+        max-height: 12em;
+        overflow: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+      }
       .demo {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -102,7 +110,7 @@
           <input id="pubText" type="text" value="hello from browser" />
           <button id="pubBtn">Publish</button>
         </p>
-        <pre id="topicLog"></pre>
+        <div class="log" id="topicLog"></div>
       </div>
       <pre class="code"><span class="com">// Subscribe — every published message arrives as onmessage.</span>
 <span class="kw">const</span> sub = <span class="kw">new</span> WebSocket(<span class="str">'ws://localhost:9000/topic/chatter'</span>);
@@ -125,7 +133,7 @@ ws.onopen = () =&gt; {
           <input id="b" type="number" value="3" />
           <button id="callBtn">Call</button>
         </p>
-        <pre id="serviceLog"></pre>
+        <div class="log" id="serviceLog"></div>
       </div>
       <pre class="code"><span class="com">// Service call — send {id, request}, await one response, close.</span>
 <span class="kw">const</span> ws = <span class="kw">new</span> WebSocket(<span class="str">'ws://localhost:9000/service/add_two_ints'</span>);
