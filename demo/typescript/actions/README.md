@@ -32,7 +32,7 @@ This demo implements a Fibonacci sequence calculator using ROS2 actions:
 ## Project Structure
 
 ```
-ts_demo/actions/
+demo/typescript/actions/
 ├── src/
 │   ├── client.ts          # Action client implementation
 │   └── server.ts          # Action server implementation
@@ -74,7 +74,7 @@ Before running this demo, ensure you have:
 3. **Navigate to the demo directory**:
 
    ```bash
-   cd ts_demo/actions
+   cd demo/typescript/actions
    ```
 
 4. **Install dependencies**:

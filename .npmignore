@@ -26,6 +26,7 @@ tutorials/
 electron_demo/
 ts_demo/
 tools/
+demo/
 .github/
 .nyc_output/
 .vscode/

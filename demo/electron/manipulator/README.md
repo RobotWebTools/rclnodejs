@@ -25,7 +25,7 @@ An interactive Electron application demonstrating a two-joint robotic manipulato
 1. **Navigate to the demo directory**:
 
    ```bash
-   cd rclnodejs/electron_demo/manipulator
+   cd rclnodejs/demo/electron/manipulator
    ```
 
 2. **Install dependencies**:

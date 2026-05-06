@@ -68,8 +68,9 @@ npm install rclnodejs
 - API documentation: [robotwebtools.github.io/rclnodejs/docs](https://robotwebtools.github.io/rclnodejs/docs/index.html)
 - Tutorials: [tutorials/](https://github.com/RobotWebTools/rclnodejs/tree/develop/tutorials)
 - JavaScript examples: [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
-- TypeScript demos: [ts_demo/](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo)
-- Electron demos: [electron_demo/](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo)
+- TypeScript demos: [demo/typescript/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript)
+- Electron demos: [demo/electron/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/electron)
+- WebSocket bridge demo: [demo/rosocket/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/rosocket)
 - Companion CLI: [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/)
 
 ## Message Generation
