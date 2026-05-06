@@ -12,9 +12,10 @@ cpplint.py
 suppr.txt
 generated/
 build/
+__pycache__/
+*.pyc
 coverage/
 dist/
-electron_demo/
 log/
 install/
 test/
@@ -22,6 +23,9 @@ docs/
 example/
 benchmark/
 tutorials/
+electron_demo/
+ts_demo/
+tools/
 .github/
 .nyc_output/
 .vscode/
@@ -30,4 +34,3 @@ scripts/cpplint.js
 scripts/npm-pack.sh
 scripts/npmjs-readme.md
 scripts/run_test.js
-ts_demo/
