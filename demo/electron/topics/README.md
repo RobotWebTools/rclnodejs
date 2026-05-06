@@ -30,7 +30,7 @@ A minimal Electron application demonstrating basic ROS2 topic communication usin
 1. **Navigate to the demo directory**:
 
    ```bash
-   cd rclnodejs/electron_demo/topics
+   cd rclnodejs/demo/electron/topics
    ```
 
 2. **Source your ROS 2 environment**:

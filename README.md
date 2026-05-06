@@ -144,10 +144,10 @@ Create rich, interactive desktop applications using Electron and web technologie
 
 |                       Demo                        |                                                              Description                                                              |                            Screenshot                            |
 | :-----------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------: |
-|  **🐢 [turtle_tf2](./electron_demo/turtle_tf2)**  |  Real-time coordinate frame visualization with turtle control. Features TF2 transforms, keyboard control, and dynamic frame updates.  |  ![turtle_tf2](./electron_demo/turtle_tf2/turtle-tf2-demo.png)   |
-| **🦾 [manipulator](./electron_demo/manipulator)** | Interactive two-joint robotic arm simulation. Features 3D joint visualization, manual/automatic control, and visual movement markers. | ![manipulator](./electron_demo/manipulator/manipulator-demo.png) |
+|  **🐢 [turtle_tf2](./demo/electron/turtle_tf2)**  |  Real-time coordinate frame visualization with turtle control. Features TF2 transforms, keyboard control, and dynamic frame updates.  |  ![turtle_tf2](./demo/electron/turtle_tf2/turtle-tf2-demo.png)   |
+| **🦾 [manipulator](./demo/electron/manipulator)** | Interactive two-joint robotic arm simulation. Features 3D joint visualization, manual/automatic control, and visual movement markers. | ![manipulator](./demo/electron/manipulator/manipulator-demo.png) |
 
-Explore more examples in [electron_demo](https://github.com/RobotWebTools/rclnodejs/tree/develop/electron_demo).
+Explore more examples in [demo/electron](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/electron).
 
 ## Using rclnodejs with TypeScript
 
@@ -175,7 +175,7 @@ rclnodejs.init().then(() => {
 });
 ```
 
-See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/ts_demo) for more examples.
+See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript) for more examples.
 
 ## Observable Subscriptions
 

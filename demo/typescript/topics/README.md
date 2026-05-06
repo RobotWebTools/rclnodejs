@@ -47,7 +47,7 @@ npm run build
 Navigate to this demo directory and install dependencies:
 
 ```bash
-cd ts_demo/topics
+cd demo/typescript/topics
 npm install
 ```
 
@@ -162,7 +162,7 @@ Starting TypeScript Subscriber Demo...
 ## Project Structure
 
 ```
-ts_demo/topics/
+demo/typescript/topics/
 ├── package.json          # Project dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
 ├── README.md            # This file
@@ -239,7 +239,7 @@ This demo showcases several TypeScript advantages:
    **Solution**: Ensure you're in the correct directory and rclnodejs is properly linked:
 
    ```bash
-   cd ts_demo/topics
+   cd demo/typescript/topics
    npm install
    ```
 

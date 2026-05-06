@@ -1,0 +1,220 @@
+<!doctype html>
+<!--
+  rosocket browser demo. Open this file directly in a browser (File > Open,
+  or drag-and-drop). Talks to the Node server in this folder over plain
+  WebSocket — no JS library required.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>rosocket demo</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 720px;
+        margin: 2em auto;
+        padding: 0 1em;
+      }
+      h1 {
+        margin-bottom: 0;
+      }
+      h2 {
+        margin-top: 1.5em;
+      }
+      input,
+      button {
+        font-size: 1em;
+        padding: 0.3em 0.5em;
+      }
+      input[type='text'],
+      input[type='number'] {
+        width: 14em;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 0.5em;
+        max-height: 12em;
+        overflow: auto;
+        white-space: pre-wrap;
+      }
+      .log {
+        background: #f4f4f4;
+        padding: 0.5em;
+        max-height: 12em;
+        overflow: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+      }
+      .demo {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1em;
+        align-items: start;
+      }
+      .demo > .controls pre {
+        max-height: 10em;
+      }
+      .demo > .code {
+        margin: 0;
+        background: #1e1e1e;
+        color: #e6e6e6;
+        padding: 0.75em;
+        border-radius: 4px;
+        font-size: 0.85em;
+        line-height: 1.35;
+        max-height: none;
+        overflow: auto;
+      }
+      .code .kw {
+        color: #569cd6;
+      }
+      .code .str {
+        color: #ce9178;
+      }
+      .code .com {
+        color: #6a9955;
+        font-style: italic;
+      }
+      @media (max-width: 720px) {
+        .demo {
+          grid-template-columns: 1fr;
+        }
+      }
+      .ok {
+        color: #096;
+      }
+      .err {
+        color: #c33;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>rosocket demo</h1>
+    <p>
+      Browser ↔ ROS 2 over plain WebSocket. Adjust the bridge URL if your WSL
+      IP differs from <code>localhost</code>.
+    </p>
+    <p>
+      Bridge:
+      <input id="bridge" type="text" value="ws://localhost:9000" />
+    </p>
+
+    <h2>Topic: /chatter (std_msgs/msg/String)</h2>
+    <div class="demo">
+      <div class="controls">
+        <p>
+          <button id="subBtn">Subscribe</button>
+          <button id="unsubBtn" disabled>Unsubscribe</button>
+        </p>
+        <p>
+          <input id="pubText" type="text" value="hello from browser" />
+          <button id="pubBtn">Publish</button>
+        </p>
+        <div class="log" id="topicLog"></div>
+      </div>
+      <pre class="code"><span class="com">// Subscribe — every published message arrives as onmessage.</span>
+<span class="kw">const</span> sub = <span class="kw">new</span> WebSocket(<span class="str">'ws://localhost:9000/topic/chatter'</span>);
+sub.onmessage = (ev) =&gt; console.log(<span class="str">'recv:'</span>, ev.data);
+<span class="com">// e.g. {"data":"hi"}</span>
+
+<span class="com">// Publish — open, send JSON, close.</span>
+<span class="kw">const</span> ws = <span class="kw">new</span> WebSocket(<span class="str">'ws://localhost:9000/topic/chatter'</span>);
+ws.onopen = () =&gt; {
+  ws.send(JSON.stringify({ data: <span class="str">'hello from browser'</span> }));
+  setTimeout(() =&gt; ws.close(), <span class="str">200</span>); <span class="com">// let it flush</span>
+};</pre>
+    </div>
+
+    <h2>Service: /add_two_ints (example_interfaces/srv/AddTwoInts)</h2>
+    <div class="demo">
+      <div class="controls">
+        <p>
+          a: <input id="a" type="number" value="2" /> b:
+          <input id="b" type="number" value="3" />
+          <button id="callBtn">Call</button>
+        </p>
+        <div class="log" id="serviceLog"></div>
+      </div>
+      <pre class="code"><span class="com">// Service call — send {id, request}, await one response, close.</span>
+<span class="kw">const</span> ws = <span class="kw">new</span> WebSocket(<span class="str">'ws://localhost:9000/service/add_two_ints'</span>);
+ws.onopen = () =&gt; ws.send(JSON.stringify({
+  id: <span class="str">1</span>,
+  request: { a: <span class="str">'2n'</span>, b: <span class="str">'3n'</span> }, <span class="com">// int64 → "Nn" string</span>
+}));
+ws.onmessage = (ev) =&gt; {
+  console.log(<span class="str">'resp:'</span>, ev.data);
+  <span class="com">// {"id":1,"response":{"sum":"5n"}}</span>
+  ws.close();
+};</pre>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const bridge = () => $('bridge').value.replace(/\/+$/, '');
+
+      function log(el, msg, cls) {
+        const line = document.createElement('div');
+        if (cls) line.className = cls;
+        const ts = new Date().toLocaleTimeString();
+        line.textContent = `[${ts}] ${msg}`;
+        el.prepend(line);
+      }
+
+      // --- Topic subscription ---
+      let subSocket = null;
+      $('subBtn').onclick = () => {
+        if (subSocket) return;
+        subSocket = new WebSocket(`${bridge()}/topic/chatter`);
+        subSocket.onopen = () => {
+          log($('topicLog'), 'subscribed to /chatter', 'ok');
+          $('subBtn').disabled = true;
+          $('unsubBtn').disabled = false;
+        };
+        subSocket.onmessage = (ev) => {
+          log($('topicLog'), `recv: ${ev.data}`);
+        };
+        subSocket.onerror = () => log($('topicLog'), 'socket error', 'err');
+        subSocket.onclose = () => {
+          log($('topicLog'), 'subscription closed');
+          subSocket = null;
+          $('subBtn').disabled = false;
+          $('unsubBtn').disabled = true;
+        };
+      };
+      $('unsubBtn').onclick = () => subSocket && subSocket.close();
+
+      // --- Topic publish (separate ephemeral connection) ---
+      $('pubBtn').onclick = () => {
+        const ws = new WebSocket(`${bridge()}/topic/chatter`);
+        ws.onopen = () => {
+          const msg = { data: $('pubText').value };
+          ws.send(JSON.stringify(msg));
+          log($('topicLog'), `pub: ${JSON.stringify(msg)}`, 'ok');
+          // Give the publisher a moment to flush before closing.
+          setTimeout(() => ws.close(), 200);
+        };
+        ws.onerror = () => log($('topicLog'), 'publish error', 'err');
+      };
+
+      // --- Service call ---
+      $('callBtn').onclick = () => {
+        const ws = new WebSocket(`${bridge()}/service/add_two_ints`);
+        const a = $('a').value;
+        const b = $('b').value;
+        ws.onopen = () => {
+          // AddTwoInts.a/b are int64; the bridge expects BigInt-encoded
+          // strings ("12n") for 64-bit integer fields. Plain JSON numbers
+          // are not coerced because the bridge has no schema info.
+          const request = { a: `${a}n`, b: `${b}n` };
+          ws.send(JSON.stringify({ id: 1, request }));
+          log($('serviceLog'), `call: a=${a} b=${b}`, 'ok');
+        };
+        ws.onmessage = (ev) => {
+          log($('serviceLog'), `resp: ${ev.data}`);
+          ws.close();
+        };
+        ws.onerror = () => log($('serviceLog'), 'service error', 'err');
+      };
+    </script>
+  </body>
+</html>

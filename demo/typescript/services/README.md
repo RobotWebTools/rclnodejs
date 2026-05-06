@@ -48,7 +48,7 @@ npm run build
 Navigate to this demo directory and install dependencies:
 
 ```bash
-cd ts_demo/services
+cd demo/typescript/services
 npm install
 ```
 

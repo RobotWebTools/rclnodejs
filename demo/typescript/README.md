@@ -59,7 +59,7 @@ Asynchronous actions with progress feedback and cancellation
 
 ## 🔗 Related Resources
 
-- [rclnodejs Tutorials](../tutorials/) - Comprehensive API documentation
-- [Electron Demos](../electron_demo/) - GUI applications with rclnodejs
+- [rclnodejs Tutorials](../../tutorials/) - Comprehensive API documentation
+- [Electron Demos](../electron/) - GUI applications with rclnodejs
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/) - Language reference
 - [ROS2 Documentation](https://docs.ros.org/) - Official ROS2 concepts

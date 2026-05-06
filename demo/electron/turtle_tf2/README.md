@@ -77,7 +77,7 @@ The demo uses the following key dependencies:
 1. **Navigate to the demo directory**:
 
    ```bash
-   cd electron_demo/turtle_tf2
+   cd demo/electron/turtle_tf2
    ```
 
 2. **Install dependencies**:
