@@ -71,7 +71,7 @@ Napi::Value CreateLifecycleStateMachine(const Napi::CallbackInfo& info) {
   const rosidl_service_type_support_t* gs =
       GetServiceTypeSupport("lifecycle_msgs", "GetState");
 
-#if ROS_VERSION >= 5000  // ROS2 Rolling
+#if ROS_VERSION >= 2605  // ROS2 Lyrical or newer
   rcl_lifecycle_state_machine_options_t options =
       rcl_lifecycle_get_default_state_machine_options();
   options.enable_com_interface = info[1].As<Napi::Boolean>().Value();

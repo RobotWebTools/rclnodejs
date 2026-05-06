@@ -124,7 +124,7 @@ Napi::Value ConvertToJSTopicEndpoint(
   return endpoint;
 }
 
-#if ROS_VERSION > 2505
+#if ROS_VERSION >= 2605
 Napi::Value ConvertToJSServiceEndpointInfo(
     Napi::Env env, const rmw_service_endpoint_info_t* service_endpoint_info) {
   Napi::Object endpoint = Napi::Object::New(env);
@@ -164,7 +164,7 @@ Napi::Value ConvertToJSServiceEndpointInfo(
 
   return endpoint;
 }
-#endif  // ROS_VERSION > 2505
+#endif  // ROS_VERSION >= 2605
 
 uv_lib_t g_lib;
 Napi::Env g_env = nullptr;
@@ -308,7 +308,7 @@ Napi::Array ConvertToJSTopicEndpointInfoList(
   return list;
 }
 
-#if ROS_VERSION > 2505
+#if ROS_VERSION >= 2605
 Napi::Array ConvertToJSServiceEndpointInfoList(
     Napi::Env env, const rmw_service_endpoint_info_array_t* info_array) {
   Napi::Array list = Napi::Array::New(env, info_array->size);
@@ -319,7 +319,7 @@ Napi::Array ConvertToJSServiceEndpointInfoList(
   }
   return list;
 }
-#endif  // ROS_VERSION > 2505
+#endif  // ROS_VERSION >= 2605
 
 char** AbstractArgsFromNapiArray(const Napi::Array& jsArgv) {
   size_t argc = jsArgv.Length();

@@ -3,7 +3,16 @@ declare module 'rclnodejs' {
     /**
      * Valid ROS 2 distro short names
      */
-    type DistroName = 'eloquent' | 'foxy' | 'galactic' | 'humble' | 'rolling';
+    type DistroName =
+      | 'eloquent'
+      | 'foxy'
+      | 'galactic'
+      | 'humble'
+      | 'iron'
+      | 'jazzy'
+      | 'kilted'
+      | 'lyrical'
+      | 'rolling';
 
     /**
      * rclnodejs distro ID numbers
@@ -14,7 +23,12 @@ declare module 'rclnodejs' {
       FOXY = 2006,
       GALACTIC = 2105,
       HUMBLE = 2205,
+      IRON = 2305,
+      JAZZY = 2405,
+      KILTED = 2505,
+      LYRICAL = 2605,
       ROLLING = 5000,
+      FUTURE = 9999,
     }
 
     /**
