@@ -18,6 +18,7 @@ jobs:
           - humble
           - jazzy
           - kilted
+          - lyrical
         include:
           # Humble Hawksbill (May 2022 - May 2027)
           - docker_image: ubuntu:jammy
@@ -31,6 +32,14 @@ jobs:
           - docker_image: ubuntu:noble
             ros_distribution: kilted
             ubuntu_codename: noble
+          # Lyrical Luth (May 2026 - May 2031, beta)
+          # NOTE: the tarball URL below is a date-stamped beta snapshot and
+          # must be refreshed manually until upstream publishes a stable
+          # "latest" download (or until GA).
+          - docker_image: ubuntu:26.04
+            ros_distribution: lyrical
+            ubuntu_codename: resolute
+            ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-beta-20260430/ros2-lyrical-2026-04-30-resolute-aarch64.tar.bz2"
 
     steps:
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
@@ -40,9 +49,33 @@ jobs:
         architecture: ${{ matrix.architecture }}
 
     - name: Setup ROS2
+      if: ${{ matrix.ros_distribution != 'lyrical' }}
       uses: ros-tooling/setup-ros@v0.7
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
+
+    - name: Enable ROS2 apt repository (lyrical)
+      if: ${{ matrix.ros_distribution == 'lyrical' }}
+      run: |
+        apt-get update
+        apt-get install -y software-properties-common curl
+        add-apt-repository universe
+        ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F'"' '{print $4}')
+        curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
+        dpkg -i /tmp/ros2-apt-source.deb
+        apt-get update
+        apt-get install -y build-essential cmake tar bzip2 python3 python3-rosdep python3-colcon-common-extensions
+
+    - name: Install ROS2 from binary tarball (lyrical)
+      if: ${{ matrix.ros_distribution == 'lyrical' }}
+      run: |
+        curl -sL "${{ matrix.ros_tar_url }}" -o /tmp/ros2-${{ matrix.ros_distribution }}.tar.bz2
+        mkdir -p /opt/ros/${{ matrix.ros_distribution }}
+        tar xf /tmp/ros2-${{ matrix.ros_distribution }}.tar.bz2 --strip-components=1 -C /opt/ros/${{ matrix.ros_distribution }}
+        rm /tmp/ros2-${{ matrix.ros_distribution }}.tar.bz2
+        rosdep init || true
+        rosdep update
+        rosdep install --rosdistro ${{ matrix.ros_distribution }} --from-paths /opt/ros/${{ matrix.ros_distribution }}/share --ignore-src -y --skip-keys "cyclonedds fastcdr fastdds iceoryx_binding_c rmw_connextdds rti-connext-dds-7.3.0 rti-connext-dds-7.7.0 urdfdom_headers python3-pyqt6.qtsvg rosidl_buffer_py pybind11"
 
     - uses: actions/checkout@v6
 
