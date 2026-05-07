@@ -29,7 +29,7 @@ This demo showcases how to use **rclnodejs** with **Electron** to create an inte
 
 Before running this demo, ensure you have:
 
-1. **ROS2 installed** (Humble, Jazzy, Kilted, or Rolling)
+1. **ROS2 installed** (Humble, Jazzy, Kilted, Lyrical, or Rolling)
 2. **Node.js** (version 20.20.2 or higher)
 3. **rclnodejs built** and working
 
@@ -319,9 +319,9 @@ console.log('Publishing command:', command, twist);
 ## 📚 Learning Resources
 
 - [rclnodejs Documentation](https://github.com/RobotWebTools/rclnodejs)
-- [ROS2 Tutorials](https://docs.ros.org/en/rolling/Tutorials.html)
+- [ROS2 Tutorials](https://docs.ros.org/en/lyrical/Tutorials.html)
 - [Electron Documentation](https://www.electronjs.org/docs)
-- [geometry_msgs/Twist Documentation](https://docs.ros.org/en/rolling/p/geometry_msgs/interfaces/msg/Twist.html)
+- [geometry_msgs/Twist Documentation](https://docs.ros.org/en/lyrical/p/geometry_msgs/interfaces/msg/Twist.html)
 
 ## 📄 License
 
