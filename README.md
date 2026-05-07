@@ -119,7 +119,7 @@ rclnodejs auto-generates JavaScript bindings and TypeScript declarations for eve
 Use the generated types directly:
 
 ```javascript
-import * as rclnodejs from 'rclnodejs';
+const rclnodejs = require('rclnodejs');
 let stringMsgObject = rclnodejs.createMessageObject('std_msgs/msg/String');
 stringMsgObject.data = 'hello world';
 ```
