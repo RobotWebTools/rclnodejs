@@ -164,8 +164,8 @@ const isSupported =
 
 ## References
 
-- [ROS 2 Content Filtering Documentation](https://docs.ros.org/en/kilted/Tutorials/Demos/Content-Filtering-Subscription.html)
-- [Advanced Topic Keys Tutorial](https://docs.ros.org/en/kilted/Tutorials/Advanced/Topic-Keys/Filtered-Topic-Keys-Tutorial.html)
+- [ROS 2 Content Filtering Documentation](https://docs.ros.org/en/lyrical/Tutorials/Demos/Content-Filtering-Subscription.html)
+- [Advanced Topic Keys Tutorial](https://docs.ros.org/en/lyrical/Tutorials/Advanced/Topic-Keys/Filtered-Topic-Keys-Tutorial.html)
 - [rclnodejs GitHub Repository](https://github.com/RobotWebTools/rclnodejs)
 
 ---
@@ -488,7 +488,7 @@ Content filtering in rclnodejs provides powerful message filtering at the DDS mi
 
 For more information:
 
-- [ROS 2 Content Filtering Demo](https://docs.ros.org/en/kilted/Tutorials/Demos/Content-Filtering-Subscription.html)
+- [ROS 2 Content Filtering Demo](https://docs.ros.org/en/lyrical/Tutorials/Demos/Content-Filtering-Subscription.html)
 - [rclnodejs API Documentation](https://robotwebtools.github.io/rclnodejs/)
 - [Content filtering tests](../test/test-subscription-content-filter.js)
 - [DDS 1.4 Specification](https://www.omg.org/spec/DDS/1.4/PDF) (Annex B for filter syntax)

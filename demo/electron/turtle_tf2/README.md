@@ -50,7 +50,7 @@ The turtle_tf2 demo showcases:
 
 ### System Requirements
 
-- **ROS2**: Humble, Iron, or Rolling distribution
+- **ROS2**: Humble, Jazzy, Kilted, Lyrical, or Rolling distribution
 - **Node.js**: Version 20.20.2 or higher
 - **turtlesim**: ROS2 turtle simulation package
 - **Electron**: For desktop application framework
@@ -404,7 +404,7 @@ turtle_tf2/
 
 ## Related Resources
 
-- [ROS2 TF2 Tutorials](https://docs.ros.org/en/humble/Tutorials/Intermediate/Tf2/Tf2-Main.html)
+- [ROS2 TF2 Tutorials](https://docs.ros.org/en/lyrical/Tutorials/Intermediate/Tf2/Tf2-Main.html)
 - [turtle_tf2_py Source](https://github.com/ros/geometry_tutorials/tree/ros2/turtle_tf2_py)
 - [Three.js Documentation](https://threejs.org/docs/)
 - [rclnodejs GitHub](https://github.com/RobotWebTools/rclnodejs)

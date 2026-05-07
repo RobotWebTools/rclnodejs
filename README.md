@@ -9,7 +9,7 @@
 
 | **ROS 2 Distro** | **CI Status** |
 | :---: | :---: |
-| [![ROS 2](https://img.shields.io/badge/ROS%202-Humble%20%7C%20Jazzy%20%7C%20Kilted%20%7C%20Rolling-blue?logo=ros)](https://www.ros.org/) | [![Linux x64](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml?query=branch%3Adevelop)<br>[![Linux arm64](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml?query=branch%3Adevelop)<br>[![Windows](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml?query=branch%3Adevelop)<br>[![ASan](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml?query=branch%3Adevelop) |
+| [![ROS 2](https://img.shields.io/badge/ROS%202-Humble%20%7C%20Jazzy%20%7C%20Kilted%20%7C%20Lyrical%20%7C%20Rolling-blue?logo=ros)](https://www.ros.org/) | [![Linux x64](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml?query=branch%3Adevelop)<br>[![Linux arm64](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml?query=branch%3Adevelop)<br>[![Windows](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml?query=branch%3Adevelop)<br>[![ASan](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml?query=branch%3Adevelop) |
 
 **rclnodejs** is a Node.js client library for [ROS 2](https://www.ros.org/) that provides comprehensive JavaScript and TypeScript APIs for developing ROS 2 solutions.
 
@@ -48,7 +48,7 @@ Choose the path that matches how you plan to use rclnodejs:
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/) version >= 20.20.2
-- [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html)
+- [ROS 2 SDK](https://docs.ros.org/en/lyrical/Installation.html)
 
 Before installing, building, or running rclnodejs, source your ROS 2 environment:
 
@@ -90,6 +90,7 @@ rclnodejs ships with prebuilt native binaries for common Linux configurations si
 
 - **Ubuntu 22.04 (Jammy)** - ROS 2 Humble
 - **Ubuntu 24.04 (Noble)** - ROS 2 Jazzy, Kilted
+- **Ubuntu 26.04 (Resolute)** - ROS 2 Lyrical
 - **Architectures:** x64, arm64
 - **Node.js:** >= 20.20.2 (N-API compatible)
 
@@ -202,7 +203,7 @@ See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions
 
 > A tiny WebSocket gateway to ROS 2 — built into `rclnodejs`.
 
-> **Availability:** experimental; currently only on the `develop` branch and not yet part of any published `rclnodejs` release.
+> **Availability:** new in `2.0.0-beta.0`.
 
 **rosocket** exposes ROS 2 topics/services as plain WebSocket URLs — a
 **lightweight** alternative to the rosbridge + roslibjs stack. Zero browser

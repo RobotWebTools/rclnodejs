@@ -1457,7 +1457,7 @@ Remember to handle service availability gracefully and use appropriate error han
 
 For more information, see:
 
-- [ROS 2 Introspection Documentation](https://docs.ros.org/en/rolling/Concepts/About-ROS-Interfaces.html)
+- [ROS 2 Introspection Documentation](https://docs.ros.org/en/lyrical/Concepts/About-ROS-Interfaces.html)
 - [rclnodejs API Documentation](https://robotwebtools.github.io/rclnodejs/)
 - [Type Description Service implementation](../lib/type_description_service.js)
 - [Type Description Service tests](../test/test-type-description-service.js)

@@ -48,7 +48,7 @@ demo/typescript/actions/
 
 Before running this demo, ensure you have:
 
-1. **ROS2** installed (tested with ROS2 Humble/Iron/Jazzy)
+1. **ROS2** installed (tested with ROS2 Humble/Jazzy/Kilted/Lyrical)
 2. **Node.js** (version 20.20.2 or higher)
 3. **rclnodejs** built and configured in the parent directory (`../../`)
 4. **test_msgs** package available (usually included with ROS2)

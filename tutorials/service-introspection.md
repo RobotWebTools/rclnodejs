@@ -1170,7 +1170,7 @@ Remember to use introspection judiciously in production systems, considering the
 
 For more information, see:
 
-- [ROS 2 Service Introspection Documentation](https://docs.ros.org/en/kilted/Tutorials/Demos/Service-Introspection.html)
+- [ROS 2 Service Introspection Documentation](https://docs.ros.org/en/lyrical/Tutorials/Demos/Service-Introspection.html)
 - [rclnodejs API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html)
 - [Example service code](../example/services/service/service-example.js)
 - [Introspection test cases](../test/test-service-introspection.js)

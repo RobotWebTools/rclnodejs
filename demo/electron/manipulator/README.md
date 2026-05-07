@@ -17,7 +17,7 @@ An interactive Electron application demonstrating a two-joint robotic manipulato
 ## 📋 Prerequisites
 
 - **Node.js** (>= 20.20.2) - JavaScript runtime
-- **ROS 2** (Humble, Jazzy, or newer) - Robot Operating System 2
+- **ROS 2** (Humble, Jazzy, Kilted, Lyrical, or Rolling) - Robot Operating System 2
 - **rclnodejs compatible environment** - Linux recommended (tested on Ubuntu/WSL)
 
 ## 🛠️ Installation
@@ -329,7 +329,7 @@ manipulator/
 
 ## 📚 Learning Resources
 
-- **ROS2 Concepts**: [ROS2 Documentation](https://docs.ros.org/en/humble/)
+- **ROS2 Concepts**: [ROS2 Documentation](https://docs.ros.org/en/lyrical/)
 - **Three.js Guide**: [Three.js Documentation](https://threejs.org/docs/)
 - **Electron Tutorials**: [Electron Documentation](https://electronjs.org/docs)
 - **rclnodejs API**: [rclnodejs Repository](https://github.com/RobotWebTools/rclnodejs)
