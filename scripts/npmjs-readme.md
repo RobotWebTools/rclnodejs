@@ -2,7 +2,7 @@
 
 `rclnodejs` is a Node.js client library for ROS 2 that provides JavaScript and TypeScript APIs for building ROS 2 applications.
 
-Supported ROS 2 distributions include Humble, Jazzy, Kilted, and Rolling.
+Supported ROS 2 distributions include Humble, Jazzy, Kilted, Lyrical, and Rolling.
 
 ```javascript
 const rclnodejs = require('rclnodejs');
@@ -21,7 +21,7 @@ This example assumes your ROS 2 environment is already sourced.
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/) version >= 20.20.2
-- [ROS 2 SDK](https://docs.ros.org/en/jazzy/Installation.html)
+- [ROS 2 SDK](https://docs.ros.org/en/lyrical/Installation.html)
 
 Before installing or running rclnodejs, source your ROS 2 environment:
 
@@ -51,6 +51,7 @@ rclnodejs ships with prebuilt native binaries for common Linux configurations si
 
 - **Ubuntu 22.04 (Jammy)** - ROS 2 Humble
 - **Ubuntu 24.04 (Noble)** - ROS 2 Jazzy, Kilted
+- **Ubuntu 26.04 (Resolute)** - ROS 2 Lyrical
 - **Architectures:** x64, arm64
 - **Node.js:** >= 20.20.2 (N-API compatible)
 
