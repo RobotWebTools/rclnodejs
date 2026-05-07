@@ -41,11 +41,9 @@ To install from GitHub instead of npm, run:
 npm install RobotWebTools/rclnodejs#<branch>
 ```
 
-Or add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependencies.
-
 ### Prebuilt Binaries
 
-rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This applies to supported Linux environments when installing the published npm package.
+rclnodejs ships with prebuilt native binaries for common Linux configurations, so most installs skip compilation.
 
 **Supported Platforms:**
 
@@ -55,9 +53,7 @@ rclnodejs ships with prebuilt native binaries for common Linux configurations si
 - **Architectures:** x64, arm64
 - **Node.js:** >= 20.20.2 (N-API compatible)
 
-Installations outside this prebuilt matrix automatically fall back to building from source.
-
-**Force Building from Source:**
+Installations outside this matrix automatically fall back to building from source. To force a source build even when a prebuilt binary is available:
 
 ```bash
 export RCLNODEJS_FORCE_BUILD=1
@@ -70,21 +66,19 @@ npm install rclnodejs
 - Tutorials: [tutorials/](https://github.com/RobotWebTools/rclnodejs/tree/develop/tutorials)
 - JavaScript examples: [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
 - TypeScript demos: [demo/typescript/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript)
+- WebSocket bridge demo (rosocket): [demo/rosocket/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/rosocket)
 - Electron demos: [demo/electron/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/electron)
-- WebSocket bridge demo: [demo/rosocket/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/rosocket)
 - Companion CLI: [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/)
 
 ## Message Generation
 
-rclnodejs generates JavaScript message interfaces and TypeScript declarations during installation for `rclnodejs > 1.5.0`. If you install additional ROS packages later, rerun the generator in your project:
+rclnodejs auto-generates JavaScript message interfaces and TypeScript declarations during `npm install`, so in most projects you do not need to run anything by hand. If you install additional ROS packages **after** rclnodejs was installed, re-run the generator from your project so the new interfaces are picked up:
 
 ```bash
 npx generate-ros-messages
 ```
 
 Generated files are written to `<your-project>/node_modules/rclnodejs/generated/`.
-
-This step is only needed after adding ROS packages that were not present when rclnodejs was installed.
 
 ## Using rclnodejs with TypeScript
 
@@ -100,17 +94,24 @@ TypeScript declaration files are included in the package. In most projects, conf
 }
 ```
 
-```typescript
-import * as rclnodejs from 'rclnodejs';
+Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript example at the top of this README.
 
-rclnodejs.init().then(() => {
-  const node = new rclnodejs.Node('publisher_example_node');
-  const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
-  publisher.publish(`Hello ROS 2 from rclnodejs`);
-  node.spin();
-});
+## rosocket — Browser ↔ ROS 2 bridge
+
+A tiny WebSocket gateway to ROS 2, built into `rclnodejs`. Exposes ROS 2 topics and services as plain WebSocket URLs — a lightweight alternative to the rosbridge + roslibjs stack. Browsers use only built-in `WebSocket` + `JSON`; no JavaScript library required.
+
+```bash
+npx rosocket --port 9000 --topic /chatter:std_msgs/msg/String
 ```
+
+```js
+const ws = new WebSocket('ws://host:9000/topic/chatter');
+ws.onmessage = (e) => console.log(JSON.parse(e.data).data);
+ws.onopen    = () => ws.send(JSON.stringify({ data: 'hi' }));
+```
+
+See the [rosocket guide](https://github.com/RobotWebTools/rclnodejs/tree/develop/rosocket) for the URL scheme, service calls, and the programmatic `startRosocket()` API.
 
 ## License
 
-Apache License Version 2.0
+Apache License 2.0
