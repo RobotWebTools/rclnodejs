@@ -13,7 +13,7 @@
 
 **rclnodejs** is a Node.js client library for [ROS 2](https://www.ros.org/) that provides comprehensive JavaScript and TypeScript APIs for developing ROS 2 solutions.
 
-**Key features:** Topics, Services, Actions, Parameters, Lifecycle Nodes, TypeScript support, RxJS Observables, Electron integration, and prebuilt binaries for Linux x64/arm64.
+**Key features:** Topics, Services, Actions, Parameters, Lifecycle Nodes, TypeScript support, RxJS Observables, Electron integration, browser ↔ ROS 2 WebSocket bridge (rosocket), and prebuilt binaries for Linux x64/arm64.
 
 ```javascript
 const rclnodejs = require('rclnodejs');
@@ -32,18 +32,15 @@ This example assumes your ROS 2 environment is already sourced.
 - Get started:
   [Installation](#installation), [Quick Start](#quick-start), [Tutorials](./tutorials/)
 - Reference:
-  [API Documentation](#api-documentation), [Using TypeScript](#using-rclnodejs-with-typescript), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation)
+  [API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html), [Using TypeScript](#using-rclnodejs-with-typescript), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation)
 - Features and examples:
-  [rclnodejs-cli](#rclnodejs-cli), [Electron-based Visualization](#electron-based-visualization), [Observable Subscriptions](#observable-subscriptions), [rosocket](#rosocket--ros-2-in-the-browser-no-library-required), [Performance Benchmarks](#performance-benchmarks)
+  [rosocket](#rosocket--browser--ros-2-bridge), [Observable Subscriptions](#observable-subscriptions), [Electron-based Visualization](#electron-based-visualization), [Performance Benchmarks](#performance-benchmarks), [rclnodejs-cli](#rclnodejs-cli)
 - Project docs:
   [Efficient Usage Tips](./docs/EFFICIENCY.md), [FAQ and Known Issues](./docs/FAQ.md), [Building from Scratch](./docs/BUILDING.md), [Contributing](./docs/CONTRIBUTING.md)
 
 ## Installation
 
-Choose the path that matches how you plan to use rclnodejs:
-
-- Install from npm: add rclnodejs to your own application.
-- Quick Start: run the examples from this repository checkout.
+Most users only need [Install from npm](#install-from-npm) below. If you have cloned this repository and want to run the bundled examples, see [Quick Start](#quick-start) instead.
 
 ### Prerequisites
 
@@ -68,15 +65,11 @@ After installation, use the example at the top of this README as a minimal publi
 
 ### Install from GitHub
 
-Use this path only if you need a branch or commit that is not yet published to npm.
-
-GitHub installs normally build from source. The published npm package includes prebuilt binaries for supported Linux targets, but this repository does not track those prebuilt artifacts.
+Use this path only if you need a branch or commit not yet published to npm. GitHub installs build from source.
 
 ```bash
 npm install RobotWebTools/rclnodejs#<branch>
 ```
-
-Or add `"rclnodejs":"RobotWebTools/rclnodejs#<branch>"` to your `package.json` dependency section.
 
 > **Docker:** For containerized development, see the included [Dockerfile](./Dockerfile) for building and testing with different ROS distributions and Node.js versions.
 
@@ -84,7 +77,7 @@ See the [features](./docs/FEATURES.md) and try the [examples](https://github.com
 
 ### Prebuilt Binaries
 
-rclnodejs ships with prebuilt native binaries for common Linux configurations since `v1.5.2`, eliminating the need for compilation during installation. This applies to supported Linux environments when installing the published npm package.
+rclnodejs ships with prebuilt native binaries for common Linux configurations, so most installs skip compilation.
 
 **Supported Platforms:**
 
@@ -94,11 +87,7 @@ rclnodejs ships with prebuilt native binaries for common Linux configurations si
 - **Architectures:** x64, arm64
 - **Node.js:** >= 20.20.2 (N-API compatible)
 
-Installations outside this prebuilt matrix automatically fall back to building from source.
-
-**Force Building from Source:**
-
-If you need to build from source even when a prebuilt binary is available, set the environment variable:
+Installations outside this matrix automatically fall back to building from source. To force a source build even when a prebuilt binary is available:
 
 ```bash
 export RCLNODEJS_FORCE_BUILD=1
@@ -107,9 +96,7 @@ npm install rclnodejs
 
 ## Quick Start
 
-Use these steps if you are working from this repository checkout and want to run one of the included examples.
-
-These steps assume the [installation prerequisites](#prerequisites) are already satisfied and your ROS 2 environment has been sourced.
+From a clone of this repository, after sourcing your ROS 2 environment:
 
 1. Install the repository dependencies from the project root.
 
@@ -123,32 +110,39 @@ npm install
 node example/topics/publisher/publisher-example.js
 ```
 
-You should see messages being published once per second.
+More runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
 
-If you want to build an application instead of running the repository examples, install rclnodejs into your own project with [Install from npm](#install-from-npm) and start from the sample code near the top of this README.
+## ROS 2 Interface Message Generation
 
-Explore more runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
+rclnodejs auto-generates JavaScript bindings and TypeScript declarations for every ROS 2 `.msg`, `.srv`, and `.action` interface available in your sourced ROS 2 environment. This happens during `npm install`, so in most projects you do not need to run anything by hand.
 
-## rclnodejs-cli
+Use the generated types directly:
 
-[rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) is a separate companion project that provides command-line tooling for working with rclnodejs-based ROS 2 applications. It is particularly useful for creating ROS 2 Node.js packages and working with launch files for multi-node orchestration.
+```javascript
+import * as rclnodejs from 'rclnodejs';
+let stringMsgObject = rclnodejs.createMessageObject('std_msgs/msg/String');
+stringMsgObject.data = 'hello world';
+```
 
-See the rclnodejs-cli repository for installation instructions and the current command set.
+### Re-running message generation
 
-## API Documentation
+If you install additional ROS packages **after** rclnodejs was installed, re-run the generator from your project so the new interfaces are picked up:
 
-API documentation is available [online](https://robotwebtools.github.io/rclnodejs/docs/index.html). To generate it locally from this repository checkout, run `npm run docs`.
+```bash
+npx generate-ros-messages
+```
 
-## Electron-based Visualization
+Generated files are written to `<your-project>/node_modules/rclnodejs/generated/`.
 
-Create rich, interactive desktop applications using Electron and web technologies like Three.js. Demos leverage **Electron Forge** for easy packaging on Windows, macOS, and Linux.
+### IDL Message Generation
 
-|                       Demo                        |                                                              Description                                                              |                            Screenshot                            |
-| :-----------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------: |
-|  **🐢 [turtle_tf2](./demo/electron/turtle_tf2)**  |  Real-time coordinate frame visualization with turtle control. Features TF2 transforms, keyboard control, and dynamic frame updates.  |  ![turtle_tf2](./demo/electron/turtle_tf2/turtle-tf2-demo.png)   |
-| **🦾 [manipulator](./demo/electron/manipulator)** | Interactive two-joint robotic arm simulation. Features 3D joint visualization, manual/automatic control, and visual movement markers. | ![manipulator](./demo/electron/manipulator/manipulator-demo.png) |
+In addition to the standard ROS 2 message generation (`.msg`, `.srv`, `.action`), rclnodejs can also generate JavaScript message files directly from IDL (Interface Definition Language) files. This is useful for custom IDL files or when you need finer control over the generation process.
 
-Explore more examples in [demo/electron](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/electron).
+To generate messages from IDL files:
+
+```bash
+npm run generate-messages-idl
+```
 
 ## Using rclnodejs with TypeScript
 
@@ -164,19 +158,28 @@ TypeScript declaration files are included in the package and exposed through the
 }
 ```
 
-TypeScript example:
+Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript example at the top of this README. See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript) for more.
 
-```typescript
-import * as rclnodejs from 'rclnodejs';
-rclnodejs.init().then(() => {
-  const node = new rclnodejs.Node('publisher_example_node');
-  const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
-  publisher.publish(`Hello ROS 2 from rclnodejs`);
-  node.spin();
-});
+## rosocket — Browser ↔ ROS 2 bridge
+
+> A tiny WebSocket gateway to ROS 2 — built into `rclnodejs`. _New in `2.0.0-beta.0`._
+
+**rosocket** exposes ROS 2 topics/services as plain WebSocket URLs — a
+**lightweight** alternative to the rosbridge + roslibjs stack. Zero browser
+code, one Node.js process; browsers use only built-in `WebSocket` + `JSON`,
+no JavaScript library required.
+
+```bash
+npx rosocket --port 9000 --topic /chatter:std_msgs/msg/String
 ```
 
-See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript) for more examples.
+```js
+const ws = new WebSocket('ws://host:9000/topic/chatter');
+ws.onmessage = (e) => console.log(JSON.parse(e.data).data);
+ws.onopen    = () => ws.send(JSON.stringify({ data: 'hi' }));
+```
+
+See [rosocket/README.md](./rosocket/README.md) for the URL scheme, service calls, and the programmatic `startRosocket()` API.
 
 ## Observable Subscriptions
 
@@ -199,62 +202,15 @@ obsSub.observable
 
 See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions.md) for more details.
 
-## rosocket — ROS 2 in the browser, no library required
+## Electron-based Visualization
 
-> A tiny WebSocket gateway to ROS 2 — built into `rclnodejs`.
+Build interactive desktop ROS 2 apps with Electron + Three.js, packaged for Windows/macOS/Linux via **Electron Forge**. Featured demo: 🦾 **[manipulator](./demo/electron/manipulator)** — a two-joint arm with manual/automatic control.
 
-> **Availability:** new in `2.0.0-beta.0`.
+<p align="left">
+  <a href="./demo/electron/manipulator"><img src="./demo/electron/manipulator/manipulator-demo.png" alt="manipulator demo" width="320"></a>
+</p>
 
-**rosocket** exposes ROS 2 topics/services as plain WebSocket URLs — a
-**lightweight** alternative to the rosbridge + roslibjs stack. Zero browser
-code, one Node.js process; browsers use only built-in `WebSocket` + `JSON`,
-no JavaScript library required.
-
-```bash
-npx rosocket --port 9000 --topic /chatter:std_msgs/msg/String
-```
-
-```js
-const ws = new WebSocket('ws://host:9000/topic/chatter');
-ws.onmessage = (e) => console.log(JSON.parse(e.data).data);
-ws.onopen    = () => ws.send(JSON.stringify({ data: 'hi' }));
-```
-
-See [rosocket/README.md](./rosocket/README.md) for the URL scheme, service calls, and the programmatic `startRosocket()` API.
-
-## ROS 2 Interface Message Generation
-
-ROS client libraries convert IDL message descriptions into target language source code. rclnodejs provides the `generate-ros-messages` script to generate JavaScript message interface files and TypeScript declarations.
-
-**Example usage:**
-
-```javascript
-import * as rclnodejs from 'rclnodejs';
-let stringMsgObject = rclnodejs.createMessageObject('std_msgs/msg/String');
-stringMsgObject.data = 'hello world';
-```
-
-### Running Message Generation
-
-Run the message generation script in your project when new ROS packages are installed:
-
-```bash
-npx generate-ros-messages
-```
-
-Generated files are located at `<yourproject>/node_modules/rclnodejs/generated/`.
-
-> **Note:** This step is not needed for `rclnodejs > 1.5.0` because bundled interfaces are generated during installation. Rerun this command only after adding new ROS packages to your environment.
-
-### IDL Message Generation
-
-In addition to the standard ROS2 message generation (`.msg`, `.srv`, and `.action`), rclnodejs provides advanced support for generating JavaScript message files directly from IDL (Interface Definition Language) files. This feature is particularly useful when working with custom IDL files or when you need more control over the message generation process.
-
-To generate messages from IDL files, use the `generate-messages-idl` npm script:
-
-```bash
-npm run generate-messages-idl
-```
+More in [demo/electron](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/electron).
 
 ## Performance Benchmarks
 
@@ -266,7 +222,11 @@ Benchmark results for 1000 iterations with 1024 KB messages (Ubuntu 24.04 WSL2, 
 | **rclnodejs** (Node.js) |        744 |          927 |
 | **rclpy** (Python)      |      1,618 |       15,380 |
 
-These numbers are workload- and environment-specific. See [benchmark/README.md](./benchmark/README.md) for the full setup and methodology.
+See [benchmark/README.md](./benchmark/README.md) for the full setup and methodology.
+
+## rclnodejs-cli
+
+[rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) is a companion project providing command-line tooling for scaffolding rclnodejs application skeletons and working with launch files for multi-node orchestration.
 
 ## Contributing
 
