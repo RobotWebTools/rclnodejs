@@ -4,6 +4,18 @@
   "description": "ROS2.0 JavaScript client with Node.js",
   "main": "index.js",
   "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./index.js"
+    },
+    "./web/server": {
+      "types": "./types/index.d.ts",
+      "default": "./lib/runtime/index.js"
+    },
+    "./rosocket": "./rosocket/index.js",
+    "./package.json": "./package.json"
+  },
   "keywords": [
     "rclnodejs",
     "ros2",
