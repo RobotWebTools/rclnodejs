@@ -59,6 +59,8 @@
   },
   "bin": {
     "generate-ros-messages": "./scripts/generate_messages.js",
+    "rclnodejs-web": "./bin/rclnodejs-web.js",
+    "rcl-web": "./bin/rclnodejs-web.js",
     "rosocket": "./rosocket/cli.js"
   },
   "authors": [
