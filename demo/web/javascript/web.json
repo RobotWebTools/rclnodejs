@@ -1,0 +1,22 @@
+{
+  "$comment": "Sample rclnodejs/web config consumed by `npx rclnodejs-web web.json`. Every key is optional; the defaults shown match the CLI defaults.",
+  "port": 9000,
+  "path": "/capability",
+  "node": "rclnodejs_web_demo",
+  "http": {
+    "$comment": "HTTP transport for `call` and `publish`. curl-able, AI-agent friendly. Subscribe still uses WebSocket.",
+    "port": 9001
+  },
+  "expose": {
+    "call": {
+      "/add_two_ints": "example_interfaces/srv/AddTwoInts"
+    },
+    "publish": {
+      "/web_demo_chatter": "std_msgs/msg/String"
+    },
+    "subscribe": {
+      "/web_demo_tick": "std_msgs/msg/String",
+      "/web_demo_chatter": "std_msgs/msg/String"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "rclnodejs-web-demo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "rclnodejs/web browser demo — no toolchain, just <script type=\"module\"> served by a tiny static server that maps /sdk/* to the in-repo SDK.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

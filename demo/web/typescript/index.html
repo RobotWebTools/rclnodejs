@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>rclnodejs/web — TypeScript demo</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <h1>
+      rclnodejs/web demo
+      <span class="badge">TypeScript</span>
+    </h1>
+    <p>
+      Same four panels as the JavaScript demo, but the browser entry is
+      written in <strong>TypeScript</strong> with Vite — pass one ROS
+      type-name string per call and the SDK derives the request,
+      response, and message shapes from rclnodejs's generated types.
+    </p>
+    <p>
+      Endpoint:
+      <span class="endpoint" id="endpoint">ws://localhost:9000/capability</span>
+      &nbsp;<span class="status" id="status">connecting…</span>
+    </p>
+    <div class="transport">
+      <strong>Transport:</strong>
+      <label><input type="radio" name="transport" value="ws" checked /> WebSocket</label>
+      <label><input type="radio" name="transport" value="http" /> HTTP (call+publish; subscribe falls through to WS)</label>
+      <div style="margin-top:0.4em;font-size:0.85em;color:#666">
+        Same registry, same allow-list, same typed SDK — only the URL
+        scheme changes.
+      </div>
+    </div>
+
+    <h2>1. Service call — <code>/add_two_ints</code></h2>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <input id="addA" type="number" value="2" />
+          <span>+</span>
+          <input id="addB" type="number" value="40" />
+          <button id="callBtn">call</button>
+        </div>
+        <div class="log" id="callLog"></div>
+      </div>
+      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
+
+<span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
+
+<span class="com">// One string generic — the ROS service type name. Request</span>
+<span class="com">// and response shapes are derived from the generated types.</span>
+<span class="kw">const</span> reply = <span class="kw">await</span> ros.<span class="kw">call</span>&lt;<span class="str">'example_interfaces/srv/AddTwoInts'</span>&gt;(
+  <span class="str">'/add_two_ints'</span>,
+  { a: <span class="str">'2n'</span>, b: <span class="str">'40n'</span> }, <span class="com">// int64 → "Nn" string on the wire</span>
+);
+console.log(reply.sum); <span class="com">// '42n'  (typed as `${number}n`)</span></pre>
+    </div>
+
+    <h2>2. Topic subscription — <code>/web_demo_tick</code></h2>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <button id="subBtn">subscribe</button>
+          <button id="unsubBtn" disabled>unsubscribe</button>
+        </div>
+        <div class="log" id="tickLog"></div>
+      </div>
+      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
+
+<span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
+
+<span class="com">// Generic = ROS message type name. msg is auto-typed.</span>
+<span class="kw">const</span> sub = <span class="kw">await</span> ros.<span class="kw">subscribe</span>&lt;<span class="str">'std_msgs/msg/String'</span>&gt;(
+  <span class="str">'/web_demo_tick'</span>,
+  (msg) =&gt; console.log(msg.data), <span class="com">// msg.data: string</span>
+);
+
+<span class="com">// later — stop receiving:</span>
+<span class="kw">await</span> sub.close();</pre>
+    </div>
+
+    <h2>3. Topic publish — <code>/web_demo_chatter</code></h2>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <input id="chatMsg" type="text" value="hello from TS" style="width:18em" />
+          <button id="pubBtn">publish</button>
+        </div>
+        <div class="log" id="chatLog"></div>
+      </div>
+      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
+
+<span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
+
+<span class="com">// Generic = ROS message type name. Payload is auto-typed.</span>
+<span class="kw">await</span> ros.<span class="kw">subscribe</span>&lt;<span class="str">'std_msgs/msg/String'</span>&gt;(
+  <span class="str">'/web_demo_chatter'</span>,
+  (msg) =&gt; console.log(<span class="str">'recv:'</span>, msg.data),
+);
+<span class="kw">await</span> ros.<span class="kw">publish</span>&lt;<span class="str">'std_msgs/msg/String'</span>&gt;(
+  <span class="str">'/web_demo_chatter'</span>,
+  { data: <span class="str">'hello from TS'</span> },
+);</pre>
+    </div>
+
+    <h2>4. Capability allow-list in action</h2>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <button id="badCallBtn">call <code>/dangerous</code></button>
+        </div>
+        <div class="log" id="badLog"></div>
+      </div>
+      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
+
+<span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
+
+<span class="com">// `/dangerous` is not in the server's expose() allow-list.</span>
+<span class="kw">try</span> {
+  <span class="kw">await</span> ros.<span class="kw">call</span>(<span class="str">'/dangerous'</span>, {});
+} <span class="kw">catch</span> (e) {
+  <span class="com">// Rejected by the runtime before any ROS 2 Node API runs.</span>
+  console.log((e <span class="kw">as</span> { code?: <span class="ty">string</span> }).code); <span class="com">// 'not_exposed'</span>
+}</pre>
+    </div>
+
+    <h2>5. Same capability, no SDK — just <code>curl</code></h2>
+    <p style="font-size:0.9em;color:#555">
+      Every <code>call</code> / <code>publish</code> in the allow-list
+      is also reachable as plain HTTP. AI agents and CLI scripts can
+      hit the runtime without a JavaScript stack.
+    </p>
+    <pre class="code"><span class="com"># service call — returns 200 + JSON</span>
+curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
+  -H <span class="str">'content-type: application/json'</span> \
+  -d <span class="str">'{"a":"7n","b":"35n"}'</span>
+<span class="com"># =&gt; {"sum":"42n"}</span>
+
+<span class="com"># publish — returns 204 No Content</span>
+curl -sS -X POST http://localhost:9001/capability/publish/web_demo_chatter \
+  -H <span class="str">'content-type: application/json'</span> \
+  -d <span class="str">'{"data":"hi from curl"}'</span></pre>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
