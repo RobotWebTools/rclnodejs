@@ -3,10 +3,32 @@
 const path = require('path');
 const { spawn } = require('child_process');
 
+// The Electron prebuilt binary download is broken on Node >= 26.1: the
+// extract-zip 2.0.1 dependency used by electron's install.js silently
+// stops after the first zip entry, leaving node_modules/electron/path.txt
+// missing. extract-zip is unmaintained (last release 2020-06) and this
+// affects every electron version that depends on it (verified locally on
+// electron@34 and electron@42 with Node 26.1.0; Node 26.0.0 still works).
+//
+// Skip the Electron usability test on Node >= 26 entirely. The native
+// addon coverage is already provided by the full mocha suite that ran
+// before this script. Drop this gate once either Node fixes the
+// regression or electron switches to a maintained extractor.
+const nodeMajor = parseInt(process.versions.node.split('.')[0], 10);
+if (nodeMajor >= 26) {
+  console.warn(
+    `Skipping Electron usability test on Node.js ${process.versions.node}: ` +
+      'electron postinstall (extract-zip 2.0.1) is broken on Node >= 26.1. ' +
+      'The native addon coverage is already provided by the mocha suite above.'
+  );
+  process.exit(0);
+}
+
 let electron;
 try {
   electron = require('electron');
 } catch (e) {
+  console.error('require("electron") failed:', e && e.message ? e.message : e);
   console.error(
     'Electron module not found. Please install electron to run this test.'
   );
