@@ -40,7 +40,7 @@
     "docs": "make -C tools/jsdoc",
     "docs:gh-pages": "node tools/jsdoc/regenerate-published-docs.js --branch origin/gh-pages --preserve-published",
     "docs:gh-pages:full": "node tools/jsdoc/regenerate-published-docs.js --branch origin/gh-pages --full-rebuild",
-    "test": "nyc node --expose-gc ./scripts/run_test.js && tsd && npm install --no-save electron@34.0.0 && node test/electron/run_test.js",
+    "test": "nyc node --expose-gc ./scripts/run_test.js && tsd && npm install --no-save electron && node test/electron/run_test.js",
     "test-idl": "nyc node --expose-gc ./scripts/run_test.js --idl",
     "lint": "eslint && node ./scripts/cpplint.js",
     "test:asan": "bash scripts/run_asan_test.sh",
