@@ -15,6 +15,7 @@
     },
     "./rosocket": "./rosocket/index.js",
     "./lib/*": "./lib/*.js",
+    "./lib/*.js": "./lib/*.js",
     "./package.json": "./package.json"
   },
   "keywords": [
