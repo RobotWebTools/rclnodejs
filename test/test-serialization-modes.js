@@ -24,6 +24,7 @@ const {
   toJSONString,
   applySerializationMode,
   isValidSerializationMode,
+  reviveBigInts,
 } = require('../lib/message_serialization.js');
 
 describe('Serialization Modes Tests', function () {
@@ -266,5 +267,75 @@ describe('Message Serialization Unit Tests', function () {
     assert.strictEqual(isValidSerializationMode('plain'), true);
     assert.strictEqual(isValidSerializationMode('json'), true);
     assert.strictEqual(isValidSerializationMode('other'), false);
+  });
+
+  describe('reviveBigInts', function () {
+    it('rehydrates a top-level "Nn" string into a bigint', function () {
+      assert.strictEqual(reviveBigInts('42n'), 42n);
+      assert.strictEqual(reviveBigInts('-7n'), -7n);
+      assert.strictEqual(reviveBigInts('0n'), 0n);
+    });
+
+    it('leaves non-BigInt strings untouched', function () {
+      assert.strictEqual(reviveBigInts('hello'), 'hello');
+      assert.strictEqual(reviveBigInts('42'), '42');
+      assert.strictEqual(reviveBigInts('n'), 'n');
+      assert.strictEqual(reviveBigInts(''), '');
+    });
+
+    it('passes through other primitives unchanged', function () {
+      assert.strictEqual(reviveBigInts(42), 42);
+      assert.strictEqual(reviveBigInts(true), true);
+      assert.strictEqual(reviveBigInts(null), null);
+      assert.strictEqual(reviveBigInts(undefined), undefined);
+    });
+
+    it('rehydrates nested arrays and objects', function () {
+      const input = {
+        sum: '42n',
+        items: ['1n', '2n', 'plain'],
+        nested: { count: '7n', name: 'foo' },
+      };
+      const out = reviveBigInts(input);
+      assert.strictEqual(out.sum, 42n);
+      assert.deepStrictEqual(out.items, [1n, 2n, 'plain']);
+      assert.strictEqual(out.nested.count, 7n);
+      assert.strictEqual(out.nested.name, 'foo');
+    });
+
+    it('round-trips toJSONSafe → reviveBigInts for bigint fields', function () {
+      const original = { a: 9007199254740993n, b: { c: -1n, d: [5n, 6n] } };
+      const wire = JSON.parse(JSON.stringify(toJSONSafe(original)));
+      const revived = reviveBigInts(wire);
+      assert.strictEqual(revived.a, original.a);
+      assert.strictEqual(revived.b.c, original.b.c);
+      assert.deepStrictEqual(revived.b.d, original.b.d);
+    });
+
+    it('refuses to be a prototype-pollution vector', function () {
+      const polluted = JSON.parse(
+        '{"__proto__":{"polluted":true},"constructor":{"prototype":{"polluted":true}},"prototype":{"polluted":true},"safe":"1n"}'
+      );
+      const out = reviveBigInts(polluted);
+      // Object.prototype must remain untouched.
+      assert.strictEqual({}.polluted, undefined);
+      // Forbidden keys are dropped from the result.
+      assert.strictEqual(
+        Object.prototype.hasOwnProperty.call(out, '__proto__'),
+        false
+      );
+      assert.strictEqual(
+        Object.prototype.hasOwnProperty.call(out, 'constructor'),
+        false
+      );
+      assert.strictEqual(
+        Object.prototype.hasOwnProperty.call(out, 'prototype'),
+        false
+      );
+      // Legitimate fields are still revived.
+      assert.strictEqual(out.safe, 1n);
+      // And the revived object has a null prototype, so further proto access is inert.
+      assert.strictEqual(Object.getPrototypeOf(out), null);
+    });
   });
 });

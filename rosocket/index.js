@@ -10,25 +10,10 @@
 
 const { WebSocketServer } = require('ws');
 const debug = require('debug')('rclnodejs:rosocket');
-const { toJSONSafe } = require('../lib/message_serialization.js');
-
-// Convert a JSON value coming from the browser into shapes rclnodejs understands.
-// Mainly: integer fields declared as 64-bit need to be BigInt. We don't have schema
-// information here, so we accept either Number or BigInt for fields and let the
-// underlying serializer coerce. For convenience we convert string-encoded ints
-// like "12n" produced by toJSONSafe back to BigInt.
-function reviveBigInts(value) {
-  if (value === null || typeof value !== 'object') {
-    if (typeof value === 'string' && /^-?\d+n$/.test(value)) {
-      return BigInt(value.slice(0, -1));
-    }
-    return value;
-  }
-  if (Array.isArray(value)) return value.map(reviveBigInts);
-  const out = {};
-  for (const k of Object.keys(value)) out[k] = reviveBigInts(value[k]);
-  return out;
-}
+const {
+  toJSONSafe,
+  reviveBigInts,
+} = require('../lib/message_serialization.js');
 
 function safeSend(ws, payload) {
   if (ws.readyState !== ws.OPEN) return;

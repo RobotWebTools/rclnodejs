@@ -10,10 +10,11 @@
       "default": "./index.js"
     },
     "./web/server": {
-      "types": "./types/index.d.ts",
+      "types": "./lib/runtime/index.d.ts",
       "default": "./lib/runtime/index.js"
     },
     "./rosocket": "./rosocket/index.js",
+    "./lib/*": "./lib/*.js",
     "./package.json": "./package.json"
   },
   "keywords": [
