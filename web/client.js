@@ -69,6 +69,13 @@ class _WsLink {
 
   connect() {
     return new Promise((resolve, reject) => {
+      if (!WS) {
+        return reject(
+          new Error(
+            'no WebSocket implementation available; provide a global WebSocket or install the optional `ws` package'
+          )
+        );
+      }
       const ws = new WS(this.url);
       this._ws = ws;
       const onOpen = () => {
