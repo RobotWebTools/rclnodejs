@@ -119,22 +119,40 @@ declare module 'rclnodejs/web' {
   }
 
   /**
+   * Pair of explicit endpoints when HTTP and WebSocket live behind
+   * different URLs (e.g. one is fronted by a TLS proxy, the other isn't).
+   * Pass either field on its own to limit the client to that transport.
+   */
+  export interface ConnectEndpoints {
+    /** Base URL for the HTTP capability transport (`POST /capability/...`). */
+    http?: string;
+    /** Full URL of the WebSocket capability endpoint. */
+    ws?: string;
+  }
+
+  /**
    * Browser-native Web Runtime client.
    *
-   * Today the only supported transport is WebSocket — pass a `ws://`
-   * or `wss://` URL. HTTP support is planned and will be added once
-   * the server-side `HttpTransport` ships; the SDK will then accept
-   * `http://`/`https://` URLs (and a `{http, ws}` endpoint pair) on
-   * the same `connect()` entry point.
+   * The user-facing verb API (`call` / `publish` / `subscribe`) is the
+   * same regardless of transport. The transport(s) used underneath
+   * are picked from the URL scheme passed to {@link connect}:
    *
-   * **Path conventions.** The default `WebSocketTransport` listens on
-   * `/capability`, so `connect('ws://host:9000/capability')` is the
-   * normal form. If you change `--path` on the server (or sit it
-   * behind a path-rewriting proxy), pass the full URL accordingly.
+   *   - `ws://` / `wss://` — WebSocket only.
+   *   - `http://` / `https://` — HTTP for `call`/`publish`; subscribe
+   *     falls through to a sibling WebSocket endpoint at the same
+   *     host with `/capability` appended.
+   *   - {@link ConnectEndpoints} — both URLs spelled out.
+   *
+   * **Path conventions.** The single-URL forms assume the server uses
+   * the default `rclnodejs-web` path layout: `/capability` for both
+   * transports. If you change `--http-base-path` or `--path` on the
+   * server (or sit it behind a path-rewriting proxy), pass the full
+   * URLs via {@link ConnectEndpoints} instead so the SDK does not
+   * have to guess.
    */
   export class RosClient {
     readonly url: string;
-    constructor(url: string, options?: ConnectOptions);
+    constructor(url: string | ConnectEndpoints, options?: ConnectOptions);
     connect(): Promise<this>;
     close(): Promise<void>;
 
@@ -179,10 +197,11 @@ declare module 'rclnodejs/web' {
    * Open a connection to a Web Runtime capability endpoint.
    * Convenience wrapper around `new RosClient(...).connect()`.
    *
-   * @param url WebSocket URL (`ws://` or `wss://`).
+   * @param url Either a single URL (`ws://`, `wss://`, `http://`,
+   *            `https://`) or a {@link ConnectEndpoints} pair.
    */
   export function connect(
-    url: string,
+    url: string | ConnectEndpoints,
     options?: ConnectOptions
   ): Promise<RosClient>;
 }
