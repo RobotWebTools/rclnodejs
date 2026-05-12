@@ -8,17 +8,14 @@
 
 'use strict';
 
-// SDK-level integration tests for `rclnodejs/web`. The runtime / wire
-// protocol itself is covered separately by test/test-runtime.js — this
-// file only asserts what changes when the Browser SDK sits in front of
-// it (UUID frame ids, error surface on `code:`, async verb shape).
+// SDK tests for `rclnodejs/web`. Runtime / wire protocol coverage
+// lives in test/test-runtime.js.
 
 const assert = require('assert');
 const rclnodejs = require('../index.js');
 const { createRuntime, WebSocketTransport } = require('../lib/runtime');
 
-// `web/` is published as ESM; `await import()` lets us pull it in
-// from this CommonJS test file.
+// `web/` is ESM; await import() lets us pull it in from this CJS file.
 let connect;
 before(async function () {
   ({ connect } = await import('../web/index.js'));
@@ -85,8 +82,7 @@ describe('rclnodejs/web (Browser SDK)', function () {
         if (!received) received = msg && msg.data;
       });
 
-      // Retry publish until the subscription's discovery completes —
-      // identical pattern to test-rosocket.js.
+      // Retry until subscription discovery completes.
       timer = setInterval(() => {
         ros.publish('/rt_chatter', { data: 'hello-runtime' }).catch(() => {});
       }, 100);
@@ -100,10 +96,7 @@ describe('rclnodejs/web (Browser SDK)', function () {
   });
 
   it('surfaces not_exposed errors with a structured `code` field', async function () {
-    // The dispatcher's not_exposed branch is already covered by
-    // test-runtime.js; this test asserts that the SDK propagates the
-    // server's `code:` onto the rejected Promise's error so callers
-    // can branch on it programmatically.
+    // Asserts the SDK propagates `code:` onto the rejected Promise.
     const ros = await connect(endpoint);
     try {
       await assertRejectsWithCode(
