@@ -224,9 +224,7 @@ class _WsLink {
   _failAll(err) {
     const cause = err instanceof Error ? err : new Error(String(err));
     for (const p of this._pending.values()) {
-      try {
-        p.reject(cause);
-      } catch (_) {}
+      p.reject(cause);
     }
     this._pending.clear();
   }
@@ -360,7 +358,6 @@ export class RosClient {
   constructor(url, options = {}) {
     this.options = options;
     if (options.reconnect) {
-      // eslint-disable-next-line no-console
       console.warn(
         'rclnodejs/web: reconnect is not yet implemented; ignoring option'
       );
@@ -417,7 +414,7 @@ export class RosClient {
     if (!this._wsUrl) {
       throw Object.assign(
         new Error(
-          'subscribe requires a WebSocket endpoint; connect() was given an HTTP-only URL with no WS sibling'
+          'no WebSocket endpoint available; connect() was given an HTTP-only URL with no WS sibling'
         ),
         { code: 'transport_unavailable' }
       );
@@ -467,14 +464,16 @@ export class RosClient {
 
 /**
  * Resolve the user-supplied `connect()` URL into an `{httpUrl, wsUrl}`
- * pair. Either may be absent — then the corresponding link is not
- * constructed and the client returns `transport_unavailable` for any
- * verb that needs it.
+ * pair plus a `wsExplicit` flag (true when the caller named a WS URL
+ * themselves, false when we derived one from an HTTP base). Either
+ * URL may be `null` — the corresponding link then isn't constructed
+ * and verbs needing it reject with `transport_unavailable`.
  */
 function _resolveUrls(url) {
+  // Form 1: explicit { http, ws } pair.
   if (url && typeof url === 'object' && !Array.isArray(url)) {
-    const httpUrl = _validateEndpoint(url.http, 'http', /^https?:\/\//i);
-    const wsUrl = _validateEndpoint(url.ws, 'ws', /^wss?:\/\//i);
+    const httpUrl = _validateEndpoint(url.http, 'http');
+    const wsUrl = _validateEndpoint(url.ws, 'ws');
     if (!httpUrl && !wsUrl) {
       throw new TypeError(
         'connect({http, ws}): at least one of http or ws must be provided'
@@ -482,6 +481,8 @@ function _resolveUrls(url) {
     }
     return { httpUrl, wsUrl, wsExplicit: !!wsUrl };
   }
+
+  // Form 2: single URL string. Pick the transport from the scheme.
   if (typeof url !== 'string' || !url) {
     throw new TypeError(
       'connect(url): url must be a non-empty string or {http, ws}'
@@ -491,32 +492,44 @@ function _resolveUrls(url) {
     return { httpUrl: null, wsUrl: url, wsExplicit: true };
   }
   if (/^https?:\/\//i.test(url)) {
-    // HTTP base URL: derive a sibling WS URL by swapping the scheme
-    // and pointing at /capability. Lazy — we don't open it until the
-    // user actually calls subscribe().
-    let wsUrl;
-    try {
-      const u = new URL(url);
-      u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
-      u.pathname = (u.pathname.replace(/\/+$/, '') || '') + '/capability';
-      wsUrl = u.toString();
-    } catch (_) {
-      wsUrl = null;
-    }
-    return { httpUrl: url, wsUrl, wsExplicit: false };
+    // HTTP base URL: derive a sibling WS URL lazily — we don't open
+    // it until the user actually calls subscribe().
+    return { httpUrl: url, wsUrl: _deriveWsSibling(url), wsExplicit: false };
   }
   throw new TypeError(
     `connect(url): unrecognised URL scheme: ${url} (expected ws://, wss://, http://, or https://)`
   );
 }
 
+// Swap http(s) → ws(s) and append the default `/capability` path.
+// Returns null if the URL can't be parsed; verbs that need WS will
+// then surface a clear `transport_unavailable` error themselves.
+function _deriveWsSibling(httpUrl) {
+  try {
+    const u = new URL(httpUrl);
+    u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
+    u.pathname = u.pathname.replace(/\/+$/, '') + '/capability';
+    return u.toString();
+  } catch (_) {
+    return null;
+  }
+}
+
+// Per-field config for `_validateEndpoint`. Keeps the validator
+// itself a straight three-step check (presence, type, scheme).
+const _ENDPOINT_FIELDS = {
+  http: { schemeRe: /^https?:\/\//i, expected: 'http:// or https://' },
+  ws: { schemeRe: /^wss?:\/\//i, expected: 'ws:// or wss://' },
+};
+
 /**
- * Validate one endpoint of an `{http, ws}` pair. Returns the trimmed
- * URL on success, `null` if the field is absent, or throws a clear
- * TypeError if the field is present but not a usable string.
+ * Validate one endpoint of an `{http, ws}` pair. Returns the URL
+ * unchanged on success, `null` when the field is absent, or throws
+ * a clear `TypeError` when present but malformed.
  */
-function _validateEndpoint(value, field, schemeRe) {
+function _validateEndpoint(value, field) {
   if (value === undefined || value === null) return null;
+  const { schemeRe, expected } = _ENDPOINT_FIELDS[field];
   if (typeof value !== 'string' || !value) {
     throw new TypeError(
       `connect({${field}}): ${field} must be a non-empty string, got ${typeof value}`
@@ -524,7 +537,7 @@ function _validateEndpoint(value, field, schemeRe) {
   }
   if (!schemeRe.test(value)) {
     throw new TypeError(
-      `connect({${field}}): ${field} must start with ${field === 'http' ? 'http:// or https://' : 'ws:// or wss://'} (got ${value})`
+      `connect({${field}}): ${field} must start with ${expected} (got ${value})`
     );
   }
   return value;
