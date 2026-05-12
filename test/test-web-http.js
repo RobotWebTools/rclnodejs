@@ -17,8 +17,9 @@ const {
 } = require('../lib/runtime');
 
 let connect;
+let RosClient;
 before(async function () {
-  ({ connect } = await import('../web/index.js'));
+  ({ connect, RosClient } = await import('../web/index.js'));
 });
 
 describe('rclnodejs/web — HTTP transport (call + publish)', function () {
@@ -236,6 +237,94 @@ describe('rclnodejs/web — HTTP transport (call + publish)', function () {
       } finally {
         await ros.close();
       }
+    });
+  });
+
+  // -----------------------------------------------------------------
+  // Defensive paths — regressions for the resource-leak, malformed-URL,
+  // throwing-verifyRequest, and bad-endpoint cases.
+  // -----------------------------------------------------------------
+  describe('defensive paths', function () {
+    it('runs dispatcher cleanup on every HTTP request (no Publisher leak)', async function () {
+      // Each `publish()` lazily creates one Publisher per (connection,
+      // capability). Without an emitted 'close' on HttpRequestConnection,
+      // those Publishers would accumulate forever. We can't directly
+      // observe the Map, but we can publish many times and assert the
+      // node's publisher list doesn't grow proportionally.
+      const before = node.countPublishers('/http_chatter');
+      for (let i = 0; i < 5; i++) {
+        const res = await fetch(httpBase + '/capability/publish/http_chatter', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ data: 'leak-check-' + i }),
+        });
+        assert.strictEqual(res.status, 204);
+      }
+      // Discovery is async; allow a tick.
+      await new Promise((r) => setTimeout(r, 50));
+      const after = node.countPublishers('/http_chatter');
+      assert.ok(
+        after - before <= 1,
+        `expected at most 1 leftover publisher after 5 requests, got ${after - before}`
+      );
+    });
+
+    it('returns 400 invalid_url for malformed percent-encoding', async function () {
+      const res = await fetch(httpBase + '/capability/call/%E0%A4%A');
+      assert.strictEqual(res.status, 400);
+      const body = await res.json();
+      assert.strictEqual(body.code, 'invalid_url');
+    });
+
+    it('returns 500 internal_error if verifyRequest throws', async function () {
+      const failingRuntime = createRuntime({
+        node,
+        transport: new HttpTransport({
+          port: 0,
+          host: '127.0.0.1',
+          verifyRequest: () => {
+            throw new Error('boom');
+          },
+        }),
+      });
+      failingRuntime.expose({
+        call: { '/http_add': 'example_interfaces/srv/AddTwoInts' },
+      });
+      await failingRuntime.start();
+      const port = failingRuntime.transports[0].port;
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:${port}/capability/call/http_add`,
+          {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: '{}',
+          }
+        );
+        assert.strictEqual(res.status, 500);
+        const body = await res.json();
+        assert.strictEqual(body.code, 'internal_error');
+      } finally {
+        await failingRuntime.stop();
+      }
+    });
+
+    it('rejects connect({}) with at-least-one-of error', function () {
+      assert.throws(() => new RosClient({}), /at least one of http or ws/);
+    });
+
+    it('rejects connect({http: 42}) with non-string error', function () {
+      assert.throws(
+        () => new RosClient({ http: 42 }),
+        /http must be a non-empty string/
+      );
+    });
+
+    it('rejects connect({ws: "http://x"}) with wrong-scheme error', function () {
+      assert.throws(
+        () => new RosClient({ ws: 'http://x' }),
+        /ws must start with ws:\/\/ or wss:\/\//
+      );
     });
   });
 });

@@ -459,11 +459,14 @@ export class RosClient {
  */
 function _resolveUrls(url) {
   if (url && typeof url === 'object' && !Array.isArray(url)) {
-    return {
-      httpUrl: url.http || null,
-      wsUrl: url.ws || null,
-      wsExplicit: !!url.ws,
-    };
+    const httpUrl = _validateEndpoint(url.http, 'http', /^https?:\/\//i);
+    const wsUrl = _validateEndpoint(url.ws, 'ws', /^wss?:\/\//i);
+    if (!httpUrl && !wsUrl) {
+      throw new TypeError(
+        'connect({http, ws}): at least one of http or ws must be provided'
+      );
+    }
+    return { httpUrl, wsUrl, wsExplicit: !!wsUrl };
   }
   if (typeof url !== 'string' || !url) {
     throw new TypeError(
@@ -491,6 +494,26 @@ function _resolveUrls(url) {
   throw new TypeError(
     `connect(url): unrecognised URL scheme: ${url} (expected ws://, wss://, http://, or https://)`
   );
+}
+
+/**
+ * Validate one endpoint of an `{http, ws}` pair. Returns the trimmed
+ * URL on success, `null` if the field is absent, or throws a clear
+ * TypeError if the field is present but not a usable string.
+ */
+function _validateEndpoint(value, field, schemeRe) {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'string' || !value) {
+    throw new TypeError(
+      `connect({${field}}): ${field} must be a non-empty string, got ${typeof value}`
+    );
+  }
+  if (!schemeRe.test(value)) {
+    throw new TypeError(
+      `connect({${field}}): ${field} must start with ${field === 'http' ? 'http:// or https://' : 'ws:// or wss://'} (got ${value})`
+    );
+  }
+  return value;
 }
 
 /**
