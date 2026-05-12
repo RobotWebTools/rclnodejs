@@ -13,16 +13,20 @@
 // transform. Ships with a `type: module` web/package.json so Node
 // also treats this file as ESM.
 //
-// In a real browser, `WebSocket` is a global. In Node — used by the
-// integration tests and SSR scenarios — we fall back to the optional
-// `ws` package via dynamic import.
+// In a real browser, `WebSocket` and `fetch` are globals. In Node —
+// used by the integration tests and SSR scenarios — we fall back to
+// the optional `ws` package via dynamic import (Node ≥ 18 has fetch
+// natively, no extra dep needed).
 //
 // This module never imports rclnodejs itself — zero native deps,
 // safe to bundle for the browser.
 //
-// Today the SDK only speaks the WebSocket transport. An HTTP transport
-// is planned and will be added behind a `connect({http, ws})` form
-// once the server-side `HttpTransport` ships.
+// Two transports are supported, picked from the URL scheme:
+//
+//   - ws:// / wss://       → WebSocket only (call/publish/subscribe).
+//   - http:// / https://   → HTTP for call/publish; subscribe lazily
+//                            falls through to a sibling WebSocket.
+//   - { http, ws }         → explicit endpoint pair.
 
 let WS = globalThis.WebSocket;
 if (!WS) {
@@ -228,6 +232,89 @@ class _WsLink {
   }
 }
 
+/**
+ * HTTP link. Speaks the L2 HTTP capability protocol used by
+ * `HttpTransport` on the server. Stateless — every `call`/`publish`
+ * is a one-shot `fetch()`. Does not support subscribe; the public
+ * client falls through to the WebSocket link for streaming verbs.
+ */
+class _HttpLink {
+  constructor(baseUrl) {
+    // Normalise: strip trailing slash so we can append `/capability/<kind>/<name>`
+    this.baseUrl = baseUrl.replace(/\/+$/, '');
+  }
+
+  async connect() {
+    // Stateless — nothing to open. We don't probe the server here so
+    // that connect() stays cheap; the first call() will surface any
+    // wrong-URL or wrong-port errors instead.
+  }
+
+  async close() {
+    // No-op for HTTP.
+  }
+
+  call(capability, payload) {
+    return this._fetch('call', capability, payload, /* expectBody */ true);
+  }
+
+  publish(capability, payload) {
+    return this._fetch('publish', capability, payload, /* expectBody */ false);
+  }
+
+  async _fetch(kind, capability, payload, expectBody) {
+    const url =
+      this.baseUrl + '/capability/' + kind + '/' + _encodeRosName(capability);
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload ?? {}),
+      });
+    } catch (e) {
+      throw Object.assign(new Error(`HTTP request failed: ${e.message}`), {
+        code: 'network_error',
+      });
+    }
+
+    if (res.status === 204) return undefined;
+
+    const contentType = res.headers.get('content-type') || '';
+    let body;
+    if (contentType.includes('application/json')) {
+      try {
+        body = await res.json();
+      } catch (e) {
+        throw Object.assign(
+          new Error(`invalid JSON in HTTP response: ${e.message}`),
+          { code: 'invalid_response' }
+        );
+      }
+    } else if (res.ok) {
+      body = await res.text();
+    } else {
+      body = { ok: false, error: await res.text(), code: 'http_' + res.status };
+    }
+
+    if (!res.ok) {
+      const err = body && typeof body === 'object' ? body : {};
+      throw Object.assign(new Error(err.error || `HTTP ${res.status}`), {
+        code: err.code || 'http_' + res.status,
+        status: res.status,
+      });
+    }
+    return expectBody ? body : undefined;
+  }
+}
+
+// ROS names always start with `/`. Encode each path segment so that
+// names with `~`, `:`, etc. survive routing while keeping the leading
+// slash stripped (the server adds it back).
+function _encodeRosName(name) {
+  return name.replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+}
+
 // -------------------------------------------------------------------
 // Public surface
 // -------------------------------------------------------------------
@@ -235,24 +322,38 @@ class _WsLink {
 /**
  * Thin client for the rclnodejs Web Runtime capability protocol.
  *
- * Today the only supported transport is WebSocket — pass a `ws://` or
- * `wss://` URL. HTTP support is planned and will be wired in once the
- * server-side `HttpTransport` ships.
+ * Picks a transport from the URL scheme:
  *
- * **Path conventions.** The default `WebSocketTransport` listens on
- * `/capability`, so `connect('ws://host:9000/capability')` is the
- * normal form. If you change `--path` on the server (or sit it behind
- * a path-rewriting proxy), pass the full URL accordingly.
+ *   - `ws://`, `wss://`      → WebSocket only (call/publish/subscribe).
+ *   - `http://`, `https://`  → HTTP for `call`/`publish`; `subscribe`
+ *     lazily falls through to a sibling WebSocket endpoint at the
+ *     same host with `/capability` appended.
+ *   - object `{http, ws}`    → both URLs spelled out explicitly.
+ *
+ * **Path conventions.** The single-URL forms assume the server uses
+ * the default `/capability` layout for both transports. If you change
+ * `--path` / `--http-base-path` on the server (or sit it behind a
+ * path-rewriting proxy), pass the full URLs via `{http, ws}` so the
+ * SDK does not have to guess.
  *
  * @example
  *   import { connect } from 'rclnodejs/web';
  *
+ *   // WebSocket-only
  *   const ros = await connect('ws://robot.local:9000/capability');
- *   const reply = await ros.call('/add_two_ints', { a: '2n', b: '40n' });
+ *
+ *   // HTTP for call/publish, automatic WS sibling for subscribe
+ *   const ros = await connect('http://robot.local:9001');
+ *
+ *   // Split endpoints (e.g. WS behind a different proxy)
+ *   const ros = await connect({
+ *     http: 'https://robot.example/api',
+ *     ws:   'wss://robot.example/capability',
+ *   });
  */
 export class RosClient {
   /**
-   * @param {string} url WebSocket URL (`ws://` or `wss://`).
+   * @param {string|{http?:string, ws?:string}} url
    * @param {object} [options]
    * @param {boolean} [options.reconnect=false] Reserved; not yet implemented.
    */
@@ -264,63 +365,143 @@ export class RosClient {
         'rclnodejs/web: reconnect is not yet implemented; ignoring option'
       );
     }
-    this.url = _resolveWsUrl(url);
-    this._ws = new _WsLink(this.url);
+    const { httpUrl, wsUrl, wsExplicit } = _resolveUrls(url);
+    this.url = httpUrl || wsUrl;
+    this._http = httpUrl ? new _HttpLink(httpUrl) : null;
+    this._wsUrl = wsUrl;
+    this._ws = null; // built lazily by _ensureWs() unless eager
+    // Eagerly open WS only when the user *explicitly* asked for it
+    // (passed `ws://...` or `{ws}`). When we *derived* a sibling WS
+    // URL from an HTTP base, it's lazy — most HTTP-only callers
+    // never subscribe.
+    this._wsEager = !!wsExplicit;
+    this._wsConnect = null; // memoised connect promise
   }
 
-  /** Open the WebSocket. */
+  /** Open the link(s). */
   async connect() {
-    await this._ws.connect();
+    // Open HTTP eagerly (it's a no-op anyway). Defer the WebSocket
+    // open until the user actually calls subscribe() — that way an
+    // HTTP-only deployment with no WS sibling works for call/publish
+    // without blowing up here.
+    if (this._http) await this._http.connect();
+    if (this._wsEager) await this._ensureWs();
     return this;
   }
 
-  /** Close the WebSocket. */
+  /** Close the underlying link(s). */
   async close() {
-    await this._ws.close();
+    const tasks = [];
+    if (this._ws) tasks.push(this._ws.close());
+    if (this._http) tasks.push(this._http.close());
+    await Promise.all(tasks);
+  }
+
+  /**
+   * Build (and cache) the WebSocket link on first use. Throws a
+   * structured error if no WS URL is available or the open fails.
+   */
+  async _ensureWs() {
+    if (!this._wsUrl) {
+      throw Object.assign(
+        new Error(
+          'subscribe requires a WebSocket endpoint; connect() was given an HTTP-only URL with no WS sibling'
+        ),
+        { code: 'transport_unavailable' }
+      );
+    }
+    if (this._ws) return this._ws;
+    if (!this._wsConnect) {
+      const link = new _WsLink(this._wsUrl);
+      this._wsConnect = link.connect().then(
+        () => {
+          this._ws = link;
+          return link;
+        },
+        (err) => {
+          this._wsConnect = null; // allow a retry on next subscribe()
+          throw Object.assign(
+            new Error(
+              `failed to open WebSocket sibling at ${this._wsUrl}: ${err && err.message ? err.message : String(err)}`
+            ),
+            { code: 'transport_unavailable', cause: err }
+          );
+        }
+      );
+    }
+    return this._wsConnect;
   }
 
   // -- verb API --
 
   call(capability, payload) {
-    return this._ws.call(capability, payload);
+    return (this._http || this._ws).call(capability, payload);
   }
 
   publish(capability, payload) {
-    return this._ws.publish(capability, payload);
+    return (this._http || this._ws).publish(capability, payload);
   }
 
   async subscribe(capability, callback) {
     if (typeof callback !== 'function') {
       throw new TypeError('subscribe(capability, callback): callback required');
     }
-    return this._ws.subscribe(capability, callback);
+    const ws = await this._ensureWs();
+    return ws.subscribe(capability, callback);
   }
 }
 
 /**
- * Validate the user-supplied `connect()` URL. Only `ws://` and `wss://`
- * are accepted today; anything else throws so HTTP-only callers fail
- * fast at construction time instead of much later on first verb.
+ * Resolve the user-supplied `connect()` URL into an `{httpUrl, wsUrl}`
+ * pair. Either may be absent — then the corresponding link is not
+ * constructed and the client returns `transport_unavailable` for any
+ * verb that needs it.
  */
-function _resolveWsUrl(url) {
-  if (typeof url !== 'string' || !url) {
-    throw new TypeError('connect(url): url must be a non-empty string');
+function _resolveUrls(url) {
+  if (url && typeof url === 'object' && !Array.isArray(url)) {
+    return {
+      httpUrl: url.http || null,
+      wsUrl: url.ws || null,
+      wsExplicit: !!url.ws,
+    };
   }
-  if (!/^wss?:\/\//i.test(url)) {
+  if (typeof url !== 'string' || !url) {
     throw new TypeError(
-      `connect(url): unsupported URL scheme: ${url} (expected ws:// or wss://; HTTP transport is not yet supported)`
+      'connect(url): url must be a non-empty string or {http, ws}'
     );
   }
-  return url;
+  if (/^wss?:\/\//i.test(url)) {
+    return { httpUrl: null, wsUrl: url, wsExplicit: true };
+  }
+  if (/^https?:\/\//i.test(url)) {
+    // HTTP base URL: derive a sibling WS URL by swapping the scheme
+    // and pointing at /capability. Lazy — we don't open it until the
+    // user actually calls subscribe().
+    let wsUrl;
+    try {
+      const u = new URL(url);
+      u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
+      u.pathname = (u.pathname.replace(/\/+$/, '') || '') + '/capability';
+      wsUrl = u.toString();
+    } catch (_) {
+      wsUrl = null;
+    }
+    return { httpUrl: url, wsUrl, wsExplicit: false };
+  }
+  throw new TypeError(
+    `connect(url): unrecognised URL scheme: ${url} (expected ws://, wss://, http://, or https://)`
+  );
 }
 
 /**
  * Open a connection to a Web Runtime capability endpoint.
  *
- * See {@link RosClient} for path conventions. Today only WebSocket
- * URLs (`ws://`, `wss://`) are accepted.
+ * See {@link RosClient} for the URL-scheme → transport mapping and
+ * the path conventions assumed for the default `rclnodejs-web` server
+ * layout (`/capability` on both transports). For non-default
+ * `basePath` / `path` configurations, pass `{http, ws}` explicitly.
  *
- * @param {string} url
+ * @param {string|{http?:string, ws?:string}} url
  * @param {object} [options]
  * @returns {Promise<RosClient>}
  */

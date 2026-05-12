@@ -104,6 +104,20 @@ export class WebSocketTransport extends TransportAdapter {
   path: string;
 }
 
+export interface HttpTransportOptions {
+  port?: number;
+  host?: string;
+  basePath?: string;
+  verifyRequest?: (req: import('http').IncomingMessage) => boolean;
+}
+
+export class HttpTransport extends TransportAdapter {
+  constructor(options?: HttpTransportOptions);
+  port: number;
+  host: string;
+  basePath: string;
+}
+
 export interface CreateRuntimeOptions {
   node: Node;
   transport?: TransportAdapter;
