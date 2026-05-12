@@ -222,10 +222,17 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
       const host = location.hostname || 'localhost';
       const ENDPOINTS = {
         ws: `ws://${host}:9000/capability`,
-        // HTTP base — the SDK derives the WS sibling automatically for
-        // subscribe (see web/client.js _resolveUrls).
+        // HTTP base for call/publish.
         http: `http://${host}:9001`,
       };
+      // Pass Form C ({http, ws}) when the user picks HTTP so subscribe
+      // still reaches the WS runtime on :9000. The SDK's auto-derived
+      // sibling would land on :9001 instead and fail — this dev layout
+      // splits the two transports across separate ports.
+      const connectArg = (mode) =>
+        mode === 'http'
+          ? { http: ENDPOINTS.http, ws: ENDPOINTS.ws }
+          : ENDPOINTS.ws;
 
       const endpointEl = document.getElementById('endpoint');
       const statusEl = document.getElementById('status');
@@ -236,7 +243,7 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
       const setEndpoint = (mode) => {
         endpointEl.textContent =
           mode === 'http'
-            ? `${ENDPOINTS.http}  (subscribe lazily uses ws://${host}:9000/capability)`
+            ? `${ENDPOINTS.http}  (subscribe routed to ${ENDPOINTS.ws})`
             : ENDPOINTS.ws;
       };
 
@@ -270,14 +277,15 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
         setEndpoint(mode);
         setStatus(`connecting (${mode})…`);
         try {
-          ros = await connect(ENDPOINTS[mode]);
+          ros = await connect(connectArg(mode));
           setStatus(`connected (${mode})`, 'ok');
         } catch (e) {
           setStatus(`failed: ${e.message || e}`, 'err');
           return;
         }
         // Bind the always-on /web_demo_chatter subscription on every
-        // reconnect. Over HTTP this lazily opens the WS sibling.
+        // reconnect. Over HTTP the explicit { ws } in connectArg() makes
+        // this work — see comment above.
         try {
           await ros.subscribe('/web_demo_chatter', (msg) =>
             log('chatLog', `<- ${msg.data}`),

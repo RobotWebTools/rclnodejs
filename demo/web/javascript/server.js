@@ -19,6 +19,12 @@ const http = require('http');
 const fs = require('fs');
 
 const rclnodejs = require('../../../index.js');
+// In a downstream project this is the public, supported import:
+//   const { createRuntime, WebSocketTransport, HttpTransport } =
+//     require('rclnodejs/web/server');
+// Inside this in-repo demo we go through the relative path because the
+// `demo/web/javascript/` folder has its own package.json (so Node's
+// package self-reference doesn't see `rclnodejs` as resolvable here).
 const {
   createRuntime,
   WebSocketTransport,
@@ -128,7 +134,12 @@ async function main() {
       relPath = urlPath.replace(/^\/+/, '');
     }
     const filePath = path.resolve(baseDir, relPath);
-    if (!filePath.startsWith(baseDir)) {
+    // Confine reads to baseDir. `path.relative` collapses `..` segments,
+    // so any escape attempt either yields a result that starts with `..`
+    // or is absolute — reject both. (`startsWith(baseDir)` alone would
+    // false-positive on a sibling like `${baseDir}-other/...`.)
+    const rel = path.relative(baseDir, filePath);
+    if (rel.startsWith('..') || path.isAbsolute(rel)) {
       res.writeHead(403).end('forbidden');
       return;
     }

@@ -20,10 +20,18 @@ type Mode = 'ws' | 'http';
 const HOST = location.hostname || 'localhost';
 const ENDPOINTS: Record<Mode, string> = {
   ws: `ws://${HOST}:9000/capability`,
-  // HTTP base URL — the SDK derives the WS sibling automatically for
-  // subscribe (see web/client.js _resolveUrls).
+  // HTTP base for call/publish.
   http: `http://${HOST}:9001`,
 };
+// Pass Form C ({http, ws}) when the user picks HTTP so subscribe still
+// reaches the WS runtime on :9000. The SDK's auto-derived sibling would
+// land on :9001 instead and fail — this dev layout splits the two
+// transports across separate ports.
+function connectArg(mode: Mode): string | { http: string; ws: string } {
+  return mode === 'http'
+    ? { http: ENDPOINTS.http, ws: ENDPOINTS.ws }
+    : ENDPOINTS.ws;
+}
 
 function $<T extends HTMLElement>(id: string): T {
   const el = document.getElementById(id);
@@ -40,7 +48,7 @@ function setStatus(text: string, cls: 'ok' | 'err' | '' = ''): void {
 function setEndpoint(mode: Mode): void {
   $('endpoint').textContent =
     mode === 'http'
-      ? `${ENDPOINTS.http}  (subscribe lazily uses ws://${HOST}:9000/capability)`
+      ? `${ENDPOINTS.http}  (subscribe routed to ${ENDPOINTS.ws})`
       : ENDPOINTS.ws;
 }
 
@@ -83,15 +91,15 @@ async function main(): Promise<void> {
     setEndpoint(mode);
     setStatus(`connecting (${mode})…`);
     try {
-      ros = await connect(ENDPOINTS[mode]);
+      ros = await connect(connectArg(mode));
       setStatus(`connected (${mode})`, 'ok');
     } catch (e) {
       setStatus(`failed: ${String(e)}`, 'err');
       return;
     }
 
-    // Always-on chatter subscription; over HTTP this lazily opens
-    // the WS sibling endpoint (subscribe always uses WS).
+    // Always-on chatter subscription; subscribe always uses WS — the
+    // explicit { ws } in connectArg() makes this work in HTTP mode too.
     try {
       await ros.subscribe<'std_msgs/msg/String'>('/web_demo_chatter', (msg) =>
         log('chatLog', `<- ${msg.data}`)

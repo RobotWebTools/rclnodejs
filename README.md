@@ -119,7 +119,7 @@ how much glue you want to write.
   capability runtime. One string generic per call gives request,
   response, and message types; a `web.json` allow-list is the public
   API surface; the same capabilities are also reachable over plain
-  HTTP for `curl`, Postman, and AI-agent tool-use. _New in `2.0.0`._
+  HTTP for `curl`, Postman, and AI-agent tool-use. _New in `2.0.0-beta.0`._
 
   ```ts
   import { connect } from 'rclnodejs/web';
