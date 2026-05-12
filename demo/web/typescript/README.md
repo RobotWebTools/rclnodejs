@@ -13,14 +13,12 @@ const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
 
 ## Run it (two shells)
 
-**Setup once:**
-
 ```bash
 cd demo/web/typescript
 npm install
 ```
 
-**Shell 1 — runtime (with backing ROS 2 nodes):**
+**Shell 1 — runtime:**
 
 ```bash
 source /opt/ros/<distro>/setup.bash
@@ -39,29 +37,28 @@ npm run dev
 # ➜  Local:  http://localhost:5173/
 ```
 
-Edits to `src/main.ts` hot-reload; edits to `server.ts` need a
-restart of shell 1.
+Edits to `src/main.ts` hot-reload; edits to `server.ts` need a restart
+of shell 1.
 
 ## Without the bundled `server.ts`
 
 Real projects use the `rclnodejs-web` CLI against an existing ROS 2
-graph instead of running `server.ts`:
+graph:
 
 ```bash
 npx rclnodejs-web ../javascript/web.json
-# (then `ros2 run demo_nodes_cpp add_two_ints_server` etc.
-#  to back the panels)
+# (then `ros2 run demo_nodes_cpp add_two_ints_server` etc. to back the panels)
 ```
 
 `src/main.ts` doesn't change between the two setups.
 
 ## Other npm scripts
 
-| Command | What it does |
-|---|---|
-| `npm run typecheck` | `tsc --noEmit` — silent on success |
-| `npm run build` | static bundle in `dist/` (~6 kB JS, ~1.5 kB CSS gzipped) |
-| `npm run preview` | serve the built `dist/` |
+| Command             | What it does                                         |
+| ------------------- | ---------------------------------------------------- |
+| `npm run typecheck` | `tsc --noEmit` — silent on success                   |
+| `npm run build`     | static bundle in `dist/` (~6 kB JS, ~1.5 kB CSS gz)  |
+| `npm run preview`   | serve the built `dist/`                              |
 
 ## Deploying for real
 
@@ -69,4 +66,4 @@ Browser bundle (`dist/`) and runtime are independent — they only
 share a WebSocket URL. Static-host the bundle anywhere; run
 `rclnodejs-web` wherever ROS 2 lives. For production: terminate
 `wss://` at a TLS proxy, gate the upgrade with your existing auth,
-and keep `web.json` narrow.
+keep `web.json` narrow.

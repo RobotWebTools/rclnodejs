@@ -29,16 +29,15 @@ SDK from a plain URL).
   const ros = await connect('ws://localhost:9000/capability');
 
   const reply = await ros.call('/add_two_ints', { a: '2n', b: '40n' });
-  console.log(reply.sum);              // '42n'
+  console.log(reply.sum); // '42n'
 
   await ros.subscribe('/web_demo_tick', (msg) => render(msg.data));
   await ros.publish('/web_demo_chatter', { data: 'hi' });
 </script>
 ```
 
-That's the whole client. The page also has a **transport toggle**
-(WebSocket vs. HTTP) so you can flip the SDK between the two without
-restarting.
+The page also has a **transport toggle** (WebSocket vs. HTTP) so you
+can flip the SDK between the two without restarting.
 
 ## Same capability, no SDK
 
@@ -67,10 +66,10 @@ The browser code is unchanged; only the URL it points to changes.
 
 ## Putting the SDK in your own project
 
-| Approach | When | How |
-|---|---|---|
-| Plain `<script type="module">` | static page, hackathon | host `web/index.js` somewhere, `import { connect } from '/path/to/it'` |
-| ESM via npm | Vite, Next.js, esbuild, webpack | `npm i rclnodejs`, then `import { connect } from 'rclnodejs/web'` |
-| ESM CDN | quick prototypes, codepens | `import { connect } from 'https://esm.sh/rclnodejs/web'` |
+| Approach                        | When                            | How                                                                |
+| ------------------------------- | ------------------------------- | ------------------------------------------------------------------ |
+| Plain `<script type="module">`  | static page, hackathon          | host `web/index.js` somewhere, `import { connect } from '/path/to/it'` |
+| ESM via npm                     | Vite, Next.js, esbuild, webpack | `npm i rclnodejs`, then `import { connect } from 'rclnodejs/web'`  |
+| ESM CDN                         | quick prototypes, codepens      | `import { connect } from 'https://esm.sh/rclnodejs/web'`           |
 
 For a typed version, see the [TypeScript demo](../typescript/).
