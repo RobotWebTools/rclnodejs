@@ -3,3 +3,9 @@ leak:ref-napi/prebuilds/linux-x64/node.napi.node$
 leak:^napi_module_register$
 leak:^napi_create_reference$
 leak:^napi_create_external$
+# Node-internal one-shot singletons retained for the lifetime of the process.
+# Triggered by Node's lazy initialisation of the global `fetch()` (undici) and
+# the ESM loader compiling our `web/client.js` module — both allocated once,
+# never freed before process exit, and not owned by rclnodejs code.
+leak:node::contextify::ContextifyContext
+leak:node::contextify::ContextifyScript
