@@ -24,6 +24,32 @@ const {
   DEFAULTS,
 } = require('../lib/runtime/cli-config.js');
 
+// Reap a spawned child deterministically: SIGINT → wait → SIGKILL → wait,
+// resolving only after the process has actually exited. Prevents a hung
+// `rclnodejs-web` from leaking past the test (which would hold the rcl
+// context and flap subsequent runs).
+function reapChild(child, { graceMs = 2000 } = {}) {
+  if (child.exitCode !== null) return Promise.resolve();
+  return new Promise((resolve) => {
+    const onExit = () => resolve();
+    child.once('exit', onExit);
+    try {
+      child.kill('SIGINT');
+    } catch (_) {
+      // already dead between the check and the kill — onExit will fire.
+    }
+    setTimeout(() => {
+      if (child.exitCode === null) {
+        try {
+          child.kill('SIGKILL');
+        } catch (_) {
+          // already dead — onExit will still fire
+        }
+      }
+    }, graceMs);
+  });
+}
+
 describe('rclnodejs-web CLI', function () {
   this.timeout(60 * 1000);
 
@@ -244,15 +270,20 @@ describe('rclnodejs-web CLI', function () {
 
   describe('end-to-end CLI launch', function () {
     let proc;
+    let tmp;
+    beforeEach(function () {
+      tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'rcl-cli-e2e-'));
+    });
     afterEach(async function () {
-      if (proc && !proc.killed) {
-        proc.kill('SIGINT');
-        await new Promise((res) => {
-          proc.once('exit', res);
-          setTimeout(res, 2000);
-        });
+      if (proc && proc.exitCode === null) {
+        // Try a polite shutdown first; escalate to SIGKILL after a grace
+        // period so a hung child can never leave a zombie that flaps the
+        // next test (or holds the rcl context). Only resolve once the
+        // process has *actually* exited.
+        await reapChild(proc);
       }
       proc = undefined;
+      fs.rmSync(tmp, { recursive: true, force: true });
     });
 
     it('--help exits 0 and prints usage without loading rclnodejs', function (done) {
@@ -439,6 +470,106 @@ describe('rclnodejs-web CLI', function () {
           );
           assert.strictEqual(res.status, 404);
           const body = await res.json();
+          assert.strictEqual(body.code, 'not_exposed');
+          finish();
+        } catch (e) {
+          finish(e);
+        }
+      });
+
+      proc.on('exit', (code) => {
+        if (!finished && code !== null && code !== 0) {
+          clearTimeout(giveUp);
+          finish(
+            new Error(`CLI exited ${code}\nstderr=${stderr}\nstdout=${banner}`)
+          );
+        }
+      });
+    });
+
+    it('boots from a JSON config file passed positionally', function (done) {
+      let finished = false;
+      const finish = (err) => {
+        if (finished) return;
+        finished = true;
+        if (proc && !proc.killed) proc.kill('SIGKILL');
+        done(err);
+      };
+
+      // Write a complete web.json: WS + HTTP + an exposed call.
+      // `port: 0` / `http.port: 0` exercise the ephemeral-binding path
+      // through the config file (not just CLI flags).
+      const cfgPath = path.join(tmp, 'web.json');
+      fs.writeFileSync(
+        cfgPath,
+        JSON.stringify({
+          port: 0,
+          host: '127.0.0.1',
+          path: '/capability',
+          node: 'cli_jsoncfg_smoketest',
+          http: { port: 0, host: '127.0.0.1' },
+          expose: {
+            call: { '/cfg_add': 'example_interfaces/srv/AddTwoInts' },
+          },
+        })
+      );
+
+      proc = spawn(
+        process.execPath,
+        [path.join(__dirname, '..', 'bin', 'rclnodejs-web.js'), cfgPath],
+        { stdio: ['ignore', 'pipe', 'pipe'] }
+      );
+      let stderr = '';
+      proc.stderr.on('data', (d) => (stderr += d.toString()));
+
+      const giveUp = setTimeout(() => {
+        finish(
+          new Error(
+            `timed out waiting for banner. stderr=${stderr}\nstdout=${banner}`
+          )
+        );
+      }, 5000);
+
+      let banner = '';
+      proc.stdout.on('data', async (d) => {
+        banner += d.toString();
+        const wsM = /rclnodejs\/web listening on ws:\/\/[^:]+:(\d+)/.exec(
+          banner
+        );
+        const httpM = /also http:\/\/[^:]+:(\d+)/.exec(banner);
+        if (!wsM || !httpM) return;
+        clearTimeout(giveUp);
+
+        try {
+          const httpPort = Number(httpM[1]);
+          // The exposed capability from web.json must be reachable;
+          // an unexposed one must 404. Together these prove the JSON
+          // expose block was honoured (not just the CLI defaults).
+          const exposed = await fetch(
+            `http://127.0.0.1:${httpPort}/capability/call/cfg_add`,
+            {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ a: '1n', b: '2n' }),
+              signal: AbortSignal.timeout(800),
+            }
+          ).catch((e) => ({ _aborted: e.name === 'TimeoutError' }));
+          if (!exposed._aborted) {
+            // No backend services /cfg_add, so a real reply is unlikely;
+            // but if one came back, it must NOT be a not_exposed 404.
+            assert.notStrictEqual(exposed.status, 404);
+          }
+
+          const unexposed = await fetch(
+            `http://127.0.0.1:${httpPort}/capability/call/never_in_cfg`,
+            {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: '{}',
+            }
+          );
+          assert.strictEqual(unexposed.status, 404);
+          const body = await unexposed.json();
           assert.strictEqual(body.code, 'not_exposed');
           finish();
         } catch (e) {
