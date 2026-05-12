@@ -1,0 +1,138 @@
+#!/usr/bin/env node
+// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// `rclnodejs-web` — the rclnodejs Web launcher.
+//
+// For frontend developers who don't want to write a Node.js server.
+// Run `rclnodejs-web --help` or `npx rclnodejs-web web.json` to start
+// the runtime. See demo/web/javascript/README.md for the full demo.
+
+'use strict';
+
+const path = require('node:path');
+const fs = require('node:fs');
+
+const {
+  parseArgv,
+  loadConfigFile,
+  mergeConfig,
+  CliError,
+  HELP,
+} = require('../lib/runtime/cli-config.js');
+
+const argv = process.argv.slice(2);
+
+(async function main() {
+  let parsed;
+  try {
+    parsed = parseArgv(argv);
+  } catch (e) {
+    fail(e);
+  }
+
+  if (parsed.help) {
+    process.stdout.write(HELP);
+    process.exit(0);
+  }
+  if (parsed.version) {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8')
+    );
+    process.stdout.write(`rclnodejs ${pkg.version}\n`);
+    process.exit(0);
+  }
+
+  let cfg;
+  try {
+    cfg = mergeConfig(loadConfigFile(parsed.configPath), parsed.partial);
+  } catch (e) {
+    fail(e);
+  }
+
+  // Defer the rclnodejs require until after argv parsing so --help / --version
+  // never pay the (slow, native) load cost.
+  const rclnodejs = require('../index.js');
+  const {
+    createRuntime,
+    WebSocketTransport,
+    HttpTransport,
+  } = require('../lib/runtime');
+
+  await rclnodejs.init();
+  const node = rclnodejs.createNode(cfg.node);
+  rclnodejs.spin(node);
+
+  // Always start the WebSocket transport. Add HTTP only when the user
+  // configured an http.port (via --http-port or in the config file).
+  const transports = [
+    new WebSocketTransport({
+      port: cfg.port,
+      host: cfg.host,
+      path: cfg.path,
+    }),
+  ];
+  const httpEnabled =
+    cfg.http && cfg.http.port !== null && cfg.http.port !== undefined;
+  if (httpEnabled) {
+    transports.push(
+      new HttpTransport({
+        port: cfg.http.port,
+        host: cfg.http.host || cfg.host,
+        basePath: cfg.http.basePath || cfg.path,
+      })
+    );
+  }
+  const runtime = createRuntime({ node, transports });
+  runtime.expose(cfg.expose);
+  await runtime.start();
+
+  // After start(), each transport reports the actual bound port
+  // (matters for `--port 0` / `--http-port 0` ephemeral modes).
+  const wsTransport = runtime.transports[0];
+  const httpTransport = httpEnabled ? runtime.transports[1] : null;
+
+  if (!parsed.quiet) {
+    const displayHost = (h) =>
+      ['0.0.0.0', '::'].includes(h) ? 'localhost' : h;
+    const list = runtime.registry.list();
+    const totals =
+      Object.keys(list.call).length +
+      Object.keys(list.publish).length +
+      Object.keys(list.subscribe).length;
+    process.stdout.write(
+      `rclnodejs/web listening on ws://${displayHost(cfg.host)}:${wsTransport.port}${cfg.path} (${totals} capabilities)\n`
+    );
+    if (httpTransport) {
+      const httpHost = displayHost(cfg.http.host || cfg.host);
+      const httpBase = cfg.http.basePath || cfg.path;
+      process.stdout.write(
+        `                  also http://${httpHost}:${httpTransport.port}${httpBase} (call/publish only)\n`
+      );
+    }
+  }
+
+  const stop = async () => {
+    if (!parsed.quiet) process.stdout.write('\nstopping…\n');
+    await runtime.stop();
+    rclnodejs.shutdown();
+    process.exit(0);
+  };
+  process.once('SIGINT', stop);
+  process.once('SIGTERM', stop);
+})().catch((err) => fail(err));
+
+function fail(err) {
+  if (err && err.cli) {
+    process.stderr.write(`error: ${err.message}\n\n${HELP}`);
+    process.exit(2);
+  }
+  process.stderr.write((err && err.stack) || String(err));
+  process.stderr.write('\n');
+  process.exit(1);
+}
