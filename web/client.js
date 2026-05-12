@@ -369,13 +369,13 @@ export class RosClient {
     this.url = httpUrl || wsUrl;
     this._http = httpUrl ? new _HttpLink(httpUrl) : null;
     this._wsUrl = wsUrl;
-    this._ws = null; // built lazily by _ensureWs() unless eager
-    // Eagerly open WS only when the user *explicitly* asked for it
-    // (passed `ws://...` or `{ws}`). When we *derived* a sibling WS
-    // URL from an HTTP base, it's lazy — most HTTP-only callers
-    // never subscribe.
+    // Eagerly construct (but don't yet open) the WS link when the user
+    // explicitly asked for it. When the WS URL was *derived* from an
+    // HTTP base, leave construction lazy — most HTTP-only callers
+    // never subscribe and never need the WS sibling at all.
+    this._ws = wsExplicit && wsUrl ? new _WsLink(wsUrl) : null;
     this._wsEager = !!wsExplicit;
-    this._wsConnect = null; // memoised connect promise
+    this._wsConnect = null; // memoised connect promise (in-flight or settled)
   }
 
   /** Open the link(s). */
@@ -392,8 +392,20 @@ export class RosClient {
   /** Close the underlying link(s). */
   async close() {
     const tasks = [];
-    if (this._ws) tasks.push(this._ws.close());
     if (this._http) tasks.push(this._http.close());
+    if (this._wsConnect) {
+      // WS is connecting or connected — wait for the open to settle,
+      // then close. Swallow the open error: nothing to close in that case.
+      tasks.push(
+        this._wsConnect.then(
+          (link) => link.close(),
+          () => undefined
+        )
+      );
+    } else if (this._ws) {
+      // Constructed eagerly but connect() never ran — no-op close.
+      tasks.push(this._ws.close());
+    }
     await Promise.all(tasks);
   }
 
@@ -410,36 +422,38 @@ export class RosClient {
         { code: 'transport_unavailable' }
       );
     }
-    if (this._ws) return this._ws;
-    if (!this._wsConnect) {
-      const link = new _WsLink(this._wsUrl);
-      this._wsConnect = link.connect().then(
-        () => {
-          this._ws = link;
-          return link;
-        },
-        (err) => {
-          this._wsConnect = null; // allow a retry on next subscribe()
-          throw Object.assign(
-            new Error(
-              `failed to open WebSocket sibling at ${this._wsUrl}: ${err && err.message ? err.message : String(err)}`
-            ),
-            { code: 'transport_unavailable', cause: err }
-          );
-        }
-      );
-    }
+    if (this._wsConnect) return this._wsConnect; // open is in-flight or done.
+    // Reuse the eagerly-constructed link if present, otherwise build it
+    // now (HTTP-derived sibling case).
+    if (!this._ws) this._ws = new _WsLink(this._wsUrl);
+    const link = this._ws;
+    this._wsConnect = link.connect().then(
+      () => link,
+      (err) => {
+        this._wsConnect = null; // allow a retry on next subscribe()
+        throw Object.assign(
+          new Error(
+            `failed to open WebSocket sibling at ${this._wsUrl}: ${err && err.message ? err.message : String(err)}`
+          ),
+          { code: 'transport_unavailable', cause: err }
+        );
+      }
+    );
     return this._wsConnect;
   }
 
   // -- verb API --
 
-  call(capability, payload) {
-    return (this._http || this._ws).call(capability, payload);
+  async call(capability, payload) {
+    if (this._http) return this._http.call(capability, payload);
+    const ws = await this._ensureWs();
+    return ws.call(capability, payload);
   }
 
-  publish(capability, payload) {
-    return (this._http || this._ws).publish(capability, payload);
+  async publish(capability, payload) {
+    if (this._http) return this._http.publish(capability, payload);
+    const ws = await this._ensureWs();
+    return ws.publish(capability, payload);
   }
 
   async subscribe(capability, callback) {

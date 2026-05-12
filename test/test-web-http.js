@@ -326,6 +326,85 @@ describe('rclnodejs/web — HTTP transport (call + publish)', function () {
         /ws must start with ws:\/\/ or wss:\/\//
       );
     });
+
+    it('call() before connect() rejects asynchronously, never throws sync', async function () {
+      // Regression: previously `(this._http || this._ws).call(...)` could
+      // throw a synchronous TypeError when constructed with ws:// and
+      // connect() hadn't run yet. Now call() is async and rejects.
+      const r = new RosClient('ws://127.0.0.1:1');
+      const p = r.call('/never_used', {});
+      assert.ok(typeof p.then === 'function', 'call() must return a Promise');
+      await assert.rejects(p);
+      await r.close();
+    });
+
+    it('stop() does not hang when keep-alive sockets are open', async function () {
+      // Open a keep-alive request and don't read the body, then stop().
+      // closeAllConnections() must let server.close() resolve promptly.
+      const t0 = Date.now();
+      const stopPromise = (async () => {
+        await fetch(httpBase + '/capability/call/http_add', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: '{}',
+        }).catch(() => undefined);
+      })();
+      await stopPromise;
+      // Build a one-off runtime so we can stop it cleanly here.
+      const tmp = createRuntime({
+        node,
+        transport: new HttpTransport({ port: 0, host: '127.0.0.1' }),
+      });
+      tmp.expose({ call: { '/x': 'std_srvs/srv/Empty' } });
+      await tmp.start();
+      const port = tmp.transports[0].port;
+      // Fire-and-forget a request; ignore its outcome. The keep-alive
+      // socket would normally hold server.close() open for ~5s.
+      fetch(`http://127.0.0.1:${port}/capability/call/x`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{}',
+      }).catch(() => undefined);
+      await new Promise((r) => setTimeout(r, 50));
+      const t1 = Date.now();
+      await tmp.stop();
+      assert.ok(
+        Date.now() - t1 < 2000,
+        `stop() took ${Date.now() - t1}ms; expected fast shutdown`
+      );
+      assert.ok(Date.now() - t0 < 5000, 'whole test should finish under 5s');
+    });
+
+    it('normalises basePath: leading/trailing slash, missing leading', async function () {
+      const cases = [
+        { input: 'cap', expected: '/cap' },
+        { input: '/cap/', expected: '/cap' },
+        { input: '/cap///', expected: '/cap' },
+      ];
+      for (const { input, expected } of cases) {
+        const t = new HttpTransport({ basePath: input });
+        assert.strictEqual(
+          t.basePath,
+          expected,
+          `for ${JSON.stringify(input)}`
+        );
+      }
+      assert.throws(
+        () => new HttpTransport({ basePath: 42 }),
+        /basePath must be a string/
+      );
+    });
+
+    it('rejects sneaky content-type that includes application/json', async function () {
+      const res = await fetch(httpBase + '/capability/call/http_add', {
+        method: 'POST',
+        headers: { 'content-type': 'text/plain;application/json' },
+        body: '{}',
+      });
+      assert.strictEqual(res.status, 400);
+      const body = await res.json();
+      assert.strictEqual(body.code, 'invalid_content_type');
+    });
   });
 });
 
