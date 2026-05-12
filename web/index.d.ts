@@ -37,14 +37,27 @@ declare module 'rclnodejs/web' {
    * string `"<n>n"` so they survive `JSON.stringify`. Everything else
    * passes through unchanged.
    *
+   * Cases (checked in order):
+   *   - `bigint`            → {@link Int64Wire} (the `"<n>n"` string)
+   *   - `ReadonlyArray<U>`  → `WireType<U>[]`   (recurse per element)
+   *   - `Date`              → `string`          (ISO string on the wire)
+   *   - `object`            → field-wise recursion
+   *   - everything else     → passes through unchanged
+   *
    * @experimental — exposed for advanced consumers that want to derive
    * wire shapes by hand. Most users should rely on the type-name
    * generics on {@link RosClient.call} / `subscribe` / etc., which
    * apply this mapping internally.
    */
-  export type WireType<T> = [T] extends [bigint]
-    ? Int64Wire
-    : T extends ReadonlyArray<infer U>
+  // The bigint check uses `[T] extends [bigint]` (tuple wrapper) instead
+  // of bare `T extends bigint` so the conditional doesn't distribute
+  // across union members like `bigint | string` (which would map only
+  // the bigint half and silently drop the rest).
+  export type WireType<T> = [T] extends [bigint] ? Int64Wire : _WireRecurse<T>;
+
+  /** Recursion step for {@link WireType}; pulled out to keep the cascade flat. */
+  type _WireRecurse<T> =
+    T extends ReadonlyArray<infer U>
       ? WireType<U>[]
       : T extends Date
         ? string
