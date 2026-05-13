@@ -238,8 +238,16 @@ class _WsLink {
  */
 class _HttpLink {
   constructor(baseUrl) {
-    // Normalise: strip trailing slash so we can append `/capability/<kind>/<name>`
-    this.baseUrl = baseUrl.replace(/\/+$/, '');
+    // Normalise: strip trailing slash so we can append the path. If
+    // the user URL already ends with `/capability` (e.g. they spelled
+    // it out explicitly, mirroring the WS form), don't double-prefix
+    // it on every fetch. The default-runtime layout still works for
+    // the bare-host form `'http://host:9001'` — we just append the
+    // default path ourselves below.
+    const trimmed = baseUrl.replace(/\/+$/, '');
+    this.baseUrl = trimmed.endsWith('/capability')
+      ? trimmed
+      : trimmed + '/capability';
   }
 
   async connect() {
@@ -261,8 +269,7 @@ class _HttpLink {
   }
 
   async _fetch(kind, capability, payload, expectBody) {
-    const url =
-      this.baseUrl + '/capability/' + kind + '/' + _encodeRosName(capability);
+    const url = this.baseUrl + '/' + kind + '/' + _encodeRosName(capability);
     let res;
     try {
       res = await fetch(url, {
