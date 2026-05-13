@@ -4,6 +4,7 @@
   "private": true,
   "description": "rclnodejs/web browser demo — no toolchain, just <script type=\"module\"> served by a tiny static server that maps /sdk/* to the in-repo SDK.",
   "scripts": {
-    "start": "node server.js"
+    "runtime": "node runtime.js",
+    "static": "node static.js"
   }
 }

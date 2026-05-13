@@ -34,7 +34,7 @@ npm run server
 
 ```bash
 npm run dev
-# ➜  Local:  http://localhost:5173/
+# ➜  Local:  http://localhost:8080/
 ```
 
 Edits to `src/main.ts` hot-reload; edits to `server.ts` need a restart

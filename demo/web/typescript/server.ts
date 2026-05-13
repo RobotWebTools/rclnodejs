@@ -7,9 +7,11 @@
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // TypeScript demo server. Run with `npm run server` (which uses tsx) or
-// `npx tsx server.ts`. Behaviour is identical to demo/web/javascript/server.js
-// except this side is written in TypeScript so the typed SDK story is
-// visible end to end.
+// `npx tsx server.ts`. Behaviour matches demo/web/javascript/runtime.js
+// — same runtime + same demo nodes — except this side is written in
+// TypeScript so the typed SDK story is visible end to end. The static
+// page server is Vite (`npm run dev`), parallel to the JS demo's
+// separate `node static.js`.
 
 // rclnodejs is a CommonJS module without first-class ESM types; using
 // require keeps the server independent of how a downstream project
@@ -94,7 +96,7 @@ async function main(): Promise<void> {
   );
   console.log('Capabilities  :', JSON.stringify(runtime.registry.list()));
   console.log(
-    'Vite dev     : run `npm run dev` in another shell, then open http://localhost:5173/'
+    'Vite dev     : run `npm run dev` in another shell, then open http://localhost:8080/'
   );
 
   const stop = async (): Promise<void> => {

@@ -1,27 +1,41 @@
-# ROS 2 in the browser — no build tools required
+# Zero-build ROS 2 in a single HTML page
 
 A single static HTML page that talks to a real ROS 2 graph — just
 `<script type="module">` and the SDK's ESM file. No bundler, no
 `npm install` for the page itself.
 
-## Run it
+## Run it (two shells)
+
+```bash
+cd demo/web/javascript
+```
+
+**Shell 1 — runtime + the demo's ROS 2 nodes:**
 
 ```bash
 source /opt/ros/<distro>/setup.bash
-node demo/web/javascript/server.js
+node runtime.js          # or: npm run runtime
 # rclnodejs/web : ws://localhost:9000/capability
 #               also http://localhost:9001/capability  (call/publish, curl-able)
-# Static files  : http://localhost:8080/
 ```
 
-Open <http://localhost:8080/> in any modern browser.
+**Shell 2 — static-file server (hosts `index.html` + maps `/sdk/*` to
+the in-repo [`web/`](../../../web/) folder so the page can `import`
+the SDK from a plain URL):**
 
-`server.js` is a convenience for this demo: it runs the rclnodejs/web
-runtime, exposes a tiny `/add_two_ints` service + 1 Hz
-`/web_demo_tick` publisher (so every panel has live data), **and**
-serves `index.html` (mapping `/sdk/*` to the in-repo
-[`web/`](../../../web/) folder so the page can `import` the SDK from
-a plain URL).
+```bash
+node static.js           # or: npm run static
+# Static files : http://localhost:8080/
+```
+
+Open <http://localhost:8080/> in any modern browser. The split is the
+same shape as the [TypeScript demo](../typescript/) (`tsx server.ts`
++ `vite`) — runtime in shell 1, page server in shell 2 — so you can
+swap in `nginx` / a CDN / `python3 -m http.server 8080` for shell 2
+without touching shell 1.
+
+`runtime.js` exposes a tiny `/add_two_ints` service + 1 Hz
+`/web_demo_tick` publisher so every panel has live data.
 
 ## What the browser code looks like
 
@@ -55,18 +69,19 @@ curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
 
 Subscribe stays on WebSocket.
 
-## Without the bundled `server.js`
+## Without the bundled `runtime.js`
 
-`server.js` bundles the runtime, the sample ROS 2 nodes, and the
-static-file server into one process so the demo runs out of the
-box. In a real project you already have those ROS 2 nodes running
-elsewhere, and you serve the page from your normal web host.
-**Replace `node server.js` with the CLI** — the browser code is
-unchanged, only the URL it points to changes:
+`runtime.js` bundles the rclnodejs/web runtime and the demo's sample
+ROS 2 nodes (the `/add_two_ints` service + the `/web_demo_tick`
+publisher) into one process so the demo runs out of the box. In a
+real project you already have those ROS 2 nodes running elsewhere,
+so you only need the runtime. **Replace shell 1's `node runtime.js`
+with the CLI** — shell 2 (`node static.js`) and the browser code are
+unchanged:
 
 ```bash
-# instead of `node server.js` (the `-p rclnodejs` tells npx the
-# `rclnodejs-web` binary lives inside the `rclnodejs` package):
+# shell 1 (instead of `node runtime.js`); the `-p rclnodejs` tells npx
+# the `rclnodejs-web` binary lives inside the `rclnodejs` package:
 npx -p rclnodejs rclnodejs-web web.json
 
 # the publisher / service the demo expects:

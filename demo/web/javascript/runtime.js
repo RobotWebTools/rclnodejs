@@ -6,17 +6,17 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
-// rclnodejs/web demo — server side.
+// rclnodejs/web demo — runtime side (rclnodejs/web runtime + the demo's
+// ROS 2 nodes; named `runtime.js` to avoid being confused with the
+// page-side `static.js`).
 //
 //   1. Source ROS 2 (`source /opt/ros/<distro>/setup.bash`)
-//   2. From this folder run `node server.js`
-//   3. Open index.html in any browser (see README for the deploy options)
+//   2. From this folder run `node runtime.js` (or `npm run runtime`)
+//   3. In another shell run `node static.js` (or `npm run static`) to host
+//      `index.html` on http://localhost:8080/ — same split as the
+//      TypeScript demo's `tsx server.ts` + `vite`.
 
 'use strict';
-
-const path = require('path');
-const http = require('http');
-const fs = require('fs');
 
 const rclnodejs = require('../../../index.js');
 // In a downstream project this is the public, supported import:
@@ -33,7 +33,6 @@ const {
 
 const RUNTIME_PORT = Number(process.env.RUNTIME_PORT || 9000);
 const HTTP_PORT = Number(process.env.HTTP_PORT || 9001);
-const STATIC_PORT = Number(process.env.STATIC_PORT || 8080);
 
 function displayHost(host) {
   return host === '0.0.0.0' || host === '::' ? 'localhost' : host;
@@ -107,67 +106,13 @@ async function main() {
     `              also http://${displayHost('::')}:${HTTP_PORT}/capability  (call/publish, curl-able)`
   );
   console.log('Capabilities  :', JSON.stringify(runtime.registry.list()));
-
-  // ---- Optional: serve index.html so the user does not need any
-  //                bundler or python -m http.server. Static asset
-  //                server only — production deployments use nginx,
-  //                a CDN, or any static host.
-  //
-  // The static server also maps `/sdk/*` to the in-repo `web/`
-  // folder so `index.html` can `import { connect } from '/sdk/index.js'`
-  // without bundling. In a downstream project you'd `npm install
-  // rclnodejs` and import from `node_modules/rclnodejs/web/index.js`
-  // (or your CDN of choice).
-  const demoDir = __dirname;
-  const sdkDir = path.resolve(__dirname, '..', '..', '..', 'web');
-  const staticServer = http.createServer((req, res) => {
-    let urlPath = (req.url || '/').split('?')[0];
-    if (urlPath === '/') urlPath = '/index.html';
-
-    let baseDir;
-    let relPath;
-    if (urlPath.startsWith('/sdk/')) {
-      baseDir = sdkDir;
-      relPath = urlPath.slice('/sdk/'.length);
-    } else {
-      baseDir = demoDir;
-      relPath = urlPath.replace(/^\/+/, '');
-    }
-    const filePath = path.resolve(baseDir, relPath);
-    // Confine reads to baseDir. `path.relative` collapses `..` segments,
-    // so any escape attempt either yields a result that starts with `..`
-    // or is absolute — reject both. (`startsWith(baseDir)` alone would
-    // false-positive on a sibling like `${baseDir}-other/...`.)
-    const rel = path.relative(baseDir, filePath);
-    if (rel.startsWith('..') || path.isAbsolute(rel)) {
-      res.writeHead(403).end('forbidden');
-      return;
-    }
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        res.writeHead(404).end('not found');
-        return;
-      }
-      const ext = path.extname(filePath).toLowerCase();
-      const ctype =
-        {
-          '.html': 'text/html; charset=utf-8',
-          '.js': 'application/javascript; charset=utf-8',
-          '.mjs': 'application/javascript; charset=utf-8',
-          '.css': 'text/css; charset=utf-8',
-          '.json': 'application/json; charset=utf-8',
-        }[ext] || 'application/octet-stream';
-      res.writeHead(200, { 'content-type': ctype }).end(data);
-    });
-  });
-  staticServer.listen(STATIC_PORT, () => {
-    console.log(`Static files : http://localhost:${STATIC_PORT}/`);
-  });
+  console.log(
+    'Static page  : run `node static.js` in another shell, then open http://localhost:8080/'
+  );
 
   // ---- Graceful shutdown ----------------------------------------------
   const stop = async () => {
     console.log('\nstopping…');
-    staticServer.close();
     await runtime.stop();
     rclnodejs.shutdown();
     process.exit(0);

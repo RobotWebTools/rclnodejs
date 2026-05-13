@@ -13,7 +13,9 @@ import { defineConfig } from 'vite';
 // (`optimizeDeps.esbuildOptions.target`).
 export default defineConfig({
   server: {
-    port: 5173,
+    // 8080 to match the JavaScript demo's static-file server, instead of
+    // Vite's default 5173 — keeps the two demos' README instructions in sync.
+    port: 8080,
   },
   esbuild: {
     target: 'es2022',

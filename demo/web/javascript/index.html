@@ -1,12 +1,13 @@
 <!doctype html>
 <!--
-  rclnodejs/web demo. Open via http://localhost:8080/ once
-  `node server.js` is running. See README.md for deploy options.
+  rclnodejs/web demo. Open via http://localhost:8080/ once both
+  `node runtime.js` (rclnodejs/web runtime) and `node static.js`
+  (page server) are running — see README.md.
 -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>rclnodejs/web demo</title>
+    <title>rclnodejs/web — zero-build ROS 2 in a single HTML page</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -105,6 +106,16 @@
         background: #fecaca;
         color: #991b1b;
       }
+      .badge {
+        display: inline-block;
+        font-size: 0.7em;
+        padding: 0.1em 0.4em;
+        border-radius: 4px;
+        background: #f7df1e;
+        color: #000;
+        vertical-align: middle;
+        margin-left: 0.5em;
+      }
       .transport {
         margin: 1em 0 0.5em;
         padding: 0.6em 0.8em;
@@ -129,7 +140,10 @@
     </style>
   </head>
   <body>
-    <h1>rclnodejs/web demo</h1>
+    <h1>
+      Zero-build ROS 2 in a single HTML page
+      <span class="badge">JavaScript</span>
+    </h1>
     <p>
       A single static HTML page that talks to a real ROS 2 graph — one Node
       process exposes a typed, capability-allow-listed gateway, the browser
