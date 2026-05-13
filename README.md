@@ -115,11 +115,12 @@ More runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/
 `rclnodejs` ships **two** browser ↔ ROS 2 bridges — pick one based on
 how much glue you want to write.
 
-- **[`rclnodejs/web`](./tutorials/web.md)** — typed browser SDK +
-  capability runtime. One string generic per call gives request,
-  response, and message types; a `web.json` allow-list is the public
-  API surface; the same capabilities are also reachable over plain
-  HTTP for `curl`, Postman, and AI-agent tool-use. _New in `2.0.0-beta.0`._
+- **[`rclnodejs/web`](./tutorials/web.md)** — **typed, allow-listed,
+  curl-able** browser ↔ ROS 2. A `web.json` file is your public API;
+  the browser SDK types `call` / `publish` / `subscribe` end-to-end
+  from rclnodejs's auto-generated message maps; and
+  `curl -X POST .../capability/call/...` works for shell scripts,
+  Postman, and AI-agent tool-use. _New in `2.0.0-beta.0`._
 
   ```ts
   import { connect } from 'rclnodejs/web';

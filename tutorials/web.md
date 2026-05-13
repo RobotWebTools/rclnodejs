@@ -142,8 +142,7 @@ await ros.close(); // cancels subscriptions, closes both transports
 
 Today **`reconnect: true` is accepted but ignored** (the SDK warns
 once). If the server drops, the client is dead — `connect()` again
-and re-`subscribe()`. Auto-reconnect with resubscribe is on the
-roadmap.
+and re-`subscribe()`.
 
 ## 6. End-to-end
 
@@ -203,37 +202,74 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
 
 ## 8. How it compares
 
-`rclnodejs` ships **two** browser ↔ ROS 2 bridges, side-by-side
-with the upstream `rosbridge` + `roslibjs` stack:
+The browser ↔ ROS 2 space already has `rosbridge` + `roslibjs`, and
+`rclnodejs` itself ships a second, lighter bridge called `rosocket`.
+All three speak to the same ROS graph — the differences live in **the
+contract you sign with the browser**, not in transport tricks.
 
-|                             | `rosocket`                              | **`rclnodejs/web`**                                                  | `rosbridge` + `roslibjs`                 |
-| --------------------------- | --------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------- |
-| **Browser API**             | Hand-rolled `WebSocket + JSON`          | `import { connect } from 'rclnodejs/web'`                            | `roslibjs`                               |
-| **URL shape**               | `/topic/<name>`, `/service/<name>`      | `/capability` (WS) + `POST /capability/{call,publish}/<name>` (HTTP) | rosbridge protocol over WS               |
-| **Public surface**          | All listed topics/services              | **Required `web.json` allow-list** — a reviewable artifact           | The whole ROS graph                      |
-| **TypeScript types**        | `any`-shaped                            | Single string generic → request/response/message                     | `any`-shaped; bolt-on community packages |
-| **HTTP `call` / `publish`** | ❌                                      | ✅ — `curl`, Postman, AI-agent tool-use just work                    | ❌                                       |
-| **Best for**                | Quick prototypes, `roslibjs`-style apps | New apps, AI agents, typed UIs                                       | Graph introspection, rqt-web, fleet UIs  |
+> 💡 **Why we don't try to hide the ROS graph.** Robotics has no
+> stable equivalent to the web's URL/DOM/REST/SQL primitives, so any
+> attempt at a fully product-agnostic `robot.navigate(...)` style API
+> ends in unbounded capability explosion. All three options below
+> therefore keep the browser facing topics/services/actions
+> deliberately. The differentiator is the operational surface
+> _around_ the graph (allow-list, types, transports, governance), not
+> a new frontend abstraction. `robot.navigate()`-style verbs belong
+> in the integrator's product layer on top of these.
 
-`rosocket` and `rclnodejs/web` are **siblings**, not layers — run as
-separate processes on separate ports. `rosbridge` remains the right
-choice when you genuinely need graph-shaped semantics (anything that
-has to enumerate the live graph rather than work against a fixed
-contract).
+### Pick by the contract you want
+
+| You want…                                                                       | Use                                                                   |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **A reviewable allow-list, typed SDK, and curl-able HTTP** for new browser apps | **`rclnodejs/web`** _(this guide; default for new code)_              |
+| Live graph introspection / debug consoles / `rqt`-web / fleet topic discovery   | `rosbridge` + `roslibjs`                                              |
+| Hand-rolled `WebSocket + JSON` against a couple of named topics, no SDK at all  | [`rosocket`](../rosocket/)                                            |
+| You already have a working `roslibjs` codebase with no migration pressure       | Stay on `rosbridge` + `roslibjs`                                      |
+| You need ROS 2 Actions                                                          | `rosbridge` + `roslibjs` _(rclnodejs/web does not implement actions)_ |
+
+### Detailed matrix
+
+|                             | **`rclnodejs/web`** _(default)_                                      | [`rosocket`](../rosocket/)              | `rosbridge` + `roslibjs`                                         |
+| --------------------------- | -------------------------------------------------------------------- | --------------------------------------- | ---------------------------------------------------------------- |
+| **Public API surface**      | **`web.json` allow-list — reviewable artifact**                      | All listed topics/services              | The whole live ROS graph                                         |
+| **Browser API**             | `import { connect } from 'rclnodejs/web'` — typed, three verbs       | Hand-rolled `WebSocket + JSON`          | `roslibjs`                                                       |
+| **TypeScript types**        | Single string generic → request/response/message from generated maps | `any`-shaped                            | `any`; bolt-on community packages                                |
+| **Wire shape**              | `/capability` (WS) + `POST /capability/{call,publish}/<name>` (HTTP) | `/topic/<name>`, `/service/<name>` (WS) | rosbridge protocol over WS                                       |
+| **HTTP `call` / `publish`** | ✅ — `curl`, Postman, AI-agent tool-use just work                    | ❌                                      | ❌                                                               |
+| **Setup**                   | `npx rclnodejs-web web.json`                                         | `npx rosocket --topic …`                | `apt install ros-<distro>-rosbridge-server` + Python launch file |
+| **Auth hooks**              | `verifyClient` / `verifyRequest` per transport (today)               | Connection-level                        | `securityglobs` plugin                                           |
+| **Mature / battle-tested**  | New (2.0)                                                            | New (2.0)                               | 10+ years in production                                          |
+
+### Sibling, not competitor: `rosocket`
+
+`rosocket` and `rclnodejs/web` ship in the **same** rclnodejs package
+but are independent runtimes — different ports, different contracts,
+no shared state. Reach for `rosocket` when you genuinely just want
+"one named topic over a raw WebSocket"; reach for `rclnodejs/web`
+when you want a typed SDK and a reviewable allow-list. Neither
+replaces the other.
+
+### Not a `rosbridge` replacement
+
+`rosbridge` is still the right tool when the browser genuinely needs
+**graph-shaped semantics** — enumerating live topics, building
+`rqt`-style debug UIs, fleet dashboards that have to discover what's
+running. `rclnodejs/web` deliberately gives that up in exchange for a
+narrow, declarative contract.
 
 ## 9. Auth, HTTPS, Actions
 
 - **HTTPS / `wss://`.** The runtime speaks plain `ws://` and
   `http://`. Put nginx, Caddy, or any TLS proxy in front of
   `rclnodejs-web`; clients then point at `wss://` / `https://`.
-- **Auth.** Today, gate at the connection level via the
+- **Auth.** Gate at the connection level via the
   `verifyClient(req)` / `verifyRequest(req)` hooks on
   `WebSocketTransport` / `HttpTransport` (return `false` to reject
-  with a 401). Per-capability scopes are on the roadmap.
+  with a 401).
 - **Browser ROS install?** No — the browser only ever speaks to the
   endpoint `rclnodejs-web` exposes.
-- **Actions.** Not yet — reserved as the `action` kind in the wire
-  protocol; coming in a follow-up release.
+- **Actions.** Not implemented. Use `rosbridge` + `roslibjs` if you
+  need ROS 2 Actions in the browser today.
 
 ## See also
 
