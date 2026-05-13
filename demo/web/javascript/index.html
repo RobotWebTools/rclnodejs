@@ -8,32 +8,46 @@
     <meta charset="utf-8" />
     <title>rclnodejs/web demo</title>
     <style>
-      :root { color-scheme: light dark; }
+      :root {
+        color-scheme: light dark;
+      }
       body {
         font-family: system-ui, sans-serif;
         max-width: 880px;
         margin: 2em auto;
         padding: 0 1em;
       }
-      h1 { margin-bottom: 0; }
-      h2 { margin-top: 2em; }
+      h1 {
+        margin-bottom: 0;
+      }
+      h2 {
+        margin-top: 2em;
+      }
       .endpoint {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 0.9em;
       }
-      input, button {
+      input,
+      button {
         font-size: 1em;
         padding: 0.3em 0.5em;
       }
-      input[type='text'], input[type='number'] { width: 8em; }
+      input[type='text'],
+      input[type='number'] {
+        width: 8em;
+      }
       .panel {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 1em;
         align-items: start;
       }
-      .controls { padding: 0.25em 0; }
-      .controls .row { margin-bottom: 0.5em; }
+      .controls {
+        padding: 0.25em 0;
+      }
+      .controls .row {
+        margin-bottom: 0.5em;
+      }
       .log {
         background: #1e1e1e;
         color: #d4d4d4;
@@ -46,9 +60,15 @@
         white-space: pre-wrap;
       }
       /* Don't render the dark log box until something is logged. */
-      .log:empty { display: none; }
-      .log .ok { color: #6ec06e; }
-      .log .err { color: #f08080; }
+      .log:empty {
+        display: none;
+      }
+      .log .ok {
+        color: #6ec06e;
+      }
+      .log .err {
+        color: #f08080;
+      }
       pre.code {
         margin: 0;
         background: #1e1e1e;
@@ -59,9 +79,16 @@
         line-height: 1.4;
         overflow: auto;
       }
-      .code .kw { color: #569cd6; }
-      .code .str { color: #ce9178; }
-      .code .com { color: #6a9955; font-style: italic; }
+      .code .kw {
+        color: #569cd6;
+      }
+      .code .str {
+        color: #ce9178;
+      }
+      .code .com {
+        color: #6a9955;
+        font-style: italic;
+      }
       .status {
         display: inline-block;
         font-size: 0.85em;
@@ -70,8 +97,14 @@
         background: #fde68a;
         color: #92400e;
       }
-      .status.ok { background: #bbf7d0; color: #166534; }
-      .status.err { background: #fecaca; color: #991b1b; }
+      .status.ok {
+        background: #bbf7d0;
+        color: #166534;
+      }
+      .status.err {
+        background: #fecaca;
+        color: #991b1b;
+      }
       .transport {
         margin: 1em 0 0.5em;
         padding: 0.6em 0.8em;
@@ -79,32 +112,47 @@
         border-radius: 4px;
         font-size: 0.9em;
       }
-      .transport label { margin-right: 1em; cursor: pointer; }
+      .transport label {
+        margin-right: 1em;
+        cursor: pointer;
+      }
       @media (prefers-color-scheme: dark) {
-        .transport { background: #2a2a2a; }
+        .transport {
+          background: #2a2a2a;
+        }
       }
       @media (max-width: 720px) {
-        .panel { grid-template-columns: 1fr; }
+        .panel {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
     <h1>rclnodejs/web demo</h1>
     <p>
-      Browser-side proof that one Node process exposes a typed,
-      capability-allow-listed gateway from the browser to ROS 2 — no
-      <code>roslibjs</code>, no rosbridge.
+      A single static HTML page that talks to a real ROS 2 graph — one Node
+      process exposes a typed, capability-allow-listed gateway, the browser
+      drives it with three verbs.
     </p>
     <p>
-      Endpoint: <span class="endpoint" id="endpoint">ws://localhost:9000/capability</span>
+      Endpoint:
+      <span class="endpoint" id="endpoint">ws://localhost:9000/capability</span>
       &nbsp;<span class="status" id="status">connecting…</span>
     </p>
     <div class="transport">
       <strong>Transport:</strong>
-      <label><input type="radio" name="transport" value="ws" checked /> WebSocket (call+publish+subscribe)</label>
-      <label><input type="radio" name="transport" value="http" /> HTTP (call+publish; subscribe falls through to WS sibling)</label>
-      <div style="margin-top:0.4em;font-size:0.85em;color:#666">
-        Same registry, same allow-list — the SDK picks the transport from the URL scheme.
+      <label
+        ><input type="radio" name="transport" value="ws" checked /> WebSocket
+        (call+publish+subscribe)</label
+      >
+      <label
+        ><input type="radio" name="transport" value="http" /> HTTP
+        (call+publish; subscribe falls through to WS sibling)</label
+      >
+      <div style="margin-top: 0.4em; font-size: 0.85em; color: #666">
+        Same registry, same allow-list — the SDK picks the transport from the
+        URL scheme.
       </div>
     </div>
 
@@ -119,7 +167,9 @@
         </div>
         <div class="log" id="callLog"></div>
       </div>
-      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
@@ -138,7 +188,9 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
         </div>
         <div class="log" id="tickLog"></div>
       </div>
-      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
@@ -155,12 +207,19 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
     <div class="panel">
       <div class="controls">
         <div class="row">
-          <input id="chatMsg" type="text" value="hello from the browser" style="width:18em" />
+          <input
+            id="chatMsg"
+            type="text"
+            value="hello from the browser"
+            style="width: 18em"
+          />
           <button id="pubBtn">publish</button>
         </div>
         <div class="log" id="chatLog"></div>
       </div>
-      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
@@ -180,7 +239,9 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
         </div>
         <div class="log" id="badLog"></div>
       </div>
-      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
@@ -194,13 +255,16 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
     </div>
 
     <h2>5. Same capability, no SDK — just <code>curl</code></h2>
-    <p style="font-size:0.9em;color:#555">
-      The HTTP transport is what makes <code>rclnodejs/web</code> <em>actually</em>
-      web-native: every <code>call</code> and <code>publish</code> in your
-      allow-list is reachable from any HTTP client — curl, Postman, an
-      AI agent… no JavaScript required. Subscribe stays on WebSocket.
+    <p style="font-size: 0.9em; color: #555">
+      The HTTP transport is what makes <code>rclnodejs/web</code>
+      <em>actually</em> web-native: every <code>call</code> and
+      <code>publish</code> in your allow-list is reachable from any HTTP client
+      — curl, Postman, an AI agent… no JavaScript required. Subscribe stays on
+      WebSocket.
     </p>
-    <pre class="code"><span class="com"># service call — returns 200 + JSON</span>
+    <pre
+      class="code"
+    ><span class="com"># service call — returns 200 + JSON</span>
 curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
   -H <span class="str">'content-type: application/json'</span> \
   -d <span class="str">'{"a":"7n","b":"35n"}'</span>
@@ -261,13 +325,17 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
 
       async function teardown() {
         if (tickSub) {
-          try { await tickSub.close(); } catch (_) {}
+          try {
+            await tickSub.close();
+          } catch (_) {}
           tickSub = null;
           document.getElementById('subBtn').disabled = false;
           document.getElementById('unsubBtn').disabled = true;
         }
         if (ros) {
-          try { await ros.close(); } catch (_) {}
+          try {
+            await ros.close();
+          } catch (_) {}
           ros = null;
         }
       }
@@ -288,7 +356,7 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
         // this work — see comment above.
         try {
           await ros.subscribe('/web_demo_chatter', (msg) =>
-            log('chatLog', `<- ${msg.data}`),
+            log('chatLog', `<- ${msg.data}`)
           );
         } catch (e) {
           log('chatLog', `subscribe failed: ${e.message} (${e.code})`, 'err');
@@ -319,7 +387,7 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
           if (!ros) return;
           try {
             tickSub = await ros.subscribe('/web_demo_tick', (msg) =>
-              log('tickLog', msg.data),
+              log('tickLog', msg.data)
             );
             subBtn.disabled = true;
             unsubBtn.disabled = false;
@@ -352,14 +420,18 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
           if (!ros) return;
           try {
             await ros.call('/dangerous', {});
-            log('badLog', 'unexpected success — registry should have rejected', 'err');
+            log(
+              'badLog',
+              'unexpected success — registry should have rejected',
+              'err'
+            );
           } catch (e) {
             log('badLog', `rejected: ${e.message} (${e.code})`, 'ok');
           }
         };
 
         for (const radio of document.querySelectorAll(
-          'input[name="transport"]',
+          'input[name="transport"]'
         )) {
           radio.addEventListener('change', (e) => reconnect(e.target.value));
         }

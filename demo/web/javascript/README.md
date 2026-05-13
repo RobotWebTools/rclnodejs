@@ -1,8 +1,8 @@
-# JavaScript demo (no build tools)
+# ROS 2 in the browser — no build tools required
 
-A single static HTML page that talks to a real ROS 2 graph. No
-`roslibjs`, no rosbridge, **no bundler** — just `<script type="module">`
-and the SDK's ESM file.
+A single static HTML page that talks to a real ROS 2 graph — just
+`<script type="module">` and the SDK's ESM file. No bundler, no
+`npm install` for the page itself.
 
 ## Run it
 
@@ -16,10 +16,12 @@ node demo/web/javascript/server.js
 
 Open <http://localhost:8080/> in any modern browser.
 
-`server.js` does two things you'd normally split: it exposes ROS 2 to
-the browser **and** serves `index.html` (mapping `/sdk/*` to the
-in-repo [`web/`](../../../web/) folder so the page can `import` the
-SDK from a plain URL).
+`server.js` is a convenience for this demo: it runs the rclnodejs/web
+runtime, exposes a tiny `/add_two_ints` service + 1 Hz
+`/web_demo_tick` publisher (so every panel has live data), **and**
+serves `index.html` (mapping `/sdk/*` to the in-repo
+[`web/`](../../../web/) folder so the page can `import` the SDK from
+a plain URL).
 
 ## What the browser code looks like
 
@@ -55,14 +57,22 @@ Subscribe stays on WebSocket.
 
 ## Without the bundled `server.js`
 
-Real projects use the `rclnodejs-web` CLI against an existing ROS 2
-graph instead of running `server.js`:
+`server.js` bundles the runtime, the sample ROS 2 nodes, and the
+static-file server into one process so the demo runs out of the
+box. In a real project you already have those ROS 2 nodes running
+elsewhere, and you serve the page from your normal web host.
+**Replace `node server.js` with the CLI** — the browser code is
+unchanged, only the URL it points to changes:
 
 ```bash
-npx rclnodejs-web web.json
-```
+# instead of `node server.js` (the `-p rclnodejs` tells npx the
+# `rclnodejs-web` binary lives inside the `rclnodejs` package):
+npx -p rclnodejs rclnodejs-web web.json
 
-The browser code is unchanged; only the URL it points to changes.
+# the publisher / service the demo expects:
+ros2 run demo_nodes_cpp add_two_ints_server
+# (and a publisher of std_msgs/String on /web_demo_tick from any source)
+```
 
 ## Putting the SDK in your own project
 

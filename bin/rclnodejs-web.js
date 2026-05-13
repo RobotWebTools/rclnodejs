@@ -64,68 +64,95 @@ const argv = process.argv.slice(2);
     HttpTransport,
   } = require('../lib/runtime');
 
-  await rclnodejs.init();
-  const node = rclnodejs.createNode(cfg.node);
-  rclnodejs.spin(node);
+  // Track partial init so the catch block can clean up native handles before
+  // process.exit() — without this, a startup failure (e.g. EADDRINUSE on the
+  // WS port) leaves rclnodejs's native spin loop running and segfaults on exit.
+  let rclInitialized = false;
+  let runtime = null;
 
-  // Always start the WebSocket transport. Add HTTP only when the user
-  // configured an http.port (via --http-port or in the config file).
-  const transports = [
-    new WebSocketTransport({
-      port: cfg.port,
-      host: cfg.host,
-      path: cfg.path,
-    }),
-  ];
-  const httpEnabled =
-    cfg.http && cfg.http.port !== null && cfg.http.port !== undefined;
-  if (httpEnabled) {
-    transports.push(
-      new HttpTransport({
-        port: cfg.http.port,
-        host: cfg.http.host || cfg.host,
-        basePath: cfg.http.basePath || cfg.path,
-      })
-    );
-  }
-  const runtime = createRuntime({ node, transports });
-  runtime.expose(cfg.expose);
-  await runtime.start();
+  try {
+    await rclnodejs.init();
+    rclInitialized = true;
 
-  // After start(), each transport reports the actual bound port
-  // (matters for `--port 0` / `--http-port 0` ephemeral modes).
-  const wsTransport = runtime.transports[0];
-  const httpTransport = httpEnabled ? runtime.transports[1] : null;
+    const node = rclnodejs.createNode(cfg.node);
+    rclnodejs.spin(node);
 
-  if (!parsed.quiet) {
-    const displayHost = (h) =>
-      ['0.0.0.0', '::'].includes(h) ? 'localhost' : h;
-    const list = runtime.registry.list();
-    const totals =
-      Object.keys(list.call).length +
-      Object.keys(list.publish).length +
-      Object.keys(list.subscribe).length;
-    process.stdout.write(
-      `rclnodejs/web listening on ws://${displayHost(cfg.host)}:${wsTransport.port}${cfg.path} (${totals} capabilities)\n`
-    );
-    if (httpTransport) {
-      const httpHost = displayHost(cfg.http.host || cfg.host);
-      const httpBase = cfg.http.basePath || cfg.path;
-      process.stdout.write(
-        `                  also http://${httpHost}:${httpTransport.port}${httpBase} (call/publish only)\n`
+    // Always start the WebSocket transport. Add HTTP only when the user
+    // configured an http.port (via --http-port or in the config file).
+    const transports = [
+      new WebSocketTransport({
+        port: cfg.port,
+        host: cfg.host,
+        path: cfg.path,
+      }),
+    ];
+    const httpEnabled =
+      cfg.http && cfg.http.port !== null && cfg.http.port !== undefined;
+    if (httpEnabled) {
+      transports.push(
+        new HttpTransport({
+          port: cfg.http.port,
+          host: cfg.http.host || cfg.host,
+          basePath: cfg.http.basePath || cfg.path,
+        })
       );
     }
-  }
+    runtime = createRuntime({ node, transports });
+    runtime.expose(cfg.expose);
+    await runtime.start();
 
-  const stop = async () => {
-    if (!parsed.quiet) process.stdout.write('\nstopping…\n');
-    await runtime.stop();
-    rclnodejs.shutdown();
-    process.exit(0);
-  };
-  process.once('SIGINT', stop);
-  process.once('SIGTERM', stop);
-})().catch((err) => fail(err));
+    // After start(), each transport reports the actual bound port
+    // (matters for `--port 0` / `--http-port 0` ephemeral modes).
+    const wsTransport = runtime.transports[0];
+    const httpTransport = httpEnabled ? runtime.transports[1] : null;
+
+    if (!parsed.quiet) {
+      const displayHost = (h) =>
+        ['0.0.0.0', '::'].includes(h) ? 'localhost' : h;
+      const list = runtime.registry.list();
+      const totals =
+        Object.keys(list.call).length +
+        Object.keys(list.publish).length +
+        Object.keys(list.subscribe).length;
+      process.stdout.write(
+        `rclnodejs/web listening on ws://${displayHost(cfg.host)}:${wsTransport.port}${cfg.path} (${totals} capabilities)\n`
+      );
+      if (httpTransport) {
+        const httpHost = displayHost(cfg.http.host || cfg.host);
+        const httpBase = cfg.http.basePath || cfg.path;
+        process.stdout.write(
+          `                  also http://${httpHost}:${httpTransport.port}${httpBase} (call/publish only)\n`
+        );
+      }
+    }
+
+    const stop = async () => {
+      if (!parsed.quiet) process.stdout.write('\nstopping…\n');
+      await runtime.stop();
+      rclnodejs.shutdown();
+      process.exit(0);
+    };
+    process.once('SIGINT', stop);
+    process.once('SIGTERM', stop);
+  } catch (err) {
+    // Best-effort native cleanup so rclnodejs doesn't segfault on dirty exit.
+    if (runtime) {
+      try {
+        await runtime.stop();
+      } catch (_) {
+        /* ignore — we're already failing */
+      }
+    }
+    if (rclInitialized) {
+      try {
+        rclnodejs.shutdown();
+      } catch (_) {
+        /* ignore — we're already failing */
+      }
+    }
+    fail(err);
+  }
+})();
 
 function fail(err) {
   if (err && err.cli) {

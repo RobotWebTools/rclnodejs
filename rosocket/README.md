@@ -15,6 +15,17 @@ browser** (or any WebSocket-capable client) talk to ROS 2 through `rclnodejs`,
 with **no extra JavaScript library** required on the client side. Browsers
 only need the built-in `WebSocket` and `JSON` APIs.
 
+> 💡 **Building a new browser app? Start with [`rclnodejs/web`](../web/README.md).**
+> It's the recommended browser ↔ ROS 2 SDK in this package — typed three-verb
+> API (`call` / `publish` / `subscribe`), a reviewable per-app capability
+> allow-list (`web.json`), and a `curl`-able HTTP transport for Postman /
+> AI-agent tool-use. **`rosocket` (this page) is the lighter sibling**:
+> one named topic or service per WebSocket, no SDK, no allow-list. Reach
+> for `rosocket` when you genuinely want exactly that; reach for
+> `rclnodejs/web` when you want a typed SDK, an allow-list, and HTTP
+> fallback. See [`web/README.md` §4 "How it compares"](../web/README.md#4-how-it-compares)
+> for the full picture vs. `rosbridge` + `roslibjs`.
+
 How it compares with the classic
 [rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite) +
 [roslibjs](https://github.com/RobotWebTools/roslibjs) stack:

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>rclnodejs/web — TypeScript demo</title>
+    <title>rclnodejs/web — end-to-end typed in a TypeScript app</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -12,10 +12,10 @@
       <span class="badge">TypeScript</span>
     </h1>
     <p>
-      Same four panels as the JavaScript demo, but the browser entry is
-      written in <strong>TypeScript</strong> with Vite — pass one ROS
-      type-name string per call and the SDK derives the request,
-      response, and message shapes from rclnodejs's generated types.
+      Same five panels as the JavaScript demo, but the browser entry is written
+      in <strong>TypeScript</strong> with Vite — pass one ROS type-name string
+      per call and the SDK derives the request, response, and message shapes
+      from rclnodejs's generated types.
     </p>
     <p>
       Endpoint:
@@ -24,11 +24,17 @@
     </p>
     <div class="transport">
       <strong>Transport:</strong>
-      <label><input type="radio" name="transport" value="ws" checked /> WebSocket</label>
-      <label><input type="radio" name="transport" value="http" /> HTTP (call+publish; subscribe falls through to WS)</label>
-      <div style="margin-top:0.4em;font-size:0.85em;color:#666">
-        Same registry, same allow-list, same typed SDK — only the URL
-        scheme changes.
+      <label
+        ><input type="radio" name="transport" value="ws" checked />
+        WebSocket</label
+      >
+      <label
+        ><input type="radio" name="transport" value="http" /> HTTP
+        (call+publish; subscribe falls through to WS)</label
+      >
+      <div style="margin-top: 0.4em; font-size: 0.85em; color: #666">
+        Same registry, same allow-list, same typed SDK — only the URL scheme
+        changes.
       </div>
     </div>
 
@@ -43,7 +49,9 @@
         </div>
         <div class="log" id="callLog"></div>
       </div>
-      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
@@ -65,7 +73,9 @@ console.log(reply.sum); <span class="com">// '42n'  (typed as `${number}n`)</spa
         </div>
         <div class="log" id="tickLog"></div>
       </div>
-      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
@@ -83,12 +93,19 @@ console.log(reply.sum); <span class="com">// '42n'  (typed as `${number}n`)</spa
     <div class="panel">
       <div class="controls">
         <div class="row">
-          <input id="chatMsg" type="text" value="hello from TS" style="width:18em" />
+          <input
+            id="chatMsg"
+            type="text"
+            value="hello from TS"
+            style="width: 18em"
+          />
           <button id="pubBtn">publish</button>
         </div>
         <div class="log" id="chatLog"></div>
       </div>
-      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
@@ -111,7 +128,9 @@ console.log(reply.sum); <span class="com">// '42n'  (typed as `${number}n`)</spa
         </div>
         <div class="log" id="badLog"></div>
       </div>
-      <pre class="code"><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'rclnodejs/web'</span>;
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
@@ -125,12 +144,14 @@ console.log(reply.sum); <span class="com">// '42n'  (typed as `${number}n`)</spa
     </div>
 
     <h2>5. Same capability, no SDK — just <code>curl</code></h2>
-    <p style="font-size:0.9em;color:#555">
-      Every <code>call</code> / <code>publish</code> in the allow-list
-      is also reachable as plain HTTP. AI agents and CLI scripts can
-      hit the runtime without a JavaScript stack.
+    <p style="font-size: 0.9em; color: #555">
+      Every <code>call</code> / <code>publish</code> in the allow-list is also
+      reachable as plain HTTP. AI agents and CLI scripts can hit the runtime
+      without a JavaScript stack.
     </p>
-    <pre class="code"><span class="com"># service call — returns 200 + JSON</span>
+    <pre
+      class="code"
+    ><span class="com"># service call — returns 200 + JSON</span>
 curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
   -H <span class="str">'content-type: application/json'</span> \
   -d <span class="str">'{"a":"7n","b":"35n"}'</span>

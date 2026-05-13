@@ -6,7 +6,7 @@
   "description": "TypeScript-first demo of rclnodejs/web with Vite.",
   "scripts": {
     "server": "tsx server.ts",
-    "rclnodejs-web": "rclnodejs-web ../javascript/web.json",
+    "rclnodejs-web": "rclnodejs-web web.json",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
