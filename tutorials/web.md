@@ -249,6 +249,15 @@ no shared state. Reach for `rosocket` when you genuinely just want
 when you want a typed SDK and a reviewable allow-list. Neither
 replaces the other.
 
+> **The URL shapes are deliberately different**, not a missed
+> opportunity to unify. `rosocket`'s `ws://host:9000/topic/<name>`
+> means "one socket per resource, the path **is** the resource";
+> `rclnodejs/web`'s `ws://host:9000/capability` means "one socket per
+> session, the resource lives in the message frame so call/publish/
+> subscribe can multiplex." Same wire (WebSocket + JSON), different
+> multiplexing model. The URL is the user-visible signal of which
+> contract you're talking to.
+
 ### Not a `rosbridge` replacement
 
 `rosbridge` is still the right tool when the browser genuinely needs
