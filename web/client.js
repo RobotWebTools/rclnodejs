@@ -328,17 +328,18 @@ function _encodeRosName(name) {
  *     same host with `/capability` appended.
  *   - object `{http, ws}`    → both URLs spelled out explicitly.
  *
- * **Path conventions.** The single-URL forms assume the server uses
- * the default `/capability` layout for both transports. If you change
- * `--path` / `--http-base-path` on the server (or sit it behind a
- * path-rewriting proxy), pass the full URLs via `{http, ws}` so the
- * SDK does not have to guess.
+ * **Path conventions.** When a `ws://` / `wss://` URL is passed
+ * without a path (or with just `/`), the SDK appends the runtime's
+ * default `/capability` path automatically — `'ws://host:9000'` and
+ * `'ws://host:9000/capability'` therefore behave identically. Pass
+ * an explicit non-default path if your server changed `--path` /
+ * `--http-base-path` or sits behind a path-rewriting proxy.
  *
  * @example
  *   import { connect } from 'rclnodejs/web';
  *
- *   // WebSocket-only
- *   const ros = await connect('ws://robot.local:9000/capability');
+ *   // WebSocket-only (path defaults to /capability)
+ *   const ros = await connect('ws://robot.local:9000');
  *
  *   // HTTP for call/publish, automatic WS sibling for subscribe
  *   const ros = await connect('http://robot.local:9001');
@@ -473,7 +474,7 @@ function _resolveUrls(url) {
   // Form 1: explicit { http, ws } pair.
   if (url && typeof url === 'object' && !Array.isArray(url)) {
     const httpUrl = _validateEndpoint(url.http, 'http');
-    const wsUrl = _validateEndpoint(url.ws, 'ws');
+    const wsUrl = _normaliseWsPath(_validateEndpoint(url.ws, 'ws'));
     if (!httpUrl && !wsUrl) {
       throw new TypeError(
         'connect({http, ws}): at least one of http or ws must be provided'
@@ -489,7 +490,7 @@ function _resolveUrls(url) {
     );
   }
   if (/^wss?:\/\//i.test(url)) {
-    return { httpUrl: null, wsUrl: url, wsExplicit: true };
+    return { httpUrl: null, wsUrl: _normaliseWsPath(url), wsExplicit: true };
   }
   if (/^https?:\/\//i.test(url)) {
     // HTTP base URL: derive a sibling WS URL lazily — we don't open
@@ -499,6 +500,26 @@ function _resolveUrls(url) {
   throw new TypeError(
     `connect(url): unrecognised URL scheme: ${url} (expected ws://, wss://, http://, or https://)`
   );
+}
+
+// Append the runtime's default `/capability` path when the caller
+// passed a bare host (`ws://host:9000` or `ws://host:9000/`). Leave
+// any explicit non-empty path untouched so users behind a
+// path-rewriting proxy or with a non-default `WebSocketTransport({
+// path })` keep working. Returns the input unchanged on parse error
+// (let the underlying WebSocket constructor surface the bad URL).
+function _normaliseWsPath(wsUrl) {
+  if (!wsUrl) return wsUrl;
+  try {
+    const u = new URL(wsUrl);
+    if (u.pathname === '' || u.pathname === '/') {
+      u.pathname = '/capability';
+      return u.toString();
+    }
+    return wsUrl;
+  } catch (_) {
+    return wsUrl;
+  }
 }
 
 // Swap http(s) → ws(s) and append the default `/capability` path.

@@ -133,6 +133,31 @@ describe('rclnodejs/web (Browser SDK)', function () {
       await ros.close();
     }
   });
+
+  // The runtime listens on `/capability` by default. Callers should be
+  // able to omit that path from the URL and still connect — the SDK
+  // appends it automatically when the user-supplied URL has no path.
+  it('appends the default /capability path when the URL has none', async function () {
+    const port = runtime.transports[0].port;
+    const ros = await connect(`ws://127.0.0.1:${port}`);
+    try {
+      const sub = await ros.subscribe('/rt_chatter', () => {});
+      await sub.close();
+    } finally {
+      await ros.close();
+    }
+  });
+
+  it('appends the default /capability path inside { ws } form', async function () {
+    const port = runtime.transports[0].port;
+    const ros = await connect({ ws: `ws://127.0.0.1:${port}` });
+    try {
+      const sub = await ros.subscribe('/rt_chatter', () => {});
+      await sub.close();
+    } finally {
+      await ros.close();
+    }
+  });
 });
 
 function waitFor(predicate, timeoutMs) {
