@@ -89,28 +89,17 @@ describe('type description service test suite', function () {
       this.skip();
     }
 
-    setTimeout(() => {
-      exec(
-        'ros2 param list /test_type_description_service',
-        (error, stdout, stderr) => {
-          if (error || stderr) {
-            done(
-              new Error(
-                `Test type description service configured by parameter failed. Error: ${error}, Stderr: ${stderr}`
-              )
-            );
-            return;
-          }
-          if (stdout.includes('start_type_description_service')) {
-            done();
-          } else {
-            done(
-              new Error("'start_type_description_service' not found in stdout.")
-            );
-          }
-        }
-      );
-    }, 1000);
+    // ROS 2 graph discovery is asynchronous: there is no guarantee
+    // that an external `ros2` CLI process will see this node
+    // immediately after rclnodejs.spin() returns. A fixed setTimeout
+    // is racy on slower runners (notably the Rolling lane). Poll
+    // instead, with a generous overall budget.
+    waitForRos2Cli(
+      'ros2 param list /test_type_description_service',
+      (stdout) => stdout.includes('start_type_description_service'),
+      done,
+      "'start_type_description_service' not found in stdout."
+    );
   });
 
   it('Test start_type_description_service parameter value', function (done) {
@@ -118,30 +107,59 @@ describe('type description service test suite', function () {
       this.skip();
     }
 
-    setTimeout(() => {
-      exec(
-        'ros2 param get /test_type_description_service start_type_description_service',
-        (error, stdout, stderr) => {
-          if (error || stderr) {
-            done(
-              new Error(
-                `Test type description service configured by parameter failed. Error: ${error}, Stderr: ${stderr}`
-              )
-            );
-            return;
-          }
-          if (stdout.includes('Boolean value is: True')) {
-            done();
-          } else {
-            console.log(stdout);
-            done(
-              new Error(
-                "'start_type_description_service param value' not found in stdout."
-              )
-            );
-          }
-        }
-      );
-    }, 1000);
+    waitForRos2Cli(
+      'ros2 param get /test_type_description_service start_type_description_service',
+      (stdout) => stdout.includes('Boolean value is: True'),
+      done,
+      "'start_type_description_service param value' not found in stdout."
+    );
   });
 });
+
+// Run a `ros2 ...` CLI command repeatedly until either `predicate(stdout)`
+// returns true (success) or the overall budget runs out. Treats
+// `Node not found` and other transient failures as retryable while the
+// graph is still propagating; surfaces the last error otherwise.
+function waitForRos2Cli(
+  cmd,
+  predicate,
+  done,
+  notFoundMessage,
+  { timeoutMs = 15000, intervalMs = 500 } = {}
+) {
+  const deadline = Date.now() + timeoutMs;
+  let lastErr = null;
+  let lastStdout = '';
+  let lastStderr = '';
+
+  const tick = () => {
+    exec(cmd, (error, stdout, stderr) => {
+      lastErr = error;
+      lastStdout = stdout || '';
+      lastStderr = stderr || '';
+
+      if (!error && !stderr && predicate(lastStdout)) {
+        return done();
+      }
+
+      if (Date.now() < deadline) {
+        return setTimeout(tick, intervalMs);
+      }
+
+      // Timed out. Prefer the most informative failure: the predicate
+      // mismatch (we got a CLI response but the wrong content) wins
+      // over a transient discovery error.
+      if (!error && !stderr) {
+        return done(new Error(`${notFoundMessage}\nstdout: ${lastStdout}`));
+      }
+      done(
+        new Error(
+          `\`${cmd}\` did not succeed within ${timeoutMs}ms. ` +
+            `Last error: ${lastErr}, last stderr: ${lastStderr}`
+        )
+      );
+    });
+  };
+
+  tick();
+}

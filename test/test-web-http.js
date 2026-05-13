@@ -238,6 +238,33 @@ describe('rclnodejs/web — HTTP transport (call + publish)', function () {
         await ros.close();
       }
     });
+
+    // The HTTP transport's default basePath is `/capability`. Callers
+    // should be able to spell that out explicitly without the SDK
+    // double-prefixing it on every fetch — `'http://host:port'` and
+    // `'http://host:port/capability'` must produce the same request
+    // URLs.
+    it('accepts URLs with explicit /capability suffix without double-prefixing', async function () {
+      const ros = await connect(httpBase + '/capability');
+      try {
+        const reply = await ros.call('/http_add', { a: '5n', b: '7n' });
+        assert.strictEqual(reply.sum, '12n');
+      } finally {
+        await ros.close();
+      }
+    });
+
+    it('idempotent under { http } form too', async function () {
+      const ros = await connect({ http: httpBase + '/capability' });
+      try {
+        const ret = await ros.publish('/http_chatter', {
+          data: 'explicit-base',
+        });
+        assert.strictEqual(ret, undefined);
+      } finally {
+        await ros.close();
+      }
+    });
   });
 
   // -----------------------------------------------------------------

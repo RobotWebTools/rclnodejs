@@ -143,12 +143,12 @@ declare module 'rclnodejs/web' {
    *     host with `/capability` appended.
    *   - {@link ConnectEndpoints} — both URLs spelled out.
    *
-   * **Path conventions.** The single-URL forms assume the server uses
-   * the default `rclnodejs-web` path layout: `/capability` for both
-   * transports. If you change `--http-base-path` or `--path` on the
-   * server (or sit it behind a path-rewriting proxy), pass the full
-   * URLs via {@link ConnectEndpoints} instead so the SDK does not
-   * have to guess.
+   * **Path conventions.** When a `ws://` / `wss://` URL is passed
+   * without a path (or with just `/`), the SDK appends the runtime's
+   * default `/capability` path automatically — so `'ws://host:9000'`
+   * and `'ws://host:9000/capability'` behave identically. Pass an
+   * explicit non-default path if your server changed `--path` /
+   * `--http-base-path` or sits behind a path-rewriting proxy.
    */
   export class RosClient {
     readonly url: string;
