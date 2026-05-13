@@ -42,7 +42,7 @@ Reduce network traffic and improve performance by filtering messages at the DDS 
 
 Use RxJS Observables for reactive programming with ROS 2 subscriptions. Apply operators like `throttleTime()`, `combineLatest()`, and `filter()` to process message streams declaratively.
 
-#### [rclnodejs/web — Browser SDK guide](web.md)
+#### [rclnodejs/web — Browser SDK guide](../web/README.md)
 
 Front-end developer guide to talking to ROS 2 from a web app using `rclnodejs/web` and the bundled `rclnodejs-web` CLI. Covers the `connect()` URL forms (WebSocket vs. HTTP vs. split endpoints), the typed verb API (`call` / `publish` / `subscribe`) with single-string-generic typing derived from generated `MessagesMap` / `ServicesMap`, the `"42n"` BigInt convention, structured error codes, and curl recipes.
 

@@ -30,7 +30,7 @@ This example assumes your ROS 2 environment is already sourced.
 ## Documentation
 
 - Get started:
-  [Installation](#installation), [Quick Start](#quick-start), [Web SDK guide](./tutorials/web.md), [Tutorials](./tutorials/)
+  [Installation](#installation), [Quick Start](#quick-start), [Web SDK guide](./web/README.md), [Tutorials](./tutorials/)
 - Reference:
   [API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html), [Using TypeScript](#using-rclnodejs-with-typescript), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation)
 - Features:
@@ -115,7 +115,7 @@ More runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/
 `rclnodejs` ships **two** browser ↔ ROS 2 bridges — pick one based on
 how much glue you want to write.
 
-- **[`rclnodejs/web`](./tutorials/web.md)** — **typed, allow-listed,
+- **[`rclnodejs/web`](./web/README.md)** — **typed, allow-listed,
   curl-able** browser ↔ ROS 2. A `web.json` file is your public API;
   the browser SDK types `call` / `publish` / `subscribe` end-to-end
   from rclnodejs's auto-generated message maps; and

@@ -3,7 +3,7 @@
 > Talk to ROS 2 from a web app — typed, allow-listed, no `roslibjs`.
 
 `rclnodejs/web` is the browser-side of `rclnodejs`: a compact ESM
-module (`web/client.js`) plus a server runtime (`bin/rclnodejs-web.js`)
+module (`./client.js`) plus a server runtime (`../bin/rclnodejs-web.js`)
 that exposes a declarative subset of your ROS 2 graph over WebSocket
 **and** plain HTTP. The browser API is three verbs — `call`,
 `publish`, `subscribe` — typed end-to-end from rclnodejs's
@@ -282,7 +282,7 @@ narrow, declarative contract.
 
 ## See also
 
-- [`web/client.js`](../web/client.js) — the SDK source, worth a skim.
+- [`client.js`](./client.js) — the SDK source, worth a skim.
 - [`demo/web/javascript/`](../demo/web/javascript/) — runnable demo,
   no build tools, transport toggle + curl recipes.
 - [`demo/web/typescript/`](../demo/web/typescript/) — same demo with
