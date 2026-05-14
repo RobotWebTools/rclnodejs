@@ -42,7 +42,7 @@ function parseResourcePath(pathname) {
 }
 
 /**
- * Start a resource-style WebSocket bridge that exposes ROS 2 topics and
+ * Start a resource-style WebSocket gateway that exposes ROS 2 topics and
  * services as plain WebSocket URLs carrying ROS messages as JSON.
  *
  * URL scheme:

@@ -66,7 +66,7 @@ npm install rclnodejs
 - Tutorials: [tutorials/](https://github.com/RobotWebTools/rclnodejs/tree/develop/tutorials)
 - JavaScript examples: [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
 - TypeScript demos: [demo/typescript/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript)
-- WebSocket bridge demo (rosocket): [demo/rosocket/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/rosocket)
+- WebSocket gateway demo (rosocket): [demo/rosocket/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/rosocket)
 - Electron demos: [demo/electron/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/electron)
 - Companion CLI: [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/)
 
@@ -96,7 +96,7 @@ TypeScript declaration files are included in the package. In most projects, conf
 
 Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript example at the top of this README.
 
-## rosocket — Browser ↔ ROS 2 bridge
+## rosocket — ROS 2 gateway for the browser
 
 A tiny WebSocket gateway to ROS 2, built into `rclnodejs`. Exposes ROS 2 topics and services as plain WebSocket URLs — a lightweight alternative to the rosbridge + roslibjs stack. Browsers use only built-in `WebSocket` + `JSON`; no JavaScript library required.
 

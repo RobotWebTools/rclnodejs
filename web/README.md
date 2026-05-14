@@ -145,7 +145,7 @@ curl -sS -X POST http://localhost:9001/capability/publish/chatter \
 ## 4. How it compares
 
 The closest neighbour in this space is `rosbridge` + `roslibjs` — the
-standard browser ↔ ROS 2 stack for the past decade. Both target the
+standard browser-side ROS 2 stack for the past decade. Both target the
 same job (talk to ROS 2 from a web app over WebSocket + JSON) and
 both deliberately keep the browser facing topics/services rather
 than inventing a higher-level abstraction. What differs is **what's

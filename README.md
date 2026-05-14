@@ -13,7 +13,7 @@
 
 **rclnodejs** is a Node.js client library for [ROS 2](https://www.ros.org/) that provides comprehensive JavaScript and TypeScript APIs for developing ROS 2 solutions.
 
-**Key features:** Topics, Services, Actions, Parameters, Lifecycle Nodes, TypeScript support, RxJS Observables, Electron integration, browser ↔ ROS 2 (typed Web SDK + WebSocket bridge — `rclnodejs/web`, `rosocket`), and prebuilt binaries for Linux x64/arm64.
+**Key features:** Topics, Services, Actions, Parameters, Lifecycle Nodes, TypeScript support, RxJS Observables, Electron integration, ROS 2 in the browser (typed Web SDK + thin WebSocket gateway — `rclnodejs/web`, `rosocket`), and prebuilt binaries for Linux x64/arm64.
 
 ```javascript
 const rclnodejs = require('rclnodejs');
@@ -32,9 +32,9 @@ This example assumes your ROS 2 environment is already sourced.
 - Get started:
   [Installation](#installation), [Quick Start](#quick-start), [Web SDK guide](./web/README.md), [Tutorials](./tutorials/)
 - Reference:
-  [API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html), [Using TypeScript](#using-rclnodejs-with-typescript), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation)
+  [API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation), [Using TypeScript](#using-rclnodejs-with-typescript)
 - Features:
-  [Browser ↔ ROS 2](#browser--ros-2), [Observable Subscriptions](#observable-subscriptions), [Electron-based Visualization](#electron-based-visualization), [Performance Benchmarks](#performance-benchmarks), [rclnodejs-cli](#rclnodejs-cli)
+  [ROS 2 in the browser](#ros-2-in-the-browser), [Observable Subscriptions](#observable-subscriptions), [Electron-based Visualization](#electron-based-visualization)
 - Project docs:
   [Efficient Usage Tips](./docs/EFFICIENCY.md), [FAQ and Known Issues](./docs/FAQ.md), [Building from Scratch](./docs/BUILDING.md), [Contributing](./docs/CONTRIBUTING.md)
 
@@ -110,17 +110,19 @@ node example/topics/publisher/publisher-example.js
 
 More runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
 
-## Browser ↔ ROS 2
+## ROS 2 in the browser
 
-`rclnodejs` ships **two** browser ↔ ROS 2 bridges — pick one based on
+`rclnodejs` ships **two** ways to reach ROS 2 from the browser — pick one based on
 how much glue you want to write.
 
 - **[`rclnodejs/web`](./web/README.md)** — **typed, allow-listed,
-  curl-able** browser ↔ ROS 2. A `web.json` file is your public API;
+  curl-able** ROS 2 in the browser. A `web.json` file is your public API;
   the browser SDK types `call` / `publish` / `subscribe` end-to-end
-  from rclnodejs's auto-generated message maps; and
-  `curl -X POST .../capability/call/...` works for shell scripts,
-  Postman, and AI-agent tool-use. _New in `2.0.0-beta.0`._
+  from your ROS 2 message types; and every capability
+  is also a plain HTTP endpoint —
+  `curl -X POST http://<host>/capability/call/<name>` — so shell
+  scripts, Postman, and AI-agent tool-use just work.
+  _New in `2.0.0-beta.0`._
 
   ```ts
   import { connect } from 'rclnodejs/web';
@@ -138,6 +140,31 @@ how much glue you want to write.
   ```bash
   npx rosocket --port 9000 --topic /chatter:std_msgs/msg/String
   ```
+
+## Observable Subscriptions
+
+rclnodejs supports [RxJS](https://rxjs.dev/) Observable subscriptions for reactive programming with ROS 2 messages. Use operators like `throttleTime()`, `debounceTime()`, `map()`, and `combineLatest()` to build declarative message processing pipelines.
+
+```javascript
+const { throttleTime, map } = require('rxjs');
+
+const obsSub = node.createObservableSubscription(
+  'sensor_msgs/msg/LaserScan',
+  '/scan'
+);
+obsSub.observable
+  .pipe(
+    throttleTime(200),
+    map((msg) => msg.ranges)
+  )
+  .subscribe((ranges) => console.log('Ranges:', ranges.length));
+```
+
+See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions.md) for more details.
+
+## Electron-based Visualization
+
+Build desktop ROS 2 apps with Electron + Three.js, packaged for Windows/macOS/Linux via **Electron Forge**. Featured demo: 🦾 **[manipulator](./demo/electron/manipulator)** — a two-joint arm with manual/automatic control. More in [demo/electron](./demo/electron/).
 
 ## ROS 2 Interface Message Generation
 
@@ -181,38 +208,10 @@ TypeScript declaration files are included in the package and exposed through the
 
 Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript example at the top of this README. See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript) for more.
 
-## Observable Subscriptions
+## More
 
-rclnodejs supports [RxJS](https://rxjs.dev/) Observable subscriptions for reactive programming with ROS 2 messages. Use operators like `throttleTime()`, `debounceTime()`, `map()`, and `combineLatest()` to build declarative message processing pipelines.
-
-```javascript
-const { throttleTime, map } = require('rxjs');
-
-const obsSub = node.createObservableSubscription(
-  'sensor_msgs/msg/LaserScan',
-  '/scan'
-);
-obsSub.observable
-  .pipe(
-    throttleTime(200),
-    map((msg) => msg.ranges)
-  )
-  .subscribe((ranges) => console.log('Ranges:', ranges.length));
-```
-
-See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions.md) for more details.
-
-## Electron-based Visualization
-
-Build desktop ROS 2 apps with Electron + Three.js, packaged for Windows/macOS/Linux via **Electron Forge**. Featured demo: 🦾 **[manipulator](./demo/electron/manipulator)** — a two-joint arm with manual/automatic control. More in [demo/electron](./demo/electron/).
-
-## Performance Benchmarks
-
-`rclnodejs` lands between `rclcpp` (C++) and `rclpy` (Python) for both topic and service round-trips — typically **~4× faster than `rclpy`** and within an order of magnitude of `rclcpp` (1000 iterations × 1024 KB messages, Ubuntu 24.04 WSL2). Full table and methodology in [benchmark/README.md](./benchmark/README.md).
-
-## rclnodejs-cli
-
-[rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) is a companion project providing command-line tooling for scaffolding rclnodejs application skeletons and working with launch files for multi-node orchestration.
+- **Performance** — faster than `rclpy` and competitive with `rclcpp` for both topic and service round-trips. Full benchmarks in [benchmark/README.md](./benchmark/README.md).
+- **Companion CLI** — [`rclnodejs-cli`](https://github.com/RobotWebTools/rclnodejs-cli/) scaffolds rclnodejs application skeletons and orchestrates launch files for multi-node setups.
 
 ## Contributing
 
