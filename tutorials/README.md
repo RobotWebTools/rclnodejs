@@ -44,7 +44,7 @@ Use RxJS Observables for reactive programming with ROS 2 subscriptions. Apply op
 
 #### [rclnodejs/web — Browser SDK guide](../web/README.md)
 
-Front-end developer guide to talking to ROS 2 from a web app using `rclnodejs/web` and the bundled `rclnodejs-web` CLI. Covers the `connect()` URL forms (WebSocket vs. HTTP vs. split endpoints), the typed verb API (`call` / `publish` / `subscribe`) with single-string-generic typing derived from generated `MessagesMap` / `ServicesMap`, the `"42n"` BigInt convention, structured error codes, and curl recipes.
+Front-end developer guide to talking to ROS 2 from a web app using `rclnodejs/web` and the bundled `rclnodejs-web` CLI. Covers the `connect()` URL forms (WebSocket vs. HTTP vs. split endpoints), the typed verb API (`call` / `publish` / `subscribe`) — one ROS 2 type name gives you a fully typed request, response, or message — the `"42n"` BigInt convention for 64-bit integers, structured error codes, and curl recipes.
 
 ### 🔍 Introspection & Debugging
 
