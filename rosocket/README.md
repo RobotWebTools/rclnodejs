@@ -23,8 +23,8 @@ only need the built-in `WebSocket` and `JSON` APIs.
 > one named topic or service per WebSocket, no SDK, no allow-list. Reach
 > for `rosocket` when you genuinely want exactly that; reach for
 > `rclnodejs/web` when you want a typed SDK, an allow-list, and HTTP
-> fallback. See [`web/README.md` §4 "How it compares"](../web/README.md#4-how-it-compares)
-> for the full picture vs. `rosbridge` + `roslibjs`.
+> fallback. See [`rclnodejs/web` vs. `rosbridge` + `roslibjs`](../web/README.md#4-rclnodejsweb-vs-rosbridge-roslibjs)
+> in the SDK guide for the full picture.
 
 How it compares with the classic
 [rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite) +
