@@ -11,8 +11,8 @@
 // page-side `static.js`).
 //
 //   1. Source ROS 2 (`source /opt/ros/<distro>/setup.bash`)
-//   2. From this folder run `node runtime.js` (or `npm run runtime`)
-//   3. In another shell run `node static.js` (or `npm run static`) to host
+//   2. From this folder run `node runtime.js`
+//   3. In another shell run `node static.js` to host
 //      `index.html` on http://localhost:8080/ — same split as the
 //      TypeScript demo's `tsx server.ts` + `vite`.
 
@@ -22,9 +22,8 @@ const rclnodejs = require('../../../index.js');
 // In a downstream project this is the public, supported import:
 //   const { createRuntime, WebSocketTransport, HttpTransport } =
 //     require('rclnodejs/web/server');
-// Inside this in-repo demo we go through the relative path because the
-// `demo/web/javascript/` folder has its own package.json (so Node's
-// package self-reference doesn't see `rclnodejs` as resolvable here).
+// Inside this in-repo demo we use the relative path so the file runs
+// straight out of a fresh git clone, no `npm install` required.
 const {
   createRuntime,
   WebSocketTransport,

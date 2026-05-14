@@ -16,9 +16,8 @@
 //
 // Pair with `node runtime.js` (the rclnodejs/web runtime + the demo's
 // ROS 2 nodes) in another shell — the same split as the TypeScript
-// demo's `tsx server.ts` + `vite`. Run as `node static.js` or
-// `npm run static`. Production deployments use nginx, a CDN, or any
-// other static host.
+// demo's `tsx server.ts` + `vite`. Production deployments use nginx,
+// a CDN, or any other static host.
 
 'use strict';
 

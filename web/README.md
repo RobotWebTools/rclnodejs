@@ -141,15 +141,14 @@ curl -sS -X POST http://localhost:9001/capability/publish/chatter \
   -d '{"data":"hi from curl"}'
 ```
 
-## 4. How it compares
+## 4. `rclnodejs/web` vs. `rosbridge` + `roslibjs`
 
-The closest neighbour in this space is `rosbridge` + `roslibjs` — the
-standard browser-side ROS 2 stack for the past decade. Both target the
-same job (talk to ROS 2 from a web app over WebSocket + JSON) and
-both deliberately keep the browser facing topics/services rather
-than inventing a higher-level abstraction. What differs is **what's
-exposed to the browser, how strongly it's typed, and whether plain
-HTTP works**:
+`rosbridge` + `roslibjs` is the standard browser-side ROS 2 stack of the
+past decade. Both stacks target the same job (talk to ROS 2 from a web
+app over WebSocket + JSON) and both keep the browser facing
+topics/services rather than inventing a higher-level abstraction. What
+differs is **what's exposed to the browser, how strongly it's typed,
+and whether plain HTTP works**:
 
 |                             | **`rclnodejs/web`**                                                  | `rosbridge` + `roslibjs`          |
 | --------------------------- | -------------------------------------------------------------------- | --------------------------------- |

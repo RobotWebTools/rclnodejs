@@ -1,8 +1,7 @@
 # End-to-end typed ROS 2 in a TypeScript app
 
-Same five panels as [`../javascript/`](../javascript/), but the browser
-entry is **TypeScript** with **Vite** — so the typed SDK story is
-visible in your IDE.
+A **TypeScript** browser entry built with **Vite**, driven by the typed
+SDK so request, reply, and message shapes are visible in your IDE.
 
 ```ts
 const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
@@ -37,9 +36,6 @@ npm run dev
 # ➜  Local:  http://localhost:8080/
 ```
 
-Edits to `src/main.ts` hot-reload; edits to `server.ts` need a restart
-of shell 1.
-
 ## Without the bundled `server.ts`
 
 `npm run server` is a convenience for this demo — it bundles the
@@ -70,11 +66,3 @@ sees `ws://localhost:9000/capability` either way.
 | `npm run typecheck` | `tsc --noEmit` — silent on success                   |
 | `npm run build`     | static bundle in `dist/` (~6 kB JS, ~1.5 kB CSS gz)  |
 | `npm run preview`   | serve the built `dist/`                              |
-
-## Deploying for real
-
-Browser bundle (`dist/`) and runtime are independent — they only
-share a WebSocket URL. Static-host the bundle anywhere; run
-`rclnodejs-web` wherever ROS 2 lives. For production: terminate
-`wss://` at a TLS proxy, gate the upgrade with your existing auth,
-keep `web.json` narrow.
