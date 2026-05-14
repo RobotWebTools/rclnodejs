@@ -5,7 +5,7 @@
   "type": "module",
   "description": "TypeScript-first demo of rclnodejs/web with Vite.",
   "scripts": {
-    "server": "tsx server.ts",
+    "server": "NODE_OPTIONS=--no-deprecation tsx server.ts",
     "rclnodejs-web": "rclnodejs-web web.json",
     "dev": "vite",
     "build": "vite build",

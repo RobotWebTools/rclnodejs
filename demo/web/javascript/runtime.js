@@ -37,6 +37,25 @@ function displayHost(host) {
   return host === '0.0.0.0' || host === '::' ? 'localhost' : host;
 }
 
+// Render the registry as a small human-readable table:
+//   call       /add_two_ints       example_interfaces/srv/AddTwoInts
+//   publish    /web_demo_chatter   std_msgs/msg/String
+//   subscribe  /web_demo_tick      std_msgs/msg/String
+function formatCapabilities(caps) {
+  const rows = [];
+  for (const verb of ['call', 'publish', 'subscribe']) {
+    for (const [topic, type] of Object.entries(caps[verb] || {})) {
+      rows.push([verb, topic, type]);
+    }
+  }
+  if (rows.length === 0) return '  (none)';
+  const w0 = Math.max(...rows.map((r) => r[0].length));
+  const w1 = Math.max(...rows.map((r) => r[1].length));
+  return rows
+    .map(([v, t, ty]) => `  ${v.padEnd(w0)}  ${t.padEnd(w1)}  ${ty}`)
+    .join('\n');
+}
+
 async function main() {
   // ---- Layer 1: rclnodejs core ----------------------------------------
   await rclnodejs.init();
@@ -98,15 +117,25 @@ async function main() {
   });
   await runtime.start();
 
+  const caps = runtime.registry.list();
+  const total =
+    Object.keys(caps.call || {}).length +
+    Object.keys(caps.publish || {}).length +
+    Object.keys(caps.subscribe || {}).length;
+
+  console.log('rclnodejs/web demo running (JavaScript)');
   console.log(
-    `rclnodejs/web : ws://${displayHost('::')}:${RUNTIME_PORT}/capability`
+    `  WebSocket : ws://${displayHost('::')}:${RUNTIME_PORT}/capability`
   );
   console.log(
-    `              also http://${displayHost('::')}:${HTTP_PORT}/capability  (call/publish, curl-able)`
+    `  HTTP      : http://${displayHost('::')}:${HTTP_PORT}/capability  (call / publish, curl-able)`
   );
-  console.log('Capabilities  :', JSON.stringify(runtime.registry.list()));
+  console.log();
+  console.log(`Exposed capabilities (${total}):`);
+  console.log(formatCapabilities(caps));
+  console.log();
   console.log(
-    'Static page  : run `node static.js` in another shell, then open http://localhost:8080/'
+    'Static page: run `node static.js` in another shell, then open http://localhost:8080/'
   );
 
   // ---- Graceful shutdown ----------------------------------------------

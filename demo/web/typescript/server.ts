@@ -29,6 +29,25 @@ const { createRuntime, WebSocketTransport, HttpTransport } = require_(
 const RUNTIME_PORT = Number(process.env.RUNTIME_PORT || 9000);
 const HTTP_PORT = Number(process.env.HTTP_PORT || 9001);
 
+// Render the registry as a small human-readable table — see the matching
+// helper in demo/web/javascript/runtime.js.
+function formatCapabilities(
+  caps: Record<'call' | 'publish' | 'subscribe', Record<string, string>>
+): string {
+  const rows: Array<[string, string, string]> = [];
+  for (const verb of ['call', 'publish', 'subscribe'] as const) {
+    for (const [topic, type] of Object.entries(caps[verb] || {})) {
+      rows.push([verb, topic, type]);
+    }
+  }
+  if (rows.length === 0) return '  (none)';
+  const w0 = Math.max(...rows.map((r) => r[0].length));
+  const w1 = Math.max(...rows.map((r) => r[1].length));
+  return rows
+    .map(([v, t, ty]) => `  ${v.padEnd(w0)}  ${t.padEnd(w1)}  ${ty}`)
+    .join('\n');
+}
+
 async function main(): Promise<void> {
   await rclnodejs.init();
   const node = rclnodejs.createNode('rclnodejs_web_ts_demo_node');
@@ -88,15 +107,23 @@ async function main(): Promise<void> {
   });
   await runtime.start();
 
+  const caps = runtime.registry.list();
+  const total =
+    Object.keys(caps.call || {}).length +
+    Object.keys(caps.publish || {}).length +
+    Object.keys(caps.subscribe || {}).length;
+
+  console.log('rclnodejs/web demo running (TypeScript)');
+  console.log(`  WebSocket : ws://localhost:${RUNTIME_PORT}/capability`);
   console.log(
-    `rclnodejs/web : ws://localhost:${RUNTIME_PORT}/capability  (TS demo)`
+    `  HTTP      : http://localhost:${HTTP_PORT}/capability  (call / publish, curl-able)`
   );
+  console.log();
+  console.log(`Exposed capabilities (${total}):`);
+  console.log(formatCapabilities(caps));
+  console.log();
   console.log(
-    `              also http://localhost:${HTTP_PORT}/capability  (call/publish, curl-able)`
-  );
-  console.log('Capabilities  :', JSON.stringify(runtime.registry.list()));
-  console.log(
-    'Vite dev     : run `npm run dev` in another shell, then open http://localhost:8080/'
+    'Static page: run `npm run dev` in another shell, then open http://localhost:8080/'
   );
 
   const stop = async (): Promise<void> => {
