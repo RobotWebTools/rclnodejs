@@ -46,22 +46,3 @@ await ros.publish('/cmd_vel', { linear: { x: 0.5 } });
 That's the whole API. No connection state machine, no `roslibjs`, no
 operations dictionary. See [`web/README.md`](../../web/README.md)
 for the full guide.
-
-## Things you'll likely ask
-
-- **Will my browser need a ROS install?** No. The browser only speaks
-  to the WebSocket (or HTTP) endpoint that `rclnodejs/web` exposes.
-- **Can the browser reach `/dangerous_topic` if it knows the name?**
-  No — anything not listed in `web.json` is rejected with
-  `code: 'not_exposed'`. The allow-list is the contract.
-- **HTTPS / `wss://`?** Put nginx, Caddy, or any TLS proxy in front
-  of `rclnodejs-web`. The runtime itself speaks plain `ws://` /
-  `http://`.
-- **Auth?** Today: gate at the connection level via the
-  `verifyClient(req)` / `verifyRequest(req)` hooks on
-  `WebSocketTransport` / `HttpTransport`. Per-capability scopes are
-  on the roadmap.
-- **Actions?** Not yet — coming in a follow-up release.
-- **64-bit integers look weird** (`"42n"`)? — That's how JavaScript
-  handles `int64` on the wire. Both the SDK and your ROS 2 messages
-  round-trip them transparently.

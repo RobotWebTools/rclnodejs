@@ -6,8 +6,7 @@
 module plus a server runtime that together expose a declarative
 subset of your ROS 2 graph over WebSocket **and** plain HTTP. The
 browser API is three verbs — `call`, `publish`, `subscribe` — typed
-end-to-end from rclnodejs's auto-generated message and service
-maps.
+end-to-end from your ROS 2 message and service types.
 
 For runnable code see [`demo/web/`](../demo/web/):
 
@@ -84,7 +83,7 @@ const ros = await connect({
 
 The snippet below is **TypeScript** — the `<'pkg/.../Type'>` generic
 in angle brackets is what drives end-to-end typing of the payload
-and reply, sourced from rclnodejs's generated maps (no codegen, no
+and reply from your ROS 2 message types (no codegen, no
 shared types module). From plain JavaScript, drop the generic and
 the calls behave identically.
 
@@ -155,5 +154,5 @@ HTTP works**:
 |                             | **`rclnodejs/web`**                                                  | `rosbridge` + `roslibjs`          |
 | --------------------------- | -------------------------------------------------------------------- | --------------------------------- |
 | **Public API surface**      | **`web.json` allow-list — reviewable artifact**                      | The whole live ROS graph          |
-| **TypeScript types**        | Single string generic → request/response/message from generated maps | `any`; bolt-on community packages |
+| **TypeScript types**        | One ROS 2 type name → fully typed request/response/message | `any`; bolt-on community packages |
 | **HTTP `call` / `publish`** | ✅ — `curl`, Postman, AI-agent tool-use just work                    | ❌ (WebSocket only)               |
