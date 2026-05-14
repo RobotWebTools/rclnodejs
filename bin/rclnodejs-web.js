@@ -114,8 +114,9 @@ const argv = process.argv.slice(2);
         Object.keys(list.call).length +
         Object.keys(list.publish).length +
         Object.keys(list.subscribe).length;
+      const noun = totals === 1 ? 'capability' : 'capabilities';
       process.stdout.write(
-        `rclnodejs/web listening on ws://${displayHost(cfg.host)}:${wsTransport.port}${cfg.path} (${totals} capabilities)\n`
+        `rclnodejs/web listening on ws://${displayHost(cfg.host)}:${wsTransport.port}${cfg.path} (${totals} ${noun})\n`
       );
       if (httpTransport) {
         const httpHost = displayHost(cfg.http.host || cfg.host);
