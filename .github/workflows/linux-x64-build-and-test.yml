@@ -64,7 +64,7 @@ jobs:
       if: ${{ matrix.ros_distribution == 'rolling' || matrix.ros_distribution == 'lyrical' }}
       run: |
         apt-get update
-        apt-get install -y software-properties-common curl
+        apt-get install -y sudo software-properties-common curl
 
         # Enable required repositories. The same setup applies to both the
         # rolling nightly tarball and the lyrical apt-deb install; see the
