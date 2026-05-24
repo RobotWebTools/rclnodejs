@@ -27,7 +27,7 @@ jobs:
           - ros_distribution: kilted
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-kilted-20250728/ros2-kilted-20250728-windows-release-amd64.zip"
             run_tests: false
-          # Lyrical Luth (May 2026 - May 2031, beta)
+          # Lyrical Luth (May 2026 - May 2031)
           # Reference: https://docs.ros.org/en/lyrical/Installation/Windows-Install-Binary.html
           - ros_distribution: lyrical
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-20260522/ros2-lyrical-2026-05-22-windows-AMD64.zip"

@@ -32,7 +32,7 @@ jobs:
           - docker_image: ubuntu:noble
             ros_distribution: kilted
             ubuntu_codename: noble
-          # Lyrical Luth (May 2026 - May 2031, beta)
+          # Lyrical Luth (May 2026 - May 2031)
           - docker_image: ubuntu:26.04
             ros_distribution: lyrical
             ubuntu_codename: resolute

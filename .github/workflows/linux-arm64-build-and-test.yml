@@ -37,7 +37,7 @@ jobs:
           # Kilted Kaiju (May 2025 - Dec 2026)
           - docker_image: ubuntu:noble
             ros_distribution: kilted
-          # Lyrical Luth (May 2026 - May 2031, beta)
+          # Lyrical Luth (May 2026 - May 2031)
           - docker_image: ubuntu:26.04
             ros_distribution: lyrical
 
