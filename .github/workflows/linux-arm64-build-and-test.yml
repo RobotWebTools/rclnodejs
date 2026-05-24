@@ -58,7 +58,7 @@ jobs:
       if: ${{ matrix.ros_distribution == 'lyrical' }}
       run: |
         apt-get update
-        apt-get install -y software-properties-common curl
+        apt-get install -y sudo software-properties-common curl
 
         # Enable required repositories per:
         # https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
