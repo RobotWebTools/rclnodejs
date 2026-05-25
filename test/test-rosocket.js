@@ -14,7 +14,7 @@ const rclnodejs = require('../index.js');
 const { startRosocket } = require('../rosocket');
 const rosocket = require('../rosocket');
 
-describe('rosocket resource-style WebSocket bridge', function () {
+describe('rosocket resource-style WebSocket gateway', function () {
   this.timeout(60 * 1000);
 
   it('exports startRosocket', function () {

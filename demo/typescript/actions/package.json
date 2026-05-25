@@ -34,7 +34,7 @@
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
-    "rclnodejs": "^1.0.0"
+    "rclnodejs": "^2.0.0"
   },
   "peerDependenciesMeta": {
     "rclnodejs": {

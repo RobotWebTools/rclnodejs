@@ -1,0 +1,23 @@
+{
+  "name": "rclnodejs-web-ts-demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TypeScript-first demo of rclnodejs/web with Vite.",
+  "scripts": {
+    "server": "NODE_OPTIONS=--no-deprecation tsx server.ts",
+    "rclnodejs-web": "rclnodejs-web web.json",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "rclnodejs": "^2.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7"
+  }
+}

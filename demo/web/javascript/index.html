@@ -1,0 +1,459 @@
+<!doctype html>
+<!--
+  rclnodejs/web demo. Open via http://localhost:8080/ once both
+  `node runtime.js` (rclnodejs/web runtime) and `node static.js`
+  (page server) are running — see README.md.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>rclnodejs/web — zero-build ROS 2 in a single HTML page</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 880px;
+        margin: 2em auto;
+        padding: 0 1em;
+      }
+      h1 {
+        margin-bottom: 0;
+      }
+      h2 {
+        margin-top: 2em;
+      }
+      .endpoint {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+      }
+      input,
+      button {
+        font-size: 1em;
+        padding: 0.3em 0.5em;
+      }
+      input[type='text'],
+      input[type='number'] {
+        width: 8em;
+      }
+      .panel {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1em;
+        align-items: start;
+      }
+      .controls {
+        padding: 0.25em 0;
+      }
+      .controls .row {
+        margin-bottom: 0.5em;
+      }
+      .log {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 0.6em;
+        border-radius: 4px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.85em;
+        max-height: 12em;
+        overflow: auto;
+        white-space: pre-wrap;
+      }
+      /* Don't render the dark log box until something is logged. */
+      .log:empty {
+        display: none;
+      }
+      .log .ok {
+        color: #6ec06e;
+      }
+      .log .err {
+        color: #f08080;
+      }
+      pre.code {
+        margin: 0;
+        background: #1e1e1e;
+        color: #e6e6e6;
+        padding: 0.75em;
+        border-radius: 4px;
+        font-size: 0.85em;
+        line-height: 1.4;
+        overflow: auto;
+      }
+      .code .kw {
+        color: #569cd6;
+      }
+      .code .str {
+        color: #ce9178;
+      }
+      .code .com {
+        color: #6a9955;
+        font-style: italic;
+      }
+      .status {
+        display: inline-block;
+        font-size: 0.85em;
+        padding: 0.15em 0.6em;
+        border-radius: 999px;
+        background: #fde68a;
+        color: #92400e;
+      }
+      .status.ok {
+        background: #bbf7d0;
+        color: #166534;
+      }
+      .status.err {
+        background: #fecaca;
+        color: #991b1b;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.7em;
+        padding: 0.1em 0.4em;
+        border-radius: 4px;
+        background: #f7df1e;
+        color: #000;
+        vertical-align: middle;
+        margin-left: 0.5em;
+      }
+      .transport {
+        margin: 1em 0 0.5em;
+        padding: 0.6em 0.8em;
+        background: #f5f5f4;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+      .transport label {
+        margin-right: 1em;
+        cursor: pointer;
+      }
+      @media (prefers-color-scheme: dark) {
+        .transport {
+          background: #2a2a2a;
+        }
+      }
+      @media (max-width: 720px) {
+        .panel {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      Zero-build ROS 2 in a single HTML page
+      <span class="badge">JavaScript</span>
+    </h1>
+    <p>
+      A single static HTML page that talks to a real ROS 2 graph — one Node
+      process exposes a typed, capability-allow-listed gateway, the browser
+      drives it with three verbs.
+    </p>
+    <p>
+      Endpoint:
+      <span class="endpoint" id="endpoint">ws://localhost:9000/capability</span>
+      &nbsp;<span class="status" id="status">connecting…</span>
+    </p>
+    <div class="transport">
+      <strong>Transport:</strong>
+      <label
+        ><input type="radio" name="transport" value="ws" checked /> WebSocket
+        (call+publish+subscribe)</label
+      >
+      <label
+        ><input type="radio" name="transport" value="http" /> HTTP
+        (call+publish; subscribe falls through to WS sibling)</label
+      >
+      <div style="margin-top: 0.4em; font-size: 0.85em; color: #666">
+        Same registry, same allow-list — the SDK picks the transport from the
+        URL scheme.
+      </div>
+    </div>
+
+    <h2>1. Service call — <code>/add_two_ints</code></h2>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <input id="addA" type="number" value="2" />
+          <span>+</span>
+          <input id="addB" type="number" value="40" />
+          <button id="callBtn">call</button>
+        </div>
+        <div class="log" id="callLog"></div>
+      </div>
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
+
+<span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
+
+<span class="kw">const</span> reply = <span class="kw">await</span> ros.<span class="kw">call</span>(<span class="str">'/add_two_ints'</span>, {
+  a: <span class="str">'2n'</span>, b: <span class="str">'40n'</span>, <span class="com">// int64 → "Nn" string on the wire</span>
+});
+console.log(reply.sum); <span class="com">// '42n'</span></pre>
+    </div>
+
+    <h2>2. Topic subscription — <code>/web_demo_tick</code></h2>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <button id="subBtn">subscribe</button>
+          <button id="unsubBtn" disabled>unsubscribe</button>
+        </div>
+        <div class="log" id="tickLog"></div>
+      </div>
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
+
+<span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
+
+<span class="com">// The server publishes /web_demo_tick once a second.</span>
+<span class="kw">const</span> sub = <span class="kw">await</span> ros.<span class="kw">subscribe</span>(<span class="str">'/web_demo_tick'</span>, (msg) =&gt; {
+  console.log(<span class="str">'recv:'</span>, msg.data);
+});
+
+<span class="com">// later — stop receiving:</span>
+<span class="kw">await</span> sub.close();</pre>
+    </div>
+
+    <h2>3. Topic publish — <code>/web_demo_chatter</code></h2>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <input
+            id="chatMsg"
+            type="text"
+            value="hello from the browser"
+            style="width: 18em"
+          />
+          <button id="pubBtn">publish</button>
+        </div>
+        <div class="log" id="chatLog"></div>
+      </div>
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
+
+<span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
+
+<span class="com">// Subscribe so we can see the round-trip:</span>
+<span class="kw">await</span> ros.<span class="kw">subscribe</span>(<span class="str">'/web_demo_chatter'</span>, (m) =&gt;
+  console.log(<span class="str">'recv:'</span>, m.data),
+);
+
+<span class="kw">await</span> ros.<span class="kw">publish</span>(<span class="str">'/web_demo_chatter'</span>, { data: <span class="str">'hello'</span> });</pre>
+    </div>
+
+    <h2>4. Capability allow-list in action</h2>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <button id="badCallBtn">call <code>/dangerous</code></button>
+        </div>
+        <div class="log" id="badLog"></div>
+      </div>
+      <pre
+        class="code"
+      ><span class="kw">import</span> { connect } <span class="kw">from</span> <span class="str">'/sdk/index.js'</span>;
+
+<span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
+
+<span class="com">// /dangerous is not in the server's allow-list — the runtime</span>
+<span class="com">// rejects the call before it reaches ROS 2.</span>
+<span class="kw">try</span> {
+  <span class="kw">await</span> ros.<span class="kw">call</span>(<span class="str">'/dangerous'</span>, {});
+} <span class="kw">catch</span> (e) {
+  console.log(e.code); <span class="com">// 'not_exposed'</span>
+}</pre>
+    </div>
+
+    <h2>5. Same capability, no SDK — just <code>curl</code></h2>
+    <p style="font-size: 0.9em; color: #555">
+      The HTTP transport is what makes <code>rclnodejs/web</code>
+      <em>actually</em> web-native: every <code>call</code> and
+      <code>publish</code> in your allow-list is reachable from any HTTP client
+      — curl, Postman, an AI agent… no JavaScript required. Subscribe stays on
+      WebSocket.
+    </p>
+    <pre
+      class="code"
+    ><span class="com"># service call — returns 200 + JSON</span>
+curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
+  -H <span class="str">'content-type: application/json'</span> \
+  -d <span class="str">'{"a":"7n","b":"35n"}'</span>
+<span class="com"># =&gt; {"sum":"42n"}</span>
+
+<span class="com"># publish — returns 204 No Content on success</span>
+curl -sS -X POST http://localhost:9001/capability/publish/web_demo_chatter \
+  -H <span class="str">'content-type: application/json'</span> \
+  -d <span class="str">'{"data":"hi from curl"}'</span>
+
+<span class="com"># allow-list rejection — returns 404 + structured error body</span>
+curl -sS -X POST http://localhost:9001/capability/call/dangerous \
+  -H <span class="str">'content-type: application/json'</span> -d <span class="str">'{}'</span>
+<span class="com"># =&gt; {"ok":false,"error":"capability not exposed: call /dangerous","code":"not_exposed"}</span></pre>
+
+    <script type="module">
+      import { connect } from '/sdk/index.js';
+
+      const host = location.hostname || 'localhost';
+      const ENDPOINTS = {
+        ws: `ws://${host}:9000/capability`,
+        // HTTP base for call/publish.
+        http: `http://${host}:9001`,
+      };
+      // Pass Form C ({http, ws}) when the user picks HTTP so subscribe
+      // still reaches the WS runtime on :9000. The SDK's auto-derived
+      // sibling would land on :9001 instead and fail — this dev layout
+      // splits the two transports across separate ports.
+      const connectArg = (mode) =>
+        mode === 'http'
+          ? { http: ENDPOINTS.http, ws: ENDPOINTS.ws }
+          : ENDPOINTS.ws;
+
+      const endpointEl = document.getElementById('endpoint');
+      const statusEl = document.getElementById('status');
+      const setStatus = (text, cls) => {
+        statusEl.textContent = text;
+        statusEl.className = `status ${cls || ''}`;
+      };
+      const setEndpoint = (mode) => {
+        endpointEl.textContent =
+          mode === 'http'
+            ? `${ENDPOINTS.http}  (subscribe routed to ${ENDPOINTS.ws})`
+            : ENDPOINTS.ws;
+      };
+
+      const log = (id, text, cls) => {
+        const el = document.getElementById(id);
+        const line = document.createElement('div');
+        line.textContent = `${new Date().toLocaleTimeString()}  ${text}`;
+        if (cls) line.className = cls;
+        el.appendChild(line);
+        el.scrollTop = el.scrollHeight;
+      };
+
+      let ros;
+      let tickSub;
+
+      async function teardown() {
+        if (tickSub) {
+          try {
+            await tickSub.close();
+          } catch (_) {}
+          tickSub = null;
+          document.getElementById('subBtn').disabled = false;
+          document.getElementById('unsubBtn').disabled = true;
+        }
+        if (ros) {
+          try {
+            await ros.close();
+          } catch (_) {}
+          ros = null;
+        }
+      }
+
+      async function reconnect(mode) {
+        await teardown();
+        setEndpoint(mode);
+        setStatus(`connecting (${mode})…`);
+        try {
+          ros = await connect(connectArg(mode));
+          setStatus(`connected (${mode})`, 'ok');
+        } catch (e) {
+          setStatus(`failed: ${e.message || e}`, 'err');
+          return;
+        }
+        // Bind the always-on /web_demo_chatter subscription on every
+        // reconnect. Over HTTP the explicit { ws } in connectArg() makes
+        // this work — see comment above.
+        try {
+          await ros.subscribe('/web_demo_chatter', (msg) =>
+            log('chatLog', `<- ${msg.data}`)
+          );
+        } catch (e) {
+          log('chatLog', `subscribe failed: ${e.message} (${e.code})`, 'err');
+        }
+      }
+
+      async function init() {
+        // Wire button handlers once. They use the live `ros` ref so
+        // they work across reconnect()s.
+        document.getElementById('callBtn').onclick = async () => {
+          if (!ros) return;
+          const a = document.getElementById('addA').value;
+          const b = document.getElementById('addB').value;
+          try {
+            const reply = await ros.call('/add_two_ints', {
+              a: `${a}n`,
+              b: `${b}n`,
+            });
+            log('callLog', `${a} + ${b} = ${reply.sum}`, 'ok');
+          } catch (e) {
+            log('callLog', `error: ${e.message} (${e.code})`, 'err');
+          }
+        };
+
+        const subBtn = document.getElementById('subBtn');
+        const unsubBtn = document.getElementById('unsubBtn');
+        subBtn.onclick = async () => {
+          if (!ros) return;
+          try {
+            tickSub = await ros.subscribe('/web_demo_tick', (msg) =>
+              log('tickLog', msg.data)
+            );
+            subBtn.disabled = true;
+            unsubBtn.disabled = false;
+            log('tickLog', `subscribed (subId=${tickSub.subId})`, 'ok');
+          } catch (e) {
+            log('tickLog', `error: ${e.message} (${e.code})`, 'err');
+          }
+        };
+        unsubBtn.onclick = async () => {
+          if (!tickSub) return;
+          await tickSub.close();
+          tickSub = null;
+          unsubBtn.disabled = true;
+          subBtn.disabled = false;
+          log('tickLog', 'unsubscribed', 'ok');
+        };
+
+        document.getElementById('pubBtn').onclick = async () => {
+          if (!ros) return;
+          const data = document.getElementById('chatMsg').value;
+          try {
+            await ros.publish('/web_demo_chatter', { data });
+            log('chatLog', `-> ${data}`, 'ok');
+          } catch (e) {
+            log('chatLog', `error: ${e.message} (${e.code})`, 'err');
+          }
+        };
+
+        document.getElementById('badCallBtn').onclick = async () => {
+          if (!ros) return;
+          try {
+            await ros.call('/dangerous', {});
+            log(
+              'badLog',
+              'unexpected success — registry should have rejected',
+              'err'
+            );
+          } catch (e) {
+            log('badLog', `rejected: ${e.message} (${e.code})`, 'ok');
+          }
+        };
+
+        for (const radio of document.querySelectorAll(
+          'input[name="transport"]'
+        )) {
+          radio.addEventListener('change', (e) => reconnect(e.target.value));
+        }
+
+        await reconnect('ws');
+      }
+
+      init();
+    </script>
+  </body>
+</html>

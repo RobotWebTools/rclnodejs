@@ -1,0 +1,131 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+body {
+  max-width: 880px;
+  margin: 2em auto;
+  padding: 0 1em;
+}
+h1 {
+  margin-bottom: 0;
+}
+h2 {
+  margin-top: 2em;
+}
+.endpoint {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+input,
+button {
+  font-size: 1em;
+  padding: 0.3em 0.5em;
+}
+input[type='text'],
+input[type='number'] {
+  width: 8em;
+}
+.panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1em;
+  align-items: start;
+}
+.controls {
+  padding: 0.25em 0;
+}
+.controls .row {
+  margin-bottom: 0.5em;
+}
+.log {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 0.6em;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  max-height: 12em;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+/* Don't render the dark log box until something is logged. */
+.log:empty {
+  display: none;
+}
+.log .ok {
+  color: #6ec06e;
+}
+.log .err {
+  color: #f08080;
+}
+pre.code {
+  margin: 0;
+  background: #1e1e1e;
+  color: #e6e6e6;
+  padding: 0.75em;
+  border-radius: 4px;
+  font-size: 0.85em;
+  line-height: 1.4;
+  overflow: auto;
+}
+.code .kw {
+  color: #569cd6;
+}
+.code .ty {
+  color: #4ec9b0;
+}
+.code .str {
+  color: #ce9178;
+}
+.code .com {
+  color: #6a9955;
+  font-style: italic;
+}
+.status {
+  display: inline-block;
+  font-size: 0.85em;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  background: #fde68a;
+  color: #92400e;
+}
+.status.ok {
+  background: #bbf7d0;
+  color: #166534;
+}
+.status.err {
+  background: #fecaca;
+  color: #991b1b;
+}
+.badge {
+  display: inline-block;
+  font-size: 0.7em;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  background: #3178c6;
+  color: white;
+  vertical-align: middle;
+  margin-left: 0.5em;
+}
+.transport {
+  margin: 1em 0 0.5em;
+  padding: 0.6em 0.8em;
+  background: #f5f5f4;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.transport label {
+  margin-right: 1em;
+  cursor: pointer;
+}
+@media (prefers-color-scheme: dark) {
+  .transport {
+    background: #2a2a2a;
+  }
+}
+@media (max-width: 720px) {
+  .panel {
+    grid-template-columns: 1fr;
+  }
+}

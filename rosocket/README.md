@@ -10,10 +10,21 @@
 > npm install RobotWebTools/rclnodejs#develop
 > ```
 
-**rosocket** is a **lightweight** WebSocket bridge that lets a **plain web
+**rosocket** is a **lightweight** WebSocket gateway that lets a **plain web
 browser** (or any WebSocket-capable client) talk to ROS 2 through `rclnodejs`,
 with **no extra JavaScript library** required on the client side. Browsers
 only need the built-in `WebSocket` and `JSON` APIs.
+
+> 💡 **Building a new browser app? Start with [`rclnodejs/web`](../web/README.md).**
+> It's the recommended SDK for ROS 2 in the browser — typed three-verb
+> API (`call` / `publish` / `subscribe`), a reviewable per-app capability
+> allow-list (`web.json`), and a `curl`-able HTTP transport for Postman /
+> AI-agent tool-use. **`rosocket` (this page) is the lighter sibling**:
+> one named topic or service per WebSocket, no SDK, no allow-list. Reach
+> for `rosocket` when you genuinely want exactly that; reach for
+> `rclnodejs/web` when you want a typed SDK, an allow-list, and HTTP
+> fallback. See [`rclnodejs/web` vs. `rosbridge` + `roslibjs`](../web/README.md#4-rclnodejsweb-vs-rosbridge-roslibjs)
+> in the SDK guide for the full picture.
 
 How it compares with the classic
 [rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite) +
@@ -97,7 +108,7 @@ const cli = new WebSocket(
 ```
 
 The same applies to the CLI — drop `--topic` / `--service` to run a generic
-bridge: `npx rosocket --port 9000`.
+gateway: `npx rosocket --port 9000`.
 
 ## CLI (`rosocket`)
 

@@ -1,7 +1,7 @@
-# rosocket demo (browser ↔ ROS 2)
+# rosocket demo — ROS 2 in the browser
 
 A minimal end-to-end example of the
-[`rosocket`](../../rosocket/README.md) WebSocket bridge. The Node
+[`rosocket`](../../rosocket/README.md) WebSocket gateway. The Node
 server runs anywhere ROS 2 is sourced; the HTML page runs in any
 modern browser and talks to it over plain `WebSocket` — no client
 library required.
@@ -26,7 +26,7 @@ library required.
 # 1. Source your ROS 2 distro (humble / jazzy / kilted / lyrical / rolling)
 source /opt/ros/$ROS_DISTRO/setup.bash
 
-# 2. Terminal A — start the WebSocket bridge
+# 2. Terminal A — start the WebSocket gateway
 node demo/rosocket/server.js
 # [rosocket-demo] listening on ws://localhost:9000 (bind=0.0.0.0)
 
