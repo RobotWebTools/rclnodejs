@@ -38,14 +38,9 @@ jobs:
           # Kilted Kaiju (May 2025 - Dec 2026)
           - docker_image: ubuntu:noble
             ros_distribution: kilted
-          # Lyrical Luth (May 2026 - May 2031, beta)
-          # NOTE: the tarball URL below is a date-stamped beta snapshot and must
-          # be refreshed manually until upstream publishes a stable "latest"
-          # download (or until GA), at which point it can be replaced with the
-          # stable URL similar to the rolling nightly redirect.
+          # Lyrical Luth (May 2026 - May 2031)
           - docker_image: ubuntu:26.04
             ros_distribution: lyrical
-            ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-beta-20260430/ros2-lyrical-2026-04-30-resolute-x86_64.tar.bz2"
           # Rolling Ridley (No End-Of-Life) - migrated to Ubuntu 26.04 (resolute)
           # to follow the Lyrical Luth target platform.
           # See: https://docs.ros.org/en/jazzy/Releases/Release-Lyrical-Luth.html
@@ -69,10 +64,10 @@ jobs:
       if: ${{ matrix.ros_distribution == 'rolling' || matrix.ros_distribution == 'lyrical' }}
       run: |
         apt-get update
-        apt-get install -y software-properties-common curl
+        apt-get install -y sudo software-properties-common curl
 
         # Enable required repositories. The same setup applies to both the
-        # rolling nightly tarball and the lyrical beta tarball; see the
+        # rolling nightly tarball and the lyrical apt-deb install; see the
         # per-distro install docs for reference:
         #   rolling: https://docs.ros.org/en/rolling/Installation/Alternatives/Ubuntu-Install-Binary.html
         #   lyrical: https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
@@ -81,11 +76,26 @@ jobs:
         curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
         dpkg -i /tmp/ros2-apt-source.deb
         apt-get update
-        apt-get install -y build-essential cmake tar bzip2 python3 python3-rosdep python3-colcon-common-extensions
+        # Common build deps for both rolling and lyrical. Rolling-only tarball
+        # tooling (tar, bzip2, python3-rosdep) is installed in the rolling step
+        # below so the lyrical lane stays minimal.
+        apt-get install -y build-essential cmake python3 python3-colcon-common-extensions
 
-    - name: Install ROS2 from binary tarball (rolling / lyrical)
-      if: ${{ matrix.ros_distribution == 'rolling' || matrix.ros_distribution == 'lyrical' }}
+    - name: Install ROS2 from apt (lyrical)
+      if: ${{ matrix.ros_distribution == 'lyrical' }}
       run: |
+        # Per https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
+        apt-get install -y \
+          ros-lyrical-desktop \
+          ros-lyrical-test-msgs
+
+    - name: Install ROS2 from binary tarball (rolling)
+      if: ${{ matrix.ros_distribution == 'rolling' }}
+      run: |
+        # Tools only the rolling tarball path needs: tar/bzip2 for extraction,
+        # python3-rosdep for resolving runtime deps below.
+        apt-get install -y tar bzip2 python3-rosdep
+
         # Extract binary tarball AFTER apt packages so its newer libs overwrite apt's older ones
         curl -sL "${{ matrix.ros_tar_url }}" -o /tmp/ros2-${{ matrix.ros_distribution }}.tar.bz2
         mkdir -p /opt/ros/${{ matrix.ros_distribution }}
