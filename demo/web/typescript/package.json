@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "rclnodejs": "github:minggangw/rclnodejs-1#feat/web-tutorial-and-demos"
+    "rclnodejs": "^2.0.0"
   },
   "devDependencies": {
     "tsx": "^4.19.2",

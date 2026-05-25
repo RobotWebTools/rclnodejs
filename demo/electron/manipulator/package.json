@@ -22,7 +22,7 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "rclnodejs": "^1.8.1",
+    "rclnodejs": "^2.0.0",
     "three": "^0.182.0"
   },
   "devDependencies": {
