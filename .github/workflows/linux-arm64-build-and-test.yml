@@ -73,12 +73,9 @@ jobs:
       if: ${{ matrix.ros_distribution == 'lyrical' }}
       run: |
         # Per https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
-        apt-get install -y \
-          ros-lyrical-desktop \
-          ros-lyrical-test-msgs
+        apt-get install -y ros-lyrical-desktop
 
     - name: Install test-msgs and mrpt_msgs on Linux
-      if: ${{ matrix.ros_distribution != 'lyrical' }}
       run: |
         sudo apt install -y ros-${{ matrix.ros_distribution }}-test-msgs ros-${{ matrix.ros_distribution }}-mrpt-msgs
 
