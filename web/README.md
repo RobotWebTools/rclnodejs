@@ -17,9 +17,13 @@ For runnable code see [`demo/web/`](../demo/web/):
 
 ## 1. Server side: stand up the runtime
 
+> `-p rclnodejs` tells npx the `rclnodejs-web` binary lives inside the
+> `rclnodejs` package; drop it once `rclnodejs` is already installed in
+> the current project.
+
 ```bash
 source /opt/ros/<distro>/setup.bash
-npx rclnodejs-web \
+npx -p rclnodejs rclnodejs-web \
   --port 9000 --http-port 9001 \
   --call /add_two_ints=example_interfaces/srv/AddTwoInts \
   --publish /chatter=std_msgs/msg/String \
@@ -43,7 +47,7 @@ Or feed the same allow-list from `web.json`:
 ```
 
 ```bash
-npx rclnodejs-web web.json
+npx -p rclnodejs rclnodejs-web web.json
 ```
 
 > The `expose` block is the **public API** your browser depends on.

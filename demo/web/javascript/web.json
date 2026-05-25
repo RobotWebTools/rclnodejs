@@ -1,5 +1,5 @@
 {
-  "$comment": "Sample rclnodejs/web config consumed by `npx rclnodejs-web web.json`. Every key is optional; the defaults shown match the CLI defaults.",
+  "$comment": "Sample rclnodejs/web config consumed by `npx -p rclnodejs rclnodejs-web web.json` (the `-p rclnodejs` form works even when rclnodejs isn't already installed in the current project). Every key is optional; the defaults shown match the CLI defaults.",
   "port": 9000,
   "path": "/capability",
   "node": "rclnodejs_web_demo",
