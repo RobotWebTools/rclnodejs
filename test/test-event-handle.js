@@ -24,6 +24,8 @@ const {
   PublisherEventCallbacks,
   PublisherEventType,
   SubscriptionEventType,
+  isPublisherEventTypeSupported,
+  isSubscriptionEventTypeSupported,
 } = require('../lib/event_handler.js');
 
 describe('Event handle test suite prior to jazzy', function () {
@@ -43,6 +45,87 @@ describe('Event handle test suite prior to jazzy', function () {
     assert.throws(() => {
       new PublisherEventCallbacks();
     }, /PublisherEventCallbacks is only available in ROS 2 Jazzy and later/);
+  });
+});
+
+describe('Event type is supported - native binding unavailable', function () {
+  before(function () {
+    if (
+      typeof rclnodejsBinding.isPublisherEventTypeSupported === 'function' &&
+      typeof rclnodejsBinding.isSubscriptionEventTypeSupported === 'function'
+    ) {
+      this.skip();
+    }
+  });
+
+  it('isPublisherEventTypeSupported throws when native binding is missing', function () {
+    assert.throws(() => {
+      isPublisherEventTypeSupported(PublisherEventType.PUBLISHER_MATCHED);
+    }, /isPublisherEventTypeSupported is only available in ROS 2 Rolling and later/);
+  });
+
+  it('isSubscriptionEventTypeSupported throws when native binding is missing', function () {
+    assert.throws(() => {
+      isSubscriptionEventTypeSupported(
+        SubscriptionEventType.SUBSCRIPTION_MATCHED
+      );
+    }, /isSubscriptionEventTypeSupported is only available in ROS 2 Rolling and later/);
+  });
+});
+
+describe('Event type is supported - native binding available', function () {
+  before(function () {
+    if (
+      typeof rclnodejsBinding.isPublisherEventTypeSupported !== 'function' ||
+      typeof rclnodejsBinding.isSubscriptionEventTypeSupported !== 'function'
+    ) {
+      this.skip();
+    }
+  });
+
+  it('isPublisherEventTypeSupported returns a boolean for every event type', function () {
+    for (const eventType of Object.values(PublisherEventType)) {
+      const result = isPublisherEventTypeSupported(eventType);
+      assert.strictEqual(typeof result, 'boolean');
+    }
+  });
+
+  it('isSubscriptionEventTypeSupported returns a boolean for every event type', function () {
+    for (const eventType of Object.values(SubscriptionEventType)) {
+      const result = isSubscriptionEventTypeSupported(eventType);
+      assert.strictEqual(typeof result, 'boolean');
+    }
+  });
+
+  it('MATCHED events are reported as supported across RMW implementations', function () {
+    assert.strictEqual(
+      isPublisherEventTypeSupported(PublisherEventType.PUBLISHER_MATCHED),
+      true
+    );
+    assert.strictEqual(
+      isSubscriptionEventTypeSupported(
+        SubscriptionEventType.SUBSCRIPTION_MATCHED
+      ),
+      true
+    );
+  });
+
+  it('isPublisherEventTypeSupported rejects invalid event types', function () {
+    assert.throws(() => {
+      isPublisherEventTypeSupported(-1);
+    }, /Value '-1' for 'eventType' is out of range: one of PublisherEventType values/);
+    assert.throws(() => {
+      isPublisherEventTypeSupported('matched');
+    }, /Invalid type for 'eventType': expected number, got string/);
+  });
+
+  it('isSubscriptionEventTypeSupported rejects invalid event types', function () {
+    assert.throws(() => {
+      isSubscriptionEventTypeSupported(999);
+    }, /Value '999' for 'eventType' is out of range: one of SubscriptionEventType values/);
+    assert.throws(() => {
+      isSubscriptionEventTypeSupported(undefined);
+    }, /Invalid type for 'eventType': expected number, got undefined/);
   });
 });
 

@@ -247,6 +247,26 @@ Napi::Value CreatePublisherEventHandle(const Napi::CallbackInfo& info) {
   return js_obj;
 }
 
+#if ROS_VERSION >= 5000
+Napi::Value IsPublisherEventTypeSupported(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  rcl_publisher_event_type_t event_type =
+      static_cast<rcl_publisher_event_type_t>(
+          info[0].As<Napi::Number>().Int32Value());
+  return Napi::Boolean::New(env,
+                            rcl_publisher_event_type_is_supported(event_type));
+}
+
+Napi::Value IsSubscriptionEventTypeSupported(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  rcl_subscription_event_type_t event_type =
+      static_cast<rcl_subscription_event_type_t>(
+          info[0].As<Napi::Number>().Int32Value());
+  return Napi::Boolean::New(
+      env, rcl_subscription_event_type_is_supported(event_type));
+}
+#endif  // ROS_VERSION >= 5000
+
 Napi::Value TakeEvent(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   RclHandle* event_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
@@ -288,6 +308,12 @@ Napi::Object InitEventHandleBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createPublisherEventHandle",
               Napi::Function::New(env, CreatePublisherEventHandle));
   exports.Set("takeEvent", Napi::Function::New(env, TakeEvent));
+#if ROS_VERSION >= 5000
+  exports.Set("isPublisherEventTypeSupported",
+              Napi::Function::New(env, IsPublisherEventTypeSupported));
+  exports.Set("isSubscriptionEventTypeSupported",
+              Napi::Function::New(env, IsSubscriptionEventTypeSupported));
+#endif  // ROS_VERSION >= 5000
   return exports;
 }
 
