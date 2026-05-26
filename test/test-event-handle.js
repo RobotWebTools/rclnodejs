@@ -113,19 +113,19 @@ describe('Event type is supported - native binding available', function () {
   it('isPublisherEventTypeSupported rejects invalid event types', function () {
     assert.throws(() => {
       isPublisherEventTypeSupported(-1);
-    }, /Invalid PublisherEventType value/);
+    }, /Value '-1' for 'eventType' is out of range: one of PublisherEventType values/);
     assert.throws(() => {
       isPublisherEventTypeSupported('matched');
-    }, /Invalid PublisherEventType value/);
+    }, /Invalid type for 'eventType': expected number, got string/);
   });
 
   it('isSubscriptionEventTypeSupported rejects invalid event types', function () {
     assert.throws(() => {
       isSubscriptionEventTypeSupported(999);
-    }, /Invalid SubscriptionEventType value/);
+    }, /Value '999' for 'eventType' is out of range: one of SubscriptionEventType values/);
     assert.throws(() => {
       isSubscriptionEventTypeSupported(undefined);
-    }, /Invalid SubscriptionEventType value/);
+    }, /Invalid type for 'eventType': expected number, got undefined/);
   });
 });
 
