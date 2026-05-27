@@ -46,6 +46,13 @@ declare module 'rclnodejs' {
     rosoutQos: QoS | QoS.ProfileRef;
 
     /**
+     * A flag controlling the startup of logger services.
+     * When true a node will start get_logger_levels and set_logger_levels services.
+     * Default value = false;
+     */
+    enableLoggerService: boolean;
+
+    /**
      * An instance configured with default values.
      */
     static defaultOptions: NodeOptions;
