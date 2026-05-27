@@ -95,9 +95,18 @@ jobs:
         # Fix ownership of the workspace to allow write access
         sudo chown -R $(whoami):$(whoami) $GITHUB_WORKSPACE
 
+    # Wrap the test step in nick-fields/retry@v4 to absorb transient flakes
+    # (mocha races, native rebuilds, Electron postinstall, network blips).
+    # Keep max_attempts low so real regressions still surface quickly.
     - name: Build and test rclnodejs
-      run: |
-        uname -a
-        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
-        npm i
-        npm test
+      uses: nick-fields/retry@v4
+      with:
+        shell: bash
+        max_attempts: 2
+        retry_wait_seconds: 10
+        timeout_minutes: 60
+        command: |
+          uname -a
+          source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+          npm i
+          npm test

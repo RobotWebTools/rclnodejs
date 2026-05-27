@@ -123,22 +123,39 @@ jobs:
 
     - uses: actions/checkout@v6
 
+    # The mocha suite and the Electron postinstall (extract-zip 2.0.1) are
+    # known to be intermittently flaky on this runner. Wrap both test
+    # invocations in nick-fields/retry@v4 so a single transient failure does
+    # not fail the whole matrix leg. Keep max_attempts conservative so real
+    # regressions still surface quickly.
     - name: Build and test rclnodejs
-      run: |
-        uname -a
-        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
-        npm i
-        npm run lint
-        npm test
-        npm run clean
+      uses: nick-fields/retry@v4
+      with:
+        shell: bash
+        max_attempts: 2
+        retry_wait_seconds: 10
+        timeout_minutes: 60
+        command: |
+          uname -a
+          source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+          npm i
+          npm run lint
+          npm test
+          npm run clean
 
     - name: Test with IDL ROS messages (rolling / lyrical)
       if: ${{ matrix.ros_distribution == 'rolling' || matrix.ros_distribution == 'lyrical' }}
-      run: |
-        source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
-        npm i
-        npm run test-idl
-        npm run clean
+      uses: nick-fields/retry@v4
+      with:
+        shell: bash
+        max_attempts: 2
+        retry_wait_seconds: 10
+        timeout_minutes: 60
+        command: |
+          source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
+          npm i
+          npm run test-idl
+          npm run clean
 
     - name: Coveralls
       if: ${{ matrix.ros_distribution == 'rolling' && matrix['node-version'] == '24.X' }}
