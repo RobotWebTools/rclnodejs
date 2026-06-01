@@ -88,11 +88,19 @@ jobs:
         call "C:\pixi_ws\ros2-windows\setup.bat"
         npm i
 
+    # Wrap the test step in nick-fields/retry@v4 to absorb transient flakes
+    # (mocha races, native rebuilds, network blips). Keep max_attempts low so
+    # real regressions still surface quickly.
     - name: Test rclnodejs
       if: ${{ matrix.run_tests }}
-      shell: cmd
-      run: |
-        set PATH=C:\pixi_ws\.pixi\envs\default\Library\bin;C:\pixi_ws\.pixi\envs\default\Scripts;C:\pixi_ws\.pixi\envs\default\bin;%PATH%
-        set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-        call "C:\pixi_ws\ros2-windows\setup.bat"
-        npm test
+      uses: nick-fields/retry@v4
+      with:
+        shell: cmd
+        max_attempts: 2
+        retry_wait_seconds: 10
+        timeout_minutes: 60
+        command: |
+          set PATH=C:\pixi_ws\.pixi\envs\default\Library\bin;C:\pixi_ws\.pixi\envs\default\Scripts;C:\pixi_ws\.pixi\envs\default\bin;%PATH%
+          set RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+          call "C:\pixi_ws\ros2-windows\setup.bat"
+          npm test

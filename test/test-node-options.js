@@ -35,6 +35,7 @@ describe('rclnodejs NodeOptions test suite', function () {
       nodeOptions.automaticallyDeclareParametersFromOverrides,
       false
     );
+    assert.strictEqual(nodeOptions.enableLoggerService, false);
     assert.ok(Array.isArray(nodeOptions.parameterOverrides));
     assert.strictEqual(nodeOptions.parameterOverrides.length, 0);
   });
@@ -47,6 +48,7 @@ describe('rclnodejs NodeOptions test suite', function () {
       nodeOptions.automaticallyDeclareParametersFromOverrides,
       false
     );
+    assert.strictEqual(nodeOptions.enableLoggerService, false);
     assert.ok(Array.isArray(nodeOptions.parameterOverrides));
     assert.strictEqual(nodeOptions.parameterOverrides.length, 0);
   });
@@ -61,6 +63,7 @@ describe('rclnodejs NodeOptions test suite', function () {
 
     nodeOptions.startParameterServices = false;
     nodeOptions.automaticallyDeclareParametersFromOverrides = true;
+    nodeOptions.enableLoggerService = true;
     nodeOptions.parameterOverrides = param;
 
     assert.strictEqual(nodeOptions.startParameterServices, false);
@@ -68,6 +71,7 @@ describe('rclnodejs NodeOptions test suite', function () {
       nodeOptions.automaticallyDeclareParametersFromOverrides,
       true
     );
+    assert.strictEqual(nodeOptions.enableLoggerService, true);
     assert.ok(Array.isArray(nodeOptions.parameterOverrides));
     assert.strictEqual(nodeOptions.parameterOverrides.length, 1);
     assert.strictEqual(nodeOptions.parameterOverrides[0].name, 'str_param');

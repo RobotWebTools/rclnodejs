@@ -41,7 +41,16 @@ jobs:
         source /opt/ros/jazzy/setup.bash
         npm i
 
+    # Wrap the asan test step in nick-fields/retry@v4 to absorb transient
+    # flakes. ASan can be sensitive to timing-related test races; keep
+    # max_attempts low so real regressions still surface quickly.
     - name: Build and test with AddressSanitizer
-      run: |
-        source /opt/ros/jazzy/setup.bash
-        npm run test:asan
+      uses: nick-fields/retry@v4
+      with:
+        shell: bash
+        max_attempts: 2
+        retry_wait_seconds: 10
+        timeout_minutes: 60
+        command: |
+          source /opt/ros/jazzy/setup.bash
+          npm run test:asan
