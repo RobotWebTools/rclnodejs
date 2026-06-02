@@ -1,6 +1,17 @@
 declare module 'rclnodejs' {
   /**
-   * Identifies type of ROS message such as msg or srv.
+   * Identifies a ROS message, service or action type.
+   *
+   * A type can be supplied in any of the following forms:
+   * - a constructor returned by {@link require | rclnodejs.require(...)} — for a
+   *   message (e.g. `std_msgs/msg/String`), a service (with `Request`/`Response`)
+   *   or an action (with `Goal`/`Feedback`/`Result`). This form is fully typed:
+   *   the concrete message types are inferred for callbacks, requests, responses,
+   *   goals, feedback and results.
+   * - a string, e.g. `'std_msgs/msg/String'`. Also fully typed.
+   * - an object descriptor, e.g. `{package: 'std_msgs', type: 'msg', name: 'String'}`.
+   *   Supported at runtime but not statically resolvable, so it falls back to
+   *   `object`. Prefer the string or constructor form for full type safety.
    */
   type TypeClass<T = TypeClassName> =
     | (new (...args: any[]) => any) // a message class constructor, e.g. the value returned by rclnodejs.require('std_msgs/msg/String')
