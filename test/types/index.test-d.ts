@@ -211,6 +211,24 @@ node.createPublisher(TYPE_CLASS, TOPIC, publisher.options, (event: object) => {
 expectType<void>(publisher.assertLiveliness());
 expectType<string>(publisher.loggerName);
 
+// ---- TypeClass forms ----
+// Case 1: a message/service class constructor (e.g. the value returned by rclnodejs.require)
+const StringClass = rclnodejs.require('std_msgs/msg/String');
+expectAssignable<rclnodejs.TypeClass>(StringClass);
+const publisherFromCtor = node.createPublisher(StringClass, TOPIC);
+expectType<rclnodejs.Publisher<typeof StringClass>>(publisherFromCtor);
+
+// Case 2: a string representing the message class name
+expectAssignable<rclnodejs.TypeClass>(TYPE_CLASS);
+const publisherFromString = node.createPublisher(TYPE_CLASS, TOPIC);
+expectType<rclnodejs.Publisher<'std_msgs/msg/String'>>(publisherFromString);
+
+// Case 3: an object descriptor of the message class
+const typeDescriptor = { package: 'std_msgs', type: 'msg', name: 'String' };
+expectAssignable<rclnodejs.TypeClass>(typeDescriptor);
+const publisherFromDescriptor = node.createPublisher(typeDescriptor, TOPIC);
+expectType<rclnodejs.Publisher<typeof typeDescriptor>>(publisherFromDescriptor);
+
 // ---- LifecyclePublisher ----
 const lifecyclePublisher = lifecycleNode.createLifecyclePublisher(
   TYPE_CLASS,
@@ -342,6 +360,30 @@ expectType<void>(
 );
 expectType<boolean>(client.isDestroyed());
 expectType<string>(client.loggerName);
+
+// ---- Service/Client constructor-form typing ----
+// Passing a service constructor (the value returned by rclnodejs.require) should
+// infer the concrete request/response message types, not fall back to `object`.
+const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
+const serviceFromCtor = node.createService(
+  AddTwoInts,
+  'add_two_ints_ctor',
+  (request) => {
+    expectType<rclnodejs.example_interfaces.srv.AddTwoInts_Request>(request);
+  }
+);
+expectType<rclnodejs.example_interfaces.srv.AddTwoIntsConstructor>(
+  serviceFromCtor
+);
+
+const clientFromCtor = node.createClient(AddTwoInts, 'add_two_ints_ctor');
+expectType<rclnodejs.Client<typeof AddTwoInts>>(clientFromCtor);
+clientFromCtor.sendRequest(new AddTwoInts.Request(), (response) => {
+  expectType<rclnodejs.example_interfaces.srv.AddTwoInts_Response>(response);
+});
+expectType<Promise<rclnodejs.example_interfaces.srv.AddTwoInts_Response>>(
+  clientFromCtor.sendRequestAsync(new AddTwoInts.Request())
+);
 
 // ---- Timer ----
 const timerCallback: rclnodejs.TimerRequestCallback = (timerInfo) => {
@@ -600,6 +642,25 @@ expectType<void>(
     rclnodejs.Node.getDefaultOptions() as rclnodejs.QoS,
     rclnodejs.ServiceIntrospectionStates.CONTENTS
   )
+);
+
+// ---- Action constructor-form typing ----
+// Passing an action constructor (the value returned by rclnodejs.require) should
+// infer the concrete goal/feedback/result message types, not fall back to `object`.
+const actionClientFromCtor = new rclnodejs.ActionClient(
+  node,
+  Fibonacci,
+  'fibonacci_ctor'
+);
+expectType<rclnodejs.ActionClient<typeof Fibonacci>>(actionClientFromCtor);
+expectType<rclnodejs.example_interfaces.action.Fibonacci_Goal>(
+  {} as rclnodejs.ActionGoal<typeof Fibonacci>
+);
+expectType<rclnodejs.example_interfaces.action.Fibonacci_Feedback>(
+  {} as rclnodejs.ActionFeedback<typeof Fibonacci>
+);
+expectType<rclnodejs.example_interfaces.action.Fibonacci_Result>(
+  {} as rclnodejs.ActionResult<typeof Fibonacci>
 );
 
 // ---- ActionUuid -----

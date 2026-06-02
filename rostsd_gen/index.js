@@ -164,7 +164,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(fd, '  type Message = MessagesMap[MessageTypeClassName];\n');
   fs.writeSync(
     fd,
-    '  type MessageType<T> = T extends MessageTypeClassName ? MessagesMap[T] : object;\n\n'
+    '  type MessageType<T> = T extends MessageTypeClassName ? MessagesMap[T] : T extends new (...args: any[]) => infer R ? R : object;\n\n'
   );
 
   // write message contructor mappings
@@ -193,7 +193,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(fd, '  type Service = ServicesMap[ServiceTypeClassName];\n');
   fs.writeSync(
     fd,
-    '  type ServiceType<T> = T extends ServiceTypeClassName ? ServicesMap[T] : object;\n\n'
+    '  type ServiceType<T> = T extends ServiceTypeClassName ? ServicesMap[T] : T extends { Request: any; Response: any } ? T : object;\n\n'
   );
 
   // write actions type mappings
@@ -206,7 +206,7 @@ function savePkgInfoAsTSD(pkgInfos, fd) {
   fs.writeSync(fd, '  type Action = ActionsMap[ActionTypeClassName];\n');
   fs.writeSync(
     fd,
-    '  type ActionType<T> = T extends ActionTypeClassName ? ActionsMap[T] : object;\n\n'
+    '  type ActionType<T> = T extends ActionTypeClassName ? ActionsMap[T] : T extends { Goal: any; Feedback: any; Result: any } ? T : object;\n\n'
   );
 
   fs.writeSync(

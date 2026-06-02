@@ -3,10 +3,24 @@ declare module 'rclnodejs' {
    * Identifies type of ROS message such as msg or srv.
    */
   type TypeClass<T = TypeClassName> =
-    | (() => any)
-    | T // a string representing the message class, e.g. 'std_msgs/msg/String',
+    | (new (...args: any[]) => any) // a message class constructor, e.g. the value returned by rclnodejs.require('std_msgs/msg/String')
     | {
-        // object representing a message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}
+        // a service class constructor, e.g. the value returned by rclnodejs.require('example_interfaces/srv/AddTwoInts')
+        readonly Request: new (...args: any[]) => any;
+        readonly Response: new (...args: any[]) => any;
+      }
+    | {
+        // an action class constructor, e.g. the value returned by rclnodejs.require('example_interfaces/action/Fibonacci')
+        readonly Goal: new (...args: any[]) => any;
+        readonly Feedback: new (...args: any[]) => any;
+        readonly Result: new (...args: any[]) => any;
+      }
+    | T // a string representing the message/service/action class, e.g. 'std_msgs/msg/String',
+    | {
+        // object representing a message class, e.g. {package: 'std_msgs', type: 'msg', name: 'String'}.
+        // NOTE: this form is supported at runtime but provides no message type inference in
+        // TypeScript (messages resolve to `object`). Prefer the string or constructor form for
+        // full type safety.
         package: string;
         type: string;
         name: string;
