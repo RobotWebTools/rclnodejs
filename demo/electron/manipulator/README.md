@@ -64,7 +64,7 @@ npm start
 1. **Source your ROS2 environment**:
 
    ```bash
-   source /opt/ros/humble/setup.bash  # or your ROS2 installation path
+   source /opt/ros/$ROS_DISTRO/setup.bash  # or your ROS2 installation path
    ```
 
 2. **Run the demo**:
@@ -140,7 +140,7 @@ To verify the demo is working correctly, you can monitor the published topics:
 
 ```bash
 # In a separate terminal, source ROS2 environment
-source /opt/ros/humble/setup.bash  # or your ROS2 installation
+source /opt/ros/$ROS_DISTRO/setup.bash  # or your ROS2 installation
 
 # List all available topics
 ros2 topic list
@@ -199,7 +199,7 @@ Even as a standalone application, **ROS 2 must be installed and sourced on the t
 
 ```bash
 # Source ROS2 environment
-source /opt/ros/humble/setup.bash
+source /opt/ros/$ROS_DISTRO/setup.bash
 
 # Run the packaged executable
 ./out/rclnodejs-manipulator-demo-linux-x64/rclnodejs-manipulator-demo
@@ -301,7 +301,7 @@ manipulator/
 
    ```bash
    # Source ROS2 environment manually
-   source /opt/ros/humble/setup.bash  # or your ROS2 installation path
+   source /opt/ros/$ROS_DISTRO/setup.bash  # or your ROS2 installation path
    npm start
    ```
 
