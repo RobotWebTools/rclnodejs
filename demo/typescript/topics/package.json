@@ -32,6 +32,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "rclnodejs": "file:../../"
+    "rclnodejs": "file:../../.."
   }
 }

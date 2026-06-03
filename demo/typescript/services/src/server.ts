@@ -3,6 +3,15 @@
  *
  * This demo shows how to create a ROS2 service server using TypeScript
  * with rclnodejs. It provides an AddTwoInts service that adds two integers.
+ *
+ * It also demonstrates the two equivalent, fully type-safe ways to
+ * identify a service type:
+ *   - String name:   node.createService('example_interfaces/srv/AddTwoInts', ...)
+ *   - Service class: node.createService(AddTwoInts, ...)
+ *
+ * This demo uses the class form (obtained from `rclnodejs.require(...)`):
+ * TypeScript infers the callback's request and response types directly from
+ * the constructor, so no explicit `any` annotations are needed.
  */
 
 import * as rclnodejs from 'rclnodejs';
@@ -27,19 +36,25 @@ async function main(): Promise<void> {
     // Request counter
     let requestCount = 0;
 
-    // Create a service server for AddTwoInts
+    // Create a service server for AddTwoInts using the service class
+    // (type-based form). Obtain the constructor with `rclnodejs.require(...)`
+    // and pass it directly; the `request` and `response` parameters are
+    // inferred from it. The string form
+    // `node.createService('example_interfaces/srv/AddTwoInts', ...)` works
+    // identically and is equally type-safe.
+    const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
     const service = node.createService(
-      'example_interfaces/srv/AddTwoInts',
+      AddTwoInts,
       SERVICE_NAME,
-      (request: any, response: any) => {
+      (request, response) => {
         requestCount++;
 
-        // Log the incoming request
+        // Log the incoming request (request.a / request.b are typed)
         console.log(
           `🔢 [${requestCount}] Received request: a=${request.a}, b=${request.b}`
         );
 
-        // Calculate the sum using response.template
+        // Calculate the sum using response.template (typed response message)
         let result = response.template;
         result.sum = request.a + request.b;
 
