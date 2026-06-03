@@ -69,6 +69,43 @@ describe('Test service class', function () {
     rclnodejs.spin(clientNode);
   });
 
+  it('Node.createService()/createClient() with constructor-form typeClass', function (done) {
+    // Regression test: passing the loaded interface constructor (the value
+    // returned by rclnodejs.require) to createService/createClient must work
+    // the same as passing the type string.
+    const clientNode = rclnodejs.createNode('ctor_ps_client');
+    const serviceNode = rclnodejs.createNode('ctor_ps_service');
+    const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
+
+    serviceNode.createService(
+      AddTwoInts,
+      'ctor_ps_channel',
+      (request, response) => {
+        assert.deepStrictEqual(request.a, 1n);
+        assert.deepStrictEqual(request.b, 2n);
+        let result = response.template;
+        result.sum = request.a + request.b;
+        response.send(result);
+      }
+    );
+    const client = clientNode.createClient(AddTwoInts, 'ctor_ps_channel');
+    const request = new AddTwoInts.Request();
+    request.a = 1n;
+    request.b = 2n;
+
+    const timer = clientNode.createTimer(BigInt(100000000), () => {
+      client.sendRequest(request, (response) => {
+        timer.cancel();
+        assert.deepStrictEqual(response.sum, 3n);
+        serviceNode.destroy();
+        clientNode.destroy();
+        done();
+      });
+    });
+    rclnodejs.spin(serviceNode);
+    rclnodejs.spin(clientNode);
+  });
+
   it('Get service options', function () {
     const node = rclnodejs.createNode('test_node');
     const service = node.createService(

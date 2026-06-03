@@ -26,8 +26,8 @@ Before running this demo, ensure you have:
 Make sure your ROS 2 environment is properly sourced before running the demo:
 
 ```bash
-# For example, if using ROS 2 Jazzy
-source /opt/ros/jazzy/setup.bash
+# For example, if using ROS 2 Lyrical
+source /opt/ros/lyrical/setup.bash
 
 # Or if you have a custom workspace
 source /path/to/your/ros2_ws/install/setup.bash
@@ -45,11 +45,15 @@ npm run build
 
 ## Installation
 
-Navigate to this demo directory and install dependencies:
+This demo depends on the **local rclnodejs** in this repository
+(`"rclnodejs": "file:../../.."`) so it always builds against the in-tree
+TypeScript types. Install with `--ignore-scripts` so npm links the local
+package without trying to rebuild its native addon (the prebuilt binary in the
+repo is reused):
 
 ```bash
 cd demo/typescript/services
-npm install
+npm install --ignore-scripts
 ```
 
 ## Usage
@@ -101,6 +105,40 @@ For development, you can run TypeScript files directly with ts-node:
    ```
 
 ## How It Works
+
+Both the server and client show the **two equivalent, fully type-safe ways**
+to identify a service type:
+
+- **String name**: pass the type string, e.g. `'example_interfaces/srv/AddTwoInts'`.
+- **Service class**: obtain the constructor with `rclnodejs.require(...)` and
+  pass it directly. TypeScript then infers the request and response types from
+  the constructor, so no explicit `any` annotations are needed.
+
+This demo uses the **service class** form:
+
+```typescript
+const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
+
+// Server — request/response are inferred from the constructor
+const service = node.createService(
+  AddTwoInts,
+  SERVICE_NAME,
+  (request, response) => {
+    const result = response.template;
+    result.sum = request.a + request.b; // request.a / request.b are typed
+    response.send(result);
+  }
+);
+
+// Client — request built by instantiating the request class
+const client = node.createClient(AddTwoInts, SERVICE_NAME);
+const request = new AddTwoInts.Request();
+request.a = 42n;
+request.b = 17n;
+client.sendRequest(request, (response) => {
+  console.log(`sum=${response.sum}`); // response is typed
+});
+```
 
 ### Service Server (`server.ts`)
 
@@ -204,15 +242,19 @@ const REQUEST_INTERVAL = 1000; // Send requests every 1 second
 
 ### Use Different Service Types
 
-To use a different service type, update the type string and interface:
+To use a different service type, update the type string or service class:
 
 ```typescript
-// For example, using a custom service
+// Style A — string name
 const service = node.createService(
   'your_package/srv/YourService',
   'service_name',
   callback
 );
+
+// Style B — service class (request/response inferred from the constructor)
+const YourService = rclnodejs.require('your_package/srv/YourService');
+const service2 = node.createService(YourService, 'service_name', callback);
 ```
 
 ### Add Custom Logic

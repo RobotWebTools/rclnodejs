@@ -405,3 +405,28 @@ describe('Rclnodejs message type testing', function () {
     });
   });
 });
+
+describe('loadInterface() argument handling', function () {
+  const loader = require('../lib/interface_loader.js');
+
+  it('returns a loaded interface class as-is (idempotent)', function () {
+    const StringMsg = loader.loadInterface('std_msgs/msg/String');
+    assert.strictEqual(typeof StringMsg, 'function');
+    // Passing the constructor back in should return the very same class.
+    assert.strictEqual(loader.loadInterface(StringMsg), StringMsg);
+  });
+
+  it('throws for an arbitrary function that is not a generated interface', function () {
+    const notAnInterface = () => {};
+    assert.throws(
+      () => loader.loadInterface(notAnInterface),
+      (err) => err && err.code === 'MESSAGE_NOT_FOUND'
+    );
+
+    class Foo {}
+    assert.throws(
+      () => loader.loadInterface(Foo),
+      (err) => err && err.code === 'MESSAGE_NOT_FOUND'
+    );
+  });
+});

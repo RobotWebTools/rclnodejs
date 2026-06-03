@@ -35,6 +35,10 @@ Asynchronous actions with progress feedback and cancellation
 - **Full typing** for all ROS2 messages, services, and actions
 - **Compile-time validation** of message structures
 - **IntelliSense support** in VS Code and other TypeScript editors
+- **Two equivalent forms**: identify a type by its **string name**
+  (e.g. `'std_msgs/msg/String'`) or by its **class/constructor** obtained from
+  `rclnodejs.require(...)`. With the class form, TypeScript infers the concrete
+  message/service/action types automatically\u2014no explicit annotations needed.
 
 ### Modern Development
 

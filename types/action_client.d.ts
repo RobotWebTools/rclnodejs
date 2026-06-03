@@ -1,13 +1,19 @@
 declare module 'rclnodejs' {
   type ActionGoal<T> = T extends ActionTypeClassName
     ? InstanceType<ActionsMap[T]['Goal']>
-    : object;
+    : T extends { Goal: new (...args: any[]) => infer R }
+      ? R
+      : object;
   type ActionFeedback<T> = T extends ActionTypeClassName
     ? InstanceType<ActionsMap[T]['Feedback']>
-    : object;
+    : T extends { Feedback: new (...args: any[]) => infer R }
+      ? R
+      : object;
   type ActionResult<T> = T extends ActionTypeClassName
     ? InstanceType<ActionsMap[T]['Result']>
-    : object;
+    : T extends { Result: new (...args: any[]) => infer R }
+      ? R
+      : object;
 
   /**
    * Goal handle for working with Action Clients.

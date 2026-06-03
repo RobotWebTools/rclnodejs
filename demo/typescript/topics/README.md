@@ -25,8 +25,8 @@ Before running this demo, ensure you have:
 Make sure your ROS 2 environment is properly sourced before running the demo:
 
 ```bash
-# For example, if using ROS 2 Jazzy
-source /opt/ros/jazzy/setup.bash
+# For example, if using ROS 2 Lyrical
+source /opt/ros/lyrical/setup.bash
 
 # Or if you have a custom workspace
 source /path/to/your/ros2_ws/install/setup.bash
@@ -44,11 +44,15 @@ npm run build
 
 ## Installation
 
-Navigate to this demo directory and install dependencies:
+This demo depends on the **local rclnodejs** in this repository
+(`"rclnodejs": "file:../../.."`) so it always builds against the in-tree
+TypeScript types. Install with `--ignore-scripts` so npm links the local
+package without trying to rebuild its native addon (the prebuilt binary in the
+repo is reused):
 
 ```bash
 cd demo/typescript/topics
-npm install
+npm install --ignore-scripts
 ```
 
 ## Usage
@@ -137,9 +141,10 @@ Starting TypeScript Publisher Demo...
 ✓ Created timer with 1000ms interval
 🚀 Publisher is running. Press Ctrl+C to stop...
 
-📤 Published: "Hello from TypeScript publisher! Message #1 at 2025-07-16T10:30:00.123Z"
-📤 Published: "Hello from TypeScript publisher! Message #2 at 2025-07-16T10:30:01.125Z"
-📤 Published: "Hello from TypeScript publisher! Message #3 at 2025-07-16T10:30:02.127Z"
+📤 [A/string] Published: "Hello from TypeScript publisher! Message #1 at 2025-07-16T10:30:00.123Z"
+📤 [B/class] Published: "Hello from typed publisher! Message #1"
+📤 [A/string] Published: "Hello from TypeScript publisher! Message #2 at 2025-07-16T10:30:01.125Z"
+📤 [B/class] Published: "Hello from typed publisher! Message #2"
 ...
 ```
 
@@ -152,10 +157,10 @@ Starting TypeScript Subscriber Demo...
 ✓ Created subscription on topic: ts_demo
 👂 Subscriber is listening. Press Ctrl+C to stop...
 
-📥 [1] Received: "Hello from TypeScript publisher! Message #1 at 2025-07-16T10:30:00.123Z"
-    Timestamp: 2025-07-16T10:30:00.124Z
-📥 [2] Received: "Hello from TypeScript publisher! Message #2 at 2025-07-16T10:30:01.125Z"
-    Timestamp: 2025-07-16T10:30:01.126Z
+📥 [A/string] [1] Received: "Hello from TypeScript publisher! Message #1 at 2025-07-16T10:30:00.123Z"
+📥 [B/class] Received: "Hello from typed publisher! Message #1"
+📥 [A/string] [2] Received: "Hello from TypeScript publisher! Message #2 at 2025-07-16T10:30:01.125Z"
+📥 [B/class] Received: "Hello from typed publisher! Message #2"
 ...
 ```
 
@@ -176,14 +181,23 @@ demo/typescript/topics/
 
 ## Code Explanation
 
+Both demos show the **two equivalent, fully type-safe ways** to identify a
+message type:
+
+- **String name** (Style A): pass the type string, e.g. `'std_msgs/msg/String'`.
+- **Message class** (Style B): obtain the constructor with `rclnodejs.require(...)`
+  and pass it directly. TypeScript then infers the message type from the
+  constructor, so no explicit annotation is needed.
+
 ### Publisher (`src/publisher.ts`)
 
 The publisher demonstrates:
 
 - **Node Creation**: Creates a ROS2 node using TypeScript
-- **Publisher Setup**: Creates a publisher for `std_msgs/msg/String` messages
+- **Publisher Setup**: Creates publishers for `std_msgs/msg/String` messages
 - **Timer Usage**: Uses `node.createTimer()` for periodic message publishing
-- **Message Creation**: Uses `rclnodejs.createMessageObject()` with proper typing
+- **Message Creation**: Builds messages with `createMessageObject()` (Style A)
+  or by instantiating the message class (Style B)
 - **Graceful Shutdown**: Handles SIGINT for clean shutdown
 
 Key TypeScript features used:
@@ -192,21 +206,29 @@ Key TypeScript features used:
 import * as rclnodejs from 'rclnodejs';
 
 const node = new rclnodejs.Node('ts_publisher_demo');
+
+// Style A — string name
 const publisher = node.createPublisher('std_msgs/msg/String', TOPIC_NAME);
 const message = rclnodejs.createMessageObject('std_msgs/msg/String');
+
+// Style B — message class (type inferred from the constructor)
+const StringMsg = rclnodejs.require('std_msgs/msg/String');
+const typedPublisher = node.createPublisher(StringMsg, TOPIC_NAME);
+const typedMessage = new StringMsg(); // `typedMessage.data` is typed
 ```
 
 ### Subscriber (`src/subscriber.ts`)
 
 The subscriber demonstrates:
 
-- **Subscription Creation**: Creates a typed subscription for string messages
+- **Subscription Creation**: Creates typed subscriptions for string messages
 - **Callback Handling**: Processes incoming messages with proper TypeScript typing
 - **Message Processing**: Displays received messages with timestamps
 
 Key TypeScript features used:
 
 ```typescript
+// Style A — string name, callback type annotated explicitly
 const subscription = node.createSubscription(
   'std_msgs/msg/String',
   TOPIC_NAME,
@@ -214,6 +236,12 @@ const subscription = node.createSubscription(
     console.log(`Received: "${message.data}"`);
   }
 );
+
+// Style B — message class, callback type inferred from the constructor
+const StringMsg = rclnodejs.require('std_msgs/msg/String');
+node.createSubscription(StringMsg, TOPIC_NAME, (message) => {
+  console.log(`Received: "${message.data}"`);
+});
 ```
 
 ## TypeScript Benefits
@@ -252,7 +280,7 @@ This demo showcases several TypeScript advantages:
    **Solution**: Source your ROS 2 setup file:
 
    ```bash
-   source /opt/ros/jazzy/setup.bash
+   source /opt/ros/lyrical/setup.bash
    ```
 
 3. **Build errors:**
@@ -300,12 +328,17 @@ const TOPIC_NAME = 'your_custom_topic';
 
 ### Change Message Type
 
-To use a different message type, update the type string and interface:
+To use a different message type, update the type string or message class:
 
 ```typescript
-// For example, using geometry_msgs/msg/Twist
+// Style A — string name
 const publisher = node.createPublisher('geometry_msgs/msg/Twist', 'cmd_vel');
 const message = rclnodejs.createMessageObject('geometry_msgs/msg/Twist');
+
+// Style B — message class (type inferred from the constructor)
+const Twist = rclnodejs.require('geometry_msgs/msg/Twist');
+const typedPublisher = node.createPublisher(Twist, 'cmd_vel');
+const message2 = new Twist();
 ```
 
 ### Adjust Publishing Rate

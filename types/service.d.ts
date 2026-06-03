@@ -1,11 +1,15 @@
 declare module 'rclnodejs' {
   type ServiceRequestMessage<T> = T extends ServiceTypeClassName
     ? InstanceType<ServicesMap[T]['Request']>
-    : object;
+    : T extends { Request: new (...args: any[]) => infer R }
+      ? R
+      : object;
 
   type ServiceResponseMessage<T> = T extends ServiceTypeClassName
     ? InstanceType<ServicesMap[T]['Response']>
-    : object;
+    : T extends { Response: new (...args: any[]) => infer R }
+      ? R
+      : object;
 
   /**
    * Callback for receiving service requests from a client.

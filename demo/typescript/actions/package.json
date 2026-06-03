@@ -33,12 +33,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
-  "peerDependencies": {
-    "rclnodejs": "^2.0.0"
-  },
-  "peerDependenciesMeta": {
-    "rclnodejs": {
-      "optional": false
-    }
+  "dependencies": {
+    "rclnodejs": "file:../../.."
   }
 }

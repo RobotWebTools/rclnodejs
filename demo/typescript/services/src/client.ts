@@ -3,6 +3,15 @@
  *
  * This demo shows how to create a ROS2 service client using TypeScript
  * with rclnodejs. It calls the AddTwoInts service with random numbers.
+ *
+ * It also demonstrates the two equivalent, fully type-safe ways to
+ * identify a service type:
+ *   - String name:   node.createClient('example_interfaces/srv/AddTwoInts', ...)
+ *   - Service class: node.createClient(AddTwoInts, ...)
+ *
+ * This demo uses the class form (obtained from `rclnodejs.require(...)`):
+ * TypeScript infers the request and the response-callback types directly
+ * from the constructor, so no explicit `any` annotations are needed.
  */
 
 import * as rclnodejs from 'rclnodejs';
@@ -25,11 +34,13 @@ async function main(): Promise<void> {
     const node = new rclnodejs.Node('ts_client_demo');
     console.log(`✓ Created node: ${node.getFullyQualifiedName()}`);
 
-    // Create a client for AddTwoInts service
-    const client = node.createClient(
-      'example_interfaces/srv/AddTwoInts',
-      SERVICE_NAME
-    );
+    // Create a client for AddTwoInts using the service class (type-based
+    // form). Obtain the constructor with `rclnodejs.require(...)` and pass it
+    // directly; the request and response types are inferred from it. The
+    // string form `node.createClient('example_interfaces/srv/AddTwoInts', ...)`
+    // works identically and is equally type-safe.
+    const AddTwoInts = rclnodejs.require('example_interfaces/srv/AddTwoInts');
+    const client = node.createClient(AddTwoInts, SERVICE_NAME);
     console.log(`✓ Created service client: ${SERVICE_NAME}`);
 
     // Wait for the service to be available
@@ -57,17 +68,17 @@ async function main(): Promise<void> {
         const a = Math.floor(Math.random() * 100);
         const b = Math.floor(Math.random() * 100);
 
-        // Create request message
-        const request = {
-          a: BigInt(a),
-          b: BigInt(b),
-        };
+        // Create a typed request message by instantiating the class.
+        // `a` and `b` are typed (bigint) from the inferred request type.
+        const request = new AddTwoInts.Request();
+        request.a = BigInt(a);
+        request.b = BigInt(b);
 
         console.log(`📞 [${requestCount}] Sending request: a=${a}, b=${b}`);
         console.log(`    Timestamp: ${new Date().toISOString()}`);
 
-        // Send the request and wait for response
-        client.sendRequest(request, (response: any) => {
+        // Send the request and wait for response (response is typed)
+        client.sendRequest(request, (response) => {
           console.log(
             `📨 [${requestCount}] Received response: sum=${response.sum}`
           );

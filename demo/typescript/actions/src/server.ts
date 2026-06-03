@@ -3,26 +3,40 @@
  *
  * This demo shows how to create a ROS2 action server using TypeScript
  * with rclnodejs. It provides a Fibonacci calculation service.
+ *
+ * It also demonstrates the two equivalent, fully type-safe ways to
+ * identify an action type:
+ *   - String name:  new rclnodejs.ActionServer(node, 'test_msgs/action/Fibonacci', ...)
+ *   - Action class: new rclnodejs.ActionServer(node, Fibonacci, ...)
+ *
+ * This demo uses the class form (obtained from `rclnodejs.require(...)`):
+ * TypeScript infers the goal, feedback and result types directly from the
+ * constructor, so the callbacks need no explicit `any` annotations.
  */
 
 import * as rclnodejs from 'rclnodejs';
 
 const ACTION_NAME = 'fibonacci';
 
+// The Fibonacci action class (type-based form). Passing this constructor to
+// ActionServer lets TypeScript infer the goal/feedback/result types. The
+// string form 'test_msgs/action/Fibonacci' works identically.
+const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
+
 /**
  * Fibonacci Action Server Class
  */
 class FibonacciActionServer {
   private node: rclnodejs.Node;
-  private actionServer: rclnodejs.ActionServer<'test_msgs/action/Fibonacci'>;
+  private actionServer: rclnodejs.ActionServer<typeof Fibonacci>;
 
   constructor(node: rclnodejs.Node) {
     this.node = node;
 
-    // Create action server for Fibonacci action
+    // Create action server for Fibonacci action using the action class
     this.actionServer = new rclnodejs.ActionServer(
       node,
-      'test_msgs/action/Fibonacci',
+      Fibonacci,
       ACTION_NAME,
       this.executeCallback.bind(this),
       this.goalCallback.bind(this),
@@ -39,13 +53,12 @@ class FibonacciActionServer {
    * Execute callback - performs the Fibonacci calculation
    */
   async executeCallback(
-    goalHandle: rclnodejs.ServerGoalHandle<'test_msgs/action/Fibonacci'>
-  ): Promise<any> {
+    goalHandle: rclnodejs.ServerGoalHandle<typeof Fibonacci>
+  ): Promise<rclnodejs.ActionResult<typeof Fibonacci>> {
     this.node
       .getLogger()
       .info(`🚀 Executing goal for Fibonacci(${goalHandle.request.order})`);
 
-    const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
     const feedbackMessage = new Fibonacci.Feedback();
     const sequence: number[] = [0, 1];
 
@@ -110,13 +123,12 @@ class FibonacciActionServer {
   }
 
   /**
-   * Goal callback - decides whether to accept or reject incoming goals
-   *
-   * Note: According to the type definition, this should receive ActionGoal<T>,
-   * but the actual implementation may pass different types. Using 'any' to handle
-   * this inconsistency and support ActionGoal<T>.
+   * Goal callback - decides whether to accept or reject incoming goals.
+   * The goal type is inferred from the action constructor.
    */
-  goalCallback(goal: any): rclnodejs.GoalResponse {
+  goalCallback(
+    goal: rclnodejs.ActionGoal<typeof Fibonacci>
+  ): rclnodejs.GoalResponse {
     const order = goal.order;
 
     this.node
@@ -146,9 +158,7 @@ class FibonacciActionServer {
    * Cancel callback - handles goal cancellation requests
    */
   cancelCallback(
-    goalHandle:
-      | rclnodejs.ServerGoalHandle<'test_msgs/action/Fibonacci'>
-      | undefined
+    goalHandle: rclnodejs.ServerGoalHandle<typeof Fibonacci> | undefined
   ): rclnodejs.CancelResponse {
     this.node.getLogger().info('📥 Received cancel request');
     return rclnodejs.CancelResponse.ACCEPT;

@@ -60,7 +60,7 @@ Before running this demo, ensure you have:
 1. **Ensure ROS2 is sourced**:
 
    ```bash
-   source /opt/ros/humble/setup.bash  # or your ROS2 distribution
+   source /opt/ros/lyrical/setup.bash  # or your ROS2 distribution
    ```
 
 2. **Build the main rclnodejs package** (if not already done):
@@ -79,8 +79,13 @@ Before running this demo, ensure you have:
 
 4. **Install dependencies**:
 
+   This demo depends on the **local rclnodejs** in this repository
+   (`"rclnodejs": "file:../../.."`). Install with `--ignore-scripts` so npm
+   links the local package without trying to rebuild its native addon (the
+   prebuilt binary in the repo is reused):
+
    ```bash
-   npm install
+   npm install --ignore-scripts
    ```
 
 5. **Build the TypeScript code**:
@@ -194,29 +199,52 @@ You can also test the action server using ROS2 command-line tools:
 
 ## Understanding the Code
 
+Both the server and client show the **two equivalent, fully type-safe ways**
+to identify an action type:
+
+- **String name**: pass the type string, e.g. `'test_msgs/action/Fibonacci'`.
+- **Action class**: obtain the constructor with `rclnodejs.require(...)` and
+  pass it directly. TypeScript then infers the goal, feedback and result types
+  from the constructor, so no explicit `any` annotations are needed.
+
+This demo uses the **action class** form. The constructor is loaded once at
+module scope and reused for the type annotations via `typeof Fibonacci`:
+
+```typescript
+const Fibonacci = rclnodejs.require('test_msgs/action/Fibonacci');
+```
+
 ### Action Server (`server.ts`)
 
-The action server implements three main callbacks:
+The action server implements three main callbacks, all typed from
+`typeof Fibonacci`:
 
 1. **Goal Callback**: Decides whether to accept or reject incoming goals
 
    ```typescript
-   goalCallback(goalHandle: any): rclnodejs.GoalResponse {
-     // Validate the goal and return ACCEPT or REJECT
+   goalCallback(
+     goal: rclnodejs.ActionGoal<typeof Fibonacci>
+   ): rclnodejs.GoalResponse {
+     // Validate the goal (goal.order is typed) and return ACCEPT or REJECT
    }
    ```
 
 2. **Execute Callback**: Performs the actual work (Fibonacci calculation)
 
    ```typescript
-   async executeCallback(goalHandle: any): Promise<any> {
-     // Calculate Fibonacci sequence and provide feedback
+   async executeCallback(
+     goalHandle: rclnodejs.ServerGoalHandle<typeof Fibonacci>
+   ): Promise<rclnodejs.ActionResult<typeof Fibonacci>> {
+     // Calculate the sequence and publish typed feedback
    }
    ```
 
 3. **Cancel Callback**: Handles goal cancellation requests
+
    ```typescript
-   cancelCallback(goalHandle: any): rclnodejs.CancelResponse {
+   cancelCallback(
+     goalHandle: rclnodejs.ServerGoalHandle<typeof Fibonacci> | undefined
+   ): rclnodejs.CancelResponse {
      // Return ACCEPT to allow cancellation
    }
    ```
@@ -226,14 +254,23 @@ The action server implements three main callbacks:
 The action client:
 
 1. Waits for the action server to be available
-2. Creates and sends a goal
-3. Handles feedback during execution
+2. Creates and sends a goal (`new Fibonacci.Goal()`)
+3. Handles typed feedback during execution
 4. Processes the final result
 
 ```typescript
+const goal = new Fibonacci.Goal();
+goal.order = FIBONACCI_ORDER;
+
 const goalHandle = await this.actionClient.sendGoal(goal, (feedback) =>
   this.feedbackCallback(feedback)
 );
+
+private feedbackCallback(
+  feedback: rclnodejs.ActionFeedback<typeof Fibonacci>
+): void {
+  // feedback.sequence is typed
+}
 ```
 
 ## Customization
@@ -263,7 +300,7 @@ You can modify the demo to:
 
 4. **ROS2 environment not sourced**:
    ```bash
-   source /opt/ros/humble/setup.bash  # or your ROS2 distribution
+   source /opt/ros/lyrical/setup.bash  # or your ROS2 distribution
    ```
 
 ### Debugging

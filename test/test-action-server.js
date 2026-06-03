@@ -167,6 +167,51 @@ describe('rclnodejs action server', function () {
     server.destroy();
   });
 
+  it('Test single goal accept with constructor-form typeClass', async function () {
+    // Regression test: passing the loaded interface constructor (the value
+    // returned by rclnodejs.require) to ActionServer/ActionClient must work
+    // the same as passing the type string. See loadInterface idempotency.
+    let goalUuid = createUuid();
+    let goalOrder = 10;
+
+    function goalCallback(goal) {
+      assert.strictEqual(goal.order, goalOrder);
+      return rclnodejs.GoalResponse.ACCEPT;
+    }
+
+    function handleAcceptedCallback(goalHandle) {
+      goalHandle.execute();
+    }
+
+    let ctorClient = new rclnodejs.ActionClient(
+      node,
+      Fibonacci,
+      'fibonacci_ctor'
+    );
+
+    let server = new rclnodejs.ActionServer(
+      node,
+      Fibonacci,
+      'fibonacci_ctor',
+      executeCallback,
+      goalCallback,
+      handleAcceptedCallback
+    );
+
+    let goal = new Fibonacci.Goal();
+    goal.order = goalOrder;
+
+    await ctorClient.waitForServer(1000);
+    const handle = await ctorClient.sendGoal(goal, null, goalUuid);
+    assert.ok(handle.accepted);
+
+    let result = await handle.getResult();
+    assert.ok(result);
+
+    ctorClient.destroy();
+    server.destroy();
+  });
+
   it('Test single goal reject', async function () {
     let goalUuid = createUuid();
     let goalOrder = 10;
