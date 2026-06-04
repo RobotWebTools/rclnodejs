@@ -1,17 +1,16 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2020",
-    /* Strict Type-Checking Options */
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "es2022",
     "strict": true,
-    /* Additional Checks */
     /* next line commented out because we need unused vars for type tests */
     // "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "lib": ["es2020"]
+    "lib": ["es2022"],
+    "types": ["node"]
   },
   "include": [
         "types/**/*"
