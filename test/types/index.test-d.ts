@@ -414,12 +414,15 @@ expectType<void>(timer.clearOnResetCallback());
 expectType<rclnodejs.TimerInfo>(timer.callTimerWithInfo());
 
 // ---- Rate ----
-const rate = await node.createRate(1);
-expectType<rclnodejs.Rate>(rate);
-expectType<number>(rate.frequency);
-expectType<boolean>(rate.isCanceled());
-expectType<Promise<void>>(rate.sleep());
-expectType<void>(rate.cancel());
+expectType<Promise<rclnodejs.Rate>>(node.createRate(1));
+void (async () => {
+  const rate = await node.createRate(1);
+  expectType<rclnodejs.Rate>(rate);
+  expectType<number>(rate.frequency);
+  expectType<boolean>(rate.isCanceled());
+  expectType<Promise<void>>(rate.sleep());
+  expectType<void>(rate.cancel());
+})();
 
 // ---- Duration ----
 const duration1 = new rclnodejs.Duration();
