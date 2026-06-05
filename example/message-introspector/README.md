@@ -6,14 +6,14 @@ This directory contains an example demonstrating the `MessageIntrospector` class
 
 The `MessageIntrospector` class provides a simple way to understand the structure of ROS 2 messages without directly using `loader.loadInterface`. It's useful for debugging, generating documentation, and building dynamic UIs based on message structure.
 
-## MessageIntrospector Example (`message-introspector-example.js`)
+## MessageIntrospector Example (`message-introspector-example.cjs`)
 
 **Purpose**: Demonstrates how to inspect message structure, fields, and default values.
 
 ### Run Command
 
 ```bash
-node message-introspector-example.js
+node message-introspector-example.cjs
 ```
 
 ### Expected Output

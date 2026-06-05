@@ -15,7 +15,7 @@ ROS 2 services provide a request-response communication pattern where clients se
 
 ### AddTwoInts Service
 
-#### Service Server (`service/service-example.js`)
+#### Service Server (`service/service-example.cjs`)
 
 **Purpose**: Demonstrates creating a service server that adds two integers.
 
@@ -29,9 +29,9 @@ ROS 2 services provide a request-response communication pattern where clients se
 - **Features**:
   - Service introspection (ROS 2 Iron+) for monitoring service calls
   - Proper response handling using `response.template` and `response.send()`
-- **Run Command**: `node example/services/service/service-example.js`
+- **Run Command**: `node example/services/service/service-example.cjs`
 
-#### Service Client (`client/client-example.js`)
+#### Service Client (`client/client-example.cjs`)
 
 **Purpose**: Demonstrates creating a service client that sends requests to the AddTwoInts service.
 
@@ -46,9 +46,9 @@ ROS 2 services provide a request-response communication pattern where clients se
   - Service availability checking with `waitForService()`
   - Service introspection configuration (ROS 2 Iron+)
   - Asynchronous request handling with callbacks
-- **Run Command**: `node example/services/client/client-example.js`
+- **Run Command**: `node example/services/client/client-example.cjs`
 
-#### Async Service Client (`client/async-client-example.js`)
+#### Async Service Client (`client/async-client-example.cjs`)
 
 **Purpose**: Demonstrates modern async/await patterns for service communication, solving callback hell and providing cleaner error handling.
 
@@ -68,9 +68,9 @@ ROS 2 services provide a request-response communication pattern where clients se
   - **Error Types**: Specific error types (`TimeoutError`, `AbortError`) for better error handling (async only)
   - **Backward Compatible**: Works alongside existing callback-based `sendRequest()`
   - **TypeScript Ready**: Full type safety with comprehensive TypeScript definitions
-- **Run Command**: `node example/services/client/async-client-example.js`
+- **Run Command**: `node example/services/client/async-client-example.cjs`
 
-#### Service Client Validation (`client/client-validation-example.js`)
+#### Service Client Validation (`client/client-validation-example.cjs`)
 
 **Purpose**: Demonstrates request validation features for service clients.
 
@@ -89,7 +89,7 @@ ROS 2 services provide a request-response communication pattern where clients se
   - **Dynamic Toggle**: Enable/disable validation with `willValidateRequest` property
   - **Detailed Errors**: Field-level validation issues with expected vs received types
   - **Strict Mode**: Detect extra fields that don't belong in the request
-- **Run Command**: `node example/services/client/client-validation-example.js`
+- **Run Command**: `node example/services/client/client-validation-example.cjs`
 - **Note**: Standalone example - demonstrates validation errors without requiring a running service
 
 **Key API Differences**:
@@ -129,7 +129,7 @@ try {
 
 ### GetMap Service
 
-#### Service Server (`service/getmap-service-example.js`)
+#### Service Server (`service/getmap-service-example.cjs`)
 
 **Purpose**: Demonstrates creating a service server that provides occupancy grid map data.
 
@@ -145,9 +145,9 @@ try {
   - Realistic navigation map data for robotics applications
   - Service introspection support (ROS 2 Iron+)
   - Detailed logging of map properties
-- **Run Command**: `node example/services/service/getmap-service-example.js`
+- **Run Command**: `node example/services/service/getmap-service-example.cjs`
 
-#### Service Client (`client/getmap-client-example.js`)
+#### Service Client (`client/getmap-client-example.cjs`)
 
 **Purpose**: Demonstrates creating a service client that requests map data from the GetMap service.
 
@@ -163,7 +163,7 @@ try {
   - Map data analysis (cell distribution, metadata extraction)
   - Educational output showing map properties
   - Visual representation of map data
-- **Run Command**: `node example/services/client/getmap-client-example.js`
+- **Run Command**: `node example/services/client/getmap-client-example.cjs`
 
 ## How to Run the Examples
 
@@ -175,7 +175,7 @@ try {
 
    ```bash
    cd /path/to/rclnodejs
-   node example/services/service/service-example.js
+   node example/services/service/service-example.cjs
    ```
 
    You should see:
@@ -188,7 +188,7 @@ try {
 
    ```bash
    cd /path/to/rclnodejs
-   node example/services/client/client-example.js
+   node example/services/client/client-example.cjs
    ```
 
 4. **Expected Output**:
@@ -216,14 +216,14 @@ try {
 
    ```bash
    cd /path/to/rclnodejs
-   node example/services/service/service-example.js
+   node example/services/service/service-example.cjs
    ```
 
 3. **Start the Async Client**: In another terminal, run:
 
    ```bash
    cd /path/to/rclnodejs
-   node example/services/client/async-client-example.js
+   node example/services/client/async-client-example.cjs
    ```
 
 4. **Expected Output**:
@@ -251,7 +251,7 @@ try {
 
    ```bash
    cd /path/to/rclnodejs
-   node example/services/service/getmap-service-example.js
+   node example/services/service/getmap-service-example.cjs
    ```
 
    You should see:
@@ -266,7 +266,7 @@ try {
 
    ```bash
    cd /path/to/rclnodejs
-   node example/services/client/getmap-client-example.js
+   node example/services/client/getmap-client-example.cjs
    ```
 
 4. **Expected Output**:

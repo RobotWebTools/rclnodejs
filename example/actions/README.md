@@ -24,7 +24,7 @@ Actions are ideal for:
 
 The `action_client/` directory contains examples of nodes that send goals to action servers:
 
-#### 1. Basic Action Client (`action-client-example.js`)
+#### 1. Basic Action Client (`action-client-example.cjs`)
 
 **Purpose**: Demonstrates basic action client functionality with the Fibonacci action.
 
@@ -40,9 +40,9 @@ The `action_client/` directory contains examples of nodes that send goals to act
   - Goal acceptance verification
   - Feedback handling during execution
   - Result processing with status checking
-- **Run Command**: `node action_client/action-client-example.js`
+- **Run Command**: `node action_client/action-client-example.cjs`
 
-#### 2. Action Client with Cancellation (`action-client-cancel-example.js`)
+#### 2. Action Client with Cancellation (`action-client-cancel-example.cjs`)
 
 **Purpose**: Demonstrates how to cancel an action goal during execution.
 
@@ -58,9 +58,9 @@ The `action_client/` directory contains examples of nodes that send goals to act
   - Goal cancellation with `cancelGoal()`
   - Cancellation response verification
   - Cleanup and shutdown handling
-- **Run Command**: `node action_client/action-client-cancel-example.js`
+- **Run Command**: `node action_client/action-client-cancel-example.cjs`
 
-#### 3. Action Client Validation (`action-client-validation-example.js`)
+#### 3. Action Client Validation (`action-client-validation-example.cjs`)
 
 **Purpose**: Demonstrates goal validation features for action clients.
 
@@ -80,14 +80,14 @@ The `action_client/` directory contains examples of nodes that send goals to act
   - **Detailed Errors**: Field-level validation issues with expected vs received types
   - **Strict Mode**: Detect extra fields that don't belong in the goal
   - **Reusable Validators**: Create validators for repeated goal validation
-- **Run Command**: `node action_client/action-client-validation-example.js`
+- **Run Command**: `node action_client/action-client-validation-example.cjs`
 - **Note**: Standalone example - demonstrates validation errors without requiring a running action server
 
 ### Action Server Examples
 
 The `action_server/` directory contains examples of nodes that provide action services:
 
-#### 1. Basic Action Server (`action-server-example.js`)
+#### 1. Basic Action Server (`action-server-example.cjs`)
 
 **Purpose**: Demonstrates basic action server implementation for computing Fibonacci sequences.
 
@@ -103,9 +103,9 @@ The `action_server/` directory contains examples of nodes that provide action se
   - Execution callback with feedback publishing
   - Cancellation handling (`cancelCallback`)
   - Progress updates every second
-- **Run Command**: `node action_server/action-server-example.js`
+- **Run Command**: `node action_server/action-server-example.cjs`
 
-#### 2. Deferred Execution Server (`action-server-defer-example.js`)
+#### 2. Deferred Execution Server (`action-server-defer-example.cjs`)
 
 **Purpose**: Shows how to defer goal execution using timers and handle accepted callbacks.
 
@@ -121,9 +121,9 @@ The `action_server/` directory contains examples of nodes that provide action se
   - Handle accepted callback (`handleAcceptedCallback`)
   - Timer-based execution control
   - Manual goal execution triggering
-- **Run Command**: `node action_server/action-server-defer-example.js`
+- **Run Command**: `node action_server/action-server-defer-example.cjs`
 
-#### 3. Single Goal Server (`action-server-single-goal-example.js`)
+#### 3. Single Goal Server (`action-server-single-goal-example.cjs`)
 
 **Purpose**: Demonstrates a server that only allows one active goal at a time.
 
@@ -139,7 +139,7 @@ The `action_server/` directory contains examples of nodes that provide action se
   - Automatic abortion of previous goals
   - Goal state tracking (`isActive`)
   - Handle accepted callback for goal management
-- **Run Command**: `node action_server/action-server-single-goal-example.js`
+- **Run Command**: `node action_server/action-server-single-goal-example.cjs`
 
 ## How to Run the Examples
 
@@ -156,7 +156,7 @@ The `action_server/` directory contains examples of nodes that provide action se
 
    ```bash
    cd example/actions
-   node action_server/action-server-example.js
+   node action_server/action-server-example.cjs
    ```
 
    You should see:
@@ -169,7 +169,7 @@ The `action_server/` directory contains examples of nodes that provide action se
 
    ```bash
    cd example/actions
-   node action_client/action-client-example.js
+   node action_client/action-client-example.cjs
    ```
 
 3. **Expected Output**:
@@ -203,14 +203,14 @@ The `action_server/` directory contains examples of nodes that provide action se
 1. **Start Server**: Run any action server example
 2. **Start Cancellation Client**:
    ```bash
-   node action_client/action-client-cancel-example.js
+   node action_client/action-client-cancel-example.cjs
    ```
 3. **Expected Behavior**: Client sends goal, receives feedback for 2 seconds, then cancels
 
 #### Specialized Server Examples
 
-- **Deferred Execution**: Use `action-server-defer-example.js` to see 3-second execution delay
-- **Single Goal**: Use `action-server-single-goal-example.js` to test goal abortion behavior
+- **Deferred Execution**: Use `action-server-defer-example.cjs` to see 3-second execution delay
+- **Single Goal**: Use `action-server-single-goal-example.cjs` to test goal abortion behavior
 
 ## Action Components Explained
 

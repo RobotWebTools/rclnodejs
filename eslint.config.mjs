@@ -78,7 +78,7 @@ export default [
             sourceType: "commonjs",
         },
         files: ["rosidl_parser/**/*.{js,cjs}", "rosidl_gen/**/*.{js,cjs}",
-            "rostsd_gen/**/*.{js,cjs}", "example/**/*.js"],
+            "rostsd_gen/**/*.{js,cjs}", "example/**/*.cjs"],
         rules: {
             ...eslintPluginPrettierRecommended.rules,
         },
