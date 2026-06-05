@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const utils = require('./utils.js');
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import * as utils from './utils.js';
 
 describe('rclnodejs validator testing', function () {
   this.timeout(60 * 1000);

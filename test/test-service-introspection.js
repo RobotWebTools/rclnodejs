@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import childProcess from 'child_process';
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import YAML from 'yaml';
+import util from 'node:util';
+import { exec as nodeExec } from 'node:child_process';
 
-const childProcess = require('child_process');
-const assert = require('assert');
-const rclnodejs = require('../index.js');
 const DistroUtils = rclnodejs.DistroUtils;
-const YAML = require('yaml');
-
-const util = require('node:util');
-const exec = util.promisify(require('node:child_process').exec);
+const exec = util.promisify(nodeExec);
 
 const ServiceIntrospectionStates = rclnodejs.ServiceIntrospectionStates;
 const QOS = rclnodejs.QoS.profileSystemDefault;

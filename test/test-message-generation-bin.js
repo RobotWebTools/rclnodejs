@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const childProcess = require('child_process');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const rimraf = require('rimraf');
-const rclnodejs = require('../index.js');
+import assert from 'assert';
+import childProcess from 'child_process';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import * as rimraf from 'rimraf';
+import rclnodejs from '../index.js';
 
 const GEN_FOLDER = 'generated';
 const SCRIPT_NAME = 'generate-ros-messages';

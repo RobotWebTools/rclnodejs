@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import { isClose } from '../lib/utils.js';
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import * as assertUtils from './utils.js';
+import prettier from 'prettier';
 
-const { isClose } = require('../lib/utils.js');
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const assertUtils = require('./utils.js');
-const { util } = require('prettier');
+const { util } = prettier;
 const assertThrowsError = assertUtils.assertThrowsError;
 
 describe('rclnodejs node test suite', function () {

@@ -10,13 +10,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
 
-const assert = require('assert');
-
-const rclnodejs = require('../index.js');
-const childProcess = require('child_process');
-const assertUtils = require('./utils.js');
+import rclnodejs from '../index.js';
+import childProcess from 'child_process';
+import * as assertUtils from './utils.js';
 
 const NODE_NAME = 'lifecycle_node';
 

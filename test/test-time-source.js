@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import sinon from 'sinon';
+import rclnodejs from '../index.js';
 
-const assert = require('assert');
-const sinon = require('sinon');
-const rclnodejs = require('../index.js');
 const { Clock, Parameter, ParameterType, ROSClock, TimeSource, Time } =
   rclnodejs;
 

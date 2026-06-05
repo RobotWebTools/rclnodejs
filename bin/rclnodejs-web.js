@@ -11,20 +11,20 @@
 //
 // For frontend developers who don't want to write a Node.js server.
 // Run `rclnodejs-web --help` or `npx rclnodejs-web web.json` to start
-// the runtime. See demo/web/javascript/README.md for the full demo.
+// demo. See demo/web/javascript/README.md for the full demo.
 
-'use strict';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-const path = require('node:path');
-const fs = require('node:fs');
-
-const {
+import {
   parseArgv,
   loadConfigFile,
   mergeConfig,
-  CliError,
   HELP,
-} = require('../lib/runtime/cli-config.js');
+} from '../lib/runtime/cli-config.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const argv = process.argv.slice(2);
 
@@ -55,14 +55,11 @@ const argv = process.argv.slice(2);
     fail(e);
   }
 
-  // Defer the rclnodejs require until after argv parsing so --help / --version
+  // Defer the rclnodejs import until after argv parsing so --help / --version
   // never pay the (slow, native) load cost.
-  const rclnodejs = require('../index.js');
-  const {
-    createRuntime,
-    WebSocketTransport,
-    HttpTransport,
-  } = require('../lib/runtime');
+  const rclnodejs = (await import('../index.js')).default;
+  const { createRuntime, WebSocketTransport, HttpTransport } =
+    await import('../lib/runtime/index.js');
 
   // Track partial init so the catch block can clean up native handles before
   // process.exit() — without this, a startup failure (e.g. EADDRINUSE on the

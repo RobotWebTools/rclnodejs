@@ -10,12 +10,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import childProcess from 'child_process';
+import os from 'os';
+import { fileURLToPath } from 'url';
 
-const assert = require('assert');
-const rclnodejs = require('..');
-const childProcess = require('child_process');
-const os = require('os');
+const __filename = fileURLToPath(import.meta.url);
 
 function forkOnlyRemoveRclnodejsHandlers() {
   const myHandler = () => {};

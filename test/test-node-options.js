@@ -11,20 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const assertUtils = require('./utils.js');
-const assertThrowsError = assertUtils.assertThrowsError;
-
-const NodeOptions = rclnodejs.NodeOptions;
-
-const {
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import * as assertUtils from './utils.js';
+import {
   ParameterType,
   Parameter,
   ParameterDescriptor,
-} = require('../lib/parameter.js');
+} from '../lib/parameter.js';
+
+const assertThrowsError = assertUtils.assertThrowsError;
+
+const NodeOptions = rclnodejs.NodeOptions;
 
 describe('rclnodejs NodeOptions test suite', function () {
   it('constructor test', function () {

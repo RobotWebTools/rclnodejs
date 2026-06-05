@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const {
-  MessageValidationError,
-  TypeValidationError,
-} = require('../lib/errors.js');
-const {
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import { MessageValidationError, TypeValidationError } from '../lib/errors.js';
+import {
   assertValidMessage,
   validateMessage,
   createMessageValidator,
@@ -28,7 +23,7 @@ const {
   getMessageSchema,
   ValidationProblem,
   getMessageTypeString,
-} = require('../lib/message_validation.js');
+} from '../lib/message_validation.js';
 
 describe('Message Validation Tests', function () {
   this.timeout(60 * 1000);

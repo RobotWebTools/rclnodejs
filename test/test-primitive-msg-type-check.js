@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const assertThrowsError = require('./utils.js').assertThrowsError;
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import { assertThrowsError } from './utils.js';
 
 // In IDL mode, .msg 'char' type is mapped to 'uint8' (they are identical in IDL spec)
 const useIDL = process.argv.includes('--idl');

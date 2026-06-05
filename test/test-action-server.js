@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const deepEqual = require('deep-equal');
-const assertUtils = require('./utils.js');
-const { isActionIntrospectionSupported } = require('./utils.js');
-const { randomUUID } = require('crypto');
-const rclnodejs = require('../index.js');
+import assert from 'assert';
+import deepEqual from 'deep-equal';
+import * as assertUtils from './utils.js';
+import { isActionIntrospectionSupported } from './utils.js';
+import { randomUUID } from 'crypto';
+import rclnodejs from '../index.js';
+import ActionInterfaces from '../lib/action/interfaces.js';
+import ActionUuid from '../lib/action/uuid.js';
 
 describe('rclnodejs action server', function () {
   let node;
@@ -660,8 +660,6 @@ describe('rclnodejs action server', function () {
     const expiredGoalInfos = [];
     const origExecuteExpiredGoals = server._executeExpiredGoals.bind(server);
     server._executeExpiredGoals = function (result, count) {
-      const ActionInterfaces = require('../lib/action/interfaces.js');
-      const ActionUuid = require('../lib/action/uuid.js');
       for (let i = 0; i < count; i++) {
         const goalInfo = new ActionInterfaces.GoalInfo();
         goalInfo.deserialize(result._refArray[i]);

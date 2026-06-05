@@ -3,7 +3,11 @@ const assert = require('assert');
 const inspect = require('util').inspect;
 const debug = require('debug')('ref');
 const os = require('os');
-const addon = require('../../../lib/native_loader.js');
+// native_loader.js is an ES module (default export). When required from CJS,
+// Node returns the module namespace, so unwrap the default export.
+const nativeLoader = require('../../../lib/native_loader.js');
+const addon =
+  nativeLoader && nativeLoader.default ? nativeLoader.default : nativeLoader;
 
 if (!addon || !addon.ref) {
   throw new Error('Failed to load ref bindings from rclnodejs addon');

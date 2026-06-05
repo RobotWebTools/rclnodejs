@@ -1,27 +1,15 @@
-'use strict';
+import assert from 'assert';
+import sinon from 'sinon';
 
-const assert = require('assert');
-const sinon = require('sinon');
+import fs from 'fs';
+import child_process from 'child_process';
 
-const fs = require('fs');
-const child_process = require('child_process');
-
-// Require the module once without clearing cache to avoid triggering
-// loadNativeAddon() repeatedly. The TestHelpers functions read process
-// state at call time, so they can be tested with platform/env changes
-// without re-requiring the module.
-// NOTE: The module may have been loaded by other tests before NODE_ENV was set,
-// so TestHelpers might not be present. We clear cache and re-require with
-// NODE_ENV='test' to ensure TestHelpers is exported.
-const nativeLoaderPath = require.resolve('../lib/native_loader.js');
-if (
-  !require.cache[nativeLoaderPath] ||
-  !require.cache[nativeLoaderPath].exports.TestHelpers
-) {
-  delete require.cache[nativeLoaderPath];
-  process.env.NODE_ENV = 'test';
-}
-const nativeLoader = require('../lib/native_loader.js');
+// native_loader attaches TestHelpers to the addon only when NODE_ENV==='test'.
+// In ESM modules are singletons and cannot be re-required via require.cache, so
+// set the env first and use a cache-busting dynamic import to obtain a fresh
+// module instance that exposes TestHelpers.
+process.env.NODE_ENV = 'test';
+const nativeLoader = (await import('../lib/native_loader.js?env=test')).default;
 
 describe('NativeLoader testing', function () {
   const sandbox = sinon.createSandbox();
@@ -105,16 +93,15 @@ describe('NativeLoader testing', function () {
     assert.ok(args.includes('rclnodejs.node'));
   });
 
-  it('loadNativeAddon force build triggers rebuild', function () {
+  it('loadNativeAddon force build triggers rebuild', async function () {
     process.env.RCLNODEJS_FORCE_BUILD = '1';
     const execSync = sandbox.stub(child_process, 'execSync');
 
-    // Clear cache and re-require to trigger loadNativeAddon with RCLNODEJS_FORCE_BUILD.
-    // execSync is stubbed so no real rebuild (which deletes generated/) occurs.
-    delete require.cache[require.resolve('../lib/native_loader.js')];
-
+    // Re-evaluate native_loader via a cache-busting dynamic import to trigger
+    // loadNativeAddon with RCLNODEJS_FORCE_BUILD. execSync is stubbed so no
+    // real rebuild (which deletes generated/) occurs.
     try {
-      require('../lib/native_loader.js');
+      await import('../lib/native_loader.js?forcebuild=1');
     } catch (e) {
       // Ignore if loading binding fails, as long as execSync was called
     }

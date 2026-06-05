@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const sinon = require('sinon');
-const rclnodejs = require('../index.js');
-const generator = require('../rosidl_gen/index.cjs');
+import assert from 'assert';
+import sinon from 'sinon';
+import rclnodejs from '../index.js';
+import generator from '../rosidl_gen/index.cjs';
 
 describe('rclnodejs init and shutdown test suite', function () {
   this.timeout(60 * 1000);
@@ -109,9 +107,15 @@ describe('rclnodejs init and shutdown test suite', function () {
       .rejects(new Error('generator failed'));
 
     try {
-      const indexPath = require.resolve('../index.js');
-      delete require.cache[indexPath];
-      const freshRclnodejs = require('../index.js');
+      // index.js gates generateAll() behind a module-level _rosVersionChecked
+      // flag that is already true once any earlier test has initialized. ESM
+      // modules are singletons and cannot be reloaded via require.cache, so use
+      // a cache-busting dynamic import to obtain a fresh index.js instance with
+      // _rosVersionChecked === false. Its lib/* imports resolve to the existing
+      // singletons (including the same generator CJS module the stub targets).
+      const freshRclnodejs = (
+        await import(`../index.js?rollbacktest=${Date.now()}`)
+      ).default;
 
       const failedContext = new freshRclnodejs.Context();
 

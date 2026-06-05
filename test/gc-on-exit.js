@@ -1,5 +1,3 @@
-'use strict';
-
 // helper module to trigger gc on exit, useful to remove false positives when running with ASAN/LSAN
 
 // requires `--expose-gc` flag

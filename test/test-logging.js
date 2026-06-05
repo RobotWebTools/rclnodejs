@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const sinon = require('sinon');
-const rclnodejsBinding = require('../lib/native_loader.js');
-const Logging = require('../lib/logging.js');
-const Context = require('../lib/context.js');
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import sinon from 'sinon';
+import rclnodejsBinding from '../lib/native_loader.js';
+import Logging from '../lib/logging.js';
+import Context from '../lib/context.js';
 
 describe('Test logging util', function () {
   it('Test setting severity level', function () {

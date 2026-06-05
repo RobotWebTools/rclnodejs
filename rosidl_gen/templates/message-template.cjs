@@ -268,7 +268,8 @@ function generateMessage(data) {
   // ROS 2 Rolling (ros2/rosidl#941) added is_rosidl_buffer / owns_rosidl_buffer
   // to every primitive sequence struct. Lyrical inherits the same ABI change.
   // Emit the extra fields only for primitive-package types on Lyrical+.
-  const DistroUtils = require('../../lib/distro.js');
+  // lib/distro.js is an ES module; require() returns its namespace, so unwrap .default.
+  const DistroUtils = require('../../lib/distro.js').default;
   const needsRosidlBufferFields =
     isPrimitivePackage(spec.baseType) &&
     DistroUtils.getDistroId() >= DistroUtils.DistroId.LYRICAL;
@@ -299,7 +300,7 @@ function generateMessage(data) {
 
 'use strict';
 
-${willUseTypedArray ? "const rclnodejs = require('../../lib/native_loader.js');" : ''}
+${willUseTypedArray ? "const rclnodejs = require('../../lib/native_loader.js').default;" : ''}
 const ref = require('../../third_party/ref-napi');
 const StructType = require('@rclnodejs/ref-struct-di')(ref);
 const ArrayType = require('@rclnodejs/ref-array-di')(ref);

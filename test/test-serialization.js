@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const { serializeMessage, deserializeMessage } = require('../index.js');
+import assert from 'assert';
+import rclnodejs from '../index.js';
+
+const { serializeMessage, deserializeMessage } = rclnodejs;
 
 describe('rclnodejs publisher test suite', function () {
   [

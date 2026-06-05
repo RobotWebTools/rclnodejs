@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const rclnodejs = require('../index.js');
-const deepEqual = require('deep-equal');
+import rclnodejs from '../index.js';
+import deepEqual from 'deep-equal';
 
 describe('Rclnodejs message translation: complex types', function () {
   this.timeout(60 * 1000);

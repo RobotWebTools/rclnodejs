@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const primitiveTypes = require('../rosidl_gen/primitive_types.cjs');
+import assert from 'assert';
+import primitiveTypes from '../rosidl_gen/primitive_types.cjs';
 
 describe('rosidl_gen primitive_types', function () {
   describe('initString(str, own=true)', function () {

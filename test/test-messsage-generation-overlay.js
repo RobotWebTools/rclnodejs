@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import childProcess from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import rclnodejs from '../index.js';
+import generator from '../rosidl_gen/index.cjs';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
-const assert = require('assert');
-const childProcess = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const rclnodejs = require('../index.js');
-const generator = require('../rosidl_gen/index.cjs');
+const require = createRequire(import.meta.url);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const GENERATED_PATH = path.join(__dirname, '..', 'generated');
 const POINT_PATH = path.join(

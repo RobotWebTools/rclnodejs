@@ -15,10 +15,8 @@
  *
  */
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
+import assert from 'assert';
+import rclnodejs from '../index.js';
 
 /**
  * These tests need to be run with `--expose-gc` flags.

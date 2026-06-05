@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const deepEqual = require('deep-equal');
-const rclnodejs = require('../index.js');
+import assert from 'assert';
+import deepEqual from 'deep-equal';
+import rclnodejs from '../index.js';
 
 describe('Rclnodejs message properities validation', function () {
   this.timeout(60 * 1000);

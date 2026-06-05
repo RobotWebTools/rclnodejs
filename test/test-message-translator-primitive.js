@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const rclnodejs = require('../index.js');
-const deepEqual = require('deep-equal');
-const arrayGen = require('./array_generator.js');
-const { isTypedArray } = require('./utils.js');
+import rclnodejs from '../index.js';
+import deepEqual from 'deep-equal';
+import * as arrayGen from './array_generator.js';
+import { isTypedArray } from './utils.js';
 
 // In IDL mode, .msg 'char' type is mapped to 'uint8' (they are identical in IDL spec)
 const useIDL = process.argv.includes('--idl');

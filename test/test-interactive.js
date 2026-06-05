@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import childProcess from 'child_process';
+import rclnodejs from '../index.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const assert = require('assert');
-const childProcess = require('child_process');
-const rclnodejs = require('../index.js');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 describe('rclnodejs interactive testing', function () {
   this.timeout(60 * 1000);

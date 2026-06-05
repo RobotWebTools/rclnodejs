@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import { isClose } from '../lib/utils.js';
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import * as assertUtils from './utils.js';
+import DistroUtils from '../lib/distro.js';
+import Context from '../lib/context.js';
 
-const { isClose } = require('../lib/utils.js');
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const assertUtils = require('./utils.js');
-const DistroUtils = require('../lib/distro.js');
-const { NodeOptions } = require('../index.js');
+const { NodeOptions } = rclnodejs;
 const assertThrowsError = assertUtils.assertThrowsError;
-const Context = require('../lib/context.js');
 
 describe('rclnodejs node test suite', function () {
   this.timeout(60 * 1000);

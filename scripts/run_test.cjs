@@ -42,9 +42,11 @@ utils
       }
     });
 
-    mocha.run(function (failures) {
-      process.exitCode = failures ? 1 : 0;
-      process.exit(process.exitCode);
+    mocha.loadFilesAsync().then(() => {
+      mocha.run(function (failures) {
+        process.exitCode = failures ? 1 : 0;
+        process.exit(process.exitCode);
+      });
     });
   })
   .catch((err) => {
