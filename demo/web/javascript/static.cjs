@@ -6,15 +6,15 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
-// rclnodejs/web demo — static-file server (page side; named `static.js`
-// to avoid being confused with the runtime-side `runtime.js`).
+// rclnodejs/web demo — static-file server (page side; named `static.cjs`
+// to avoid being confused with the runtime-side `runtime.cjs`).
 //
 // Serves index.html on port 8080 and maps `/sdk/*` to the in-repo
 // `web/` folder so the page can `import { connect } from '/sdk/index.js'`
 // without bundling. In a downstream project you'd `npm install rclnodejs`
 // and `import { connect } from 'rclnodejs/web'` instead.
 //
-// Pair with `node runtime.js` (the rclnodejs/web runtime + the demo's
+// Pair with `node runtime.cjs` (the rclnodejs/web runtime + the demo's
 // ROS 2 nodes) in another shell — the same split as the TypeScript
 // demo's `tsx server.ts` + `vite`. Production deployments use nginx,
 // a CDN, or any other static host.

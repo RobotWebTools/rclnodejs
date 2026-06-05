@@ -7,18 +7,18 @@
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // rclnodejs/web demo — runtime side (rclnodejs/web runtime + the demo's
-// ROS 2 nodes; named `runtime.js` to avoid being confused with the
-// page-side `static.js`).
+// ROS 2 nodes; named `runtime.cjs` to avoid being confused with the
+// page-side `static.cjs`).
 //
 //   1. Source ROS 2 (`source /opt/ros/<distro>/setup.bash`)
-//   2. From this folder run `node runtime.js`
-//   3. In another shell run `node static.js` to host
+//   2. From this folder run `node runtime.cjs`
+//   3. In another shell run `node static.cjs` to host
 //      `index.html` on http://localhost:8080/ — same split as the
 //      TypeScript demo's `tsx server.ts` + `vite`.
 
 'use strict';
 
-const rclnodejs = require('../../../index.js');
+const rclnodejs = require('../../../index.js').default;
 // In a downstream project this is the public, supported import:
 //   const { createRuntime, WebSocketTransport, HttpTransport } =
 //     require('rclnodejs/web/server');
@@ -135,7 +135,7 @@ async function main() {
   console.log(formatCapabilities(caps));
   console.log();
   console.log(
-    'Static page: run `node static.js` in another shell, then open http://localhost:8080/'
+    'Static page: run `node static.cjs` in another shell, then open http://localhost:8080/'
   );
 
   // ---- Graceful shutdown ----------------------------------------------

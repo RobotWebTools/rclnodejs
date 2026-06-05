@@ -17,17 +17,17 @@
 //   ws://<host>:9000/service/add_two_ints example_interfaces/srv/AddTwoInts
 //
 // Run inside WSL (where ROS 2 is sourced):
-//   node demo/rosocket/server.js
+//   node demo/rosocket/server.cjs
 //
 // To exercise the service, start the existing AddTwoInts example in a
 // second terminal (it implements `/add_two_ints`):
-//   node example/services/service/service-example.js
+//   node example/services/service/service-example.cjs
 //
 // Then open demo/rosocket/index.html on the Windows host browser. WSL2
 // forwards localhost so `ws://localhost:9000` works as-is. See README.md
 // for fallback instructions.
 
-const rclnodejs = require('../../index.js');
+const rclnodejs = require('../../index.js').default;
 const { startRosocket } = require('../../rosocket');
 
 const PORT = Number(process.env.PORT) || 9000;
