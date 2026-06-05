@@ -61,7 +61,7 @@ export default [
             ecmaVersion: "latest",
             sourceType: "module",
         },
-        files: ["lib/**/*.js", "test/**/*.js", "bin/**/*.js", "rosocket/**/*.js", "index.js"],
+        files: ["lib/**/*.js", "test/**/*.js", "bin/**/*.js", "rosocket/**/*.js", "index.js", "example/**/*.mjs"],
         rules: {
             ...eslintPluginPrettierRecommended.rules,
         },
