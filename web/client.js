@@ -29,13 +29,23 @@
 //   - { http, ws }         → explicit endpoint pair.
 
 let WS = globalThis.WebSocket;
-if (!WS) {
+let _wsResolved = !!WS;
+
+// Resolve a Node WebSocket implementation lazily. This avoids a top-level
+// `await import('ws')`, which is unavailable in the CommonJS build. In browsers
+// `globalThis.WebSocket` is used and the `ws` package is never touched.
+async function _ensureWS() {
+  if (_wsResolved) {
+    return WS;
+  }
+  _wsResolved = true;
   try {
     const wsModule = await import('ws');
     WS = wsModule.WebSocket || wsModule.default;
   } catch {
     // No WebSocket implementation available in this environment.
   }
+  return WS;
 }
 
 // Frame ids are UUIDs so they never collide across sessions or modules
@@ -71,7 +81,8 @@ class _WsLink {
     this._closed = false;
   }
 
-  connect() {
+  async connect() {
+    await _ensureWS();
     return new Promise((resolve, reject) => {
       if (!WS) {
         return reject(

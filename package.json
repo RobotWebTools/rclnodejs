@@ -3,22 +3,33 @@
   "version": "2.0.0",
   "description": "ROS2.0 JavaScript client with Node.js",
   "type": "module",
-  "main": "index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "types": "types/index.d.ts",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "default": "./index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
     },
     "./web": {
       "types": "./web/index.d.ts",
-      "default": "./web/index.js"
+      "import": "./dist/web.js",
+      "require": "./dist/web.cjs",
+      "default": "./dist/web.js"
     },
     "./web/server": {
       "types": "./lib/runtime/index.d.ts",
-      "default": "./lib/runtime/index.js"
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs",
+      "default": "./dist/server.js"
     },
-    "./rosocket": "./rosocket/index.js",
+    "./rosocket": {
+      "import": "./dist/rosocket.js",
+      "require": "./dist/rosocket.cjs",
+      "default": "./dist/rosocket.js"
+    },
     "./lib/*": "./lib/*.js",
     "./lib/*.js": "./lib/*.js",
     "./package.json": "./package.json"
@@ -34,6 +45,7 @@
   "scripts": {
     "build": "node-gyp -j 16 build",
     "build:dev": "node-gyp -j 16 build --debug",
+    "build:dist": "tsup",
     "rebuild": "npm run clean && node-gyp -j 16 rebuild",
     "rebuild:dev": "npm run clean && node-gyp -j 16 rebuild --debug",
     "generate-messages": "node scripts/generate_messages.cjs",
@@ -52,6 +64,7 @@
     "lint": "eslint && node ./scripts/cpplint.cjs",
     "test:asan": "bash scripts/run_asan_test.sh",
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.h && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,cjs,md,ts}\" ./*.{js,md,ts}",
+    "prepack": "npm run build:dist",
     "prepare": "husky",
     "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "prebuild:node": "prebuildify --napi --strip --name node --target 20.20.2",
@@ -99,6 +112,7 @@
     "sinon": "^22.0.0",
     "tree-kill": "^1.2.2",
     "tsd": "^0.33.0",
+    "tsup": "^8.5.1",
     "typescript": "^6.0.2"
   },
   "dependencies": {
