@@ -69,6 +69,19 @@ jobs:
           echo "=== arm64 prebuilds ==="
           ls -la prebuilds/linux-arm64/
 
+      - name: Install dependencies
+        # --ignore-scripts skips install/postinstall (native build + message
+        # generation need a sourced ROS env, which this job doesn't have) while
+        # still installing devDependencies such as tsup needed for build:dist.
+        run: npm install --ignore-scripts
+
+      - name: Build dist (ESM/CJS bundles)
+        # npm-pack.sh packs with --ignore-scripts, so the prepack hook that
+        # normally runs build:dist is skipped. dist/ is git-ignored and absent
+        # on a fresh checkout, so build it explicitly before packing — the
+        # published package's main/module/exports all point at ./dist/*.
+        run: npm run build:dist
+
       - name: Pack
         run: ./scripts/npm-pack.sh
 
@@ -96,7 +109,7 @@ jobs:
           fi
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
             echo "=== DRY RUN ==="
-            npm publish --provenance --access public --tag "$TAG" --dry-run ./dist/rclnodejs-*.tgz
+            npm publish --provenance --access public --tag "$TAG" --dry-run ./pack/rclnodejs-*.tgz
           else
-            npm publish --provenance --access public --tag "$TAG" ./dist/rclnodejs-*.tgz
+            npm publish --provenance --access public --tag "$TAG" ./pack/rclnodejs-*.tgz
           fi
