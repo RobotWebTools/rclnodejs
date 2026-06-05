@@ -31,8 +31,11 @@ FILENAME=`npm pack --ignore-scripts $RAWMODULEDIR | awk '{for(i=1; i<=NF; i++) i
 TARFILENAME="$WORKDIR/$FILENAME"
 
 popd > /dev/null
-mkdir -p dist
-cp -f $TARFILENAME ./dist/
+# Output the packed tarball to ./pack (NOT ./dist): since the ESM/CJS dual build
+# (tsup) now owns ./dist and that directory is published to npm, dropping the
+# tarball there would ship pack artifacts inside the package.
+mkdir -p pack
+cp -f $TARFILENAME ./pack/
 rm -rf $WORKDIR
 
-echo "Generated ./dist/$FILENAME"
+echo "Generated ./pack/$FILENAME"

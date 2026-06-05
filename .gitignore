@@ -16,6 +16,7 @@ cpplint.py
 generated
 types/interfaces.d.ts
 dist
+pack
 build
 log
 .vscode
