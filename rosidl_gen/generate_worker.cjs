@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const generateJSStructFromIDL = require('./idl_generator.js');
-const packages = require('./packages.js');
+const generateJSStructFromIDL = require('./idl_generator.cjs');
+const packages = require('./packages.cjs');
 const path = require('path');
 
 const generatedRoot = path.join(__dirname, '../generated/');

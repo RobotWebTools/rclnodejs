@@ -17,7 +17,7 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const rclnodejs = require('../index.js');
-const generator = require('../rosidl_gen/index.js');
+const generator = require('../rosidl_gen/index.cjs');
 
 describe('rclnodejs init and shutdown test suite', function () {
   this.timeout(60 * 1000);

@@ -18,7 +18,8 @@ const { compareVersions } = require('../lib/utils.js');
 const path = require('path');
 const execFile = require('child_process').execFile;
 
-const pythonExecutable = require('./py_utils').getPythonExecutable('python3');
+const pythonExecutable =
+  require('./py_utils.cjs').getPythonExecutable('python3');
 
 const contextSupportedVersion = '21.0.0.0';
 const currentVersion = process.version;

@@ -31,7 +31,7 @@ demo/
 .nyc_output/
 .vscode/
 .husky/
-scripts/cpplint.js
+scripts/cpplint.cjs
 scripts/npm-pack.sh
 scripts/npmjs-readme.md
-scripts/run_test.js
+scripts/run_test.cjs

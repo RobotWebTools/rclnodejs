@@ -9,5 +9,5 @@ Run this script every time new interfaces are generated, see script/generate_mes
 You can update the interfaces.d.ts types manually by running the generate_tsd.js script.
 
 ```
-node node_modules/rclnodejs/scripts/generate_tsd.js
+node node_modules/rclnodejs/scripts/generate_tsd.cjs
 ```

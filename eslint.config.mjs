@@ -57,8 +57,8 @@ export default [
             ecmaVersion: "latest",
             sourceType: "commonjs",
         },
-        files: ["lib/**/*.js", "rosidl_parser/**/*.js", "rosidl_gen/**/*.js",
-            "rostsd_gen/**/*.js", "test/**/*.js", "example/**/*.js", "index.js"],
+        files: ["lib/**/*.js", "rosidl_parser/**/*.{js,cjs}", "rosidl_gen/**/*.{js,cjs}",
+            "rostsd_gen/**/*.{js,cjs}", "test/**/*.js", "example/**/*.js", "index.js"],
         rules: {
             ...eslintPluginPrettierRecommended.rules,
         },

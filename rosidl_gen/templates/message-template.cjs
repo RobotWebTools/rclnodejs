@@ -303,9 +303,9 @@ ${willUseTypedArray ? "const rclnodejs = require('../../lib/native_loader.js');"
 const ref = require('../../third_party/ref-napi');
 const StructType = require('@rclnodejs/ref-struct-di')(ref);
 const ArrayType = require('@rclnodejs/ref-array-di')(ref);
-const primitiveTypes = require('../../rosidl_gen/primitive_types.js');
-const deallocator = require('../../rosidl_gen/deallocator.js');
-const translator = require('../../rosidl_gen/message_translator.js');
+const primitiveTypes = require('../../rosidl_gen/primitive_types.cjs');
+const deallocator = require('../../rosidl_gen/deallocator.cjs');
+const translator = require('../../rosidl_gen/message_translator.cjs');
 
 ${spec.fields
   .map((field) => {

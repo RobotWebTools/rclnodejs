@@ -321,7 +321,7 @@ describe('LifecycleNode test suite', function () {
     // TODO: refactor the version info to reusable location
     const GALACTIC_VERSION = 2105;
     const versionInfo = childProcess
-      .execSync('node scripts/ros_distro.js')
+      .execSync('node scripts/ros_distro.cjs')
       .toString('utf-8');
     const version =
       versionInfo && versionInfo.length > 0

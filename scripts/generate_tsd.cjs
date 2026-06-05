@@ -12,7 +12,7 @@
 
 'use strict';
 
-const tsdGenerator = require('../rostsd_gen/index.js');
+const tsdGenerator = require('../rostsd_gen/index.cjs');
 
 console.log('Start TypeScript declaration file generation...');
 try {

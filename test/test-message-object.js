@@ -30,7 +30,7 @@ describe('Rclnodejs createMessage() testing', function () {
   });
 
   it('Test .createMessage() for every message in system', function () {
-    const packages = require('../rosidl_gen/packages.js');
+    const packages = require('../rosidl_gen/packages.cjs');
     const installedPackagesRoot =
       os.type() === 'Windows_NT'
         ? process.env.AMENT_PREFIX_PATH.split(';')
@@ -171,7 +171,7 @@ describe('Rclnodejs createMessageObject() testing', function () {
   });
 
   it('Test .createMessageObject() for every message in system', function () {
-    const packages = require('../rosidl_gen/packages.js');
+    const packages = require('../rosidl_gen/packages.cjs');
     const installedPackagesRoot =
       os.type() === 'Windows_NT'
         ? process.env.AMENT_PREFIX_PATH.split(';')
