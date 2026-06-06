@@ -29,7 +29,7 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const loader = require('../lib/interface_loader.js');
-const pkgFilters = require('../rosidl_gen/filter.js');
+const pkgFilters = require('../rosidl_gen/filter.cjs');
 
 const descriptorInterfaceNamespace = 'descriptor';
 

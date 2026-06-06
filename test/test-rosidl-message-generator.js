@@ -101,7 +101,7 @@ describe('ROSIDL Node.js message generator test suite', function () {
 
   it('Try require all message classes', function () {
     this.timeout(60 * 1000);
-    const packages = require('../rosidl_gen/packages.js');
+    const packages = require('../rosidl_gen/packages.cjs');
     const installedPackagesRoot =
       os.type() === 'Windows_NT'
         ? process.env.AMENT_PREFIX_PATH.split(';')

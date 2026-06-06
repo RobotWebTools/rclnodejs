@@ -25,7 +25,7 @@ const Context = require('./lib/context.js');
 const debug = require('debug')('rclnodejs');
 const Duration = require('./lib/duration.js');
 const fs = require('fs');
-const generator = require('./rosidl_gen/index.js');
+const generator = require('./rosidl_gen/index.cjs');
 const loader = require('./lib/interface_loader.js');
 const logging = require('./lib/logging.js');
 const NodeOptions = require('./lib/node_options.js');
@@ -44,7 +44,7 @@ const {
   QoSOverridingOptions,
 } = require('./lib/qos_overriding_options.js');
 const rclnodejs = require('./lib/native_loader.js');
-const tsdGenerator = require('./rostsd_gen/index.js');
+const tsdGenerator = require('./rostsd_gen/index.cjs');
 const validator = require('./lib/validator.js');
 const Time = require('./lib/time.js');
 const ActionClient = require('./lib/action/client.js');

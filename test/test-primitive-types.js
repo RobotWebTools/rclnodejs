@@ -15,7 +15,7 @@
 'use strict';
 
 const assert = require('assert');
-const primitiveTypes = require('../rosidl_gen/primitive_types.js');
+const primitiveTypes = require('../rosidl_gen/primitive_types.cjs');
 
 describe('rosidl_gen primitive_types', function () {
   describe('initString(str, own=true)', function () {

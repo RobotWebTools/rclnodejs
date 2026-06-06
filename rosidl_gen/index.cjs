@@ -15,8 +15,8 @@
 'use strict';
 
 const fse = require('../lib/utils.js');
-const generateJSStructFromIDL = require('./idl_generator.js');
-const packages = require('./packages.js');
+const generateJSStructFromIDL = require('./idl_generator.cjs');
+const packages = require('./packages.cjs');
 const path = require('path');
 const generatedRoot = path.join(__dirname, '../generated/');
 const serviceMsgPath = path.join(generatedRoot, 'srv_msg');
@@ -49,7 +49,7 @@ function generateInPathSyncWorker(targetPath) {
     // Use child_process.spawnSync for truly synchronous execution
     const result = require('child_process').spawnSync(
       'node',
-      [path.join(__dirname, 'generate_worker.js')],
+      [path.join(__dirname, 'generate_worker.cjs')],
       {
         env: { ...process.env, WORKER_TARGET_PATH: targetPath },
         encoding: 'utf8',
