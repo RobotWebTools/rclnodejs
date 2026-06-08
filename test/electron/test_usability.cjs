@@ -1,6 +1,6 @@
 'use strict';
 
-const rclnodejs = require('../../index.js');
+const rclnodejs = require('../../index.js').default;
 const { app } = require('electron');
 
 app.on('ready', () => {

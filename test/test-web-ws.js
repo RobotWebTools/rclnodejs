@@ -13,7 +13,7 @@ import assert from 'assert';
 import rclnodejs from '../index.js';
 import { createRuntime, WebSocketTransport } from '../lib/runtime/index.js';
 
-// `web/` is ESM; await import() lets us pull it in from this CJS file.
+// `web/` is ESM; dynamic import() defers loading the browser SDK until the test starts.
 let connect;
 before(async function () {
   ({ connect } = await import('../web/index.js'));
