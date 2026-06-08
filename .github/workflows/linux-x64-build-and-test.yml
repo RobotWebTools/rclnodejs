@@ -54,6 +54,10 @@ jobs:
         node-version: ${{ matrix.node-version }}
         architecture: ${{ matrix.architecture }}
 
+    # Checkout early so the local composite action under .github/actions is
+    # available to the rolling / lyrical apt setup step below.
+    - uses: actions/checkout@v6
+
     - name: Setup ROS2
       if: ${{ matrix.ros_distribution != 'rolling' && matrix.ros_distribution != 'lyrical' }}
       uses: ros-tooling/setup-ros@v0.7
@@ -62,30 +66,11 @@ jobs:
 
     - name: Enable ROS2 apt repository (rolling / lyrical)
       if: ${{ matrix.ros_distribution == 'rolling' || matrix.ros_distribution == 'lyrical' }}
-      run: |
-        apt-get update
-        apt-get install -y sudo software-properties-common curl
-
-        # Enable required repositories. The same setup applies to both the
-        # rolling nightly tarball and the lyrical apt-deb install; see the
-        # per-distro install docs for reference:
-        #   rolling: https://docs.ros.org/en/rolling/Installation/Alternatives/Ubuntu-Install-Binary.html
-        #   lyrical: https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
-        add-apt-repository universe
-        ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F'"' '{print $4}')
-        curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
-        dpkg -i /tmp/ros2-apt-source.deb
-        apt-get update
-        # Common build deps for both rolling and lyrical. Rolling-only tarball
-        # tooling (tar, bzip2, python3-rosdep) is installed in the rolling step
-        # below so the lyrical lane stays minimal.
-        apt-get install -y build-essential cmake python3 python3-colcon-common-extensions
-
-    - name: Install ROS2 from apt (lyrical)
-      if: ${{ matrix.ros_distribution == 'lyrical' }}
-      run: |
-        # Per https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
-        apt-get install -y ros-lyrical-desktop
+      uses: ./.github/actions/setup-ros2-apt
+      with:
+        # Lyrical installs the desktop from apt here; rolling only needs the
+        # repository enabled and installs ROS2 from a tarball in the next step.
+        install-desktop: ${{ matrix.ros_distribution == 'lyrical' }}
 
     - name: Install ROS2 from binary tarball (rolling)
       if: ${{ matrix.ros_distribution == 'rolling' }}
@@ -120,8 +105,6 @@ jobs:
           LIBASOUND_PKG="libasound2t64"
         fi
         sudo apt install -y xvfb libgtk-3-0 libnss3 $LIBASOUND_PKG libgbm-dev
-
-    - uses: actions/checkout@v6
 
     # The mocha suite and the Electron postinstall (extract-zip 2.0.1) are
     # known to be intermittently flaky on this runner. Wrap both test
