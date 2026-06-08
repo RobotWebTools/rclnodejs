@@ -1,0 +1,6 @@
+{
+  "extension": [".js"],
+  "include": ["lib/**", "index.js"],
+  "reporter": ["lcov"],
+  "report-dir": "./coverage"
+}

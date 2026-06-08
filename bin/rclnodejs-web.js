@@ -11,7 +11,7 @@
 //
 // For frontend developers who don't want to write a Node.js server.
 // Run `rclnodejs-web --help` or `npx rclnodejs-web web.json` to start
-// demo. See demo/web/javascript/README.md for the full demo.
+// the runtime.
 
 import path from 'node:path';
 import fs from 'node:fs';
