@@ -17,7 +17,8 @@ jobs:
   asan:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:noble
+      # Lyrical Luth is the latest ROS2 LTS and targets Ubuntu 26.04.
+      image: ubuntu:26.04
     steps:
     - name: Setup Node.js 24.X
       uses: actions/setup-node@v6
@@ -25,20 +26,34 @@ jobs:
         node-version: 24.X
         architecture: x64
 
-    - name: Setup ROS2 Jazzy
-      uses: ros-tooling/setup-ros@v0.7
-      with:
-        required-ros-distributions: jazzy
+    - name: Enable ROS2 apt repository (lyrical)
+      run: |
+        # ros-tooling/setup-ros does not support lyrical yet, so install from
+        # the official apt repo as documented at
+        # https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
+        apt-get update
+        apt-get install -y sudo software-properties-common curl
+
+        add-apt-repository universe
+        ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F'"' '{print $4}')
+        curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
+        dpkg -i /tmp/ros2-apt-source.deb
+        apt-get update
+        apt-get install -y build-essential cmake python3 python3-colcon-common-extensions
+
+    - name: Install ROS2 from apt (lyrical)
+      run: |
+        apt-get install -y ros-lyrical-desktop
 
     - name: Install test dependencies
       run: |
-        sudo apt install -y ros-jazzy-test-msgs ros-jazzy-mrpt-msgs
+        sudo apt install -y ros-lyrical-test-msgs ros-lyrical-mrpt-msgs
 
     - uses: actions/checkout@v6
 
     - name: Install npm dependencies
       run: |
-        source /opt/ros/jazzy/setup.bash
+        source /opt/ros/lyrical/setup.bash
         npm i
 
     # Wrap the asan test step in nick-fields/retry@v4 to absorb transient
@@ -52,5 +67,5 @@ jobs:
         retry_wait_seconds: 10
         timeout_minutes: 60
         command: |
-          source /opt/ros/jazzy/setup.bash
+          source /opt/ros/lyrical/setup.bash
           npm run test:asan
