@@ -51,10 +51,7 @@
 #define PACKAGE_NAME "rclnodejs"
 
 #ifdef DEBUG_ON
-#define RCLNODEJS_DEBUG(...)                                   \
-  RCUTILS_LOG_COND_NAMED(                                      \
-      RCUTILS_LOG_SEVERITY_DEBUG, RCUTILS_LOG_CONDITION_EMPTY, \
-      RCUTILS_LOG_CONDITION_EMPTY, PACKAGE_NAME, __VA_ARGS__)
+#define RCLNODEJS_DEBUG(...) RCUTILS_LOG_DEBUG_NAMED(PACKAGE_NAME, __VA_ARGS__)
 #else
 #define RCLNODEJS_DEBUG(...)
 #endif
