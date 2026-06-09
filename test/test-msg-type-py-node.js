@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import childProcess from 'child_process';
+import deepEqual from 'deep-equal';
+import rclnodejs from '../index.js';
+import * as utils from './utils.js';
 
-const assert = require('assert');
-const childProcess = require('child_process');
-const deepEqual = require('deep-equal');
-const rclnodejs = require('../index.js');
-const utils = require('./utils.js');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('Rclnodejs - Python message type testing', function () {
   this.timeout(60 * 1000);

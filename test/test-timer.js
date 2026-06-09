@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const rclnodejsNative = require('../lib/native_loader.js');
-const DistroUtils = require('../lib/distro.js');
-const sinon = require('sinon');
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import rclnodejsNative from '../lib/native_loader.js';
+import DistroUtils from '../lib/distro.js';
+import sinon from 'sinon';
 
 const TIMER_INTERVAL = BigInt('100000000');
 describe('rclnodejs Timer class testing', function () {

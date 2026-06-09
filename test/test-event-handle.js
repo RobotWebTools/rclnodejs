@@ -12,21 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const sinon = require('sinon');
-const DistroUtils = require('../lib/distro.js');
-const rclnodejs = require('../index.js');
-const rclnodejsBinding = require('../lib/native_loader.js');
-const {
+import assert from 'assert';
+import sinon from 'sinon';
+import DistroUtils from '../lib/distro.js';
+import rclnodejs from '../index.js';
+import rclnodejsBinding from '../lib/native_loader.js';
+import {
   SubscriptionEventCallbacks,
   PublisherEventCallbacks,
   PublisherEventType,
   SubscriptionEventType,
   isPublisherEventTypeSupported,
   isSubscriptionEventTypeSupported,
-} = require('../lib/event_handler.js');
+} from '../lib/event_handler.js';
 
 describe('Event handle test suite prior to jazzy', function () {
   before(function () {

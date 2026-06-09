@@ -1,8 +1,6 @@
-'use strict';
-
-const childProcess = require('child_process');
-const assert = require('assert');
-const rclnodejs = require('../index.js');
+import childProcess from 'child_process';
+import assert from 'assert';
+import rclnodejs from '../index.js';
 const DistroUtils = rclnodejs.DistroUtils;
 
 const RMWUtils = rclnodejs.RMWUtils;

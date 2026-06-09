@@ -6,14 +6,11 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 
-'use strict';
+import { WebSocketServer } from 'ws';
+import createDebug from 'debug';
+import { toJSONSafe, reviveBigInts } from '../lib/message_serialization.js';
 
-const { WebSocketServer } = require('ws');
-const debug = require('debug')('rclnodejs:rosocket');
-const {
-  toJSONSafe,
-  reviveBigInts,
-} = require('../lib/message_serialization.js');
+const debug = createDebug('rclnodejs:rosocket');
 
 function safeSend(ws, payload) {
   if (ws.readyState !== ws.OPEN) return;
@@ -227,4 +224,4 @@ function handleService(ws, node, serviceName, typeName) {
   });
 }
 
-module.exports = { startRosocket };
+export { startRosocket };

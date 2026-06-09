@@ -6,13 +6,12 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 
-'use strict';
+import assert from 'assert';
+import WebSocket from 'ws';
+import rclnodejs from '../index.js';
+import * as rosocket from '../rosocket/index.js';
 
-const assert = require('assert');
-const WebSocket = require('ws');
-const rclnodejs = require('../index.js');
-const { startRosocket } = require('../rosocket');
-const rosocket = require('../rosocket');
+const { startRosocket } = rosocket;
 
 describe('rosocket resource-style WebSocket gateway', function () {
   this.timeout(60 * 1000);

@@ -7,10 +7,8 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 
-'use strict';
-
-const rclnodejs = require('../index.js');
-const { startRosocket } = require('./index.js');
+import rclnodejs from '../index.js';
+import { startRosocket } from './index.js';
 
 const USAGE = `Usage: rosocket [options]
 

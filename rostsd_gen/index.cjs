@@ -28,7 +28,8 @@ declare module "rclnodejs" {
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
-const loader = require('../lib/interface_loader.js');
+// lib/interface_loader.js is an ES module; require() returns its namespace, so unwrap .default.
+const loader = require('../lib/interface_loader.js').default;
 const pkgFilters = require('../rosidl_gen/filter.cjs');
 
 const descriptorInterfaceNamespace = 'descriptor';

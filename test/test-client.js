@@ -1,10 +1,8 @@
-'use strict';
-
-const assert = require('assert');
-const sinon = require('sinon');
-const rclnodejsBinding = require('../lib/native_loader.js');
-const Client = require('../lib/client.js');
-const DistroUtils = require('../lib/distro.js');
+import assert from 'assert';
+import sinon from 'sinon';
+import rclnodejsBinding from '../lib/native_loader.js';
+import Client from '../lib/client.js';
+import DistroUtils from '../lib/distro.js';
 
 describe('Client coverage testing', function () {
   let sandbox;

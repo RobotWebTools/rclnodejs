@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import os from 'os';
+import rclnodejs from '../index.js';
+import path from 'path';
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
 
-const assert = require('assert');
-const os = require('os');
-const rclnodejs = require('../index.js');
-const path = require('path');
+const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function sourceSetupScript(setupPath) {
   // Source the local_setup.sh to get environment variables

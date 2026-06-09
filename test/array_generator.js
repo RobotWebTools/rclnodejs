@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
 function generateValues(Type, maxLength, range, negative, round, extra) {
   if (!extra) extra = [];
   const length = Math.floor(Math.random() * (maxLength - 1) + 1);
@@ -41,9 +39,4 @@ function noRound(v) {
   return v;
 }
 
-module.exports = {
-  generateValues: generateValues,
-  positive: positive,
-  negative: negative,
-  noRound: noRound,
-};
+export { generateValues, positive, negative, noRound };

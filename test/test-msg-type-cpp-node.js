@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import childProcess from 'child_process';
+import deepEqual from 'deep-equal';
+import rclnodejs from '../index.js';
 
-const assert = require('assert');
-const path = require('path');
-const childProcess = require('child_process');
-const deepEqual = require('deep-equal');
-const rclnodejs = require('../index.js');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('Rclnodejs - Cpp message type testing', function () {
   var cppSubscriptionPath = path.join(__dirname, 'cpp', 'subscription_msg');

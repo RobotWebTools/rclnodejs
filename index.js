@@ -12,68 +12,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const DistroUtils = require('./lib/distro.js');
-const RMWUtils = require('./lib/rmw.js');
-const { Clock, ROSClock } = require('./lib/clock.js');
-const ClockEvent = require('./lib/clock_event.js');
-const ClockType = require('./lib/clock_type.js');
-const ClockChange = require('./lib/clock_change.js');
-const { compareVersions } = require('./lib/utils.js');
-const Context = require('./lib/context.js');
-const debug = require('debug')('rclnodejs');
-const Duration = require('./lib/duration.js');
-const fs = require('fs');
-const generator = require('./rosidl_gen/index.cjs');
-const loader = require('./lib/interface_loader.js');
-const logging = require('./lib/logging.js');
-const NodeOptions = require('./lib/node_options.js');
-const {
+import fs from 'fs';
+import path from 'path';
+import { spawn } from 'child_process';
+import createDebug from 'debug';
+import DistroUtils from './lib/distro.js';
+import RMWUtils from './lib/rmw.js';
+import { Clock, ROSClock } from './lib/clock.js';
+import ClockEvent from './lib/clock_event.js';
+import ClockType from './lib/clock_type.js';
+import ClockChange from './lib/clock_change.js';
+import { compareVersions } from './lib/utils.js';
+import Context from './lib/context.js';
+import Duration from './lib/duration.js';
+import generator from './rosidl_gen/index.cjs';
+import loader from './lib/interface_loader.js';
+import logging from './lib/logging.js';
+import NodeOptions from './lib/node_options.js';
+import {
   FloatingPointRange,
   IntegerRange,
   Parameter,
   ParameterDescriptor,
   ParameterType,
   DEFAULT_NUMERIC_RANGE_TOLERANCE,
-} = require('./lib/parameter.js');
-const path = require('path');
-const QoS = require('./lib/qos.js');
-const {
+} from './lib/parameter.js';
+import QoS from './lib/qos.js';
+import {
   QoSPolicyKind,
   QoSOverridingOptions,
-} = require('./lib/qos_overriding_options.js');
-const rclnodejs = require('./lib/native_loader.js');
-const tsdGenerator = require('./rostsd_gen/index.cjs');
-const validator = require('./lib/validator.js');
-const Time = require('./lib/time.js');
-const ActionClient = require('./lib/action/client.js');
-const ActionServer = require('./lib/action/server.js');
-const ActionUuid = require('./lib/action/uuid.js');
-const ClientGoalHandle = require('./lib/action/client_goal_handle.js');
-const { CancelResponse, GoalResponse } = require('./lib/action/response.js');
-const ServerGoalHandle = require('./lib/action/server_goal_handle.js');
-const { toJSONSafe, toJSONString } = require('./lib/message_serialization.js');
-const {
+} from './lib/qos_overriding_options.js';
+import rclnodejs from './lib/native_loader.js';
+import tsdGenerator from './rostsd_gen/index.cjs';
+import validator from './lib/validator.js';
+import Time from './lib/time.js';
+import ActionClient from './lib/action/client.js';
+import ActionServer from './lib/action/server.js';
+import ActionUuid from './lib/action/uuid.js';
+import ClientGoalHandle from './lib/action/client_goal_handle.js';
+import { CancelResponse, GoalResponse } from './lib/action/response.js';
+import ServerGoalHandle from './lib/action/server_goal_handle.js';
+import { toJSONSafe, toJSONString } from './lib/message_serialization.js';
+import {
   getActionClientNamesAndTypesByNode,
   getActionServerNamesAndTypesByNode,
   getActionNamesAndTypes,
-} = require('./lib/action/graph.js');
-const ServiceIntrospectionStates = require('./lib/service_introspection.js');
-const {
-  serializeMessage,
-  deserializeMessage,
-} = require('./lib/serialization.js');
-const ParameterClient = require('./lib/parameter_client.js');
-const errors = require('./lib/errors.js');
-const ParameterWatcher = require('./lib/parameter_watcher.js');
-const ParameterEventHandler = require('./lib/parameter_event_handler.js');
-const waitForMessage = require('./lib/wait_for_message.js');
-const MessageIntrospector = require('./lib/message_introspector.js');
-const MessageInfo = require('./lib/message_info.js');
-const ObservableSubscription = require('./lib/observable_subscription.js');
-const { spawn } = require('child_process');
-const {
+} from './lib/action/graph.js';
+import ServiceIntrospectionStates from './lib/service_introspection.js';
+import { serializeMessage, deserializeMessage } from './lib/serialization.js';
+import ParameterClient from './lib/parameter_client.js';
+import * as errors from './lib/errors.js';
+import ParameterWatcher from './lib/parameter_watcher.js';
+import ParameterEventHandler from './lib/parameter_event_handler.js';
+import waitForMessage from './lib/wait_for_message.js';
+import MessageIntrospector from './lib/message_introspector.js';
+import MessageInfo from './lib/message_info.js';
+import ObservableSubscription from './lib/observable_subscription.js';
+import {
   ValidationProblem,
   getMessageSchema,
   getFieldNames,
@@ -81,7 +76,15 @@ const {
   validateMessage,
   assertValidMessage,
   createMessageValidator,
-} = require('./lib/message_validation.js');
+} from './lib/message_validation.js';
+// The following three modules participate in a circular dependency with this
+// file (via rate.js). In ESM the circular references are resolved by live
+// bindings, so they are imported here at the top like everything else.
+import Node from './lib/node.js';
+import TimeSource from './lib/time_source.js';
+import Lifecycle from './lib/lifecycle.js';
+
+const debug = createDebug('rclnodejs');
 
 /**
  * Get the version of the generator that was used for the currently present interfaces.
@@ -764,25 +767,16 @@ const _sigHandler = () => {
 };
 process.on('SIGINT', _sigHandler);
 
-module.exports = rcl;
-
-// The following statements are located here to work around a
-// circular dependency issue occurring in rate.js.
-// Do not change the order of the following imports.
-const Node = require('./lib/node.js');
-
 /** {@link Node} class */
 rcl.Node = Node;
 
-const TimeSource = require('./lib/time_source.js');
-
 /** {@link TimeSource} class */
 rcl.TimeSource = TimeSource;
-
-const Lifecycle = require('./lib/lifecycle.js');
 
 /** Lifecycle namespace */
 rcl.lifecycle = Lifecycle;
 
 /** {@link MessageIntrospector} class */
 rcl.MessageIntrospector = MessageIntrospector;
+
+export default rcl;

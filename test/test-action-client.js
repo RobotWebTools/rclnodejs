@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const sinon = require('sinon');
-const assertUtils = require('./utils.js');
-const rclnodejs = require('../index.js');
-const { ActionUuid } = require('../index.js');
-const { isActionIntrospectionSupported } = require('./utils.js');
+import assert from 'assert';
+import sinon from 'sinon';
+import * as assertUtils from './utils.js';
+import rclnodejs from '../index.js';
+import { isActionIntrospectionSupported } from './utils.js';
+import nativeLoader from '../lib/native_loader.js';
+const { ActionUuid } = rclnodejs;
 
 describe('rclnodejs action client', function () {
   let node;
@@ -316,7 +315,6 @@ describe('rclnodejs action client', function () {
   });
 
   describe('enableFeedbackMsgOptimization', function () {
-    const nativeLoader = require('../lib/native_loader.js');
     const isFeedbackFilterSupported = () =>
       typeof nativeLoader.actionConfigureFeedbackSubFilterAddGoalId ===
       'function';

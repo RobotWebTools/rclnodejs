@@ -11,12 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const assertUtils = require('./utils.js');
-const { performance } = require('perf_hooks');
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import * as assertUtils from './utils.js';
+import { performance } from 'perf_hooks';
 
 describe('rclnodejs rate test suite', function () {
   let node;

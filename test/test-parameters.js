@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import * as assertUtils from './utils.js';
+import { isClose } from '../lib/utils.js';
+import rclnodejs from '../index.js';
+import loader from '../lib/interface_loader.js';
 
-const assert = require('assert');
-const assertUtils = require('./utils.js');
 const assertThrowsError = assertUtils.assertThrowsError;
-const { isClose } = require('../lib/utils.js');
-const rclnodejs = require('../index.js');
-const loader = require('../lib/interface_loader.js');
 
 const ParameterType = rclnodejs.ParameterType;
 const Parameter = rclnodejs.Parameter;

@@ -1,11 +1,9 @@
-'use strict';
-
-const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const sinon = require('sinon');
-const utils = require('../lib/utils.js');
+import assert from 'assert';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import sinon from 'sinon';
+import * as utils from '../lib/utils.js';
 
 describe('Utils testing', function () {
   let tmpDir;

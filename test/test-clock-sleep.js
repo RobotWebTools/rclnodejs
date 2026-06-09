@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import Context from '../lib/context.js';
+import TimeSource from '../lib/time_source.js';
 const { Clock, ROSClock, ClockType, Duration, Time } = rclnodejs;
 
 describe('Clock sleep methods', function () {
@@ -176,7 +176,6 @@ describe('Clock sleep methods', function () {
   describe('error handling', function () {
     it('should throw error for invalid context', async function () {
       const clock = new Clock(ClockType.STEADY_TIME);
-      const Context = require('../lib/context.js');
       const invalidContext = new Context();
       // Don't initialize the context
 
@@ -234,7 +233,6 @@ describe('Clock sleep methods', function () {
 
       try {
         // Set up TimeSource to activate ROS time
-        const TimeSource = require('../lib/time_source.js');
         const timeSource = new TimeSource(node);
         const clock = new ROSClock();
         timeSource.attachClock(clock);

@@ -12,7 +12,8 @@
 
 'use strict';
 
-const DistroUtils = require('../lib/distro');
+// lib/distro.js is an ES module; require() returns its namespace, so unwrap .default.
+const DistroUtils = require('../lib/distro').default;
 
 const distroName = DistroUtils.getDistroName();
 const distroId = DistroUtils.getDistroId(distroName);

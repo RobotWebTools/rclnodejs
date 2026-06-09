@@ -10,11 +10,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const sinon = require('sinon');
-const rclnodejs = require('../index.js');
+import assert from 'assert';
+import sinon from 'sinon';
+import rclnodejs from '../index.js';
 
 describe('rclnodejs guard condition test suite', function () {
   var node;

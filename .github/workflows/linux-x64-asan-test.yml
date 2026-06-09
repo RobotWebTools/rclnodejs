@@ -17,7 +17,8 @@ jobs:
   asan:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:noble
+      # Lyrical Luth is the latest ROS2 LTS and targets Ubuntu 26.04.
+      image: ubuntu:26.04
     steps:
     - name: Setup Node.js 24.X
       uses: actions/setup-node@v6
@@ -25,20 +26,21 @@ jobs:
         node-version: 24.X
         architecture: x64
 
-    - name: Setup ROS2 Jazzy
-      uses: ros-tooling/setup-ros@v0.7
-      with:
-        required-ros-distributions: jazzy
+    - uses: actions/checkout@v6
+
+    - name: Setup ROS2 Lyrical from apt
+      # ros-tooling/setup-ros does not support lyrical yet, so the shared
+      # composite action installs it from the official apt repo. See
+      # https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
+      uses: ./.github/actions/setup-ros2-apt
 
     - name: Install test dependencies
       run: |
-        sudo apt install -y ros-jazzy-test-msgs ros-jazzy-mrpt-msgs
-
-    - uses: actions/checkout@v6
+        sudo apt install -y ros-lyrical-test-msgs ros-lyrical-mrpt-msgs
 
     - name: Install npm dependencies
       run: |
-        source /opt/ros/jazzy/setup.bash
+        source /opt/ros/lyrical/setup.bash
         npm i
 
     # Wrap the asan test step in nick-fields/retry@v4 to absorb transient
@@ -52,5 +54,5 @@ jobs:
         retry_wait_seconds: 10
         timeout_minutes: 60
         command: |
-          source /opt/ros/jazzy/setup.bash
+          source /opt/ros/lyrical/setup.bash
           npm run test:asan

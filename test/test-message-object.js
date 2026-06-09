@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import { createRequire } from 'module';
+import assert from 'assert';
+import os from 'os';
+import rclnodejs from '../index.js';
 
-const assert = require('assert');
-const os = require('os');
-const rclnodejs = require('../index.js');
+const require = createRequire(import.meta.url);
 
 describe('Rclnodejs createMessage() testing', function () {
   this.timeout(60 * 1000);

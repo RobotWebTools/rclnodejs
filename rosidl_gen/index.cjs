@@ -88,6 +88,13 @@ async function generateAll(forcedGenerating) {
       path.join(__dirname, 'generator.json'),
       path.join(generatedRoot, 'generator.json')
     );
+    // The generated message files are CommonJS. Mark the generated/ tree as a
+    // CommonJS scope so they keep loading correctly under the package's
+    // "type": "module" setting.
+    await fse.writeFile(
+      path.join(generatedRoot, 'package.json'),
+      '{ "type": "commonjs" }\n'
+    );
     await fse.mkdir(serviceMsgPath);
     // Process in AMENT_PREFIX_PATH in reverse order to
     // such that interfaces defined earlier on the AMENX_PREFIX_PATH

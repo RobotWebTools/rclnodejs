@@ -36,7 +36,7 @@ try {
 }
 
 let command = electron;
-let args = [path.join(__dirname, 'test_usability.js'), '--no-sandbox'];
+let args = [path.join(__dirname, 'test_usability.cjs'), '--no-sandbox'];
 
 // Handle headless Linux environments (like CI) by using xvfb-run
 if (process.platform === 'linux' && !process.env.DISPLAY) {

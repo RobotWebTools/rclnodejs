@@ -18,7 +18,8 @@ const fse = require('../lib/utils.js');
 const path = require('path');
 const parser = require('../rosidl_parser/rosidl_parser.cjs');
 const actionMsgs = require('./action_msgs.cjs');
-const DistroUtils = require('../lib/distro.js');
+// lib/distro.js is an ES module; require() returns its namespace, so unwrap .default.
+const DistroUtils = require('../lib/distro.js').default;
 const generateMessage = require('./templates/message-template.cjs');
 const generateService = require('./templates/service-template.cjs');
 const generateAction = require('./templates/action-template.cjs');

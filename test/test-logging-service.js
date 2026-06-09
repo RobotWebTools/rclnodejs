@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const sinon = require('sinon');
-const Logging = require('../lib/logging.js');
-const LoggingService = require('../lib/logging_service.js');
+import assert from 'assert';
+import sinon from 'sinon';
+import Logging from '../lib/logging.js';
+import LoggingService from '../lib/logging_service.js';
 
 const LOGGING_SEVERITY = {
   UNSET: 0,

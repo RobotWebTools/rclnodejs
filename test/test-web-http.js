@@ -6,15 +6,13 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const {
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import {
   createRuntime,
   WebSocketTransport,
   HttpTransport,
-} = require('../lib/runtime');
+} from '../lib/runtime/index.js';
 
 let connect;
 let RosClient;

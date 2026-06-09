@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const {
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import {
   isTypedArray,
   needsJSONConversion,
   toPlainArrays,
@@ -25,7 +23,7 @@ const {
   applySerializationMode,
   isValidSerializationMode,
   reviveBigInts,
-} = require('../lib/message_serialization.js');
+} from '../lib/message_serialization.js';
 
 describe('Serialization Modes Tests', function () {
   let node;

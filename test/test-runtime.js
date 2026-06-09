@@ -6,16 +6,14 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 
-'use strict';
-
-const assert = require('assert');
-const WebSocket = require('ws');
-const rclnodejs = require('../index.js');
-const {
+import assert from 'assert';
+import WebSocket from 'ws';
+import rclnodejs from '../index.js';
+import {
   createRuntime,
   CapabilityRegistry,
   WebSocketTransport,
-} = require('../lib/runtime');
+} from '../lib/runtime/index.js';
 
 describe('CapabilityRegistry (unit)', function () {
   it('expose() registers shorthand and rich forms', function () {

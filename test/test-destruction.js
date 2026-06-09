@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const childProcess = require('child_process');
-const rclnodejs = require('../index.js');
+import assert from 'assert';
+import childProcess from 'child_process';
+import rclnodejs from '../index.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 describe('Node & Entity destroy testing', function () {
   this.timeout(60 * 1000);

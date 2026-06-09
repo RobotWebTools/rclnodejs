@@ -16,6 +16,10 @@ export default [
             "**/benchmark/",
             "**/docs/",
             "**/demo/electron/",
+            "**/coverage/",
+            "**/dist/",
+            "**/prebuilds/",
+            "**/build/",
         ],
     },
     {
@@ -55,10 +59,26 @@ export default [
                 ...globals.node,
             },
             ecmaVersion: "latest",
+            sourceType: "module",
+        },
+        files: ["lib/**/*.js", "test/**/*.js", "bin/**/*.js", "rosocket/**/*.js", "index.js"],
+        rules: {
+            ...eslintPluginPrettierRecommended.rules,
+        },
+    },
+    {
+        plugins: {
+            prettier,
+        },
+        languageOptions: {
+            globals: {
+                ...globals.node,
+            },
+            ecmaVersion: "latest",
             sourceType: "commonjs",
         },
-        files: ["lib/**/*.js", "rosidl_parser/**/*.{js,cjs}", "rosidl_gen/**/*.{js,cjs}",
-            "rostsd_gen/**/*.{js,cjs}", "test/**/*.js", "example/**/*.js", "index.js"],
+        files: ["rosidl_parser/**/*.{js,cjs}", "rosidl_gen/**/*.{js,cjs}",
+            "rostsd_gen/**/*.{js,cjs}", "example/**/*.js"],
         rules: {
             ...eslintPluginPrettierRecommended.rules,
         },

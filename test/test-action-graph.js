@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const assertUtils = require('./utils.js');
-const rclnodejs = require('../index.js');
+import assert from 'assert';
+import * as assertUtils from './utils.js';
+import rclnodejs from '../index.js';
 
 describe('rclnodejs action graph', function () {
   let node1;

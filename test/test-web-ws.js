@@ -6,16 +6,14 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 
-'use strict';
-
 // SDK tests for `rclnodejs/web`. Runtime / wire protocol coverage
 // lives in test/test-runtime.js.
 
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const { createRuntime, WebSocketTransport } = require('../lib/runtime');
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import { createRuntime, WebSocketTransport } from '../lib/runtime/index.js';
 
-// `web/` is ESM; await import() lets us pull it in from this CJS file.
+// `web/` is ESM; dynamic import() defers loading the browser SDK until the test starts.
 let connect;
 before(async function () {
   ({ connect } = await import('../web/index.js'));

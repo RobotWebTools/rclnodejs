@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
 
-const assert = require('assert');
+import rclnodejs from '../index.js';
+import * as assertUtils from './utils.js';
+import DistroUtils from '../lib/distro.js';
 
-const rclnodejs = require('../index.js');
-const assertUtils = require('./utils.js');
-const DistroUtils = require('../lib/distro.js');
-
-const {
+import {
   ParameterType,
   Parameter,
   ParameterDescriptor,
   PARAMETER_SEPARATOR,
-} = require('../lib/parameter.js');
+} from '../lib/parameter.js';
 
 const PARAMETER_EVENT_MSG_TYPE = 'rcl_interfaces/msg/ParameterEvent';
 const PARAMETER_EVENT_TOPIC = 'parameter_events';

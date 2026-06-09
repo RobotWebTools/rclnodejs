@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
+import assert from 'assert';
+import rclnodejs from '../index.js';
 const { Clock, ROSClock, ClockType, ClockChange, Time } = rclnodejs;
 
 describe('ClockChange enum', function () {
@@ -47,7 +45,7 @@ describe('ClockChange enum', function () {
   });
 
   it('should be exportable from rclnodejs module', function () {
-    const { ClockChange: ImportedClockChange } = require('../index.js');
+    const { ClockChange: ImportedClockChange } = rclnodejs;
     assert.strictEqual(ImportedClockChange, ClockChange);
     assert.strictEqual(ImportedClockChange.ROS_TIME_ACTIVATED, 2);
   });
@@ -229,8 +227,6 @@ describe('ClockChange integration with sleep methods', function () {
   });
 
   it('ClockChange enum should be accessible via rclnodejs module', function () {
-    const rclnodejs = require('../index.js');
-
     assert.ok(rclnodejs.ClockChange, 'ClockChange should be exported');
     assert.strictEqual(
       typeof rclnodejs.ClockChange,

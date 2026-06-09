@@ -6,23 +6,24 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 
-'use strict';
+import assert from 'assert';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
+import WebSocket from 'ws';
+import { fileURLToPath } from 'url';
 
-const assert = require('assert');
-const fs = require('node:fs');
-const os = require('node:os');
-const path = require('node:path');
-const { spawn } = require('node:child_process');
-const WebSocket = require('ws');
-
-const {
+import {
   parseArgv,
   loadConfigFile,
   mergeConfig,
   validateConfig,
   CliError,
   DEFAULTS,
-} = require('../lib/runtime/cli-config.js');
+} from '../lib/runtime/cli-config.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Reap a spawned child deterministically: SIGINT → wait → SIGKILL → wait,
 // resolving only after the process has actually exited. Prevents a hung

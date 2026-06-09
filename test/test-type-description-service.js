@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const DistroUtils = require('../lib/distro.js');
-const rclnodejs = require('../index.js');
-const TypeDescriptionService = require('../lib/type_description_service.js');
-const { exec } = require('child_process');
+import assert from 'assert';
+import DistroUtils from '../lib/distro.js';
+import rclnodejs from '../index.js';
+import TypeDescriptionService from '../lib/type_description_service.js';
+import { exec } from 'child_process';
 
 describe('type description service test suite', function () {
   this.timeout(60 * 1000);

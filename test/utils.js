@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import childProcess from 'child_process';
+import rclnodejs from '../index.js';
 
-const assert = require('assert');
-const { DistroUtils } = require('../index.js');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const childProcess = require('child_process');
+const { DistroUtils } = rclnodejs;
 
 function assertMember(name, obj, member, typeName) {
   assert.ok(name in obj);
@@ -91,12 +91,12 @@ function isActionIntrospectionSupported() {
   return DistroUtils.getDistroId() > DistroUtils.getDistroId('jazzy');
 }
 
-module.exports = {
-  assertMember: assertMember,
-  assertThrowsError: assertThrowsError,
-  createDelay: createDelay,
-  getAvailablePath: getAvailablePath,
-  launchPythonProcess: launchPythonProcess,
-  isTypedArray: isTypedArray,
-  isActionIntrospectionSupported: isActionIntrospectionSupported,
+export {
+  assertMember,
+  assertThrowsError,
+  createDelay,
+  getAvailablePath,
+  launchPythonProcess,
+  isTypedArray,
+  isActionIntrospectionSupported,
 };

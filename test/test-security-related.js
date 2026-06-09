@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const assertThrowsError = require('./utils.js').assertThrowsError;
-const translator = require('../rosidl_gen/message_translator.cjs');
-const arrayGen = require('./array_generator.js');
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import { assertThrowsError } from './utils.js';
+import translator from '../rosidl_gen/message_translator.cjs';
+import * as arrayGen from './array_generator.js';
 
 describe('Destroying non-existent objects testing', function () {
   this.timeout(60 * 1000);

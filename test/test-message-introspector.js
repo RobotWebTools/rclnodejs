@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const MessageIntrospector = require('../lib/message_introspector.js');
-const { TypeValidationError } = require('../lib/errors.js');
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import MessageIntrospector from '../lib/message_introspector.js';
+import { TypeValidationError } from '../lib/errors.js';
 
 describe('MessageIntrospector Tests', function () {
   before(async function () {

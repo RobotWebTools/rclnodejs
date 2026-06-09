@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
+import assert from 'assert';
+import rclnodejs from '../index.js';
+import rxjs from 'rxjs';
 
-const assert = require('assert');
-const rclnodejs = require('../index.js');
-const { take, map, filter, toArray } = require('rxjs');
+const { take, map, filter, toArray } = rxjs;
 
 describe('rclnodejs observable subscription test suite', function () {
   this.timeout(60 * 1000);

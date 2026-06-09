@@ -1,0 +1,46 @@
+name: 'Setup ROS2 apt repository'
+description: >-
+  Enable the official ros-apt-source repository (and common build deps) on
+  Ubuntu, and optionally install the Lyrical Luth desktop. Shared by the
+  build-and-test and ASan workflows so the lyrical/rolling apt setup lives in
+  one place.
+
+inputs:
+  install-desktop:
+    description: >-
+      When 'true' (default) install ros-lyrical-desktop. Set to 'false' to only
+      enable the apt repository and build deps (e.g. the rolling lane installs
+      ROS2 from a binary tarball after this action runs).
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Enable ROS2 apt repository
+      shell: bash
+      run: |
+        apt-get update
+        apt-get install -y sudo software-properties-common curl
+
+        # Enable required repositories. The same setup applies to both the
+        # rolling nightly tarball and the lyrical apt-deb install; see the
+        # per-distro install docs for reference:
+        #   rolling: https://docs.ros.org/en/rolling/Installation/Alternatives/Ubuntu-Install-Binary.html
+        #   lyrical: https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
+        add-apt-repository universe
+        ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F'"' '{print $4}')
+        curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
+        dpkg -i /tmp/ros2-apt-source.deb
+        apt-get update
+        # Common build deps for both rolling and lyrical. Rolling-only tarball
+        # tooling (tar, bzip2, python3-rosdep) is installed by the caller so the
+        # lyrical lane stays minimal.
+        apt-get install -y build-essential cmake python3 python3-colcon-common-extensions
+
+    - name: Install ROS2 from apt (lyrical)
+      if: ${{ inputs.install-desktop == 'true' }}
+      shell: bash
+      run: |
+        # Per https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
+        apt-get install -y ros-lyrical-desktop
