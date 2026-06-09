@@ -24,7 +24,7 @@ await rclnodejs.init();
 const node = rclnodejs.createNode('timer_example_node');
 
 const timer = node.createTimer(BigInt(1000000000), () => {
-  console.log('One second escaped!');
+  console.log('One second elapsed!');
 
   console.log('Cancel this timer.');
   timer.cancel();
@@ -39,7 +39,7 @@ const timer = node.createTimer(BigInt(1000000000), () => {
     'The next call will be ' + timer.timeUntilNextCall() + 'ms later.'
   );
 
-  console.log('Shuting down...');
+  console.log('Shutting down...');
   rclnodejs.shutdown();
 });
 
