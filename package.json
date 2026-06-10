@@ -63,7 +63,7 @@
     "test-idl": "node --expose-gc ./scripts/run_test.cjs --idl",
     "lint": "eslint && node ./scripts/cpplint.cjs",
     "test:asan": "bash scripts/run_asan_test.sh",
-    "format": "clang-format -i -style=file ./src/*.cpp ./src/*.h && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,cjs,md,ts}\" ./*.{js,md,ts}",
+    "format": "clang-format -i -style=file ./src/*.cpp ./src/*.h && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,cjs,mjs,md,ts}\" ./*.{js,md,ts}",
     "prepack": "npm run build:dist",
     "prepare": "husky",
     "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
