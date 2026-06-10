@@ -105,29 +105,20 @@ For development, you can run TypeScript files directly with ts-node:
 
 ## TypeScript Setup
 
-This demo includes a self-contained TypeScript configuration that allows compilation without requiring the full rclnodejs installation to be built first. The key components are:
-
-### Local Type Definitions
-
-The `types/rclnodejs.d.ts` file provides basic TypeScript declarations for rclnodejs, enabling:
-
-- ✅ TypeScript compilation without dependencies
-- ✅ Type checking and IntelliSense support
-- ✅ Proper interface definitions for common ROS2 operations
+This demo builds against the in-tree **rclnodejs** package
+(`"rclnodejs": "file:../../.."`), so it uses the package's own TypeScript
+declarations — there are no local stub types.
 
 ### TypeScript Configuration
 
 The `tsconfig.json` is configured to:
 
-- Use local type definitions from the `types/` directory
+- Use modern `NodeNext` module resolution, matching how Node.js resolves the
+  package's `exports` map
+- Target `ES2022`, consistent with the rclnodejs package itself
 - Compile TypeScript to JavaScript in the `dist/` directory
 - Generate source maps and declaration files
 - Enable strict type checking
-
-### Development vs Runtime
-
-- **Compilation**: Uses local type definitions (no rclnodejs dependency)
-- **Runtime**: Requires actual rclnodejs installation and ROS 2 environment
 
 ## Expected Output
 

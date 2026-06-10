@@ -199,7 +199,7 @@ Starting TypeScript Service Client Demo...
 
 This demo includes:
 
-- **Local Type Definitions**: Custom TypeScript definitions for rclnodejs in `types/rclnodejs.d.ts`
+- **Package Type Definitions**: Uses the in-tree rclnodejs TypeScript declarations (no local stub types)
 - **Service Types**: Type definitions for `example_interfaces/srv/AddTwoInts`
 - **Strict Type Checking**: Full TypeScript strict mode enabled
 - **Build Pipeline**: Automated compilation with shebang fixing for executable JavaScript
@@ -292,7 +292,7 @@ Modify the service callback to implement your own business logic:
    ```
    Type errors in service definitions
    ```
-   **Solution**: Check the type definitions in `types/rclnodejs.d.ts` match your usage.
+   **Solution**: Ensure the in-tree rclnodejs package is built so its TypeScript declarations are available.
 
 ### Debugging Tips
 

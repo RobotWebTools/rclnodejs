@@ -42,7 +42,7 @@ Asynchronous actions with progress feedback and cancellation
 
 ### Modern Development
 
-- **ES2020+ syntax** with async/await patterns
+- **ES2022+ syntax** with async/await patterns
 - **Modular architecture** with clean separation of concerns
 - **Error boundaries** with comprehensive exception handling
 - **Graceful shutdown** handling for SIGINT/SIGTERM

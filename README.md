@@ -199,9 +199,9 @@ TypeScript declaration files are included in the package and exposed through the
 ```jsonc
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "es2022",
   },
 }
 ```

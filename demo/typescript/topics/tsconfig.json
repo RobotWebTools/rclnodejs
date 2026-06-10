@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "es2022",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -12,9 +12,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "lib": ["es2020"],
+    "lib": ["es2022"],
     "typeRoots": [
-      "./types",
       "./node_modules/@types"
     ]
   },
