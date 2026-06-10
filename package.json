@@ -26,8 +26,14 @@
       "default": "./dist/server.js"
     },
     "./rosocket": {
-      "import": "./dist/rosocket.js",
-      "require": "./dist/rosocket.cjs",
+      "import": {
+        "types": "./rosocket/index.d.ts",
+        "default": "./dist/rosocket.js"
+      },
+      "require": {
+        "types": "./rosocket/index.d.cts",
+        "default": "./dist/rosocket.cjs"
+      },
       "default": "./dist/rosocket.js"
     },
     "./lib/*": "./lib/*.js",
