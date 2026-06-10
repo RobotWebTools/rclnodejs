@@ -105,7 +105,7 @@ npm install
 2. Run a publisher example from this checkout.
 
 ```bash
-node example/topics/publisher/publisher-example.js
+node example/topics/publisher/publisher-example.cjs
 ```
 
 More runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).

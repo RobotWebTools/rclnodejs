@@ -22,7 +22,7 @@ Graph introspection allows you to:
 
 ## Graph Example
 
-### ROS Graph Discovery (`ros-graph-example.js`)
+### ROS Graph Discovery (`ros-graph-example.cjs`)
 
 **Purpose**: Demonstrates comprehensive ROS 2 graph introspection capabilities.
 
@@ -61,7 +61,7 @@ This example creates a complete ROS 2 system with multiple nodes and then intros
 #### Run Command
 
 ```bash
-node ros-graph-example.js
+node ros-graph-example.cjs
 ```
 
 ## Sample Output

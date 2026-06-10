@@ -7,11 +7,11 @@
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // TypeScript demo server. Run with `npm run server` (which uses tsx) or
-// `npx tsx server.ts`. Behaviour matches demo/web/javascript/runtime.js
+// `npx tsx server.ts`. Behaviour matches demo/web/javascript/runtime.cjs
 // — same runtime + same demo nodes — except this side is written in
 // TypeScript so the typed SDK story is visible end to end. The static
 // page server is Vite (`npm run dev`), parallel to the JS demo's
-// separate `node static.js`.
+// separate `node static.cjs`.
 
 // rclnodejs is a CommonJS module without first-class ESM types; using
 // require keeps the server independent of how a downstream project
@@ -30,7 +30,7 @@ const RUNTIME_PORT = Number(process.env.RUNTIME_PORT || 9000);
 const HTTP_PORT = Number(process.env.HTTP_PORT || 9001);
 
 // Render the registry as a small human-readable table — see the matching
-// helper in demo/web/javascript/runtime.js.
+// helper in demo/web/javascript/runtime.cjs.
 function formatCapabilities(
   caps: Record<'call' | 'publish' | 'subscribe', Record<string, string>>
 ): string {

@@ -6,6 +6,7 @@
 .gitignore
 .prettierrc.yml
 eslint.config.mjs
+tsup.config.js
 CONTRIBUTORS.md
 Dockerfile
 cpplint.py
@@ -15,9 +16,11 @@ build/
 __pycache__/
 *.pyc
 coverage/
-dist/
 log/
 install/
+pack/
+dist/package/
+dist/*.tgz
 test/
 docs/
 example/
