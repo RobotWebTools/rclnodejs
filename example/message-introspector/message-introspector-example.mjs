@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2025 Mahmoud Alghalayini. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,28 +17,26 @@
 
 import rclnodejs from '../../index.js';
 
+/**
+ * This example demonstrates the MessageIntrospector class for
+ * inspecting ROS 2 message structure without using loader.loadInterface.
+ */
 await rclnodejs.init();
 
-const node = rclnodejs.createNode('timer_example_node');
+const Twist = new rclnodejs.MessageIntrospector('geometry_msgs/msg/Twist');
+const String = new rclnodejs.MessageIntrospector('std_msgs/msg/String');
+const JointState = new rclnodejs.MessageIntrospector(
+  'sensor_msgs/msg/JointState'
+);
 
-const timer = node.createTimer(BigInt(1000000000), () => {
-  console.log('One second elapsed!');
+console.log('Twist fields:', Twist.fields);
+console.log('Twist defaults:', Twist.defaults);
 
-  console.log('Cancel this timer.');
-  timer.cancel();
+console.log('String fields:', String.fields);
+console.log('String defaults:', String.defaults);
 
-  if (timer.isCanceled()) {
-    console.log('The timer has been canceled successfully.');
-  }
+console.log('JointState fields:', JointState.fields);
 
-  console.log('Reset the timer.');
-  timer.reset();
-  console.log(
-    'The next call will be ' + timer.timeUntilNextCall() + 'ms later.'
-  );
+console.log('Twist schema msgName:', Twist.schema.msgName);
 
-  console.log('Shutting down...');
-  rclnodejs.shutdown();
-});
-
-rclnodejs.spin(node);
+await rclnodejs.shutdown();

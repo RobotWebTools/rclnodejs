@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2017 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,33 @@
 
 import rclnodejs from '../../../index.js';
 
-await rclnodejs.init();
+try {
+  await rclnodejs.init();
+  const node = rclnodejs.createNode('publisher_message_example_node');
+  const publisher = node.createPublisher(
+    'sensor_msgs/msg/JointState',
+    'JointState'
+  );
+  let count = 0;
 
-const node = rclnodejs.createNode('subscription_example_node');
+  setInterval(function () {
+    publisher.publish({
+      header: {
+        stamp: {
+          sec: 123456,
+          nanosec: 789,
+        },
+        frame_id: 'main frame',
+      },
+      name: ['Tom', 'Jerry'],
+      position: [1, 2],
+      velocity: [2, 3],
+      effort: [4, 5, 6],
+    });
+    console.log(`Publish ${++count} messages.`);
+  }, 1000);
 
-node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-  console.log(`Received message: ${typeof msg}`, msg);
-});
-
-rclnodejs.spin(node);
+  rclnodejs.spin(node);
+} catch (e) {
+  console.log(e);
+}

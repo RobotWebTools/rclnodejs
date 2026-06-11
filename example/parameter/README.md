@@ -22,7 +22,7 @@ Parameters are ideal for:
 
 ### Local Parameters (On Current Node)
 
-#### 1. Parameter Declaration (`parameter-declaration-example.cjs`)
+#### 1. Parameter Declaration (`parameter-declaration-example.mjs`)
 
 **Purpose**: Demonstrates how to declare and use parameters in a ROS 2 node.
 
@@ -41,9 +41,9 @@ Parameters are ideal for:
   - **Name**: `param1`
   - **Type**: `PARAMETER_STRING`
   - **Default Value**: `"hello world"`
-- **Run Command**: `node parameter-declaration-example.cjs`
+- **Run Command**: `node parameter-declaration-example.mjs`
 
-#### 2. Parameter Override (`parameter-override-example.cjs`)
+#### 2. Parameter Override (`parameter-override-example.mjs`)
 
 **Purpose**: Shows how to override parameter values using command-line arguments.
 
@@ -63,11 +63,11 @@ Parameters are ideal for:
   - **Type**: `PARAMETER_STRING`
   - **Default Value**: `"hello world"`
   - **Override Value**: `"hello ros2"` (via command line)
-- **Run Command**: `node parameter-override-example.cjs`
+- **Run Command**: `node parameter-override-example.mjs`
 
 ### Remote Parameter Access (On Other Nodes)
 
-#### 3. ParameterClient Basic (`parameter-client-basic-example.cjs`)
+#### 3. ParameterClient Basic (`parameter-client-basic-example.mjs`)
 
 **Purpose**: Demonstrates accessing and modifying parameters on a remote node using `ParameterClient`.
 
@@ -84,9 +84,9 @@ Parameters are ideal for:
   - Batch parameter retrieval
   - Automatic type inference for parameter values
 - **Target Node**: `turtlesim` (run: `ros2 run turtlesim turtlesim_node`)
-- **Run Command**: `node parameter-client-basic-example.cjs`
+- **Run Command**: `node parameter-client-basic-example.mjs`
 
-#### 4. ParameterClient Advanced (`parameter-client-advanced-example.cjs`)
+#### 4. ParameterClient Advanced (`parameter-client-advanced-example.mjs`)
 
 **Purpose**: Comprehensive example showing all ParameterClient features and capabilities.
 
@@ -108,9 +108,9 @@ Parameters are ideal for:
   - Automatic BigInt conversion for integers
   - Type inference demonstrations
   - Lifecycle management
-- **Run Command**: `node parameter-client-advanced-example.cjs`
+- **Run Command**: `node parameter-client-advanced-example.mjs`
 
-#### 5. ParameterWatcher (`parameter-watcher-example.cjs`)
+#### 5. ParameterWatcher (`parameter-watcher-example.mjs`)
 
 **Purpose**: Demonstrates watching parameter changes on a remote node in real-time.
 
@@ -126,7 +126,7 @@ Parameters are ideal for:
   - Built on top of ParameterClient
   - Simple EventEmitter API
 - **Target Node**: `turtlesim` (run: `ros2 run turtlesim turtlesim_node`)
-- **Run Command**: `node parameter-watcher-example.cjs`
+- **Run Command**: `node parameter-watcher-example.mjs`
 - **Test Changes**: In another terminal, run `ros2 param set /turtlesim background_r 200`
 
 **ParameterClient Key Features**:
@@ -184,7 +184,7 @@ Parameters are ideal for:
 
 ```bash
 cd example/parameter
-node parameter-declaration-example.cjs
+node parameter-declaration-example.mjs
 ```
 
 **Expected Output**:
@@ -212,7 +212,7 @@ ParameterDescriptor {
 
 ```bash
 cd example/parameter
-node parameter-override-example.cjs
+node parameter-override-example.mjs
 ```
 
 **Expected Output**:
@@ -250,7 +250,7 @@ Then in another terminal:
 
 ```bash
 cd example/parameter
-node parameter-client-basic-example.cjs
+node parameter-client-basic-example.mjs
 ```
 
 **Expected Output**:
@@ -264,7 +264,7 @@ Updated background_b: 200n
 
 ```bash
 cd example/parameter
-node parameter-client-advanced-example.cjs
+node parameter-client-advanced-example.mjs
 ```
 
 **Expected Output**:
@@ -297,7 +297,7 @@ Then in another terminal:
 
 ```bash
 cd example/parameter
-node parameter-watcher-example.cjs
+node parameter-watcher-example.mjs
 ```
 
 **Expected Output**:

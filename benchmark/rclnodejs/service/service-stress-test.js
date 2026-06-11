@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use strict';
-
 /* eslint-disable camelcase */
-const { program } = require('commander');
-const rclnodejs = require('../../../index.js');
+import { program } from 'commander';
+import rclnodejs from '../../../index.js';
 
 program
   .option('-s, --size <size_kb>', 'The block size in KB', '1')

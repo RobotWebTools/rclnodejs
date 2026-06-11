@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2017 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,28 @@
 
 import rclnodejs from '../../../index.js';
 
+const { QoS } = rclnodejs;
+
 await rclnodejs.init();
 
-const node = rclnodejs.createNode('subscription_example_node');
+const node = rclnodejs.createNode('publisher_qos_example_node');
 
-node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-  console.log(`Received message: ${typeof msg}`, msg);
+let qos = new QoS();
+qos.history = QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT;
+qos.reliability =
+  QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT;
+qos.durability = QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT;
+qos.depth = 1;
+qos.avoidRosNameSpaceConventions = false;
+
+const publisher = node.createPublisher('std_msgs/msg/String', 'topic', {
+  qos,
 });
+
+let counter = 0;
+setInterval(function () {
+  console.log(`Publishing message: Hello ROS ${counter}`);
+  publisher.publish(`Hello ROS ${counter++}`);
+}, 1000);
 
 rclnodejs.spin(node);

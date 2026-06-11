@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2020 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,10 +19,15 @@ import rclnodejs from '../../../index.js';
 
 await rclnodejs.init();
 
-const node = rclnodejs.createNode('subscription_example_node');
+const node = rclnodejs.createNode('subscription_message_example_node');
 
-node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-  console.log(`Received message: ${typeof msg}`, msg);
-});
+node.createSubscription(
+  'test_msgs/msg/BasicTypes',
+  'chatter',
+  { isRaw: true },
+  (msg) => {
+    console.log(`Received message: ${msg.toString('utf8')}`);
+  }
+);
 
 rclnodejs.spin(node);

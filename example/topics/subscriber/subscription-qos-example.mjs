@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2017 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,19 @@
 
 import rclnodejs from '../../../index.js';
 
+const { QoS } = rclnodejs;
+
 await rclnodejs.init();
 
-const node = rclnodejs.createNode('subscription_example_node');
+const node = rclnodejs.createNode('subscription_qos_example_node');
 
-node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-  console.log(`Received message: ${typeof msg}`, msg);
-});
+node.createSubscription(
+  'std_msgs/msg/String',
+  'topic',
+  { qos: QoS.profileSystemDefault },
+  (msg) => {
+    console.log(`Received message: ${typeof msg}`, msg);
+  }
+);
 
 rclnodejs.spin(node);

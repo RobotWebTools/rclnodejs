@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2025 Mahmoud Alghalayini. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,10 +19,22 @@ import rclnodejs from '../../../index.js';
 
 await rclnodejs.init();
 
-const node = rclnodejs.createNode('subscription_example_node');
+const node = rclnodejs.createNode('publisher_validation_example_node');
 
-node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-  console.log(`Received message: ${typeof msg}`, msg);
+const publisher = node.createPublisher('std_msgs/msg/String', 'topic', {
+  validateMessages: true,
 });
 
-rclnodejs.spin(node);
+publisher.publish({ data: 'Hello ROS' });
+console.log('Published valid message');
+
+try {
+  publisher.publish({ data: 12345 });
+} catch (error) {
+  if (error instanceof rclnodejs.MessageValidationError) {
+    console.log('Caught validation error:', error.issues[0].problem);
+  }
+}
+
+node.destroy();
+rclnodejs.shutdown();

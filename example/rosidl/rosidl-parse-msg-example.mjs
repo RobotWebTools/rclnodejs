@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2017 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// From an installed package you would write `import rclnodejs from 'rclnodejs'`;
-// run from this checkout we import the source entry point directly.
+import parser from '../../rosidl_parser/rosidl_parser.cjs';
 
-import rclnodejs from '../../../index.js';
+const rosInstallPath = process.env.AMENT_PREFIX_PATH;
+const packageName = 'std_msgs';
+const packagePath = rosInstallPath + '/share/std_msgs/msg/ColorRGBA.msg';
 
-await rclnodejs.init();
+try {
+  const spec = await parser.parseMessageFile(packageName, packagePath);
 
-const node = rclnodejs.createNode('subscription_example_node');
+  console.log(`msg name: ${spec.msgName}`);
 
-node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-  console.log(`Received message: ${typeof msg}`, msg);
-});
-
-rclnodejs.spin(node);
+  console.log('fields includes:');
+  spec.fields.forEach((field) => {
+    console.log(field);
+  });
+} catch (e) {
+  console.log(e);
+}

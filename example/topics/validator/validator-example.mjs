@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2017 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,18 @@
 
 import rclnodejs from '../../../index.js';
 
-await rclnodejs.init();
+const { validator } = rclnodejs;
 
-const node = rclnodejs.createNode('subscription_example_node');
-
-node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-  console.log(`Received message: ${typeof msg}`, msg);
-});
-
-rclnodejs.spin(node);
+console.log(
+  'validation of topic "/node_name/chatter" is ' +
+    validator.validateFullTopicName('/node_name/chatter')
+);
+console.log(
+  'validation of node "my_node" is ' + validator.validateNodeName('my_node')
+);
+console.log(
+  'validation of topic "chatter" is ' + validator.validateTopicName('chatter')
+);
+console.log(
+  'validation of namespace "/my_ns" is ' + validator.validateNamespace('/my_ns')
+);

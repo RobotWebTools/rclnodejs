@@ -34,7 +34,7 @@ RclNodeError (base)
 
 ## Examples
 
-### 1. Type Validation (`error-handling-example.cjs` - Example 1)
+### 1. Type Validation (`error-handling-example.mjs` - Example 1)
 
 **Purpose**: Demonstrates catching `TypeValidationError` when providing wrong argument types.
 
@@ -42,7 +42,7 @@ RclNodeError (base)
 - **Features**: Shows `argumentName`, `expectedType`, and `providedValue` properties
 - **Key Properties**: `error.argumentName`, `error.expectedType`, `error.providedValue`
 
-### 2. Range Validation (`error-handling-example.cjs` - Example 2)
+### 2. Range Validation (`error-handling-example.mjs` - Example 2)
 
 **Purpose**: Demonstrates catching `RangeValidationError` for out-of-bounds values.
 
@@ -50,7 +50,7 @@ RclNodeError (base)
 - **Features**: Shows `validationRule` and `providedValue` for constraint violations
 - **Key Properties**: `error.validationRule`, `error.providedValue`, `error.nodeName`
 
-### 3. Service Errors (`error-handling-example.cjs` - Example 3)
+### 3. Service Errors (`error-handling-example.mjs` - Example 3)
 
 **Purpose**: Demonstrates `TimeoutError` and `AbortError` handling for service operations.
 
@@ -58,7 +58,7 @@ RclNodeError (base)
 - **Features**: Demonstrates timeout with `sendRequestAsync({ timeout })` and `AbortController`
 - **Key Properties**: `error.timeout`, `error.operationType`, `error.entityName`
 
-### 4. Publisher Errors (`error-handling-example.cjs` - Example 4)
+### 4. Publisher Errors (`error-handling-example.mjs` - Example 4)
 
 **Purpose**: Demonstrates catching `PublisherError` during publisher creation.
 
@@ -66,7 +66,7 @@ RclNodeError (base)
 - **Features**: Shows error handling for topic creation failures
 - **Key Class**: `PublisherError`
 
-### 5. Subscription Errors (`error-handling-example.cjs` - Example 5)
+### 5. Subscription Errors (`error-handling-example.mjs` - Example 5)
 
 **Purpose**: Demonstrates catching `SubscriptionError` during subscription creation.
 
@@ -74,7 +74,7 @@ RclNodeError (base)
 - **Features**: Shows error handling for subscription creation failures
 - **Key Class**: `SubscriptionError`
 
-### 6. Parameter Errors (`error-handling-example.cjs` - Example 6)
+### 6. Parameter Errors (`error-handling-example.mjs` - Example 6)
 
 **Purpose**: Demonstrates `ParameterTypeError` for parameter type mismatches.
 
@@ -82,7 +82,7 @@ RclNodeError (base)
 - **Features**: Shows parameter validation and type checking
 - **Key Class**: `ParameterTypeError`
 
-### 7. Name Validation (`error-handling-example.cjs` - Example 7)
+### 7. Name Validation (`error-handling-example.mjs` - Example 7)
 
 **Purpose**: Demonstrates `NameValidationError` for invalid ROS names.
 
@@ -90,7 +90,7 @@ RclNodeError (base)
 - **Features**: Shows `invalidIndex` property pointing to error location
 - **Key Properties**: `error.invalidIndex`, `error.message`
 
-### 8. Error Recovery (`error-handling-example.cjs` - Example 8)
+### 8. Error Recovery (`error-handling-example.mjs` - Example 8)
 
 **Purpose**: Demonstrates retry logic with structured error handling.
 
@@ -98,7 +98,7 @@ RclNodeError (base)
 - **Features**: Shows differentiation between recoverable and non-recoverable errors
 - **Pattern**: Retry on `TimeoutError`, abort on `AbortError` or other errors
 
-### 9. Error Serialization (`error-handling-example.cjs` - Example 9)
+### 9. Error Serialization (`error-handling-example.mjs` - Example 9)
 
 **Purpose**: Demonstrates using `toJSON()` for logging and debugging.
 
@@ -106,7 +106,7 @@ RclNodeError (base)
 - **Features**: Shows `toJSON()` method producing complete error information
 - **Method**: `error.toJSON()`
 
-### 10. Generic Error Handler (`error-handling-example.cjs` - Example 10)
+### 10. Generic Error Handler (`error-handling-example.mjs` - Example 10)
 
 **Purpose**: Demonstrates reusable error handler for all rclnodejs errors.
 
@@ -121,7 +121,7 @@ RclNodeError (base)
 2. **Run All Examples**:
 
    ```bash
-   node example/error-handling/error-handling-example.cjs
+   node example/error-handling/error-handling-example.mjs
    ```
 
 3. **Expected Output**: Demonstrates all 10 error handling patterns with clear success indicators

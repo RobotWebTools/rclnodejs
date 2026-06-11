@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2023 Wayne Parrott. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,29 @@
 import rclnodejs from '../../../index.js';
 
 await rclnodejs.init();
+const node = new rclnodejs.Node('publisher_content_filter_example_node');
+const publisher = node.createPublisher(
+  'sensor_msgs/msg/Temperature',
+  'temperature'
+);
 
-const node = rclnodejs.createNode('subscription_example_node');
+let count = 0;
+setInterval(function () {
+  let temperature = (Math.random() * 100).toFixed(2);
 
-node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-  console.log(`Received message: ${typeof msg}`, msg);
-});
+  publisher.publish({
+    header: {
+      stamp: {
+        sec: 123456,
+        nanosec: 789,
+      },
+      frame_id: 'main frame',
+    },
+    temperature: temperature,
+    variance: 0,
+  });
 
-rclnodejs.spin(node);
+  console.log(`Publish temerature message-${++count}: ${temperature} degrees`);
+}, 100);
+
+node.spin();

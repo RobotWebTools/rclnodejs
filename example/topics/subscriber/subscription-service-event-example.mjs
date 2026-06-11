@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2023 Wayne Parrott. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,15 @@
 import rclnodejs from '../../../index.js';
 
 await rclnodejs.init();
+const node = new rclnodejs.Node('subscription_service_event_example_node');
+let count = 0;
 
-const node = rclnodejs.createNode('subscription_example_node');
+node.createSubscription(
+  'example_interfaces/srv/AddTwoInts_Event',
+  '/add_two_ints/_service_event',
+  (event) => {
+    console.log(`Received event No. ${++count}: `, event);
+  }
+);
 
-node.createSubscription('std_msgs/msg/String', 'topic', (msg) => {
-  console.log(`Received message: ${typeof msg}`, msg);
-});
-
-rclnodejs.spin(node);
+node.spin();

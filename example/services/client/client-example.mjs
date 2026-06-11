@@ -1,4 +1,4 @@
-// Copyright (c) 2026 RobotWebTools Contributors. All rights reserved.
+// Copyright (c) 2017 Intel Corporation. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import rclnodejs from '../../../index.js';
 
 await rclnodejs.init();
 
-const node = rclnodejs.createNode('async_client_example_node');
+const node = rclnodejs.createNode('client_example_node');
 const client = node.createClient(
   'example_interfaces/srv/AddTwoInts',
   'add_two_ints'
@@ -48,16 +48,11 @@ if (!available) {
   console.log('Error: service not available');
   rclnodejs.shutdown();
 } else {
-  rclnodejs.spin(node);
-
   console.log(`Sending: ${typeof request}`, request);
-
-  try {
-    const response = await client.sendRequestAsync(request, { timeout: 5000 });
+  client.sendRequest(request, (response) => {
     console.log(`Result: ${typeof response}`, response);
-  } catch (error) {
-    console.log(`Error: ${error.message}`);
-  } finally {
     rclnodejs.shutdown();
-  }
+  });
+
+  rclnodejs.spin(node);
 }

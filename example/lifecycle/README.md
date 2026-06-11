@@ -38,7 +38,7 @@ State transitions are triggered by these transitions:
 
 ## Lifecycle Example
 
-### Lifecycle Node with Countdown (`lifecycle-node-example.cjs`)
+### Lifecycle Node with Countdown (`lifecycle-node-example.mjs`)
 
 **Purpose**: Demonstrates a complete lifecycle node implementation with automated state management.
 
@@ -81,7 +81,7 @@ This example creates a lifecycle node that:
 #### Run Command
 
 ```bash
-node lifecycle-node-example.cjs
+node lifecycle-node-example.mjs
 ```
 
 ## Sample Output
