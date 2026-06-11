@@ -16,13 +16,13 @@
 **Key features:** Topics, Services, Actions, Parameters, Lifecycle Nodes, TypeScript support, RxJS Observables, Electron integration, ROS 2 in the browser (typed Web SDK + thin WebSocket gateway — `rclnodejs/web`, `rosocket`), and prebuilt binaries for Linux x64/arm64.
 
 ```javascript
-const rclnodejs = require('rclnodejs');
-rclnodejs.init().then(() => {
-  const node = new rclnodejs.Node('publisher_example_node');
-  const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
-  publisher.publish(`Hello ROS 2 from rclnodejs`);
-  node.spin();
-});
+import rclnodejs from 'rclnodejs';
+
+await rclnodejs.init();
+const node = new rclnodejs.Node('publisher_example_node');
+const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
+publisher.publish(`Hello ROS 2 from rclnodejs`);
+node.spin();
 ```
 
 This example assumes your ROS 2 environment is already sourced.
@@ -105,7 +105,7 @@ npm install
 2. Run a publisher example from this checkout.
 
 ```bash
-node example/topics/publisher/publisher-example.cjs
+node example/topics/publisher/publisher-example.mjs
 ```
 
 More runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
@@ -146,7 +146,7 @@ how much glue you want to write.
 rclnodejs supports [RxJS](https://rxjs.dev/) Observable subscriptions for reactive programming with ROS 2 messages. Use operators like `throttleTime()`, `debounceTime()`, `map()`, and `combineLatest()` to build declarative message processing pipelines.
 
 ```javascript
-const { throttleTime, map } = require('rxjs');
+import { throttleTime, map } from 'rxjs';
 
 const obsSub = node.createObservableSubscription(
   'sensor_msgs/msg/LaserScan',
@@ -173,7 +173,7 @@ rclnodejs auto-generates JavaScript bindings and TypeScript declarations for eve
 Use the generated types directly:
 
 ```javascript
-const rclnodejs = require('rclnodejs');
+import rclnodejs from 'rclnodejs';
 let stringMsgObject = rclnodejs.createMessageObject('std_msgs/msg/String');
 stringMsgObject.data = 'hello world';
 ```
