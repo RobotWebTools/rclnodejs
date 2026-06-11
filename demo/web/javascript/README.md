@@ -14,12 +14,12 @@ cd demo/web/javascript
 
 ```bash
 source /opt/ros/<distro>/setup.bash
-node runtime.cjs
+node runtime.mjs
 # rclnodejs/web : ws://localhost:9000/capability
 #               also http://localhost:9001/capability  (call/publish, curl-able)
 ```
 
-`runtime.cjs` exposes a tiny `/add_two_ints` service + 1 Hz
+`runtime.mjs` exposes a tiny `/add_two_ints` service + 1 Hz
 `/web_demo_tick` publisher so every panel has live data.
 
 **Shell 2 — static-file server (hosts `index.html` + maps `/sdk/*` to
@@ -27,7 +27,7 @@ the in-repo [`web/`](../../../web/) folder so the page can `import`
 the SDK from a plain URL):**
 
 ```bash
-node static.cjs
+node static.mjs
 # Static files : http://localhost:8080/
 ```
 
@@ -67,18 +67,18 @@ curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
 
 Subscribe stays on WebSocket.
 
-## Without the bundled `runtime.cjs`
+## Without the bundled `runtime.mjs`
 
-`runtime.cjs` bundles the rclnodejs/web runtime and the demo's sample
+`runtime.mjs` bundles the rclnodejs/web runtime and the demo's sample
 ROS 2 nodes (the `/add_two_ints` service + the `/web_demo_tick`
 publisher) into one process so the demo runs out of the box. In a
 real project you already have those ROS 2 nodes running elsewhere,
-so you only need the runtime. **Replace shell 1's `node runtime.cjs`
-with the CLI** — shell 2 (`node static.cjs`) and the browser code are
+so you only need the runtime. **Replace shell 1's `node runtime.mjs`
+with the CLI** — shell 2 (`node static.mjs`) and the browser code are
 unchanged:
 
 ```bash
-# shell 1 (instead of `node runtime.cjs`); the `-p rclnodejs` tells npx
+# shell 1 (instead of `node runtime.mjs`); the `-p rclnodejs` tells npx
 # the `rclnodejs-web` binary lives inside the `rclnodejs` package:
 npx -p rclnodejs rclnodejs-web web.json
 

@@ -23,7 +23,7 @@ ROSIDL parsing is useful for:
 
 ## ROSIDL Examples
 
-### 1. Message Parsing (`rosidl-parse-msg-example.cjs`)
+### 1. Message Parsing (`rosidl-parse-msg-example.mjs`)
 
 **Purpose**: Demonstrates parsing ROS 2 message definition files (.msg).
 
@@ -63,7 +63,7 @@ float32 a  # Alpha (transparency) component
 #### Run Command
 
 ```bash
-node rosidl-parse-msg-example.cjs
+node rosidl-parse-msg-example.mjs
 ```
 
 #### Expected Output
@@ -105,7 +105,7 @@ fields includes:
 }
 ```
 
-### 2. Service Parsing (`rosidl-parse-srv-example.cjs`)
+### 2. Service Parsing (`rosidl-parse-srv-example.mjs`)
 
 **Purpose**: Demonstrates parsing ROS 2 service definition files (.srv).
 
@@ -147,7 +147,7 @@ string message  # Informational message
 #### Run Command
 
 ```bash
-node rosidl-parse-srv-example.cjs
+node rosidl-parse-srv-example.mjs
 ```
 
 #### Expected Output
@@ -183,7 +183,7 @@ srv response fields includes:
 }
 ```
 
-### 3. Action Parsing (`rosidl-parse-action-example.cjs`)
+### 3. Action Parsing (`rosidl-parse-action-example.mjs`)
 
 **Purpose**: Demonstrates parsing ROS 2 action definition files (.action).
 
@@ -227,7 +227,7 @@ int32[] partial_sequence  # Partial sequence (feedback)
 #### Run Command
 
 ```bash
-node rosidl-parse-action-example.cjs
+node rosidl-parse-action-example.mjs
 ```
 
 #### Expected Output

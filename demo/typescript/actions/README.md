@@ -36,8 +36,6 @@ demo/typescript/actions/
 ├── src/
 │   ├── client.ts          # Action client implementation
 │   └── server.ts          # Action server implementation
-├── types/
-│   └── rclnodejs.d.ts     # Type definitions
 ├── package.json           # Project configuration
 ├── tsconfig.json          # TypeScript configuration
 ├── .gitignore            # Git ignore rules

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// ESM variant of subscription-example.js.
-//
 // From an installed package you would write `import rclnodejs from 'rclnodejs'`;
 // run from this checkout we import the source entry point directly.
 

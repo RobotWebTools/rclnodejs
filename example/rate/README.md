@@ -22,7 +22,7 @@ Rate control is essential for:
 
 ## Rate Example
 
-### Rate-Limited Loop with High-Frequency Publisher (`rate-example.cjs`)
+### Rate-Limited Loop with High-Frequency Publisher (`rate-example.mjs`)
 
 **Purpose**: Demonstrates rate control in a scenario with mismatched publication and processing frequencies.
 
@@ -62,7 +62,7 @@ This example creates a sophisticated timing demonstration that shows:
 #### Run Command
 
 ```bash
-node rate-example.cjs
+node rate-example.mjs
 ```
 
 ## Sample Output

@@ -11,12 +11,12 @@ library required.
 - Subscribe to and publish on `/chatter` (`std_msgs/msg/String`).
 - Call `/add_two_ints` (`example_interfaces/srv/AddTwoInts`) — the
   service implementation lives in
-  [`example/services/service/service-example.cjs`](../../example/services/service/service-example.cjs)
+  [`example/services/service/service-example.mjs`](../../example/services/service/service-example.mjs)
   and is launched in a second terminal.
 
 ## Layout
 
-- `server.cjs` — `rclnodejs` node + `startRosocket` bridge only.
+- `server.mjs` — `rclnodejs` node + `startRosocket` bridge only.
 - `index.html` — single-file browser client using only built-in
   `WebSocket` and `JSON`.
 
@@ -27,12 +27,12 @@ library required.
 source /opt/ros/$ROS_DISTRO/setup.bash
 
 # 2. Terminal A — start the WebSocket gateway
-node demo/rosocket/server.cjs
+node demo/rosocket/server.mjs
 # [rosocket-demo] listening on ws://localhost:9000 (bind=0.0.0.0)
 
 # 3. Terminal B — start the AddTwoInts service so the browser has
 #    something to call
-node example/services/service/service-example.cjs
+node example/services/service/service-example.mjs
 ```
 
 The server binds to `0.0.0.0:9000` so it is reachable from any host
