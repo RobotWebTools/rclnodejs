@@ -108,6 +108,9 @@ export interface HttpTransportOptions {
   port?: number;
   host?: string;
   basePath?: string;
+  sse?: boolean;
+  sseKeepAliveMs?: number;
+  cors?: boolean | string | string[];
   verifyRequest?: (req: import('http').IncomingMessage) => boolean;
 }
 
