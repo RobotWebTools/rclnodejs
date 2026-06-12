@@ -91,6 +91,12 @@ const argv = process.argv.slice(2);
           port: cfg.http.port,
           host: cfg.http.host || cfg.host,
           basePath: cfg.http.basePath || cfg.path,
+          sse: cfg.http.sse,
+          sseKeepAliveMs:
+            cfg.http.sseKeepAliveMs != null
+              ? cfg.http.sseKeepAliveMs
+              : undefined,
+          cors: cfg.http.cors,
         })
       );
     }
@@ -118,8 +124,11 @@ const argv = process.argv.slice(2);
       if (httpTransport) {
         const httpHost = displayHost(cfg.http.host || cfg.host);
         const httpBase = cfg.http.basePath || cfg.path;
+        const httpKinds = cfg.http.sse
+          ? 'call/publish + subscribe (SSE)'
+          : 'call/publish only';
         process.stdout.write(
-          `                  also http://${httpHost}:${httpTransport.port}${httpBase} (call/publish only)\n`
+          `                  also http://${httpHost}:${httpTransport.port}${httpBase} (${httpKinds})\n`
         );
       }
     }

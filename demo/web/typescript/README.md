@@ -29,6 +29,12 @@ npm run server
 `server.ts` runs the runtime *and* a tiny `/add_two_ints` service +
 1 Hz `/web_demo_tick` publisher so every panel has live data.
 
+> The HTTP transport here serves `call` / `publish` only; `subscribe`
+> uses WebSocket. HTTP `subscribe` over Server-Sent Events is an opt-in
+> (`new HttpTransport({ sse: true })`, or `--http-sse` on the CLI) — see
+> the [JavaScript demo](../javascript/README.md) for a working SSE +
+> `EventSource` example.
+
 **Shell 2 — Vite dev server:**
 
 ```bash

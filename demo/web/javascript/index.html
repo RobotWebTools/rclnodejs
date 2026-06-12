@@ -273,8 +273,12 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
       The HTTP transport is what makes <code>rclnodejs/web</code>
       <em>actually</em> web-native: every <code>call</code> and
       <code>publish</code> in your allow-list is reachable from any HTTP client
-      — curl, Postman, an AI agent… no JavaScript required. Subscribe stays on
-      WebSocket.
+      — curl, Postman, an AI agent… no JavaScript required. With
+      <code>sse: true</code> on the runtime (set in this demo's
+      <code>runtime.mjs</code>), <code>subscribe</code> is also reachable as a
+      Server-Sent Events stream — handy for clients that can't hold a
+      WebSocket open. Browser apps still prefer the WebSocket transport, which
+      multiplexes many topics on one connection.
     </p>
     <pre
       class="code"
@@ -289,10 +293,78 @@ curl -sS -X POST http://localhost:9001/capability/publish/web_demo_chatter \
   -H <span class="str">'content-type: application/json'</span> \
   -d <span class="str">'{"data":"hi from curl"}'</span>
 
+<span class="com"># subscribe over SSE — streams text/event-stream until you ^C</span>
+<span class="com"># (-N disables curl's buffering so events print as they arrive)</span>
+curl -N http://localhost:9001/capability/subscribe/web_demo_tick
+<span class="com"># event: ready</span>
+<span class="com"># data: {"capability":"/web_demo_tick","subId":"sse"}</span>
+<span class="com">#</span>
+<span class="com"># event: message</span>
+<span class="com"># data: {"data":"tick 0 @ 2026-06-12T…"}</span>
+<span class="com"># …one `message` event per published sample…</span>
+
 <span class="com"># allow-list rejection — returns 404 + structured error body</span>
 curl -sS -X POST http://localhost:9001/capability/call/dangerous \
   -H <span class="str">'content-type: application/json'</span> -d <span class="str">'{}'</span>
 <span class="com"># =&gt; {"ok":false,"error":"capability not exposed: call /dangerous","code":"not_exposed"}</span></pre>
+
+    <h2>
+      6. Native <code>EventSource</code> — SSE subscribe over HTTP
+      <span class="badge">no SDK</span>
+    </h2>
+    <p style="font-size: 0.9em; color: #555">
+      The same SSE stream the <code>curl</code> example above reads is a
+      first-class browser API: <code>EventSource</code>. No SDK, no WebSocket —
+      just a plain HTTP GET the browser keeps open and auto-reconnects. This
+      works cross-origin because the runtime sends CORS headers
+      (<code>new HttpTransport({ sse: true, cors: true })</code>). For
+      multiplexing many topics on one connection, the WebSocket transport in
+      section 2 is still the better fit.
+    </p>
+    <p style="font-size: 0.9em; color: #555">
+      The topic box defaults to <code>/web_demo_tick</code> (the demo's
+      built-in tick loop). It is also wired to <code>/topic</code> so you can
+      feed the demo from the stock publisher example instead — run
+      <code
+        >node ../../../example/topics/publisher/publisher-example.mjs</code
+      >
+      in another shell, set the box to <code>/topic</code>, and watch your own
+      node's messages stream in.
+    </p>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <input
+            id="sseTopic"
+            type="text"
+            value="/web_demo_tick"
+            spellcheck="false"
+            aria-label="topic to subscribe to"
+          />
+          <button id="sseBtn">open EventSource</button>
+          <button id="sseCloseBtn" disabled>close</button>
+        </div>
+        <div class="log" id="sseLog"></div>
+      </div>
+      <pre
+        class="code"
+      ><span class="com">// No import — EventSource is built into every browser.</span>
+<span class="com">// Swap the topic for '/topic' to pair with publisher-example.mjs.</span>
+<span class="kw">const</span> es = <span class="kw">new</span> EventSource(
+  <span class="str">'http://localhost:9001/capability/subscribe/web_demo_tick'</span>,
+);
+
+es.addEventListener(<span class="str">'ready'</span>, (e) =&gt;
+  console.log(<span class="str">'subscribed:'</span>, JSON.parse(e.data)),
+);
+es.addEventListener(<span class="str">'message'</span>, (e) =&gt; {
+  <span class="kw">const</span> msg = JSON.parse(e.data);
+  console.log(<span class="str">'recv:'</span>, msg.data);
+});
+
+<span class="com">// later — stop receiving:</span>
+es.close();</pre>
+    </div>
 
     <script type="module">
       import { connect } from '/sdk/index.js';
@@ -442,6 +514,62 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
           } catch (e) {
             log('badLog', `rejected: ${e.message} (${e.code})`, 'ok');
           }
+        };
+
+        // Native EventSource — independent of the WS/HTTP transport
+        // toggle above. It always talks to the HTTP transport's SSE
+        // endpoint directly, which is exactly the point: no SDK, no
+        // WebSocket, just a browser primitive over plain HTTP (CORS is
+        // enabled on the runtime so this works cross-origin).
+        const sseBtn = document.getElementById('sseBtn');
+        const sseCloseBtn = document.getElementById('sseCloseBtn');
+        const sseTopic = document.getElementById('sseTopic');
+        let es;
+        const closeEs = () => {
+          if (es) {
+            es.close();
+            es = null;
+          }
+          sseBtn.disabled = false;
+          sseCloseBtn.disabled = true;
+          sseTopic.disabled = false;
+        };
+        sseBtn.onclick = () => {
+          closeEs();
+          // Accept '/topic' or 'topic'; the URL path carries the bare name.
+          const name = (sseTopic.value || '/web_demo_tick')
+            .trim()
+            .replace(/^\//, '');
+          const url = `${ENDPOINTS.http}/capability/subscribe/${encodeURIComponent(
+            name
+          )}`;
+          es = new EventSource(url);
+          sseBtn.disabled = true;
+          sseCloseBtn.disabled = false;
+          sseTopic.disabled = true;
+          log('sseLog', `EventSource → ${url}`, 'ok');
+          es.addEventListener('ready', (e) => {
+            const info = JSON.parse(e.data);
+            log('sseLog', `ready (subId=${info.subId})`, 'ok');
+          });
+          es.addEventListener('message', (e) => {
+            log('sseLog', JSON.parse(e.data).data);
+          });
+          es.addEventListener('error', (e) => {
+            // SSE `error` events carry no payload for transport drops;
+            // our runtime only sends a data-bearing `error` event for a
+            // terminal failure (e.g. capability removed).
+            if (e.data) {
+              const err = JSON.parse(e.data);
+              log('sseLog', `error: ${err.error} (${err.code})`, 'err');
+            } else if (es && es.readyState === EventSource.CONNECTING) {
+              log('sseLog', 'connection lost — auto-reconnecting…', 'err');
+            }
+          });
+        };
+        sseCloseBtn.onclick = () => {
+          closeEs();
+          log('sseLog', 'closed', 'ok');
         };
 
         for (const radio of document.querySelectorAll(

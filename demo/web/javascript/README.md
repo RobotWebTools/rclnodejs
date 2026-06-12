@@ -17,6 +17,7 @@ source /opt/ros/<distro>/setup.bash
 node runtime.mjs
 # rclnodejs/web : ws://localhost:9000/capability
 #               also http://localhost:9001/capability  (call/publish, curl-able)
+#               also http://localhost:9001/capability/subscribe/<name>  (SSE)
 ```
 
 `runtime.mjs` exposes a tiny `/add_two_ints` service + 1 Hz
@@ -65,7 +66,60 @@ curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
 # => {"sum":"42n"}
 ```
 
-Subscribe stays on WebSocket.
+This demo's `runtime.mjs` also enables SSE (`new HttpTransport({ sse: true })`),
+so `subscribe` is reachable over HTTP as a `text/event-stream` — useful for
+clients that can't hold a WebSocket open:
+
+```bash
+curl -N http://localhost:9001/capability/subscribe/web_demo_tick
+# event: ready
+# data: {"capability":"/web_demo_tick","subId":"sse"}
+#
+# event: message
+# data: {"data":"tick 0 @ 2026-06-12T…"}
+# …one `message` event per published sample, until you ^C
+```
+
+Browser apps should still prefer the WebSocket transport for `subscribe`
+(one connection multiplexes every topic). SSE subscribe targets the
+curl / AI-agent / server-side persona.
+
+The page also has a **native `EventSource` panel** (section 6) that
+subscribes to `/web_demo_tick` over the same SSE endpoint — no SDK, no
+WebSocket, just the browser primitive over plain HTTP. Because the page
+(`:8080`) and the HTTP transport (`:9001`) are different origins, the
+demo's `runtime.mjs` enables CORS (`new HttpTransport({ sse: true, cors:
+true })`) so the cross-origin `EventSource` is allowed. In production,
+pass your site's origin instead of `true`.
+
+### Pair it with the stock publisher example
+
+The EventSource panel's topic box defaults to `/web_demo_tick`, but the
+runtime also exposes `/topic` so you can feed the demo from your own
+node instead of the built-in tick loop. In a third shell, run the
+standard publisher example:
+
+```bash
+source /opt/ros/<distro>/setup.bash
+node ../../../example/topics/publisher/publisher-example.mjs
+# Publishing message: Hello ROS 0
+# Publishing message: Hello ROS 1
+# …
+```
+
+Then set the panel's topic box to `/topic` and click **open
+EventSource** — you'll see that node's `Hello ROS N` messages stream in.
+The same works over `curl`:
+
+```bash
+curl -N http://localhost:9001/capability/subscribe/topic
+# event: message
+# data: {"data":"Hello ROS 0"}
+```
+
+This makes [`publisher-example.mjs`](../../../example/topics/publisher/publisher-example.mjs)
+and the web demo a ready-made publisher/subscriber pair for trying the
+web runtime against your own publishers.
 
 ## Without the bundled `runtime.mjs`
 
@@ -86,3 +140,8 @@ npx -p rclnodejs rclnodejs-web web.json
 ros2 run demo_nodes_cpp add_two_ints_server
 # (and a publisher of std_msgs/String on /web_demo_tick from any source)
 ```
+
+> Note: this demo enables the SSE subscribe endpoint programmatically in
+> `runtime.mjs` via `new HttpTransport({ sse: true, cors: true })`. The
+> `rclnodejs-web` CLI can do the same with `--http-sse` and `--http-cors`
+> (or `"http": { "sse": true, "cors": "*" }` in `web.json`).

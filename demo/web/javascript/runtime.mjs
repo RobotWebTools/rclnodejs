@@ -101,6 +101,14 @@ const runtime = createRuntime({
     new HttpTransport({
       port: HTTP_PORT,
       host: '::',
+      // Opt-in Server-Sent Events for `subscribe` over plain HTTP:
+      //   GET /capability/subscribe/<name>   (text/event-stream)
+      // Intended for clients that can't hold a WebSocket open (curl,
+      // AI agents, serverless / edge functions). Browser apps should
+      // still prefer the WebSocket transport, which multiplexes many
+      // topics on one connection. Off by default in HttpTransport.
+      sse: true,
+      cors: true,
     }),
   ],
 });
@@ -110,6 +118,11 @@ runtime.expose({
   subscribe: {
     '/web_demo_tick': 'std_msgs/msg/String',
     '/web_demo_chatter': 'std_msgs/msg/String',
+    // Pairs with the stock publisher example so developers can feed the
+    // demo from their own node instead of the built-in tick loop:
+    //   node ../../../example/topics/publisher/publisher-example.mjs
+    // then subscribe to `/topic` from the browser / curl / EventSource.
+    '/topic': 'std_msgs/msg/String',
   },
 });
 await runtime.start();
@@ -126,6 +139,9 @@ console.log(
 );
 console.log(
   `  HTTP      : http://${displayHost('::')}:${HTTP_PORT}/capability  (call / publish, curl-able)`
+);
+console.log(
+  `  HTTP SSE  : http://${displayHost('::')}:${HTTP_PORT}/capability/subscribe/<name>  (subscribe via text/event-stream)`
 );
 console.log();
 console.log(`Exposed capabilities (${total}):`);
