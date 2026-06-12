@@ -15,8 +15,8 @@
       "/web_demo_chatter": "std_msgs/msg/String"
     },
     "subscribe": {
-      "/web_demo_tick": "std_msgs/msg/String",
-      "/web_demo_chatter": "std_msgs/msg/String"
+      "/web_demo_chatter": "std_msgs/msg/String",
+      "/topic": "std_msgs/msg/String"
     }
   }
 }

@@ -193,7 +193,7 @@
 console.log(reply.sum); <span class="com">// '42n'</span></pre>
     </div>
 
-    <h2>2. Topic subscription — <code>/web_demo_tick</code></h2>
+    <h2>2. Topic subscription — <code>/web_demo_chatter</code></h2>
     <div class="panel">
       <div class="controls">
         <div class="row">
@@ -208,8 +208,9 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
-<span class="com">// The server publishes /web_demo_tick once a second.</span>
-<span class="kw">const</span> sub = <span class="kw">await</span> ros.<span class="kw">subscribe</span>(<span class="str">'/web_demo_tick'</span>, (msg) =&gt; {
+<span class="com">// /web_demo_chatter is the shared demo topic — anything panel 3</span>
+<span class="com">// (or curl) publishes to it lands here, since it's the same topic.</span>
+<span class="kw">const</span> sub = <span class="kw">await</span> ros.<span class="kw">subscribe</span>(<span class="str">'/web_demo_chatter'</span>, (msg) =&gt; {
   console.log(<span class="str">'recv:'</span>, msg.data);
 });
 
@@ -295,12 +296,12 @@ curl -sS -X POST http://localhost:9001/capability/publish/web_demo_chatter \
 
 <span class="com"># subscribe over SSE — streams text/event-stream until you ^C</span>
 <span class="com"># (-N disables curl's buffering so events print as they arrive)</span>
-curl -N http://localhost:9001/capability/subscribe/web_demo_tick
+curl -N http://localhost:9001/capability/subscribe/web_demo_chatter
 <span class="com"># event: ready</span>
-<span class="com"># data: {"capability":"/web_demo_tick","subId":"sse"}</span>
+<span class="com"># data: {"capability":"/web_demo_chatter","subId":"sse"}</span>
 <span class="com">#</span>
 <span class="com"># event: message</span>
-<span class="com"># data: {"data":"tick 0 @ 2026-06-12T…"}</span>
+<span class="com"># data: {"data":"hi from curl"}</span>
 <span class="com"># …one `message` event per published sample…</span>
 
 <span class="com"># allow-list rejection — returns 404 + structured error body</span>
@@ -322,14 +323,11 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
       section 2 is still the better fit.
     </p>
     <p style="font-size: 0.9em; color: #555">
-      The topic box defaults to <code>/web_demo_tick</code> (the demo's
-      built-in tick loop). It is also wired to <code>/topic</code> so you can
-      feed the demo from the stock publisher example instead — run
-      <code
-        >node ../../../example/topics/publisher/publisher-example.mjs</code
-      >
-      in another shell, set the box to <code>/topic</code>, and watch your own
-      node's messages stream in.
+      The topic box defaults to <code>/web_demo_chatter</code> — the same
+      topic panels 2 and 3 use, so a publish from panel 3 streams in here at
+      the same time it reaches the WebSocket subscriber. Point the box at
+      <code>/topic</code> instead to subscribe to an external ROS 2 publisher
+      (see the README's <em>publisher example</em> pairing).
     </p>
     <div class="panel">
       <div class="controls">
@@ -337,7 +335,7 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
           <input
             id="sseTopic"
             type="text"
-            value="/web_demo_tick"
+            value="/web_demo_chatter"
             spellcheck="false"
             aria-label="topic to subscribe to"
           />
@@ -349,9 +347,9 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
       <pre
         class="code"
       ><span class="com">// No import — EventSource is built into every browser.</span>
-<span class="com">// Swap the topic for '/topic' to pair with publisher-example.mjs.</span>
+<span class="com">// '/web_demo_chatter' is the shared demo topic; use '/topic' to pair with publisher-example.mjs.</span>
 <span class="kw">const</span> es = <span class="kw">new</span> EventSource(
-  <span class="str">'http://localhost:9001/capability/subscribe/web_demo_tick'</span>,
+  <span class="str">'http://localhost:9001/capability/subscribe/web_demo_chatter'</span>,
 );
 
 es.addEventListener(<span class="str">'ready'</span>, (e) =&gt;
@@ -472,7 +470,7 @@ es.close();</pre>
         subBtn.onclick = async () => {
           if (!ros) return;
           try {
-            tickSub = await ros.subscribe('/web_demo_tick', (msg) =>
+            tickSub = await ros.subscribe('/web_demo_chatter', (msg) =>
               log('tickLog', msg.data)
             );
             subBtn.disabled = true;
@@ -537,7 +535,7 @@ es.close();</pre>
         sseBtn.onclick = () => {
           closeEs();
           // Accept '/topic' or 'topic'; the URL path carries the bare name.
-          const name = (sseTopic.value || '/web_demo_tick')
+          const name = (sseTopic.value || '/web_demo_chatter')
             .trim()
             .replace(/^\//, '');
           const url = `${ENDPOINTS.http}/capability/subscribe/${encodeURIComponent(

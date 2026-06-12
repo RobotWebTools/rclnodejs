@@ -20,8 +20,9 @@ node runtime.mjs
 #               also http://localhost:9001/capability/subscribe/<name>  (SSE)
 ```
 
-`runtime.mjs` exposes a tiny `/add_two_ints` service + 1 Hz
-`/web_demo_tick` publisher so every panel has live data.
+`runtime.mjs` exposes a tiny `/add_two_ints` service and the shared
+`/web_demo_chatter` talker/listener topic (publish from one panel,
+receive in the others).
 
 **Shell 2 — static-file server (hosts `index.html` + maps `/sdk/*` to
 the in-repo [`web/`](../../../web/) folder so the page can `import`
@@ -46,7 +47,7 @@ Open <http://localhost:8080/> in any modern browser. Runtime in shell
   const reply = await ros.call('/add_two_ints', { a: '2n', b: '40n' });
   console.log(reply.sum); // '42n'
 
-  await ros.subscribe('/web_demo_tick', (msg) => render(msg.data));
+  await ros.subscribe('/web_demo_chatter', (msg) => render(msg.data));
   await ros.publish('/web_demo_chatter', { data: 'hi' });
 </script>
 ```
@@ -71,12 +72,12 @@ so `subscribe` is reachable over HTTP as a `text/event-stream` — useful for
 clients that can't hold a WebSocket open:
 
 ```bash
-curl -N http://localhost:9001/capability/subscribe/web_demo_tick
+curl -N http://localhost:9001/capability/subscribe/web_demo_chatter
 # event: ready
-# data: {"capability":"/web_demo_tick","subId":"sse"}
+# data: {"capability":"/web_demo_chatter","subId":"sse"}
 #
 # event: message
-# data: {"data":"tick 0 @ 2026-06-12T…"}
+# data: {"data":"hi from curl"}
 # …one `message` event per published sample, until you ^C
 ```
 
@@ -85,7 +86,7 @@ Browser apps should still prefer the WebSocket transport for `subscribe`
 curl / AI-agent / server-side persona.
 
 The page also has a **native `EventSource` panel** (section 6) that
-subscribes to `/web_demo_tick` over the same SSE endpoint — no SDK, no
+subscribes to `/web_demo_chatter` over the same SSE endpoint — no SDK, no
 WebSocket, just the browser primitive over plain HTTP. Because the page
 (`:8080`) and the HTTP transport (`:9001`) are different origins, the
 demo's `runtime.mjs` enables CORS (`new HttpTransport({ sse: true, cors:
@@ -94,10 +95,10 @@ pass your site's origin instead of `true`.
 
 ### Pair it with the stock publisher example
 
-The EventSource panel's topic box defaults to `/web_demo_tick`, but the
-runtime also exposes `/topic` so you can feed the demo from your own
-node instead of the built-in tick loop. In a third shell, run the
-standard publisher example:
+The EventSource panel's topic box defaults to `/web_demo_chatter` (the
+shared demo topic), but the runtime also exposes `/topic` so you can
+feed the demo from your own node. In a third shell, run the standard
+publisher example:
 
 ```bash
 source /opt/ros/<distro>/setup.bash
@@ -124,12 +125,11 @@ web runtime against your own publishers.
 ## Without the bundled `runtime.mjs`
 
 `runtime.mjs` bundles the rclnodejs/web runtime and the demo's sample
-ROS 2 nodes (the `/add_two_ints` service + the `/web_demo_tick`
-publisher) into one process so the demo runs out of the box. In a
-real project you already have those ROS 2 nodes running elsewhere,
-so you only need the runtime. **Replace shell 1's `node runtime.mjs`
-with the CLI** — shell 2 (`node static.mjs`) and the browser code are
-unchanged:
+ROS 2 nodes (the `/add_two_ints` service) into one process so the demo
+runs out of the box. In a real project you already have those ROS 2
+nodes running elsewhere, so you only need the runtime. **Replace shell
+1's `node runtime.mjs` with the CLI** — shell 2 (`node static.mjs`) and
+the browser code are unchanged:
 
 ```bash
 # shell 1 (instead of `node runtime.mjs`); the `-p rclnodejs` tells npx
@@ -138,7 +138,7 @@ npx -p rclnodejs rclnodejs-web web.json
 
 # the publisher / service the demo expects:
 ros2 run demo_nodes_cpp add_two_ints_server
-# (and a publisher of std_msgs/String on /web_demo_tick from any source)
+# (and a publisher of std_msgs/String on /web_demo_chatter from any source)
 ```
 
 > Note: this demo enables the SSE subscribe endpoint programmatically in

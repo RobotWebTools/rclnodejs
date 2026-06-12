@@ -38,7 +38,7 @@ function displayHost(host) {
 // Render the registry as a small human-readable table:
 //   call       /add_two_ints       example_interfaces/srv/AddTwoInts
 //   publish    /web_demo_chatter   std_msgs/msg/String
-//   subscribe  /web_demo_tick      std_msgs/msg/String
+//   subscribe  /web_demo_chatter   std_msgs/msg/String
 function formatCapabilities(caps) {
   const rows = [];
   for (const verb of ['call', 'publish', 'subscribe']) {
@@ -68,17 +68,6 @@ node.createService(
     response.send(reply);
   }
 );
-
-// A real ROS 2 publisher producing a tick once a second so the
-// browser's subscribe() has something to receive without the user
-// having to publish first.
-const tickPub = node.createPublisher('std_msgs/msg/String', '/web_demo_tick');
-let counter = 0;
-setInterval(() => {
-  tickPub.publish({
-    data: `tick ${counter++} @ ${new Date().toISOString()}`,
-  });
-}, 1000);
 
 rclnodejs.spin(node);
 
@@ -116,10 +105,12 @@ runtime.expose({
   call: { '/add_two_ints': 'example_interfaces/srv/AddTwoInts' },
   publish: { '/web_demo_chatter': 'std_msgs/msg/String' },
   subscribe: {
-    '/web_demo_tick': 'std_msgs/msg/String',
+    // Shared talker/listener topic: panels 2 (WebSocket), 3 (round-trip),
+    // and 6 (SSE) all use it — so a browser publish is visible across
+    // every subscriber at once.
     '/web_demo_chatter': 'std_msgs/msg/String',
     // Pairs with the stock publisher example so developers can feed the
-    // demo from their own node instead of the built-in tick loop:
+    // demo from their own node:
     //   node ../../../example/topics/publisher/publisher-example.mjs
     // then subscribe to `/topic` from the browser / curl / EventSource.
     '/topic': 'std_msgs/msg/String',
