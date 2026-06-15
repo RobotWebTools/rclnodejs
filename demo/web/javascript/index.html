@@ -200,7 +200,7 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
           <button id="subBtn">subscribe</button>
           <button id="unsubBtn" disabled>unsubscribe</button>
         </div>
-        <div class="log" id="tickLog"></div>
+        <div class="log" id="subLog"></div>
       </div>
       <pre
         class="code"
@@ -405,14 +405,14 @@ es.close();</pre>
       };
 
       let ros;
-      let tickSub;
+      let chatterSub;
 
       async function teardown() {
-        if (tickSub) {
+        if (chatterSub) {
           try {
-            await tickSub.close();
+            await chatterSub.close();
           } catch (_) {}
-          tickSub = null;
+          chatterSub = null;
           document.getElementById('subBtn').disabled = false;
           document.getElementById('unsubBtn').disabled = true;
         }
@@ -470,23 +470,23 @@ es.close();</pre>
         subBtn.onclick = async () => {
           if (!ros) return;
           try {
-            tickSub = await ros.subscribe('/web_demo_chatter', (msg) =>
-              log('tickLog', msg.data)
+            chatterSub = await ros.subscribe('/web_demo_chatter', (msg) =>
+              log('subLog', msg.data)
             );
             subBtn.disabled = true;
             unsubBtn.disabled = false;
-            log('tickLog', `subscribed (subId=${tickSub.subId})`, 'ok');
+            log('subLog', `subscribed (subId=${chatterSub.subId})`, 'ok');
           } catch (e) {
-            log('tickLog', `error: ${e.message} (${e.code})`, 'err');
+            log('subLog', `error: ${e.message} (${e.code})`, 'err');
           }
         };
         unsubBtn.onclick = async () => {
-          if (!tickSub) return;
-          await tickSub.close();
-          tickSub = null;
+          if (!chatterSub) return;
+          await chatterSub.close();
+          chatterSub = null;
           unsubBtn.disabled = true;
           subBtn.disabled = false;
-          log('tickLog', 'unsubscribed', 'ok');
+          log('subLog', 'unsubscribed', 'ok');
         };
 
         document.getElementById('pubBtn').onclick = async () => {
