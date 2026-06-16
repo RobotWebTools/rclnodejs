@@ -100,15 +100,22 @@ class PointerBuffer : public ObjectWrap<PointerBuffer> {
 };
 
 Object PointerBuffer::Init(Napi::Env env, Object exports) {
-  Function func =
-      DefineClass(env, "PointerBuffer",
-                  {InstanceMethod("isNull", &PointerBuffer::IsNull),
-                   InstanceMethod("get", &PointerBuffer::Get),
-                   InstanceMethod("address", &PointerBuffer::Address),
-                   InstanceMethod("toString", &PointerBuffer::ToString),
-                   InstanceMethod("copy", &PointerBuffer::Copy),
-                   InstanceMethod("slice", &PointerBuffer::Slice),
-                   InstanceAccessor<&PointerBuffer::Length>("length")});
+  Function func = DefineClass(
+      env, "PointerBuffer",
+      {InstanceMethod("isNull", &PointerBuffer::IsNull),
+       InstanceMethod("get", &PointerBuffer::Get),
+       InstanceMethod("address", &PointerBuffer::Address),
+       InstanceMethod("toString", &PointerBuffer::ToString),
+       InstanceMethod("copy", &PointerBuffer::Copy),
+       InstanceMethod("slice", &PointerBuffer::Slice),
+       // Use the runtime InstanceAccessor(name, getter, setter)
+       // overload rather than the templated
+       // InstanceAccessor<&Fn>() form: the latter's constexpr
+       // member-pointer template argument triggers an MSVC
+       // Internal Compiler Error (C1001) on the VS 2026 (v18)
+       // toolset used by the windows-2025 CI runner. This form
+       // is equivalent and compiles cleanly on every platform.
+       InstanceAccessor("length", &PointerBuffer::Length, nullptr)});
 
   exports.Set("PointerBuffer", func);
   InstanceData* data = InstanceData::Get(env);
