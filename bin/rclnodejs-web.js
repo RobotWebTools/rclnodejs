@@ -21,6 +21,7 @@ import {
   parseArgv,
   loadConfigFile,
   mergeConfig,
+  validateConfig,
   HELP,
 } from '../lib/runtime/cli-config.js';
 
@@ -51,6 +52,11 @@ const argv = process.argv.slice(2);
   let cfg;
   try {
     cfg = mergeConfig(loadConfigFile(parsed.configPath), parsed.partial);
+    // Re-validate the merged result: loadConfigFile only validates the
+    // JSON file, so values supplied purely via flags (e.g.
+    // `--http-sse-keep-alive foo` → NaN, or a non-numeric `--http-port`)
+    // would otherwise reach the transport unchecked.
+    validateConfig(cfg, 'options');
   } catch (e) {
     fail(e);
   }

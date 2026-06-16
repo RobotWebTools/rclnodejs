@@ -358,6 +358,20 @@ describe('rclnodejs-web CLI', function () {
       assert.strictEqual(merged.http.cors, '*');
       assert.strictEqual(merged.http.sseKeepAliveMs, 5000);
     });
+
+    it('validateConfig rejects a flag-only NaN keep-alive (bin flow)', function () {
+      // Mirrors bin/rclnodejs-web.js: parse → merge → validate. A
+      // non-numeric `--http-sse-keep-alive` becomes NaN in the parsed
+      // partial; the post-merge validateConfig is what rejects it, since
+      // loadConfigFile only validates JSON config files.
+      const { partial } = parseArgv(['--http-sse-keep-alive', 'foo']);
+      assert.ok(Number.isNaN(partial.http.sseKeepAliveMs));
+      const merged = mergeConfig({}, partial);
+      assert.throws(
+        () => validateConfig(merged, 'options'),
+        (e) => e instanceof CliError && /http\.sseKeepAliveMs/.test(e.message)
+      );
+    });
   });
 
   describe('end-to-end CLI launch', function () {

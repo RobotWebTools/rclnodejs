@@ -433,6 +433,284 @@ describe('rclnodejs/web — HTTP transport (call + publish)', function () {
   });
 });
 
+// ===================================================================
+// SSE subscribe + CORS — opt-in HTTP behaviour (sse: true, cors: …).
+// ===================================================================
+describe('rclnodejs/web — HTTP transport (SSE subscribe + CORS)', function () {
+  this.timeout(60 * 1000);
+
+  let node;
+  let runtime;
+  let base; // "http://127.0.0.1:<port>"
+  let serviceImpl;
+
+  before(async function () {
+    await rclnodejs.init();
+    node = rclnodejs.createNode('http_sse_test_node');
+    rclnodejs.spin(node);
+
+    serviceImpl = node.createService(
+      'example_interfaces/srv/AddTwoInts',
+      '/sse_add',
+      (request, response) => {
+        const reply = response.template;
+        reply.sum = request.a + request.b;
+        response.send(reply);
+      }
+    );
+
+    runtime = createRuntime({
+      node,
+      transport: new HttpTransport({
+        port: 0,
+        host: '127.0.0.1',
+        sse: true,
+        cors: true,
+      }),
+    });
+    runtime.expose({
+      call: { '/sse_add': 'example_interfaces/srv/AddTwoInts' },
+      publish: { '/sse_chatter': 'std_msgs/msg/String' },
+      subscribe: { '/sse_chatter': 'std_msgs/msg/String' },
+    });
+    await runtime.start();
+    base = `http://127.0.0.1:${runtime.transports[0].port}`;
+  });
+
+  after(async function () {
+    if (runtime) await runtime.stop();
+    if (node && serviceImpl) {
+      try {
+        node.destroyService(serviceImpl);
+      } catch (_) {}
+    }
+    rclnodejs.shutdown();
+  });
+
+  describe('SSE subscribe', function () {
+    it('GET subscribe streams a ready event then message events', async function () {
+      const ac = new AbortController();
+      const res = await fetch(base + '/capability/subscribe/sse_chatter', {
+        headers: { accept: 'text/event-stream' },
+        signal: ac.signal,
+      });
+      assert.strictEqual(res.status, 200);
+      assert.match(res.headers.get('content-type') || '', /text\/event-stream/);
+      const sse = sseReader(res);
+      try {
+        // The runtime emits `ready` once the dispatcher acknowledges the
+        // subscribe (headers are deferred until then).
+        const ready = await sse.next((e) => e.event === 'ready');
+        assert.strictEqual(JSON.parse(ready.data).capability, '/sse_chatter');
+
+        // Publish over HTTP until a delivery streams back. (Subscriptions
+        // only see samples published after they're established, so we
+        // retry on an interval to avoid a startup race.)
+        const pump = setInterval(() => {
+          fetch(base + '/capability/publish/sse_chatter', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ data: 'sse-hello' }),
+          }).catch(() => {});
+        }, 100);
+        try {
+          const msg = await sse.next((e) => e.event === 'message');
+          assert.strictEqual(JSON.parse(msg.data).data, 'sse-hello');
+        } finally {
+          clearInterval(pump);
+        }
+      } finally {
+        await sse.cancel();
+        ac.abort();
+      }
+    });
+
+    it('rejects a non-GET subscribe with 405 + allow: GET', async function () {
+      const res = await fetch(base + '/capability/subscribe/sse_chatter', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{}',
+      });
+      assert.strictEqual(res.status, 405);
+      assert.strictEqual(res.headers.get('allow'), 'GET');
+      const body = await res.json();
+      assert.strictEqual(body.code, 'method_not_allowed');
+    });
+
+    it('rejects an unexposed SSE subscribe as a JSON error (not a stream)', async function () {
+      // The 200 text/event-stream headers are deferred until the
+      // dispatcher acks, so a rejected subscribe surfaces as a normal
+      // JSON error with the mapped status — never a half-open stream.
+      const res = await fetch(base + '/capability/subscribe/nope', {
+        headers: { accept: 'text/event-stream' },
+      });
+      assert.strictEqual(res.status, 404);
+      assert.match(res.headers.get('content-type') || '', /application\/json/);
+      const body = await res.json();
+      assert.strictEqual(body.code, 'not_exposed');
+    });
+  });
+
+  describe('CORS', function () {
+    it('answers OPTIONS preflight on capability routes with 204 + headers', async function () {
+      const res = await fetch(base + '/capability/call/sse_add', {
+        method: 'OPTIONS',
+        headers: {
+          origin: 'http://localhost:8080',
+          'access-control-request-method': 'POST',
+          'access-control-request-headers': 'content-type, authorization',
+        },
+      });
+      assert.strictEqual(res.status, 204);
+      assert.strictEqual(res.headers.get('access-control-allow-origin'), '*');
+      assert.match(
+        res.headers.get('access-control-allow-methods') || '',
+        /POST/
+      );
+      // Reflects the browser's requested headers so Authorization / custom
+      // headers pass preflight rather than being limited to content-type.
+      assert.strictEqual(
+        res.headers.get('access-control-allow-headers'),
+        'content-type, authorization'
+      );
+    });
+
+    it('falls back to content-type when no request-headers hint is sent', async function () {
+      const res = await fetch(base + '/capability/call/sse_add', {
+        method: 'OPTIONS',
+        headers: {
+          origin: 'http://localhost:8080',
+          'access-control-request-method': 'POST',
+        },
+      });
+      assert.strictEqual(res.status, 204);
+      assert.strictEqual(
+        res.headers.get('access-control-allow-headers'),
+        'content-type'
+      );
+    });
+
+    it('adds CORS headers to actual (non-preflight) responses', async function () {
+      const res = await fetch(base + '/capability/call/sse_add', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          origin: 'http://localhost:8080',
+        },
+        body: JSON.stringify({ a: '1n', b: '2n' }),
+      });
+      assert.strictEqual(res.status, 200);
+      assert.strictEqual(res.headers.get('access-control-allow-origin'), '*');
+      assert.strictEqual((await res.json()).sum, '3n');
+    });
+
+    it('does not answer OPTIONS preflight for non-capability paths', async function () {
+      const res = await fetch(base + '/not-a-capability', {
+        method: 'OPTIONS',
+        headers: { origin: 'http://localhost:8080' },
+      });
+      assert.strictEqual(res.status, 404);
+    });
+  });
+
+  describe('CORS allow-list', function () {
+    let listRuntime;
+    let listBase;
+
+    before(async function () {
+      listRuntime = createRuntime({
+        node,
+        transport: new HttpTransport({
+          port: 0,
+          host: '127.0.0.1',
+          cors: ['http://allowed.example'],
+        }),
+      });
+      listRuntime.expose({
+        call: { '/sse_add': 'example_interfaces/srv/AddTwoInts' },
+      });
+      await listRuntime.start();
+      listBase = `http://127.0.0.1:${listRuntime.transports[0].port}`;
+    });
+
+    after(async function () {
+      if (listRuntime) await listRuntime.stop();
+    });
+
+    it('echoes an allowed origin and sets Vary: Origin', async function () {
+      const res = await fetch(listBase + '/capability/call/sse_add', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          origin: 'http://allowed.example',
+        },
+        body: JSON.stringify({ a: '2n', b: '3n' }),
+      });
+      assert.strictEqual(res.status, 200);
+      assert.strictEqual(
+        res.headers.get('access-control-allow-origin'),
+        'http://allowed.example'
+      );
+      assert.match(res.headers.get('vary') || '', /Origin/i);
+    });
+
+    it('omits allow-origin for an origin not on the list', async function () {
+      const res = await fetch(listBase + '/capability/call/sse_add', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          origin: 'http://evil.example',
+        },
+        body: JSON.stringify({ a: '2n', b: '3n' }),
+      });
+      assert.strictEqual(res.status, 200);
+      assert.strictEqual(res.headers.get('access-control-allow-origin'), null);
+    });
+  });
+});
+
+// Minimal Server-Sent Events reader over a fetch() response body. Parses
+// `event:`/`data:` lines into `{event, data}` records and exposes a
+// `next(predicate)` that resolves with the first matching record. Keep-
+// alive comment lines (`:`-prefixed) are ignored.
+function sseReader(res) {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  const state = { buffer: '', event: 'message', data: '' };
+
+  async function next(predicate, timeoutMs = 8000) {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      let nl;
+      while ((nl = state.buffer.indexOf('\n')) >= 0) {
+        const line = state.buffer.slice(0, nl).replace(/\r$/, '');
+        state.buffer = state.buffer.slice(nl + 1);
+        if (line === '') {
+          const ev = { event: state.event, data: state.data };
+          state.event = 'message';
+          state.data = '';
+          if (ev.data !== '' && predicate(ev)) return ev;
+          continue;
+        }
+        if (line.startsWith(':')) continue; // keep-alive comment
+        const ci = line.indexOf(':');
+        const field = ci === -1 ? line : line.slice(0, ci);
+        const val = ci === -1 ? '' : line.slice(ci + 1).replace(/^ /, '');
+        if (field === 'event') state.event = val;
+        else if (field === 'data') state.data += val;
+      }
+      if (Date.now() > deadline) {
+        throw new Error('sseReader: timed out waiting for event');
+      }
+      const { value, done } = await reader.read();
+      if (done) throw new Error('sseReader: stream ended early');
+      state.buffer += decoder.decode(value, { stream: true });
+    }
+  }
+
+  return { next, cancel: () => reader.cancel().catch(() => {}) };
+}
+
 function waitFor(predicate, timeoutMs) {
   const started = Date.now();
   return new Promise((resolve, reject) => {
