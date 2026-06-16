@@ -121,7 +121,8 @@ how much glue you want to write.
   from your ROS 2 message types; and every capability
   is also a plain HTTP endpoint —
   `curl -X POST http://<host>/capability/call/<name>` — so shell
-  scripts, Postman, and AI-agent tool-use just work.
+  scripts, Postman, AI-agent tool-use, and even a bare browser
+  `fetch()` (CORS-enabled) just work.
   _New in `2.0.0-beta.0`._
 
   ```ts

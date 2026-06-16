@@ -84,6 +84,31 @@ stream — no SDK, no WebSocket. It works cross-origin (`:8080` → `:9001`)
 because the demo also enables CORS (`new HttpTransport({ sse: true, cors:
 true })`); in production, pass your site's origin instead of `true`.
 
+The same is true for `call` / `publish` from the browser itself: the
+**native `fetch()` panel** (section 7) hits these endpoints directly —
+the `curl` commands above translate one-to-one to `fetch()` (same method,
+URL, headers and JSON body), again cross-origin thanks to CORS:
+
+```js
+// service call → 200 + JSON reply
+const res = await fetch(
+  'http://localhost:9001/capability/call/add_two_ints',
+  {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ a: '7n', b: '35n' }),
+  },
+);
+console.log((await res.json()).sum); // '42n'
+
+// topic publish → 204 No Content
+await fetch('http://localhost:9001/capability/publish/web_demo_chatter', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ data: 'hi from fetch()' }),
+});
+```
+
 > For browser apps, prefer the WebSocket transport for `subscribe` — one
 > connection multiplexes every topic. SSE targets the curl / AI-agent /
 > server-side persona.

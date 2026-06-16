@@ -364,6 +364,58 @@ es.addEventListener(<span class="str">'message'</span>, (e) =&gt; {
 es.close();</pre>
     </div>
 
+    <h2>
+      7. Native <code>fetch()</code> — call &amp; publish over HTTP
+      <span class="badge">no SDK</span>
+    </h2>
+    <p style="font-size: 0.9em; color: #555">
+      The <code>curl</code> commands in section 5 translate one-to-one to the
+      browser's <code>fetch()</code> API — same method, URL, headers and JSON
+      body. Because the runtime sends CORS headers
+      (<code>new HttpTransport({ cors: true })</code>), these cross-origin
+      requests succeed straight from the page (served on <code>:8080</code>,
+      runtime on <code>:9001</code>). <code>call</code> returns
+      <code>200</code> + a JSON reply; <code>publish</code> returns
+      <code>204 No Content</code>. The publish lands on the same
+      <code>/web_demo_chatter</code> topic as panels 2 and 3, so it also shows
+      up in their logs.
+    </p>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <button id="fetchCallBtn">fetch call <code>/add_two_ints</code></button>
+          <button id="fetchPubBtn">
+            fetch publish <code>/web_demo_chatter</code>
+          </button>
+        </div>
+        <div class="log" id="fetchLog"></div>
+      </div>
+      <pre
+        class="code"
+      ><span class="com">// No import — fetch() is built into every browser.</span>
+<span class="com">// Service call → 200 + JSON reply:</span>
+<span class="kw">const</span> res = <span class="kw">await</span> fetch(
+  <span class="str">'http://localhost:9001/capability/call/add_two_ints'</span>,
+  {
+    method: <span class="str">'POST'</span>,
+    headers: { <span class="str">'content-type'</span>: <span class="str">'application/json'</span> },
+    body: JSON.stringify({ a: <span class="str">'7n'</span>, b: <span class="str">'35n'</span> }),
+  },
+);
+<span class="kw">const</span> reply = <span class="kw">await</span> res.json();
+console.log(reply.sum); <span class="com">// '42n'</span>
+
+<span class="com">// Topic publish → 204 No Content (no body):</span>
+<span class="kw">await</span> fetch(
+  <span class="str">'http://localhost:9001/capability/publish/web_demo_chatter'</span>,
+  {
+    method: <span class="str">'POST'</span>,
+    headers: { <span class="str">'content-type'</span>: <span class="str">'application/json'</span> },
+    body: JSON.stringify({ data: <span class="str">'hello from fetch()'</span> }),
+  },
+);</pre>
+    </div>
+
     <script type="module">
       import { connect } from '/sdk/index.js';
 
@@ -568,6 +620,47 @@ es.close();</pre>
         sseCloseBtn.onclick = () => {
           closeEs();
           log('sseLog', 'closed', 'ok');
+        };
+
+        // Native fetch() — call/publish straight to the HTTP transport,
+        // no SDK and no WebSocket. CORS on the runtime lets these
+        // cross-origin requests (page on :8080 → runtime on :9001)
+        // succeed. Independent of the WS/HTTP transport toggle above.
+        document.getElementById('fetchCallBtn').onclick = async () => {
+          try {
+            const res = await fetch(
+              `${ENDPOINTS.http}/capability/call/add_two_ints`,
+              {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ a: '7n', b: '35n' }),
+              }
+            );
+            const reply = await res.json();
+            log('fetchLog', `7 + 35 = ${reply.sum} (HTTP ${res.status})`, 'ok');
+          } catch (e) {
+            log('fetchLog', `call error: ${e.message}`, 'err');
+          }
+        };
+        document.getElementById('fetchPubBtn').onclick = async () => {
+          try {
+            const res = await fetch(
+              `${ENDPOINTS.http}/capability/publish/web_demo_chatter`,
+              {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ data: 'hello from fetch()' }),
+              }
+            );
+            // publish replies 204 No Content on success.
+            log(
+              'fetchLog',
+              `published 'hello from fetch()' (HTTP ${res.status})`,
+              res.ok ? 'ok' : 'err'
+            );
+          } catch (e) {
+            log('fetchLog', `publish error: ${e.message}`, 'err');
+          }
         };
 
         for (const radio of document.querySelectorAll(
