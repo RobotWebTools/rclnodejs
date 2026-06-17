@@ -124,7 +124,6 @@ how much glue you want to write.
   streaming as Server-Sent Events (`GET .../capability/subscribe/<name>`) —
   so shell scripts, Postman, AI-agent tool-use, and even a bare browser
   `fetch()` / `EventSource` (CORS-enabled) just work.
-  _New in `2.0.0-beta.0`._
 
   ```ts
   import { connect } from 'rclnodejs/web';
@@ -137,7 +136,6 @@ how much glue you want to write.
 - **[`rosocket`](./rosocket/README.md)** — thin WebSocket gateway,
   zero browser dependencies (just built-in `WebSocket` + `JSON`).
   Best for quick prototypes and `roslibjs`-style apps.
-  _New in `2.0.0-beta.0`._
 
   ```bash
   npx rosocket --port 9000 --topic /chatter:std_msgs/msg/String
