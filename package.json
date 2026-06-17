@@ -112,7 +112,7 @@
     "jsdoc": "^4.0.4",
     "lint-staged": "^17.0.0",
     "mocha": "^11.0.2",
-    "node-gyp": "^12.2.0",
+    "node-gyp": "^13.0.0",
     "prebuildify": "^6.0.1",
     "rimraf": "^6.0.1",
     "sinon": "^22.0.0",
