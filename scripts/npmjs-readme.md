@@ -5,13 +5,13 @@
 Supported ROS 2 distributions include Humble, Jazzy, Kilted, Lyrical, and Rolling.
 
 ```javascript
-const rclnodejs = require('rclnodejs');
-rclnodejs.init().then(() => {
-  const node = new rclnodejs.Node('publisher_example_node');
-  const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
-  publisher.publish(`Hello ROS 2 from rclnodejs`);
-  node.spin();
-});
+import rclnodejs from 'rclnodejs';
+
+await rclnodejs.init();
+const node = new rclnodejs.Node('publisher_example_node');
+const publisher = node.createPublisher('std_msgs/msg/String', 'topic');
+publisher.publish(`Hello ROS 2 from rclnodejs`);
+node.spin();
 ```
 
 This example assumes your ROS 2 environment is already sourced.
@@ -87,9 +87,9 @@ TypeScript declaration files are included in the package. In most projects, conf
 ```jsonc
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "es2022",
   },
 }
 ```
