@@ -120,9 +120,10 @@ how much glue you want to write.
   the browser SDK types `call` / `publish` / `subscribe` end-to-end
   from your ROS 2 message types; and every capability
   is also a plain HTTP endpoint —
-  `curl -X POST http://<host>/capability/call/<name>` — so shell
-  scripts, Postman, AI-agent tool-use, and even a bare browser
-  `fetch()` (CORS-enabled) just work.
+  `curl -X POST http://<host>/capability/call/<name>`, with `subscribe`
+  streaming as Server-Sent Events (`GET .../capability/subscribe/<name>`) —
+  so shell scripts, Postman, AI-agent tool-use, and even a bare browser
+  `fetch()` / `EventSource` (CORS-enabled) just work.
   _New in `2.0.0-beta.0`._
 
   ```ts
