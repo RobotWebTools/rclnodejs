@@ -1,414 +1,97 @@
-# Turtle TF2 Electron Demo
+# Turtle TF2 Demo (Electron + rclnodejs)
 
-This demo replicates the functionality of the ROS2 `turtle_tf2_py` package using rclnodejs and provides a modern web-based 3D visualization interface. It demonstrates coordinate frame transformations, turtle simulation, and real-time TF2 data visualization.
-
-## Overview
-
-The turtle_tf2 demo showcases:
-
-- **Transform Broadcasting**: Multiple TF2 broadcasters publishing coordinate frame relationships
-- **Transform Listening**: Real-time monitoring and visualization of coordinate transformations
-- **Turtle Simulation**: Integration with turtlesim for turtle pose tracking and control
-- **Turtle Following**: Intelligent turtle2 behavior that automatically follows turtle1 using TF2 transforms
-- **3D Visualization**: WebGL-based rendering using Three.js for immersive coordinate frame visualization
-- **Interactive Controls**: Web interface for spawning turtles, controlling motion, and managing transforms
+A rclnodejs port of ROS 2's `turtle_tf2_py`, with a Three.js 3D view of
+coordinate-frame transforms. It broadcasts and listens to TF2 transforms, drives
+turtlesim, and makes turtle2 follow turtle1.
 
 ![demo screenshot](./turtle-tf2-demo.gif)
 
 ## Features
 
-### TF2 Broadcasters
-
-- **Static Frame Broadcaster**: Publishes fixed coordinate frame relationships
-- **Dynamic Frame Broadcaster**: Creates time-varying transforms with circular motion patterns
-- **Fixed Frame Broadcaster**: Maintains constant offset transforms
-- **Turtle Transform Broadcaster**: Converts turtle poses to TF2 transforms
-
-### Turtle Following System
-
-- **Real-time Following**: turtle2 automatically follows turtle1 using distance and angle calculations
-- **Smart Movement**: Proportional velocity control based on distance to target
-- **Collision Avoidance**: turtle2 stops when within optimal following distance (0.5 units)
-- **Transform Integration**: Following logic uses turtle pose data from TF2 coordinate frames
-
-### Visualization
-
-- **3D Scene**: Interactive Three.js environment with orbit controls
-- **Coordinate Frames**: Visual representation of X, Y, Z axes with color coding
-- **Turtle Models**: 3D turtle representations with real-time pose updates
-- **Transform Monitoring**: Live display of active transforms and their parameters
-- **Frame Toggles**: Show/hide specific coordinate frames
-
-### Control Interface
-
-- **Turtle Spawning**: Create turtle2 instance (turtle1 spawns automatically with turtlesim)
-- **Motion Control**: WASD keyboard controls for turtle1 movement
-- **Demo Management**: Initialize and reset demo state
-- **Transform Filtering**: Toggle visibility of different frame types
+- TF2 broadcasters: static, dynamic (circular motion), fixed-offset, and
+  turtle-pose
+- TF2 listener that drives turtle2 to follow turtle1
+- 3D Three.js scene with orbit controls, colored frame axes, and a live
+  transform list
+- Controls to spawn turtle2, drive turtle1 (WASD), and toggle frame visibility
 
 ## Prerequisites
 
-### System Requirements
+- ROS 2 (Humble, Jazzy, Kilted, Lyrical, or Rolling), sourced
+- Node.js >= 20.20.2
+- turtlesim: `sudo apt install ros-$ROS_DISTRO-turtlesim`
+- Linux (prebuilt rclnodejs binaries are provided for Ubuntu)
 
-- **ROS2**: Humble, Jazzy, Kilted, Lyrical, or Rolling distribution
-- **Node.js**: Version 20.20.2 or higher
-- **turtlesim**: ROS2 turtle simulation package
-- **Electron**: For desktop application framework
-
-### ROS2 Packages
+## Install & Run
 
 ```bash
-# Install required ROS2 packages
-sudo apt install ros-$ROS_DISTRO-turtlesim
-sudo apt install ros-$ROS_DISTRO-tf2-tools
-sudo apt install ros-$ROS_DISTRO-tf2-ros
-```
-
-### Node.js Dependencies
-
-The demo uses the following key dependencies:
-
-- `rclnodejs`: ROS2 bindings for Node.js
-- `electron`: Cross-platform desktop app framework
-- `three`: 3D graphics library for WebGL rendering
-
-## Installation
-
-1. **Navigate to the demo directory**:
-
-   ```bash
-   cd demo/electron/turtle_tf2
-   ```
-
-2. **Install dependencies**:
-
-   ```bash
-   npm install
-   ```
-
-3. **Native modules — no manual rebuild needed**:
-
-   rclnodejs ships prebuilt binaries for Electron and selects the matching one at
-   runtime from `ROS_DISTRO` + Linux codename + architecture, so make sure ROS 2 is
-   sourced (next step) before launching. Do not run `electron-rebuild` against
-   rclnodejs — it recompiles from source and bypasses the prebuilt binary; the Forge
-   `rebuildConfig` in `package.json` already excludes `rclnodejs`.
-
-4. **Source ROS2 environment**:
-
-   ```bash
-   source /opt/ros/$ROS_DISTRO/setup.bash
-   ```
-
-   **Important**: The ROS2 environment must be sourced in the same terminal session where you run `npm start`.
-
-## Running the Demo
-
-**⚠️ Important Setup Note**: Before running the demo, make sure to:
-
-1. Source the ROS2 environment in your terminal: `source /opt/ros/$ROS_DISTRO/setup.bash`
-2. Keep this terminal session active for the entire demo run
-
-### Method 1: Complete Demo
-
-Start the full demo with all components (ensure you have run `npm install` first):
-
-```bash
-# Source ROS2 first
-source /opt/ros/$ROS_DISTRO/setup.bash
-
-# Then start the demo
+cd demo/electron/turtle_tf2
+npm install
+source /opt/ros/$ROS_DISTRO/setup.bash   # required, in the same terminal as npm start
+ros2 run turtlesim turtlesim_node        # in another sourced terminal
 npm start
 ```
 
-### Method 2: Step-by-Step Launch
+rclnodejs ships prebuilt Electron binaries and selects the matching one at
+runtime from `ROS_DISTRO` + Linux codename + architecture, so no compilation is
+needed. Do not run `electron-rebuild` against rclnodejs — it rebuilds from
+source and bypasses the prebuilt binary (the Forge `rebuildConfig` in
+`package.json` already excludes `rclnodejs`).
 
-1. **Source ROS2 environment**:
+In the app: click "Start Demo" to launch the broadcasters, "Spawn Turtle2" to
+add the follower, then drive turtle1 with WASD and watch turtle2 follow.
 
-   ```bash
-   source /opt/ros/$ROS_DISTRO/setup.bash
-   ```
-
-2. **Start turtlesim (in separate terminal, also sourced)**:
-
-   ```bash
-   source /opt/ros/$ROS_DISTRO/setup.bash
-   ros2 run turtlesim turtlesim_node
-   ```
-
-3. **Launch the Electron application**:
-
-   ```bash
-   npm start
-   ```
-
-4. **Use the web interface to**:
-   - Click "Start Demo" to initialize all TF2 broadcasters
-   - Click "Spawn Turtle2" to create the second turtle (turtle1 spawns automatically)
-   - Use WASD keys to control turtle1 movement
-   - Watch turtle2 automatically follow turtle1
-   - Use frame toggle buttons to show/hide specific transforms
-
-**⚠️ Important**: The dynamic frame (`carrot1_dynamic`) orbits around the static frame (`carrot1_static`) in a circular pattern with a 2-unit radius, regardless of turtle positions.
-
-## 📦 Packaging for Distribution
-
-You can package the application into a standalone folder using **Electron Forge**.
-
-### 1. Build the Package
-
-Run the following command to create a distributable executable:
-
-```bash
-npm run package
-```
-
-The output will be located in the `out/` directory.
-
-### 2. Create Installers (Optional)
-
-To create a `.zip` file or other platform-specific installers (deb/rpm), run:
-
-```bash
-npm run make
-```
-
-**Note**: Creating DEB/RPM installers requires system tools like `dpkg` and `fakeroot`. For ZIP files, you need `zip`.
-
-### 3. Running the Standalone Application
-
-Even as a standalone application, **ROS 2 must be installed and sourced on the target machine** because `rclnodejs` links dynamically to the ROS 2 shared libraries.
-
-```bash
-# Source ROS2 environment
-source /opt/ros/$ROS_DISTRO/setup.bash
-
-# Run the packaged executable
-./out/rclnodejs-turtle-tf2-demo-linux-x64/rclnodejs-turtle-tf2-demo
-```
-
-## Demo Components
-
-### Main Process (main.js)
-
-- **TF2 Static Broadcaster**: Publishes `world → carrot1_static` transform
-- **TF2 Dynamic Broadcaster**: Publishes time-varying `carrot1_static → carrot1_dynamic` transform
-- **Fixed Frame Broadcaster**: Publishes constant offset `turtle1 → carrot1_fixed` transform
-- **Turtle TF2 Broadcaster**: Converts turtle poses to `world → turtle1/turtle2` transforms
-- **Turtle TF2 Listener**: Monitors turtle poses and controls turtle2 following behavior using real-time transform data
-
-### Renderer Process (renderer.js)
-
-- **3D Scene Management**: Three.js scene setup with lighting and camera controls
-- **Coordinate Frame Visualization**: Colored axes representation (X=red, Y=green, Z=blue)
-- **Turtle Rendering**: 3D turtle models with real-time pose updates
-- **Following Logic**: Calculates distance, angle, and velocity commands for turtle2 following behavior
-- **Transform Monitoring**: Live display of transform data and frame relationships
-- **User Interaction**: Control buttons, keyboard handling, and visual feedback systems
-
-### HTML Interface (index.html)
-
-- **Control Panel**: Buttons for turtle spawning and demo management
-- **Status Display**: Real-time connection and system status
-- **Transform List**: Active transforms with position and rotation data
-- **3D Viewport**: WebGL canvas for Three.js rendering
-
-## Understanding TF2 Concepts
-
-### Coordinate Frames
-
-- **world**: Global reference frame (origin)
-- **turtle1/turtle2**: Turtle body frames following turtlesim poses
-- **carrot1_static**: Static frame with fixed relationship to world
-- **carrot1_dynamic**: Dynamic frame with circular motion around carrot1_static (2-unit radius)
-- **carrot1_fixed**: Fixed offset frame relative to turtle1
-
-### Transform Chain
-
-The demo creates the following transform chain:
+## Coordinate Frames
 
 ```
-world → carrot1_static → carrot1_dynamic
+world → carrot1_static → carrot1_dynamic   (dynamic orbits static, 2-unit radius)
 world → turtle1 → carrot1_fixed
 world → turtle2
 ```
 
-### Real-time Visualization
-
-- Coordinate frames are rendered as colored axes (X=red, Y=green, Z=blue)
-- Transforms update in real-time as turtles move and frames change
-- The transform list shows current position and rotation values
-- Interactive 3D camera allows inspection from different angles
+Axes are colored X=red, Y=green, Z=blue, and the transform list shows live
+positions and rotations.
 
 ## Controls
 
-### Keyboard Controls (NEW!)
+- **Turtle1**: W/S forward/back, A/D turn (click the 3D view first for keyboard
+  focus)
+- **Camera**: mouse drag to orbit, wheel to zoom, right-drag to pan
+- **Frames**: toggle static (red), dynamic (orange), and fixed (purple) markers
 
-**Turtle1 Movement**:
+turtle2 follows turtle1 proportionally (max ~2.0 units/s), correcting heading
+and stopping within 0.5 units.
 
-- **W**: Move forward
-- **S**: Move backward
-- **A**: Turn left
-- **D**: Turn right
+## Packaging
 
-💡 **Tip**: Click on the 3D visualization area first to ensure keyboard focus, then use WASD keys to drive turtle1 around the turtlesim environment. turtle2 will automatically follow turtle1!
+```bash
+npm run package   # standalone app in out/
+npm run make      # zip / deb / rpm installers (needs zip, dpkg, fakeroot)
+```
 
-**Camera Controls**:
+The target machine must still have ROS 2 installed and sourced — rclnodejs links
+dynamically to ROS 2 shared libraries:
 
-- **Arrow Keys**: Move camera view
-- **Mouse Drag**: Rotate camera around scene
-- **Mouse Wheel**: Zoom in/out
-- **Right Click + Drag**: Pan camera view
-
-**Note**: Arrow keys are reserved for 3D camera navigation. Use WASD keys exclusively for turtle control to avoid conflicts.
-
-### Turtle Management
-
-- **Spawn Turtle2**: Creates turtle2 at position (4.0, 2.0) - turtle1 is automatically spawned by turtlesim
-- **Stop All**: Halts all turtle motion commands
-
-### Turtle Following Behavior
-
-Once turtle2 is spawned, it will automatically follow turtle1 with the following intelligent behaviors:
-
-- **Distance-based Speed**: turtle2 moves faster when far from turtle1, slower when close
-- **Angle Correction**: turtle2 continuously adjusts its heading to face turtle1
-- **Smart Stopping**: turtle2 stops moving when within 0.5 units of turtle1 to avoid collision
-- **Real-time Updates**: Following commands are sent every second based on current turtle positions
-
-**Following Algorithm Details**:
-
-- **Linear Velocity**: Proportional to distance (max speed: 2.0 units/sec)
-- **Angular Velocity**: Proportional to angle difference (4.0 × angle error)
-- **Minimum Following Distance**: 0.5 units (prevents excessive oscillation)
-
-You can observe the following behavior by:
-
-1. Spawning turtle2 using the "Spawn Turtle2" button
-2. Using WASD keys to move turtle1 around
-3. Watching turtle2 chase turtle1 in both the turtlesim window and 3D visualization
-
-### Demo Control
-
-- **Start Demo**: Initializes all TF2 broadcasters and systems
-- **Reset Demo**: Clears all turtles and transforms, resets to initial state
-
-### Frame Visibility
-
-- **Toggle Static**: Show/hide carrot1_static frame (red sphere, fixed position)
-- **Toggle Dynamic**: Show/hide carrot1_dynamic frame (orange sphere, orbits around carrot1_static)
-- **Toggle Fixed**: Show/hide carrot1_fixed frame (purple sphere, fixed offset from turtle1)
-
-**Visual Guide**:
-
-- **Static Frame**: Red sphere at fixed world coordinates (2.0, 3.0, 0.0)
-- **Dynamic Frame**: Orange sphere that moves in a circular pattern around the static frame (2-unit radius)
-- **Fixed Frame**: Purple sphere that maintains a constant offset relative to turtle1
-- **Turtle Frames**: Coordinate axes (X=red, Y=green, Z=blue) attached to each turtle
-
-### 3D Navigation
-
-- **Mouse Drag**: Rotate camera around scene
-- **Mouse Wheel**: Zoom in/out
-- **Right Click + Drag**: Pan camera view
+```bash
+source /opt/ros/$ROS_DISTRO/setup.bash
+./out/rclnodejs-turtle-tf2-demo-linux-x64/rclnodejs-turtle-tf2-demo
+```
 
 ## Troubleshooting
 
-### Common Issues
-
-1. **"Cannot connect to ROS2" or "librcl.so: cannot open shared object file"**
-   - Ensure ROS2 is sourced: `source /opt/ros/$ROS_DISTRO/setup.bash`
-   - **Critical**: Source ROS2 in the SAME terminal where you run `npm start`
-   - Check if ROS2 daemon is running: `ros2 daemon status`
-   - Verify ROS2 installation: `ros2 --version`
-
-2. **"Turtlesim not responding" or "Failed to spawn turtle2"**
-   - Verify turtlesim is running: `ros2 run turtlesim turtlesim_node`
-   - Check available topics: `ros2 topic list`
-   - Ensure spawn service is available: `ros2 service list | grep spawn`
-   - Try restarting turtlesim_node if spawn calls fail
-
-3. **"No transforms detected"**
-   - Ensure demo is started: Click "Start Demo" button
-   - Check TF2 tree: `ros2 run tf2_tools view_frames`
-
-4. **"Dynamic frame not visible when toggling"**
-   - **Check if the demo is started**: Click "Start Demo" button first to initialize all broadcasters
-   - **Look for an orange sphere near coordinates (2,3)**: The dynamic frame appears as an orange sphere orbiting around the red static frame
-   - **Wait for circular motion**: The dynamic frame moves in a 2-unit radius circle, taking about 6 seconds for a full rotation
-   - **The orange sphere is now bigger**: The dynamic frame has been made 3x larger for better visibility
-   - **Check the transform list**: The dynamic frame should appear in the left panel's transform list with changing coordinates around (2±2, 3±2, 0)
-
-5. **"3D visualization not loading"**
-   - Check browser console for WebGL errors
-   - Ensure hardware acceleration is enabled
-   - Try restarting the Electron application
-
-6. **"electron: not found" or native module errors**
-   - Make sure ROS 2 is sourced so rclnodejs can match its prebuilt binary (`ROS_DISTRO` must be set; prebuilt binaries are provided for Ubuntu)
-   - Ensure Node.js version is compatible (20.20.2 or higher)
-   - Try deleting `node_modules` and running `npm install` again; to force a from-source rebuild of rclnodejs set `RCLNODEJS_FORCE_BUILD=1`
-
-7. **"THREE is not defined" or script loading errors**
-   - Ensure Three.js is properly installed: `npm install three@0.155.0`
-   - Check that `node_modules/three/build/three.min.js` exists
-   - If issues persist, try reinstalling: `rm -rf node_modules && npm install`
-
-8. **WSL (Windows Subsystem for Linux) specific issues**
-   - Install audio libraries: `sudo apt install libasound2t64 libasound2-dev`
-   - Enable X11 forwarding for GUI: Install VcXsrv or similar X server
-   - Some GUI features may be limited in WSL environment
-
-### Debugging Commands
-
-```bash
-# Check TF2 transforms
-ros2 run tf2_tools view_frames
-
-# Monitor TF2 topic
-ros2 topic echo /tf
-
-# List active nodes
-ros2 node list
-
-# Check turtle poses
-ros2 topic echo /turtle1/pose
-```
-
-## Development
-
-### Project Structure
-
-```
-turtle_tf2/
-├── package.json          # Node.js dependencies and scripts
-├── main.js               # Electron main process with ROS2 nodes
-├── renderer.js           # Three.js renderer and UI logic
-├── index.html            # Web interface and controls
-└── README.md             # This documentation
-```
-
-### Key Technologies
-
-- **rclnodejs**: Provides ROS2 integration for Node.js
-- **Electron**: Enables desktop application with web technologies
-- **Three.js**: Handles 3D graphics and WebGL rendering
-- **TF2**: ROS2 transform library for coordinate frame management
-
-### Extending the Demo
-
-- Add custom coordinate frames by modifying broadcaster nodes
-- Implement additional turtle behaviors in the listener logic
-- Enhance 3D visualization with trails, grids, or measurement tools
-- Create custom transform visualizations for specific use cases
-
-## Related Resources
-
-- [ROS2 TF2 Tutorials](https://docs.ros.org/en/lyrical/Tutorials/Intermediate/Tf2/Tf2-Main.html)
-- [turtle_tf2_py Source](https://github.com/ros/geometry_tutorials/tree/ros2/turtle_tf2_py)
-- [Three.js Documentation](https://threejs.org/docs/)
-- [rclnodejs GitHub](https://github.com/RobotWebTools/rclnodejs)
+- **"librcl.so: cannot open shared object file"** — source ROS 2 in the same
+  terminal as `npm start`.
+- **Can't spawn turtle2** — ensure `turtlesim_node` is running and
+  `ros2 service list | grep spawn` shows the service.
+- **No transforms** — click "Start Demo"; inspect with
+  `ros2 run tf2_tools view_frames` or `ros2 topic echo /tf`.
+- **Stuck on "Initializing ROS2 TF2 Demo..." or blank 3D view** — a WebGL
+  failure. The app enables software WebGL (SwiftShader) for GPU-less
+  environments like WSL2; if it still fails, the loading screen shows the error.
+  Make sure your environment can create a WebGL context.
+- **Native module errors** — ensure `ROS_DISTRO` is set so the prebuilt binary
+  matches; to force a from-source rebuild set `RCLNODEJS_FORCE_BUILD=1`.
 
 ## License
 
-Licensed under the Apache License, Version 2.0. See the original rclnodejs LICENSE file for details.
+Apache License 2.0, same as rclnodejs.
