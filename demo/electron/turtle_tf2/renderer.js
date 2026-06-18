@@ -69,8 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (loadingScreen) {
       const loadingText = loadingScreen.querySelector('div:last-child');
       if (loadingText) {
+        const reason = String((err && err.message) || err);
         loadingText.textContent =
-          'Failed to initialize 3D view (WebGL unavailable): ' + err.message;
+          'Failed to initialize 3D view (WebGL unavailable): ' + reason;
         loadingText.style.color = '#ff4444';
       }
     }
