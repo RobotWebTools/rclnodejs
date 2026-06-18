@@ -45,10 +45,13 @@ A minimal Electron application demonstrating basic ROS2 topic communication usin
    npm install
    ```
 
-4. **Rebuild rclnodejs for Electron**:
-   ```bash
-   ./node_modules/.bin/electron-rebuild
-   ```
+4. **Native modules — no manual rebuild needed**:
+
+   rclnodejs ships prebuilt binaries for Electron and picks the matching one at
+   runtime from `ROS_DISTRO` + Linux codename + architecture (ROS 2 was sourced in
+   step 2). Do not run `electron-rebuild` against rclnodejs — it recompiles from
+   source and bypasses the prebuilt binary; the Forge `rebuildConfig` already
+   excludes `rclnodejs`.
 
 ## 🚀 Running the Demo
 

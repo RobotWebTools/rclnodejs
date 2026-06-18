@@ -86,13 +86,13 @@ The demo uses the following key dependencies:
    npm install
    ```
 
-3. **Rebuild native modules**:
+3. **Native modules — no manual rebuild needed**:
 
-   ```bash
-   npm run rebuild
-   ```
-
-   This step is crucial for ensuring that rclnodejs and other native dependencies are properly compiled for your system.
+   rclnodejs ships prebuilt binaries for Electron and selects the matching one at
+   runtime from `ROS_DISTRO` + Linux codename + architecture, so make sure ROS 2 is
+   sourced (next step) before launching. Do not run `electron-rebuild` against
+   rclnodejs — it recompiles from source and bypasses the prebuilt binary; the Forge
+   `rebuildConfig` in `package.json` already excludes `rclnodejs`.
 
 4. **Source ROS2 environment**:
 
@@ -111,7 +111,7 @@ The demo uses the following key dependencies:
 
 ### Method 1: Complete Demo
 
-Start the full demo with all components (ensure you have run `npm install && npm run rebuild` first):
+Start the full demo with all components (ensure you have run `npm install` first):
 
 ```bash
 # Source ROS2 first
@@ -345,14 +345,14 @@ You can observe the following behavior by:
    - Try restarting the Electron application
 
 6. **"electron: not found" or native module errors**
-   - Make sure you ran `npm run rebuild` after `npm install`
+   - Make sure ROS 2 is sourced so rclnodejs can match its prebuilt binary (`ROS_DISTRO` must be set; prebuilt binaries are provided for Ubuntu)
    - Ensure Node.js version is compatible (20.20.2 or higher)
-   - Try deleting `node_modules` and running `npm install && npm run rebuild` again
+   - Try deleting `node_modules` and running `npm install` again; to force a from-source rebuild of rclnodejs set `RCLNODEJS_FORCE_BUILD=1`
 
 7. **"THREE is not defined" or script loading errors**
    - Ensure Three.js is properly installed: `npm install three@0.155.0`
    - Check that `node_modules/three/build/three.min.js` exists
-   - If issues persist, try reinstalling: `rm -rf node_modules && npm install && npm run rebuild`
+   - If issues persist, try reinstalling: `rm -rf node_modules && npm install`
 
 8. **WSL (Windows Subsystem for Linux) specific issues**
    - Install audio libraries: `sudo apt install libasound2t64 libasound2-dev`

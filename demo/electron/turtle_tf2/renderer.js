@@ -55,10 +55,26 @@ document.addEventListener('DOMContentLoaded', function () {
   versionDiv.innerText = 'Electron: ' + process.versions.electron;
   document.body.appendChild(versionDiv);
 
-  initializeScene();
-  setupEventListeners();
-  setupKeyboardControls();
+  // Register ROS2 status listeners first so the loading screen always reflects
+  // initialization progress, even if 3D scene setup fails below.
   setupROSListeners();
+
+  try {
+    initializeScene();
+    setupEventListeners();
+    setupKeyboardControls();
+  } catch (err) {
+    console.error('Failed to initialize 3D scene:', err);
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      const loadingText = loadingScreen.querySelector('div:last-child');
+      if (loadingText) {
+        loadingText.textContent =
+          'Failed to initialize 3D view (WebGL unavailable): ' + err.message;
+        loadingText.style.color = '#ff4444';
+      }
+    }
+  }
 
   updateStatus();
 

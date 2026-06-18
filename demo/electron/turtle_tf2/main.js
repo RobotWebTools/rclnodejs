@@ -13,6 +13,12 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const rclnodejs = require('rclnodejs');
 
+// Allow WebGL to work on systems without a usable GPU (e.g. WSL2, headless,
+// or VMs) where Chromium blocklists hardware WebGL. Without this, the 3D
+// renderer fails to create a WebGL context and the visualization cannot start.
+app.commandLine.appendSwitch('ignore-gpu-blocklist');
+app.commandLine.appendSwitch('enable-unsafe-swiftshader');
+
 let mainWindow;
 let turtleTf2Nodes = {};
 

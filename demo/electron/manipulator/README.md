@@ -34,17 +34,27 @@ An interactive Electron application demonstrating a two-joint robotic manipulato
    npm install
    ```
 
-3. **Rebuild native modules for Electron**:
+3. **Source your ROS 2 environment** (required so the matching prebuilt binary is selected):
+
    ```bash
-   npm run rebuild
+   source /opt/ros/$ROS_DISTRO/setup.bash  # or your ROS 2 installation path
    ```
+
+   rclnodejs ships prebuilt native binaries for Electron, so no compilation is needed.
+   The binary is selected at runtime from `ROS_DISTRO`, the Linux distro codename, and
+   the CPU architecture, so `ROS_DISTRO` must be set before launching the app. If no
+   matching prebuilt binary is available for your platform, rclnodejs falls back to
+   building from source.
+
+   > Note: do not run `electron-rebuild` against rclnodejs — it recompiles the addon
+   > from source and bypasses the prebuilt binary. The Electron Forge `rebuildConfig`
+   > in `package.json` already excludes `rclnodejs` from the automatic rebuild step.
 
 ## 📜 Available Scripts
 
 - **`npm start`** - Launch the application in development mode
 - **`npm run package`** - Package the application into a standalone executable folder
 - **`npm run make`** - Create platform-specific installers (requires system tools like `zip`, `dpkg`)
-- **`npm run rebuild`** - Rebuild native modules after dependency changes
 
 ## 🚀 Quick Start
 
@@ -54,9 +64,9 @@ An interactive Electron application demonstrating a two-joint robotic manipulato
 npm start
 ```
 
-- ✅ **No ROS2 environment required**
-- ✅ **Works without external setup**
+- ✅ **No ROS2 topic publishing required**
 - ✅ **Pure visualization and manual control**
+- ⚠️ ROS 2 must still be sourced so the prebuilt native binary is selected (otherwise rclnodejs builds from source)
 - ⚠️ No ROS2 topic publishing (local mode only)
 
 ### Option 2: Manual ROS2 Setup (Recommended for ROS2 Integration)
@@ -308,7 +318,7 @@ manipulator/
 2. **Build errors with Electron**
 
 - This demo currently uses Electron 40.1.0
-- If you change Electron or other native-module dependencies, rerun `npm run rebuild`
+- rclnodejs loads its prebuilt Electron binary at runtime; if it fails to load, ensure ROS 2 is sourced so the matching prebuild is selected. To force a from-source rebuild of rclnodejs, set `RCLNODEJS_FORCE_BUILD=1`
 - The versions recorded in `package.json` and `package-lock.json` are the tested baseline for this demo
 
 3. **No ROS2 messages received**

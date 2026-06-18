@@ -66,11 +66,14 @@ npm run build
    npm install
    ```
 
-3. **Rebuild native modules for Electron:**
+3. **Native modules — no manual rebuild needed:**
 
-   ```bash
-   npm run rebuild
-   ```
+   rclnodejs ships prebuilt binaries for Electron and selects the matching one at
+   runtime from `ROS_DISTRO` + Linux codename + architecture, so just make sure
+   ROS 2 is sourced (next step) before launching. Do not run `electron-rebuild`
+   against rclnodejs — it recompiles from source and bypasses the prebuilt binary.
+   The Forge `rebuildConfig` in `package.json` already excludes `rclnodejs` from
+   the automatic rebuild step.
 
 4. **Start the demo:**
    ```bash
@@ -291,13 +294,12 @@ Extend the joystick commands by modifying the switch statement in `main.js` and 
    - Ensure ROS2 is properly sourced before running npm start
    - Check that rclnodejs is built correctly
 
-2. **Native Module Rebuild Issues**
-
-   ```bash
-   npm run rebuild
-   # or manually:
-   ./node_modules/.bin/electron-rebuild
-   ```
+2. **Native module fails to load**
+   - Ensure ROS 2 is sourced so rclnodejs can match its prebuilt binary
+     (`ROS_DISTRO` must be set; prebuilt binaries are provided for Ubuntu).
+   - As a last resort, force a from-source rebuild by setting
+     `RCLNODEJS_FORCE_BUILD=1` before `npm start` (needs a compiler toolchain and
+     network access).
 
 3. **Topic Not Appearing**
    - Verify ROS2 daemon is running: `ros2 daemon status`
