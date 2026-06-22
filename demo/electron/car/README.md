@@ -22,8 +22,8 @@ in real time.
 
 ```bash
 cd demo/electron/car
+source /opt/ros/<distro>/setup.bash   # required before install and launch
 npm install
-source /opt/ros/<distro>/setup.bash   # required before launch
 npm start
 ```
 

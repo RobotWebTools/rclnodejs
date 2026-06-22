@@ -26,8 +26,8 @@ turtlesim, and makes turtle2 follow turtle1.
 
 ```bash
 cd demo/electron/turtle_tf2
+source /opt/ros/<distro>/setup.bash   # required, in the same terminal as npm install / npm start
 npm install
-source /opt/ros/$ROS_DISTRO/setup.bash   # required, in the same terminal as npm start
 ros2 run turtlesim turtlesim_node        # in another sourced terminal
 npm start
 ```

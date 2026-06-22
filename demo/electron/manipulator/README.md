@@ -23,8 +23,8 @@ Three.js. It publishes and subscribes to `sensor_msgs/msg/JointState` on
 
 ```bash
 cd demo/electron/manipulator
+source /opt/ros/<distro>/setup.bash   # required before install and launch
 npm install
-source /opt/ros/$ROS_DISTRO/setup.bash   # required before launch
 npm start
 ```
 
