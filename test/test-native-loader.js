@@ -65,12 +65,17 @@ describe('NativeLoader testing', function () {
     const existsSync = sandbox.stub(fs, 'existsSync').returns(true);
     assert.strictEqual(loader.customFallbackLoader(), null);
 
-    // Verify it checked for the file
+    // Verify it checked the exact-match prebuild candidate. The loader may
+    // probe additional paths (e.g. the build/Release mirror target), so find
+    // the prebuild candidate check rather than relying on call order.
     assert.ok(existsSync.called);
-    const args = existsSync.lastCall.args[0];
+    const args = existsSync
+      .getCalls()
+      .map((call) => call.args[0])
+      .find((p) => p.includes('prebuilds') && p.includes('rclnodejs.node'));
+    assert.ok(args, 'expected a prebuild candidate path to be checked');
     assert.ok(args.includes('humble'));
     assert.ok(args.includes('-node-'));
-    assert.ok(args.includes('rclnodejs.node'));
   });
 
   it('customFallbackLoader includes electron runtime in exact match path', function () {
@@ -87,10 +92,13 @@ describe('NativeLoader testing', function () {
     assert.strictEqual(loader.customFallbackLoader(), null);
 
     assert.ok(existsSync.called);
-    const args = existsSync.lastCall.args[0];
+    const args = existsSync
+      .getCalls()
+      .map((call) => call.args[0])
+      .find((p) => p.includes('prebuilds') && p.includes('rclnodejs.node'));
+    assert.ok(args, 'expected a prebuild candidate path to be checked');
     assert.ok(args.includes('humble'));
     assert.ok(args.includes('-electron-'));
-    assert.ok(args.includes('rclnodejs.node'));
   });
 
   it('loadNativeAddon force build triggers rebuild', async function () {
