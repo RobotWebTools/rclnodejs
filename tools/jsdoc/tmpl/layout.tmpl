@@ -23,9 +23,17 @@
     var repositoryUrl = '';
     if (repository) {
         var repositoryString = typeof repository === 'string' ? repository : (repository.url || '');
-        repositoryUrl = repositoryString.replace(/^git\+/, '').replace(/^git:\/\//, 'https://').replace(/\.git$/, '');
+        repositoryString = repositoryString
+            .replace(/^git\+/, '')
+            .replace(/^git:\/\//, 'https://')
+            .replace(/^ssh:\/\/git@/, 'https://')
+            .replace(/^git@([^:]+):/, 'https://$1/')
+            .replace(/\.git$/, '');
+        if (/^https?:\/\//.test(repositoryString)) {
+            repositoryUrl = repositoryString;
+        }
     }
-    var releaseNotesUrl = (repositoryUrl && packageVersion) ? repositoryUrl + '/releases/tag/' + packageVersion : '';
+    var releaseNotesUrl = (repositoryUrl && packageVersion) ? repositoryUrl + '/releases/tag/' + encodeURIComponent(packageVersion) : '';
 ?>
 <body>
 <div class="site-backdrop"></div>
