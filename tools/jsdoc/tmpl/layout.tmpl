@@ -19,6 +19,13 @@
     var packageName = packageInfo.name || 'rclnodejs';
     var packageVersion = packageInfo.version || '';
     var packageDescription = packageInfo.description || 'ROS 2 client library for Node.js and TypeScript';
+    var repository = packageInfo.repository;
+    var repositoryUrl = '';
+    if (repository) {
+        var repositoryString = typeof repository === 'string' ? repository : (repository.url || '');
+        repositoryUrl = repositoryString.replace(/^git\+/, '').replace(/^git:\/\//, 'https://').replace(/\.git$/, '');
+    }
+    var releaseNotesUrl = (repositoryUrl && packageVersion) ? repositoryUrl + '/releases/tag/' + packageVersion : '';
 ?>
 <body>
 <div class="site-backdrop"></div>
@@ -34,6 +41,9 @@
                 <?js } ?>
             </a>
             <p class="brand-description"><?js= packageDescription ?></p>
+            <?js if (releaseNotesUrl) { ?>
+            <a class="brand-release-notes" href="<?js= releaseNotesUrl ?>" target="_blank" rel="noopener noreferrer">Release notes &#8599;</a>
+            <?js } ?>
         </div>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">

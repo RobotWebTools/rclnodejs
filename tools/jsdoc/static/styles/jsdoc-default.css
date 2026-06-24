@@ -211,6 +211,17 @@ samp,
     color: var(--text-soft);
 }
 
+.brand-release-notes {
+    width: fit-content;
+    color: var(--accent-strong);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.brand-release-notes:hover {
+    text-decoration: underline;
+}
+
 .nav-toggle {
     display: none;
     border: 0;
