@@ -22,13 +22,15 @@
     var repository = packageInfo.repository;
     var repositoryUrl = '';
     if (repository) {
-        var repositoryString = typeof repository === 'string' ? repository : (repository.url || '');
+        var repositoryString = (typeof repository === 'string' ? repository : (repository.url || '')).trim();
         repositoryString = repositoryString
             .replace(/^git\+/, '')
+            .replace(/#.*$/, '')
+            .replace(/^ssh:\/\//, '')
             .replace(/^git:\/\//, 'https://')
-            .replace(/^ssh:\/\/git@/, 'https://')
-            .replace(/^git@([^:]+):/, 'https://$1/')
-            .replace(/\.git$/, '');
+            .replace(/^git@([^:/]+)[:/]/, 'https://$1/')
+            .replace(/\.git$/, '')
+            .replace(/\/$/, '');
         if (/^https?:\/\//.test(repositoryString)) {
             repositoryUrl = repositoryString;
         }
