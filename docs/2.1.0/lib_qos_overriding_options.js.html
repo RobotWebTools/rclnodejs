@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JSDoc: Source: lib/qos_overriding_options.js</title>
+
+    <script src="../_static/scripts/prettify/prettify.js"> </script>
+    <script src="../_static/scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="../_static/styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="../_static/styles/jsdoc-default.css">
+</head>
+
+
+<body>
+<div class="site-backdrop"></div>
+<div class="site-grid"></div>
+<div class="app-shell">
+    <aside class="site-sidebar">
+        <div class="brand-card">
+            <a class="brand-link" href="index.html">
+                <span class="brand-kicker">ROS 2 JavaScript Client</span>
+                <strong class="brand-title">rclnodejs</strong>
+                
+                <span class="brand-version">v2.1.0</span>
+                
+            </a>
+            <p class="brand-description">ROS2.0 JavaScript client with Node.js</p>
+            
+            <a class="brand-release-notes" href="https://github.com/RobotWebTools/rclnodejs/releases/tag/2.1.0" target="_blank" rel="noopener noreferrer">Release notes &#8599;</a>
+            
+        </div>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+            Browse API
+        </button>
+
+        <nav class="site-nav" id="site-nav">
+            <div class="nav-home"><a href="index.html">Overview</a></div><section class="nav-section"><h3>Modules</h3><ul class="nav-list"><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul></section><section class="nav-section"><h3>Classes</h3><ul class="nav-list"><li><a href="AbortError.html">AbortError</a></li><li><a href="ActionClient.html">ActionClient</a></li><li><a href="ActionError.html">ActionError</a></li><li><a href="ActionServer.html">ActionServer</a></li><li><a href="ActionServerNotFoundError.html">ActionServerNotFoundError</a></li><li><a href="CallbackReturnValue.html">CallbackReturnValue</a></li><li><a href="Client.html">Client</a></li><li><a href="ClientGoalHandle.html">ClientGoalHandle</a></li><li><a href="Clock.html">Clock</a></li><li><a href="ClockEvent.html">ClockEvent</a></li><li><a href="Context.html">Context</a></li><li><a href="Duration.html">Duration</a></li><li><a href="FloatingPointRange.html">FloatingPointRange</a></li><li><a href="GoalRejectedError.html">GoalRejectedError</a></li><li><a href="GuardCondition.html">GuardCondition</a></li><li><a href="IntegerRange.html">IntegerRange</a></li><li><a href="LifecycleNode.html">LifecycleNode</a></li><li><a href="LifecyclePublisher.html">LifecyclePublisher</a></li><li><a href="Logging.html">Logging</a></li><li><a href="LoggingService.html">LoggingService</a></li><li><a href="MessageInfo.html">MessageInfo</a></li><li><a href="MessageIntrospector.html">MessageIntrospector</a></li><li><a href="MessageValidationError.html">MessageValidationError</a></li><li><a href="NameValidationError.html">NameValidationError</a></li><li><a href="NativeError.html">NativeError</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeNotFoundError.html">NodeNotFoundError</a></li><li><a href="NodeOptions.html">NodeOptions</a></li><li><a href="ObservableSubscription.html">ObservableSubscription</a></li><li><a href="OperationError.html">OperationError</a></li><li><a href="Parameter.html">Parameter</a></li><li><a href="ParameterCallbackHandle.html">ParameterCallbackHandle</a></li><li><a href="ParameterClient.html">ParameterClient</a></li><li><a href="ParameterDescriptor.html">ParameterDescriptor</a></li><li><a href="ParameterError.html">ParameterError</a></li><li><a href="ParameterEventCallbackHandle.html">ParameterEventCallbackHandle</a></li><li><a href="ParameterEventHandler.html">ParameterEventHandler</a></li><li><a href="ParameterNotFoundError.html">ParameterNotFoundError</a></li><li><a href="ParameterService.html">ParameterService</a></li><li><a href="ParameterTypeError.html">ParameterTypeError</a></li><li><a href="ParameterWatcher.html">ParameterWatcher</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="PublisherError.html">PublisherError</a></li><li><a href="PublisherEventCallbacks.html">PublisherEventCallbacks</a></li><li><a href="QoS.html">QoS</a></li><li><a href="QoSOverridingOptions.html">QoSOverridingOptions</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="Range.html">Range</a></li><li><a href="RangeValidationError.html">RangeValidationError</a></li><li><a href="Rate.html">Rate</a></li><li><a href="RateTimerServer.html">RateTimerServer</a></li><li><a href="RclNodeError.html">RclNodeError</a></li><li><a href="ReadOnlyParameterError.html">ReadOnlyParameterError</a></li><li><a href="Response.html">Response</a></li><li><a href="ServerGoalHandle.html">ServerGoalHandle</a></li><li><a href="Service.html">Service</a></li><li><a href="ServiceNotFoundError.html">ServiceNotFoundError</a></li><li><a href="State.html">State</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="SubscriptionError.html">SubscriptionError</a></li><li><a href="SubscriptionEventCallbacks.html">SubscriptionEventCallbacks</a></li><li><a href="Time.html">Time</a></li><li><a href="TimeSource.html">TimeSource</a></li><li><a href="TimeoutError.html">TimeoutError</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TopicError.html">TopicError</a></li><li><a href="Transition.html">Transition</a></li><li><a href="TransitionDescription.html">TransitionDescription</a></li><li><a href="TypeValidationError.html">TypeValidationError</a></li><li><a href="ValidationError.html">ValidationError</a></li></ul></section><section class="nav-section"><h3>Global</h3><ul class="nav-list"><li><a href="global.html#CallbackReturnCode">CallbackReturnCode</a></li><li><a href="global.html#CancelResponse">CancelResponse</a></li><li><a href="global.html#ClockChange">ClockChange</a></li><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DEFAULT_NUMERIC_RANGE_TOLERANCE">DEFAULT_NUMERIC_RANGE_TOLERANCE</a></li><li><a href="global.html#DistroId">DistroId</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#GoalResponse">GoalResponse</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LivelinessPolicy">LivelinessPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#PRIMITIVE_TYPE_MAP">PRIMITIVE_TYPE_MAP</a></li><li><a href="global.html#ParameterType">ParameterType</a></li><li><a href="global.html#PublisherEventType">PublisherEventType</a></li><li><a href="global.html#QoSPolicyKind">QoSPolicyKind</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li><li><a href="global.html#ServiceIntrospectionStates">ServiceIntrospectionStates</a></li><li><a href="global.html#SubscriptionEventType">SubscriptionEventType</a></li><li><a href="global.html#ValidationProblem">ValidationProblem</a></li><li><a href="global.html#_enumToString">_enumToString</a></li><li><a href="global.html#_resolveQoS">_resolveQoS</a></li><li><a href="global.html#_stringToEnum">_stringToEnum</a></li><li><a href="global.html#applySerializationMode">applySerializationMode</a></li><li><a href="global.html#assertValidMessage">assertValidMessage</a></li><li><a href="global.html#compareVersions">compareVersions</a></li><li><a href="global.html#copy">copy</a></li><li><a href="global.html#createMessageValidator">createMessageValidator</a></li><li><a href="global.html#declareQosParameters">declareQosParameters</a></li><li><a href="global.html#defaultCancelCallback">defaultCancelCallback</a></li><li><a href="global.html#defaultGoalCallback">defaultGoalCallback</a></li><li><a href="global.html#defaultHandleAcceptedCallback">defaultHandleAcceptedCallback</a></li><li><a href="global.html#detectUbuntuCodename">detectUbuntuCodename</a></li><li><a href="global.html#emptyDir">emptyDir</a></li><li><a href="global.html#ensureDir">ensureDir</a></li><li><a href="global.html#ensureDirSync">ensureDirSync</a></li><li><a href="global.html#getActionClientNamesAndTypesByNode">getActionClientNamesAndTypesByNode</a></li><li><a href="global.html#getActionNamesAndTypes">getActionNamesAndTypes</a></li><li><a href="global.html#getActionServerNamesAndTypesByNode">getActionServerNamesAndTypesByNode</a></li><li><a href="global.html#getCurrentGeneratorVersion">getCurrentGeneratorVersion</a></li><li><a href="global.html#getFieldNames">getFieldNames</a></li><li><a href="global.html#getFieldType">getFieldType</a></li><li><a href="global.html#getMessageSchema">getMessageSchema</a></li><li><a href="global.html#getMessageTypeString">getMessageTypeString</a></li><li><a href="global.html#getNestedTypeClass">getNestedTypeClass</a></li><li><a href="global.html#getValueType">getValueType</a></li><li><a href="global.html#isClose">isClose</a></li><li><a href="global.html#isPublisherEventTypeSupported">isPublisherEventTypeSupported</a></li><li><a href="global.html#isSubscriptionEventTypeSupported">isSubscriptionEventTypeSupported</a></li><li><a href="global.html#isTypedArray">isTypedArray</a></li><li><a href="global.html#isValidSerializationMode">isValidSerializationMode</a></li><li><a href="global.html#mkdir">mkdir</a></li><li><a href="global.html#needsJSONConversion">needsJSONConversion</a></li><li><a href="global.html#normalizeNodeName">normalizeNodeName</a></li><li><a href="global.html#parameterTypeFromValue">parameterTypeFromValue</a></li><li><a href="global.html#pathExists">pathExists</a></li><li><a href="global.html#readJsonSync">readJsonSync</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#removeSync">removeSync</a></li><li><a href="global.html#resolveTypeClass">resolveTypeClass</a></li><li><a href="global.html#reviveBigInts">reviveBigInts</a></li><li><a href="global.html#ros2Launch">ros2Launch</a></li><li><a href="global.html#ros2Run">ros2Run</a></li><li><a href="global.html#toJSONSafe">toJSONSafe</a></li><li><a href="global.html#toJSONString">toJSONString</a></li><li><a href="global.html#toPlainArrays">toPlainArrays</a></li><li><a href="global.html#validType">validType</a></li><li><a href="global.html#validValue">validValue</a></li><li><a href="global.html#validateArrayConstraints">validateArrayConstraints</a></li><li><a href="global.html#validateMessage">validateMessage</a></li><li><a href="global.html#validatePrimitiveValue">validatePrimitiveValue</a></li><li><a href="global.html#waitForMessage">waitForMessage</a></li><li><a href="global.html#writeFile">writeFile</a></li></ul></section>
+        </nav>
+    </aside>
+
+    <div class="site-main">
+        <header class="site-header">
+            <p class="page-eyebrow">API Reference</p>
+            <h1 class="page-title">Source: lib/qos_overriding_options.js</h1>
+            <p class="page-subtitle">ROS2.0 JavaScript client with Node.js</p>
+        </header>
+
+        <main id="main">
+            
+
+
+    
+    <section class="doc-section source-section">
+        <article class="prose-card">
+            <pre class="prettyprint source linenums"><code>// Copyright (c) 2026 The Robot Web Tools Contributors. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import QoS from './qos.js';
+import { Parameter, ParameterType, ParameterDescriptor } from './parameter.js';
+
+/**
+ * Enum of overridable QoS policy kinds.
+ * Each value corresponds to a QoS property on the {@link QoS} class.
+ * @enum {number}
+ */
+const QoSPolicyKind = Object.freeze({
+  HISTORY: 1,
+  DEPTH: 2,
+  RELIABILITY: 3,
+  DURABILITY: 4,
+  LIVELINESS: 5,
+  AVOID_ROS_NAMESPACE_CONVENTIONS: 6,
+});
+
+// Maps QoSPolicyKind -> { qosProp, paramKey, paramType, toParam, fromParam }
+const POLICY_MAP = {
+  [QoSPolicyKind.HISTORY]: {
+    qosProp: 'history',
+    paramKey: 'history',
+    enumObj: QoS.HistoryPolicy,
+    paramType: ParameterType.PARAMETER_STRING,
+    toParam: (val, enumObj) => _enumToString(val, enumObj),
+    fromParam: (val, enumObj) => _stringToEnum(val, enumObj),
+  },
+  [QoSPolicyKind.DEPTH]: {
+    qosProp: 'depth',
+    paramKey: 'depth',
+    paramType: ParameterType.PARAMETER_INTEGER,
+    toParam: (val) => BigInt(val),
+    fromParam: (val) => Number(val),
+  },
+  [QoSPolicyKind.RELIABILITY]: {
+    qosProp: 'reliability',
+    paramKey: 'reliability',
+    enumObj: QoS.ReliabilityPolicy,
+    paramType: ParameterType.PARAMETER_STRING,
+    toParam: (val, enumObj) => _enumToString(val, enumObj),
+    fromParam: (val, enumObj) => _stringToEnum(val, enumObj),
+  },
+  [QoSPolicyKind.DURABILITY]: {
+    qosProp: 'durability',
+    paramKey: 'durability',
+    enumObj: QoS.DurabilityPolicy,
+    paramType: ParameterType.PARAMETER_STRING,
+    toParam: (val, enumObj) => _enumToString(val, enumObj),
+    fromParam: (val, enumObj) => _stringToEnum(val, enumObj),
+  },
+  [QoSPolicyKind.LIVELINESS]: {
+    qosProp: 'liveliness',
+    paramKey: 'liveliness',
+    enumObj: QoS.LivelinessPolicy,
+    paramType: ParameterType.PARAMETER_STRING,
+    toParam: (val, enumObj) => _enumToString(val, enumObj),
+    fromParam: (val, enumObj) => _stringToEnum(val, enumObj),
+  },
+  [QoSPolicyKind.AVOID_ROS_NAMESPACE_CONVENTIONS]: {
+    qosProp: 'avoidRosNameSpaceConventions',
+    paramKey: 'avoid_ros_namespace_conventions',
+    paramType: ParameterType.PARAMETER_BOOL,
+    toParam: (val) => val,
+    fromParam: (val) => Boolean(val),
+  },
+};
+
+/**
+ * Convert a numeric enum value to a lowercase string name.
+ * @param {number} val - enum numeric value
+ * @param {Object} enumObj - the enum object (e.g. QoS.HistoryPolicy)
+ * @returns {string}
+ */
+function _enumToString(val, enumObj) {
+  for (const [key, v] of Object.entries(enumObj)) {
+    if (v === val) {
+      // Strip the RMW prefix: "RMW_QOS_POLICY_HISTORY_KEEP_LAST" -> "keep_last"
+      const parts = key.split('_');
+      // Find the index after the policy name (HISTORY, RELIABILITY, etc.)
+      // Pattern: RMW_QOS_POLICY_&lt;POLICY>_&lt;VALUE>
+      const policyNames = [
+        'HISTORY',
+        'RELIABILITY',
+        'DURABILITY',
+        'LIVELINESS',
+      ];
+      let valueStart = 4; // default: skip RMW_QOS_POLICY_&lt;X>_
+      for (let i = 3; i &lt; parts.length; i++) {
+        if (policyNames.includes(parts[i])) {
+          valueStart = i + 1;
+          break;
+        }
+      }
+      return parts.slice(valueStart).join('_').toLowerCase();
+    }
+  }
+  return String(val);
+}
+
+/**
+ * Convert a lowercase string back to a numeric enum value.
+ * @param {string} str - the string value (e.g. "keep_last")
+ * @param {Object} enumObj - the enum object
+ * @returns {number}
+ */
+function _stringToEnum(str, enumObj) {
+  const upper = str.toUpperCase();
+  for (const [key, val] of Object.entries(enumObj)) {
+    if (key.endsWith('_' + upper)) {
+      return val;
+    }
+  }
+  throw new Error(`Unknown QoS policy value: "${str}"`);
+}
+
+/**
+ * Options for overriding QoS policies via ROS parameters.
+ *
+ * When passed to `createPublisher()` or `createSubscription()`, the node
+ * will declare read-only parameters for each specified policy kind. These
+ * parameters can be set via command-line arguments, launch files, or
+ * parameter files to override the QoS profile at startup.
+ *
+ * Parameter naming convention:
+ *   `qos_overrides.&lt;topic>.&lt;publisher|subscription>[_&lt;entityId>].&lt;policy>`
+ *
+ * @example
+ * // Override history, depth, and reliability via parameters
+ * const sub = node.createSubscription(
+ *   'std_msgs/msg/String', '/chatter',
+ *   { qos: rclnodejs.QoS.profileDefault,
+ *     qosOverridingOptions: QoSOverridingOptions.withDefaultPolicies() },
+ *   (msg) => console.log(msg.data)
+ * );
+ * // Now you can override via CLI:
+ * //   --ros-args -p "qos_overrides./chatter.subscription.depth:=20"
+ */
+class QoSOverridingOptions {
+  /**
+   * @param {Array&lt;QoSPolicyKind>} policyKinds - Which QoS policies to expose as parameters.
+   * @param {Object} [opts]
+   * @param {function} [opts.callback] - Optional validation callback. Receives the
+   *   final QoS profile after overrides are applied. Should return
+   *   `{successful: true}` or `{successful: false, reason: '...'}`.
+   * @param {string} [opts.entityId] - Optional suffix to disambiguate multiple
+   *   publishers/subscriptions on the same topic.
+   */
+  constructor(policyKinds, opts = {}) {
+    this._policyKinds = Array.from(policyKinds);
+    this._callback = opts.callback || null;
+    this._entityId = opts.entityId || null;
+  }
+
+  get policyKinds() {
+    return this._policyKinds;
+  }
+
+  get callback() {
+    return this._callback;
+  }
+
+  get entityId() {
+    return this._entityId;
+  }
+
+  /**
+   * Create options that override history, depth, and reliability —
+   * the most commonly tuned policies.
+   * @param {Object} [opts]
+   * @param {function} [opts.callback] - Validation callback.
+   * @param {string} [opts.entityId] - Entity disambiguation suffix.
+   * @returns {QoSOverridingOptions}
+   */
+  static withDefaultPolicies(opts = {}) {
+    return new QoSOverridingOptions(
+      [QoSPolicyKind.HISTORY, QoSPolicyKind.DEPTH, QoSPolicyKind.RELIABILITY],
+      opts
+    );
+  }
+}
+
+/**
+ * Resolve QoS profile string to a mutable QoS object.
+ * If already a QoS instance, return as-is.
+ * @param {QoS|string} qos
+ * @returns {QoS}
+ */
+function _resolveQoS(qos) {
+  if (qos instanceof QoS) {
+    return qos;
+  }
+  // Plain object with QoS fields — construct a QoS from its properties
+  if (typeof qos === 'object' &amp;&amp; qos !== null &amp;&amp; !Array.isArray(qos)) {
+    return new QoS(
+      qos.history,
+      qos.depth,
+      qos.reliability,
+      qos.durability,
+      qos.liveliness,
+      qos.avoidRosNameSpaceConventions
+    );
+  }
+  // Profile string: create a QoS with the corresponding defaults
+  // Values must match the rmw_qos_profile_* definitions in rmw/types.h
+  switch (qos) {
+    case QoS.profileDefault:
+      return new QoS(
+        QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        10,
+        QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE,
+        QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_VOLATILE
+      );
+    case QoS.profileSystemDefault:
+      return new QoS(
+        QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT,
+        0,
+        QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT,
+        QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT,
+        QoS.LivelinessPolicy.RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT
+      );
+    case QoS.profileSensorData:
+      return new QoS(
+        QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        5,
+        QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
+        QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_VOLATILE
+      );
+    case QoS.profileServicesDefault:
+      return new QoS(
+        QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        10,
+        QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE,
+        QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_VOLATILE
+      );
+    case QoS.profileParameters:
+      return new QoS(
+        QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        1000,
+        QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE,
+        QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_VOLATILE
+      );
+    case QoS.profileParameterEvents:
+      return new QoS(
+        QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        1000,
+        QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE,
+        QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_VOLATILE
+      );
+    case QoS.profileActionStatusDefault:
+      return new QoS(
+        QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        1,
+        QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE,
+        QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL
+      );
+    default:
+      return new QoS(
+        QoS.HistoryPolicy.RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+        10,
+        QoS.ReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_RELIABLE,
+        QoS.DurabilityPolicy.RMW_QOS_POLICY_DURABILITY_VOLATILE
+      );
+  }
+}
+
+/**
+ * Declare QoS override parameters on the node and apply any overrides
+ * to the QoS profile in-place.
+ *
+ * @param {'publisher'|'subscription'} entityType
+ * @param {Node} node
+ * @param {string} topic - Fully resolved topic name.
+ * @param {QoS} qos - Mutable QoS object (will be modified in-place).
+ * @param {QoSOverridingOptions} options
+ */
+function declareQosParameters(entityType, node, topic, qos, options) {
+  if (!options || options.policyKinds.length === 0) {
+    return;
+  }
+
+  const idSuffix = options.entityId ? `_${options.entityId}` : '';
+  const namePrefix = `qos_overrides.${topic}.${entityType}${idSuffix}`;
+
+  for (const policyKind of options.policyKinds) {
+    const mapping = POLICY_MAP[policyKind];
+    if (!mapping) {
+      continue;
+    }
+
+    const paramName = `${namePrefix}.${mapping.paramKey}`;
+    const currentValue = qos[mapping.qosProp];
+    const paramValue = mapping.toParam(currentValue, mapping.enumObj);
+
+    const descriptor = new ParameterDescriptor(
+      paramName,
+      mapping.paramType,
+      `QoS override for ${mapping.qosProp}`,
+      true // readOnly
+    );
+
+    let param;
+    try {
+      param = node.declareParameter(
+        new Parameter(paramName, mapping.paramType, paramValue),
+        descriptor
+      );
+    } catch (e) {
+      // Already declared (e.g. multiple entities on same topic) — reuse
+      if (node.hasParameter(paramName)) {
+        param = node.getParameter(paramName);
+      } else {
+        throw e;
+      }
+    }
+
+    // Apply the (possibly overridden) parameter value back to QoS
+    if (param &amp;&amp; param.value !== paramValue) {
+      qos[mapping.qosProp] = mapping.fromParam(param.value, mapping.enumObj);
+    }
+  }
+
+  // Run validation callback if provided
+  if (options.callback) {
+    const result = options.callback(qos);
+    if (result &amp;&amp; !result.successful) {
+      throw new Error(
+        `QoS override validation failed: ${result.reason || 'unknown reason'}`
+      );
+    }
+  }
+}
+
+export {
+  QoSPolicyKind,
+  QoSOverridingOptions,
+  declareQosParameters,
+  _resolveQoS,
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+        </main>
+
+        <footer class="site-footer">
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Thu Jun 25 2026 11:01:39 GMT+0800 (Singapore Standard Time)
+        </footer>
+    </div>
+</div>
+
+<script>
+    prettyPrint();
+    (function() {
+        var button = document.querySelector('.nav-toggle');
+        var shell = document.querySelector('.app-shell');
+
+        if (!button || !shell) {
+            return;
+        }
+
+        button.addEventListener('click', function() {
+            var isOpen = shell.classList.toggle('nav-open');
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    }());
+</script>
+<script src="../_static/scripts/linenumber.js"> </script>
+</body>
+</html>

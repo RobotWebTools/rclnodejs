@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JSDoc: Class: Clock</title>
+
+    <script src="../_static/scripts/prettify/prettify.js"> </script>
+    <script src="../_static/scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="../_static/styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="../_static/styles/jsdoc-default.css">
+</head>
+
+
+<body>
+<div class="site-backdrop"></div>
+<div class="site-grid"></div>
+<div class="app-shell">
+    <aside class="site-sidebar">
+        <div class="brand-card">
+            <a class="brand-link" href="index.html">
+                <span class="brand-kicker">ROS 2 JavaScript Client</span>
+                <strong class="brand-title">rclnodejs</strong>
+                
+                <span class="brand-version">v2.0.0</span>
+                
+            </a>
+            <p class="brand-description">ROS2.0 JavaScript client with Node.js</p>
+            
+            <a class="brand-release-notes" href="https://github.com/RobotWebTools/rclnodejs/releases/tag/2.0.0" target="_blank" rel="noopener noreferrer">Release notes &#8599;</a>
+            
+        </div>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+            Browse API
+        </button>
+
+        <nav class="site-nav" id="site-nav">
+            <div class="nav-home"><a href="index.html">Overview</a></div><section class="nav-section"><h3>Modules</h3><ul class="nav-list"><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul></section><section class="nav-section"><h3>Classes</h3><ul class="nav-list"><li><a href="AbortError.html">AbortError</a></li><li><a href="ActionClient.html">ActionClient</a></li><li><a href="ActionError.html">ActionError</a></li><li><a href="ActionServer.html">ActionServer</a></li><li><a href="ActionServerNotFoundError.html">ActionServerNotFoundError</a></li><li><a href="CallbackReturnValue.html">CallbackReturnValue</a></li><li><a href="Client.html">Client</a></li><li><a href="ClientGoalHandle.html">ClientGoalHandle</a></li><li><a href="Clock.html">Clock</a></li><li><a href="ClockEvent.html">ClockEvent</a></li><li><a href="Context.html">Context</a></li><li><a href="Duration.html">Duration</a></li><li><a href="FloatingPointRange.html">FloatingPointRange</a></li><li><a href="GoalRejectedError.html">GoalRejectedError</a></li><li><a href="GuardCondition.html">GuardCondition</a></li><li><a href="IntegerRange.html">IntegerRange</a></li><li><a href="LifecycleNode.html">LifecycleNode</a></li><li><a href="LifecyclePublisher.html">LifecyclePublisher</a></li><li><a href="Logging.html">Logging</a></li><li><a href="MessageInfo.html">MessageInfo</a></li><li><a href="MessageIntrospector.html">MessageIntrospector</a></li><li><a href="MessageValidationError.html">MessageValidationError</a></li><li><a href="NameValidationError.html">NameValidationError</a></li><li><a href="NativeError.html">NativeError</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeNotFoundError.html">NodeNotFoundError</a></li><li><a href="NodeOptions.html">NodeOptions</a></li><li><a href="ObservableSubscription.html">ObservableSubscription</a></li><li><a href="OperationError.html">OperationError</a></li><li><a href="Parameter.html">Parameter</a></li><li><a href="ParameterCallbackHandle.html">ParameterCallbackHandle</a></li><li><a href="ParameterClient.html">ParameterClient</a></li><li><a href="ParameterDescriptor.html">ParameterDescriptor</a></li><li><a href="ParameterError.html">ParameterError</a></li><li><a href="ParameterEventCallbackHandle.html">ParameterEventCallbackHandle</a></li><li><a href="ParameterEventHandler.html">ParameterEventHandler</a></li><li><a href="ParameterNotFoundError.html">ParameterNotFoundError</a></li><li><a href="ParameterService.html">ParameterService</a></li><li><a href="ParameterTypeError.html">ParameterTypeError</a></li><li><a href="ParameterWatcher.html">ParameterWatcher</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="PublisherError.html">PublisherError</a></li><li><a href="PublisherEventCallbacks.html">PublisherEventCallbacks</a></li><li><a href="QoS.html">QoS</a></li><li><a href="QoSOverridingOptions.html">QoSOverridingOptions</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="Range.html">Range</a></li><li><a href="RangeValidationError.html">RangeValidationError</a></li><li><a href="Rate.html">Rate</a></li><li><a href="RateTimerServer.html">RateTimerServer</a></li><li><a href="RclNodeError.html">RclNodeError</a></li><li><a href="ReadOnlyParameterError.html">ReadOnlyParameterError</a></li><li><a href="Response.html">Response</a></li><li><a href="ServerGoalHandle.html">ServerGoalHandle</a></li><li><a href="Service.html">Service</a></li><li><a href="ServiceNotFoundError.html">ServiceNotFoundError</a></li><li><a href="State.html">State</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="SubscriptionError.html">SubscriptionError</a></li><li><a href="SubscriptionEventCallbacks.html">SubscriptionEventCallbacks</a></li><li><a href="Time.html">Time</a></li><li><a href="TimeSource.html">TimeSource</a></li><li><a href="TimeoutError.html">TimeoutError</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TopicError.html">TopicError</a></li><li><a href="Transition.html">Transition</a></li><li><a href="TransitionDescription.html">TransitionDescription</a></li><li><a href="TypeValidationError.html">TypeValidationError</a></li><li><a href="ValidationError.html">ValidationError</a></li></ul></section><section class="nav-section"><h3>Global</h3><ul class="nav-list"><li><a href="global.html#CallbackReturnCode">CallbackReturnCode</a></li><li><a href="global.html#CancelResponse">CancelResponse</a></li><li><a href="global.html#ClockChange">ClockChange</a></li><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DEFAULT_NUMERIC_RANGE_TOLERANCE">DEFAULT_NUMERIC_RANGE_TOLERANCE</a></li><li><a href="global.html#DistroId">DistroId</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#GoalResponse">GoalResponse</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LivelinessPolicy">LivelinessPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#PRIMITIVE_TYPE_MAP">PRIMITIVE_TYPE_MAP</a></li><li><a href="global.html#ParameterType">ParameterType</a></li><li><a href="global.html#PublisherEventType">PublisherEventType</a></li><li><a href="global.html#QoSPolicyKind">QoSPolicyKind</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li><li><a href="global.html#ServiceIntrospectionStates">ServiceIntrospectionStates</a></li><li><a href="global.html#SubscriptionEventType">SubscriptionEventType</a></li><li><a href="global.html#ValidationProblem">ValidationProblem</a></li><li><a href="global.html#_enumToString">_enumToString</a></li><li><a href="global.html#_resolveQoS">_resolveQoS</a></li><li><a href="global.html#_stringToEnum">_stringToEnum</a></li><li><a href="global.html#applySerializationMode">applySerializationMode</a></li><li><a href="global.html#assertValidMessage">assertValidMessage</a></li><li><a href="global.html#compareVersions">compareVersions</a></li><li><a href="global.html#copy">copy</a></li><li><a href="global.html#createMessageValidator">createMessageValidator</a></li><li><a href="global.html#declareQosParameters">declareQosParameters</a></li><li><a href="global.html#defaultCancelCallback">defaultCancelCallback</a></li><li><a href="global.html#defaultGoalCallback">defaultGoalCallback</a></li><li><a href="global.html#defaultHandleAcceptedCallback">defaultHandleAcceptedCallback</a></li><li><a href="global.html#detectUbuntuCodename">detectUbuntuCodename</a></li><li><a href="global.html#emptyDir">emptyDir</a></li><li><a href="global.html#ensureDir">ensureDir</a></li><li><a href="global.html#ensureDirSync">ensureDirSync</a></li><li><a href="global.html#getActionClientNamesAndTypesByNode">getActionClientNamesAndTypesByNode</a></li><li><a href="global.html#getActionNamesAndTypes">getActionNamesAndTypes</a></li><li><a href="global.html#getActionServerNamesAndTypesByNode">getActionServerNamesAndTypesByNode</a></li><li><a href="global.html#getCurrentGeneratorVersion">getCurrentGeneratorVersion</a></li><li><a href="global.html#getFieldNames">getFieldNames</a></li><li><a href="global.html#getFieldType">getFieldType</a></li><li><a href="global.html#getMessageSchema">getMessageSchema</a></li><li><a href="global.html#getMessageTypeString">getMessageTypeString</a></li><li><a href="global.html#getNestedTypeClass">getNestedTypeClass</a></li><li><a href="global.html#getValueType">getValueType</a></li><li><a href="global.html#isClose">isClose</a></li><li><a href="global.html#isTypedArray">isTypedArray</a></li><li><a href="global.html#isValidSerializationMode">isValidSerializationMode</a></li><li><a href="global.html#mkdir">mkdir</a></li><li><a href="global.html#needsJSONConversion">needsJSONConversion</a></li><li><a href="global.html#normalizeNodeName">normalizeNodeName</a></li><li><a href="global.html#parameterTypeFromValue">parameterTypeFromValue</a></li><li><a href="global.html#pathExists">pathExists</a></li><li><a href="global.html#readJsonSync">readJsonSync</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#removeSync">removeSync</a></li><li><a href="global.html#resolveTypeClass">resolveTypeClass</a></li><li><a href="global.html#reviveBigInts">reviveBigInts</a></li><li><a href="global.html#ros2Launch">ros2Launch</a></li><li><a href="global.html#ros2Run">ros2Run</a></li><li><a href="global.html#toJSONSafe">toJSONSafe</a></li><li><a href="global.html#toJSONString">toJSONString</a></li><li><a href="global.html#toPlainArrays">toPlainArrays</a></li><li><a href="global.html#validType">validType</a></li><li><a href="global.html#validValue">validValue</a></li><li><a href="global.html#validateArrayConstraints">validateArrayConstraints</a></li><li><a href="global.html#validateMessage">validateMessage</a></li><li><a href="global.html#validatePrimitiveValue">validatePrimitiveValue</a></li><li><a href="global.html#waitForMessage">waitForMessage</a></li><li><a href="global.html#writeFile">writeFile</a></li></ul></section>
+        </nav>
+    </aside>
+
+    <div class="site-main">
+        <header class="site-header">
+            <p class="page-eyebrow">API Reference</p>
+            <h1 class="page-title">Class: Clock</h1>
+            <p class="page-subtitle">ROS2.0 JavaScript client with Node.js</p>
+        </header>
+
+        <main id="main">
+            
+
+
+
+<section class="doc-section doc-kind-class">
+
+<header class="doc-page-header">
+    
+        <div class="doc-heading-meta">
+            <span class="doc-kind-label">class</span>
+        </div>
+        <h2 class="doc-heading"><span class="attribs"><span class="type-signature"></span></span>Clock<span class="signature">(clockType<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">- Class representing a Clock in ROS</div>
+        
+    
+</header>
+
+<article class="doc-article">
+    <div class="container-overview doc-overview">
+    
+        
+<section class="symbol-card symbol-kind-class">
+
+    
+    <p class="section-kicker">Constructor</p>
+    
+
+    
+    <div class="symbol-heading">
+        <span class="symbol-kind">class</span>
+        <h4 class="name" id="Clock"><span class="type-signature"></span>new Clock<span class="signature">(clockType<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    </div>
+    
+
+    
+
+
+
+<div class="description">
+    Create a Clock.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<div class="table-wrap">
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>clockType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ClockType">ClockType</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    Clock.ClockType.SYSTEM_TIME
+                
+                </td>
+            
+
+            <td class="description last">The type of the clock to be created.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</div>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line29">line 29</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</section>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <div class="symbol-list">
+        
+            
+<section class="symbol-card symbol-kind-member">
+<div class="symbol-heading">
+    <span class="symbol-kind">member</span>
+    <h4 class="name" id="clockType"><span class="type-signature"></span>clockType<span class="type-signature"></span></h4>
+</div>
+
+
+
+
+<div class="description">
+    Get ClockType of this Clock object.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line50">line 50</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</section>
+
+        
+        </div>
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <div class="symbol-list">
+        
+            
+<section class="symbol-card symbol-kind-function">
+
+    
+
+    
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="addClockCallback"><span class="type-signature"></span>addClockCallback<span class="signature">(callbackObject, onClockChange, minForward, minBackward)</span><span class="type-signature"></span></h4>
+    </div>
+    
+
+    
+
+
+
+<div class="description">
+    Add a clock callback.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<div class="table-wrap">
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>callbackObject</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The object containing callback methods.
+                <h6>Properties</h6>
+                
+
+<div class="table-wrap">
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>_pre_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional callback invoked before a time jump. Takes no arguments.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>_post_callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">Optional callback invoked after a time jump.
+  Receives a jumpInfo object with properties:
+  - clock_change {number}: Type of clock change that occurred.
+  - delta {bigint}: Time delta in nanoseconds.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</div>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onClockChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Whether to call the callback on clock change.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minForward</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bigint</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Minimum forward jump in nanoseconds to trigger the callback.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minBackward</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bigint</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Minimum backward jump in nanoseconds to trigger the callback.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</div>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line66">line 66</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</section>
+
+        
+            
+<section class="symbol-card symbol-kind-function">
+
+    
+
+    
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="now"><span class="type-signature"></span>now<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Time.html">Time</a>}</span></h4>
+    </div>
+    
+
+    
+
+
+
+<div class="description">
+    Return the current time.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line123">line 123</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Return the current time.
+</div>
+
+
+
+<div class="returns-type"><span>Type</span> 
+<span class="param-type"><a href="Time.html">Time</a></span>
+
+</div>
+
+    
+
+
+
+
+</section>
+
+        
+            
+<section class="symbol-card symbol-kind-function">
+
+    
+
+    
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="removeClockCallback"><span class="type-signature"></span>removeClockCallback<span class="signature">(callbackObject)</span><span class="type-signature"></span></h4>
+    </div>
+    
+
+    
+
+
+
+<div class="description">
+    Remove a clock callback.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<div class="table-wrap">
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>callbackObject</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The callback object that was previously registered with addClockCallback().</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</div>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line105">line 105</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</section>
+
+        
+            
+<section class="symbol-card symbol-kind-function">
+
+    
+
+    
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="sleepFor"><span class="type-signature">(async) </span>sleepFor<span class="signature">(duration, context<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;boolean>}</span></h4>
+    </div>
+    
+
+    
+
+
+
+<div class="description">
+    Sleep for a specified duration.
+
+Equivalent to: clock.sleepUntil(clock.now() + duration, context)
+
+When using a ROSClock, this may sleep forever if the TimeSource is misconfigured
+and the context is never shut down. ROS time being activated or deactivated causes
+this function to cease sleeping and return false.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<div class="table-wrap">
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>duration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Duration.html">Duration</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Duration of time to sleep for.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>context</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Context.html">Context</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">Context which when shut down will cause this sleep to wake early.
+  If context is null, then the default context is used.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</div>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line233">line 233</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<div class="exception-block">
+    <div class="param-desc">if context has not been initialized or is shutdown.</div>
+    <div class="returns-type"><span>Type</span> 
+<span class="param-type">Error</span>
+
+</div>
+</div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Promise that resolves to true if the full duration was slept,
+  or false if it woke for another reason.
+</div>
+
+
+
+<div class="returns-type"><span>Type</span> 
+<span class="param-type">Promise.&lt;boolean></span>
+
+</div>
+
+    
+
+
+
+
+</section>
+
+        
+            
+<section class="symbol-card symbol-kind-function">
+
+    
+
+    
+    <div class="symbol-heading">
+        <span class="symbol-kind">function</span>
+        <h4 class="name" id="sleepUntil"><span class="type-signature">(async) </span>sleepUntil<span class="signature">(until, context<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;boolean>}</span></h4>
+    </div>
+    
+
+    
+
+
+
+<div class="description">
+    Sleep until a specific time is reached on this Clock.
+
+When using a ROSClock, this may sleep forever if the TimeSource is misconfigured
+and the context is never shut down. ROS time being activated or deactivated causes
+this function to cease sleeping and return false.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<div class="table-wrap">
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>until</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Time.html">Time</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Time at which this function should stop sleeping.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>context</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Context.html">Context</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">Context whose validity will be checked while sleeping.
+  If context is null, then the default context is used. If the context is found to be
+  shut down before or by the time the wait completes, the returned promise resolves to false.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</div>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lib_clock.js.html">lib/clock.js</a>, <a href="lib_clock.js.html#line145">line 145</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+<ul>
+        <li>
+
+<div class="exception-block">
+    <div class="param-desc">if until is specified for a different type of clock than this one.</div>
+    <div class="returns-type"><span>Type</span> 
+<span class="param-type">TypeError</span>
+
+</div>
+</div>
+
+</li>
+    
+        <li>
+
+<div class="exception-block">
+    <div class="param-desc">if context has not been initialized or is shutdown.</div>
+    <div class="returns-type"><span>Type</span> 
+<span class="param-type">Error</span>
+
+</div>
+</div>
+
+</li>
+    </ul>
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Promise that resolves to true if 'until' was reached without
+  detecting a time jump or a shut down context, or false otherwise (for example, if a time
+  jump occurred or the context is no longer valid when the wait completes).
+</div>
+
+
+
+<div class="returns-type"><span>Type</span> 
+<span class="param-type">Promise.&lt;boolean></span>
+
+</div>
+
+    
+
+
+
+
+</section>
+
+        
+        </div>
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+        </main>
+
+        <footer class="site-footer">
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Thu Jun 25 2026 11:01:37 GMT+0800 (Singapore Standard Time)
+        </footer>
+    </div>
+</div>
+
+<script>
+    prettyPrint();
+    (function() {
+        var button = document.querySelector('.nav-toggle');
+        var shell = document.querySelector('.app-shell');
+
+        if (!button || !shell) {
+            return;
+        }
+
+        button.addEventListener('click', function() {
+            var isOpen = shell.classList.toggle('nav-open');
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    }());
+</script>
+<script src="../_static/scripts/linenumber.js"> </script>
+</body>
+</html>

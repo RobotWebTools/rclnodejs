@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JSDoc: Source: lib/parameter_event_handler.js</title>
+
+    <script src="../_static/scripts/prettify/prettify.js"> </script>
+    <script src="../_static/scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="../_static/styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="../_static/styles/jsdoc-default.css">
+</head>
+
+
+<body>
+<div class="site-backdrop"></div>
+<div class="site-grid"></div>
+<div class="app-shell">
+    <aside class="site-sidebar">
+        <div class="brand-card">
+            <a class="brand-link" href="index.html">
+                <span class="brand-kicker">ROS 2 JavaScript Client</span>
+                <strong class="brand-title">rclnodejs</strong>
+                
+                <span class="brand-version">v2.0.0</span>
+                
+            </a>
+            <p class="brand-description">ROS2.0 JavaScript client with Node.js</p>
+            
+            <a class="brand-release-notes" href="https://github.com/RobotWebTools/rclnodejs/releases/tag/2.0.0" target="_blank" rel="noopener noreferrer">Release notes &#8599;</a>
+            
+        </div>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+            Browse API
+        </button>
+
+        <nav class="site-nav" id="site-nav">
+            <div class="nav-home"><a href="index.html">Overview</a></div><section class="nav-section"><h3>Modules</h3><ul class="nav-list"><li><a href="module-rclnodejs.html">rclnodejs</a></li><li><a href="module-validator.html">validator</a></li></ul></section><section class="nav-section"><h3>Classes</h3><ul class="nav-list"><li><a href="AbortError.html">AbortError</a></li><li><a href="ActionClient.html">ActionClient</a></li><li><a href="ActionError.html">ActionError</a></li><li><a href="ActionServer.html">ActionServer</a></li><li><a href="ActionServerNotFoundError.html">ActionServerNotFoundError</a></li><li><a href="CallbackReturnValue.html">CallbackReturnValue</a></li><li><a href="Client.html">Client</a></li><li><a href="ClientGoalHandle.html">ClientGoalHandle</a></li><li><a href="Clock.html">Clock</a></li><li><a href="ClockEvent.html">ClockEvent</a></li><li><a href="Context.html">Context</a></li><li><a href="Duration.html">Duration</a></li><li><a href="FloatingPointRange.html">FloatingPointRange</a></li><li><a href="GoalRejectedError.html">GoalRejectedError</a></li><li><a href="GuardCondition.html">GuardCondition</a></li><li><a href="IntegerRange.html">IntegerRange</a></li><li><a href="LifecycleNode.html">LifecycleNode</a></li><li><a href="LifecyclePublisher.html">LifecyclePublisher</a></li><li><a href="Logging.html">Logging</a></li><li><a href="MessageInfo.html">MessageInfo</a></li><li><a href="MessageIntrospector.html">MessageIntrospector</a></li><li><a href="MessageValidationError.html">MessageValidationError</a></li><li><a href="NameValidationError.html">NameValidationError</a></li><li><a href="NativeError.html">NativeError</a></li><li><a href="Node.html">Node</a></li><li><a href="NodeNotFoundError.html">NodeNotFoundError</a></li><li><a href="NodeOptions.html">NodeOptions</a></li><li><a href="ObservableSubscription.html">ObservableSubscription</a></li><li><a href="OperationError.html">OperationError</a></li><li><a href="Parameter.html">Parameter</a></li><li><a href="ParameterCallbackHandle.html">ParameterCallbackHandle</a></li><li><a href="ParameterClient.html">ParameterClient</a></li><li><a href="ParameterDescriptor.html">ParameterDescriptor</a></li><li><a href="ParameterError.html">ParameterError</a></li><li><a href="ParameterEventCallbackHandle.html">ParameterEventCallbackHandle</a></li><li><a href="ParameterEventHandler.html">ParameterEventHandler</a></li><li><a href="ParameterNotFoundError.html">ParameterNotFoundError</a></li><li><a href="ParameterService.html">ParameterService</a></li><li><a href="ParameterTypeError.html">ParameterTypeError</a></li><li><a href="ParameterWatcher.html">ParameterWatcher</a></li><li><a href="Publisher.html">Publisher</a></li><li><a href="PublisherError.html">PublisherError</a></li><li><a href="PublisherEventCallbacks.html">PublisherEventCallbacks</a></li><li><a href="QoS.html">QoS</a></li><li><a href="QoSOverridingOptions.html">QoSOverridingOptions</a></li><li><a href="ROSClock.html">ROSClock</a></li><li><a href="Range.html">Range</a></li><li><a href="RangeValidationError.html">RangeValidationError</a></li><li><a href="Rate.html">Rate</a></li><li><a href="RateTimerServer.html">RateTimerServer</a></li><li><a href="RclNodeError.html">RclNodeError</a></li><li><a href="ReadOnlyParameterError.html">ReadOnlyParameterError</a></li><li><a href="Response.html">Response</a></li><li><a href="ServerGoalHandle.html">ServerGoalHandle</a></li><li><a href="Service.html">Service</a></li><li><a href="ServiceNotFoundError.html">ServiceNotFoundError</a></li><li><a href="State.html">State</a></li><li><a href="Subscription.html">Subscription</a></li><li><a href="SubscriptionError.html">SubscriptionError</a></li><li><a href="SubscriptionEventCallbacks.html">SubscriptionEventCallbacks</a></li><li><a href="Time.html">Time</a></li><li><a href="TimeSource.html">TimeSource</a></li><li><a href="TimeoutError.html">TimeoutError</a></li><li><a href="Timer.html">Timer</a></li><li><a href="TopicError.html">TopicError</a></li><li><a href="Transition.html">Transition</a></li><li><a href="TransitionDescription.html">TransitionDescription</a></li><li><a href="TypeValidationError.html">TypeValidationError</a></li><li><a href="ValidationError.html">ValidationError</a></li></ul></section><section class="nav-section"><h3>Global</h3><ul class="nav-list"><li><a href="global.html#CallbackReturnCode">CallbackReturnCode</a></li><li><a href="global.html#CancelResponse">CancelResponse</a></li><li><a href="global.html#ClockChange">ClockChange</a></li><li><a href="global.html#ClockType">ClockType</a></li><li><a href="global.html#DEFAULT_NUMERIC_RANGE_TOLERANCE">DEFAULT_NUMERIC_RANGE_TOLERANCE</a></li><li><a href="global.html#DistroId">DistroId</a></li><li><a href="global.html#DurabilityPolicy">DurabilityPolicy</a></li><li><a href="global.html#GoalResponse">GoalResponse</a></li><li><a href="global.html#HistoryPolicy">HistoryPolicy</a></li><li><a href="global.html#LivelinessPolicy">LivelinessPolicy</a></li><li><a href="global.html#LoggingSeverity">LoggingSeverity</a></li><li><a href="global.html#PRIMITIVE_TYPE_MAP">PRIMITIVE_TYPE_MAP</a></li><li><a href="global.html#ParameterType">ParameterType</a></li><li><a href="global.html#PublisherEventType">PublisherEventType</a></li><li><a href="global.html#QoSPolicyKind">QoSPolicyKind</a></li><li><a href="global.html#ReliabilityPolicy">ReliabilityPolicy</a></li><li><a href="global.html#ServiceIntrospectionStates">ServiceIntrospectionStates</a></li><li><a href="global.html#SubscriptionEventType">SubscriptionEventType</a></li><li><a href="global.html#ValidationProblem">ValidationProblem</a></li><li><a href="global.html#_enumToString">_enumToString</a></li><li><a href="global.html#_resolveQoS">_resolveQoS</a></li><li><a href="global.html#_stringToEnum">_stringToEnum</a></li><li><a href="global.html#applySerializationMode">applySerializationMode</a></li><li><a href="global.html#assertValidMessage">assertValidMessage</a></li><li><a href="global.html#compareVersions">compareVersions</a></li><li><a href="global.html#copy">copy</a></li><li><a href="global.html#createMessageValidator">createMessageValidator</a></li><li><a href="global.html#declareQosParameters">declareQosParameters</a></li><li><a href="global.html#defaultCancelCallback">defaultCancelCallback</a></li><li><a href="global.html#defaultGoalCallback">defaultGoalCallback</a></li><li><a href="global.html#defaultHandleAcceptedCallback">defaultHandleAcceptedCallback</a></li><li><a href="global.html#detectUbuntuCodename">detectUbuntuCodename</a></li><li><a href="global.html#emptyDir">emptyDir</a></li><li><a href="global.html#ensureDir">ensureDir</a></li><li><a href="global.html#ensureDirSync">ensureDirSync</a></li><li><a href="global.html#getActionClientNamesAndTypesByNode">getActionClientNamesAndTypesByNode</a></li><li><a href="global.html#getActionNamesAndTypes">getActionNamesAndTypes</a></li><li><a href="global.html#getActionServerNamesAndTypesByNode">getActionServerNamesAndTypesByNode</a></li><li><a href="global.html#getCurrentGeneratorVersion">getCurrentGeneratorVersion</a></li><li><a href="global.html#getFieldNames">getFieldNames</a></li><li><a href="global.html#getFieldType">getFieldType</a></li><li><a href="global.html#getMessageSchema">getMessageSchema</a></li><li><a href="global.html#getMessageTypeString">getMessageTypeString</a></li><li><a href="global.html#getNestedTypeClass">getNestedTypeClass</a></li><li><a href="global.html#getValueType">getValueType</a></li><li><a href="global.html#isClose">isClose</a></li><li><a href="global.html#isTypedArray">isTypedArray</a></li><li><a href="global.html#isValidSerializationMode">isValidSerializationMode</a></li><li><a href="global.html#mkdir">mkdir</a></li><li><a href="global.html#needsJSONConversion">needsJSONConversion</a></li><li><a href="global.html#normalizeNodeName">normalizeNodeName</a></li><li><a href="global.html#parameterTypeFromValue">parameterTypeFromValue</a></li><li><a href="global.html#pathExists">pathExists</a></li><li><a href="global.html#readJsonSync">readJsonSync</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#removeSync">removeSync</a></li><li><a href="global.html#resolveTypeClass">resolveTypeClass</a></li><li><a href="global.html#reviveBigInts">reviveBigInts</a></li><li><a href="global.html#ros2Launch">ros2Launch</a></li><li><a href="global.html#ros2Run">ros2Run</a></li><li><a href="global.html#toJSONSafe">toJSONSafe</a></li><li><a href="global.html#toJSONString">toJSONString</a></li><li><a href="global.html#toPlainArrays">toPlainArrays</a></li><li><a href="global.html#validType">validType</a></li><li><a href="global.html#validValue">validValue</a></li><li><a href="global.html#validateArrayConstraints">validateArrayConstraints</a></li><li><a href="global.html#validateMessage">validateMessage</a></li><li><a href="global.html#validatePrimitiveValue">validatePrimitiveValue</a></li><li><a href="global.html#waitForMessage">waitForMessage</a></li><li><a href="global.html#writeFile">writeFile</a></li></ul></section>
+        </nav>
+    </aside>
+
+    <div class="site-main">
+        <header class="site-header">
+            <p class="page-eyebrow">API Reference</p>
+            <h1 class="page-title">Source: lib/parameter_event_handler.js</h1>
+            <p class="page-subtitle">ROS2.0 JavaScript client with Node.js</p>
+        </header>
+
+        <main id="main">
+            
+
+
+    
+    <section class="doc-section source-section">
+        <article class="prose-card">
+            <pre class="prettyprint source linenums"><code>// Copyright (c) 2026, The Robot Web Tools Contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+'use strict';
+
+const { TypeValidationError, OperationError } = require('./errors');
+const { normalizeNodeName } = require('./utils');
+const validator = require('./validator');
+const debug = require('debug')('rclnodejs:parameter_event_handler');
+
+const PARAMETER_EVENT_MSG_TYPE = 'rcl_interfaces/msg/ParameterEvent';
+const PARAMETER_EVENT_TOPIC = '/parameter_events';
+
+/**
+ * @class ParameterCallbackHandle
+ * Opaque handle returned when adding a parameter callback.
+ * Used to remove the callback later.
+ */
+class ParameterCallbackHandle {
+  /**
+   * @param {string} parameterName - The parameter name
+   * @param {string} nodeName - The fully qualified node name
+   * @param {Function} callback - The callback function
+   * @hideconstructor
+   */
+  constructor(parameterName, nodeName, callback) {
+    this.parameterName = parameterName;
+    this.nodeName = nodeName;
+    this.callback = callback;
+  }
+}
+
+/**
+ * @class ParameterEventCallbackHandle
+ * Opaque handle returned when adding a parameter event callback.
+ * Used to remove the callback later.
+ */
+class ParameterEventCallbackHandle {
+  /**
+   * @param {Function} callback - The callback function
+   * @hideconstructor
+   */
+  constructor(callback) {
+    this.callback = callback;
+  }
+}
+
+/**
+ * @class ParameterEventHandler
+ *
+ * Monitors and responds to parameter changes on any node in the ROS 2 graph
+ * by subscribing to the `/parameter_events` topic.
+ *
+ * Unlike {@link ParameterWatcher}, which is tied to a single remote node and
+ * requires waiting for that node's parameter services, ParameterEventHandler
+ * responds to parameter events from any node without needing service availability.
+ *
+ * Two types of callbacks are supported:
+ * - **Parameter callbacks**: fired when a specific parameter on a specific node
+ *   is added or changed (new_parameters + changed_parameters).
+ *   Note: deleted parameters are not dispatched to parameter callbacks;
+ *   use event callbacks to observe deletions.
+ * - **Event callbacks**: fired for every ParameterEvent message received,
+ *   including deletions.
+ *
+ * @example
+ * const handler = node.createParameterEventHandler();
+ *
+ * // Watch a specific parameter on a specific node
+ * const handle = handler.addParameterCallback(
+ *   'my_param',
+ *   '/my_node',
+ *   (parameter) => {
+ *     console.log(`Parameter changed: ${parameter.name} = ${parameter.value}`);
+ *   }
+ * );
+ *
+ * // Watch all parameter events
+ * const eventHandle = handler.addParameterEventCallback((event) => {
+ *   console.log(`Event from node: ${event.node}`);
+ * });
+ *
+ * // Remove callbacks when done
+ * handler.removeParameterCallback(handle);
+ * handler.removeParameterEventCallback(eventHandle);
+ *
+ * // Destroy when no longer needed
+ * handler.destroy();
+ */
+class ParameterEventHandler {
+  #node;
+  #subscription;
+  #parameterCallbacks; // Map&lt;string, ParameterCallbackHandle[]> keyed by "paramName\0nodeName"
+  #eventCallbacks; // ParameterEventCallbackHandle[]
+  #destroyed;
+
+  /**
+   * Create a ParameterEventHandler.
+   *
+   * @param {object} node - The rclnodejs Node used to create the subscription
+   * @param {object} [options] - Options
+   * @param {object} [options.qos] - QoS profile for the parameter_events subscription
+   */
+  constructor(node, options = {}) {
+    if (!node || typeof node.createSubscription !== 'function') {
+      throw new TypeValidationError('node', node, 'Node instance', {
+        entityType: 'parameter event handler',
+      });
+    }
+
+    if (
+      options !== undefined &amp;&amp;
+      options !== null &amp;&amp;
+      typeof options !== 'object'
+    ) {
+      throw new TypeValidationError('options', options, 'object or undefined', {
+        entityType: 'parameter event handler',
+      });
+    }
+
+    const opts = options || {};
+
+    this.#node = node;
+    this.#parameterCallbacks = new Map();
+    this.#eventCallbacks = [];
+    this.#destroyed = false;
+
+    const subscriptionOptions = opts.qos ? { qos: opts.qos } : undefined;
+
+    this.#subscription = node.createSubscription(
+      PARAMETER_EVENT_MSG_TYPE,
+      PARAMETER_EVENT_TOPIC,
+      subscriptionOptions,
+      (event) => this.#handleEvent(event)
+    );
+
+    debug('Created ParameterEventHandler on node=%s', node.name());
+  }
+
+  /**
+   * Add a callback for a specific parameter on a specific node.
+   *
+   * The callback is invoked whenever the named parameter is added or changed
+   * on the specified node. The callback receives the parameter message object
+   * (rcl_interfaces/msg/Parameter) with `name` and `value` fields.
+   *
+   * @param {string} parameterName - Name of the parameter to monitor
+   * @param {string} nodeName - Fully qualified name of the node (e.g., '/my_node')
+   * @param {Function} callback - Called with (parameter) when the parameter changes
+   * @returns {ParameterCallbackHandle} Handle for removing this callback later
+   * @throws {Error} If the handler has been destroyed
+   * @throws {TypeError} If arguments are invalid
+   */
+  addParameterCallback(parameterName, nodeName, callback) {
+    this.#checkNotDestroyed();
+
+    if (typeof parameterName !== 'string' || parameterName.trim() === '') {
+      throw new TypeValidationError(
+        'parameterName',
+        parameterName,
+        'non-empty string',
+        { entityType: 'parameter event handler' }
+      );
+    }
+
+    if (typeof nodeName !== 'string' || nodeName.trim() === '') {
+      throw new TypeValidationError('nodeName', nodeName, 'non-empty string', {
+        entityType: 'parameter event handler',
+      });
+    }
+
+    if (typeof callback !== 'function') {
+      throw new TypeValidationError('callback', callback, 'function', {
+        entityType: 'parameter event handler',
+      });
+    }
+
+    const resolvedNodeName = normalizeNodeName(nodeName);
+    const resolvedParamName = parameterName.trim();
+    const handle = new ParameterCallbackHandle(
+      resolvedParamName,
+      resolvedNodeName,
+      callback
+    );
+    const key = this.#makeKey(resolvedParamName, resolvedNodeName);
+
+    if (!this.#parameterCallbacks.has(key)) {
+      this.#parameterCallbacks.set(key, []);
+    }
+
+    // Insert at front (FILO order, matching rclpy behavior)
+    this.#parameterCallbacks.get(key).unshift(handle);
+
+    debug(
+      'Added parameter callback: param=%s node=%s',
+      resolvedParamName,
+      resolvedNodeName
+    );
+
+    return handle;
+  }
+
+  /**
+   * Configure which node parameter events will be received.
+   *
+   * If nodeNames is omitted or empty, the current node filter is cleared.
+   * When a filter is active, parameter and event callbacks only receive
+   * events from the specified nodes.
+   *
+   * @param {string[]} [nodeNames] - Node names to filter parameter events from.
+   *   Relative names are resolved against the handler node namespace.
+   * @returns {boolean} True if the filter is active or was successfully cleared.
+   */
+  configureNodesFilter(nodeNames) {
+    this.#checkNotDestroyed();
+
+    if (nodeNames === undefined || nodeNames === null) {
+      this.#subscription.clearContentFilter();
+      return !this.#subscription.hasContentFilter();
+    }
+
+    if (!Array.isArray(nodeNames)) {
+      throw new TypeValidationError('nodeNames', nodeNames, 'string[]', {
+        entityType: 'parameter event handler',
+      });
+    }
+
+    if (nodeNames.length === 0) {
+      this.#subscription.clearContentFilter();
+      return !this.#subscription.hasContentFilter();
+    }
+
+    const resolvedNodeNames = nodeNames.map((nodeName, index) => {
+      if (typeof nodeName !== 'string' || nodeName.trim() === '') {
+        throw new TypeValidationError(
+          `nodeNames[${index}]`,
+          nodeName,
+          'non-empty string',
+          {
+            entityType: 'parameter event handler',
+          }
+        );
+      }
+
+      const resolvedNodeName = this.#resolvePath(nodeName.trim());
+      this.#validateFullyQualifiedNodePath(resolvedNodeName);
+      return resolvedNodeName;
+    });
+
+    const contentFilter = {
+      expression: resolvedNodeNames
+        .map((_, index) => `node = %${index}`)
+        .join(' OR '),
+      parameters: resolvedNodeNames.map((nodeName) => `'${nodeName}'`),
+    };
+
+    this.#subscription.setContentFilter(contentFilter);
+    return this.#subscription.hasContentFilter();
+  }
+
+  /**
+   * Remove a previously added parameter callback.
+   *
+   * @param {ParameterCallbackHandle} handle - The handle returned by addParameterCallback
+   * @throws {Error} If the handle is not found or handler is destroyed
+   */
+  removeParameterCallback(handle) {
+    this.#checkNotDestroyed();
+
+    if (!(handle instanceof ParameterCallbackHandle)) {
+      throw new TypeValidationError(
+        'handle',
+        handle,
+        'ParameterCallbackHandle',
+        { entityType: 'parameter event handler' }
+      );
+    }
+
+    const key = this.#makeKey(handle.parameterName, handle.nodeName);
+    const callbacks = this.#parameterCallbacks.get(key);
+
+    if (!callbacks) {
+      throw new OperationError(
+        `No callbacks registered for parameter '${handle.parameterName}' on node '${handle.nodeName}'`,
+        { entityType: 'parameter event handler' }
+      );
+    }
+
+    const index = callbacks.indexOf(handle);
+    if (index === -1) {
+      throw new OperationError("Callback doesn't exist", {
+        entityType: 'parameter event handler',
+      });
+    }
+
+    callbacks.splice(index, 1);
+
+    if (callbacks.length === 0) {
+      this.#parameterCallbacks.delete(key);
+    }
+
+    debug(
+      'Removed parameter callback: param=%s node=%s',
+      handle.parameterName,
+      handle.nodeName
+    );
+  }
+
+  /**
+   * Add a callback that is invoked for every parameter event.
+   *
+   * The callback receives the full ParameterEvent message
+   * (rcl_interfaces/msg/ParameterEvent) with `node`, `new_parameters`,
+   * `changed_parameters`, and `deleted_parameters` fields.
+   *
+   * @param {Function} callback - Called with (event) for every ParameterEvent
+   * @returns {ParameterEventCallbackHandle} Handle for removing this callback later
+   * @throws {Error} If the handler has been destroyed
+   * @throws {TypeError} If callback is not a function
+   */
+  addParameterEventCallback(callback) {
+    this.#checkNotDestroyed();
+
+    if (typeof callback !== 'function') {
+      throw new TypeValidationError('callback', callback, 'function', {
+        entityType: 'parameter event handler',
+      });
+    }
+
+    const handle = new ParameterEventCallbackHandle(callback);
+
+    // Insert at front (FILO order)
+    this.#eventCallbacks.unshift(handle);
+
+    debug('Added parameter event callback');
+
+    return handle;
+  }
+
+  /**
+   * Remove a previously added parameter event callback.
+   *
+   * @param {ParameterEventCallbackHandle} handle - The handle returned by addParameterEventCallback
+   * @throws {Error} If the handle is not found or handler is destroyed
+   */
+  removeParameterEventCallback(handle) {
+    this.#checkNotDestroyed();
+
+    if (!(handle instanceof ParameterEventCallbackHandle)) {
+      throw new TypeValidationError(
+        'handle',
+        handle,
+        'ParameterEventCallbackHandle',
+        { entityType: 'parameter event handler' }
+      );
+    }
+
+    const index = this.#eventCallbacks.indexOf(handle);
+    if (index === -1) {
+      throw new OperationError("Callback doesn't exist", {
+        entityType: 'parameter event handler',
+      });
+    }
+
+    this.#eventCallbacks.splice(index, 1);
+
+    debug('Removed parameter event callback');
+  }
+
+  /**
+   * Check if the handler has been destroyed.
+   *
+   * @returns {boolean} True if destroyed
+   */
+  isDestroyed() {
+    return this.#destroyed;
+  }
+
+  /**
+   * Destroy the handler and clean up resources.
+   * Removes the subscription and clears all callbacks.
+   */
+  destroy() {
+    if (this.#destroyed) {
+      return;
+    }
+
+    debug('Destroying ParameterEventHandler');
+
+    if (this.#subscription) {
+      try {
+        this.#node.destroySubscription(this.#subscription);
+      } catch (error) {
+        debug('Error destroying subscription: %s', error.message);
+      }
+      this.#subscription = null;
+    }
+
+    this.#parameterCallbacks.clear();
+    this.#eventCallbacks.length = 0;
+    this.#destroyed = true;
+  }
+
+  /**
+   * Get a specific parameter from a ParameterEvent message.
+   *
+   * @param {object} event - A ParameterEvent message
+   * @param {string} parameterName - The parameter name to look for
+   * @param {string} nodeName - The node name to match
+   * @returns {object|null} The matching parameter message, or null
+   * @static
+   */
+  static getParameterFromEvent(event, parameterName, nodeName) {
+    const resolvedNodeName = normalizeNodeName(nodeName);
+    const resolvedParamName = (parameterName || '').trim();
+
+    if (normalizeNodeName(event.node) !== resolvedNodeName) {
+      return null;
+    }
+
+    const allParams = [
+      ...(event.new_parameters || []),
+      ...(event.changed_parameters || []),
+    ];
+
+    for (const param of allParams) {
+      if (param.name === resolvedParamName) {
+        return param;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Get all parameters from a ParameterEvent message (new + changed).
+   *
+   * @param {object} event - A ParameterEvent message
+   * @returns {object[]} Array of parameter messages
+   * @static
+   */
+  static getParametersFromEvent(event) {
+    return [
+      ...(event.new_parameters || []),
+      ...(event.changed_parameters || []),
+    ];
+  }
+
+  /**
+   * Handle incoming parameter event.
+   * @private
+   */
+  #handleEvent(event) {
+    const eventNodeName = normalizeNodeName(event.node);
+
+    // Dispatch parameter-specific callbacks by iterating event params
+    // and doing direct Map lookups (O(event_params) instead of O(registered_callbacks))
+    const allParams = [
+      ...(event.new_parameters || []),
+      ...(event.changed_parameters || []),
+    ];
+
+    for (const parameter of allParams) {
+      const key = this.#makeKey(parameter.name, eventNodeName);
+      const callbacks = this.#parameterCallbacks.get(key);
+
+      if (callbacks) {
+        for (const handle of callbacks.slice()) {
+          try {
+            handle.callback(parameter);
+          } catch (err) {
+            debug(
+              'Error in parameter callback for %s on %s: %s',
+              parameter.name,
+              eventNodeName,
+              err.message
+            );
+          }
+        }
+      }
+    }
+
+    // Dispatch event-level callbacks
+    for (const handle of this.#eventCallbacks.slice()) {
+      try {
+        handle.callback(event);
+      } catch (err) {
+        debug('Error in parameter event callback: %s', err.message);
+      }
+    }
+  }
+
+  /**
+   * Create a map key from parameter name and node name.
+   * @private
+   */
+  #makeKey(paramName, nodeName) {
+    return `${paramName}\0${nodeName}`;
+  }
+
+  /**
+   * Resolve a node path to the fully qualified name used in ParameterEvent.node.
+   * @private
+   */
+  #resolvePath(nodePath) {
+    // Absolute node paths are already rooted. Relative names are resolved
+    // against the handler node namespace before building the content filter.
+    const unresolvedPath = nodePath.startsWith('/')
+      ? nodePath
+      : `${this.#node.namespace().replace(/\/+$/, '')}/${nodePath}`;
+
+    // Collapse repeated separators for inputs like '/ns//node/' or 'nested//node'.
+    const resolvedPath = unresolvedPath.replace(/\/+/g, '/');
+
+    // Preserve the root namespace as '/' and strip trailing slashes everywhere
+    // else so the filter matches the canonical ParameterEvent.node format.
+    if (resolvedPath === '/') {
+      return resolvedPath;
+    }
+
+    return resolvedPath.replace(/\/+$/, '');
+  }
+
+  /**
+   * Validate a fully qualified node path before using it in a content filter.
+   * @private
+   */
+  #validateFullyQualifiedNodePath(nodePath) {
+    const normalizedPath =
+      nodePath.length > 1 ? nodePath.replace(/\/+$/, '') : nodePath;
+    const separatorIndex = normalizedPath.lastIndexOf('/');
+    const nodeNamespace =
+      separatorIndex === 0 ? '/' : normalizedPath.slice(0, separatorIndex);
+    const nodeName = normalizedPath.slice(separatorIndex + 1);
+
+    validator.validateNamespace(nodeNamespace);
+    validator.validateNodeName(nodeName);
+  }
+
+  /**
+   * Check if the handler has been destroyed and throw if so.
+   * @private
+   */
+  #checkNotDestroyed() {
+    if (this.#destroyed) {
+      throw new OperationError('ParameterEventHandler has been destroyed', {
+        entityType: 'parameter event handler',
+      });
+    }
+  }
+}
+
+module.exports = ParameterEventHandler;
+module.exports.ParameterCallbackHandle = ParameterCallbackHandle;
+module.exports.ParameterEventCallbackHandle = ParameterEventCallbackHandle;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+        </main>
+
+        <footer class="site-footer">
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.5</a> on Thu Jun 25 2026 11:01:37 GMT+0800 (Singapore Standard Time)
+        </footer>
+    </div>
+</div>
+
+<script>
+    prettyPrint();
+    (function() {
+        var button = document.querySelector('.nav-toggle');
+        var shell = document.querySelector('.app-shell');
+
+        if (!button || !shell) {
+            return;
+        }
+
+        button.addEventListener('click', function() {
+            var isOpen = shell.classList.toggle('nav-open');
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+    }());
+</script>
+<script src="../_static/scripts/linenumber.js"> </script>
+</body>
+</html>
