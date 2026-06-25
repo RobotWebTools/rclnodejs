@@ -31,9 +31,6 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Fetch gh-pages branch
-        run: git fetch origin gh-pages:refs/remotes/origin/gh-pages
-
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -43,12 +40,12 @@ jobs:
         run: npm install --ignore-scripts --no-audit --no-fund
 
       - name: Build docs
-        run: npm run docs:gh-pages
+        run: npm run docs:publish
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: build/gh-pages-docs
+          path: build/published-docs
 
   deploy:
     needs: build

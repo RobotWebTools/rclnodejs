@@ -1,8 +1,16 @@
 # JSDoc Workflow
 
 This directory contains the custom JSDoc template, the landing-page generator,
-and the staging script used to prepare the docs content that is published to the
-`gh-pages` branch.
+and the staging script used to prepare the docs content that is published to
+GitHub Pages.
+
+The published version set is curated in
+[`published-versions.json`](./published-versions.json). That manifest is the
+source of truth for which versions appear on the live docs site. Each staging
+run rebuilds the whole site from scratch: every listed version is rebuilt from
+its Git tag and the in-development version from the current workspace. The
+staged tree is therefore a pure function of the manifest plus the tags — there
+is no `gh-pages` branch state to maintain or drift out of sync.
 
 ## Commands
 
@@ -18,52 +26,46 @@ Output:
 Use this to verify the docs for the version currently declared in
 `package.json`.
 
-### `npm run docs:gh-pages`
+### `npm run docs:publish`
 
-Stage the publishable docs tree under `build/gh-pages-docs/`.
-
-Behavior:
-
-- reads the currently published version set from `origin/gh-pages`
-- preserves that published history
-- regenerates docs for the current workspace version
-- rebuilds the staged landing page index
-
-This is the normal command to use for a new release.
-
-If you delete `build/` and rerun `npm run docs:gh-pages`, the staged tree will
-still contain all currently published versions. That command recreates
-`build/gh-pages-docs/` by copying the published docs snapshot from
-`origin/gh-pages`, then regenerating only the current workspace version.
-
-### `npm run docs:gh-pages:full`
-
-Fully rebuild the currently published docs history under
-`build/gh-pages-docs/`.
+Stage the full publishable docs tree under `build/published-docs/`.
 
 Behavior:
 
-- reads the published version set from `origin/gh-pages`
-- rebuilds only those published versions from tags
-- regenerates docs for the current workspace version
+- reads the published version set from `published-versions.json`
+- rebuilds every listed version from its Git tag
+- rebuilds the current workspace version from the working tree (always included)
 - rebuilds the staged landing page index
 
-This does **not** rebuild docs for every historical `rclnodejs` tag. It only
-rebuilds the subset that is actually published online.
+This is the normal command to use for a new release, and it is fully
+deterministic: deleting `build/` and rerunning reproduces the identical tree.
+
+This does **not** rebuild docs for every historical `rclnodejs` tag — only the
+curated subset listed in the manifest. To change which versions are published,
+edit `published-versions.json`.
+
+The script reads the manifest next to it by default. Override the inputs only
+for testing:
+
+- `--manifest <path>` — use a different version manifest
+- `--out <dir>` — stage into a different directory
+- `--keep-worktrees` — leave the temporary Git worktrees in place for inspection
 
 ## New Release Example
 
 For a new release such as `1.9.0`:
 
 1. Update `package.json` to `1.9.0`.
-2. Run `npm run docs`.
-3. Verify the local output in `docs/1.9.0/` and `docs/index.html`.
-4. Run `npm run docs:gh-pages`.
-5. Verify the staged output in:
-   - `build/gh-pages-docs/docs/1.9.0/`
-   - `build/gh-pages-docs/docs/index.html`
-   - `build/gh-pages-docs/.nojekyll`
-6. Publish the contents of `build/gh-pages-docs/` to the `gh-pages` branch.
+2. Add `1.9.0` to the `versions` array in `published-versions.json`.
+3. Run `npm run docs`.
+4. Verify the local output in `docs/1.9.0/` and `docs/index.html`.
+5. Run `npm run docs:publish`.
+6. Verify the staged output in:
+   - `build/published-docs/docs/1.9.0/`
+   - `build/published-docs/docs/index.html`
+   - `build/published-docs/.nojekyll`
+7. Publish the contents of `build/published-docs/` to GitHub Pages (the
+   `deploy-docs.yml` workflow does this automatically on a `docs-*` tag).
 
 ## GitHub Actions Deployment
 
@@ -82,10 +84,17 @@ so manual dispatches and `docs-*` tag pushes there will not run the docs build.
 
 ### What it does
 
-1. Full checkout with all tags and the `origin/gh-pages` branch.
-2. Runs `npm run docs:gh-pages` to stage the docs tree.
+1. Full checkout with all tags.
+2. Runs `npm run docs:publish` to stage the docs tree. This reads
+   `published-versions.json` and rebuilds every listed version from its tag
+   plus the current workspace version.
 3. Uploads the staged output as a Pages artifact.
 4. Deploys to GitHub Pages (skipped when `dry_run` is `true`).
+
+The workflow only needs `contents: read` and never writes to any branch.
+Because the manifest plus the Git tags fully describe the published set, the
+live site is always reconstructed from a fresh build — nothing can silently
+drop off.
 
 ### Testing
 
@@ -99,29 +108,29 @@ so manual dispatches and `docs-*` tag pushes there will not run the docs build.
 ## Manual Landing Page Rebuild
 
 If the staged docs tree already exists and you only want to rebuild
-`build/gh-pages-docs/docs/index.html`, run `tools/jsdoc/build-index.js` against
+`build/published-docs/docs/index.html`, run `tools/jsdoc/build-index.js` against
 that docs root and point it at the package metadata for the latest published
 version.
 
 Example for published version `1.8.0`:
 
 ```bash
-mkdir -p build/gh-pages-docs/.tmp
-git show 1.8.0:package.json > build/gh-pages-docs/.tmp/package-1.8.0.json
+mkdir -p build/published-docs/.tmp
+git show 1.8.0:package.json > build/published-docs/.tmp/package-1.8.0.json
 
-export RCLNODEJS_DOCS_ROOT="$PWD/build/gh-pages-docs/docs"
-export RCLNODEJS_DOCS_INDEX_PATH="$PWD/build/gh-pages-docs/docs/index.html"
+export RCLNODEJS_DOCS_ROOT="$PWD/build/published-docs/docs"
+export RCLNODEJS_DOCS_INDEX_PATH="$PWD/build/published-docs/docs/index.html"
 export RCLNODEJS_LOCAL_INDEX_PATH=''
-export RCLNODEJS_PACKAGE_JSON_PATH="$PWD/build/gh-pages-docs/.tmp/package-1.8.0.json"
+export RCLNODEJS_PACKAGE_JSON_PATH="$PWD/build/published-docs/.tmp/package-1.8.0.json"
 
 node tools/jsdoc/build-index.js
-rm -rf build/gh-pages-docs/.tmp
+rm -rf build/published-docs/.tmp
 ```
 
 ## Notes
 
-- The staged publish output keeps shared assets in `build/gh-pages-docs/docs/_static/`.
+- The staged publish output keeps shared assets in `build/published-docs/docs/_static/`.
 - `.nojekyll` must remain in the staged output because the published docs tree
   uses an underscore-prefixed directory.
-- The live docs index is the source of truth for which versions should remain
-  published.
+- `published-versions.json` is the source of truth for which versions are
+  published; the Git tags are the content source.
