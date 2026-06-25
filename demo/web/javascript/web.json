@@ -4,8 +4,10 @@
   "path": "/capability",
   "node": "rclnodejs_web_demo",
   "http": {
-    "$comment": "HTTP transport for `call` and `publish`. curl-able, AI-agent friendly. Subscribe still uses WebSocket.",
-    "port": 9001
+    "$comment": "HTTP transport for `call` and `publish` (curl-able, AI-agent friendly). `sse` also exposes `subscribe` over Server-Sent Events; `cors: \"*\"` allows any origin so a cross-origin browser EventSource can connect. Matches the bundled runtime.mjs.",
+    "port": 9001,
+    "sse": true,
+    "cors": "*"
   },
   "expose": {
     "call": {
@@ -15,8 +17,8 @@
       "/web_demo_chatter": "std_msgs/msg/String"
     },
     "subscribe": {
-      "/web_demo_tick": "std_msgs/msg/String",
-      "/web_demo_chatter": "std_msgs/msg/String"
+      "/web_demo_chatter": "std_msgs/msg/String",
+      "/topic": "std_msgs/msg/String"
     }
   }
 }

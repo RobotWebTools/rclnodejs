@@ -130,7 +130,8 @@ window.addEventListener('beforeunload', () => ros.close());
 
 When `--http-port` is on, every `call` / `publish` is reachable from
 any HTTP client — curl, Postman, AI-agent tool-use, no SDK required.
-Subscribe stays on WebSocket.
+With `--http-sse` (or `"http": { "sse": true }`), `subscribe` is also
+reachable over HTTP as a Server-Sent Events stream.
 
 ```bash
 # Service call
@@ -143,6 +144,29 @@ curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
 curl -sS -X POST http://localhost:9001/capability/publish/chatter \
   -H 'content-type: application/json' \
   -d '{"data":"hi from curl"}'
+
+# Subscribe over Server-Sent Events (needs --http-sse). Streams until
+# you disconnect; -N keeps curl from buffering the event stream.
+curl -N http://localhost:9001/capability/subscribe/chatter
+# event: ready
+# data: {"capability":"/chatter","subId":"sse"}
+#
+# event: message
+# data: {"data":"hello"}
+```
+
+From a browser, the same SSE endpoint works with the built-in
+`EventSource` (cross-origin when `--http-cors` is set):
+
+```js
+const es = new EventSource(
+  'http://localhost:9001/capability/subscribe/chatter'
+);
+es.addEventListener('message', (e) => {
+  const msg = JSON.parse(e.data);
+  console.log(msg.data);
+});
+es.addEventListener('error', () => es.close());
 ```
 
 ## 4. `rclnodejs/web` vs. `rosbridge` + `roslibjs`

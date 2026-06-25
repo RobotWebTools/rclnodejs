@@ -26,8 +26,14 @@ npm run server
 #               also http://localhost:9001/capability
 ```
 
-`server.ts` runs the runtime *and* a tiny `/add_two_ints` service +
-1 Hz `/web_demo_tick` publisher so every panel has live data.
+`server.ts` runs the runtime *plus* a tiny `/add_two_ints` service and a
+1 Hz `/web_demo_tick` publisher, so every panel has live data.
+
+> The HTTP transport here serves `call` / `publish` only; `subscribe`
+> uses WebSocket. HTTP `subscribe` over Server-Sent Events is an opt-in
+> (`new HttpTransport({ sse: true })`, or `--http-sse` on the CLI) — see
+> the [JavaScript demo](../javascript/README.md) for a working SSE +
+> `EventSource` example.
 
 **Shell 2 — Vite dev server:**
 
@@ -38,26 +44,20 @@ npm run dev
 
 ## Without the bundled `server.ts`
 
-`npm run server` is a convenience for this demo — it bundles the
-runtime **and** a tiny `/add_two_ints` service + `/web_demo_tick`
-publisher into one process so the demo works out of the box.
-
-In a real project you already have those ROS 2 nodes running
-elsewhere, so you only need the runtime. **Replace shell 1's
-`npm run server` with the CLI** — shell 2 (`npm run dev`) and
-`src/main.ts` are unchanged:
+`npm run server` bundles the runtime and the demo's sample nodes into one
+process so it runs out of the box. In a real project those nodes already
+run elsewhere, so you only need the runtime — replace shell 1 with the
+CLI (shell 2 and `src/main.ts` are unchanged):
 
 ```bash
-# shell 1 (instead of `npm run server`)
 npx rclnodejs-web web.json
 
-# the publisher / service the demo expects:
+# plus the nodes the demo expects:
 ros2 run demo_nodes_cpp add_two_ints_server
-# (and a publisher of std_msgs/String on /web_demo_tick from any source)
+# (and any std_msgs/String publisher on /web_demo_tick)
 ```
 
-The browser doesn't know or care which option is running — it only
-sees `ws://localhost:9000/capability` either way.
+The browser only sees `ws://localhost:9000/capability` either way.
 
 ## Other npm scripts
 

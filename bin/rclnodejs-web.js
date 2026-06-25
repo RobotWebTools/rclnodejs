@@ -21,6 +21,7 @@ import {
   parseArgv,
   loadConfigFile,
   mergeConfig,
+  validateConfig,
   HELP,
 } from '../lib/runtime/cli-config.js';
 
@@ -51,6 +52,11 @@ const argv = process.argv.slice(2);
   let cfg;
   try {
     cfg = mergeConfig(loadConfigFile(parsed.configPath), parsed.partial);
+    // Re-validate the merged result: loadConfigFile only validates the
+    // JSON file, so values supplied purely via flags (e.g.
+    // `--http-sse-keep-alive foo` → NaN, or a non-numeric `--http-port`)
+    // would otherwise reach the transport unchecked.
+    validateConfig(cfg, 'options');
   } catch (e) {
     fail(e);
   }
@@ -91,6 +97,12 @@ const argv = process.argv.slice(2);
           port: cfg.http.port,
           host: cfg.http.host || cfg.host,
           basePath: cfg.http.basePath || cfg.path,
+          sse: cfg.http.sse,
+          sseKeepAliveMs:
+            cfg.http.sseKeepAliveMs != null
+              ? cfg.http.sseKeepAliveMs
+              : undefined,
+          cors: cfg.http.cors,
         })
       );
     }
@@ -118,8 +130,11 @@ const argv = process.argv.slice(2);
       if (httpTransport) {
         const httpHost = displayHost(cfg.http.host || cfg.host);
         const httpBase = cfg.http.basePath || cfg.path;
+        const httpKinds = cfg.http.sse
+          ? 'call/publish + subscribe (SSE)'
+          : 'call/publish only';
         process.stdout.write(
-          `                  also http://${httpHost}:${httpTransport.port}${httpBase} (call/publish only)\n`
+          `                  also http://${httpHost}:${httpTransport.port}${httpBase} (${httpKinds})\n`
         );
       }
     }

@@ -193,14 +193,14 @@
 console.log(reply.sum); <span class="com">// '42n'</span></pre>
     </div>
 
-    <h2>2. Topic subscription — <code>/web_demo_tick</code></h2>
+    <h2>2. Topic subscription — <code>/web_demo_chatter</code></h2>
     <div class="panel">
       <div class="controls">
         <div class="row">
           <button id="subBtn">subscribe</button>
           <button id="unsubBtn" disabled>unsubscribe</button>
         </div>
-        <div class="log" id="tickLog"></div>
+        <div class="log" id="subLog"></div>
       </div>
       <pre
         class="code"
@@ -208,8 +208,9 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
 
 <span class="kw">const</span> ros = <span class="kw">await</span> connect(<span class="str">'ws://localhost:9000/capability'</span>);
 
-<span class="com">// The server publishes /web_demo_tick once a second.</span>
-<span class="kw">const</span> sub = <span class="kw">await</span> ros.<span class="kw">subscribe</span>(<span class="str">'/web_demo_tick'</span>, (msg) =&gt; {
+<span class="com">// /web_demo_chatter is the shared demo topic — anything panel 3</span>
+<span class="com">// (or curl) publishes to it lands here, since it's the same topic.</span>
+<span class="kw">const</span> sub = <span class="kw">await</span> ros.<span class="kw">subscribe</span>(<span class="str">'/web_demo_chatter'</span>, (msg) =&gt; {
   console.log(<span class="str">'recv:'</span>, msg.data);
 });
 
@@ -273,8 +274,12 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
       The HTTP transport is what makes <code>rclnodejs/web</code>
       <em>actually</em> web-native: every <code>call</code> and
       <code>publish</code> in your allow-list is reachable from any HTTP client
-      — curl, Postman, an AI agent… no JavaScript required. Subscribe stays on
-      WebSocket.
+      — curl, Postman, an AI agent… no JavaScript required. With
+      <code>sse: true</code> on the runtime (set in this demo's
+      <code>runtime.mjs</code>), <code>subscribe</code> is also reachable as a
+      Server-Sent Events stream — handy for clients that can't hold a
+      WebSocket open. Browser apps still prefer the WebSocket transport, which
+      multiplexes many topics on one connection.
     </p>
     <pre
       class="code"
@@ -289,10 +294,127 @@ curl -sS -X POST http://localhost:9001/capability/publish/web_demo_chatter \
   -H <span class="str">'content-type: application/json'</span> \
   -d <span class="str">'{"data":"hi from curl"}'</span>
 
+<span class="com"># subscribe over SSE — streams text/event-stream until you ^C</span>
+<span class="com"># (-N disables curl's buffering so events print as they arrive)</span>
+curl -N http://localhost:9001/capability/subscribe/web_demo_chatter
+<span class="com"># event: ready</span>
+<span class="com"># data: {"capability":"/web_demo_chatter","subId":"sse"}</span>
+<span class="com">#</span>
+<span class="com"># event: message</span>
+<span class="com"># data: {"data":"hi from curl"}</span>
+<span class="com"># …one `message` event per published sample…</span>
+
 <span class="com"># allow-list rejection — returns 404 + structured error body</span>
 curl -sS -X POST http://localhost:9001/capability/call/dangerous \
   -H <span class="str">'content-type: application/json'</span> -d <span class="str">'{}'</span>
 <span class="com"># =&gt; {"ok":false,"error":"capability not exposed: call /dangerous","code":"not_exposed"}</span></pre>
+
+    <h2>
+      6. Native <code>EventSource</code> — SSE subscribe over HTTP
+      <span class="badge">no SDK</span>
+    </h2>
+    <p style="font-size: 0.9em; color: #555">
+      The same SSE stream the <code>curl</code> example above reads is a
+      first-class browser API: <code>EventSource</code>. No SDK, no WebSocket —
+      just a plain HTTP GET the browser keeps open and auto-reconnects. This
+      works cross-origin because the runtime sends CORS headers
+      (<code>new HttpTransport({ sse: true, cors: true })</code>). For
+      multiplexing many topics on one connection, the WebSocket transport in
+      section 2 is still the better fit.
+    </p>
+    <p style="font-size: 0.9em; color: #555">
+      The topic box defaults to <code>/web_demo_chatter</code> — the same
+      topic panels 2 and 3 use, so a publish from panel 3 streams in here at
+      the same time it reaches the WebSocket subscriber. Point the box at
+      <code>/topic</code> instead to subscribe to an external ROS 2 publisher
+      (see the README's <em>publisher example</em> pairing).
+    </p>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <input
+            id="sseTopic"
+            type="text"
+            value="/web_demo_chatter"
+            spellcheck="false"
+            aria-label="topic to subscribe to"
+          />
+          <button id="sseBtn">open EventSource</button>
+          <button id="sseCloseBtn" disabled>close</button>
+        </div>
+        <div class="log" id="sseLog"></div>
+      </div>
+      <pre
+        class="code"
+      ><span class="com">// No import — EventSource is built into every browser.</span>
+<span class="com">// '/web_demo_chatter' is the shared demo topic; use '/topic' to pair with publisher-example.mjs.</span>
+<span class="kw">const</span> es = <span class="kw">new</span> EventSource(
+  <span class="str">'http://localhost:9001/capability/subscribe/web_demo_chatter'</span>,
+);
+
+es.addEventListener(<span class="str">'ready'</span>, (e) =&gt;
+  console.log(<span class="str">'subscribed:'</span>, JSON.parse(e.data)),
+);
+es.addEventListener(<span class="str">'message'</span>, (e) =&gt; {
+  <span class="kw">const</span> msg = JSON.parse(e.data);
+  console.log(<span class="str">'recv:'</span>, msg.data);
+});
+
+<span class="com">// later — stop receiving:</span>
+es.close();</pre>
+    </div>
+
+    <h2>
+      7. Native <code>fetch()</code> — call &amp; publish over HTTP
+      <span class="badge">no SDK</span>
+    </h2>
+    <p style="font-size: 0.9em; color: #555">
+      The <code>curl</code> commands in section 5 translate one-to-one to the
+      browser's <code>fetch()</code> API — same method, URL, headers and JSON
+      body. Because the runtime sends CORS headers
+      (<code>new HttpTransport({ cors: true })</code>), these cross-origin
+      requests succeed straight from the page (served on <code>:8080</code>,
+      runtime on <code>:9001</code>). <code>call</code> returns
+      <code>200</code> + a JSON reply; <code>publish</code> returns
+      <code>204 No Content</code>. The publish lands on the same
+      <code>/web_demo_chatter</code> topic as panels 2 and 3, so it also shows
+      up in their logs.
+    </p>
+    <div class="panel">
+      <div class="controls">
+        <div class="row">
+          <button id="fetchCallBtn">fetch call <code>/add_two_ints</code></button>
+          <button id="fetchPubBtn">
+            fetch publish <code>/web_demo_chatter</code>
+          </button>
+        </div>
+        <div class="log" id="fetchLog"></div>
+      </div>
+      <pre
+        class="code"
+      ><span class="com">// No import — fetch() is built into every browser.</span>
+<span class="com">// Service call → 200 + JSON reply:</span>
+<span class="kw">const</span> res = <span class="kw">await</span> fetch(
+  <span class="str">'http://localhost:9001/capability/call/add_two_ints'</span>,
+  {
+    method: <span class="str">'POST'</span>,
+    headers: { <span class="str">'content-type'</span>: <span class="str">'application/json'</span> },
+    body: JSON.stringify({ a: <span class="str">'7n'</span>, b: <span class="str">'35n'</span> }),
+  },
+);
+<span class="kw">const</span> reply = <span class="kw">await</span> res.json();
+console.log(reply.sum); <span class="com">// '42n'</span>
+
+<span class="com">// Topic publish → 204 No Content (no body):</span>
+<span class="kw">await</span> fetch(
+  <span class="str">'http://localhost:9001/capability/publish/web_demo_chatter'</span>,
+  {
+    method: <span class="str">'POST'</span>,
+    headers: { <span class="str">'content-type'</span>: <span class="str">'application/json'</span> },
+    body: JSON.stringify({ data: <span class="str">'hello from fetch()'</span> }),
+  },
+);</pre>
+    </div>
 
     <script type="module">
       import { connect } from '/sdk/index.js';
@@ -335,14 +457,14 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
       };
 
       let ros;
-      let tickSub;
+      let chatterSub;
 
       async function teardown() {
-        if (tickSub) {
+        if (chatterSub) {
           try {
-            await tickSub.close();
+            await chatterSub.close();
           } catch (_) {}
-          tickSub = null;
+          chatterSub = null;
           document.getElementById('subBtn').disabled = false;
           document.getElementById('unsubBtn').disabled = true;
         }
@@ -400,23 +522,23 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
         subBtn.onclick = async () => {
           if (!ros) return;
           try {
-            tickSub = await ros.subscribe('/web_demo_tick', (msg) =>
-              log('tickLog', msg.data)
+            chatterSub = await ros.subscribe('/web_demo_chatter', (msg) =>
+              log('subLog', msg.data)
             );
             subBtn.disabled = true;
             unsubBtn.disabled = false;
-            log('tickLog', `subscribed (subId=${tickSub.subId})`, 'ok');
+            log('subLog', `subscribed (subId=${chatterSub.subId})`, 'ok');
           } catch (e) {
-            log('tickLog', `error: ${e.message} (${e.code})`, 'err');
+            log('subLog', `error: ${e.message} (${e.code})`, 'err');
           }
         };
         unsubBtn.onclick = async () => {
-          if (!tickSub) return;
-          await tickSub.close();
-          tickSub = null;
+          if (!chatterSub) return;
+          await chatterSub.close();
+          chatterSub = null;
           unsubBtn.disabled = true;
           subBtn.disabled = false;
-          log('tickLog', 'unsubscribed', 'ok');
+          log('subLog', 'unsubscribed', 'ok');
         };
 
         document.getElementById('pubBtn').onclick = async () => {
@@ -441,6 +563,103 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
             );
           } catch (e) {
             log('badLog', `rejected: ${e.message} (${e.code})`, 'ok');
+          }
+        };
+
+        // Native EventSource — independent of the WS/HTTP transport
+        // toggle above. It always talks to the HTTP transport's SSE
+        // endpoint directly, which is exactly the point: no SDK, no
+        // WebSocket, just a browser primitive over plain HTTP (CORS is
+        // enabled on the runtime so this works cross-origin).
+        const sseBtn = document.getElementById('sseBtn');
+        const sseCloseBtn = document.getElementById('sseCloseBtn');
+        const sseTopic = document.getElementById('sseTopic');
+        let es;
+        const closeEs = () => {
+          if (es) {
+            es.close();
+            es = null;
+          }
+          sseBtn.disabled = false;
+          sseCloseBtn.disabled = true;
+          sseTopic.disabled = false;
+        };
+        sseBtn.onclick = () => {
+          closeEs();
+          // Accept '/topic' or 'topic'; the URL path carries the bare name.
+          const name = (sseTopic.value || '/web_demo_chatter')
+            .trim()
+            .replace(/^\//, '');
+          const url = `${ENDPOINTS.http}/capability/subscribe/${encodeURIComponent(
+            name
+          )}`;
+          es = new EventSource(url);
+          sseBtn.disabled = true;
+          sseCloseBtn.disabled = false;
+          sseTopic.disabled = true;
+          log('sseLog', `EventSource → ${url}`, 'ok');
+          es.addEventListener('ready', (e) => {
+            const info = JSON.parse(e.data);
+            log('sseLog', `ready (subId=${info.subId})`, 'ok');
+          });
+          es.addEventListener('message', (e) => {
+            log('sseLog', JSON.parse(e.data).data);
+          });
+          es.addEventListener('error', (e) => {
+            // SSE `error` events carry no payload for transport drops;
+            // our runtime only sends a data-bearing `error` event for a
+            // terminal failure (e.g. capability removed).
+            if (e.data) {
+              const err = JSON.parse(e.data);
+              log('sseLog', `error: ${err.error} (${err.code})`, 'err');
+            } else if (es && es.readyState === EventSource.CONNECTING) {
+              log('sseLog', 'connection lost — auto-reconnecting…', 'err');
+            }
+          });
+        };
+        sseCloseBtn.onclick = () => {
+          closeEs();
+          log('sseLog', 'closed', 'ok');
+        };
+
+        // Native fetch() — call/publish straight to the HTTP transport,
+        // no SDK and no WebSocket. CORS on the runtime lets these
+        // cross-origin requests (page on :8080 → runtime on :9001)
+        // succeed. Independent of the WS/HTTP transport toggle above.
+        document.getElementById('fetchCallBtn').onclick = async () => {
+          try {
+            const res = await fetch(
+              `${ENDPOINTS.http}/capability/call/add_two_ints`,
+              {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ a: '7n', b: '35n' }),
+              }
+            );
+            const reply = await res.json();
+            log('fetchLog', `7 + 35 = ${reply.sum} (HTTP ${res.status})`, 'ok');
+          } catch (e) {
+            log('fetchLog', `call error: ${e.message}`, 'err');
+          }
+        };
+        document.getElementById('fetchPubBtn').onclick = async () => {
+          try {
+            const res = await fetch(
+              `${ENDPOINTS.http}/capability/publish/web_demo_chatter`,
+              {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ data: 'hello from fetch()' }),
+              }
+            );
+            // publish replies 204 No Content on success.
+            log(
+              'fetchLog',
+              `published 'hello from fetch()' (HTTP ${res.status})`,
+              res.ok ? 'ok' : 'err'
+            );
+          } catch (e) {
+            log('fetchLog', `publish error: ${e.message}`, 'err');
           }
         };
 

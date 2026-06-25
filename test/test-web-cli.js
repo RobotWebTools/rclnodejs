@@ -141,6 +141,46 @@ describe('rclnodejs-web CLI', function () {
       assert.strictEqual(partial.http.host, '127.0.0.1');
       assert.strictEqual(partial.http.basePath, '/cap');
     });
+
+    it('parses --http-sse / --http-sse-keep-alive', function () {
+      const { partial } = parseArgv([
+        '--http-sse',
+        '--http-sse-keep-alive',
+        '30000',
+      ]);
+      assert.strictEqual(partial.http.sse, true);
+      assert.strictEqual(partial.http.sseKeepAliveMs, 30000);
+    });
+
+    it('parses --http-cors * as "any origin"', function () {
+      const { partial } = parseArgv(['--http-cors', '*']);
+      assert.strictEqual(partial.http.cors, true);
+    });
+
+    it('accumulates repeated --http-cors into an allow-list', function () {
+      const { partial } = parseArgv([
+        '--http-cors',
+        'https://a.example',
+        '--http-cors',
+        'https://b.example',
+      ]);
+      assert.deepStrictEqual(partial.http.cors, [
+        'https://a.example',
+        'https://b.example',
+      ]);
+    });
+
+    it('--http-cors * wins over specific origins regardless of order', function () {
+      const { partial } = parseArgv([
+        '--http-cors',
+        'https://a.example',
+        '--http-cors',
+        '*',
+        '--http-cors',
+        'https://b.example',
+      ]);
+      assert.strictEqual(partial.http.cors, true);
+    });
   });
 
   describe('config file loading + validation', function () {
@@ -209,6 +249,42 @@ describe('rclnodejs-web CLI', function () {
       );
     });
 
+    it('accepts http.sse / http.sseKeepAliveMs / http.cors', function () {
+      assert.doesNotThrow(() =>
+        validateConfig({
+          http: { port: 9001, sse: true, sseKeepAliveMs: 0, cors: '*' },
+        })
+      );
+      assert.doesNotThrow(() =>
+        validateConfig({ http: { cors: ['https://a.example'] } })
+      );
+    });
+
+    it('rejects non-boolean http.sse', function () {
+      assert.throws(
+        () => validateConfig({ http: { sse: 'yes' } }),
+        (e) => e instanceof CliError && /http\.sse/.test(e.message)
+      );
+    });
+
+    it('rejects non-number http.sseKeepAliveMs', function () {
+      assert.throws(
+        () => validateConfig({ http: { sseKeepAliveMs: 'soon' } }),
+        (e) => e instanceof CliError && /http\.sseKeepAliveMs/.test(e.message)
+      );
+    });
+
+    it('rejects http.cors of the wrong shape', function () {
+      assert.throws(
+        () => validateConfig({ http: { cors: 42 } }),
+        (e) => e instanceof CliError && /http\.cors/.test(e.message)
+      );
+      assert.throws(
+        () => validateConfig({ http: { cors: [1, 2] } }),
+        (e) => e instanceof CliError && /http\.cors/.test(e.message)
+      );
+    });
+
     it('rejects http with non-number port', function () {
       assert.throws(
         () => validateConfig({ http: { port: 'nine' } }),
@@ -266,6 +342,35 @@ describe('rclnodejs-web CLI', function () {
     it('http: omitting it leaves the transport disabled (port=null)', function () {
       const merged = mergeConfig({}, {});
       assert.strictEqual(merged.http.port, null);
+    });
+
+    it('http: sse/cors default off, and merge from either source', function () {
+      const base = mergeConfig({}, {});
+      assert.strictEqual(base.http.sse, false);
+      assert.strictEqual(base.http.cors, false);
+      assert.strictEqual(base.http.sseKeepAliveMs, null);
+
+      const merged = mergeConfig(
+        { http: { port: 9001, sse: true, cors: '*' } },
+        { http: { sseKeepAliveMs: 5000 } }
+      );
+      assert.strictEqual(merged.http.sse, true);
+      assert.strictEqual(merged.http.cors, '*');
+      assert.strictEqual(merged.http.sseKeepAliveMs, 5000);
+    });
+
+    it('validateConfig rejects a flag-only NaN keep-alive (bin flow)', function () {
+      // Mirrors bin/rclnodejs-web.js: parse → merge → validate. A
+      // non-numeric `--http-sse-keep-alive` becomes NaN in the parsed
+      // partial; the post-merge validateConfig is what rejects it, since
+      // loadConfigFile only validates JSON config files.
+      const { partial } = parseArgv(['--http-sse-keep-alive', 'foo']);
+      assert.ok(Number.isNaN(partial.http.sseKeepAliveMs));
+      const merged = mergeConfig({}, partial);
+      assert.throws(
+        () => validateConfig(merged, 'options'),
+        (e) => e instanceof CliError && /http\.sseKeepAliveMs/.test(e.message)
+      );
     });
   });
 

@@ -38,7 +38,7 @@ function displayHost(host) {
 // Render the registry as a small human-readable table:
 //   call       /add_two_ints       example_interfaces/srv/AddTwoInts
 //   publish    /web_demo_chatter   std_msgs/msg/String
-//   subscribe  /web_demo_tick      std_msgs/msg/String
+//   subscribe  /web_demo_chatter   std_msgs/msg/String
 function formatCapabilities(caps) {
   const rows = [];
   for (const verb of ['call', 'publish', 'subscribe']) {
@@ -69,17 +69,6 @@ node.createService(
   }
 );
 
-// A real ROS 2 publisher producing a tick once a second so the
-// browser's subscribe() has something to receive without the user
-// having to publish first.
-const tickPub = node.createPublisher('std_msgs/msg/String', '/web_demo_tick');
-let counter = 0;
-setInterval(() => {
-  tickPub.publish({
-    data: `tick ${counter++} @ ${new Date().toISOString()}`,
-  });
-}, 1000);
-
 rclnodejs.spin(node);
 
 // ---- Layer 2 + 3: capability runtime over WebSocket *and* HTTP -------
@@ -101,6 +90,14 @@ const runtime = createRuntime({
     new HttpTransport({
       port: HTTP_PORT,
       host: '::',
+      // Opt-in Server-Sent Events for `subscribe` over plain HTTP:
+      //   GET /capability/subscribe/<name>   (text/event-stream)
+      // Intended for clients that can't hold a WebSocket open (curl,
+      // AI agents, serverless / edge functions). Browser apps should
+      // still prefer the WebSocket transport, which multiplexes many
+      // topics on one connection. Off by default in HttpTransport.
+      sse: true,
+      cors: true,
     }),
   ],
 });
@@ -108,8 +105,15 @@ runtime.expose({
   call: { '/add_two_ints': 'example_interfaces/srv/AddTwoInts' },
   publish: { '/web_demo_chatter': 'std_msgs/msg/String' },
   subscribe: {
-    '/web_demo_tick': 'std_msgs/msg/String',
+    // Shared talker/listener topic: panels 2 (WebSocket), 3 (round-trip),
+    // and 6 (SSE) all use it — so a browser publish is visible across
+    // every subscriber at once.
     '/web_demo_chatter': 'std_msgs/msg/String',
+    // Pairs with the stock publisher example so developers can feed the
+    // demo from their own node:
+    //   node ../../../example/topics/publisher/publisher-example.mjs
+    // then subscribe to `/topic` from the browser / curl / EventSource.
+    '/topic': 'std_msgs/msg/String',
   },
 });
 await runtime.start();
@@ -126,6 +130,9 @@ console.log(
 );
 console.log(
   `  HTTP      : http://${displayHost('::')}:${HTTP_PORT}/capability  (call / publish, curl-able)`
+);
+console.log(
+  `  HTTP SSE  : http://${displayHost('::')}:${HTTP_PORT}/capability/subscribe/<name>  (subscribe via text/event-stream)`
 );
 console.log();
 console.log(`Exposed capabilities (${total}):`);

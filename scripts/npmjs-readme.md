@@ -100,7 +100,7 @@ Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript e
 
 `rclnodejs` ships **two** ways to reach ROS 2 from the browser — pick one based on how much glue you want to write.
 
-- **`rclnodejs/web`** — typed, allow-listed, `curl`-able browser SDK. A `web.json` file is your public API; the browser SDK types `call` / `publish` / `subscribe` end-to-end from your ROS 2 message types; every capability is also a plain HTTP endpoint (`curl -X POST http://<host>/capability/call/<name>`), so shell scripts, Postman, and AI-agent tool-use just work. _New in `2.0.0-beta.0`._
+- **`rclnodejs/web`** — typed, allow-listed, `curl`-able browser SDK. A `web.json` file is your public API; the browser SDK types `call` / `publish` / `subscribe` end-to-end from your ROS 2 message types; every capability is also a plain HTTP endpoint (`curl -X POST http://<host>/capability/call/<name>`), with `subscribe` streaming as Server-Sent Events (`GET http://<host>/capability/subscribe/<name>`), so shell scripts, Postman, AI-agent tool-use, and a bare browser `fetch()` / `EventSource` (CORS-enabled) just work.
 
   ```ts
   import { connect } from 'rclnodejs/web';
