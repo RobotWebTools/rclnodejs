@@ -32,20 +32,25 @@ function parseArgs(argv) {
   const options = {
     outputRoot: defaultOutputRoot,
     manifestPath: defaultManifestPath,
-    keepWorktrees: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
 
-    if (arg === '--out') {
-      options.outputRoot = path.resolve(argv[index + 1]);
+    if (arg === '--out' || arg === '--manifest') {
+      const value = argv[index + 1];
+
+      if (value === undefined) {
+        throw new Error(`Missing value for ${arg}`);
+      }
+
+      if (arg === '--out') {
+        options.outputRoot = path.resolve(value);
+      } else {
+        options.manifestPath = path.resolve(value);
+      }
+
       index += 1;
-    } else if (arg === '--manifest') {
-      options.manifestPath = path.resolve(argv[index + 1]);
-      index += 1;
-    } else if (arg === '--keep-worktrees') {
-      options.keepWorktrees = true;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -135,20 +140,6 @@ function getTaggedReleaseVersions() {
     .sort(compareVersionsAsc);
 }
 
-function getCurrentWorkspaceVersion() {
-  const packageInfo = JSON.parse(
-    fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8')
-  );
-
-  if (!semverDirectoryPattern.test(packageInfo.version)) {
-    throw new Error(
-      `Current package.json version is not a release semver: ${packageInfo.version}`
-    );
-  }
-
-  return packageInfo.version;
-}
-
 function assertTagsExist(versions) {
   const tags = new Set(getTaggedReleaseVersions());
 
@@ -232,11 +223,7 @@ function addWorktree(ref, tempRoot, directoryName = ref) {
   return worktreePath;
 }
 
-function removeWorktree(worktreePath, keepWorktrees) {
-  if (keepWorktrees) {
-    return;
-  }
-
+function removeWorktree(worktreePath) {
   try {
     runCommand('git', ['worktree', 'remove', '--force', worktreePath]);
   } catch {
@@ -262,7 +249,7 @@ function writeIndexPackage(packageJsonPath, outputRoot) {
   return destinationPath;
 }
 
-function buildVersionDocs(version, outputDocsRoot, tempRoot, keepWorktrees) {
+function buildVersionDocs(version, outputDocsRoot, tempRoot) {
   const worktreePath = addWorktree(version, tempRoot, version);
 
   try {
@@ -288,32 +275,9 @@ function buildVersionDocs(version, outputDocsRoot, tempRoot, keepWorktrees) {
       packageJsonPath: path.join(worktreePath, 'package.json'),
     };
   } catch (error) {
-    removeWorktree(worktreePath, keepWorktrees);
+    removeWorktree(worktreePath);
     throw error;
   }
-}
-
-function buildDocsFromSourceRoot(sourceRoot, outputDocsRoot) {
-  const inputs = getJsdocInputs(sourceRoot);
-
-  runCommand(
-    'npx',
-    [
-      'jsdoc',
-      '--package',
-      path.join(sourceRoot, 'package.json'),
-      ...inputs,
-      '-t',
-      __dirname,
-      '-d',
-      outputDocsRoot,
-    ],
-    { cwd: repoRoot }
-  );
-
-  return {
-    packageJsonPath: path.join(sourceRoot, 'package.json'),
-  };
 }
 
 function buildDocsIndex(outputRoot, packageJsonPath) {
@@ -331,9 +295,7 @@ function buildDocsIndex(outputRoot, packageJsonPath) {
 }
 
 function removeTemporaryPublishArtifacts(outputRoot) {
-  ['README.md', '_index-package.json'].forEach((fileName) => {
-    fs.rmSync(path.join(outputRoot, fileName), { force: true });
-  });
+  fs.rmSync(path.join(outputRoot, '_index-package.json'), { force: true });
 }
 
 function rewriteVersionHtmlToSharedAssets(versionRoot) {
@@ -392,20 +354,18 @@ function hoistSharedAssets(outputRoot) {
 function main() {
   const options = parseArgs(process.argv.slice(2));
 
-  const publishedVersions = readManifestVersions(options.manifestPath);
-  const currentVersion = getCurrentWorkspaceVersion();
-  const versions = Array.from(
-    new Set(publishedVersions.concat(currentVersion))
-  ).sort(compareVersionsAsc);
+  const versions = readManifestVersions(options.manifestPath);
+
+  if (!versions.length) {
+    throw new Error(`Manifest ${options.manifestPath} lists no versions.`);
+  }
+
   const latestVersion = versions[versions.length - 1];
 
   // The staged site is a pure function of the manifest and the Git tags: every
-  // published version is rebuilt from its tag and the in-development version
-  // from the current workspace. There is no published-branch state to drift, so
-  // a fresh build always reproduces the full site.
-  assertTagsExist(
-    publishedVersions.filter((version) => version !== currentVersion)
-  );
+  // listed version is rebuilt from its release tag, so a fresh build always
+  // reproduces the full site with no branch state to drift.
+  assertTagsExist(versions);
   ensureCleanOutput(options.outputRoot);
   fs.writeFileSync(path.join(options.outputRoot, '.nojekyll'), '', 'utf8');
 
@@ -416,19 +376,10 @@ function main() {
   try {
     console.log(`Building ${versions.length} documentation versions.`);
 
-    publishedVersions.forEach((version) => {
-      if (version === currentVersion) {
-        return;
-      }
+    versions.forEach((version) => {
+      console.log(`- ${version}`);
 
-      console.log(`- ${version} (from tag)`);
-
-      const buildResult = buildVersionDocs(
-        version,
-        docsRoot,
-        tempRoot,
-        options.keepWorktrees
-      );
+      const buildResult = buildVersionDocs(version, docsRoot, tempRoot);
 
       if (version === latestVersion) {
         latestPackageJsonPath = writeIndexPackage(
@@ -437,32 +388,16 @@ function main() {
         );
       }
 
-      removeWorktree(buildResult.worktreePath, options.keepWorktrees);
+      removeWorktree(buildResult.worktreePath);
     });
 
-    console.log(`- ${currentVersion} (current workspace)`);
-
-    const buildResult = buildDocsFromSourceRoot(repoRoot, docsRoot);
-
-    if (currentVersion === latestVersion) {
-      latestPackageJsonPath = writeIndexPackage(
-        buildResult.packageJsonPath,
-        options.outputRoot
-      );
-    }
-
-    buildDocsIndex(
-      options.outputRoot,
-      latestPackageJsonPath || path.join(repoRoot, 'package.json')
-    );
+    buildDocsIndex(options.outputRoot, latestPackageJsonPath);
     hoistSharedAssets(options.outputRoot);
     removeTemporaryPublishArtifacts(options.outputRoot);
 
     console.log(`Published docs tree ready at ${options.outputRoot}`);
   } finally {
-    if (!options.keepWorktrees) {
-      fs.rmSync(tempRoot, { recursive: true, force: true });
-    }
+    fs.rmSync(tempRoot, { recursive: true, force: true });
   }
 }
 

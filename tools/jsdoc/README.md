@@ -8,9 +8,8 @@ The published version set is curated in
 [`published-versions.json`](./published-versions.json). That manifest is the
 source of truth for which versions appear on the live docs site. Each staging
 run rebuilds the whole site from scratch: every listed version is rebuilt from
-its Git tag and the in-development version from the current workspace. The
-staged tree is therefore a pure function of the manifest plus the tags — there
-is no `gh-pages` branch state to maintain or drift out of sync.
+its Git tag. The staged tree is therefore a pure function of the manifest plus
+the tags — there is no `gh-pages` branch state to maintain or drift out of sync.
 
 ## Commands
 
@@ -34,7 +33,6 @@ Behavior:
 
 - reads the published version set from `published-versions.json`
 - rebuilds every listed version from its Git tag
-- rebuilds the current workspace version from the working tree (always included)
 - rebuilds the staged landing page index
 
 This is the normal command to use for a new release, and it is fully
@@ -49,7 +47,6 @@ for testing:
 
 - `--manifest <path>` — use a different version manifest
 - `--out <dir>` — stage into a different directory
-- `--keep-worktrees` — leave the temporary Git worktrees in place for inspection
 
 ## New Release Example
 
@@ -57,8 +54,10 @@ For a new release such as `1.9.0`:
 
 1. Update `package.json` to `1.9.0`.
 2. Add `1.9.0` to the `versions` array in `published-versions.json`.
-3. Run `npm run docs`.
-4. Verify the local output in `docs/1.9.0/` and `docs/index.html`.
+3. Run `npm run docs` to preview the new version locally (`docs/1.9.0/` and
+   `docs/index.html`).
+4. Cut and push the `1.9.0` release tag so `npm run docs:publish` can rebuild
+   it from Git.
 5. Run `npm run docs:publish`.
 6. Verify the staged output in:
    - `build/published-docs/docs/1.9.0/`
@@ -86,8 +85,7 @@ so manual dispatches and `docs-*` tag pushes there will not run the docs build.
 
 1. Full checkout with all tags.
 2. Runs `npm run docs:publish` to stage the docs tree. This reads
-   `published-versions.json` and rebuilds every listed version from its tag
-   plus the current workspace version.
+   `published-versions.json` and rebuilds every listed version from its tag.
 3. Uploads the staged output as a Pages artifact.
 4. Deploys to GitHub Pages (skipped when `dry_run` is `true`).
 
