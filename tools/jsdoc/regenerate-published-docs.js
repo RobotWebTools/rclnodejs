@@ -21,42 +21,36 @@ const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '../..');
 const buildIndexScript = path.join(__dirname, 'build-index.js');
-const defaultOutputRoot = path.join(repoRoot, 'build', 'gh-pages-docs');
+const defaultOutputRoot = path.join(repoRoot, 'build', 'published-docs');
 const semverDirectoryPattern = /^\d+\.\d+\.\d+$/;
 const sharedAssetDirectoryName = '_static';
 const sharedAssetFolders = ['fonts', 'scripts', 'styles'];
 
+const defaultManifestPath = path.join(__dirname, 'published-versions.json');
+
 function parseArgs(argv) {
   const options = {
-    branch: 'gh-pages',
     outputRoot: defaultOutputRoot,
-    versions: null,
-    preservePublished: false,
-    fullRebuild: false,
-    keepWorktrees: false,
+    manifestPath: defaultManifestPath,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
 
-    if (arg === '--branch') {
-      options.branch = argv[index + 1];
+    if (arg === '--out' || arg === '--manifest') {
+      const value = argv[index + 1];
+
+      if (value === undefined) {
+        throw new Error(`Missing value for ${arg}`);
+      }
+
+      if (arg === '--out') {
+        options.outputRoot = path.resolve(value);
+      } else {
+        options.manifestPath = path.resolve(value);
+      }
+
       index += 1;
-    } else if (arg === '--out') {
-      options.outputRoot = path.resolve(argv[index + 1]);
-      index += 1;
-    } else if (arg === '--versions') {
-      options.versions = argv[index + 1]
-        .split(',')
-        .map((value) => value.trim())
-        .filter(Boolean);
-      index += 1;
-    } else if (arg === '--preserve-published') {
-      options.preservePublished = true;
-    } else if (arg === '--full-rebuild') {
-      options.fullRebuild = true;
-    } else if (arg === '--keep-worktrees') {
-      options.keepWorktrees = true;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -103,18 +97,39 @@ function compareVersionsAsc(left, right) {
   return 0;
 }
 
-function getPublishedVersions(branch) {
-  const output = runCommand('git', [
-    'ls-tree',
-    '--name-only',
-    `${branch}:docs`,
-  ]);
+function readManifestVersions(manifestPath) {
+  let parsed;
 
-  return output
-    .split(/\r?\n/)
-    .map((entry) => entry.trim())
-    .filter((entry) => semverDirectoryPattern.test(entry))
-    .sort(compareVersionsAsc);
+  try {
+    parsed = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  } catch (error) {
+    throw new Error(
+      `Unable to read versions manifest ${manifestPath}: ${error.message}`
+    );
+  }
+
+  const list = Array.isArray(parsed) ? parsed : parsed.versions;
+
+  if (!Array.isArray(list)) {
+    throw new Error(
+      `Manifest ${manifestPath} must be an array or contain a "versions" array.`
+    );
+  }
+
+  const versions = list.map((value) => String(value).trim()).filter(Boolean);
+  const invalid = versions.filter(
+    (value) => !semverDirectoryPattern.test(value)
+  );
+
+  if (invalid.length) {
+    throw new Error(
+      `Manifest ${manifestPath} contains non-release versions: ${invalid.join(
+        ', '
+      )}`
+    );
+  }
+
+  return Array.from(new Set(versions)).sort(compareVersionsAsc);
 }
 
 function getTaggedReleaseVersions() {
@@ -123,20 +138,6 @@ function getTaggedReleaseVersions() {
     .map((entry) => entry.trim())
     .filter((entry) => semverDirectoryPattern.test(entry))
     .sort(compareVersionsAsc);
-}
-
-function getCurrentWorkspaceVersion() {
-  const packageInfo = JSON.parse(
-    fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8')
-  );
-
-  if (!semverDirectoryPattern.test(packageInfo.version)) {
-    throw new Error(
-      `Current package.json version is not a release semver: ${packageInfo.version}`
-    );
-  }
-
-  return packageInfo.version;
 }
 
 function assertTagsExist(versions) {
@@ -170,21 +171,6 @@ function getGeneratedVersions(outputRoot) {
     )
     .map((entry) => entry.name)
     .sort(compareVersionsAsc);
-}
-
-function writeBranchFile(branch, sourcePath, destinationPath) {
-  try {
-    const contents = runCommand('git', ['show', `${branch}:${sourcePath}`]);
-    fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
-    fs.writeFileSync(destinationPath, contents, 'utf8');
-  } catch (error) {
-    if (sourcePath === '.nojekyll') {
-      fs.writeFileSync(destinationPath, '', 'utf8');
-      return;
-    }
-
-    throw error;
-  }
 }
 
 function appendJsFiles(directoryPath, inputs) {
@@ -237,11 +223,7 @@ function addWorktree(ref, tempRoot, directoryName = ref) {
   return worktreePath;
 }
 
-function removeWorktree(worktreePath, keepWorktrees) {
-  if (keepWorktrees) {
-    return;
-  }
-
+function removeWorktree(worktreePath) {
   try {
     runCommand('git', ['worktree', 'remove', '--force', worktreePath]);
   } catch {
@@ -267,53 +249,7 @@ function writeIndexPackage(packageJsonPath, outputRoot) {
   return destinationPath;
 }
 
-function copyIfExists(sourcePath, destinationPath) {
-  if (!fs.existsSync(sourcePath)) {
-    return;
-  }
-
-  fs.mkdirSync(path.dirname(destinationPath), { recursive: true });
-  fs.cpSync(sourcePath, destinationPath, { recursive: true, force: true });
-}
-
-function copyDirectoryContents(sourceDir, destinationDir) {
-  if (!fs.existsSync(sourceDir)) {
-    return;
-  }
-
-  fs.mkdirSync(destinationDir, { recursive: true });
-
-  fs.readdirSync(sourceDir, { withFileTypes: true }).forEach((entry) => {
-    fs.cpSync(
-      path.join(sourceDir, entry.name),
-      path.join(destinationDir, entry.name),
-      { recursive: true, force: true }
-    );
-  });
-}
-
-function copyPublishedSnapshot(branch, outputRoot, tempRoot, keepWorktrees) {
-  const worktreePath = addWorktree(branch, tempRoot, `branch-${branch}`);
-  const rootFiles = ['.nojekyll', 'README.md', '_index-package.json'];
-
-  try {
-    copyDirectoryContents(
-      path.join(worktreePath, 'docs'),
-      path.join(outputRoot, 'docs')
-    );
-
-    rootFiles.forEach((fileName) => {
-      copyIfExists(
-        path.join(worktreePath, fileName),
-        path.join(outputRoot, fileName)
-      );
-    });
-  } finally {
-    removeWorktree(worktreePath, keepWorktrees);
-  }
-}
-
-function buildVersionDocs(version, outputDocsRoot, tempRoot, keepWorktrees) {
+function buildVersionDocs(version, outputDocsRoot, tempRoot) {
   const worktreePath = addWorktree(version, tempRoot, version);
 
   try {
@@ -339,32 +275,9 @@ function buildVersionDocs(version, outputDocsRoot, tempRoot, keepWorktrees) {
       packageJsonPath: path.join(worktreePath, 'package.json'),
     };
   } catch (error) {
-    removeWorktree(worktreePath, keepWorktrees);
+    removeWorktree(worktreePath);
     throw error;
   }
-}
-
-function buildDocsFromSourceRoot(sourceRoot, outputDocsRoot) {
-  const inputs = getJsdocInputs(sourceRoot);
-
-  runCommand(
-    'npx',
-    [
-      'jsdoc',
-      '--package',
-      path.join(sourceRoot, 'package.json'),
-      ...inputs,
-      '-t',
-      __dirname,
-      '-d',
-      outputDocsRoot,
-    ],
-    { cwd: repoRoot }
-  );
-
-  return {
-    packageJsonPath: path.join(sourceRoot, 'package.json'),
-  };
 }
 
 function buildDocsIndex(outputRoot, packageJsonPath) {
@@ -382,9 +295,7 @@ function buildDocsIndex(outputRoot, packageJsonPath) {
 }
 
 function removeTemporaryPublishArtifacts(outputRoot) {
-  ['README.md', '_index-package.json'].forEach((fileName) => {
-    fs.rmSync(path.join(outputRoot, fileName), { force: true });
-  });
+  fs.rmSync(path.join(outputRoot, '_index-package.json'), { force: true });
 }
 
 function rewriteVersionHtmlToSharedAssets(versionRoot) {
@@ -440,165 +351,53 @@ function hoistSharedAssets(outputRoot) {
   });
 }
 
-function ensureSharedAssetsForVersion(outputRoot, version) {
-  const docsRoot = path.join(outputRoot, 'docs');
-  const versionRoot = path.join(docsRoot, version);
-  const sharedRoot = path.join(docsRoot, sharedAssetDirectoryName);
-
-  if (!fs.existsSync(versionRoot)) {
-    return;
-  }
-
-  fs.mkdirSync(sharedRoot, { recursive: true });
-
-  sharedAssetFolders.forEach((folderName) => {
-    const sourcePath = path.join(versionRoot, folderName);
-
-    if (!fs.existsSync(sourcePath)) {
-      return;
-    }
-
-    fs.cpSync(sourcePath, path.join(sharedRoot, folderName), {
-      recursive: true,
-      force: true,
-    });
-  });
-
-  rewriteVersionHtmlToSharedAssets(versionRoot);
-
-  sharedAssetFolders.forEach((folderName) => {
-    fs.rmSync(path.join(versionRoot, folderName), {
-      recursive: true,
-      force: true,
-    });
-  });
-}
-
 function main() {
   const options = parseArgs(process.argv.slice(2));
 
-  if (options.preservePublished && options.fullRebuild) {
-    throw new Error(
-      'Use either --preserve-published or --full-rebuild, not both.'
-    );
-  }
-
-  const publishedVersions = options.versions
-    ? options.versions
-    : getPublishedVersions(options.branch);
-  const currentVersion = getCurrentWorkspaceVersion();
-  const versions = Array.from(
-    new Set(publishedVersions.concat(currentVersion))
-  ).sort(compareVersionsAsc);
+  const versions = readManifestVersions(options.manifestPath);
 
   if (!versions.length) {
-    throw new Error(`No published versions found in ${options.branch}:docs`);
+    throw new Error(`Manifest ${options.manifestPath} lists no versions.`);
   }
 
-  assertTagsExist(
-    publishedVersions.filter((version) => version !== currentVersion)
-  );
-  ensureCleanOutput(options.outputRoot);
-
-  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'rclnodejs-jsdoc-'));
   const latestVersion = versions[versions.length - 1];
+
+  // The staged site is a pure function of the manifest and the Git tags: every
+  // listed version is rebuilt from its release tag, so a fresh build always
+  // reproduces the full site with no branch state to drift.
+  assertTagsExist(versions);
+  ensureCleanOutput(options.outputRoot);
+  fs.writeFileSync(path.join(options.outputRoot, '.nojekyll'), '', 'utf8');
+
+  const docsRoot = path.join(options.outputRoot, 'docs');
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'rclnodejs-jsdoc-'));
   let latestPackageJsonPath = null;
 
   try {
-    if (options.preservePublished) {
-      copyPublishedSnapshot(
-        options.branch,
-        options.outputRoot,
-        tempRoot,
-        options.keepWorktrees
-      );
-      console.log(
-        `Preserved ${publishedVersions.length} published versions from ${options.branch}.`
-      );
-    } else {
-      writeBranchFile(
-        options.branch,
-        '.nojekyll',
-        path.join(options.outputRoot, '.nojekyll')
-      );
-      writeBranchFile(
-        options.branch,
-        'README.md',
-        path.join(options.outputRoot, 'README.md')
-      );
-    }
+    console.log(`Building ${versions.length} documentation versions.`);
 
-    console.log(`Regenerating ${versions.length} documentation versions.`);
+    versions.forEach((version) => {
+      console.log(`- ${version}`);
 
-    if (!options.preservePublished || options.fullRebuild) {
-      publishedVersions.forEach((version) => {
-        if (version === currentVersion) {
-          return;
-        }
+      const buildResult = buildVersionDocs(version, docsRoot, tempRoot);
 
-        console.log(`- ${version}`);
-
-        const buildResult = buildVersionDocs(
-          version,
-          path.join(options.outputRoot, 'docs'),
-          tempRoot,
-          options.keepWorktrees
+      if (version === latestVersion) {
+        latestPackageJsonPath = writeIndexPackage(
+          buildResult.packageJsonPath,
+          options.outputRoot
         );
-
-        if (version === latestVersion) {
-          latestPackageJsonPath = writeIndexPackage(
-            buildResult.packageJsonPath,
-            options.outputRoot
-          );
-        }
-
-        removeWorktree(buildResult.worktreePath, options.keepWorktrees);
-      });
-    }
-
-    if (options.preservePublished && !options.fullRebuild) {
-      const existingIndexPackagePath = path.join(
-        options.outputRoot,
-        '_index-package.json'
-      );
-
-      if (fs.existsSync(existingIndexPackagePath)) {
-        latestPackageJsonPath = existingIndexPackagePath;
       }
-    }
 
-    console.log(`- ${currentVersion} (current workspace)`);
+      removeWorktree(buildResult.worktreePath);
+    });
 
-    const buildResult = buildDocsFromSourceRoot(
-      repoRoot,
-      path.join(options.outputRoot, 'docs')
-    );
-
-    if (currentVersion === latestVersion) {
-      latestPackageJsonPath = writeIndexPackage(
-        buildResult.packageJsonPath,
-        options.outputRoot
-      );
-    }
-
-    buildDocsIndex(
-      options.outputRoot,
-      latestPackageJsonPath || path.join(repoRoot, 'package.json')
-    );
-
-    if (options.preservePublished && !options.fullRebuild) {
-      ensureSharedAssetsForVersion(options.outputRoot, currentVersion);
-    } else {
-      hoistSharedAssets(options.outputRoot);
-    }
-
+    buildDocsIndex(options.outputRoot, latestPackageJsonPath);
+    hoistSharedAssets(options.outputRoot);
     removeTemporaryPublishArtifacts(options.outputRoot);
 
     console.log(`Published docs tree ready at ${options.outputRoot}`);
   } finally {
-    if (!options.keepWorktrees) {
-      fs.rmSync(tempRoot, { recursive: true, force: true });
-    }
+    fs.rmSync(tempRoot, { recursive: true, force: true });
   }
 }
 
