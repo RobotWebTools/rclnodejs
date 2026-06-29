@@ -109,7 +109,16 @@ describe('Rclnodejs message translation: primitive types', function () {
                 );
               }
             });
-            timer = setInterval(() => publisher.publish(v), 100);
+            const start = Date.now();
+            timer = setInterval(() => {
+              if (Date.now() - start > 55 * 1000) {
+                clearInterval(timer);
+                node.destroy();
+                reject('Timed out waiting for message');
+                return;
+              }
+              publisher.publish(v);
+            }, 100);
             publisher.publish(v); // Short-cut form of publishing primitive types
             rclnodejs.spin(node);
           });
@@ -138,7 +147,16 @@ describe('Rclnodejs message translation: primitive types', function () {
                 );
               }
             });
-            timer = setInterval(() => publisher.publish({ data: v }), 100);
+            const start = Date.now();
+            timer = setInterval(() => {
+              if (Date.now() - start > 55 * 1000) {
+                clearInterval(timer);
+                node.destroy();
+                reject('Timed out waiting for message');
+                return;
+              }
+              publisher.publish({ data: v });
+            }, 100);
             publisher.publish({ data: v }); // Ensure the original form of the message can be used
             rclnodejs.spin(node);
           });
@@ -253,7 +271,16 @@ describe('Rclnodejs message translation: primitive types array', function () {
             },
             data: testData.values,
           };
-          timer = setInterval(() => publisher.publish(msg), 100);
+          const start = Date.now();
+          timer = setInterval(() => {
+            if (Date.now() - start > 55 * 1000) {
+              clearInterval(timer);
+              node.destroy();
+              reject('Timed out waiting for message');
+              return;
+            }
+            publisher.publish(msg);
+          }, 100);
           publisher.publish(msg);
           rclnodejs.spin(node);
         });
@@ -520,7 +547,16 @@ describe('Rclnodejs message translation: TypedArray large data', function () {
             },
             data: testData.values,
           };
-          timer = setInterval(() => publisher.publish(msg), 100);
+          const start = Date.now();
+          timer = setInterval(() => {
+            if (Date.now() - start > 55 * 1000) {
+              clearInterval(timer);
+              node.destroy();
+              reject('Timed out waiting for message');
+              return;
+            }
+            publisher.publish(msg);
+          }, 100);
           publisher.publish(msg);
           rclnodejs.spin(node);
         });
