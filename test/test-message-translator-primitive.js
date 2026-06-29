@@ -94,18 +94,22 @@ describe('Rclnodejs message translation: primitive types', function () {
           const MessageType = 'std_msgs/msg/' + testData.type;
           const publisher = node.createPublisher(MessageType, topic);
           return new Promise((resolve, reject) => {
+            let timer;
             const sub = node.createSubscription(MessageType, topic, (value) => {
               // For primitive types, msgs are defined as a single `.data` field
               if (value.data === v) {
+                clearInterval(timer);
                 node.destroy();
                 resolve();
               } else {
+                clearInterval(timer);
                 node.destroy();
                 reject(
                   'case ' + i + '. Expected: ' + v + ', Got: ' + value.data
                 );
               }
             });
+            timer = setInterval(() => publisher.publish(v), 100);
             publisher.publish(v); // Short-cut form of publishing primitive types
             rclnodejs.spin(node);
           });
@@ -119,18 +123,22 @@ describe('Rclnodejs message translation: primitive types', function () {
           const MessageType = 'std_msgs/msg/' + testData.type;
           const publisher = node.createPublisher(MessageType, topic);
           return new Promise((resolve, reject) => {
+            let timer;
             const sub = node.createSubscription(MessageType, topic, (value) => {
               // For primitive types, msgs are defined as a single `.data` field
               if (value.data === v) {
+                clearInterval(timer);
                 node.destroy();
                 resolve();
               } else {
+                clearInterval(timer);
                 node.destroy();
                 reject(
                   'case ' + i + '. Expected: ' + v + ', Got: ' + value.data
                 );
               }
             });
+            timer = setInterval(() => publisher.publish({ data: v }), 100);
             publisher.publish({ data: v }); // Ensure the original form of the message can be used
             rclnodejs.spin(node);
           });
@@ -221,6 +229,7 @@ describe('Rclnodejs message translation: primitive types array', function () {
         const MessageType = 'std_msgs/msg/' + testData.type;
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
+          let timer;
           const sub = node.createSubscription(MessageType, topic, (value) => {
             // For primitive types, msgs are defined as a single `.data` field
             if (
@@ -228,20 +237,24 @@ describe('Rclnodejs message translation: primitive types array', function () {
                 deepEqual(Array.from(value.data), testData.values)) ||
               deepEqual(value.data, testData.values)
             ) {
+              clearInterval(timer);
               node.destroy();
               resolve();
             } else {
+              clearInterval(timer);
               node.destroy();
               reject('Expected: ' + testData.values + ', Got: ' + value.data);
             }
           });
-          publisher.publish({
+          const msg = {
             layout: {
               dim: [{ label: 'length', size: 0, stride: 0 }],
               data_offset: 0,
             },
             data: testData.values,
-          });
+          };
+          timer = setInterval(() => publisher.publish(msg), 100);
+          publisher.publish(msg);
           rclnodejs.spin(node);
         });
       }
@@ -478,6 +491,7 @@ describe('Rclnodejs message translation: TypedArray large data', function () {
         const MessageType = 'std_msgs/msg/' + testData.type;
         const publisher = node.createPublisher(MessageType, topic);
         return new Promise((resolve, reject) => {
+          let timer;
           const sub = node.createSubscription(MessageType, topic, (value) => {
             // For primitive types, msgs are defined as a single `.data` field
             if (
@@ -485,9 +499,11 @@ describe('Rclnodejs message translation: TypedArray large data', function () {
                 deepEqual(Array.from(value.data), testData.values)) ||
               deepEqual(value.data, testData.values)
             ) {
+              clearInterval(timer);
               node.destroy();
               resolve();
             } else {
+              clearInterval(timer);
               node.destroy();
               reject(
                 'Expected: ' +
@@ -497,13 +513,15 @@ describe('Rclnodejs message translation: TypedArray large data', function () {
               );
             }
           });
-          publisher.publish({
+          const msg = {
             layout: {
               dim: [{ label: 'length', size: 0, stride: 0 }],
               data_offset: 0,
             },
             data: testData.values,
-          });
+          };
+          timer = setInterval(() => publisher.publish(msg), 100);
+          publisher.publish(msg);
           rclnodejs.spin(node);
         });
       }
