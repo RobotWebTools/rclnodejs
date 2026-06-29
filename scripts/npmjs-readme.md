@@ -110,10 +110,10 @@ Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript e
   ); // reply.sum is typed as `${number}n`
   ```
 
-  No SDK needed for subscribe — any browser streams a live ROS 2 topic via built-in `EventSource`:
+  No SDK needed for subscribe — with the HTTP/SSE transport enabled (`--http-sse`, plus `--http-cors` for cross-origin), any browser streams a live ROS 2 topic via built-in `EventSource`:
 
   ```js
-  const es = new EventSource('http://host:9000/capability/subscribe/chatter');
+  const es = new EventSource('http://host:9001/capability/subscribe/chatter');
   es.onmessage = (e) => console.log(JSON.parse(e.data)); // live ROS 2 messages
   ```
 
