@@ -216,6 +216,8 @@ describe('Rclnodejs message translation: complex types', function () {
                 node.destroy();
                 resolve();
               } else {
+                clearInterval(timer);
+                node.destroy();
                 console.log('got', value);
                 console.log('expected', v);
                 reject('case ' + i + '. Expected: ' + v + ', Got: ' + value);
