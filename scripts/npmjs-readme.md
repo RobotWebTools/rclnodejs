@@ -110,6 +110,13 @@ Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript e
   ); // reply.sum is typed as `${number}n`
   ```
 
+  No SDK needed for subscribe — with the HTTP/SSE transport enabled (`--http-sse`, plus `--http-cors` for cross-origin), any browser streams a live ROS 2 topic via built-in `EventSource`:
+
+  ```js
+  const es = new EventSource('http://host:9001/capability/subscribe/chatter');
+  es.onmessage = (e) => console.log(JSON.parse(e.data)); // live ROS 2 messages
+  ```
+
   See the [Web SDK guide](https://github.com/RobotWebTools/rclnodejs/tree/develop/web).
 
 - **`rosocket`** — thin WebSocket gateway, zero browser dependencies (just built-in `WebSocket` + `JSON`). Best for quick prototypes and `roslibjs`-style apps.
