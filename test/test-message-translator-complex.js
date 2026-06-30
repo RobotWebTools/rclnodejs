@@ -209,16 +209,33 @@ describe('Rclnodejs message translation: complex types', function () {
           const MessageType = testData.pkg + '/msg/' + testData.type;
           const publisher = node.createPublisher(MessageType, topic);
           return new Promise((resolve, reject) => {
+            let timer;
             const sub = node.createSubscription(MessageType, topic, (value) => {
               if (deepEqual(value, v)) {
+                clearInterval(timer);
                 node.destroy();
                 resolve();
               } else {
+                clearInterval(timer);
+                node.destroy();
                 console.log('got', value);
                 console.log('expected', v);
                 reject('case ' + i + '. Expected: ' + v + ', Got: ' + value);
               }
             });
+            // Keep republishing until the subscription is matched and the
+            // message is received; a single publish can be lost while pub/sub
+            // discovery is still in progress.
+            const start = Date.now();
+            timer = setInterval(() => {
+              if (Date.now() - start > 55 * 1000) {
+                clearInterval(timer);
+                node.destroy();
+                reject('Timed out waiting for message');
+                return;
+              }
+              publisher.publish(v);
+            }, 100);
             publisher.publish(v);
             rclnodejs.spin(node);
           });
