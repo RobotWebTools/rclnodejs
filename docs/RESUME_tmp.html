@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>RESUME.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> or <div class="page"></div> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="resume">RESUME</h1>
+<h2 id="contact">Contact</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Name</strong></td>
+<td>Wang, Minggang</td>
+<td><strong>Mobile</strong></td>
+<td>13910507617</td>
+</tr>
+<tr>
+<td><strong>E-mail</strong></td>
+<td>minggangw@gmail.com</td>
+<td><strong>WeChat</strong></td>
+<td>minggangw</td>
+</tr>
+</tbody>
+</table>
+<h2 id="education">Education</h2>
+<table>
+<thead>
+<tr>
+<th>Period</th>
+<th>School</th>
+<th>Degree</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2004 – 2006</td>
+<td>Beijing Institute of Technology</td>
+<td>M.S. Automation</td>
+</tr>
+<tr>
+<td>1999 – 2003</td>
+<td>Beijing Institute of Technology</td>
+<td>B.S. Automation</td>
+</tr>
+</tbody>
+</table>
+<h2 id="summary">Summary</h2>
+<p>Actively participate in a wide range of web technology-related projects, focusing on web engine, web solution enabling, and hybrid development, covering Linux &amp; macOS/Cocoa platforms and programming in C\C++, Objective-C, and JavaScript languages.</p>
+<p><strong>Open-source projects experience:</strong></p>
+<ul>
+<li>Google Chromium project as committer</li>
+<li>Web Robot Tools community as maintainer</li>
+<li>Presented the Web/Node.js solution designed for ROS2 on ROSCon2018 Madrid</li>
+<li>Presented PWA in Chromium on QCon2019 Beijing</li>
+</ul>
+<h2 id="github-profile">GitHub Profile</h2>
+<p><a href="https://github.com/minggangw">https://github.com/minggangw</a></p>
+<ul>
+<li>Lead maintainer of rclnodejs, an open-source ROS 2 client runtime that lets JavaScript/TypeScript applications act as first-class ROS 2 nodes; owns its architecture, native binding layer over ROS 2 middleware (rcl/rmw/DDS), release engineering, and cross-distribution/ABI compatibility.</li>
+<li>Led rclnodejs's modernization to native ES modules and first-class TypeScript, and extended it into the browser via web-native APIs and WebSocket connectivity, sustaining the platform across multiple ROS 2 generations.</li>
+<li>Maintainer of the RobotWebTools community.</li>
+<li>Focus areas: robotics middleware &amp; runtime systems, ROS 2, cross-language integration, web-native robotics, release engineering, package distribution &amp; ABI compatibility.</li>
+</ul>
+<h2 id="experience">Experience</h2>
+<h3 id="microsoft">Microsoft</h3>
+<p><strong>Microsoft Edge browser department</strong> · Oct 2021 - Present</p>
+<ul>
+<li>Drive Microsoft Quick Authentication project (microsoft/quick-authentication), which helps 3rd party partners to sign in with Microsoft personal account on their websites.</li>
+<li>Develop features of Edge browser, focusing on enterprise scenarios.</li>
+</ul>
+<h3 id="intel-corporation">Intel Corporation</h3>
+<p><strong>Software Engineer, Open-source Technology Center</strong> · July 2015 - Oct 2021</p>
+<p>Working at Intel Web department, focusing on the Google Chromium project, including feature implementation, framework refactor, and performance optimization. Besides, also responsible to design web solutions in the robotics &amp; IoT fields.</p>
+<ul>
+<li>Main contributor who drives the Onion Soup loader project that targets to move stuffs under //content/renderer/loader/ into blink. Responsible to refactor/decouple the loading module used by URL requests/web workers. To make sure the functionalities and stability are not influenced after a series of big changes.</li>
+<li>Implement features and fix bugs of the Service Worker module in Chromium.</li>
+<li>Support to customize the Chromium browser per China market requirements, e.g. UI/browser behavior, and enable HW optimization on Intel Tiger Lake platform.</li>
+<li>Design &amp; lead the ROS 2.0 Node.js client (4k+/month) &amp; bridge projects and extend the web capabilities to the ROS ecosystem by Node.js/Electron.</li>
+<li>Contribute to the Crosswalk Project, a Chromium-based web engine used to develop hybrid apps.</li>
+</ul>
+<h3 id="tencent">Tencent</h3>
+<p><strong>Software Engineer, QQ Browser Group</strong> · April 2014 - July 2015</p>
+<p>Working at the Tencent browser department and responsible to develop the QQ browser (Chromium based) on the macOS platform.</p>
+<ul>
+<li>Develop new features for the QQ browser, including to integrate the Tencent service into the browser, implement new UI design by leveraging the Cocoa API.</li>
+<li>Lower the product crash rate to improve the robustness.</li>
+</ul>
+<h3 id="blackberry">BlackBerry</h3>
+<p><strong>Software Engineer, Browser Product Department</strong> · April 2013 - January 2014</p>
+<p>Working at the Blackberry browser department, responsible to maintain BB10 WebKit browser.</p>
+<ul>
+<li>Implement new features based on the product roadmap.</li>
+<li>Fix bugs on the network, event handle, rendering, and multimedia modules.</li>
+</ul>
+<h3 id="nokia">Nokia</h3>
+<p><strong>Software Engineer, Nokia Research Center</strong> · May 2009 - December 2012</p>
+<ul>
+<li>Develop an indoor location app named &quot;Nokia Find &amp; Connect&quot; on S60 platform, featuring in constructing friend relationship, booking a meeting room, and locating a user in the office building.</li>
+<li>Develop a coupon client named &quot;WuXianGouXiang&quot; on S60 platform, users can get coupon based on their geo location and their interests.</li>
+</ul>
+<h3 id="cienet-technologies">CIeNET Technologies</h3>
+<p><strong>Software Engineer</strong> · January 2007 - May 2009</p>
+<ul>
+<li>Implement video streaming client on Nokia S60 platform which can play the video clips from the streaming server, featuring in H.264 decoding, RTSP/RTP protocols &amp; SIP support.</li>
+<li>Support Motorola UIQ project, developing the Media Gallery app on Motorola Z series phone on the UIQ platform.</li>
+</ul>
+<h3 id="siemens">Siemens</h3>
+<p><strong>Software Engineer</strong> · June 2006 - December 2006</p>
+<p>Develop an internal Bugzilla-like bug management system based on ASP.NET platform.</p>
+
+</body>
+</html>
