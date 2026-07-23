@@ -6,21 +6,26 @@ Builds on 2.1.0's native ESM and the `rclnodejs/web` HTTP transport from 2.0.0: 
 
 ## Streaming topics into the browser
 
-- `GET /capability/subscribe/<name>` streams `ready`/`message` events as `text/event-stream`.
-- CORS is configurable (`cors: true`, a single origin, or an allow-list), with proper preflight handling.
-- New CLI flags: `--http-sse`, `--http-sse-keep-alive <ms>`, `--http-cors <origin>`.
-- The JS demo now has live SSE and `fetch()` panels to try it without writing any code: [`demo/web/javascript/`](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/web/javascript).
+```bash
+# Terminal 1
+ros2 run demo_nodes_cpp talker  # publishes /chatter
+```
+
+```bash
+# Terminal 2
+npx -p rclnodejs rclnodejs-web --port 9000 --http-port 9001 \
+  --http-sse --http-cors '*' --subscribe /chatter=std_msgs/msg/String
+```
 
 ```js
+// Browser — no SDK needed
 const source = new EventSource(
-  'http://localhost:9001/capability/subscribe/topic'
+  'http://localhost:9001/capability/subscribe/chatter'
 );
 source.addEventListener('message', (e) => console.log(JSON.parse(e.data)));
 ```
 
-```bash
-curl -N http://localhost:9001/capability/subscribe/topic
-```
+`GET /capability/subscribe/<name>` streams as `text/event-stream`; `--http-cors` lets cross-origin pages connect too, and `--http-sse-keep-alive <ms>` controls the heartbeat interval. Full walkthrough: [`demo/web/javascript/`](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/web/javascript).
 
 Useful anywhere you want live robot data outside a ROS-aware process — a browser dashboard showing topic data in real time, or an agent/LLM tool that subscribes to a topic over plain HTTP instead of speaking ROS 2 natively.
 
