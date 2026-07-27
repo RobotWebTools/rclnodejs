@@ -27,9 +27,31 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const argv = process.argv.slice(2);
+// `openapi` is a one-shot metadata subcommand (prototype for
+// docs/AGENT_API_DESIGN_2.2.0.md): it resolves `expose` capabilities to
+// their ROS message/service schemas and prints a document to stdout, without
+// starting any transport or connecting to a live ROS graph (`rclnodejs.init()`
+// is never called). That said, resolving a message type still `require()`s
+// its generated `.js` class, which loads rclnodejs's native addon as a side
+// effect (same as any other rclnodejs usage) — so source your ROS 2
+// environment first. Without it, the native loader may not find a matching
+// prebuild and can fall back to rebuilding from source, which is slow and,
+// in the worst case, wipes `generated/` (see the incident note in
+// docs/AGENT_API_DESIGN_2.2.0.md §5).
+const SUBCOMMANDS = new Set(['openapi']);
+let subcommand;
+let argv = process.argv.slice(2);
+if (SUBCOMMANDS.has(argv[0])) {
+  subcommand = argv[0];
+  argv = argv.slice(1);
+}
 
 (async function main() {
+  if (subcommand) {
+    await runOpenApiSubcommand(argv);
+    return;
+  }
+
   let parsed;
   try {
     parsed = parseArgv(argv);
@@ -166,6 +188,79 @@ const argv = process.argv.slice(2);
     fail(err);
   }
 })();
+
+/**
+ * Handle the `openapi` one-shot subcommand: parse argv + config the same way
+ * the server start path does, build a bare `CapabilityRegistry` from
+ * `expose` (no Node, no transports, no `rclnodejs.init()`), and print the
+ * resulting OpenAPI document to stdout as JSON.
+ *
+ * @param {string[]} rest - argv with the subcommand keyword already removed
+ */
+async function runOpenApiSubcommand(rest) {
+  let parsed;
+  try {
+    parsed = parseArgv(rest);
+  } catch (e) {
+    fail(e);
+  }
+  if (parsed.help) {
+    process.stdout.write(HELP);
+    process.exit(0);
+  }
+
+  let cfg;
+  try {
+    cfg = mergeConfig(loadConfigFile(parsed.configPath), parsed.partial);
+    validateConfig(cfg, 'options');
+  } catch (e) {
+    fail(e);
+  }
+
+  const { CapabilityRegistry } = await import('../lib/runtime/index.js');
+  const { buildOpenApiDocument } = await import('../lib/openapi.js');
+  const registry = new CapabilityRegistry();
+  registry.expose(cfg.expose);
+
+  try {
+    const document = buildOpenApiDocument(registry.list(), {
+      title: cfg.node,
+      basePath: cfg.http.basePath || '/capability',
+      servers: openApiServers(cfg),
+    });
+    process.stdout.write(JSON.stringify(document, null, 2) + '\n');
+  } catch (e) {
+    fail(e);
+  }
+}
+
+/**
+ * Derive OpenAPI `servers` from the resolved config's HTTP transport.
+ *
+ * Without this the document has no `servers`, which OpenAPI defines as
+ * `[{url: '/'}]` — i.e. "resolve paths against whatever origin served this
+ * document". That is wrong here: the document is a static file, typically
+ * served by a different origin than the runtime (the demo serves it from
+ * `static.mjs` on :8080 while the runtime's HTTP transport listens on
+ * :9001), so Swagger UI's "Try it out" would hit the static server.
+ *
+ * Uses `localhost` rather than the configured bind host on purpose: the
+ * default `::` is a wildcard bind address, not a URL an HTTP client can
+ * dial. Downstream deployments behind a proxy should rewrite `servers`.
+ *
+ * @param {object} cfg - fully-resolved config from `mergeConfig`
+ * @returns {Array<{url: string, description: string}>} empty when the HTTP
+ *   transport is disabled — WS-only runtimes have no HTTP origin to point at
+ */
+function openApiServers(cfg) {
+  if (!cfg.http || cfg.http.port == null) return [];
+  return [
+    {
+      url: `http://localhost:${cfg.http.port}`,
+      description: 'rclnodejs/web HTTP transport',
+    },
+  ];
+}
 
 function fail(err) {
   if (err && err.cli) {
