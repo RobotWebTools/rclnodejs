@@ -62,6 +62,10 @@ describe('lib/openapi.js', function () {
       assert.ok(re.test('42n'));
       assert.ok(re.test('-7n'));
       assert.ok(!re.test('42'));
+      // Explicit example so API explorers (e.g. Swagger UI) show a sane
+      // value instead of synthesizing an arbitrarily long digit run to
+      // satisfy the unbounded `[0-9]+` pattern.
+      assert.ok(re.test(schema.example));
 
       const unsignedSchema = primitiveToJsonSchema({ type: 'uint64' });
       assert.strictEqual(unsignedSchema.type, 'string');
@@ -69,6 +73,7 @@ describe('lib/openapi.js', function () {
       const unsignedRe = new RegExp(unsignedSchema.pattern);
       assert.ok(unsignedRe.test('42n'));
       assert.ok(!unsignedRe.test('-7n'));
+      assert.ok(unsignedRe.test(unsignedSchema.example));
     });
 
     it('maps bounded strings to maxLength', function () {
@@ -95,13 +100,10 @@ describe('lib/openapi.js', function () {
     };
 
     it('produces a valid-looking OpenAPI 3.1 document shell', function () {
-      const doc = buildOpenApiDocument(capabilities, {
-        title: 'test API',
-        version: '1.2.3',
-      });
+      const doc = buildOpenApiDocument(capabilities, { title: 'test API' });
       assert.strictEqual(doc.openapi, '3.1.0');
       assert.strictEqual(doc.info.title, 'test API');
-      assert.strictEqual(doc.info.version, '1.2.3');
+      assert.strictEqual(doc.info.version, '0.0.0');
     });
 
     it('documents a call capability as POST /capability/call/<name>', function () {
@@ -163,32 +165,6 @@ describe('lib/openapi.js', function () {
     });
   });
 
-  describe('servers', function () {
-    const capabilities = {
-      call: {},
-      publish: { '/chatter': 'std_msgs/msg/String' },
-      subscribe: {},
-    };
-
-    it('omits servers by default', function () {
-      const doc = buildOpenApiDocument(capabilities);
-      assert.ok(!('servers' in doc));
-    });
-
-    it('emits servers when given, so clients target the runtime origin', function () {
-      // Without this, OpenAPI's default `servers` is [{url: '/'}] — every
-      // path resolves against whatever origin served the document. When a
-      // static file server hosts openapi.json but the runtime listens
-      // elsewhere, "Try it out" hits the static server and 404s.
-      const doc = buildOpenApiDocument(capabilities, {
-        servers: [{ url: 'http://localhost:9001', description: 'http' }],
-      });
-      assert.deepStrictEqual(doc.servers, [
-        { url: 'http://localhost:9001', description: 'http' },
-      ]);
-    });
-  });
-
   describe('CLI subcommand (bin/rclnodejs-web.js openapi)', function () {
     this.timeout(10000);
 
@@ -202,6 +178,23 @@ describe('lib/openapi.js', function () {
       const doc = JSON.parse(stdout);
       assert.strictEqual(doc.openapi, '3.1.0');
       assert.ok(doc.paths['/capability/call/add_two_ints']);
+    });
+
+    it('openapi routes use --path when http.basePath is not set, matching the server transport', async function () {
+      // Must match HttpTransport's own fallback (cfg.path, not a hardcoded
+      // '/capability') or the document describes routes the server doesn't
+      // actually serve.
+      const { code, stdout } = await runCli([
+        'openapi',
+        '--path',
+        '/api',
+        '--call',
+        '/add_two_ints=example_interfaces/srv/AddTwoInts',
+      ]);
+      assert.strictEqual(code, 0);
+      const doc = JSON.parse(stdout);
+      assert.ok(doc.paths['/api/call/add_two_ints']);
+      assert.ok(!doc.paths['/capability/call/add_two_ints']);
     });
 
     it('openapi omits servers when the HTTP transport is off', async function () {
@@ -226,6 +219,50 @@ describe('lib/openapi.js', function () {
       const doc = JSON.parse(stdout);
       assert.strictEqual(doc.servers.length, 1);
       assert.strictEqual(doc.servers[0].url, 'http://localhost:9001');
+    });
+
+    it('openapi uses a configured --http-host verbatim, not a hardcoded localhost', async function () {
+      const { code, stdout } = await runCli([
+        'openapi',
+        '--publish',
+        '/chatter=std_msgs/msg/String',
+        '--http-port',
+        '9001',
+        '--http-host',
+        'api.example.com',
+      ]);
+      assert.strictEqual(code, 0);
+      const doc = JSON.parse(stdout);
+      assert.strictEqual(doc.servers[0].url, 'http://api.example.com:9001');
+    });
+
+    it('openapi displays a wildcard --http-host as localhost, matching the startup banner', async function () {
+      const { code, stdout } = await runCli([
+        'openapi',
+        '--publish',
+        '/chatter=std_msgs/msg/String',
+        '--http-port',
+        '9001',
+        '--http-host',
+        '0.0.0.0',
+      ]);
+      assert.strictEqual(code, 0);
+      const doc = JSON.parse(stdout);
+      assert.strictEqual(doc.servers[0].url, 'http://localhost:9001');
+    });
+
+    it("openapi leaves info.version at the '0.0.0' placeholder", async function () {
+      // info.version describes the user's API, not the tool that generated
+      // it, and buildOpenApiDocument() has no option for it (see its
+      // docstring) — so it's always this fixed placeholder.
+      const { code, stdout } = await runCli([
+        'openapi',
+        '--publish',
+        '/chatter=std_msgs/msg/String',
+      ]);
+      assert.strictEqual(code, 0);
+      const doc = JSON.parse(stdout);
+      assert.strictEqual(doc.info.version, '0.0.0');
     });
 
     it('rejects an unknown flag the same way the server-start path does', async function () {

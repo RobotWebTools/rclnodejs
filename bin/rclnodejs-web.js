@@ -27,6 +27,11 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// A wildcard bind address (dual-stack default, or IPv4-any) isn't a URL an
+// HTTP client can dial, so display/advertise it as `localhost` instead.
+// Any other configured host (a real hostname/IP) passes through unchanged.
+const displayHost = (h) => (['0.0.0.0', '::'].includes(h) ? 'localhost' : h);
+
 // `openapi` is a one-shot subcommand: it prints an OpenAPI document to
 // stdout without starting any transport or calling `rclnodejs.init()`.
 // Still needs ROS 2 sourced, though — resolving a message type loads
@@ -131,8 +136,6 @@ if (SUBCOMMANDS.has(argv[0])) {
     const httpTransport = httpEnabled ? runtime.transports[1] : null;
 
     if (!parsed.quiet) {
-      const displayHost = (h) =>
-        ['0.0.0.0', '::'].includes(h) ? 'localhost' : h;
       const list = runtime.registry.list();
       const totals =
         Object.keys(list.call).length +
@@ -215,11 +218,14 @@ async function runOpenApiSubcommand(rest) {
   registry.expose(cfg.expose);
 
   try {
+    // No `version` option: `info.version` describes the caller's API, not
+    // rclnodejs's own release — see lib/openapi.js's docstring.
     const document = buildOpenApiDocument(registry.list(), {
       title: cfg.node,
-      basePath: cfg.http.basePath || '/capability',
-      servers: openApiServers(cfg),
+      basePath: cfg.http.basePath || cfg.path,
     });
+    const servers = openApiServers(cfg);
+    if (servers.length) document.servers = servers;
     process.stdout.write(JSON.stringify(document, null, 2) + '\n');
   } catch (e) {
     fail(e);
@@ -240,9 +246,10 @@ async function runOpenApiSubcommand(rest) {
  */
 function openApiServers(cfg) {
   if (!cfg.http || cfg.http.port == null) return [];
+  const host = displayHost(cfg.http.host || cfg.host);
   return [
     {
-      url: `http://localhost:${cfg.http.port}`,
+      url: `http://${host}:${cfg.http.port}`,
       description: 'rclnodejs/web HTTP transport',
     },
   ];
