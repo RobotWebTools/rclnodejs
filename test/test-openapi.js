@@ -6,10 +6,10 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 
-// Prototype tests for docs/AGENT_API_DESIGN_2.2.0.md: the OpenAPI /
-// agent-tool-schema export built on top of the capability registry.
-// These are pure metadata transforms — no ROS 2 init, no transports, no
-// network — so they run fast and need no `rclnodejs.init()`.
+// Tests for lib/openapi.js: the OpenAPI export built on top of the
+// capability registry. These are pure metadata transforms — no ROS 2
+// init, no transports, no network — so they run fast and need no
+// `rclnodejs.init()`.
 
 import assert from 'assert';
 import path from 'node:path';
