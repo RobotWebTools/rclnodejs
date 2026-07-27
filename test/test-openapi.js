@@ -29,7 +29,7 @@ function runCli(args) {
     let stderr = '';
     p.stdout.on('data', (d) => (stdout += d.toString()));
     p.stderr.on('data', (d) => (stderr += d.toString()));
-    p.on('exit', (code) => resolve({ code, stdout, stderr }));
+    p.on('close', (code) => resolve({ code, stdout, stderr }));
     p.on('error', reject);
   });
 }
@@ -65,6 +65,10 @@ describe('lib/openapi.js', function () {
 
       const unsignedSchema = primitiveToJsonSchema({ type: 'uint64' });
       assert.strictEqual(unsignedSchema.type, 'string');
+      assert.strictEqual(unsignedSchema.format, 'uint64');
+      const unsignedRe = new RegExp(unsignedSchema.pattern);
+      assert.ok(unsignedRe.test('42n'));
+      assert.ok(!unsignedRe.test('-7n'));
     });
 
     it('maps bounded strings to maxLength', function () {
