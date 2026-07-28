@@ -34,7 +34,7 @@ This example assumes your ROS 2 environment is already sourced.
 - Reference:
   [API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation), [Using TypeScript](#using-rclnodejs-with-typescript)
 - Features:
-  [ROS 2 in the browser](#ros-2-in-the-browser), [Observable Subscriptions](#observable-subscriptions), [Electron-based Visualization](#electron-based-visualization)
+  [Bring ROS 2 to the Web](#bring-ros-2-to-the-web), [Observable Subscriptions](#observable-subscriptions), [Electron-based Visualization](#electron-based-visualization)
 - Project docs:
   [Efficient Usage Tips](./docs/EFFICIENCY.md), [FAQ and Known Issues](./docs/FAQ.md), [Building from Scratch](./docs/BUILDING.md), [Contributing](./docs/CONTRIBUTING.md)
 
@@ -110,7 +110,7 @@ node example/topics/publisher/publisher-example.mjs
 
 More runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
 
-## ROS 2 in the browser
+## Bring ROS 2 to the Web
 
 `rclnodejs` ships **two** ways to reach ROS 2 from the browser — pick one based on
 how much glue you want to write.
@@ -123,7 +123,10 @@ how much glue you want to write.
   `curl -X POST http://<host>/capability/call/<name>`, with `subscribe`
   streaming as Server-Sent Events (`GET .../capability/subscribe/<name>`) —
   so shell scripts, Postman, AI-agent tool-use, and even a bare browser
-  `fetch()` / `EventSource` (CORS-enabled) just work.
+  `fetch()` / `EventSource` (CORS-enabled) just work. The same
+  `web.json` also generates an OpenAPI 3.1 document
+  (`rclnodejs-web openapi`) — codegen, API explorers, and AI-agent
+  tool-use get a standard, machine-readable description for free.
 
   ```ts
   import { connect } from 'rclnodejs/web';
@@ -131,13 +134,6 @@ how much glue you want to write.
   const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
     '/add_two_ints', { a: '2n', b: '40n' }
   ); // reply.sum is typed as `${number}n`
-  ```
-
-  No SDK needed for subscribe — with the HTTP/SSE transport enabled (`--http-sse`, plus `--http-cors` for cross-origin), any browser streams a live ROS 2 topic via built-in `EventSource`:
-
-  ```js
-  const es = new EventSource('http://host:9001/capability/subscribe/chatter');
-  es.onmessage = (e) => console.log(JSON.parse(e.data)); // live ROS 2 messages
   ```
 
 - **[`rosocket`](./rosocket/README.md)** — thin WebSocket gateway,
@@ -150,24 +146,7 @@ how much glue you want to write.
 
 ## Observable Subscriptions
 
-rclnodejs supports [RxJS](https://rxjs.dev/) Observable subscriptions for reactive programming with ROS 2 messages. Use operators like `throttleTime()`, `debounceTime()`, `map()`, and `combineLatest()` to build declarative message processing pipelines.
-
-```javascript
-import { throttleTime, map } from 'rxjs';
-
-const obsSub = node.createObservableSubscription(
-  'sensor_msgs/msg/LaserScan',
-  '/scan'
-);
-obsSub.observable
-  .pipe(
-    throttleTime(200),
-    map((msg) => msg.ranges)
-  )
-  .subscribe((ranges) => console.log('Ranges:', ranges.length));
-```
-
-See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions.md) for more details.
+rclnodejs supports [RxJS](https://rxjs.dev/) Observable subscriptions for reactive programming with ROS 2 messages — operators like `throttleTime()`, `debounceTime()`, `map()`, and `combineLatest()` build declarative message processing pipelines. See the [Observable Subscriptions Tutorial](./tutorials/observable-subscriptions.md) for the full API and runnable examples.
 
 ## Electron-based Visualization
 
