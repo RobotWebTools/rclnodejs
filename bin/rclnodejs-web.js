@@ -32,10 +32,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Any other configured host (a real hostname/IP) passes through unchanged.
 const displayHost = (h) => (['0.0.0.0', '::'].includes(h) ? 'localhost' : h);
 
-// `openapi` is a one-shot subcommand: it prints an OpenAPI document to
-// stdout without starting any transport or calling `rclnodejs.init()`.
-// Still needs ROS 2 sourced, though — resolving a message type loads
-// rclnodejs's native addon as a side effect, same as any other usage.
+// `openapi` is a one-shot subcommand: prints an OpenAPI document to
+// stdout, no transport or `rclnodejs.init()` — but still needs ROS 2
+// sourced, since resolving a message type loads the native addon.
 const SUBCOMMANDS = new Set(['openapi']);
 let subcommand;
 let argv = process.argv.slice(2);
@@ -187,8 +186,7 @@ if (SUBCOMMANDS.has(argv[0])) {
 
 /**
  * Handle the `openapi` subcommand: build a bare `CapabilityRegistry` from
- * `expose` (no Node, no transports, no `rclnodejs.init()`) and print the
- * resulting OpenAPI document to stdout as JSON.
+ * `expose` and print the resulting OpenAPI document to stdout as JSON.
  *
  * @param {string[]} rest - argv with the subcommand keyword already removed
  */
@@ -218,8 +216,7 @@ async function runOpenApiSubcommand(rest) {
   registry.expose(cfg.expose);
 
   try {
-    // No `version` option: `info.version` describes the caller's API, not
-    // rclnodejs's own release — see lib/openapi.js's docstring.
+    // No `version` option here — see lib/openapi.js's docstring.
     const document = buildOpenApiDocument(registry.list(), {
       title: cfg.node,
       basePath: cfg.http.basePath || cfg.path,
@@ -233,16 +230,15 @@ async function runOpenApiSubcommand(rest) {
 }
 
 /**
- * Derive OpenAPI `servers` from the resolved config's HTTP transport.
+ * Derive OpenAPI `servers` from the config's HTTP transport.
  *
- * Without this, OpenAPI defaults `servers` to `[{url: '/'}]` — the origin
- * that served the document, not the runtime. That's wrong for a static
- * `openapi.json` served from elsewhere (e.g. Swagger UI's "Try it out"
- * would hit the wrong server), so fill it in from the config instead.
+ * Without this, OpenAPI defaults `servers` to `[{url: '/'}]` — the
+ * document's own origin, not the runtime's, which is wrong once
+ * `openapi.json` is served from elsewhere (e.g. Swagger UI's "Try it out").
  *
  * @param {object} cfg - fully-resolved config from `mergeConfig`
- * @returns {Array<{url: string, description: string}>} empty when the HTTP
- *   transport is disabled
+ * @returns {Array<{url: string, description: string}>} empty when HTTP
+ *   is disabled
  */
 function openApiServers(cfg) {
   if (!cfg.http || cfg.http.port == null) return [];
