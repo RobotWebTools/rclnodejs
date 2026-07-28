@@ -8,8 +8,7 @@
 
 // Tests for lib/openapi.js: the OpenAPI export built on top of the
 // capability registry. These are pure metadata transforms — no ROS 2
-// init, no transports, no network — so they run fast and need no
-// `rclnodejs.init()`.
+// init, no transports, no network — so they run fast.
 
 import assert from 'assert';
 import path from 'node:path';
