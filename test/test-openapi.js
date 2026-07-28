@@ -143,6 +143,23 @@ describe('lib/openapi.js', function () {
       assert.ok(sseContent, 'expected a text/event-stream response');
     });
 
+    it("subscribe's 404 documents both unsupported_kind (sse off, the default) and not_exposed", function () {
+      const doc = buildOpenApiDocument(capabilities);
+      const op = doc.paths['/capability/subscribe/cmd_vel'].get;
+      const codeSchema =
+        op.responses['404'].content['application/json'].schema.properties.code;
+      assert.deepStrictEqual(codeSchema.enum, [
+        'not_exposed',
+        'unsupported_kind',
+      ]);
+    });
+
+    it('normalizes a trailing-slash basePath, matching HttpTransport, instead of emitting a double slash', function () {
+      const doc = buildOpenApiDocument(capabilities, { basePath: '/api/' });
+      assert.ok(doc.paths['/api/call/add_two_ints']);
+      assert.ok(!('/api//call/add_two_ints' in doc.paths));
+    });
+
     it('de-duplicates nested message types into one shared $ref component', function () {
       const doc = buildOpenApiDocument(capabilities);
       const op = doc.paths['/capability/subscribe/cmd_vel'].get;
