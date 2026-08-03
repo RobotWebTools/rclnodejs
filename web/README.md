@@ -1,12 +1,16 @@
 # rclnodejs/web — Browser SDK guide
 
-> Talk to ROS 2 from a web app — typed, allow-listed, `curl`-able.
+> Talk to ROS 2 from a web app — typed, allow-listed, `curl`-able,
+> OpenAPI-documented.
 
 `rclnodejs/web` is the browser-side of `rclnodejs`: a compact ESM
 module plus a server runtime that together expose a declarative
 subset of your ROS 2 graph over WebSocket **and** plain HTTP. The
 browser API is three verbs — `call`, `publish`, `subscribe` — typed
-end-to-end from your ROS 2 message and service types.
+end-to-end from your ROS 2 message and service types. The same
+`expose` config also generates an OpenAPI 3.1 document, so
+codegen, API explorers, and AI-agent tool-use all get a standard,
+machine-readable description of your ROS 2 graph for free.
 
 For runnable code see [`demo/web/`](../demo/web/):
 
@@ -168,6 +172,20 @@ es.addEventListener('message', (e) => {
 });
 es.addEventListener('error', () => es.close());
 ```
+
+### OpenAPI export
+
+Want the same HTTP surface as a browsable/machine-readable spec
+instead of hand-writing routes? `rclnodejs-web openapi` prints an
+OpenAPI 3.1 document for the same `expose` config, without starting
+the runtime:
+
+```bash
+npx -p rclnodejs rclnodejs-web openapi web.json > openapi.json
+```
+
+See [`demo/web/javascript/`](../demo/web/javascript/) for a full
+walkthrough, including browsing it in Swagger UI.
 
 ## 4. `rclnodejs/web` vs. `rosbridge` + `roslibjs`
 

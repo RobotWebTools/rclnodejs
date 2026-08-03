@@ -1,11 +1,12 @@
 {
-  "$comment": "Sample rclnodejs/web config consumed by `npx -p rclnodejs rclnodejs-web web.json` (the `-p rclnodejs` form works even when rclnodejs isn't already installed in the current project). Every key is optional; the defaults shown match the CLI defaults.",
+  "$comment": "Sample rclnodejs/web config consumed by `npx rclnodejs-web web.json` from a project that has rclnodejs installed. Inside a checkout of the rclnodejs repo itself, run `node ../../../bin/rclnodejs-web.js web.json` instead — npx resolves `rclnodejs` against the enclosing package.json, which *is* rclnodejs here, so it finds no bin to run. Every key is optional; the defaults shown match the CLI defaults.",
   "port": 9000,
   "path": "/capability",
   "node": "rclnodejs_web_demo",
   "http": {
-    "$comment": "HTTP transport for `call` and `publish` (curl-able, AI-agent friendly). `sse` also exposes `subscribe` over Server-Sent Events; `cors: \"*\"` allows any origin so a cross-origin browser EventSource can connect. Matches the bundled runtime.mjs.",
+    "$comment": "HTTP transport for `call` and `publish` (curl-able, AI-agent friendly). `sse` also exposes `subscribe` over Server-Sent Events; `cors: \"*\"` allows any origin so a cross-origin browser EventSource can connect. `host` binds to loopback only, shown here to document the option (the default without it, `::`, binds all interfaces but displays the same). Matches the bundled runtime.mjs.",
     "port": 9001,
+    "host": "localhost",
     "sse": true,
     "cors": "*"
   },

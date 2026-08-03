@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>rclnodejs/web demo — OpenAPI (Swagger UI)</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swagger-ui-dist@5.32.11/swagger-ui.css"
+    />
+  </head>
+  <body>
+    <!--
+      Browses openapi.json in Swagger UI (loaded from unpkg, no local
+      install needed). Generate it first, then open this file:
+
+        node ../../../bin/rclnodejs-web.js openapi web.json > openapi.json
+
+      "Try it out" sends real HTTP requests to the runtime, not to
+      whatever origin serves this page, so the runtime must be running
+      separately with CORS enabled:
+
+        node ../../../bin/rclnodejs-web.js web.json
+
+      `subscribe` capabilities show their schema here but have no
+      live-stream viewer — use the EventSource panel in index.html, or
+      `curl -N`, instead. See README.md for the full explanation.
+    -->
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5.32.11/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.32.11/swagger-ui-standalone-preset.js"></script>
+    <script>
+      window.onload = () => {
+        window.ui = SwaggerUIBundle({
+          url: './openapi.json',
+          dom_id: '#swagger-ui',
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+          layout: 'StandaloneLayout',
+        });
+      };
+    </script>
+  </body>
+</html>

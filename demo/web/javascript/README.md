@@ -21,21 +21,15 @@ node runtime.mjs
 ```
 
 `runtime.mjs` exposes a tiny `/add_two_ints` service and the shared
-`/web_demo_chatter` talker/listener topic (publish from one panel,
-receive in the others).
+`/web_demo_chatter` talker/listener topic.
 
-**Shell 2 — static-file server (hosts `index.html` + maps `/sdk/*` to
-the in-repo [`web/`](../../../web/) folder so the page can `import`
-the SDK from a plain URL):**
+**Shell 2 — static-file server** (hosts `index.html`, maps `/sdk/*` to
+the in-repo [`web/`](../../../web/) SDK):
 
 ```bash
 node static.mjs
 # Static files : http://localhost:8080/
 ```
-
-Open <http://localhost:8080/> in any modern browser. Runtime in shell
-1, page server in shell 2 — so you can swap in `nginx` / a CDN /
-`python3 -m http.server 8080` for shell 2 without touching shell 1.
 
 ## What the browser code looks like
 
@@ -57,57 +51,23 @@ can flip the SDK between the two without restarting.
 
 ## Same capability, no SDK
 
-Every `call` / `publish` is reachable as plain HTTP — drive the runtime
-from `curl`, Postman, or an AI agent, no JavaScript required:
+Every `call` / `publish` / `subscribe` is also reachable as plain HTTP —
+curl, Postman, or an AI agent, no JavaScript required:
 
 ```bash
 curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
   -H 'content-type: application/json' -d '{"a":"7n","b":"35n"}'
 # => {"sum":"42n"}
-```
 
-The demo also enables SSE (`new HttpTransport({ sse: true })`), so
-`subscribe` works over HTTP as a `text/event-stream` — handy for clients
-that can't hold a WebSocket open:
-
-```bash
 curl -N http://localhost:9001/capability/subscribe/web_demo_chatter
-# event: ready
-# data: {"capability":"/web_demo_chatter","subId":"sse"}
-#
 # event: message
 # data: {"data":"hi from curl"}
 ```
 
-The page's **native `EventSource` panel** (section 6) reads this same
-stream — no SDK, no WebSocket. It works cross-origin (`:8080` → `:9001`)
-because the demo also enables CORS (`new HttpTransport({ sse: true, cors:
-true })`); in production, pass your site's origin instead of `true`.
-
-The same is true for `call` / `publish` from the browser itself: the
-**native `fetch()` panel** (section 7) hits these endpoints directly —
-the `curl` commands above translate one-to-one to `fetch()` (same method,
-URL, headers and JSON body), again cross-origin thanks to CORS:
-
-```js
-// service call → 200 + JSON reply
-const res = await fetch(
-  'http://localhost:9001/capability/call/add_two_ints',
-  {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ a: '7n', b: '35n' }),
-  },
-);
-console.log((await res.json()).sum); // '42n'
-
-// topic publish → 204 No Content
-await fetch('http://localhost:9001/capability/publish/web_demo_chatter', {
-  method: 'POST',
-  headers: { 'content-type': 'application/json' },
-  body: JSON.stringify({ data: 'hi from fetch()' }),
-});
-```
+The demo enables SSE + CORS (`new HttpTransport({ sse: true, cors: true
+})`), so the same endpoints also work from a plain browser
+`EventSource` / `fetch()` — see the page's own panels 6 and 7 for live,
+runnable examples.
 
 > For browser apps, prefer the WebSocket transport for `subscribe` — one
 > connection multiplexes every topic. SSE targets the curl / AI-agent /
@@ -116,36 +76,45 @@ await fetch('http://localhost:9001/capability/publish/web_demo_chatter', {
 ### Pair it with your own publisher
 
 The runtime also exposes `/topic`, so you can feed the demo from any ROS 2
-node instead of the in-page publisher. Run the stock publisher example in
-a third shell, then point the EventSource panel (or `curl`) at `/topic`:
+node instead of the in-page publisher:
 
 ```bash
 source /opt/ros/<distro>/setup.bash
 node ../../../example/topics/publisher/publisher-example.mjs
-# Publishing message: Hello ROS 0, 1, 2, …
 
 curl -N http://localhost:9001/capability/subscribe/topic
-# event: message
-# data: {"data":"Hello ROS 0"}
 ```
 
 ## Without the bundled `runtime.mjs`
 
 `runtime.mjs` bundles the runtime and the demo's sample nodes into one
-process so it runs out of the box. In a real project those nodes already
-run elsewhere, so you only need the runtime — replace shell 1 with the
-CLI (shell 2 and the browser code are unchanged):
+process. In a real project those nodes already run elsewhere, so you
+only need the runtime — replace shell 1 with the CLI (shell 2 is
+unchanged):
 
 ```bash
-# the `-p rclnodejs` tells npx the binary lives in the rclnodejs package:
-npx -p rclnodejs rclnodejs-web web.json
+node ../../../bin/rclnodejs-web.js web.json
 
-# plus the service the demo expects (and any std_msgs/String publisher
-# on /web_demo_chatter):
+# plus the service the demo expects:
 ros2 run demo_nodes_cpp add_two_ints_server
 ```
 
-> The bundled `runtime.mjs` enables SSE + CORS via
-> `new HttpTransport({ sse: true, cors: true })`. The CLI does the same
-> with `--http-sse` / `--http-cors` (or `"http": { "sse": true, "cors":
-> "*" }` in `web.json`).
+`web.json` already sets `sse`/`cors`, matching what `runtime.mjs` enables
+in code.
+
+## OpenAPI — no server required
+
+The same `web.json` also documents itself as an OpenAPI 3.1 document — a
+one-shot subcommand that prints it and exits, without starting any
+transport or calling `rclnodejs.init()`.
+
+```bash
+source /opt/ros/<distro>/setup.bash
+node ../../../bin/rclnodejs-web.js openapi web.json > openapi.json
+
+# Browse it in Swagger UI (loads from a CDN, no install needed):
+node static.mjs
+# open http://localhost:8080/swagger-ui.html
+```
+
+![Swagger UI showing the generated OpenAPI document for rclnodejs_web_demo](./swagger-ui.png)
