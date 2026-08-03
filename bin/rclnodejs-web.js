@@ -27,9 +27,28 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const argv = process.argv.slice(2);
+// A wildcard bind address (dual-stack default, or IPv4-any) isn't a URL an
+// HTTP client can dial, so display/advertise it as `localhost` instead.
+// Any other configured host (a real hostname/IP) passes through unchanged.
+const displayHost = (h) => (['0.0.0.0', '::'].includes(h) ? 'localhost' : h);
+
+// `openapi` is a one-shot subcommand: prints an OpenAPI document to
+// stdout, no transport or `rclnodejs.init()` — but still needs ROS 2
+// sourced, since resolving a message type loads the native addon.
+const SUBCOMMANDS = new Set(['openapi']);
+let subcommand;
+let argv = process.argv.slice(2);
+if (SUBCOMMANDS.has(argv[0])) {
+  subcommand = argv[0];
+  argv = argv.slice(1);
+}
 
 (async function main() {
+  if (subcommand) {
+    await runOpenApiSubcommand(argv);
+    return;
+  }
+
   let parsed;
   try {
     parsed = parseArgv(argv);
@@ -116,8 +135,6 @@ const argv = process.argv.slice(2);
     const httpTransport = httpEnabled ? runtime.transports[1] : null;
 
     if (!parsed.quiet) {
-      const displayHost = (h) =>
-        ['0.0.0.0', '::'].includes(h) ? 'localhost' : h;
       const list = runtime.registry.list();
       const totals =
         Object.keys(list.call).length +
@@ -166,6 +183,73 @@ const argv = process.argv.slice(2);
     fail(err);
   }
 })();
+
+/**
+ * Handle the `openapi` subcommand: build a bare `CapabilityRegistry` from
+ * `expose` and print the resulting OpenAPI document to stdout as JSON.
+ *
+ * @param {string[]} rest - argv with the subcommand keyword already removed
+ */
+async function runOpenApiSubcommand(rest) {
+  let parsed;
+  try {
+    parsed = parseArgv(rest);
+  } catch (e) {
+    fail(e);
+  }
+  if (parsed.help) {
+    process.stdout.write(HELP);
+    process.exit(0);
+  }
+
+  let cfg;
+  try {
+    cfg = mergeConfig(loadConfigFile(parsed.configPath), parsed.partial);
+    validateConfig(cfg, 'options');
+  } catch (e) {
+    fail(e);
+  }
+
+  const { CapabilityRegistry } = await import('../lib/runtime/index.js');
+  const { buildOpenApiDocument } = await import('../lib/openapi.js');
+  const registry = new CapabilityRegistry();
+  registry.expose(cfg.expose);
+
+  try {
+    // No `version` option here — see lib/openapi.js's docstring.
+    const document = buildOpenApiDocument(registry.list(), {
+      title: cfg.node,
+      basePath: cfg.http.basePath || cfg.path,
+    });
+    const servers = openApiServers(cfg);
+    if (servers.length) document.servers = servers;
+    process.stdout.write(JSON.stringify(document, null, 2) + '\n');
+  } catch (e) {
+    fail(e);
+  }
+}
+
+/**
+ * Derive OpenAPI `servers` from the config's HTTP transport.
+ *
+ * Without this, OpenAPI defaults `servers` to `[{url: '/'}]` — the
+ * document's own origin, not the runtime's, which is wrong once
+ * `openapi.json` is served from elsewhere (e.g. Swagger UI's "Try it out").
+ *
+ * @param {object} cfg - fully-resolved config from `mergeConfig`
+ * @returns {Array<{url: string, description: string}>} empty when HTTP
+ *   is disabled
+ */
+function openApiServers(cfg) {
+  if (!cfg.http || cfg.http.port == null) return [];
+  const host = displayHost(cfg.http.host || cfg.host);
+  return [
+    {
+      url: `http://${host}:${cfg.http.port}`,
+      description: 'rclnodejs/web HTTP transport',
+    },
+  ];
+}
 
 function fail(err) {
   if (err && err.cli) {
