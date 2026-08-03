@@ -118,6 +118,3 @@ node static.mjs
 ```
 
 ![Swagger UI showing the generated OpenAPI document for rclnodejs_web_demo](./swagger-ui.png)
-
-
-
