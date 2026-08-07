@@ -111,11 +111,39 @@ declare module 'rclnodejs/web' {
 
   export interface ConnectOptions {
     /**
-     * Reserved for future reconnect-on-close support. Setting this to
-     * `true` today has no effect; the SDK warns and continues with
-     * single-shot connection semantics.
+     * Reopen the WebSocket link with backoff after a drop, replaying
+     * subscriptions. Emits `'reconnecting'` / `'reconnected'` /
+     * `'disconnected'` — see {@link RosClient.on}. The first connect
+     * attempt still rejects once rather than retrying forever.
+     * @default false
      */
     reconnect?: boolean;
+
+    /**
+     * Retry a failed HTTP `call()`/`publish()` this many times (network
+     * errors and 5xx only) before rejecting, with the same backoff as
+     * `reconnect`. No effect on WebSocket-only clients.
+     * @default 0
+     */
+    httpRetries?: number;
+  }
+
+  /** Detail passed to a `'reconnecting'` listener. */
+  export interface ReconnectingDetail {
+    /** 1-based attempt number for this reconnect sequence. */
+    attempt: number;
+    /** Delay in milliseconds before this attempt fires. */
+    delay: number;
+  }
+
+  /** SDK lifecycle events emitted by {@link RosClient.on}, WebSocket link only. */
+  export interface RosClientEventMap {
+    /** An established connection dropped unexpectedly. */
+    disconnected: undefined;
+    /** About to retry opening the connection. */
+    reconnecting: ReconnectingDetail;
+    /** A retry succeeded and subscriptions were replayed. */
+    reconnected: undefined;
   }
 
   /**
@@ -155,6 +183,18 @@ declare module 'rclnodejs/web' {
     constructor(url: string | ConnectEndpoints, options?: ConnectOptions);
     connect(): Promise<this>;
     close(): Promise<void>;
+
+    /** Subscribe to an SDK lifecycle event — see {@link RosClientEventMap}. */
+    on<K extends keyof RosClientEventMap>(
+      event: K,
+      handler: (detail: RosClientEventMap[K]) => void
+    ): this;
+
+    /** Remove a listener added with {@link RosClient.on}. */
+    off<K extends keyof RosClientEventMap>(
+      event: K,
+      handler: (detail: RosClientEventMap[K]) => void
+    ): this;
 
     /**
      * Invoke a service capability.
