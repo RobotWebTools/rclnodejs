@@ -112,9 +112,10 @@ declare module 'rclnodejs/web' {
   export interface ConnectOptions {
     /**
      * Reopen the WebSocket link with backoff after a drop, replaying
-     * subscriptions. Emits `'reconnecting'` / `'reconnected'` /
-     * `'disconnected'` — see {@link RosClient.on}. The first connect
-     * attempt still rejects once rather than retrying forever.
+     * subscriptions. Enables `'reconnecting'` / `'reconnected'` — see
+     * {@link RosClient.on}; `'disconnected'` fires on any unexpected drop
+     * regardless of this option. The first connect attempt still rejects
+     * once rather than retrying forever.
      * @default false
      */
     reconnect?: boolean;

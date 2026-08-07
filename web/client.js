@@ -119,10 +119,15 @@ class _WsLink {
       }
       const ws = new WS(this.url);
       this._ws = ws;
-      // True once this open attempt's own promise has settled.
+      // `settled`: this open attempt's promise has resolved/rejected.
+      // `opened`: onOpen actually fired for this attempt (distinct from
+      // `settled`, which onError can also set on a first-attempt failure —
+      // without this, a subsequent 'close' would wrongly reach _handleClose()).
       let settled = false;
+      let opened = false;
       const onOpen = () => {
         settled = true;
+        opened = true;
         this._reconnectAttempt = 0;
         this._reconnecting = false;
         this._resubscribeAll();
@@ -136,12 +141,14 @@ class _WsLink {
         }
       };
       const onClose = () => {
+        if (opened) {
+          this._handleClose();
+          return;
+        }
         if (!settled) {
           settled = true;
           reject(new Error('connection closed before it was established'));
-          return;
         }
-        this._handleClose();
       };
       const onMessage = (ev) => this._onMessage(ev);
 
@@ -161,20 +168,27 @@ class _WsLink {
 
   /** Handle an unexpected close: fail in-flight requests, then finalize or reconnect. */
   _handleClose() {
-    this._failAll(_connectionLostError());
     if (this._userClosed) {
-      this._closed = true;
-      this._subs.clear();
+      this._failAll(new Error('connection closed'));
+      this._finalizeClosed();
       return;
     }
     this._onEvent('disconnected', undefined);
     if (!this._reconnect) {
-      this._closed = true;
-      this._subs.clear();
+      this._failAll(_connectionLostError(false));
+      this._finalizeClosed();
       return;
     }
+    this._failAll(_connectionLostError(true));
     this._reconnecting = true;
     this._scheduleReconnect();
+  }
+
+  /** Shared terminal state for a deliberate close or a non-reconnecting drop. */
+  _finalizeClosed() {
+    this._closed = true;
+    this._reconnecting = false;
+    this._subs.clear();
   }
 
   _scheduleReconnect() {
@@ -241,10 +255,17 @@ class _WsLink {
       clearTimeout(this._reconnectTimer);
       this._reconnectTimer = null;
     }
-    if (!this._ws || this._closed) return;
+    if (!this._ws || this._closed) {
+      this._finalizeClosed();
+      return;
+    }
     const ws = this._ws;
-    // Already closed (e.g. mid-backoff) means 'close' won't fire again.
-    if (ws.readyState === 3) return;
+    // Already closed (e.g. mid-backoff) means 'close' won't fire again, so
+    // finalize directly instead of leaving state as if still reconnecting.
+    if (ws.readyState === 3) {
+      this._finalizeClosed();
+      return;
+    }
     return new Promise((resolve) => {
       const onClose = () => {
         if (ws.removeEventListener) ws.removeEventListener('close', onClose);
@@ -430,10 +451,13 @@ function _isRetryableHttpError(err) {
   return !!err && (err.code === 'network_error' || (err.status ?? 0) >= 500);
 }
 
-function _connectionLostError() {
-  return Object.assign(new Error('connection lost; reconnecting'), {
-    code: 'connection_lost',
-  });
+function _connectionLostError(reconnecting = true) {
+  return Object.assign(
+    new Error(
+      reconnecting ? 'connection lost; reconnecting' : 'connection lost'
+    ),
+    { code: 'connection_lost' }
+  );
 }
 
 // ROS names always start with `/`. Encode each path segment so that
@@ -485,9 +509,10 @@ export class RosClient {
    * @param {string|{http?:string, ws?:string}} url
    * @param {object} [options]
    * @param {boolean} [options.reconnect=false] Reopen the WS link with
-   *   backoff after a drop, replaying subscriptions. Emits 'reconnecting' /
-   *   'reconnected' / 'disconnected' — see {@link RosClient#on}. The first
-   *   connect attempt still rejects once rather than retrying forever.
+   *   backoff after a drop, replaying subscriptions. Enables 'reconnecting' /
+   *   'reconnected' \u2014 see {@link RosClient#on}; 'disconnected' fires on any
+   *   unexpected drop regardless. The first connect attempt still rejects
+   *   once rather than retrying forever.
    * @param {number} [options.httpRetries=0] Retry a failed HTTP
    *   call()/publish() this many times (network errors and 5xx only).
    */
@@ -515,8 +540,10 @@ export class RosClient {
   }
 
   /**
-   * Subscribe to an SDK lifecycle event: 'disconnected', 'reconnecting'
-   * ({attempt, delay}), or 'reconnected'. Only fires with {reconnect: true}.
+   * Subscribe to an SDK lifecycle event: 'disconnected' (fires on any
+   * unexpected drop, regardless of `reconnect`), 'reconnecting'
+   * ({attempt, delay}), or 'reconnected' (the latter two only with
+   * {reconnect: true}).
    */
   on(event, handler) {
     if (!this._listeners.has(event)) this._listeners.set(event, new Set());

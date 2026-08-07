@@ -16,8 +16,9 @@ import rclnodejs from '../index.js';
 import { createRuntime, WebSocketTransport } from '../lib/runtime/index.js';
 
 let connect;
+let RosClient;
 before(async function () {
-  ({ connect } = await import('../web/index.js'));
+  ({ connect, RosClient } = await import('../web/index.js'));
 });
 
 describe('rclnodejs/web — WebSocket reconnect', function () {
@@ -155,6 +156,63 @@ describe('rclnodejs/web — WebSocket reconnect', function () {
       });
       await dropServerSideConnection();
       await waitFor(() => disconnected, 5000);
+      // A *new* request after the drop hits the _closed guard, not the
+      // in-flight connection_lost path — see the test below for that case.
+      await assertRejectsWithCode(
+        ros.call('/rc_add_slow', { a: '1n', b: '2n' }),
+        undefined
+      );
+    } finally {
+      await ros.close();
+    }
+  });
+
+  it('without reconnect: true, an in-flight call() still gets a connection_lost code', async function () {
+    const ros = await connect(endpoint);
+    try {
+      const pending = ros.call('/rc_add_slow', { a: '1n', b: '2n' });
+      await dropServerSideConnection();
+      await assertRejectsWithCode(pending, 'connection_lost');
+    } finally {
+      await ros.close();
+    }
+  });
+
+  it('the first connection attempt rejects once and never starts reconnecting, even if error precedes close', async function () {
+    // A port nothing listens on: the underlying socket fails via 'error'
+    // followed by 'close' — the same ordering a mid-session drop uses, but
+    // on the very first attempt, which must reject once and stop there.
+    const deadPort = await new Promise((resolve) => {
+      const srv = http.createServer();
+      srv.listen(0, '127.0.0.1', () => {
+        const { port } = srv.address();
+        srv.close(() => resolve(port));
+      });
+    });
+
+    const ros = new RosClient(`ws://127.0.0.1:${deadPort}/capability`, {
+      reconnect: true,
+    });
+    let reconnecting = false;
+    ros.on('reconnecting', () => {
+      reconnecting = true;
+    });
+
+    await assert.rejects(ros.connect());
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    assert.strictEqual(reconnecting, false);
+  });
+
+  it('close() during backoff finalizes cleanly instead of staying in a reconnecting state', async function () {
+    const ros = await connect(endpoint, { reconnect: true });
+    try {
+      await dropServerSideConnection();
+      // Still mid-backoff: the base delay is >=250ms, and the dropped
+      // socket's readyState is already 3 (CLOSED) at this point. Without
+      // the fix, _reconnecting never resets and this next call() would
+      // reject with connection_lost forever instead of a definitive close.
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      await ros.close();
       await assertRejectsWithCode(
         ros.call('/rc_add_slow', { a: '1n', b: '2n' }),
         undefined
