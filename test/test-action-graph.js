@@ -67,6 +67,7 @@ describe('rclnodejs action graph', function () {
   async function waitForCount(countFn, expected) {
     const timeout = 5000;
     const start = Date.now();
+    // The count call is synchronous, but DDS discovery is not, so poll until it converges
     let actual = countFn();
     while (actual !== expected && Date.now() - start < timeout) {
       await assertUtils.createDelay(100);
@@ -75,11 +76,31 @@ describe('rclnodejs action graph', function () {
     return actual;
   }
 
+  // An entry appears as soon as its goal service is discovered, so wait for the
+  // remaining sub-entities too rather than just the expected number of entries
+  function isEndpointInfoComplete(result, count) {
+    return (
+      result.length === count &&
+      result.every((info) =>
+        [
+          info.goalServiceInfo,
+          info.cancelServiceInfo,
+          info.resultServiceInfo,
+          info.feedbackTopicInfo,
+          info.statusTopicInfo,
+        ].every((subEntity) => subEntity.node_name !== '')
+      )
+    );
+  }
+
   async function waitForEndpointInfo(infoFn, count) {
     const timeout = 5000;
     const start = Date.now();
     let result = infoFn();
-    while (result.length !== count && Date.now() - start < timeout) {
+    while (
+      !isEndpointInfoComplete(result, count) &&
+      Date.now() - start < timeout
+    ) {
       await assertUtils.createDelay(100);
       result = infoFn();
     }
