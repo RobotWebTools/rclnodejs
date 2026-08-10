@@ -254,6 +254,13 @@ describe('rclnodejs action graph', function () {
   });
 
   it('Test countActionClients and countActionServers', async function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <
+      rclnodejs.DistroUtils.DistroId.LYRICAL
+    ) {
+      this.skip();
+    }
+
     assert.strictEqual(
       await waitForCount(
         () => node1.countActionClients(`${NODE2_NS}/${ACTION1_NAME}`),
@@ -273,6 +280,13 @@ describe('rclnodejs action graph', function () {
   });
 
   it('Test getActionClientsInfoByAction', async function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <
+      rclnodejs.DistroUtils.DistroId.ROLLING
+    ) {
+      this.skip();
+    }
+
     const infos = await waitForEndpointInfo(
       () => node1.getActionClientsInfoByAction(`${NODE2_NS}/${ACTION1_NAME}`),
       1
@@ -306,6 +320,13 @@ describe('rclnodejs action graph', function () {
   });
 
   it('Test getActionServersInfoByAction', async function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <
+      rclnodejs.DistroUtils.DistroId.ROLLING
+    ) {
+      this.skip();
+    }
+
     const infos = await waitForEndpointInfo(
       () => node1.getActionServersInfoByAction(`${NODE2_NS}/${ACTION1_NAME}`),
       1
