@@ -64,6 +64,28 @@ describe('rclnodejs action graph', function () {
     return [];
   }
 
+  async function waitForCount(countFn, expected) {
+    const timeout = 5000;
+    const start = Date.now();
+    let actual = countFn();
+    while (actual !== expected && Date.now() - start < timeout) {
+      await assertUtils.createDelay(100);
+      actual = countFn();
+    }
+    return actual;
+  }
+
+  async function waitForEndpointInfo(infoFn, count) {
+    const timeout = 5000;
+    const start = Date.now();
+    let result = infoFn();
+    while (result.length !== count && Date.now() - start < timeout) {
+      await assertUtils.createDelay(100);
+      result = infoFn();
+    }
+    return result;
+  }
+
   before(function () {
     return rclnodejs.init();
   });
@@ -228,6 +250,79 @@ describe('rclnodejs action graph', function () {
     assert.notStrictEqual(
       result.findIndex((r) => r.name === `${NODE3_NS}/${ACTION2_NAME}`),
       -1
+    );
+  });
+
+  it('Test countActionClients and countActionServers', async function () {
+    assert.strictEqual(
+      await waitForCount(
+        () => node1.countActionClients(`${NODE2_NS}/${ACTION1_NAME}`),
+        1
+      ),
+      1
+    );
+    assert.strictEqual(
+      await waitForCount(
+        () => node1.countActionServers(`${NODE2_NS}/${ACTION1_NAME}`),
+        1
+      ),
+      1
+    );
+    assert.strictEqual(node1.countActionClients('/missing_action'), 0);
+    assert.strictEqual(node1.countActionServers('/missing_action'), 0);
+  });
+
+  it('Test getActionClientsInfoByAction', async function () {
+    const infos = await waitForEndpointInfo(
+      () => node1.getActionClientsInfoByAction(`${NODE2_NS}/${ACTION1_NAME}`),
+      1
+    );
+    assert.strictEqual(infos.length, 1);
+    const info = infos[0];
+    assert.ok(info instanceof rclnodejs.ActionEndpointInfo);
+    assert.strictEqual(info.nodeName, NODE2_NAME);
+    assert.strictEqual(info.nodeNamespace, NODE2_NS);
+    assert.strictEqual(info.actionType, fibonacci);
+    assert.strictEqual(
+      info.goalServiceInfo.service_type,
+      `${fibonacci}_SendGoal`
+    );
+    assert.strictEqual(
+      info.cancelServiceInfo.service_type,
+      'action_msgs/srv/CancelGoal'
+    );
+    assert.strictEqual(
+      info.resultServiceInfo.service_type,
+      `${fibonacci}_GetResult`
+    );
+    assert.strictEqual(
+      info.feedbackTopicInfo.topic_type,
+      `${fibonacci}_FeedbackMessage`
+    );
+    assert.strictEqual(
+      info.statusTopicInfo.topic_type,
+      'action_msgs/msg/GoalStatusArray'
+    );
+  });
+
+  it('Test getActionServersInfoByAction', async function () {
+    const infos = await waitForEndpointInfo(
+      () => node1.getActionServersInfoByAction(`${NODE2_NS}/${ACTION1_NAME}`),
+      1
+    );
+    assert.strictEqual(infos.length, 1);
+    const info = infos[0];
+    assert.ok(info instanceof rclnodejs.ActionEndpointInfo);
+    assert.strictEqual(info.nodeName, NODE2_NAME);
+    assert.strictEqual(info.nodeNamespace, NODE2_NS);
+    assert.strictEqual(info.actionType, fibonacci);
+    assert.strictEqual(
+      info.goalServiceInfo.service_type,
+      `${fibonacci}_SendGoal`
+    );
+    assert.strictEqual(
+      info.feedbackTopicInfo.topic_type,
+      `${fibonacci}_FeedbackMessage`
     );
   });
 });

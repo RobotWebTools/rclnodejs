@@ -17,6 +17,7 @@
 #include <rcl/error_handling.h>
 #include <rcl/graph.h>
 #include <rcl/rcl.h>
+#include <rcl_action/graph.h>
 
 #include <string>
 
@@ -39,6 +40,12 @@ typedef rcl_ret_t (*rcl_get_info_by_service_func_t)(
     const char* service_name, bool no_mangle,
     rcl_service_endpoint_info_array_t* info_array);
 #endif  // ROS_VERSION >= 2605
+
+#if ROS_VERSION >= 5000
+typedef rcl_ret_t (*rcl_action_get_info_by_action_func_t)(
+    const rcl_node_t* node, rcutils_allocator_t* allocator,
+    const char* action_name, rcl_action_endpoint_info_array_t* info_array);
+#endif  // ROS_VERSION >= 5000
 
 Napi::Value GetPublisherNamesAndTypesByNode(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -207,6 +214,34 @@ Napi::Value GetServiceNamesAndTypes(const Napi::CallbackInfo& info) {
   return result_list;
 }
 
+#if ROS_VERSION >= 2605
+Napi::Value CountActionClients(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string action_name = info[1].As<Napi::String>().Utf8Value();
+  size_t count = 0;
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_action_count_clients(node, action_name.c_str(), &count),
+      "Failed to count action clients");
+  return Napi::Number::New(env, count);
+}
+
+Napi::Value CountActionServers(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string action_name = info[1].As<Napi::String>().Utf8Value();
+  size_t count = 0;
+
+  THROW_ERROR_IF_NOT_EQUAL(
+      RCL_RET_OK, rcl_action_count_servers(node, action_name.c_str(), &count),
+      "Failed to count action servers");
+  return Napi::Number::New(env, count);
+}
+#endif  // ROS_VERSION >= 2605
+
 Napi::Value GetInfoByTopic(Napi::Env env, rcl_node_t* node,
                            const char* topic_name, bool no_mangle,
                            const char* type,
@@ -324,6 +359,60 @@ Napi::Value GetServersInfoByService(const Napi::CallbackInfo& info) {
 }
 #endif  // ROS_VERSION >= 2605
 
+#if ROS_VERSION >= 5000
+Napi::Value GetInfoByAction(
+    Napi::Env env, rcl_node_t* node, const char* action_name, const char* type,
+    rcl_action_get_info_by_action_func_t rcl_action_get_info_by_action) {
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+  rcl_action_endpoint_info_array_t info_array =
+      rcl_action_get_zero_initialized_endpoint_info_array();
+
+  RCPPUTILS_SCOPE_EXIT({
+    rcl_ret_t fini_ret =
+        rcl_action_endpoint_info_array_fini(&info_array, &allocator);
+    if (RCL_RET_OK != fini_ret) {
+      Napi::Error::New(env, rcl_get_error_string().str)
+          .ThrowAsJavaScriptException();
+      rcl_reset_error();
+    }
+  });
+
+  rcl_ret_t ret =
+      rcl_action_get_info_by_action(node, &allocator, action_name, &info_array);
+  if (RCL_RET_OK != ret) {
+    if (RCL_RET_UNSUPPORTED == ret) {
+      Napi::Error::New(
+          env, std::string("Failed to get information by action for ") + type +
+                   ": function not supported by RMW_IMPLEMENTATION")
+          .ThrowAsJavaScriptException();
+      return env.Undefined();
+    }
+    Napi::Error::New(
+        env, std::string("Failed to get information by action for ") + type)
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+
+  return ConvertToJSActionEndpointInfoList(env, &info_array);
+}
+
+Napi::Value GetActionClientsInfoByAction(const Napi::CallbackInfo& info) {
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string action_name = info[1].As<Napi::String>().Utf8Value();
+  return GetInfoByAction(info.Env(), node, action_name.c_str(), "clients",
+                         rcl_action_get_clients_info_by_action);
+}
+
+Napi::Value GetActionServersInfoByAction(const Napi::CallbackInfo& info) {
+  RclHandle* node_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_node_t* node = reinterpret_cast<rcl_node_t*>(node_handle->ptr());
+  std::string action_name = info[1].As<Napi::String>().Utf8Value();
+  return GetInfoByAction(info.Env(), node, action_name.c_str(), "servers",
+                         rcl_action_get_servers_info_by_action);
+}
+#endif  // ROS_VERSION >= 5000
+
 Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getPublisherNamesAndTypesByNode",
               Napi::Function::New(env, GetPublisherNamesAndTypesByNode));
@@ -342,11 +431,21 @@ Napi::Object InitGraphBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("getSubscriptionsInfoByTopic",
               Napi::Function::New(env, GetSubscriptionsInfoByTopic));
 #if ROS_VERSION >= 2605
+  exports.Set("countActionClients",
+              Napi::Function::New(env, CountActionClients));
+  exports.Set("countActionServers",
+              Napi::Function::New(env, CountActionServers));
   exports.Set("getClientsInfoByService",
               Napi::Function::New(env, GetClientsInfoByService));
   exports.Set("getServersInfoByService",
               Napi::Function::New(env, GetServersInfoByService));
 #endif  // ROS_VERSION >= 2605
+#if ROS_VERSION >= 5000
+  exports.Set("getActionClientsInfoByAction",
+              Napi::Function::New(env, GetActionClientsInfoByAction));
+  exports.Set("getActionServersInfoByAction",
+              Napi::Function::New(env, GetActionServersInfoByAction));
+#endif  // ROS_VERSION >= 5000
   return exports;
 }
 

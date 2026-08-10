@@ -931,6 +931,22 @@ declare module 'rclnodejs' {
      */
     getServiceNamesAndTypes(): Array<NamesAndTypesQueryResult>;
 
+    /** Return the number of action clients on an action. */
+    countActionClients(actionName: string): number | null;
+
+    /** Return the number of action servers on an action. */
+    countActionServers(actionName: string): number | null;
+
+    /** Return endpoint information for action clients on an action. */
+    getActionClientsInfoByAction(
+      actionName: string
+    ): ActionEndpointInfo[] | null;
+
+    /** Return endpoint information for action servers on an action. */
+    getActionServersInfoByAction(
+      actionName: string
+    ): ActionEndpointInfo[] | null;
+
     /**
      * Return a list of publishers on a given topic.
      *

@@ -52,6 +52,7 @@ import ActionUuid from './lib/action/uuid.js';
 import ClientGoalHandle from './lib/action/client_goal_handle.js';
 import { CancelResponse, GoalResponse } from './lib/action/response.js';
 import ServerGoalHandle from './lib/action/server_goal_handle.js';
+import ActionEndpointInfo from './lib/action/endpoint_info.js';
 import { toJSONSafe, toJSONString } from './lib/message_serialization.js';
 import {
   getActionClientNamesAndTypesByNode,
@@ -294,6 +295,9 @@ let rcl = {
 
   /** {@link ActionUuid} class */
   ActionUuid: ActionUuid,
+
+  /** {@link ActionEndpointInfo} class */
+  ActionEndpointInfo: ActionEndpointInfo,
 
   /** {@link ClientGoalHandle} class */
   ClientGoalHandle: ClientGoalHandle,
