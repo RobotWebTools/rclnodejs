@@ -931,18 +931,50 @@ declare module 'rclnodejs' {
      */
     getServiceNamesAndTypes(): Array<NamesAndTypesQueryResult>;
 
-    /** Return the number of action clients on an action. */
+    /**
+     * Return the number of action clients on an action.
+     *
+     * @param actionName - The action on which to count the action clients.
+     * @returns The number of action clients, or `null` when the ROS distro is
+     *          older than Lyrical and does not provide action graph counts.
+     */
     countActionClients(actionName: string): number | null;
 
-    /** Return the number of action servers on an action. */
+    /**
+     * Return the number of action servers on an action.
+     *
+     * @param actionName - The action on which to count the action servers.
+     * @returns The number of action servers, or `null` when the ROS distro is
+     *          older than Lyrical and does not provide action graph counts.
+     */
     countActionServers(actionName: string): number | null;
 
-    /** Return endpoint information for action clients on an action. */
+    /**
+     * Return endpoint information for each action client on an action.
+     *
+     * Each entry aggregates the endpoint information of all the underlying
+     * entities of one action client, i.e. the clients of the goal, cancel and
+     * result services and the subscriptions on the feedback and status topics.
+     *
+     * @param actionName - The action on which to find the action clients.
+     * @returns An array of ActionEndpointInfo, or `null` when the ROS distro is
+     *          older than Rolling and does not provide action endpoint information.
+     */
     getActionClientsInfoByAction(
       actionName: string
     ): ActionEndpointInfo[] | null;
 
-    /** Return endpoint information for action servers on an action. */
+    /**
+     * Return endpoint information for each action server on an action.
+     *
+     * Each entry aggregates the endpoint information of all the underlying
+     * entities of one action server, i.e. the servers of the goal, cancel and
+     * result services and the publishers on the feedback and status topics.
+     *
+     * @param actionName - The action on which to find the action servers.
+     * @returns An array of ActionEndpointInfo, or `null` when the ROS distro is
+     *          older than Rolling and does not provide action endpoint information.
+     */
     getActionServersInfoByAction(
       actionName: string
     ): ActionEndpointInfo[] | null;
