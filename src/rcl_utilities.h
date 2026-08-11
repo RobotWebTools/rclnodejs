@@ -18,6 +18,9 @@
 #include <napi.h>
 #include <rcl/graph.h>
 #include <rmw/rmw.h>
+#if ROS_VERSION >= 5000
+#include <rcl_action/graph.h>
+#endif
 
 #include <memory>
 #include <string>
@@ -55,6 +58,11 @@ Napi::Array ConvertToJSTopicEndpointInfoList(
 Napi::Array ConvertToJSServiceEndpointInfoList(
     Napi::Env env, const rmw_service_endpoint_info_array_t* info_array);
 #endif  // ROS_VERSION >= 2605
+
+#if ROS_VERSION >= 5000
+Napi::Array ConvertToJSActionEndpointInfoList(
+    Napi::Env env, const rcl_action_endpoint_info_array_t* info_array);
+#endif  // ROS_VERSION >= 5000
 
 Napi::Value ConvertToQoS(Napi::Env env, const rmw_qos_profile_t* qos_profile);
 

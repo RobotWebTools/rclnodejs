@@ -106,11 +106,17 @@ Napi::Value ConvertToJSTopicEndpoint(
 
   Napi::Object endpoint = Napi::Object::New(env);
   endpoint.Set("node_name",
-               Napi::String::New(env, topic_endpoint_info->node_name));
+               Napi::String::New(env, topic_endpoint_info->node_name
+                                          ? topic_endpoint_info->node_name
+                                          : ""));
   endpoint.Set("node_namespace",
-               Napi::String::New(env, topic_endpoint_info->node_namespace));
+               Napi::String::New(env, topic_endpoint_info->node_namespace
+                                          ? topic_endpoint_info->node_namespace
+                                          : ""));
   endpoint.Set("topic_type",
-               Napi::String::New(env, topic_endpoint_info->topic_type));
+               Napi::String::New(env, topic_endpoint_info->topic_type
+                                          ? topic_endpoint_info->topic_type
+                                          : ""));
 #if ROS_VERSION > 2205  // 2205 == Humble
   endpoint.Set("topic_type_hash",
                ConvertToHashObject(env, &topic_endpoint_info->topic_type_hash));
@@ -129,11 +135,18 @@ Napi::Value ConvertToJSServiceEndpointInfo(
     Napi::Env env, const rmw_service_endpoint_info_t* service_endpoint_info) {
   Napi::Object endpoint = Napi::Object::New(env);
   endpoint.Set("node_name",
-               Napi::String::New(env, service_endpoint_info->node_name));
-  endpoint.Set("node_namespace",
-               Napi::String::New(env, service_endpoint_info->node_namespace));
+               Napi::String::New(env, service_endpoint_info->node_name
+                                          ? service_endpoint_info->node_name
+                                          : ""));
+  endpoint.Set(
+      "node_namespace",
+      Napi::String::New(env, service_endpoint_info->node_namespace
+                                 ? service_endpoint_info->node_namespace
+                                 : ""));
   endpoint.Set("service_type",
-               Napi::String::New(env, service_endpoint_info->service_type));
+               Napi::String::New(env, service_endpoint_info->service_type
+                                          ? service_endpoint_info->service_type
+                                          : ""));
   endpoint.Set(
       "service_type_hash",
       ConvertToHashObject(env, &service_endpoint_info->service_type_hash));
@@ -320,6 +333,34 @@ Napi::Array ConvertToJSServiceEndpointInfoList(
   return list;
 }
 #endif  // ROS_VERSION >= 2605
+
+#if ROS_VERSION >= 5000
+Napi::Array ConvertToJSActionEndpointInfoList(
+    Napi::Env env, const rcl_action_endpoint_info_array_t* info_array) {
+  Napi::Array list = Napi::Array::New(env, info_array->size);
+  for (size_t i = 0; i < info_array->size; ++i) {
+    const rcl_action_endpoint_info_t* action_info = &info_array->info_array[i];
+    Napi::Object endpoint = Napi::Object::New(env);
+    endpoint.Set(
+        "goal_service_info",
+        ConvertToJSServiceEndpointInfo(env, &action_info->goal_service_info));
+    endpoint.Set(
+        "cancel_service_info",
+        ConvertToJSServiceEndpointInfo(env, &action_info->cancel_service_info));
+    endpoint.Set(
+        "result_service_info",
+        ConvertToJSServiceEndpointInfo(env, &action_info->result_service_info));
+    endpoint.Set(
+        "feedback_topic_info",
+        ConvertToJSTopicEndpoint(env, &action_info->feedback_topic_info));
+    endpoint.Set(
+        "status_topic_info",
+        ConvertToJSTopicEndpoint(env, &action_info->status_topic_info));
+    list.Set(i, endpoint);
+  }
+  return list;
+}
+#endif  // ROS_VERSION >= 5000
 
 char** AbstractArgsFromNapiArray(const Napi::Array& jsArgv) {
   size_t argc = jsArgv.Length();

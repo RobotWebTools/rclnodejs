@@ -64,6 +64,49 @@ describe('rclnodejs action graph', function () {
     return [];
   }
 
+  async function waitForCount(countFn, expected) {
+    const timeout = 5000;
+    const start = Date.now();
+    // The count call is synchronous, but DDS discovery is not, so poll until it converges
+    let actual = countFn();
+    while (actual !== expected && Date.now() - start < timeout) {
+      await assertUtils.createDelay(100);
+      actual = countFn();
+    }
+    return actual;
+  }
+
+  // An entry appears as soon as its goal service is discovered, so wait for the
+  // remaining sub-entities too rather than just the expected number of entries
+  function isEndpointInfoComplete(result, count) {
+    return (
+      result.length === count &&
+      result.every((info) =>
+        [
+          info.goalServiceInfo,
+          info.cancelServiceInfo,
+          info.resultServiceInfo,
+          info.feedbackTopicInfo,
+          info.statusTopicInfo,
+        ].every((subEntity) => subEntity.node_name !== '')
+      )
+    );
+  }
+
+  async function waitForEndpointInfo(infoFn, count) {
+    const timeout = 5000;
+    const start = Date.now();
+    let result = infoFn();
+    while (
+      !isEndpointInfoComplete(result, count) &&
+      Date.now() - start < timeout
+    ) {
+      await assertUtils.createDelay(100);
+      result = infoFn();
+    }
+    return result;
+  }
+
   before(function () {
     return rclnodejs.init();
   });
@@ -228,6 +271,100 @@ describe('rclnodejs action graph', function () {
     assert.notStrictEqual(
       result.findIndex((r) => r.name === `${NODE3_NS}/${ACTION2_NAME}`),
       -1
+    );
+  });
+
+  it('Test countActionClients and countActionServers', async function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <
+      rclnodejs.DistroUtils.DistroId.LYRICAL
+    ) {
+      this.skip();
+    }
+
+    assert.strictEqual(
+      await waitForCount(
+        () => node1.countActionClients(`${NODE2_NS}/${ACTION1_NAME}`),
+        1
+      ),
+      1
+    );
+    assert.strictEqual(
+      await waitForCount(
+        () => node1.countActionServers(`${NODE2_NS}/${ACTION1_NAME}`),
+        1
+      ),
+      1
+    );
+    assert.strictEqual(node1.countActionClients('/missing_action'), 0);
+    assert.strictEqual(node1.countActionServers('/missing_action'), 0);
+  });
+
+  it('Test getActionClientsInfoByAction', async function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <
+      rclnodejs.DistroUtils.DistroId.ROLLING
+    ) {
+      this.skip();
+    }
+
+    const infos = await waitForEndpointInfo(
+      () => node1.getActionClientsInfoByAction(`${NODE2_NS}/${ACTION1_NAME}`),
+      1
+    );
+    assert.strictEqual(infos.length, 1);
+    const info = infos[0];
+    assert.ok(info instanceof rclnodejs.ActionEndpointInfo);
+    assert.strictEqual(info.nodeName, NODE2_NAME);
+    assert.strictEqual(info.nodeNamespace, NODE2_NS);
+    assert.strictEqual(info.actionType, fibonacci);
+    assert.strictEqual(
+      info.goalServiceInfo.service_type,
+      `${fibonacci}_SendGoal`
+    );
+    assert.strictEqual(
+      info.cancelServiceInfo.service_type,
+      'action_msgs/srv/CancelGoal'
+    );
+    assert.strictEqual(
+      info.resultServiceInfo.service_type,
+      `${fibonacci}_GetResult`
+    );
+    assert.strictEqual(
+      info.feedbackTopicInfo.topic_type,
+      `${fibonacci}_FeedbackMessage`
+    );
+    assert.strictEqual(
+      info.statusTopicInfo.topic_type,
+      'action_msgs/msg/GoalStatusArray'
+    );
+  });
+
+  it('Test getActionServersInfoByAction', async function () {
+    if (
+      rclnodejs.DistroUtils.getDistroId() <
+      rclnodejs.DistroUtils.DistroId.ROLLING
+    ) {
+      this.skip();
+    }
+
+    const infos = await waitForEndpointInfo(
+      () => node1.getActionServersInfoByAction(`${NODE2_NS}/${ACTION1_NAME}`),
+      1
+    );
+    assert.strictEqual(infos.length, 1);
+    const info = infos[0];
+    assert.ok(info instanceof rclnodejs.ActionEndpointInfo);
+    assert.strictEqual(info.nodeName, NODE2_NAME);
+    assert.strictEqual(info.nodeNamespace, NODE2_NS);
+    assert.strictEqual(info.actionType, fibonacci);
+    assert.strictEqual(
+      info.goalServiceInfo.service_type,
+      `${fibonacci}_SendGoal`
+    );
+    assert.strictEqual(
+      info.feedbackTopicInfo.topic_type,
+      `${fibonacci}_FeedbackMessage`
     );
   });
 });

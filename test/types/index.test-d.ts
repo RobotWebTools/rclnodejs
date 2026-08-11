@@ -107,6 +107,14 @@ expectType<number>(node.countPublishers(TOPIC));
 expectType<number>(node.countSubscribers(TOPIC));
 expectType<number>(node.countClients(SERVICE_NAME));
 expectType<number>(node.countServices(SERVICE_NAME));
+expectType<number | null>(node.countActionClients('action'));
+expectType<number | null>(node.countActionServers('action'));
+expectType<rclnodejs.ActionEndpointInfo[] | null>(
+  node.getActionClientsInfoByAction('action')
+);
+expectType<rclnodejs.ActionEndpointInfo[] | null>(
+  node.getActionServersInfoByAction('action')
+);
 expectType<rclnodejs.Options<string | rclnodejs.QoS>>(
   rclnodejs.Node.getDefaultOptions()
 );

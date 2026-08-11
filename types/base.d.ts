@@ -1,4 +1,5 @@
 /// <reference path="./action_client.d.ts" />
+/// <reference path="./action_endpoint_info.d.ts" />
 /// <reference path="./action_server.d.ts" />
 /// <reference path="./action_uuid.d.ts" />
 /// <reference path="./client.d.ts" />
