@@ -25,108 +25,65 @@ publisher.publish(`Hello ROS 2 from rclnodejs`);
 node.spin();
 ```
 
-This example assumes your ROS 2 environment is already sourced.
-
 ## Documentation
 
-- Get started:
-  [Installation](#installation), [Quick Start](#quick-start), [Web SDK guide](./web/README.md), [Tutorials](./tutorials/)
 - Reference:
-  [API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html), [ROS 2 Interface Message Generation](#ros-2-interface-message-generation), [Using TypeScript](#using-rclnodejs-with-typescript)
-- Features:
-  [Bring ROS 2 to the Web](#bring-ros-2-to-the-web), [Observable Subscriptions](#observable-subscriptions), [Electron-based Visualization](#electron-based-visualization)
+  [API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html), [Web SDK guide](./web/README.md), [Tutorials](./tutorials/)
 - Project docs:
   [Efficient Usage Tips](./docs/EFFICIENCY.md), [FAQ and Known Issues](./docs/FAQ.md), [Building from Scratch](./docs/BUILDING.md), [Contributing](./docs/CONTRIBUTING.md)
 
 ## Installation
-
-Most users only need [Install from npm](#install-from-npm) below. If you have cloned this repository and want to run the bundled examples, see [Quick Start](#quick-start) instead.
 
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/en/) version >= 20.20.2
 - [ROS 2 SDK](https://docs.ros.org/en/lyrical/Installation.html)
 
-Before installing, building, or running rclnodejs, source your ROS 2 environment:
+Source your ROS 2 environment before installing, building or running rclnodejs:
 
 ```bash
 source /opt/ros/<distro>/setup.bash
 ```
 
-### Install from npm
-
-Use this path if you want to depend on rclnodejs from your own ROS 2 Node.js application.
+### Add rclnodejs to your project
 
 ```bash
 npm i rclnodejs
 ```
 
-After installation, use the example at the top of this README as a minimal publisher, or continue with [Quick Start](#quick-start) to run the examples in this repository.
+For a branch or commit not yet published to npm, use
+`npm install RobotWebTools/rclnodejs#<branch>`, which builds from source.
 
-### Install from GitHub
+Prebuilt binaries ship for Ubuntu 22.04 (Humble), 24.04 (Jazzy, Kilted) and
+26.04 (Lyrical) on x64 and arm64, so most installs skip compilation; anything
+else builds from source. Set `RCLNODEJS_FORCE_BUILD=1` to always build from
+source, and see the [Dockerfile](./Dockerfile) for containerized development.
 
-Use this path only if you need a branch or commit not yet published to npm. GitHub installs build from source.
-
-```bash
-npm install RobotWebTools/rclnodejs#<branch>
-```
-
-> **Docker:** For containerized development, see the included [Dockerfile](./Dockerfile) for building and testing with different ROS distributions and Node.js versions.
-
-### Prebuilt Binaries
-
-rclnodejs ships with prebuilt native binaries for common Linux configurations, so most installs skip compilation.
-
-**Supported Platforms:**
-
-- **Ubuntu 22.04 (Jammy)** - ROS 2 Humble
-- **Ubuntu 24.04 (Noble)** - ROS 2 Jazzy, Kilted
-- **Ubuntu 26.04 (Resolute)** - ROS 2 Lyrical
-- **Architectures:** x64, arm64
-- **Node.js:** >= 20.20.2 (N-API compatible)
-
-Installations outside this matrix automatically fall back to building from source. To force a source build even when a prebuilt binary is available:
-
-```bash
-export RCLNODEJS_FORCE_BUILD=1
-npm install rclnodejs
-```
-
-## Quick Start
-
-From a clone of this repository, after sourcing your ROS 2 environment:
-
-1. Install the repository dependencies from the project root.
+### Run the examples from a clone
 
 ```bash
 npm install
-```
-
-2. Run a publisher example from this checkout.
-
-```bash
 node example/topics/publisher/publisher-example.mjs
 ```
 
-More runnable examples in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
+More in [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example) and step-by-step guides in [tutorials/](./tutorials/).
 
 ## Bring ROS 2 to the Web
 
 `rclnodejs` ships **two** ways to reach ROS 2 from the browser — pick one based on
 how much glue you want to write.
 
-- **[`rclnodejs/web`](./web/README.md)** — **typed, allow-listed,
-  curl-able** ROS 2 in the browser. A `web.json` file is your public API;
-  the browser SDK types `call` / `publish` / `subscribe` end-to-end
-  from your ROS 2 message types; and every capability
-  is also a plain HTTP endpoint —
-  `curl -X POST http://<host>/capability/call/<name>`, with `subscribe`
-  streaming as Server-Sent Events (`GET .../capability/subscribe/<name>`) —
-  so shell scripts, Postman, AI-agent tool-use, and even a bare browser
-  `fetch()` / `EventSource` (CORS-enabled) just work. The same
-  `web.json` also generates an OpenAPI 3.1 document
-  (`rclnodejs-web openapi`) — codegen, API explorers, and AI-agent
-  tool-use get a standard, machine-readable description for free.
+- **[`rclnodejs/web`](./web/README.md)** — a typed layer over your ROS 2 graph:
+  you allow-list capabilities in `web.json` or via CLI flags; anything else is
+  rejected before it reaches ROS 2. Best for typed web apps and HTTP clients.
+  - **Typed SDK** — `call`, `publish` and `subscribe`, typed end-to-end from
+    your generated message and service types.
+  - **Two transports** — WebSocket, plus an optional HTTP listener
+    (`--http-port`) so `call` and `publish` work from `curl`, Postman or
+    `fetch()`. `subscribe` needs WebSocket, or `--http-sse` to stream it as
+    Server-Sent Events.
+  - **OpenAPI 3.1** — `rclnodejs-web openapi` emits a machine-readable spec
+    for codegen, API explorers and agent tool-use.
 
   ```ts
   import { connect } from 'rclnodejs/web';
@@ -154,29 +111,15 @@ Build desktop ROS 2 apps with Electron + Three.js, packaged for Windows/macOS/Li
 
 ## ROS 2 Interface Message Generation
 
-rclnodejs auto-generates JavaScript bindings and TypeScript declarations for every ROS 2 `.msg`, `.srv`, and `.action` interface available in your sourced ROS 2 environment. This happens during `npm install`, so in most projects you do not need to run anything by hand.
+rclnodejs auto-generates JavaScript bindings and TypeScript declarations for every ROS 2 `.msg`, `.srv`, and `.action` interface in your sourced environment. This runs during `npm install`, so in most projects you never invoke it by hand.
 
-Use the generated types directly:
-
-```javascript
-import rclnodejs from 'rclnodejs';
-let stringMsgObject = rclnodejs.createMessageObject('std_msgs/msg/String');
-stringMsgObject.data = 'hello world';
-```
-
-### Re-running message generation
-
-If you install additional ROS packages **after** rclnodejs was installed, re-run the generator from your project so the new interfaces are picked up:
+If you install additional ROS packages afterwards, re-run it from your project so the new interfaces are picked up:
 
 ```bash
 npx generate-ros-messages
 ```
 
-Generated files are written to `<your-project>/node_modules/rclnodejs/generated/`.
-
-### IDL Message Generation
-
-For custom `.idl` files (Interface Definition Language), this repo also exposes `npm run generate-messages-idl`. See [docs/BUILDING.md](./docs/BUILDING.md) for when you'd need it.
+Generated files are written to `<your-project>/node_modules/rclnodejs/generated/`. For custom `.idl` files, this repo also exposes `npm run generate-messages-idl`.
 
 ## Using rclnodejs with TypeScript
 
@@ -192,7 +135,7 @@ TypeScript declaration files are included in the package and exposed through the
 }
 ```
 
-Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript example at the top of this README. See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript) for more.
+Then `import * as rclnodejs from 'rclnodejs'` works as in the example above. See [TypeScript demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript).
 
 ## More
 
