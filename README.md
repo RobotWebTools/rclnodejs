@@ -78,9 +78,10 @@ how much glue you want to write.
   rejected before it reaches ROS 2. Best for typed web apps and HTTP clients.
   - **Typed SDK** — `call`, `publish` and `subscribe`, typed end-to-end from
     your generated message and service types.
-  - **Two transports** — WebSocket by default, and plain HTTP so `call` and
-    `publish` work from `curl`, Postman or `fetch()`. `subscribe` needs
-    WebSocket, or `--http-sse` to stream it as Server-Sent Events.
+  - **Two transports** — WebSocket, plus an optional HTTP listener
+    (`--http-port`) so `call` and `publish` work from `curl`, Postman or
+    `fetch()`. `subscribe` needs WebSocket, or `--http-sse` to stream it as
+    Server-Sent Events.
   - **OpenAPI 3.1** — `rclnodejs-web openapi` emits a machine-readable spec
     for codegen, API explorers and agent tool-use.
 
