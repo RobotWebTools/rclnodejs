@@ -63,14 +63,10 @@ const _genId =
         });
       };
 
-// Exponential backoff with jitter (half fixed, half random) shared by WS reconnect and HTTP retry.
+// Exponential backoff with jitter (half fixed, half random) used by WS reconnect.
 function _backoffDelay(attempt, { baseMs = 500, maxMs = 30000 } = {}) {
   const capped = Math.min(baseMs * 2 ** attempt, maxMs);
   return capped / 2 + Math.random() * (capped / 2);
-}
-
-function _sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // -------------------------------------------------------------------
@@ -358,7 +354,7 @@ class _WsLink {
  * client falls through to the WebSocket link for streaming verbs.
  */
 class _HttpLink {
-  constructor(baseUrl, options = {}) {
+  constructor(baseUrl) {
     // Normalise: strip trailing slash so we can append the path. If
     // the user URL already ends with `/capability` (e.g. they spelled
     // it out explicitly, mirroring the WS form), don't double-prefix
@@ -369,7 +365,6 @@ class _HttpLink {
     this.baseUrl = trimmed.endsWith('/capability')
       ? trimmed
       : trimmed + '/capability';
-    this._retries = Math.max(0, options.retries || 0);
   }
 
   async connect() {
@@ -390,19 +385,7 @@ class _HttpLink {
     return this._fetch('publish', capability, payload, /* expectBody */ false);
   }
 
-  /** Retries only network errors and 5xx; a 4xx won't succeed on retry. */
   async _fetch(kind, capability, payload, expectBody) {
-    for (let attempt = 0; ; attempt++) {
-      try {
-        return await this._fetchOnce(kind, capability, payload, expectBody);
-      } catch (e) {
-        if (attempt >= this._retries || !_isRetryableHttpError(e)) throw e;
-        await _sleep(_backoffDelay(attempt));
-      }
-    }
-  }
-
-  async _fetchOnce(kind, capability, payload, expectBody) {
     const url = this.baseUrl + '/' + kind + '/' + _encodeRosName(capability);
     let res;
     try {
@@ -445,10 +428,6 @@ class _HttpLink {
     }
     return expectBody ? body : undefined;
   }
-}
-
-function _isRetryableHttpError(err) {
-  return !!err && (err.code === 'network_error' || (err.status ?? 0) >= 500);
 }
 
 function _connectionLostError(reconnecting = true) {
@@ -513,8 +492,6 @@ export class RosClient {
    *   'reconnected' \u2014 see {@link RosClient#on}; 'disconnected' fires on any
    *   unexpected drop regardless. The first connect attempt still rejects
    *   once rather than retrying forever.
-   * @param {number} [options.httpRetries=0] Retry a failed HTTP
-   *   call()/publish() this many times (network errors and 5xx only).
    */
   constructor(url, options = {}) {
     this.options = options;
@@ -526,9 +503,7 @@ export class RosClient {
       reconnect: !!options.reconnect,
       onEvent: (name, detail) => this._emit(name, detail),
     };
-    this._http = httpUrl
-      ? new _HttpLink(httpUrl, { retries: options.httpRetries })
-      : null;
+    this._http = httpUrl ? new _HttpLink(httpUrl) : null;
     this._wsUrl = wsUrl;
     // Eagerly construct (but don't yet open) the WS link when the user
     // explicitly asked for it. When the WS URL was *derived* from an

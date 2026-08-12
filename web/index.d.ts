@@ -119,14 +119,6 @@ declare module 'rclnodejs/web' {
      * @default false
      */
     reconnect?: boolean;
-
-    /**
-     * Retry a failed HTTP `call()`/`publish()` this many times (network
-     * errors and 5xx only) before rejecting, with the same backoff as
-     * `reconnect`. No effect on WebSocket-only clients.
-     * @default 0
-     */
-    httpRetries?: number;
   }
 
   /** Detail passed to a `'reconnecting'` listener. */
