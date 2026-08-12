@@ -267,6 +267,10 @@ class _WsLink {
       const onClose = () => {
         if (ws.removeEventListener) ws.removeEventListener('close', onClose);
         else ws.off && ws.off('close', onClose);
+        // If this ws never reached 'open' (e.g. closed mid-reconnect-attempt),
+        // _handleClose() is never called, so finalize here too - idempotent
+        // if it was.
+        this._finalizeClosed();
         resolve();
       };
       if (ws.addEventListener)
@@ -275,6 +279,7 @@ class _WsLink {
       try {
         ws.close();
       } catch (_) {
+        this._finalizeClosed();
         resolve();
       }
     });
