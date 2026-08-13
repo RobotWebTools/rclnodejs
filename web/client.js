@@ -122,9 +122,6 @@ class _WsLink {
       }
       const ws = new WS(this.url);
       this._ws = ws;
-      // Distinguishes "resolved via onOpen" from "rejected before ever
-      // opening" so onClose knows whether to call _handleClose() or reject
-      // this attempt directly.
       let opened = false;
       const onOpen = () => {
         opened = true;
