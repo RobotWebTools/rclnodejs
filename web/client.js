@@ -83,6 +83,13 @@ function _backoffDelay(attempt, { baseMs = 500, maxMs = 30000 } = {}) {
  * connection attempt is unaffected — a bad URL still rejects once.
  */
 class _WsLink {
+  /**
+   * @param {string} url
+   * @param {object} [options]
+   * @param {boolean} [options.reconnect=false] See class doc above.
+   * @param {(event: string, detail: unknown) => void} [options.onEvent]
+   *   Notified for 'disconnected' / 'reconnecting' / 'reconnected'.
+   */
   constructor(url, options = {}) {
     this.url = url;
     this._reconnect = !!options.reconnect;
@@ -115,15 +122,11 @@ class _WsLink {
       }
       const ws = new WS(this.url);
       this._ws = ws;
-      // `attemptSettled`: this open attempt's promise has resolved/rejected.
-      // `opened`: onOpen actually fired for this attempt (distinct from
-      // `attemptSettled`, which onError can also set on a first-attempt
-      // failure — without this, a subsequent 'close' would wrongly reach
-      // _handleClose()).
-      let attemptSettled = false;
+      // Distinguishes "resolved via onOpen" from "rejected before ever
+      // opening" so onClose knows whether to call _handleClose() or reject
+      // this attempt directly.
       let opened = false;
       const onOpen = () => {
-        attemptSettled = true;
         opened = true;
         this._reconnectAttempt = 0;
         this._reconnecting = false;
@@ -132,8 +135,7 @@ class _WsLink {
       };
       const onError = (err) => {
         // Ignore post-open: 'close' always follows and _handleClose() owns failing pending requests.
-        if (!attemptSettled) {
-          attemptSettled = true;
+        if (!opened) {
           reject(err && err.error ? err.error : err);
         }
       };
@@ -142,10 +144,7 @@ class _WsLink {
           this._handleClose();
           return;
         }
-        if (!attemptSettled) {
-          attemptSettled = true;
-          reject(new Error('connection closed before it was established'));
-        }
+        reject(new Error('connection closed before it was established'));
       };
       const onMessage = (ev) => this._onMessage(ev);
 
@@ -267,9 +266,9 @@ class _WsLink {
       const onClose = () => {
         if (ws.removeEventListener) ws.removeEventListener('close', onClose);
         else ws.off && ws.off('close', onClose);
-        // If this ws never reached 'open' (e.g. closed mid-reconnect-attempt),
-        // _handleClose() is never called, so finalize here too - idempotent
-        // if it was.
+        // Covers the case where this ws never reached 'open' (e.g. closed
+        // mid-reconnect-attempt) and so never ran _handleClose(); harmless
+        // if it already did.
         this._finalizeClosed();
         resolve();
       };
