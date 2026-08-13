@@ -264,17 +264,22 @@ class _WsLink {
     }
     return new Promise((resolve) => {
       const onClose = () => {
-        if (ws.removeEventListener) ws.removeEventListener('close', onClose);
-        else ws.off && ws.off('close', onClose);
+        if (ws.removeEventListener) {
+          ws.removeEventListener('close', onClose);
+        } else {
+          ws.off('close', onClose);
+        }
         // Covers the case where this ws never reached 'open' (e.g. closed
         // mid-reconnect-attempt) and so never ran _handleClose(); harmless
         // if it already did.
         this._finalizeClosed();
         resolve();
       };
-      if (ws.addEventListener)
+      if (ws.addEventListener) {
         ws.addEventListener('close', onClose, { once: true });
-      else ws.once('close', onClose);
+      } else {
+        ws.once('close', onClose);
+      }
       try {
         ws.close();
       } catch (_) {
