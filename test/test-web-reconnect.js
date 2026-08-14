@@ -209,7 +209,7 @@ describe('rclnodejs/web — WebSocket reconnect', function () {
       await dropServerSideConnection();
       // Still mid-backoff: the base delay is >=250ms, and the dropped
       // socket's readyState is already 3 (CLOSED) at this point. Without
-      // the fix, _reconnecting never resets and this next call() would
+      // the fix, _isReconnecting never resets and this next call() would
       // reject with connection_lost forever instead of a definitive close.
       await new Promise((resolve) => setTimeout(resolve, 50));
       await ros.close();

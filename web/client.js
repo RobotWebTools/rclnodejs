@@ -92,14 +92,14 @@ class _WsLink {
    */
   constructor(url, options = {}) {
     this.url = url;
-    this._reconnect = !!options.reconnect;
+    this._isReconnectEnabled = !!options.reconnect;
     this._onEvent = options.onEvent || (() => {});
     this._ws = null;
     this._pending = new Map();
     this._subs = new Map();
     this._closed = false;
-    this._userClosed = false;
-    this._reconnecting = false;
+    this._isUserClosed = false;
+    this._isReconnecting = false;
     this._reconnectAttempt = 0;
     this._reconnectTimer = null;
   }
@@ -122,22 +122,22 @@ class _WsLink {
       }
       const ws = new WS(this.url);
       this._ws = ws;
-      let opened = false;
+      let isOpened = false;
       const onOpen = () => {
-        opened = true;
+        isOpened = true;
         this._reconnectAttempt = 0;
-        this._reconnecting = false;
+        this._isReconnecting = false;
         this._resubscribeAll();
         resolve();
       };
       const onError = (err) => {
         // Ignore post-open: 'close' always follows and _handleClose() owns failing pending requests.
-        if (!opened) {
+        if (!isOpened) {
           reject(err && err.error ? err.error : err);
         }
       };
       const onClose = () => {
-        if (opened) {
+        if (isOpened) {
           this._handleClose();
           return;
         }
@@ -161,26 +161,26 @@ class _WsLink {
 
   /** Handle an unexpected close: fail in-flight requests, then finalize or reconnect. */
   _handleClose() {
-    if (this._userClosed) {
+    if (this._isUserClosed) {
       this._failAll(new Error('connection closed'));
       this._finalizeClosed();
       return;
     }
     this._onEvent('disconnected', undefined);
-    if (!this._reconnect) {
+    if (!this._isReconnectEnabled) {
       this._failAll(_connectionLostError(false));
       this._finalizeClosed();
       return;
     }
     this._failAll(_connectionLostError(true));
-    this._reconnecting = true;
+    this._isReconnecting = true;
     this._scheduleReconnect();
   }
 
   /** Shared terminal state for a deliberate close or a non-reconnecting drop. */
   _finalizeClosed() {
     this._closed = true;
-    this._reconnecting = false;
+    this._isReconnecting = false;
     this._subs.clear();
   }
 
@@ -195,7 +195,7 @@ class _WsLink {
         // close() aborting this in-flight attempt also lands here - don't
         // keep retrying past a deliberate close.
         () => {
-          if (!this._userClosed) this._scheduleReconnect();
+          if (!this._isUserClosed) this._scheduleReconnect();
         }
       );
     }, delay);
@@ -219,7 +219,7 @@ class _WsLink {
     return this._request({ kind: 'publish', capability, payload });
   }
   subscribe(capability, callback) {
-    if (this._reconnecting) {
+    if (this._isReconnecting) {
       return Promise.reject(_connectionLostError());
     }
     const id = _genId();
@@ -243,7 +243,7 @@ class _WsLink {
   }
 
   async close() {
-    this._userClosed = true;
+    this._isUserClosed = true;
     if (this._reconnectTimer) {
       clearTimeout(this._reconnectTimer);
       this._reconnectTimer = null;
@@ -289,7 +289,7 @@ class _WsLink {
   _request(frame) {
     return new Promise((resolve, reject) => {
       if (this._closed) return reject(new Error('connection closed'));
-      if (this._reconnecting) return reject(_connectionLostError());
+      if (this._isReconnecting) return reject(_connectionLostError());
       const id = _genId();
       frame.id = id;
       this._pending.set(id, { resolve, reject });
