@@ -183,7 +183,11 @@ declare module 'rclnodejs/web' {
       handler: (detail: RosClientEventMap[K]) => void
     ): this;
 
-    /** Remove a listener added with {@link RosClient.on}. */
+    /**
+     * Remove a listener added with {@link RosClient.on}. `handler` must be
+     * the same function reference passed to `on()` - a new closure with
+     * equivalent behavior won't match.
+     */
     off<K extends keyof RosClientEventMap>(
       event: K,
       handler: (detail: RosClientEventMap[K]) => void

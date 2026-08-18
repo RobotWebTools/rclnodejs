@@ -525,7 +525,8 @@ export class RosClient {
    * Subscribe to an SDK lifecycle event: 'disconnected' (fires on any
    * unexpected drop, regardless of `reconnect`), 'reconnecting'
    * ({attempt, delay}), or 'reconnected' (the latter two only with
-   * {reconnect: true}).
+   * {reconnect: true}). `handler(detail)` is called with that event's
+   * detail, or `undefined` for 'disconnected'/'reconnected'.
    */
   on(event, handler) {
     if (!this._listeners.has(event)) this._listeners.set(event, new Set());
@@ -533,7 +534,11 @@ export class RosClient {
     return this;
   }
 
-  /** Remove a listener added with {@link RosClient#on}. */
+  /**
+   * Remove a listener added with {@link RosClient#on}. `handler` must
+   * be the same function reference passed to `on()` - a new closure
+   * with equivalent behavior won't match.
+   */
   off(event, handler) {
     this._listeners.get(event)?.delete(handler);
     return this;
