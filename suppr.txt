@@ -9,3 +9,9 @@ leak:^napi_create_external$
 # never freed before process exit, and not owned by rclnodejs code.
 leak:node::contextify::ContextifyContext
 leak:node::contextify::ContextifyScript
+
+# OpenSSL's global default library context (OSSL_LIB_CTX) is a one-shot,
+# pthread_once-guarded process-lifetime singleton, lazily initialised on
+# first use of crypto (e.g. `crypto.randomUUID()` in web/client.js's
+# `_genId()`, or fetch()'s TLS support) — never freed before process exit.
+leak:OSSL_LIB_CTX_get0_global_default

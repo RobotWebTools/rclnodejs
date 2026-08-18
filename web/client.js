@@ -63,6 +63,12 @@ const _genId =
         });
       };
 
+// Exponential backoff with jitter (half fixed, half random) used by WS reconnect.
+function _backoffDelay(attempt, { baseMs = 500, maxMs = 30000 } = {}) {
+  const capped = Math.min(baseMs * 2 ** attempt, maxMs);
+  return capped / 2 + Math.random() * (capped / 2);
+}
+
 // -------------------------------------------------------------------
 // Internal "link" — the WebSocket transport. Hidden from the public API.
 // -------------------------------------------------------------------
@@ -71,17 +77,40 @@ const _genId =
  * WebSocket link. Speaks the capability frame protocol used by
  * `WebSocketTransport` on the server. Long-lived; supports `call`,
  * `publish`, `subscribe`, `unsubscribe` (and reserved `action`).
+ *
+ * With `options.reconnect`, a drop after a successful open reopens with
+ * backoff and replays subscriptions under the same `subId`. The *first*
+ * connection attempt is unaffected — a bad URL still rejects once.
  */
 class _WsLink {
-  constructor(url) {
+  /**
+   * @param {string} url
+   * @param {object} [options]
+   * @param {boolean} [options.reconnect=false] See class doc above.
+   * @param {(event: string, detail: unknown) => void} [options.onEvent]
+   *   Notified for 'disconnected' / 'reconnecting' / 'reconnected'.
+   */
+  constructor(url, options = {}) {
     this.url = url;
+    this._isReconnectEnabled = !!options.reconnect;
+    this._onEvent = options.onEvent || (() => {});
     this._ws = null;
     this._pending = new Map();
     this._subs = new Map();
     this._closed = false;
+    this._isUserClosed = false;
+    this._isReconnecting = false;
+    this._reconnectAttempt = 0;
+    this._reconnectTimer = null;
   }
 
+  /** First-time open. Rejects once if the initial connection fails. */
   async connect() {
+    return this._open();
+  }
+
+  /** Open (or reopen, on reconnect) the underlying WebSocket. */
+  async _open() {
     await _ensureWS();
     return new Promise((resolve, reject) => {
       if (!WS) {
@@ -93,38 +122,94 @@ class _WsLink {
       }
       const ws = new WS(this.url);
       this._ws = ws;
+      let isOpened = false;
       const onOpen = () => {
-        ws.removeEventListener
-          ? ws.removeEventListener('error', onError)
-          : ws.off && ws.off('error', onError);
+        isOpened = true;
+        this._reconnectAttempt = 0;
+        this._isReconnecting = false;
+        this._resubscribeAll();
         resolve();
       };
       const onError = (err) => {
-        if (this._pending.size === 0 && !this._closed) {
+        // Ignore post-open: 'close' always follows and _handleClose() owns failing pending requests.
+        if (!isOpened) {
           reject(err && err.error ? err.error : err);
-        } else {
-          this._failAll(err);
         }
       };
       const onClose = () => {
-        this._closed = true;
-        this._failAll(new Error('connection closed'));
-        this._subs.clear();
+        if (isOpened) {
+          this._handleClose();
+          return;
+        }
+        reject(new Error('connection closed before it was established'));
       };
       const onMessage = (ev) => this._onMessage(ev);
 
       if (ws.addEventListener) {
         ws.addEventListener('open', onOpen, { once: true });
         ws.addEventListener('error', onError);
-        ws.addEventListener('close', onClose);
+        ws.addEventListener('close', onClose, { once: true });
         ws.addEventListener('message', onMessage);
       } else {
         ws.once('open', onOpen);
         ws.on('error', onError);
-        ws.on('close', onClose);
+        ws.once('close', onClose);
         ws.on('message', (data) => onMessage({ data }));
       }
     });
+  }
+
+  /** Handle an unexpected close: fail in-flight requests, then finalize or reconnect. */
+  _handleClose() {
+    if (this._isUserClosed) {
+      this._failAll(new Error('connection closed'));
+      this._finalizeClosed();
+      return;
+    }
+    this._onEvent('disconnected', undefined);
+    if (!this._isReconnectEnabled) {
+      this._failAll(_connectionLostError(false));
+      this._finalizeClosed();
+      return;
+    }
+    this._failAll(_connectionLostError(true));
+    this._isReconnecting = true;
+    this._scheduleReconnect();
+  }
+
+  /** Shared terminal state for a deliberate close or a non-reconnecting drop. */
+  _finalizeClosed() {
+    this._closed = true;
+    this._isReconnecting = false;
+    this._subs.clear();
+  }
+
+  _scheduleReconnect() {
+    const attempt = this._reconnectAttempt++;
+    const delay = _backoffDelay(attempt);
+    this._onEvent('reconnecting', { attempt: attempt + 1, delay });
+    this._reconnectTimer = setTimeout(() => {
+      this._reconnectTimer = null;
+      this._open().then(
+        () => this._onEvent('reconnected', undefined),
+        // close() aborting this in-flight attempt also lands here - don't
+        // keep retrying past a deliberate close.
+        () => {
+          if (!this._isUserClosed) this._scheduleReconnect();
+        }
+      );
+    }, delay);
+  }
+
+  /**
+   * Replay every active subscription after a reopen, reusing each `subId`.
+   * Known gap: a `not_exposed` ack for a since-removed capability has no
+   * pending entry to reject, so it's silently dropped.
+   */
+  _resubscribeAll() {
+    for (const [subId, { capability }] of this._subs) {
+      this._sendRaw({ id: subId, kind: 'subscribe', capability });
+    }
   }
 
   call(capability, payload) {
@@ -134,6 +219,9 @@ class _WsLink {
     return this._request({ kind: 'publish', capability, payload });
   }
   subscribe(capability, callback) {
+    if (this._isReconnecting) {
+      return Promise.reject(_connectionLostError());
+    }
     const id = _genId();
     return new Promise((resolve, reject) => {
       this._pending.set(id, {
@@ -155,20 +243,44 @@ class _WsLink {
   }
 
   async close() {
-    if (!this._ws || this._closed) return;
+    this._isUserClosed = true;
+    if (this._reconnectTimer) {
+      clearTimeout(this._reconnectTimer);
+      this._reconnectTimer = null;
+    }
+    if (!this._ws || this._closed) {
+      this._finalizeClosed();
+      return;
+    }
+    const ws = this._ws;
+    // Already closed (e.g. mid-backoff) means 'close' won't fire again, so
+    // finalize directly instead of leaving state as if still reconnecting.
+    if (ws.readyState === 3) {
+      this._finalizeClosed();
+      return;
+    }
     return new Promise((resolve) => {
-      const ws = this._ws;
       const onClose = () => {
-        if (ws.removeEventListener) ws.removeEventListener('close', onClose);
-        else ws.off && ws.off('close', onClose);
+        if (ws.removeEventListener) {
+          ws.removeEventListener('close', onClose);
+        } else {
+          ws.off('close', onClose);
+        }
+        // Covers the case where this ws never reached 'open' (e.g. closed
+        // mid-reconnect-attempt) and so never ran _handleClose(); harmless
+        // if it already did.
+        this._finalizeClosed();
         resolve();
       };
-      if (ws.addEventListener)
+      if (ws.addEventListener) {
         ws.addEventListener('close', onClose, { once: true });
-      else ws.once('close', onClose);
+      } else {
+        ws.once('close', onClose);
+      }
       try {
         ws.close();
       } catch (_) {
+        this._finalizeClosed();
         resolve();
       }
     });
@@ -177,6 +289,7 @@ class _WsLink {
   _request(frame) {
     return new Promise((resolve, reject) => {
       if (this._closed) return reject(new Error('connection closed'));
+      if (this._isReconnecting) return reject(_connectionLostError());
       const id = _genId();
       frame.id = id;
       this._pending.set(id, { resolve, reject });
@@ -324,6 +437,15 @@ class _HttpLink {
   }
 }
 
+function _connectionLostError(reconnecting = true) {
+  return Object.assign(
+    new Error(
+      reconnecting ? 'connection lost; reconnecting' : 'connection lost'
+    ),
+    { code: 'connection_lost' }
+  );
+}
+
 // ROS names always start with `/`. Encode each path segment so that
 // names with `~`, `:`, etc. survive routing while keeping the leading
 // slash stripped (the server adds it back).
@@ -372,26 +494,66 @@ export class RosClient {
   /**
    * @param {string|{http?:string, ws?:string}} url
    * @param {object} [options]
-   * @param {boolean} [options.reconnect=false] Reserved; not yet implemented.
+   * @param {boolean} [options.reconnect=false] Reopen the WS link with
+   *   backoff after a drop, replaying subscriptions. Enables 'reconnecting' /
+   *   'reconnected' - see {@link RosClient#on}; 'disconnected' fires on any
+   *   unexpected drop regardless. The first connect attempt still rejects
+   *   once rather than retrying forever.
    */
   constructor(url, options = {}) {
     this.options = options;
-    if (options.reconnect) {
-      console.warn(
-        'rclnodejs/web: reconnect is not yet implemented; ignoring option'
-      );
-    }
+    this._listeners = new Map(); // event name -> Set<handler>
     const { httpUrl, wsUrl, wsExplicit } = _resolveUrls(url);
     this.url = httpUrl || wsUrl;
+    // Shared by both _WsLink construction sites below (eager and lazy).
+    this._wsOptions = {
+      reconnect: !!options.reconnect,
+      onEvent: (name, detail) => this._emit(name, detail),
+    };
     this._http = httpUrl ? new _HttpLink(httpUrl) : null;
     this._wsUrl = wsUrl;
     // Eagerly construct (but don't yet open) the WS link when the user
     // explicitly asked for it. When the WS URL was *derived* from an
     // HTTP base, leave construction lazy — most HTTP-only callers
     // never subscribe and never need the WS sibling at all.
-    this._ws = wsExplicit && wsUrl ? new _WsLink(wsUrl) : null;
+    this._ws = wsExplicit && wsUrl ? new _WsLink(wsUrl, this._wsOptions) : null;
     this._wsEager = !!wsExplicit;
     this._wsConnect = null; // memoised connect promise (in-flight or settled)
+  }
+
+  /**
+   * Subscribe to an SDK lifecycle event: 'disconnected' (fires on any
+   * unexpected drop, regardless of `reconnect`), 'reconnecting'
+   * ({attempt, delay}), or 'reconnected' (the latter two only with
+   * {reconnect: true}). `handler(detail)` is called with that event's
+   * detail, or `undefined` for 'disconnected'/'reconnected'.
+   */
+  on(event, handler) {
+    if (!this._listeners.has(event)) this._listeners.set(event, new Set());
+    this._listeners.get(event).add(handler);
+    return this;
+  }
+
+  /**
+   * Remove a listener added with {@link RosClient#on}. `handler` must
+   * be the same function reference passed to `on()` - a new closure
+   * with equivalent behavior won't match.
+   */
+  off(event, handler) {
+    this._listeners.get(event)?.delete(handler);
+    return this;
+  }
+
+  _emit(event, detail) {
+    const handlers = this._listeners.get(event);
+    if (!handlers) return;
+    for (const handler of handlers) {
+      try {
+        handler(detail);
+      } catch (_) {
+        // a listener throwing must not break the caller that emitted this
+      }
+    }
   }
 
   /** Open the link(s). */
@@ -441,7 +603,7 @@ export class RosClient {
     if (this._wsConnect) return this._wsConnect; // open is in-flight or done.
     // Reuse the eagerly-constructed link if present, otherwise build it
     // now (HTTP-derived sibling case).
-    if (!this._ws) this._ws = new _WsLink(this._wsUrl);
+    if (!this._ws) this._ws = new _WsLink(this._wsUrl, this._wsOptions);
     const link = this._ws;
     this._wsConnect = link.connect().then(
       () => link,
