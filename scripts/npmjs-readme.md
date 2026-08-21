@@ -2,6 +2,8 @@
 
 `rclnodejs` is a Node.js client library for ROS 2 that provides JavaScript and TypeScript APIs for building ROS 2 applications.
 
+**Key features:** Topics, Services, Actions, Parameters, Lifecycle Nodes, TypeScript support, RxJS Observables, Electron integration, ROS 2 in the browser (typed Web SDK + thin WebSocket gateway — `rclnodejs/web`, `rosocket`), and prebuilt binaries for Linux x64/arm64.
+
 Supported ROS 2 distributions include Humble, Jazzy, Kilted, Lyrical, and Rolling.
 
 ```javascript
@@ -41,24 +43,7 @@ To install from GitHub instead of npm, run:
 npm install RobotWebTools/rclnodejs#<branch>
 ```
 
-### Prebuilt Binaries
-
-rclnodejs ships with prebuilt native binaries for common Linux configurations, so most installs skip compilation.
-
-**Supported Platforms:**
-
-- **Ubuntu 22.04 (Jammy)** - ROS 2 Humble
-- **Ubuntu 24.04 (Noble)** - ROS 2 Jazzy, Kilted
-- **Ubuntu 26.04 (Resolute)** - ROS 2 Lyrical
-- **Architectures:** x64, arm64
-- **Node.js:** >= 20.20.2 (N-API compatible)
-
-Installations outside this matrix automatically fall back to building from source. To force a source build even when a prebuilt binary is available:
-
-```bash
-export RCLNODEJS_FORCE_BUILD=1
-npm install rclnodejs
-```
+Prebuilt binaries ship for Ubuntu 22.04 (Humble), 24.04 (Jazzy, Kilted) and 26.04 (Lyrical) on x64 and arm64, so most installs skip compilation; anything else builds from source. Set `RCLNODEJS_FORCE_BUILD=1` to always build from source.
 
 ## Documentation and Examples
 
@@ -100,7 +85,10 @@ Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript e
 
 `rclnodejs` ships **two** ways to reach ROS 2 from the browser — pick one based on how much glue you want to write.
 
-- **`rclnodejs/web`** — typed, allow-listed, `curl`-able browser SDK. A `web.json` file is your public API; the browser SDK types `call` / `publish` / `subscribe` end-to-end from your ROS 2 message types; every capability is also a plain HTTP endpoint (`curl -X POST http://<host>/capability/call/<name>`), with `subscribe` streaming as Server-Sent Events (`GET http://<host>/capability/subscribe/<name>`), so shell scripts, Postman, AI-agent tool-use, and a bare browser `fetch()` / `EventSource` (CORS-enabled) just work.
+- **`rclnodejs/web`** — a typed layer over your ROS 2 graph: you allow-list capabilities in `web.json` or via CLI flags; anything else is rejected before it reaches ROS 2. Best for typed web apps and HTTP clients.
+  - **Typed SDK** — `call`, `publish` and `subscribe`, typed end-to-end from your generated message and service types.
+  - **Two transports** — WebSocket, plus an optional HTTP listener (`--http-port`) so `call` and `publish` work from `curl`, Postman or `fetch()`. `subscribe` needs WebSocket, or `--http-sse` to stream it as Server-Sent Events.
+  - **OpenAPI 3.1** — `rclnodejs-web openapi` emits a machine-readable spec for codegen, API explorers and agent tool-use.
 
   ```ts
   import { connect } from 'rclnodejs/web';
