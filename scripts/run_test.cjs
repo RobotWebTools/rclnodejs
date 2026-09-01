@@ -16,13 +16,18 @@
 
 const fs = require('fs');
 const utils = require('../lib/utils.js');
-const Mocha = require('mocha');
 const os = require('os');
 const path = require('path');
 
+// mocha@12 is ESM-only; require()'s interop with it isn't stable across
+// Node versions, so import() it instead, started early since this CJS
+// file can't use top-level await.
+const mochaImport = import('mocha');
+
 utils
   .remove(path.join(path.dirname(__dirname), 'generated'))
-  .then(() => {
+  .then(async () => {
+    const { default: Mocha } = await mochaImport;
     let mocha = new Mocha();
     const testDir = path.join(__dirname, '../test/');
     // eslint-disable-next-line
