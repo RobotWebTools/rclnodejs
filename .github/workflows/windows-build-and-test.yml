@@ -35,7 +35,7 @@ jobs:
           # Lyrical Luth (May 2026 - May 2031)
           # Reference: https://docs.ros.org/en/lyrical/Installation/Windows-Install-Binary.html
           - ros_distribution: lyrical
-            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-20260522/ros2-lyrical-2026-05-22-windows-AMD64.zip"
+            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-20260807/ros2-lyrical-2026-08-07-windows-AMD64.zip"
             run_tests: true
           - ros_distribution: rolling
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip"
