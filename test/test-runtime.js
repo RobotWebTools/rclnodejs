@@ -22,22 +22,30 @@ describe('CapabilityRegistry (unit)', function () {
       call: { '/add': 'example_interfaces/srv/AddTwoInts' },
       publish: { '/chatter': { type: 'std_msgs/msg/String' } },
       subscribe: { '/scan': 'sensor_msgs/msg/LaserScan' },
+      action: { '/fibonacci': 'example_interfaces/action/Fibonacci' },
     });
     assert.deepStrictEqual(reg.list(), {
       call: { '/add': 'example_interfaces/srv/AddTwoInts' },
       publish: { '/chatter': 'std_msgs/msg/String' },
       subscribe: { '/scan': 'sensor_msgs/msg/LaserScan' },
+      action: { '/fibonacci': 'example_interfaces/action/Fibonacci' },
     });
   });
 
   it('resolve() returns the matching capability or null', function () {
     const reg = new CapabilityRegistry().expose({
       call: { '/add': 'example_interfaces/srv/AddTwoInts' },
+      action: { '/fibonacci': 'example_interfaces/action/Fibonacci' },
     });
     assert.deepStrictEqual(reg.resolve('call', '/add'), {
       kind: 'call',
       name: '/add',
       type: 'example_interfaces/srv/AddTwoInts',
+    });
+    assert.deepStrictEqual(reg.resolve('action', '/fibonacci'), {
+      kind: 'action',
+      name: '/fibonacci',
+      type: 'example_interfaces/action/Fibonacci',
     });
     assert.strictEqual(reg.resolve('call', '/missing'), null);
     assert.strictEqual(reg.resolve('publish', '/add'), null);
@@ -140,7 +148,7 @@ describe('Web Runtime end-to-end (WebSocket transport)', function () {
     ws.close();
   });
 
-  it('reserves kind:action with code:not_implemented', async function () {
+  it('rejects an action frame with a missing/unknown op with code:unknown_op', async function () {
     const ws = new WebSocket(url());
     await waitOpen(ws);
     const replyP = waitFrame(ws, (f) => f.id === 'a1');
@@ -149,7 +157,26 @@ describe('Web Runtime end-to-end (WebSocket transport)', function () {
     );
     const reply = await replyP;
     assert.strictEqual(reply.ok, false);
-    assert.strictEqual(reply.code, 'not_implemented');
+    assert.strictEqual(reply.code, 'unknown_op');
+    ws.close();
+  });
+
+  it('rejects action send_goal against an unexposed capability with code:not_exposed', async function () {
+    const ws = new WebSocket(url());
+    await waitOpen(ws);
+    const replyP = waitFrame(ws, (f) => f.id === 'a2');
+    ws.send(
+      JSON.stringify({
+        id: 'a2',
+        kind: 'action',
+        op: 'send_goal',
+        capability: '/anything',
+        payload: {},
+      })
+    );
+    const reply = await replyP;
+    assert.strictEqual(reply.ok, false);
+    assert.strictEqual(reply.code, 'not_exposed');
     ws.close();
   });
 

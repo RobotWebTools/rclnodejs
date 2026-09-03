@@ -62,6 +62,7 @@ describe('rclnodejs-web CLI', function () {
         call: {},
         publish: {},
         subscribe: {},
+        action: {},
       });
     });
 
@@ -90,6 +91,8 @@ describe('rclnodejs-web CLI', function () {
         '/cmd_vel=geometry_msgs/msg/Twist',
         '--subscribe',
         '/scan=sensor_msgs/msg/LaserScan',
+        '--action',
+        '/fibonacci=example_interfaces/action/Fibonacci',
       ]);
       assert.deepStrictEqual(partial.expose.call, {
         '/add': 'example_interfaces/srv/AddTwoInts',
@@ -99,6 +102,9 @@ describe('rclnodejs-web CLI', function () {
       });
       assert.deepStrictEqual(partial.expose.subscribe, {
         '/scan': 'sensor_msgs/msg/LaserScan',
+      });
+      assert.deepStrictEqual(partial.expose.action, {
+        '/fibonacci': 'example_interfaces/action/Fibonacci',
       });
     });
 

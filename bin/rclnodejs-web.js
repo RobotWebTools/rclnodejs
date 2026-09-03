@@ -139,7 +139,8 @@ if (SUBCOMMANDS.has(argv[0])) {
       const totals =
         Object.keys(list.call).length +
         Object.keys(list.publish).length +
-        Object.keys(list.subscribe).length;
+        Object.keys(list.subscribe).length +
+        Object.keys(list.action).length;
       const noun = totals === 1 ? 'capability' : 'capabilities';
       process.stdout.write(
         `rclnodejs/web listening on ws://${displayHost(cfg.host)}:${wsTransport.port}${cfg.path} (${totals} ${noun})\n`
