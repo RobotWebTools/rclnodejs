@@ -49,14 +49,14 @@ jobs:
             ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-linux-amd64.tar.bz2"
     steps:
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@v7
       with:
         node-version: ${{ matrix.node-version }}
         architecture: ${{ matrix.architecture }}
 
     # Checkout early so the local composite action under .github/actions is
     # available to the rolling / lyrical apt setup step below.
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Setup ROS2
       if: ${{ matrix.ros_distribution != 'rolling' && matrix.ros_distribution != 'lyrical' }}

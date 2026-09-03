@@ -43,7 +43,7 @@ jobs:
 
     steps:
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@v7
       with:
         node-version: ${{ matrix.node-version }}
         architecture: ${{ matrix.architecture }}
@@ -88,7 +88,7 @@ jobs:
         fi
         sudo apt install -y xvfb libgtk-3-0 libnss3 $LIBASOUND_PKG libgbm-dev
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: Fix permissions
       run: |
