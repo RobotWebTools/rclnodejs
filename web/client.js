@@ -413,11 +413,7 @@ class _WsLink {
       const goal = this._goals.get(frame.goalId);
       this._goals.delete(frame.goalId);
       if (goal) {
-        goal.setStatus(
-          ['succeeded', 'canceled', 'aborted'].includes(frame.status)
-            ? frame.status
-            : 'unknown'
-        );
+        goal.setStatus(_normaliseActionStatus(frame.status));
         if (frame.ok === false) {
           goal.rejectResult(
             Object.assign(new Error(frame.error || 'action failed'), {
@@ -493,6 +489,71 @@ class _HttpLink {
     return this._fetch('publish', capability, payload, /* expectBody */ false);
   }
 
+  /**
+   * Send an action goal over HTTP. The response streams `feedback`
+   * events (relayed to `onFeedback`) and one terminal `result` event.
+   * No cancellation support over HTTP — the returned handle's `cancel()`
+   * always rejects with `code: 'unsupported_kind'`. Use the WebSocket
+   * transport for cancelable actions.
+   */
+  async action(capability, payload, { onFeedback } = {}) {
+    const url = this.baseUrl + '/action/' + _encodeRosName(capability);
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload ?? {}),
+      });
+    } catch (e) {
+      throw Object.assign(new Error(`HTTP request failed: ${e.message}`), {
+        code: 'network_error',
+      });
+    }
+
+    if (!res.ok || !res.body) {
+      let err = {};
+      try {
+        err = await res.json();
+      } catch (_) {
+        // non-JSON error body; fall back to the generic message below
+      }
+      throw Object.assign(new Error(err.error || `HTTP ${res.status}`), {
+        code: err.code || 'http_' + res.status,
+        status: res.status,
+      });
+    }
+
+    let resolveResult, rejectResult;
+    const result = new Promise((res2, rej2) => {
+      resolveResult = res2;
+      rejectResult = rej2;
+    });
+    let status;
+    _pumpActionStream(
+      res.body,
+      onFeedback,
+      resolveResult,
+      rejectResult,
+      (value) => {
+        status = value;
+      }
+    );
+    return {
+      goalId: 'http-action',
+      result,
+      get status() {
+        return status;
+      },
+      cancel: () =>
+        Promise.reject(
+          Object.assign(new Error('action cancel is not supported over HTTP'), {
+            code: 'unsupported_kind',
+          })
+        ),
+    };
+  }
+
   async _fetch(kind, capability, payload, expectBody) {
     const url = this.baseUrl + '/' + kind + '/' + _encodeRosName(capability);
     let res;
@@ -538,6 +599,12 @@ class _HttpLink {
   }
 }
 
+function _normaliseActionStatus(status) {
+  return ['succeeded', 'canceled', 'aborted'].includes(status)
+    ? status
+    : 'unknown';
+}
+
 function _connectionLostError(reconnecting = true) {
   return Object.assign(
     new Error(
@@ -545,6 +612,107 @@ function _connectionLostError(reconnecting = true) {
     ),
     { code: 'connection_lost' }
   );
+}
+
+/**
+ * Read an SSE response body (from an action `fetch()`), relaying
+ * `feedback` events to `onFeedback` and settling `result`/`error` events
+ * against the goal's result promise. Runs detached from the caller’s
+ * await chain — the returned handle's `result` promise is what the
+ * caller actually awaits.
+ */
+async function _pumpActionStream(
+  body,
+  onFeedback,
+  resolveResult,
+  rejectResult,
+  setStatus
+) {
+  let reader;
+  let buffer = '';
+  let terminalReceived = false;
+  try {
+    reader = body.getReader();
+    const decoder = new TextDecoder();
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let boundary;
+      while ((boundary = /\r?\n\r?\n/.exec(buffer)) !== null) {
+        const chunk = buffer.slice(0, boundary.index);
+        buffer = buffer.slice(boundary.index + boundary[0].length);
+        const { event, data } = _parseSseChunk(chunk);
+        if (event === 'feedback' && onFeedback) {
+          try {
+            onFeedback(data);
+          } catch (_) {
+            // user callback errors don't break the stream
+          }
+        } else if (event === 'result') {
+          terminalReceived = true;
+          setStatus(_normaliseActionStatus(data?.status));
+          resolveResult(
+            data && data.payload !== undefined ? data.payload : data
+          );
+          return;
+        } else if (event === 'error') {
+          terminalReceived = true;
+          setStatus(_normaliseActionStatus(data?.status));
+          rejectResult(
+            Object.assign(new Error((data && data.error) || 'action failed'), {
+              code: data && data.code,
+            })
+          );
+          return;
+        }
+      }
+    }
+    rejectResult(
+      Object.assign(new Error('action stream ended before a terminal result'), {
+        code: 'connection_lost',
+      })
+    );
+  } catch (e) {
+    rejectResult(
+      Object.assign(new Error(`action stream read failed: ${e.message}`), {
+        code: 'network_error',
+      })
+    );
+  } finally {
+    if (reader && terminalReceived) {
+      try {
+        await reader.cancel();
+      } catch {
+        /* stream may already be closed */
+      }
+    }
+    if (reader) {
+      try {
+        reader.releaseLock();
+      } catch {
+        /* stream may already be released */
+      }
+    }
+  }
+}
+
+/** Parse one `event:`/`data:` SSE block into `{event, data}`. */
+function _parseSseChunk(chunk) {
+  let event = 'message';
+  const dataLines = [];
+  for (const line of chunk.split(/\r?\n/)) {
+    if (line.startsWith('event:')) event = line.slice(6).trim();
+    else if (line.startsWith('data:'))
+      dataLines.push(line.slice(5).replace(/^ /, ''));
+  }
+  let data;
+  try {
+    data = JSON.parse(dataLines.join('\n'));
+  } catch (_) {
+    data = undefined;
+  }
+  return { event, data };
 }
 
 // ROS names always start with `/`. Encode each path segment so that
@@ -749,7 +917,8 @@ export class RosClient {
   /**
    * Send an action goal. Returns `{ goalId, result, status, cancel() }` where
    * `result` is a Promise resolving with the action result, and `cancel()`
-   * requests cancellation over WebSocket.
+   * requests cancellation over WebSocket; for goals sent over HTTP,
+   * `cancel()` rejects with `code: 'unsupported_kind'`.
    * Read `status` after awaiting `result` to distinguish success, cancellation,
    * and abortion without changing the result payload.
    * @param {string} capability
@@ -763,6 +932,10 @@ export class RosClient {
       throw new TypeError(
         'action(capability, payload, options): onFeedback must be a function'
       );
+    }
+    if (this._closed) throw new Error('connection closed');
+    if (this._http) {
+      return this._http.action(capability, payload, { onFeedback });
     }
     const ws = await this._ensureWs();
     return ws.action(capability, payload, { onFeedback });

@@ -7,13 +7,19 @@
 //     http://www.apache.org/licenses/LICENSE-2.0
 
 // Action capability dispatch coverage: raw wire-protocol frames (mirroring
-// test-runtime.js) plus SDK-level (`rclnodejs/web`) WebSocket round-trips.
+// test-runtime.js) plus SDK-level (`rclnodejs/web`) round-trips over both
+// the WebSocket and HTTP transports.
 
 import assert from 'assert';
 import { once } from 'node:events';
+import http from 'node:http';
 import WebSocket, { WebSocketServer } from 'ws';
 import rclnodejs from '../index.js';
-import { createRuntime, WebSocketTransport } from '../lib/runtime/index.js';
+import {
+  createRuntime,
+  WebSocketTransport,
+  HttpTransport,
+} from '../lib/runtime/index.js';
 import * as assertUtils from './utils.js';
 
 // `web/` is ESM; dynamic import() defers loading the browser SDK until the test starts.
@@ -31,6 +37,7 @@ describe('Action capability dispatch', function () {
   let runtime;
   let server;
   let wsUrl;
+  let httpUrl;
 
   function waitOpen(ws) {
     return new Promise((resolve, reject) => {
@@ -92,11 +99,15 @@ describe('Action capability dispatch', function () {
 
     runtime = createRuntime({
       node,
-      transport: new WebSocketTransport({ port: 0, host: '127.0.0.1' }),
+      transports: [
+        new WebSocketTransport({ port: 0, host: '127.0.0.1' }),
+        new HttpTransport({ port: 0, host: '127.0.0.1' }),
+      ],
     });
     runtime.expose({ action: { '/fibonacci': fibonacci } });
     await runtime.start();
     wsUrl = `ws://127.0.0.1:${runtime.transports[0].port}/capability`;
+    httpUrl = `http://127.0.0.1:${runtime.transports[1].port}`;
   });
 
   after(async function () {
@@ -490,6 +501,114 @@ describe('Action capability dispatch', function () {
         finishExecution();
         await ros.close();
         actionServer.destroy();
+      }
+    });
+
+    it('sends a goal over HTTP (SSE) and awaits the result, with feedback', async function () {
+      const ros = await connect(httpUrl);
+      try {
+        const feedbacks = [];
+        const goal = await ros.action(
+          '/fibonacci',
+          { order: 5 },
+          { onFeedback: (fb) => feedbacks.push(fb) }
+        );
+        const result = await goal.result;
+        assert.deepStrictEqual(result.sequence, [1, 1, 2, 3]);
+        assert.strictEqual(goal.status, 'succeeded');
+        assert.throws(() => {
+          goal.status = 'aborted';
+        }, TypeError);
+        assert.strictEqual(feedbacks.length, 1);
+        assert.deepStrictEqual(feedbacks[0].sequence, [1, 1]);
+      } finally {
+        await ros.close();
+      }
+    });
+
+    it('rejects cancel over HTTP with code:unsupported_kind', async function () {
+      const ros = await connect(httpUrl);
+      try {
+        const goal = await ros.action('/fibonacci', { order: 5 });
+        await assert.rejects(goal.cancel(), (err) => {
+          assert.strictEqual(err.code, 'unsupported_kind');
+          return true;
+        });
+        await goal.result;
+      } finally {
+        await ros.close();
+      }
+    });
+
+    it('rejects when an HTTP action stream ends without a result', async function () {
+      const truncatedServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'content-type': 'text/event-stream' });
+        res.end('event: accepted\ndata: {}\n\n');
+      });
+      await new Promise((resolve) =>
+        truncatedServer.listen(0, '127.0.0.1', resolve)
+      );
+      const address = truncatedServer.address();
+      const ros = await connect(`http://127.0.0.1:${address.port}`);
+      try {
+        const goal = await ros.action('/fibonacci', { order: 5 });
+        await assert.rejects(goal.result, (err) => {
+          assert.strictEqual(err.code, 'connection_lost');
+          return true;
+        });
+      } finally {
+        await ros.close();
+        await new Promise((resolve, reject) =>
+          truncatedServer.close((err) => (err ? reject(err) : resolve()))
+        );
+      }
+    });
+
+    it('accepts CRLF-framed HTTP action events', async function () {
+      const crlfServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'content-type': 'text/event-stream' });
+        res.end(
+          'event: result\r\ndata: {"payload":{"sequence":[1,2,3]}}\r\n\r\n'
+        );
+      });
+      await new Promise((resolve) =>
+        crlfServer.listen(0, '127.0.0.1', resolve)
+      );
+      const address = crlfServer.address();
+      const ros = await connect(`http://127.0.0.1:${address.port}`);
+      try {
+        const goal = await ros.action('/fibonacci', { order: 5 });
+        assert.deepStrictEqual(await goal.result, { sequence: [1, 2, 3] });
+        assert.strictEqual(goal.status, 'unknown');
+      } finally {
+        await ros.close();
+        await new Promise((resolve, reject) =>
+          crlfServer.close((err) => (err ? reject(err) : resolve()))
+        );
+      }
+    });
+
+    it('rejects the result when HTTP stream setup fails', async function () {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () => ({
+        ok: true,
+        body: {
+          getReader() {
+            throw new Error('reader unavailable');
+          },
+        },
+      });
+      const ros = await connect('http://127.0.0.1:1');
+      try {
+        const goal = await ros.action('/fibonacci', { order: 5 });
+        await assert.rejects(goal.result, (err) => {
+          assert.strictEqual(err.code, 'network_error');
+          assert.match(err.message, /reader unavailable/);
+          return true;
+        });
+      } finally {
+        globalThis.fetch = originalFetch;
+        await ros.close();
       }
     });
   });
