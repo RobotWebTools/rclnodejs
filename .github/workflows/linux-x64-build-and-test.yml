@@ -136,7 +136,9 @@ jobs:
           else
             npm test
           fi
-          npm run clean
+          if [ "${{ matrix.ros_distribution }}" != "rolling" ]; then
+            npm run clean
+          fi
 
     - name: Test with IDL ROS messages (rolling)
       if: ${{ matrix.ros_distribution == 'rolling' }}
@@ -148,7 +150,6 @@ jobs:
         timeout_minutes: 60
         command: |
           source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
-          npm i
           npm run test-idl
           npm run clean
 
