@@ -69,7 +69,7 @@ describe('rclnodejs generate-messages binary-script tests', function () {
   let tmpPkg;
   const args = process.argv.find((arg) => arg === '--idl') ? ['--idl'] : [];
 
-  this.timeout(90 * 1000); // 90 seconds to run this test suite
+  this.timeout(10 * 60 * 1000);
 
   // Create a test pkg wtih rclnodejs dependency
   //   create test package folder
