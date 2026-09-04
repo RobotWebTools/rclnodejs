@@ -129,10 +129,9 @@ jobs:
           npm i
           npm run lint
           # c8 (coverage) depends on yargs 17, whose extensionless `yargs/yargs`
-          # entry fails to load under `require()` on Node 26. Coverage is only
-          # uploaded from the Node 24.X leg, so wrap with c8 there and run the
-          # plain suite everywhere else to keep the Node 26 lane green.
-          if [ "${{ matrix.node-version }}" = "24.X" ]; then
+          # entry fails to load under `require()` on Node 26. Generate coverage
+          # only in the Lyrical Node 24.X leg that uploads it below.
+          if [ "${{ matrix.ros_distribution }}" = "lyrical" ] && [ "${{ matrix.node-version }}" = "24.X" ]; then
             npm run test:coverage
           else
             npm test
