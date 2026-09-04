@@ -7,13 +7,17 @@
 //     http://www.apache.org/licenses/LICENSE-2.0
 
 import assert from 'assert';
+import sinon from 'sinon';
 import WebSocket from 'ws';
 import rclnodejs from '../index.js';
+import ActionClient from '../lib/action/client.js';
+import ClientGoalHandle from '../lib/action/client_goal_handle.js';
 import {
   createRuntime,
   CapabilityRegistry,
   WebSocketTransport,
 } from '../lib/runtime/index.js';
+import * as assertUtils from './utils.js';
 
 describe('CapabilityRegistry (unit)', function () {
   it('expose() registers shorthand and rich forms', function () {
@@ -22,22 +26,30 @@ describe('CapabilityRegistry (unit)', function () {
       call: { '/add': 'example_interfaces/srv/AddTwoInts' },
       publish: { '/chatter': { type: 'std_msgs/msg/String' } },
       subscribe: { '/scan': 'sensor_msgs/msg/LaserScan' },
+      action: { '/fibonacci': 'example_interfaces/action/Fibonacci' },
     });
     assert.deepStrictEqual(reg.list(), {
       call: { '/add': 'example_interfaces/srv/AddTwoInts' },
       publish: { '/chatter': 'std_msgs/msg/String' },
       subscribe: { '/scan': 'sensor_msgs/msg/LaserScan' },
+      action: { '/fibonacci': 'example_interfaces/action/Fibonacci' },
     });
   });
 
   it('resolve() returns the matching capability or null', function () {
     const reg = new CapabilityRegistry().expose({
       call: { '/add': 'example_interfaces/srv/AddTwoInts' },
+      action: { '/fibonacci': 'example_interfaces/action/Fibonacci' },
     });
     assert.deepStrictEqual(reg.resolve('call', '/add'), {
       kind: 'call',
       name: '/add',
       type: 'example_interfaces/srv/AddTwoInts',
+    });
+    assert.deepStrictEqual(reg.resolve('action', '/fibonacci'), {
+      kind: 'action',
+      name: '/fibonacci',
+      type: 'example_interfaces/action/Fibonacci',
     });
     assert.strictEqual(reg.resolve('call', '/missing'), null);
     assert.strictEqual(reg.resolve('publish', '/add'), null);
@@ -64,11 +76,44 @@ describe('Web Runtime end-to-end (WebSocket transport)', function () {
 
   let node;
   let runtime;
+  let Fibonacci;
+  let actionServer;
+  let acceptCancellation = true;
+
+  const fibonacci = 'example_interfaces/action/Fibonacci';
+
+  async function executeAction(goalHandle) {
+    const feedback = new Fibonacci.Feedback();
+    feedback.sequence = [1, 1];
+    goalHandle.publishFeedback(feedback);
+    await assertUtils.createDelay(100);
+    const result = new Fibonacci.Result();
+    if (goalHandle.isCancelRequested) {
+      goalHandle.canceled();
+      return result;
+    }
+    goalHandle.succeed();
+    result.sequence = [1, 1, 2, 3];
+    return result;
+  }
 
   before(async function () {
     await rclnodejs.init();
+    Fibonacci = rclnodejs.require(fibonacci);
     node = rclnodejs.createNode('runtime_test_node');
     rclnodejs.spin(node);
+    actionServer = new rclnodejs.ActionServer(
+      node,
+      fibonacci,
+      '/wb_fibonacci',
+      executeAction,
+      null,
+      null,
+      () =>
+        acceptCancellation
+          ? rclnodejs.CancelResponse.ACCEPT
+          : rclnodejs.CancelResponse.REJECT
+    );
     runtime = createRuntime({
       node,
       transports: [new WebSocketTransport({ port: 0 })],
@@ -77,13 +122,22 @@ describe('Web Runtime end-to-end (WebSocket transport)', function () {
       call: { '/wb_add': 'example_interfaces/srv/AddTwoInts' },
       publish: { '/wb_pub_in': 'std_msgs/msg/String' },
       subscribe: { '/wb_chatter': 'std_msgs/msg/String' },
+      action: {
+        '/wb_fibonacci': fibonacci,
+        '/wb_offline': fibonacci,
+      },
     });
     await runtime.start();
   });
 
   after(async function () {
+    if (actionServer) actionServer.destroy();
     if (runtime) await runtime.stop();
     rclnodejs.shutdown();
+  });
+
+  afterEach(function () {
+    acceptCancellation = true;
   });
 
   function url() {
@@ -109,6 +163,18 @@ describe('Web Runtime end-to-end (WebSocket transport)', function () {
       };
       ws.on('message', onMsg);
     });
+  }
+
+  function sendGoal(ws, id, capability = '/wb_fibonacci') {
+    ws.send(
+      JSON.stringify({
+        id,
+        kind: 'action',
+        op: 'send_goal',
+        capability,
+        payload: { order: 5 },
+      })
+    );
   }
 
   it('rejects capabilities not in the allow-list with code:not_exposed', async function () {
@@ -140,7 +206,7 @@ describe('Web Runtime end-to-end (WebSocket transport)', function () {
     ws.close();
   });
 
-  it('reserves kind:action with code:not_implemented', async function () {
+  it('rejects an action frame with a missing/unknown op with code:unknown_op', async function () {
     const ws = new WebSocket(url());
     await waitOpen(ws);
     const replyP = waitFrame(ws, (f) => f.id === 'a1');
@@ -149,8 +215,184 @@ describe('Web Runtime end-to-end (WebSocket transport)', function () {
     );
     const reply = await replyP;
     assert.strictEqual(reply.ok, false);
-    assert.strictEqual(reply.code, 'not_implemented');
+    assert.strictEqual(reply.code, 'unknown_op');
     ws.close();
+  });
+
+  it('rejects action send_goal against an unexposed capability with code:not_exposed', async function () {
+    const ws = new WebSocket(url());
+    await waitOpen(ws);
+    const replyP = waitFrame(ws, (f) => f.id === 'a2');
+    ws.send(
+      JSON.stringify({
+        id: 'a2',
+        kind: 'action',
+        op: 'send_goal',
+        capability: '/anything',
+        payload: {},
+      })
+    );
+    const reply = await replyP;
+    assert.strictEqual(reply.ok, false);
+    assert.strictEqual(reply.code, 'not_exposed');
+    ws.close();
+  });
+
+  it('rejects an exposed action whose server is unavailable', async function () {
+    const ws = new WebSocket(url());
+    await waitOpen(ws);
+    const replyP = waitFrame(ws, (f) => f.id === 'offline');
+    sendGoal(ws, 'offline', '/wb_offline');
+    const reply = await replyP;
+    assert.strictEqual(reply.ok, false);
+    assert.strictEqual(reply.code, 'action_unavailable');
+    ws.close();
+  });
+
+  it('streams action feedback and a successful result', async function () {
+    const ws = new WebSocket(url());
+    await waitOpen(ws);
+    const ackP = waitFrame(ws, (f) => f.id === 'goal-success');
+    const feedbackP = waitFrame(
+      ws,
+      (f) => f.event === 'feedback' && f.goalId === 'goal-success'
+    );
+    const resultP = waitFrame(
+      ws,
+      (f) => f.event === 'result' && f.goalId === 'goal-success'
+    );
+    sendGoal(ws, 'goal-success');
+    const ack = await ackP;
+    assert.strictEqual(ack.ok, true);
+    assert.deepStrictEqual((await feedbackP).payload.sequence, [1, 1]);
+    const result = await resultP;
+    assert.strictEqual(result.status, 'succeeded');
+    assert.deepStrictEqual(result.payload.sequence, [1, 1, 2, 3]);
+    ws.close();
+  });
+
+  it('reports accepted action cancellation', async function () {
+    acceptCancellation = true;
+    const ws = new WebSocket(url());
+    await waitOpen(ws);
+    const ackP = waitFrame(ws, (f) => f.id === 'goal-cancel');
+    const resultP = waitFrame(
+      ws,
+      (f) => f.event === 'result' && f.goalId === 'goal-cancel'
+    );
+    sendGoal(ws, 'goal-cancel');
+    await ackP;
+    const cancelP = waitFrame(ws, (f) => f.id === 'cancel-accepted');
+    ws.send(
+      JSON.stringify({
+        id: 'cancel-accepted',
+        kind: 'action',
+        op: 'cancel',
+        goalId: 'goal-cancel',
+      })
+    );
+    const cancel = await cancelP;
+    assert.strictEqual(cancel.ok, true);
+    assert.strictEqual(cancel.payload.goals_canceling.length, 1);
+    assert.strictEqual((await resultP).status, 'canceled');
+    ws.close();
+  });
+
+  it('reports rejected action cancellation', async function () {
+    acceptCancellation = false;
+    const ws = new WebSocket(url());
+    await waitOpen(ws);
+    const ackP = waitFrame(ws, (f) => f.id === 'goal-reject-cancel');
+    const resultP = waitFrame(
+      ws,
+      (f) => f.event === 'result' && f.goalId === 'goal-reject-cancel'
+    );
+    sendGoal(ws, 'goal-reject-cancel');
+    await ackP;
+    const cancelP = waitFrame(ws, (f) => f.id === 'cancel-rejected');
+    ws.send(
+      JSON.stringify({
+        id: 'cancel-rejected',
+        kind: 'action',
+        op: 'cancel',
+        goalId: 'goal-reject-cancel',
+      })
+    );
+    const cancel = await cancelP;
+    assert.strictEqual(cancel.ok, false);
+    assert.strictEqual(cancel.code, 'cancel_rejected');
+    assert.strictEqual(cancel.payload.goals_canceling.length, 0);
+    assert.strictEqual((await resultP).status, 'succeeded');
+    ws.close();
+  });
+
+  it('reports a synchronous getResult failure', async function () {
+    const getResult = sinon
+      .stub(ClientGoalHandle.prototype, 'getResult')
+      .throws(new Error('result setup failed'));
+    try {
+      const ws = new WebSocket(url());
+      await waitOpen(ws);
+      const resultP = waitFrame(
+        ws,
+        (f) => f.event === 'result' && f.goalId === 'goal-result-error'
+      );
+      sendGoal(ws, 'goal-result-error');
+      const result = await resultP;
+      assert.strictEqual(result.ok, false);
+      assert.strictEqual(result.code, 'action_failed');
+      assert.match(result.error, /result setup failed/);
+      ws.close();
+    } finally {
+      getResult.restore();
+    }
+  });
+
+  it('keeps the action client alive until a pending cancel settles', async function () {
+    let resolveResult;
+    let resolveCancel;
+    let actionClient;
+    const getResult = sinon
+      .stub(ClientGoalHandle.prototype, 'getResult')
+      .returns(new Promise((resolve) => (resolveResult = resolve)));
+    const cancelGoal = sinon
+      .stub(ClientGoalHandle.prototype, 'cancelGoal')
+      .callsFake(function () {
+        actionClient = this._actionClient;
+        return new Promise((resolve) => (resolveCancel = resolve));
+      });
+    const destroy = sinon.spy(ActionClient.prototype, 'destroy');
+    try {
+      const ws = new WebSocket(url());
+      await waitOpen(ws);
+      const ackP = waitFrame(ws, (f) => f.id === 'goal-pending-cancel');
+      sendGoal(ws, 'goal-pending-cancel');
+      await ackP;
+      ws.send(
+        JSON.stringify({
+          id: 'pending-cancel',
+          kind: 'action',
+          op: 'cancel',
+          goalId: 'goal-pending-cancel',
+        })
+      );
+      while (!cancelGoal.called) {
+        await assertUtils.createDelay(5);
+      }
+      const closed = new Promise((resolve) => ws.once('close', resolve));
+      ws.close();
+      await closed;
+      resolveResult(new Fibonacci.Result());
+      await assertUtils.createDelay(20);
+      assert.strictEqual(destroy.calledOn(actionClient), false);
+      resolveCancel({ return_code: 0, goals_canceling: [{}] });
+      await assertUtils.createDelay(20);
+      assert.strictEqual(destroy.calledOn(actionClient), true);
+    } finally {
+      getResult.restore();
+      cancelGoal.restore();
+      destroy.restore();
+    }
   });
 
   it('rejects non-JSON frames with code:invalid_json', async function () {
