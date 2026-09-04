@@ -139,8 +139,8 @@ jobs:
           fi
           npm run clean
 
-    - name: Test with IDL ROS messages (rolling / lyrical)
-      if: ${{ matrix.ros_distribution == 'rolling' || matrix.ros_distribution == 'lyrical' }}
+    - name: Test with IDL ROS messages (rolling)
+      if: ${{ matrix.ros_distribution == 'rolling' }}
       uses: nick-fields/retry@v4
       with:
         shell: bash
@@ -154,7 +154,7 @@ jobs:
           npm run clean
 
     - name: Coveralls
-      if: ${{ matrix.ros_distribution == 'rolling' && matrix['node-version'] == '26.X' }}
+      if: ${{ matrix.ros_distribution == 'lyrical' && matrix['node-version'] == '24.X' }}
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
