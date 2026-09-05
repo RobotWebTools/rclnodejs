@@ -97,6 +97,7 @@ class _WsLink {
     this._ws = null;
     this._pending = new Map();
     this._subs = new Map();
+    this._goals = new Map(); // goal id -> { onFeedback, resolveResult, rejectResult }
     this._closed = false;
     this._isUserClosed = false;
     this._isReconnecting = false;
@@ -218,6 +219,48 @@ class _WsLink {
   publish(capability, payload) {
     return this._request({ kind: 'publish', capability, payload });
   }
+  action(capability, payload, { onFeedback } = {}) {
+    if (this._isReconnecting) {
+      return Promise.reject(_connectionLostError());
+    }
+    const id = _genId();
+    // Registered synchronously, before the frame is even sent: feedback is
+    // delivered over a separate topic subscription from the goal-accept
+    // service response, so a feedback frame can race ahead of the accept
+    // ack. If _goals isn't populated yet when that happens, the feedback
+    // is silently dropped (no id to route it to).
+    let resolveResult, rejectResult;
+    const result = new Promise((res, rej) => {
+      resolveResult = res;
+      rejectResult = rej;
+    });
+    this._goals.set(id, { onFeedback, resolveResult, rejectResult });
+    return new Promise((resolve, reject) => {
+      this._pending.set(id, {
+        resolve: () => {
+          resolve({
+            goalId: id,
+            result,
+            cancel: () => this._cancelGoal(id),
+          });
+        },
+        reject: (err) => {
+          this._goals.delete(id); // goal was never accepted; nothing to route to
+          reject(err);
+        },
+      });
+      this._sendRaw({
+        id,
+        kind: 'action',
+        op: 'send_goal',
+        capability,
+        payload,
+      });
+    });
+  }
+  _cancelGoal(goalId) {
+    return this._request({ kind: 'action', op: 'cancel', goalId });
+  }
   subscribe(capability, callback) {
     if (this._isReconnecting) {
       return Promise.reject(_connectionLostError());
@@ -333,6 +376,33 @@ class _WsLink {
       }
       return;
     }
+    if (frame.event === 'feedback') {
+      const goal = this._goals.get(frame.goalId);
+      if (goal && goal.onFeedback) {
+        try {
+          goal.onFeedback(frame.payload);
+        } catch (_) {
+          // user callback errors don't break the dispatch loop
+        }
+      }
+      return;
+    }
+    if (frame.event === 'result') {
+      const goal = this._goals.get(frame.goalId);
+      this._goals.delete(frame.goalId);
+      if (goal) {
+        if (frame.ok === false) {
+          goal.rejectResult(
+            Object.assign(new Error(frame.error || 'action failed'), {
+              code: frame.code,
+            })
+          );
+        } else {
+          goal.resolveResult(frame.payload);
+        }
+      }
+      return;
+    }
     const pend = this._pending.get(frame.id);
     if (!pend) return;
     this._pending.delete(frame.id);
@@ -351,6 +421,10 @@ class _WsLink {
       p.reject(cause);
     }
     this._pending.clear();
+    for (const goal of this._goals.values()) {
+      goal.rejectResult(cause);
+    }
+    this._goals.clear();
   }
 }
 
@@ -390,6 +464,59 @@ class _HttpLink {
 
   publish(capability, payload) {
     return this._fetch('publish', capability, payload, /* expectBody */ false);
+  }
+
+  /**
+   * Send an action goal over HTTP. The response streams `feedback`
+   * events (relayed to `onFeedback`) and one terminal `result` event.
+   * No cancellation support over HTTP — the returned handle's `cancel()`
+   * always rejects with `code: 'unsupported_kind'`. Use the WebSocket
+   * transport for cancelable actions.
+   */
+  async action(capability, payload, { onFeedback } = {}) {
+    const url = this.baseUrl + '/action/' + _encodeRosName(capability);
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload ?? {}),
+      });
+    } catch (e) {
+      throw Object.assign(new Error(`HTTP request failed: ${e.message}`), {
+        code: 'network_error',
+      });
+    }
+
+    if (!res.ok || !res.body) {
+      let err = {};
+      try {
+        err = await res.json();
+      } catch (_) {
+        // non-JSON error body; fall back to the generic message below
+      }
+      throw Object.assign(new Error(err.error || `HTTP ${res.status}`), {
+        code: err.code || 'http_' + res.status,
+        status: res.status,
+      });
+    }
+
+    let resolveResult, rejectResult;
+    const result = new Promise((res2, rej2) => {
+      resolveResult = res2;
+      rejectResult = rej2;
+    });
+    _pumpActionStream(res.body, onFeedback, resolveResult, rejectResult);
+    return {
+      goalId: 'http-action',
+      result,
+      cancel: () =>
+        Promise.reject(
+          Object.assign(new Error('action cancel is not supported over HTTP'), {
+            code: 'unsupported_kind',
+          })
+        ),
+    };
   }
 
   async _fetch(kind, capability, payload, expectBody) {
@@ -444,6 +571,85 @@ function _connectionLostError(reconnecting = true) {
     ),
     { code: 'connection_lost' }
   );
+}
+
+/**
+ * Read an SSE response body (from an action `fetch()`), relaying
+ * `feedback` events to `onFeedback` and settling `result`/`error` events
+ * against the goal's result promise. Runs detached from the caller’s
+ * await chain — the returned handle's `result` promise is what the
+ * caller actually awaits.
+ */
+async function _pumpActionStream(
+  body,
+  onFeedback,
+  resolveResult,
+  rejectResult
+) {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buffer.indexOf('\n\n')) !== -1) {
+        const chunk = buffer.slice(0, idx);
+        buffer = buffer.slice(idx + 2);
+        const { event, data } = _parseSseChunk(chunk);
+        if (event === 'feedback' && onFeedback) {
+          try {
+            onFeedback(data);
+          } catch (_) {
+            // user callback errors don't break the stream
+          }
+        } else if (event === 'result') {
+          resolveResult(
+            data && data.payload !== undefined ? data.payload : data
+          );
+          return;
+        } else if (event === 'error') {
+          rejectResult(
+            Object.assign(new Error((data && data.error) || 'action failed'), {
+              code: data && data.code,
+            })
+          );
+          return;
+        }
+      }
+    }
+    rejectResult(
+      Object.assign(new Error('action stream ended before a terminal result'), {
+        code: 'connection_lost',
+      })
+    );
+  } catch (e) {
+    rejectResult(
+      Object.assign(new Error(`action stream read failed: ${e.message}`), {
+        code: 'network_error',
+      })
+    );
+  }
+}
+
+/** Parse one `event:`/`data:` SSE block into `{event, data}`. */
+function _parseSseChunk(chunk) {
+  let event = 'message';
+  const dataLines = [];
+  for (const line of chunk.split('\n')) {
+    if (line.startsWith('event:')) event = line.slice(6).trim();
+    else if (line.startsWith('data:'))
+      dataLines.push(line.slice(5).replace(/^ /, ''));
+  }
+  let data;
+  try {
+    data = JSON.parse(dataLines.join('\n'));
+  } catch (_) {
+    data = undefined;
+  }
+  return { event, data };
 }
 
 // ROS names always start with `/`. Encode each path segment so that
@@ -640,6 +846,22 @@ export class RosClient {
     }
     const ws = await this._ensureWs();
     return ws.subscribe(capability, callback);
+  }
+
+  /**
+   * Send an action goal. Returns `{ goalId, result, cancel() }` where
+   * `result` is a Promise resolving with the action result, and `cancel()`
+   * requests cancellation — WebSocket only; over an HTTP-only connection
+   * `cancel()` rejects with `code: 'unsupported_kind'`.
+   * @param {string} capability
+   * @param {*} payload The goal.
+   * @param {object} [options]
+   * @param {(feedback: *) => void} [options.onFeedback]
+   */
+  async action(capability, payload, options) {
+    if (this._http) return this._http.action(capability, payload, options);
+    const ws = await this._ensureWs();
+    return ws.action(capability, payload, options);
   }
 }
 

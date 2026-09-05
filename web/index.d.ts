@@ -98,6 +98,24 @@ declare module 'rclnodejs/web' {
     InstanceType<_SvcCtor<TName>['Response']>
   >;
 
+  /** ROS 2 action type names available in the sourced environment. */
+  export type ActionName = keyof import('rclnodejs').ActionsMap;
+
+  /** Wire shape of the named action's goal request. */
+  export type ActionGoal<TName extends ActionName> = WireType<
+    import('rclnodejs').ActionGoal<TName>
+  >;
+
+  /** Wire shape of the named action's feedback message. */
+  export type ActionFeedback<TName extends ActionName> = WireType<
+    import('rclnodejs').ActionFeedback<TName>
+  >;
+
+  /** Wire shape of the named action's result. */
+  export type ActionResult<TName extends ActionName> = WireType<
+    import('rclnodejs').ActionResult<TName>
+  >;
+
   // -------- SDK ------------------------------------------------------
 
   /**
@@ -107,6 +125,21 @@ declare module 'rclnodejs/web' {
   export interface Subscription {
     readonly subId: string;
     close(): Promise<void>;
+  }
+
+  /**
+   * Handle for an in-flight action goal, returned by {@link RosClient.action}.
+   *
+   * `cancel()` requests cancellation of the goal — WebSocket transport
+   * only. Over an HTTP-only connection (no WebSocket sibling), `cancel()`
+   * rejects with `code: 'unsupported_kind'`: HTTP has no back-channel once
+   * the goal request is sent, so a goal sent over HTTP always runs to
+   * completion server-side even if the caller gives up on it.
+   */
+  export interface ActionHandle<TResult = unknown> {
+    readonly goalId: string;
+    readonly result: Promise<TResult>;
+    cancel(): Promise<void>;
   }
 
   export interface ConnectOptions {
@@ -228,6 +261,30 @@ declare module 'rclnodejs/web' {
       capability: string,
       callback: (msg: unknown) => void
     ): Promise<Subscription>;
+
+    /**
+     * Send an action goal.
+     *
+     * @example Typed via the ROS action type name (preferred)
+     *   const goal = await ros.action<'example_interfaces/action/Fibonacci'>(
+     *     '/fibonacci', { order: 5 }, { onFeedback: (fb) => console.log(fb) }
+     *   );
+     *   const result = await goal.result;
+     *
+     * @example Untyped (capability with a custom type not in the
+     *          generated maps, or quick prototyping)
+     *   const goal = await ros.action('/whatever', { foo: 1 });
+     */
+    action<TName extends ActionName>(
+      capability: string,
+      goal: ActionGoal<TName>,
+      options?: { onFeedback?: (feedback: ActionFeedback<TName>) => void }
+    ): Promise<ActionHandle<ActionResult<TName>>>;
+    action(
+      capability: string,
+      goal: unknown,
+      options?: { onFeedback?: (feedback: unknown) => void }
+    ): Promise<ActionHandle>;
   }
 
   /**

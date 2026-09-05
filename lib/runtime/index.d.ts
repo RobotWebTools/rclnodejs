@@ -15,7 +15,7 @@
 
 import type { Node } from 'rclnodejs';
 
-export type CapabilityKind = 'call' | 'publish' | 'subscribe';
+export type CapabilityKind = 'call' | 'publish' | 'subscribe' | 'action';
 
 /** A single capability entry as resolved from the registry. */
 export interface Capability {
@@ -34,6 +34,7 @@ export interface ExposeSpec {
   call?: CapabilityMap;
   publish?: CapabilityMap;
   subscribe?: CapabilityMap;
+  action?: CapabilityMap;
 }
 
 /** Snapshot returned by `CapabilityRegistry.list()`. */
@@ -41,6 +42,7 @@ export interface RegistrySnapshot {
   call: Record<string, string>;
   publish: Record<string, string>;
   subscribe: Record<string, string>;
+  action: Record<string, string>;
 }
 
 /**
@@ -66,6 +68,8 @@ export interface CapabilityFrame {
   capability?: string;
   payload?: unknown;
   subId?: string | number;
+  op?: 'send_goal' | 'cancel';
+  goalId?: string | number;
   ok?: boolean;
   event?: string;
   error?: string;
