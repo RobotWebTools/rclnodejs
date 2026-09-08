@@ -84,10 +84,7 @@ async function generateAll(forcedGenerating) {
       await fse.emptyDir(generatedRoot);
     }
 
-    await fse.copy(
-      path.join(__dirname, 'generator.json'),
-      path.join(generatedRoot, 'generator.json')
-    );
+    await fse.mkdirs(generatedRoot);
     // The generated message files are CommonJS. Mark the generated/ tree as a
     // CommonJS scope so they keep loading correctly under the package's
     // "type": "module" setting.
@@ -103,6 +100,13 @@ async function generateAll(forcedGenerating) {
     for (let path of getInstalledPackagePaths().reverse()) {
       await generateInPath(path);
     }
+    // Write the version marker last. init() treats generated/ as complete as
+    // soon as generator.json exists, so an interrupted or failed generation
+    // must not leave one behind.
+    await fse.copy(
+      path.join(__dirname, 'generator.json'),
+      path.join(generatedRoot, 'generator.json')
+    );
   }
 }
 

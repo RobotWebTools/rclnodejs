@@ -15,6 +15,7 @@
 import assert from 'assert';
 import childProcess from 'child_process';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import rclnodejs from '../index.js';
 import generator from '../rosidl_gen/index.cjs';
@@ -96,5 +97,38 @@ describe('override interface in overlay tests', function () {
 
     // restore original AMENT_PREFIX_PATH envar setting
     process.env.AMENT_PREFIX_PATH = amentPrefixPathOriginal;
+  });
+
+  it('failed generation leaves no generator.json marker', async () => {
+    const amentPrefixPathOriginal = process.env.AMENT_PREFIX_PATH;
+    assert.ok(amentPrefixPathOriginal, 'AMENT_PREFIX_PATH not found');
+
+    // A prefix whose ament index lists an interface file that does not exist,
+    // so generating that package rejects part-way through generateAll().
+    const brokenPrefix = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'rclnodejs_broken_prefix_')
+    );
+    const indexDir = path.join(
+      brokenPrefix,
+      'share',
+      'ament_index',
+      'resource_index',
+      'rosidl_interfaces'
+    );
+    fs.mkdirSync(indexDir, { recursive: true });
+    fs.writeFileSync(path.join(indexDir, 'broken_msgs'), 'msg/Missing.msg\n');
+    process.env.AMENT_PREFIX_PATH = brokenPrefix;
+
+    try {
+      await assert.rejects(generateMessages());
+      assert.ok(
+        !fs.existsSync(path.join(GENERATED_PATH, 'generator.json')),
+        'Expected no generator.json after a failed generation'
+      );
+    } finally {
+      // restore original AMENT_PREFIX_PATH envar setting
+      process.env.AMENT_PREFIX_PATH = amentPrefixPathOriginal;
+      fs.rmSync(brokenPrefix, { recursive: true });
+    }
   });
 });

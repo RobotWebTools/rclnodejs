@@ -35,6 +35,7 @@ async function main() {
     console.log('Generation complete.');
   } catch (e) {
     console.log(`Caught error: ${e}`);
+    process.exit(1);
   }
 }
 
