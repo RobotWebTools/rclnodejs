@@ -199,7 +199,8 @@ declare module 'rclnodejs/web' {
    *   - `http://` / `https://` — HTTP for `call`/`publish`; SSE for `action`.
    *     `subscribe` falls through to a sibling WebSocket at the same host
    *     with `/capability` appended.
-   *   - {@link ConnectEndpoints} — both URLs spelled out.
+   *   - {@link ConnectEndpoints} — when both URLs are provided,
+   *     HTTP for `call`/`publish`; WebSocket for `subscribe`/`action`.
    *
    * **Path conventions.** When a `ws://` / `wss://` URL is passed
    * without a path (or with just `/`), the SDK appends the runtime's

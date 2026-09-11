@@ -409,6 +409,21 @@ describe('Action capability dispatch', function () {
       }
     });
 
+    it('cancels actions over WebSocket with explicit HTTP and WebSocket endpoints', async function () {
+      const ros = await connect({ http: httpUrl, ws: wsUrl });
+      let result;
+      try {
+        const goal = await ros.action('/fibonacci', { order: 5 });
+        result = goal.result.catch((error) => error);
+        assert.strictEqual(await goal.cancel(), undefined);
+        assert.deepStrictEqual(await result, { sequence: [] });
+        assert.strictEqual(goal.status, 'canceled');
+      } finally {
+        await ros.close();
+        await result;
+      }
+    });
+
     for (const { name, terminal, errorCode } of [
       { name: 'missing status', terminal: { payload: {} } },
       { name: 'unknown status', terminal: { status: 'unknown', payload: {} } },
