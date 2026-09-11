@@ -133,8 +133,8 @@ declare module 'rclnodejs/web' {
   /**
    * Handle for an in-flight action goal, returned by {@link RosClient.action}.
    *
-   * `cancel()` requests cancellation over WebSocket. For goals sent over HTTP,
-   * it rejects with `code: 'unsupported_kind'`; closing the stream does not cancel the goal.
+   * HTTP `cancel()` rejects with `unsupported_kind`; use WebSocket to cancel.
+   * Closing an HTTP stream does not cancel its ROS goal.
    * `result` resolves with the ROS payload even when canceled or aborted;
    * inspect `status` after awaiting it to determine the outcome.
    */

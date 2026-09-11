@@ -489,13 +489,7 @@ class _HttpLink {
     return this._fetch('publish', capability, payload, /* expectBody */ false);
   }
 
-  /**
-   * Send an action goal over HTTP. The response streams `feedback`
-   * events (relayed to `onFeedback`) and one terminal `result` event.
-   * No cancellation support over HTTP — the returned handle's `cancel()`
-   * always rejects with `code: 'unsupported_kind'`. Use the WebSocket
-   * transport for cancelable actions.
-   */
+  /** POST a goal and stream feedback/results; use WebSocket for cancellation. */
   async action(capability, payload, { onFeedback } = {}) {
     const url = this.baseUrl + '/action/' + _encodeRosName(capability);
     let res;
@@ -516,7 +510,7 @@ class _HttpLink {
       try {
         err = await res.json();
       } catch (_) {
-        // non-JSON error body; fall back to the generic message below
+        // Fall back to the HTTP status for non-JSON errors.
       }
       throw Object.assign(new Error(err.error || `HTTP ${res.status}`), {
         code: err.code || 'http_' + res.status,
@@ -614,13 +608,7 @@ function _connectionLostError(reconnecting = true) {
   );
 }
 
-/**
- * Read an SSE response body (from an action `fetch()`), relaying
- * `feedback` events to `onFeedback` and settling `result`/`error` events
- * against the goal's result promise. Runs detached from the caller’s
- * await chain — the returned handle's `result` promise is what the
- * caller actually awaits.
- */
+/** Runs independently; terminal SSE events settle the result promise. */
 async function _pumpActionStream(
   body,
   onFeedback,
@@ -647,7 +635,7 @@ async function _pumpActionStream(
           try {
             onFeedback(data);
           } catch (_) {
-            // user callback errors don't break the stream
+            // Callback errors must not interrupt result delivery.
           }
         } else if (event === 'result') {
           terminalReceived = true;
@@ -697,7 +685,6 @@ async function _pumpActionStream(
   }
 }
 
-/** Parse one `event:`/`data:` SSE block into `{event, data}`. */
 function _parseSseChunk(chunk) {
   let event = 'message';
   const dataLines = [];
@@ -915,12 +902,9 @@ export class RosClient {
   }
 
   /**
-   * Send an action goal. Returns `{ goalId, result, status, cancel() }` where
-   * `result` is a Promise resolving with the action result, and `cancel()`
-   * requests cancellation over WebSocket; for goals sent over HTTP,
-   * `cancel()` rejects with `code: 'unsupported_kind'`.
-   * Read `status` after awaiting `result` to distinguish success, cancellation,
-   * and abortion without changing the result payload.
+   * Return `{ goalId, result, status, cancel() }` for an action goal.
+   * Await `result` for the ROS payload, then inspect terminal `status`.
+   * HTTP `cancel()` rejects with `unsupported_kind`; use WebSocket to cancel.
    * @param {string} capability
    * @param {*} payload The goal.
    * @param {object|null} [options]

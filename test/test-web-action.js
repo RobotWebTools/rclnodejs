@@ -6,9 +6,7 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 
-// Action capability dispatch coverage: raw wire-protocol frames (mirroring
-// test-runtime.js) plus SDK-level (`rclnodejs/web`) round-trips over both
-// the WebSocket and HTTP transports.
+// Action protocol and SDK tests over WebSocket and HTTP/SSE.
 
 import assert from 'assert';
 import { once } from 'node:events';
