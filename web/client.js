@@ -467,6 +467,7 @@ class _HttpLink {
     this.baseUrl = trimmed.endsWith('/capability')
       ? trimmed
       : trimmed + '/capability';
+    this._actionControllers = new Set();
   }
 
   async connect() {
@@ -476,7 +477,10 @@ class _HttpLink {
   }
 
   async close() {
-    // No-op for HTTP.
+    for (const controller of this._actionControllers) {
+      controller.abort(_connectionLostError(false));
+    }
+    this._actionControllers.clear();
   }
 
   call(capability, payload) {
@@ -490,14 +494,21 @@ class _HttpLink {
   /** POST a goal and stream feedback/results; use WebSocket for cancellation. */
   async action(capability, payload, { onFeedback } = {}) {
     const url = this.baseUrl + '/action/' + _encodeRosName(capability);
+    const controller = new AbortController();
+    const { signal } = controller;
+    this._actionControllers.add(controller);
     let res;
     try {
       res = await fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(payload ?? {}),
+        signal,
       });
+      signal.throwIfAborted();
     } catch (e) {
+      this._actionControllers.delete(controller);
+      if (signal.aborted) throw signal.reason;
       throw Object.assign(new Error(`HTTP request failed: ${e.message}`), {
         code: 'network_error',
       });
@@ -509,7 +520,10 @@ class _HttpLink {
         err = await res.json();
       } catch (_) {
         // Fall back to the HTTP status for non-JSON errors.
+      } finally {
+        this._actionControllers.delete(controller);
       }
+      signal.throwIfAborted();
       throw Object.assign(new Error(err.error || `HTTP ${res.status}`), {
         code: err.code || 'http_' + res.status,
         status: res.status,
@@ -529,8 +543,9 @@ class _HttpLink {
       rejectResult,
       (value) => {
         status = value;
-      }
-    );
+      },
+      signal
+    ).finally(() => this._actionControllers.delete(controller));
     return {
       goalId: _genId(),
       result,
@@ -612,20 +627,23 @@ async function _pumpActionStream(
   onFeedback,
   resolveResult,
   rejectResult,
-  setStatus
+  setStatus,
+  signal
 ) {
   let reader;
   let buffer = '';
-  let terminalReceived = false;
   try {
     reader = body.getReader();
     const decoder = new TextDecoder();
     for (;;) {
+      signal.throwIfAborted();
       const { done, value } = await reader.read();
+      signal.throwIfAborted();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
       let boundary;
       while ((boundary = /\r?\n\r?\n/.exec(buffer)) !== null) {
+        signal.throwIfAborted();
         const chunk = buffer.slice(0, boundary.index);
         buffer = buffer.slice(boundary.index + boundary[0].length);
         const { event, data } = _parseSseChunk(chunk);
@@ -636,7 +654,6 @@ async function _pumpActionStream(
             // Callback errors must not interrupt result delivery.
           }
         } else if (event === 'result') {
-          terminalReceived = true;
           if (data === undefined) {
             rejectResult(
               Object.assign(new Error('invalid JSON in action result event'), {
@@ -651,7 +668,6 @@ async function _pumpActionStream(
           );
           return;
         } else if (event === 'error') {
-          terminalReceived = true;
           setStatus(_normaliseActionStatus(data?.status));
           rejectResult(
             Object.assign(new Error((data && data.error) || 'action failed'), {
@@ -669,12 +685,14 @@ async function _pumpActionStream(
     );
   } catch (e) {
     rejectResult(
-      Object.assign(new Error(`action stream read failed: ${e.message}`), {
-        code: 'network_error',
-      })
+      signal.aborted
+        ? signal.reason
+        : Object.assign(new Error(`action stream read failed: ${e.message}`), {
+            code: 'network_error',
+          })
     );
   } finally {
-    if (reader && terminalReceived) {
+    if (reader) {
       try {
         await reader.cancel();
       } catch {

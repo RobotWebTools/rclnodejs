@@ -9,8 +9,9 @@
 // Action protocol and SDK tests over WebSocket and HTTP/SSE.
 
 import assert from 'assert';
-import { once } from 'node:events';
+import { EventEmitter, once } from 'node:events';
 import http from 'node:http';
+import sinon from 'sinon';
 import WebSocket, { WebSocketServer } from 'ws';
 import rclnodejs from '../index.js';
 import {
@@ -555,6 +556,134 @@ describe('Action capability dispatch', function () {
       }
     });
 
+    describe('HTTP action shutdown', function () {
+      let ros;
+      let originalFetch;
+
+      beforeEach(async function () {
+        originalFetch = globalThis.fetch;
+        ros = await connect({ http: 'http://127.0.0.1:1' });
+      });
+
+      afterEach(async function () {
+        globalThis.fetch = originalFetch;
+        await ros.close();
+      });
+
+      it('aborts requests still waiting for response headers', async function () {
+        let signal;
+        let rejectFetch;
+        globalThis.fetch = (_url, options) => {
+          signal = options.signal;
+          return new Promise((resolve, reject) => {
+            rejectFetch = reject;
+            signal?.addEventListener('abort', () => reject(signal.reason), {
+              once: true,
+            });
+          });
+        };
+        const outcome = ros
+          .action('/fibonacci', { order: 5 })
+          .catch((error) => error);
+        try {
+          await ros.close();
+          assert.ok(signal?.aborted, 'close must abort the pending fetch');
+          assert.strictEqual((await outcome).code, 'connection_lost');
+        } finally {
+          rejectFetch(new Error('test cleanup'));
+          await outcome;
+        }
+      });
+
+      it('aborts all idle streams and rejects their results', async function () {
+        const streams = [];
+        globalThis.fetch = async (_url, { signal }) => {
+          let controller;
+          const body = new ReadableStream({
+            start(value) {
+              controller = value;
+            },
+          });
+          signal?.addEventListener(
+            'abort',
+            () => controller.error(signal.reason),
+            {
+              once: true,
+            }
+          );
+          streams.push({ signal, body, controller });
+          return { ok: true, body };
+        };
+        const goals = await Promise.all([
+          ros.action('/fibonacci', { order: 5 }),
+          ros.action('/fibonacci', { order: 5 }),
+        ]);
+        const outcomes = Promise.all(
+          goals.map((goal) => goal.result.catch((error) => error))
+        );
+        try {
+          await ros.close();
+          assert.ok(streams.every(({ signal }) => signal?.aborted));
+          for (const error of await outcomes) {
+            assert.strictEqual(error.code, 'connection_lost');
+          }
+          await new Promise(setImmediate);
+          assert.ok(streams.every(({ body }) => !body.locked));
+          assert.ok(goals.every((goal) => goal.status === undefined));
+        } finally {
+          for (const { controller } of streams) {
+            controller.error(new Error('test cleanup'));
+          }
+          await outcomes;
+        }
+      });
+
+      it('stops buffered feedback when a callback closes the client', async function () {
+        let controller;
+        let cancelCount = 0;
+        const body = new ReadableStream({
+          start(value) {
+            controller = value;
+          },
+          cancel() {
+            cancelCount++;
+          },
+        });
+        globalThis.fetch = async () => ({ ok: true, body });
+        let feedbackCount = 0;
+        let closing;
+        const goal = await ros.action(
+          '/fibonacci',
+          { order: 5 },
+          {
+            onFeedback() {
+              feedbackCount++;
+              closing = ros.close();
+            },
+          }
+        );
+        const outcome = goal.result.catch((error) => error);
+        try {
+          controller.enqueue(
+            new TextEncoder().encode(
+              'event: feedback\ndata: {"sequence":[1]}\n\n' +
+                'event: feedback\ndata: {"sequence":[1,1]}\n\n' +
+                'event: result\ndata: {"status":"succeeded","payload":{}}\n\n'
+            )
+          );
+          const error = await outcome;
+          await closing;
+          assert.strictEqual(feedbackCount, 1);
+          assert.strictEqual(error.code, 'connection_lost');
+          assert.strictEqual(goal.status, undefined);
+          assert.strictEqual(cancelCount, 1);
+          assert.strictEqual(body.locked, false);
+        } finally {
+          controller.error(new Error('test cleanup'));
+        }
+      });
+    });
+
     it('rejects when an HTTP action stream ends without a result', async function () {
       const truncatedServer = http.createServer((req, res) => {
         res.writeHead(200, { 'content-type': 'text/event-stream' });
@@ -653,5 +782,104 @@ describe('Action capability dispatch', function () {
         await ros.close();
       }
     });
+  });
+});
+
+describe('HTTP action heartbeats', function () {
+  let clock;
+  let connection;
+  let response;
+
+  beforeEach(function () {
+    clock = sinon.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+  });
+
+  afterEach(function () {
+    connection?.close();
+    connection = null;
+    clock.restore();
+  });
+
+  function openAction(options) {
+    const transport = new HttpTransport(options);
+    const request = Object.assign(new EventEmitter(), {
+      method: 'POST',
+      url: '/capability/action/fibonacci',
+      headers: { 'content-type': 'application/json' },
+    });
+    response = new EventEmitter();
+    response.writeHead = sinon.stub().returns(response);
+    response.flushHeaders = sinon.spy();
+    response.write = sinon.stub().returns(true);
+    response.end = sinon.spy();
+    transport._onConnection = (value) => {
+      connection = value;
+    };
+    transport._route(request, response);
+    request.emit('data', Buffer.from('{"order":5}'));
+    request.emit('end');
+    assert.ok(connection);
+  }
+
+  for (const [label, options, interval] of [
+    ['default', {}, 15000],
+    ['configured', { sseKeepAliveMs: 10 }, 10],
+  ]) {
+    it(`uses the ${label} interval for actions without feedback`, function () {
+      openAction(options);
+      assert.strictEqual(clock.countTimers(), 0);
+      connection.send({ ok: true });
+      clock.tick(interval - 1);
+      assert.ok(!response.write.calledWith(': keep-alive\n\n'));
+      clock.tick(1);
+      assert.ok(response.write.calledWith(': keep-alive\n\n'));
+      assert.strictEqual(clock.countTimers(), 1);
+      assert.strictEqual(connection._keepAlive.hasRef(), false);
+    });
+  }
+
+  it('disables heartbeats when sseKeepAliveMs is zero', function () {
+    openAction({ sseKeepAliveMs: 0 });
+    connection.send({ ok: true });
+    clock.tick(30000);
+    assert.strictEqual(clock.countTimers(), 0);
+    assert.ok(!response.write.calledWith(': keep-alive\n\n'));
+  });
+
+  for (const ending of ['result', 'error', 'disconnect', 'write failure']) {
+    it(`clears the timer after ${ending}`, function () {
+      openAction({ sseKeepAliveMs: 10 });
+      connection.send({ ok: true });
+      clock.tick(10);
+      assert.strictEqual(clock.countTimers(), 1);
+      if (ending === 'disconnect') {
+        response.emit('close');
+      } else if (ending === 'write failure') {
+        response.write.throws(new Error('connection lost'));
+        clock.tick(10);
+      } else {
+        connection.send({
+          event: 'result',
+          ok: ending === 'result',
+          status: 'succeeded',
+          payload: { sequence: [] },
+          code: 'action_failed',
+          error: 'action failed',
+        });
+      }
+      assert.strictEqual(clock.countTimers(), 0);
+      const writes = response.write.callCount;
+      clock.tick(30);
+      assert.strictEqual(response.write.callCount, writes);
+    });
+  }
+
+  it('does not start a timer for a rejected goal', function () {
+    openAction({ sseKeepAliveMs: 10 });
+    connection.send({ ok: false, code: 'goal_rejected', error: 'rejected' });
+    clock.tick(30);
+    assert.strictEqual(clock.countTimers(), 0);
+    assert.ok(response.writeHead.calledWith(409));
+    assert.ok(response.write.notCalled);
   });
 });
