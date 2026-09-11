@@ -24,8 +24,8 @@
 // Two transports are supported, picked from the URL scheme:
 //
 //   - ws:// / wss://       → WebSocket only (call/publish/subscribe/action).
-//   - http:// / https://   → HTTP for call/publish; subscribe and action
-//                            lazily use a sibling WebSocket.
+//   - http:// / https://   → HTTP for call/publish; SSE for action.
+//                            Subscribe lazily uses a sibling WebSocket.
 //   - { http, ws }         → explicit endpoint pair.
 
 let WS = globalThis.WebSocket;
@@ -452,10 +452,8 @@ class _WsLink {
 }
 
 /**
- * HTTP link. Speaks the L2 HTTP capability protocol used by
- * `HttpTransport` on the server. Stateless — every `call`/`publish`
- * is a one-shot `fetch()`. Does not support subscribe or actions;
- * the public client uses the WebSocket link for those verbs.
+ * HTTP link for `call`/`publish` and SSE actions via `HttpTransport`.
+ * Subscriptions use the WebSocket link.
  */
 class _HttpLink {
   constructor(baseUrl) {
@@ -534,7 +532,7 @@ class _HttpLink {
       }
     );
     return {
-      goalId: 'http-action',
+      goalId: _genId(),
       result,
       get status() {
         return status;
@@ -639,6 +637,14 @@ async function _pumpActionStream(
           }
         } else if (event === 'result') {
           terminalReceived = true;
+          if (data === undefined) {
+            rejectResult(
+              Object.assign(new Error('invalid JSON in action result event'), {
+                code: 'invalid_response',
+              })
+            );
+            return;
+          }
           setStatus(_normaliseActionStatus(data?.status));
           resolveResult(
             data && data.payload !== undefined ? data.payload : data
@@ -719,9 +725,9 @@ function _encodeRosName(name) {
  * Picks a transport from the URL scheme:
  *
  *   - `ws://`, `wss://`      → WebSocket only (call/publish/subscribe/action).
- *   - `http://`, `https://`  → HTTP for `call`/`publish`; `subscribe` and
- *     `action` lazily use a sibling WebSocket endpoint at the
- *     same host with `/capability` appended.
+ *   - `http://`, `https://`  → HTTP for `call`/`publish`; SSE for `action`.
+ *     `subscribe` lazily uses a sibling WebSocket at the same host
+ *     with `/capability` appended.
  *   - object `{http, ws}`    → both URLs spelled out explicitly.
  *
  * **Path conventions.** When a `ws://` / `wss://` URL is passed
@@ -737,7 +743,7 @@ function _encodeRosName(name) {
  *   // WebSocket-only (path defaults to /capability)
  *   const ros = await connect('ws://robot.local:9000');
  *
- *   // HTTP for call/publish, WS sibling for subscribe/action
+ *   // HTTP for call/publish, SSE for action, WS sibling for subscribe
  *   const ros = await connect('http://robot.local:9001');
  *
  *   // Split endpoints (e.g. WS behind a different proxy)
@@ -771,7 +777,7 @@ export class RosClient {
     this._wsUrl = wsUrl;
     // Eagerly construct (but don't yet open) the WS link when the user
     // explicitly asked for it. When the WS URL was derived from an
-    // HTTP base, leave construction lazy until subscribe() or action().
+    // HTTP base, leave construction lazy until subscribe().
     this._ws = wsExplicit && wsUrl ? new _WsLink(wsUrl, this._wsOptions) : null;
     this._wsEager = !!wsExplicit;
     this._wsConnect = null; // memoised connect promise (in-flight or settled)
@@ -816,8 +822,7 @@ export class RosClient {
   async connect() {
     if (this._closed) throw new Error('connection closed');
     // Open HTTP eagerly (it's a no-op anyway). Defer a derived WebSocket
-    // until subscribe() or action(), allowing HTTP-only deployments to
-    // use call/publish without a WebSocket endpoint.
+    // until subscribe(), allowing call/publish/action without a WS endpoint.
     if (this._http) await this._http.connect();
     if (this._wsEager) await this._ensureWs();
     return this;
@@ -957,7 +962,7 @@ function _resolveUrls(url) {
   }
   if (/^https?:\/\//i.test(url)) {
     // HTTP base URL: derive a sibling WS URL, but open it only for
-    // subscribe() or action().
+    // subscribe().
     return { httpUrl: url, wsUrl: _deriveWsSibling(url), wsExplicit: false };
   }
   throw new TypeError(

@@ -524,6 +524,23 @@ describe('Action capability dispatch', function () {
       }
     });
 
+    it('assigns unique IDs to concurrent and sequential HTTP action handles', async function () {
+      const ros = await connect(httpUrl);
+      try {
+        const goals = await Promise.all([
+          ros.action('/fibonacci', { order: 5 }),
+          ros.action('/fibonacci', { order: 5 }),
+        ]);
+        await Promise.all(goals.map((goal) => goal.result));
+        const nextGoal = await ros.action('/fibonacci', { order: 5 });
+        await nextGoal.result;
+        goals.push(nextGoal);
+        assert.strictEqual(new Set(goals.map((goal) => goal.goalId)).size, 3);
+      } finally {
+        await ros.close();
+      }
+    });
+
     it('rejects cancel over HTTP with code:unsupported_kind', async function () {
       const ros = await connect(httpUrl);
       try {
@@ -561,6 +578,33 @@ describe('Action capability dispatch', function () {
         );
       }
     });
+
+    for (const [description, data] of [
+      ['invalid JSON', 'data: not-json\n'],
+      ['empty data', 'data:\n'],
+      ['missing data', ''],
+    ]) {
+      it(`rejects HTTP action results with ${description}`, async function () {
+        const resultServer = http.createServer((req, res) => {
+          res.writeHead(200, { 'content-type': 'text/event-stream' });
+          res.end(`event: result\n${data}\n`);
+        });
+        await new Promise((resolve) =>
+          resultServer.listen(0, '127.0.0.1', resolve)
+        );
+        const address = resultServer.address();
+        const ros = await connect(`http://127.0.0.1:${address.port}`);
+        try {
+          const goal = await ros.action('/fibonacci', { order: 5 });
+          await assert.rejects(goal.result, { code: 'invalid_response' });
+        } finally {
+          await ros.close();
+          await new Promise((resolve, reject) =>
+            resultServer.close((err) => (err ? reject(err) : resolve()))
+          );
+        }
+      });
+    }
 
     it('accepts CRLF-framed HTTP action events', async function () {
       const crlfServer = http.createServer((req, res) => {

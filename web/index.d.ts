@@ -191,14 +191,14 @@ declare module 'rclnodejs/web' {
   /**
    * Browser-native Web Runtime client.
    *
-   * The user-facing verb API (`call` / `publish` / `subscribe`) is the
-   * same regardless of transport. The transport(s) used underneath
-   * are picked from the URL scheme passed to {@link connect}:
+   * The verb API (`call` / `publish` / `subscribe` / `action`) is the same
+   * regardless of transport. Transports are picked from the URL scheme
+   * passed to {@link connect}:
    *
    *   - `ws://` / `wss://` — WebSocket only.
-   *   - `http://` / `https://` — HTTP for `call`/`publish`; subscribe
-   *     falls through to a sibling WebSocket endpoint at the same
-   *     host with `/capability` appended.
+   *   - `http://` / `https://` — HTTP for `call`/`publish`; SSE for `action`.
+   *     `subscribe` falls through to a sibling WebSocket at the same host
+   *     with `/capability` appended.
    *   - {@link ConnectEndpoints} — both URLs spelled out.
    *
    * **Path conventions.** When a `ws://` / `wss://` URL is passed

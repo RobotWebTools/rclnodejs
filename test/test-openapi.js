@@ -96,6 +96,7 @@ describe('lib/openapi.js', function () {
       call: { '/add_two_ints': 'example_interfaces/srv/AddTwoInts' },
       publish: { '/chatter': 'std_msgs/msg/String' },
       subscribe: { '/cmd_vel': 'geometry_msgs/msg/Twist' },
+      action: { '/fibonacci': 'example_interfaces/action/Fibonacci' },
     };
 
     it('produces a valid-looking OpenAPI 3.1 document shell', function () {
@@ -153,10 +154,72 @@ describe('lib/openapi.js', function () {
       ]);
     });
 
+    it('documents an action capability as POST /capability/action/<name> over SSE', function () {
+      const doc = buildOpenApiDocument(capabilities);
+      const operation = doc.paths['/capability/action/fibonacci']?.post;
+      assert.ok(operation, 'expected an HTTP action operation');
+      assert.strictEqual(operation.operationId, 'action_fibonacci');
+      assert.deepStrictEqual(operation['x-ros-capability'], {
+        kind: 'action',
+        name: '/fibonacci',
+        type: 'example_interfaces/action/Fibonacci',
+      });
+      assert.strictEqual(operation.requestBody.required, true);
+      const goalSchema =
+        operation.requestBody.content['application/json'].schema;
+      assert.deepStrictEqual(goalSchema.properties.order, { type: 'integer' });
+
+      const stream = operation.responses['200'].content['text/event-stream'];
+      assert.ok(stream, 'expected a text/event-stream response');
+      const events = Object.fromEntries(
+        stream.schema.anyOf.map((schema) => [schema.title, schema])
+      );
+      assert.deepStrictEqual(Object.keys(events), [
+        'accepted',
+        'feedback',
+        'result',
+        'error',
+      ]);
+      assert.strictEqual(events.accepted.properties.capability.type, 'string');
+      const sequenceSchema = { type: 'array', items: { type: 'integer' } };
+      assert.deepStrictEqual(
+        events.feedback.properties.sequence,
+        sequenceSchema
+      );
+      assert.deepStrictEqual(
+        events.result.properties.payload.properties.sequence,
+        sequenceSchema
+      );
+      assert.deepStrictEqual(events.result.properties.status.enum, [
+        'succeeded',
+        'canceled',
+        'aborted',
+        'unknown',
+      ]);
+      assert.deepStrictEqual(events.result.required, ['status', 'payload']);
+      assert.strictEqual(events.error.properties.code.type, 'string');
+      assert.strictEqual(events.error.properties.error.type, 'string');
+    });
+
+    it('documents HTTP action errors before streaming', function () {
+      const doc = buildOpenApiDocument(capabilities);
+      const operation = doc.paths['/capability/action/fibonacci']?.post;
+      assert.ok(operation, 'expected an HTTP action operation');
+      const rejected =
+        operation.responses['409'].content['application/json'].schema;
+      assert.strictEqual(rejected.properties.ok.const, false);
+      assert.strictEqual(rejected.properties.code.const, 'goal_rejected');
+      const notExposed =
+        operation.responses['404'].content['application/json'].schema;
+      assert.strictEqual(notExposed.properties.code.const, 'not_exposed');
+    });
+
     it('normalizes a trailing-slash basePath, matching HttpTransport, instead of emitting a double slash', function () {
       const doc = buildOpenApiDocument(capabilities, { basePath: '/api/' });
       assert.ok(doc.paths['/api/call/add_two_ints']);
       assert.ok(!('/api//call/add_two_ints' in doc.paths));
+      assert.ok(doc.paths['/api/action/fibonacci']);
+      assert.ok(!('/api//action/fibonacci' in doc.paths));
     });
 
     it('de-duplicates nested message types into one shared $ref component', function () {
@@ -184,16 +247,21 @@ describe('lib/openapi.js', function () {
   describe('CLI subcommand (bin/rclnodejs-web.js openapi)', function () {
     this.timeout(10000);
 
-    it('openapi prints a document from --call/--publish flags, no ROS init needed', async function () {
+    it('openapi prints a document from --call/--action flags, no ROS init needed', async function () {
       const { code, stdout } = await runCli([
         'openapi',
         '--call',
         '/add_two_ints=example_interfaces/srv/AddTwoInts',
+        '--action',
+        '/fibonacci=example_interfaces/action/Fibonacci',
       ]);
       assert.strictEqual(code, 0);
       const doc = JSON.parse(stdout);
       assert.strictEqual(doc.openapi, '3.1.0');
       assert.ok(doc.paths['/capability/call/add_two_ints']);
+      const action = doc.paths['/capability/action/fibonacci']?.post;
+      assert.ok(action, 'expected the CLI to include HTTP action capabilities');
+      assert.ok(action.responses['200'].content['text/event-stream']);
     });
 
     it('openapi routes use --path when http.basePath is not set, matching the server transport', async function () {
