@@ -9,6 +9,12 @@ declare module 'rclnodejs' {
     readonly period: bigint;
 
     /**
+     * The clock the timer measures time with: the clock passed to
+     * `node.createTimer()`, or the node's clock when none was passed.
+     */
+    readonly clock: Clock;
+
+    /**
      * Check if the timer is ready.
      *
      * @returns True if timer is ready, otherwise return false.
