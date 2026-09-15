@@ -164,6 +164,47 @@ describe('rclnodejs Timer class testing', function () {
       done();
     });
 
+    it('timer.clock returns the clock the timer was created with', function () {
+      const defaultTimer = node.createTimer(TIMER_INTERVAL, () => {});
+      assert.strictEqual(defaultTimer.clock, node.getClock());
+      defaultTimer.cancel();
+
+      const steadyClock = new rclnodejs.Clock(rclnodejs.ClockType.STEADY_TIME);
+      const steadyTimer = node.createTimer(
+        TIMER_INTERVAL,
+        () => {},
+        { autostart: false },
+        steadyClock
+      );
+      assert.strictEqual(steadyTimer.clock, steadyClock);
+      assert.strictEqual(
+        steadyTimer.clock.clockType,
+        rclnodejs.ClockType.STEADY_TIME
+      );
+      assert.throws(() => {
+        steadyTimer.clock = node.getClock();
+      }, TypeError);
+      steadyTimer.cancel();
+    });
+
+    it('timer.clock exposes ROS time of a ROSClock timer', function () {
+      const rosClock = new rclnodejs.ROSClock();
+      const timer = node.createTimer(TIMER_INTERVAL, () => {}, rosClock);
+      assert.strictEqual(timer.clock, rosClock);
+      assert.strictEqual(timer.clock.clockType, rclnodejs.ClockType.ROS_TIME);
+
+      const simTime = new rclnodejs.Time(
+        1234n,
+        5678n,
+        rclnodejs.ClockType.ROS_TIME
+      );
+      rosClock.isRosTimeActive = true;
+      rosClock.rosTimeOverride = simTime;
+      assert.ok(timer.clock.isRosTimeActive);
+      assert.strictEqual(timer.clock.now().nanoseconds, simTime.nanoseconds);
+      timer.cancel();
+    });
+
     it('timer.changeTimerPeriod', function (done) {
       const timer = node.createTimer(BigInt('100000000'), () => {});
       timer.changeTimerPeriod(BigInt('200000000'));

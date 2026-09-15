@@ -27,6 +27,9 @@
   - npm publish scripts
   - Mac support
 
+- **[KR Ravindra](https://github.com/KR-Ravindra)**
+  - Timer.clock accessor
+
 - **[Matt Richard](https://github.com/mattrichard)**
   - ROS2 Actions
   - Guard conditions

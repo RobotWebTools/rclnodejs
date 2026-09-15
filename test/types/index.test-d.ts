@@ -468,6 +468,7 @@ const delayedTimer = node.createTimer(BigInt(100000), timerCallback, {
 expectType<rclnodejs.Timer>(timer);
 expectType<rclnodejs.Timer>(delayedTimer);
 expectType<bigint>(timer.period);
+expectType<rclnodejs.Clock>(timer.clock);
 expectType<boolean>(timer.isReady());
 expectType<bigint>(timer.timeSinceLastCall());
 expectType<bigint>(timer.timeUntilNextCall());
