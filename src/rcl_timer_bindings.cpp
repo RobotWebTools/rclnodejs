@@ -195,6 +195,10 @@ Napi::Value CancelTimer(const Napi::CallbackInfo& info) {
   RclHandle* timer_handle = RclHandle::Unwrap(info[0].As<Napi::Object>());
   rcl_timer_t* timer = reinterpret_cast<rcl_timer_t*>(timer_handle->ptr());
 
+  if (!timer) {
+    return env.Undefined();
+  }
+
   THROW_ERROR_IF_NOT_EQUAL(RCL_RET_OK, rcl_timer_cancel(timer),
                            rcl_get_error_string().str);
 

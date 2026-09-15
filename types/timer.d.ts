@@ -30,6 +30,7 @@ declare module 'rclnodejs' {
 
     /**
      * Cancel the timer.
+     * Safe to call repeatedly, including after the timer has been destroyed.
      */
     cancel(): void;
 

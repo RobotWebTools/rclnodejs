@@ -82,10 +82,29 @@ describe('rclnodejs Timer class testing', function () {
     it('timer.cancel', function (done) {
       var timer = node.createTimer(TIMER_INTERVAL, function () {
         timer.cancel();
+        assert.strictEqual(timer.cancel(), undefined);
         assert.ok(timer.isCanceled());
         done();
       });
       rclnodejs.spin(node);
+    });
+
+    it('timer.cancel after node.destroyTimer', function () {
+      const timer = node.createTimer(TIMER_INTERVAL, () => {});
+      node.destroyTimer(timer);
+      assert.doesNotThrow(() => {
+        timer.cancel();
+        timer.cancel();
+      });
+    });
+
+    it('timer.cancel after node.destroy', function () {
+      const timer = node.createTimer(TIMER_INTERVAL, () => {});
+      node.destroy();
+      assert.doesNotThrow(() => {
+        timer.cancel();
+        timer.cancel();
+      });
     });
 
     it('timer.isCanceled', function (done) {

@@ -124,6 +124,40 @@ if (process.env['RCLNODEJS_TEST_FORK']) {
           });
         });
       });
+
+      it('custom SIGINT cleanup can cancel timers after default shutdown', async () => {
+        let signalSent = false;
+        let stderr = '';
+        const node = rclnodejs.createNode('test_fixture_shutdown');
+        node.createSubscription('std_msgs/msg/String', 'topic', () => {
+          if (!signalSent) {
+            signalSent = child.kill('SIGINT');
+          }
+        });
+
+        child = childProcess.fork(
+          fileURLToPath(new URL('publisher_setup.js', import.meta.url)),
+          { silent: true }
+        );
+        child.stdout.resume();
+        child.stderr.setEncoding('utf8');
+        child.stderr.on('data', (chunk) => {
+          stderr += chunk;
+        });
+        const closed = new Promise((resolve, reject) => {
+          child.once('error', reject);
+          child.once('close', (exitCode, signal) => {
+            resolve({ exitCode, signal });
+          });
+        });
+
+        rclnodejs.spin(node);
+        const { exitCode, signal } = await closed;
+        assert.ok(signalSent, 'Publisher exited before receiving SIGINT');
+        assert.strictEqual(signal, null, stderr);
+        assert.strictEqual(exitCode, 0, stderr);
+        assert.doesNotMatch(stderr, /timer argument is null/);
+      });
     }
 
     it('signal handlers are removed after call removeSignalHandlers', async () => {

@@ -11,6 +11,7 @@
 // limitations under the License.
 
 import assert from 'assert';
+import { execFile } from 'node:child_process';
 import rclnodejs from '../index.js';
 
 describe('Spin testing', function () {
@@ -35,6 +36,48 @@ describe('Spin testing', function () {
 
   it('rclnodejs.spin()', function () {
     rclnodejs.spin(node);
+  });
+
+  it('flushes promises from native callbacks without another JS event', function (done) {
+    this.timeout(10000);
+    const moduleUrl = new URL('../index.js', import.meta.url).href;
+    const script = `
+      import assert from 'node:assert/strict';
+      import rclnodejs from ${JSON.stringify(moduleUrl)};
+      await rclnodejs.init();
+      const node = rclnodejs.createNode('promise_wakeup_regression');
+      let timer;
+      const completion = new Promise((resolve) => {
+        timer = node.createTimer(10000000n, () => {
+          timer.cancel();
+          resolve();
+        });
+      });
+      let watchdogFired = false;
+      const watchdog = setTimeout(() => {
+        watchdogFired = true;
+      }, 1500);
+
+      try {
+        rclnodejs.spin(node);
+        await completion;
+        assert.equal(
+          watchdogFired,
+          false,
+          'Native callbacks must flush promises without another JavaScript event'
+        );
+      } finally {
+        clearTimeout(watchdog);
+        rclnodejs.shutdown();
+      }
+    `;
+
+    execFile(
+      process.execPath,
+      ['--input-type=module', '--eval', script],
+      { timeout: 8000 },
+      (error) => done(error)
+    );
   });
 
   it('rclnodejs.spinOnce()', function () {
