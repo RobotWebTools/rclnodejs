@@ -15,17 +15,20 @@
 'use strict';
 
 const exec = require('child_process').exec;
+const path = require('path');
 
 const cmd = 'wget -nc ';
 const cpplintUrl =
   'https://raw.githubusercontent.com/cpplint/cpplint/refs/heads/develop/cpplint.py';
-const root = `${__dirname}/../src`;
-const args = `--filter=-build/include_subdir,-whitespace/indent_namespace --extensions=cpp,h,hpp,cc ${root}/*`;
+const repositoryRoot = path.resolve(__dirname, '..');
+const root = path.join(repositoryRoot, 'src');
+const args = `--repository="${repositoryRoot}" --filter=-build/include_subdir,-whitespace/indent_namespace --extensions=cpp,h,hpp,cc "${root}"/*`;
 
 console.log('Downloading the cpplint...');
 exec(cmd + cpplintUrl, (err, stdout, stderr) => {
   if (err) {
-    console.log(`Downloading failed: ${stderr}`);
+    console.error(`Downloading failed: ${stderr}`);
+    process.exitCode = 1;
   } else {
     console.log('Running the cpplint...');
     exec('python3 cpplint.py ' + args, (err, stdout, stderr) => {
