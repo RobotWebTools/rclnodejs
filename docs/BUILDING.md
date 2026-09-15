@@ -74,6 +74,8 @@ With ROS sourced and the native addon built:
 
 On Linux, Electron tests need GUI libraries and, when headless, `xvfb-run`; see the [CI dependency setup](../.github/workflows/linux-x64-build-and-test.yml). Packaging tests require a bundler-supported Node version. The pack-based CLI tests are skipped on Node 20; ordinary runtime tests still run.
 
+Linux CI uses official ROS base images for all five supported distros, including Rolling on x64 and ARM64. The images provide ROS, native build tools, Python, CMake, and `libatomic1`; workflows install only additional lint/test dependencies and explicitly source ROS before building.
+
 ### Coverage
 
 ```bash

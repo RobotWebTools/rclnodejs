@@ -28,11 +28,10 @@ jobs:
 
     - uses: actions/checkout@v7
 
-    - name: Install build and test dependencies
+    - name: Install ROS test interfaces
       run: |
         apt-get update
         apt-get install -y --no-install-recommends \
-          cmake sudo \
           ros-lyrical-example-interfaces \
           ros-lyrical-test-msgs \
           ros-lyrical-mrpt-msgs
@@ -53,5 +52,6 @@ jobs:
         retry_wait_seconds: 10
         timeout_minutes: 60
         command: |
+          set -eo pipefail
           source /opt/ros/lyrical/setup.bash
           npm run test:asan
