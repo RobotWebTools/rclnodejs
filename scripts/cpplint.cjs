@@ -25,7 +25,8 @@ const args = `--filter=-build/include_subdir,-whitespace/indent_namespace --exte
 console.log('Downloading the cpplint...');
 exec(cmd + cpplintUrl, (err, stdout, stderr) => {
   if (err) {
-    console.log(`Downloading failed: ${stderr}`);
+    console.error(`Downloading failed: ${stderr}`);
+    process.exitCode = 1;
   } else {
     console.log('Running the cpplint...');
     exec('python3 cpplint.py ' + args, (err, stdout, stderr) => {

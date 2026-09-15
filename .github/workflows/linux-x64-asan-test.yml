@@ -53,5 +53,6 @@ jobs:
         retry_wait_seconds: 10
         timeout_minutes: 60
         command: |
+          set -eo pipefail
           source /opt/ros/lyrical/setup.bash
           npm run test:asan

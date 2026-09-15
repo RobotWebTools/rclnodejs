@@ -84,6 +84,7 @@ jobs:
         retry_wait_seconds: 10
         timeout_minutes: 60
         command: |
+          set -eo pipefail
           uname -a
           source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
           npm i
