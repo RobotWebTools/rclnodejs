@@ -103,7 +103,7 @@ describe('override interface in overlay tests', function () {
     const amentPrefixPathOriginal = process.env.AMENT_PREFIX_PATH;
     assert.ok(amentPrefixPathOriginal, 'AMENT_PREFIX_PATH not found');
 
-    // A prefix whose ament index lists an interface file that does not exist,
+    // A prefix whose ament index lists missing interfaces for both formats,
     // so generating that package rejects part-way through generateAll().
     const brokenPrefix = fs.mkdtempSync(
       path.join(os.tmpdir(), 'rclnodejs_broken_prefix_')
@@ -116,7 +116,10 @@ describe('override interface in overlay tests', function () {
       'rosidl_interfaces'
     );
     fs.mkdirSync(indexDir, { recursive: true });
-    fs.writeFileSync(path.join(indexDir, 'broken_msgs'), 'msg/Missing.msg\n');
+    fs.writeFileSync(
+      path.join(indexDir, 'broken_msgs'),
+      'msg/Missing.msg\nmsg/Missing.idl\n'
+    );
     process.env.AMENT_PREFIX_PATH = brokenPrefix;
 
     try {
