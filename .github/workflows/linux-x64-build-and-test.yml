@@ -106,6 +106,12 @@ jobs:
       run: |
         sudo apt install -y ros-${{ matrix.ros_distribution }}-test-msgs ros-${{ matrix.ros_distribution }}-mrpt-msgs
 
+    - name: Install C++ lint dependencies
+      if: ${{ matrix.test_suite != 'idl' }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends wget
+
     - name: Install Electron test dependencies
       if: ${{ matrix.test_suite != 'idl' }}
       run: |
@@ -132,6 +138,7 @@ jobs:
         retry_wait_seconds: 10
         timeout_minutes: 60
         command: |
+          set -eo pipefail
           uname -a
           source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
           npm i
@@ -155,6 +162,7 @@ jobs:
         retry_wait_seconds: 10
         timeout_minutes: 60
         command: |
+          set -eo pipefail
           source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
           npm i
           npm run test-idl

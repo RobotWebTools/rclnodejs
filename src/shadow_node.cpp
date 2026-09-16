@@ -110,7 +110,7 @@ void ShadowNode::Execute(const std::vector<rclnodejs::RclHandle*>& handles) {
 
   Napi::Function execute =
       Value().As<Napi::Object>().Get("execute").As<Napi::Function>();
-  execute.Call(Value(), {results});
+  execute.MakeCallback(Value(), {results});
 }
 
 void ShadowNode::CatchException(std::exception_ptr e_ptr) {
