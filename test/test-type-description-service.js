@@ -16,11 +16,14 @@ import assert from 'assert';
 import DistroUtils from '../lib/distro.js';
 import rclnodejs from '../index.js';
 import TypeDescriptionService from '../lib/type_description_service.js';
+import native from '../lib/native_loader.js';
+import sinon from 'sinon';
 import { exec } from 'child_process';
 
 describe('type description service test suite', function () {
   this.timeout(60 * 1000);
   let node;
+  let requestController;
 
   before(function () {
     if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
@@ -29,6 +32,7 @@ describe('type description service test suite', function () {
   });
 
   beforeEach(async function () {
+    requestController = new AbortController();
     await rclnodejs.init();
     const nodeName = 'test_type_description_service';
     node = rclnodejs.createNode(nodeName);
@@ -36,6 +40,7 @@ describe('type description service test suite', function () {
   });
 
   afterEach(function () {
+    requestController.abort();
     rclnodejs.shutdown();
   });
 
@@ -65,22 +70,90 @@ describe('type description service test suite', function () {
       throw new Error('Service not available');
     }
 
-    const promise = new Promise((resolve) => {
-      const timer = setInterval(() => {
-        client.sendRequest(request, (response) => {
-          clearInterval(timer);
-          assert.strictEqual(response.successful, true);
-          assert.strictEqual(
-            response.type_description.type_description.type_name,
-            topicType
-          );
-          assert.notStrictEqual(response.type_sources.length, 0);
-          resolve();
+    const maxAttempts = 3;
+    let response;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        response = await client.sendRequestAsync(request, {
+          timeout: 10000,
+          signal: requestController.signal,
         });
-      }, 2000);
-    });
-    await promise;
+        break;
+      } catch (error) {
+        if (
+          !(error instanceof rclnodejs.TimeoutError) ||
+          attempt === maxAttempts
+        ) {
+          throw error;
+        }
+      }
+    }
+
+    assert.strictEqual(response.successful, true);
+    assert.strictEqual(
+      response.type_description.type_description.type_name,
+      topicType
+    );
+    assert.notStrictEqual(response.type_sources.length, 0);
   });
+
+  for (const sendFails of [false, true]) {
+    it(`preserves and frees the native type-description response when sending ${sendFails ? 'fails' : 'succeeds'}`, function () {
+      const topicType = 'std_msgs/msg/String';
+      node.createPublisher(topicType, 'native_type_description_response');
+      const [publisher] = node.getPublishersInfoByTopic(
+        '/native_type_description_response'
+      );
+      const request = {
+        type_name: topicType,
+        type_hash: TypeDescriptionService.toTypeHash(publisher.topic_type_hash),
+        include_type_sources: true,
+      };
+      const descriptionService = node._typeDescriptionService;
+      const sandbox = sinon.createSandbox();
+      const handleRequest = native.handleRequest;
+      const sendError = new Error('response send failed');
+      let nativeResponse;
+
+      try {
+        sandbox
+          .stub(native, 'handleRequest')
+          .callsFake((nodeHandle, rawRequest, rawResponse) => {
+            handleRequest(nodeHandle, rawRequest, rawResponse);
+            nativeResponse = Buffer.from(rawResponse);
+          });
+        const sendResponse = sandbox
+          .stub(native, 'sendResponse')
+          .callsFake((serviceHandle, rawResponse) => {
+            assert.ok(
+              rawResponse.equals(nativeResponse),
+              'Send the native response without replacing its string buffers'
+            );
+            if (sendFails) {
+              throw sendError;
+            }
+          });
+        const destroyResponse = sandbox.spy(
+          descriptionService._typeClass.Response,
+          'destroyRawROS'
+        );
+        const invoke = () =>
+          descriptionService._typeDescriptionService._callback(request, {
+            _header: {},
+          });
+
+        if (sendFails) {
+          assert.throws(invoke, (error) => error === sendError);
+        } else {
+          assert.strictEqual(invoke(), null);
+        }
+        assert.strictEqual(sendResponse.callCount, 1);
+        assert.strictEqual(destroyResponse.callCount, 1);
+      } finally {
+        sandbox.restore();
+      }
+    });
+  }
 
   it('Test type description service configured by parameter', function (done) {
     if (process.platform === 'win32') {
