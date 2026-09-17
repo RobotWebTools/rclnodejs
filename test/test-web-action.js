@@ -750,29 +750,54 @@ describe('Action capability dispatch', function () {
       });
     }
 
-    it('accepts CRLF-framed HTTP action events', async function () {
-      const crlfServer = http.createServer((req, res) => {
-        res.writeHead(200, { 'content-type': 'text/event-stream' });
-        res.end(
-          'event: result\r\ndata: {"payload":{"sequence":[1,2,3]}}\r\n\r\n'
-        );
-      });
-      await new Promise((resolve) =>
-        crlfServer.listen(0, '127.0.0.1', resolve)
-      );
-      const address = crlfServer.address();
-      const ros = await connect(`http://127.0.0.1:${address.port}`);
-      try {
-        const goal = await ros.action('/fibonacci', { order: 5 });
-        assert.deepStrictEqual(await goal.result, { sequence: [1, 2, 3] });
-        assert.strictEqual(goal.status, 'unknown');
-      } finally {
-        await ros.close();
-        await new Promise((resolve, reject) =>
-          crlfServer.close((err) => (err ? reject(err) : resolve()))
-        );
+    for (const [label, lineEnding, separator] of [
+      ['LF', '\n', '\n\n'],
+      ['CRLF', '\r\n', '\r\n\r\n'],
+      ['CR', '\r', '\r\r'],
+      ['mixed CR/LF/CRLF', '\r', '\r\n\n'],
+    ]) {
+      for (const byteByByte of [false, true]) {
+        it(`accepts ${label}-framed HTTP action events ${byteByByte ? 'one byte at a time' : 'in one chunk'}`, async function () {
+          const originalFetch = globalThis.fetch;
+          const ros = await connect('http://127.0.0.1:1');
+          const feedbacks = [];
+          const stream =
+            `: keep-alive${separator}` +
+            `event: accepted${lineEnding}data: {"capability":"/fibonacci"}${separator}` +
+            `event: feedback${lineEnding}data: {"sequence":[1,1]}${separator}` +
+            `event: result${lineEnding}data: {"payload":${lineEnding}` +
+            `data: {"sequence":[1,2,3]}}${separator}`;
+          const bytes = new TextEncoder().encode(stream);
+          const body = new ReadableStream({
+            start(controller) {
+              const chunkSize = byteByByte ? 1 : bytes.length;
+              for (let index = 0; index < bytes.length; index += chunkSize) {
+                controller.enqueue(bytes.subarray(index, index + chunkSize));
+                if (byteByByte && bytes[index] === 13) {
+                  controller.enqueue(new Uint8Array());
+                }
+              }
+              controller.close();
+            },
+          });
+          globalThis.fetch = async () => ({ ok: true, body });
+
+          try {
+            const goal = await ros.action(
+              '/fibonacci',
+              { order: 5 },
+              { onFeedback: (feedback) => feedbacks.push(feedback) }
+            );
+            assert.deepStrictEqual(await goal.result, { sequence: [1, 2, 3] });
+            assert.strictEqual(goal.status, 'unknown');
+            assert.deepStrictEqual(feedbacks, [{ sequence: [1, 1] }]);
+          } finally {
+            globalThis.fetch = originalFetch;
+            await ros.close();
+          }
+        });
       }
-    });
+    }
 
     it('rejects the result when HTTP stream setup fails', async function () {
       const originalFetch = globalThis.fetch;

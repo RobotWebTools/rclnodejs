@@ -632,6 +632,7 @@ async function _pumpActionStream(
 ) {
   let reader;
   let buffer = '';
+  let skipLeadingLF = false;
   try {
     reader = body.getReader();
     const decoder = new TextDecoder();
@@ -640,12 +641,17 @@ async function _pumpActionStream(
       const { done, value } = await reader.read();
       signal.throwIfAborted();
       if (done) break;
-      buffer += decoder.decode(value, { stream: true });
+      let text = decoder.decode(value, { stream: true });
+      if (text.length === 0) continue;
+      // A CRLF split across reads is one line ending, not an empty line.
+      if (skipLeadingLF && text.startsWith('\n')) text = text.slice(1);
+      skipLeadingLF = text.endsWith('\r');
+      buffer += text.replace(/\r\n?/g, '\n');
       let boundary;
-      while ((boundary = /\r?\n\r?\n/.exec(buffer)) !== null) {
+      while ((boundary = buffer.indexOf('\n\n')) !== -1) {
         signal.throwIfAborted();
-        const chunk = buffer.slice(0, boundary.index);
-        buffer = buffer.slice(boundary.index + boundary[0].length);
+        const chunk = buffer.slice(0, boundary);
+        buffer = buffer.slice(boundary + 2);
         const { event, data } = _parseSseChunk(chunk);
         if (event === 'feedback' && onFeedback) {
           try {
@@ -712,7 +718,7 @@ async function _pumpActionStream(
 function _parseSseChunk(chunk) {
   let event = 'message';
   const dataLines = [];
-  for (const line of chunk.split(/\r?\n/)) {
+  for (const line of chunk.split('\n')) {
     if (line.startsWith('event:')) event = line.slice(6).trim();
     else if (line.startsWith('data:'))
       dataLines.push(line.slice(5).replace(/^ /, ''));
