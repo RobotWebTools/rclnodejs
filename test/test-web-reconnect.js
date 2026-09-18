@@ -234,6 +234,89 @@ describe('rclnodejs/web — WebSocket reconnect', function () {
   });
 });
 
+describe('rclnodejs/web - failed WebSocket handshakes', function () {
+  this.timeout(2000);
+
+  let TestRosClient;
+  let shouldOpen;
+  let sockets;
+
+  before(async function () {
+    const originalWebSocket = globalThis.WebSocket;
+    globalThis.WebSocket = class extends EventTarget {
+      constructor() {
+        super();
+        this.readyState = 0;
+        this.closeCalls = 0;
+        sockets.push(this);
+        queueMicrotask(() => {
+          if (shouldOpen) {
+            this.readyState = 1;
+            this.dispatchEvent(new Event('open'));
+          } else {
+            this.dispatchEvent(new Event('error'));
+          }
+        });
+      }
+
+      close() {
+        this.closeCalls++;
+        this.readyState = 2;
+      }
+    };
+    try {
+      ({ RosClient: TestRosClient } =
+        await import('../web/client.js?failed-handshake'));
+    } finally {
+      if (originalWebSocket === undefined) delete globalThis.WebSocket;
+      else globalThis.WebSocket = originalWebSocket;
+    }
+  });
+
+  beforeEach(function () {
+    shouldOpen = false;
+    sockets = [];
+  });
+
+  for (const protocol of ['http', 'ws']) {
+    it(`close() completes after a failed ${protocol} connection without a close event`, async function () {
+      const ros = new TestRosClient(`${protocol}://127.0.0.1:1`);
+      await assert.rejects(
+        protocol === 'http'
+          ? ros.subscribe('/chatter', () => {})
+          : ros.call('/service', {}),
+        { code: 'transport_unavailable' }
+      );
+      await ros.close();
+      assert.strictEqual(sockets[0].closeCalls, 1);
+      assert.strictEqual(sockets[0].readyState, 2);
+      await ros.close();
+      assert.strictEqual(sockets[0].closeCalls, 1);
+    });
+  }
+
+  it('waits for close after retrying a failed connection successfully', async function () {
+    const ros = new TestRosClient('ws://127.0.0.1:1');
+    await assert.rejects(ros.connect(), { code: 'transport_unavailable' });
+    shouldOpen = true;
+    await ros.connect();
+    sockets[0].dispatchEvent(new Event('error'));
+    sockets[1].dispatchEvent(new Event('error'));
+
+    let isClosed = false;
+    const closing = ros.close().then(() => {
+      isClosed = true;
+    });
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.strictEqual(sockets[1].closeCalls, 1);
+    assert.strictEqual(isClosed, false);
+    sockets[1].readyState = 3;
+    sockets[1].dispatchEvent(new Event('close'));
+    await closing;
+    assert.strictEqual(isClosed, true);
+  });
+});
+
 function waitFor(predicate, timeoutMs) {
   const started = Date.now();
   return new Promise((resolve, reject) => {

@@ -95,6 +95,7 @@ class _WsLink {
     this._isReconnectEnabled = !!options.reconnect;
     this._onEvent = options.onEvent || (() => {});
     this._ws = null;
+    this._openFailed = false;
     this._pending = new Map();
     this._subs = new Map();
     this._goals = new Map(); // goal id -> { onFeedback, resolveResult, rejectResult }
@@ -123,6 +124,7 @@ class _WsLink {
       }
       const ws = new WS(this.url);
       this._ws = ws;
+      this._openFailed = false;
       let isOpened = false;
       const onOpen = () => {
         isOpened = true;
@@ -134,6 +136,7 @@ class _WsLink {
       const onError = (err) => {
         // Ignore post-open: 'close' always follows and _handleClose() owns failing pending requests.
         if (!isOpened) {
+          if (this._ws === ws) this._openFailed = true;
           reject(err && err.error ? err.error : err);
         }
       };
@@ -340,6 +343,7 @@ class _WsLink {
       }
       try {
         ws.close();
+        if (this._openFailed) onClose();
       } catch (_) {
         this._finalizeClosed();
         resolve();
