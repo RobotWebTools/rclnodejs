@@ -674,12 +674,13 @@ export class RosClient {
     const tasks = [];
     if (this._http) tasks.push(this._http.close());
     if (this._wsConnect) {
+      const link = this._ws;
       // WS is connecting or connected — wait for the open to settle,
-      // then close. Swallow the open error: nothing to close in that case.
+      // then close even if the handshake failed.
       tasks.push(
         this._wsConnect.then(
-          (link) => link.close(),
-          () => undefined
+          () => link.close(),
+          () => link.close()
         )
       );
     } else if (this._ws) {

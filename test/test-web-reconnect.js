@@ -293,6 +293,23 @@ describe('rclnodejs/web - failed WebSocket handshakes', function () {
       await ros.close();
       assert.strictEqual(sockets[0].closeCalls, 1);
     });
+
+    it(`close() cleans up a pending ${protocol} handshake that fails without a close event`, async function () {
+      const ros = new TestRosClient(`${protocol}://127.0.0.1:1`);
+      const connecting =
+        protocol === 'http'
+          ? ros.subscribe('/chatter', () => {})
+          : ros.connect();
+      const rejection = assert.rejects(connecting, {
+        code: 'transport_unavailable',
+      });
+      const closing = ros.close();
+      await Promise.all([rejection, closing]);
+      assert.strictEqual(sockets[0].closeCalls, 1);
+      assert.strictEqual(sockets[0].readyState, 2);
+      await ros.close();
+      assert.strictEqual(sockets[0].closeCalls, 1);
+    });
   }
 
   it('waits for close after retrying a failed connection successfully', async function () {
