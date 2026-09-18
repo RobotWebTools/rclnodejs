@@ -95,6 +95,7 @@ class _WsLink {
     this._isReconnectEnabled = !!options.reconnect;
     this._onEvent = options.onEvent || (() => {});
     this._ws = null;
+    this._openFailed = false;
     this._pending = new Map();
     this._subs = new Map();
     this._goals = new Map(); // goal id -> { onFeedback, resolveResult, rejectResult }
@@ -123,6 +124,7 @@ class _WsLink {
       }
       const ws = new WS(this.url);
       this._ws = ws;
+      this._openFailed = false;
       let isOpened = false;
       const onOpen = () => {
         isOpened = true;
@@ -134,6 +136,7 @@ class _WsLink {
       const onError = (err) => {
         // Ignore post-open: 'close' always follows and _handleClose() owns failing pending requests.
         if (!isOpened) {
+          if (this._ws === ws) this._openFailed = true;
           reject(err && err.error ? err.error : err);
         }
       };
@@ -340,6 +343,7 @@ class _WsLink {
       }
       try {
         ws.close();
+        if (this._openFailed) onClose();
       } catch (_) {
         this._finalizeClosed();
         resolve();
@@ -670,12 +674,13 @@ export class RosClient {
     const tasks = [];
     if (this._http) tasks.push(this._http.close());
     if (this._wsConnect) {
+      const link = this._ws;
       // WS is connecting or connected — wait for the open to settle,
-      // then close. Swallow the open error: nothing to close in that case.
+      // then close even if the handshake failed.
       tasks.push(
         this._wsConnect.then(
-          (link) => link.close(),
-          () => undefined
+          () => link.close(),
+          () => link.close()
         )
       );
     } else if (this._ws) {
