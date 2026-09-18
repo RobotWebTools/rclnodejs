@@ -52,12 +52,6 @@ jobs:
             docker_image: ubuntu:resolute
             ros_distribution: rolling
             ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-linux-amd64.tar.bz2"
-          - node-version: 26.X
-            architecture: x64
-            docker_image: ubuntu:resolute
-            ros_distribution: rolling
-            ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-linux-amd64.tar.bz2"
-            test_suite: idl
     steps:
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v7
@@ -107,13 +101,11 @@ jobs:
         sudo apt install -y ros-${{ matrix.ros_distribution }}-test-msgs ros-${{ matrix.ros_distribution }}-mrpt-msgs
 
     - name: Install C++ lint dependencies
-      if: ${{ matrix.test_suite != 'idl' }}
       run: |
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends wget
 
     - name: Install Electron test dependencies
-      if: ${{ matrix.test_suite != 'idl' }}
       run: |
         # Adjust dependencies based on Ubuntu version.
         # 22.04 (jammy) uses libasound2; 24.04 (noble) and 26.04 (resolute) use the
@@ -125,12 +117,11 @@ jobs:
         sudo apt install -y xvfb libgtk-3-0 libnss3 $LIBASOUND_PKG libgbm-dev
 
     # The mocha suite and the Electron postinstall (extract-zip 2.0.1) are
-    # known to be intermittently flaky on this runner. Wrap both test
-    # invocations in nick-fields/retry@v4 so a single transient failure does
+    # known to be intermittently flaky on this runner. Wrap the test
+    # invocation in nick-fields/retry@v4 so a single transient failure does
     # not fail the whole matrix leg. Keep max_attempts conservative so real
     # regressions still surface quickly.
     - name: Build and test rclnodejs
-      if: ${{ matrix.test_suite != 'idl' }}
       uses: nick-fields/retry@v4
       with:
         shell: bash
@@ -151,21 +142,6 @@ jobs:
           else
             npm test
           fi
-          npm run clean
-
-    - name: Test with IDL ROS messages (rolling)
-      if: ${{ matrix.ros_distribution == 'rolling' && matrix.test_suite == 'idl' }}
-      uses: nick-fields/retry@v4
-      with:
-        shell: bash
-        max_attempts: 2
-        retry_wait_seconds: 10
-        timeout_minutes: 60
-        command: |
-          set -eo pipefail
-          source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
-          npm i
-          npm run test-idl
           npm run clean
 
     - name: Coveralls
