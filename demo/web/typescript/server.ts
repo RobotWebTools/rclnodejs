@@ -101,7 +101,7 @@ async function main(): Promise<void> {
       Number.isInteger(goal.order) && goal.order >= 2 && goal.order <= 12
         ? rclnodejs.GoalResponse.ACCEPT
         : rclnodejs.GoalResponse.REJECT,
-    null,
+    undefined,
     () => rclnodejs.CancelResponse.ACCEPT
   );
 
