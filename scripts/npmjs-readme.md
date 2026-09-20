@@ -87,10 +87,9 @@ Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript e
 `rclnodejs` ships **two** ways to reach ROS 2 from the browser — pick one based on how much glue you want to write.
 
 - **`rclnodejs/web`** — a typed layer over your ROS 2 graph: you allow-list capabilities in `web.json` or via CLI flags; anything else is rejected before it reaches ROS 2. Best for typed web apps and HTTP clients.
-  - **Typed SDK** — `call`, `publish`, `subscribe`, and `action`, typed end-to-end from your generated message, service, and action types.
-  - **Two transports** — WebSocket, plus an optional HTTP listener (`--http-port`) for `call`, `publish`, and action goals with Server-Sent Events feedback and results. SDK subscriptions use WebSocket; `--http-sse` additionally enables raw HTTP topic subscriptions.
-  - **Action lifecycle** — receive feedback and a terminal result/status. Submit goals over WebSocket when cancellation is needed; closing an HTTP action stream does not cancel the ROS goal.
-  - **OpenAPI 3.1** — `rclnodejs-web openapi` emits a machine-readable spec for codegen, API explorers and agent tool-use, including action goal, feedback, and result schemas. Live SSE feedback needs an SSE-aware client.
+  - **Typed SDK** — `call`, `publish`, `subscribe`, and `action`, typed from generated ROS interfaces.
+  - **Two transports** — WebSocket for all verbs, or HTTP (`--http-port`) for calls, publishes, and SSE actions. Action cancellation requires WebSocket. SDK subscriptions use WebSocket; `--http-sse` enables raw HTTP subscriptions.
+  - **OpenAPI 3.1** — export service, topic, and action schemas with `rclnodejs-web openapi`.
 
   ```ts
   import type {} from 'rclnodejs';
@@ -101,7 +100,7 @@ Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript e
   ); // reply.sum is typed as `${number}n`
   ```
 
-  The type-only import loads the generated ROS declarations without adding the native addon to browser JavaScript. See the [HTTP/SSE action walkthrough](https://github.com/RobotWebTools/rclnodejs/blob/develop/example/actions/README.md#http-actions-over-sse) for a runnable client, curl requests, and cancellation guidance.
+  See the [HTTP/SSE action walkthrough](https://github.com/RobotWebTools/rclnodejs/blob/develop/example/actions/README.md#http-actions-over-sse) for runnable examples.
 
   No SDK needed for subscribe — with the HTTP/SSE transport enabled (`--http-sse`, plus `--http-cors` for cross-origin), any browser streams a live ROS 2 topic via built-in `EventSource`:
 

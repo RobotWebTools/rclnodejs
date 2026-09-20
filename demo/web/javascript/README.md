@@ -20,10 +20,8 @@ node runtime.mjs
 #               also http://localhost:9001/capability/subscribe/<name>  (SSE)
 ```
 
-`runtime.mjs` exposes a tiny `/add_two_ints` service and the shared
-`/web_demo_chatter` talker/listener topic, plus a cancellable Fibonacci
-action using `example_interfaces/action/Fibonacci`. No separate action
-server is needed when running this bundled runtime.
+`runtime.mjs` includes `/add_two_ints`, `/web_demo_chatter`, and a cancellable
+`/fibonacci` server (`example_interfaces/action/Fibonacci`).
 
 **Shell 2 — static-file server** (hosts `index.html`, maps `/sdk/*` to
 the in-repo [`web/`](../../../web/) SDK):
@@ -33,9 +31,8 @@ node static.mjs
 # Static files : http://localhost:8080/
 ```
 
-If those ports are occupied, set `RUNTIME_PORT`, `HTTP_PORT`, and
-`STATIC_PORT` for the corresponding processes. Point the page at the
-selected runtime ports with `?wsPort=9010&httpPort=9011`.
+For custom ports, set `RUNTIME_PORT`, `HTTP_PORT`, and `STATIC_PORT`;
+match the page URL, e.g. `?wsPort=9010&httpPort=9011`.
 
 ## What the browser code looks like
 
@@ -57,13 +54,12 @@ can flip the SDK between the two without restarting.
 
 ## Fibonacci actions
 
-The action panel accepts integer orders from 2 to 12 (default 8). Select
-**Send Goal** to see feedback every half-second and the final sequence
-and status. The limit keeps each demo goal below six seconds.
+Send an order from 2 to 12 (default 8) to see feedback every half-second,
+then the final sequence and status.
 
-- **WebSocket:** **Cancel Goal** requests cancellation and displays the partial result with terminal status `canceled` when the server accepts it.
-- **HTTP:** the panel uses a separate `{ http }` client so actions really use POST/SSE, while topic subscriptions retain their WebSocket connection. **Cancel Goal** is disabled; **Stop Streaming** detaches the local client but does not cancel the ROS goal.
-- Switching transports or leaving the page closes the action client. Late events from the old goal cannot overwrite a new result; a detached ROS goal may continue on the server.
+- WebSocket: **Cancel Goal** requests cancellation.
+- HTTP/SSE: **Stop Streaming** disconnects without canceling the ROS goal.
+- Switching transports or leaving the page closes the client and ignores late events.
 
 ```js
 const client = await connect({ http: 'http://localhost:9001' });
@@ -77,10 +73,8 @@ try {
 }
 ```
 
-HTTP action streaming uses `fetch()`, not `EventSource`, because sending
-a goal requires POST. It does not require `sse: true`, which controls
-topic subscriptions only. Feedback can arrive before the acceptance
-event. Inspect the terminal status as well as the result payload.
+The panel's `{ http }` client uses `fetch()` for SSE actions. Topic
+subscriptions remain on WebSocket; `sse: true` is not needed for actions.
 
 ## Same capability, no SDK
 
@@ -139,10 +133,8 @@ ros2 run demo_nodes_cpp add_two_ints_server
 `web.json` already sets `sse`/`cors`, matching what `runtime.mjs` enables
 in code.
 
-The action panel also requires a ROS action server at `/fibonacci` using
-`example_interfaces/action/Fibonacci` when the bundled runtime is not used.
-The CLI only exposes capabilities; it does not create the sample ROS nodes.
-Wildcard CORS is intended for this local demo, not a production policy.
+For CLI mode, also run a `/fibonacci` server using
+`example_interfaces/action/Fibonacci`. Wildcard CORS is for local testing only.
 
 ## OpenAPI — no server required
 
@@ -150,9 +142,8 @@ The same `web.json` also documents itself as an OpenAPI 3.1 document — a
 one-shot subcommand that prints it and exits, without starting any
 transport or calling `rclnodejs.init()`.
 
-The generated document includes `/capability/action/fibonacci` and its
-goal, feedback, and result schemas. SSE schemas describe per-event data;
-Swagger UI may buffer the stream rather than display live feedback.
+The export includes action schemas. Swagger UI may buffer SSE; use the
+panel or curl for live feedback.
 
 ```bash
 source /opt/ros/<distro>/setup.bash

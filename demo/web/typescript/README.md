@@ -18,9 +18,8 @@ cd demo/web/typescript
 npm install
 ```
 
-The action panel needs a package build containing the action SDK. To try
-the current repository code before it is published, build it at the
-repository root, then use it without changing the demo's dependency or lockfile:
+Until a released package includes the action SDK, use the checkout instead
+without changing the dependency or lockfile:
 
 ```bash
 # From the repository root, with ROS 2 sourced and npm install completed:
@@ -38,15 +37,11 @@ npm run server
 #               also http://localhost:9001/capability
 ```
 
-`server.ts` runs the runtime *plus* a tiny `/add_two_ints` service and a
-1 Hz `/web_demo_tick` publisher, plus a bounded, cancellable Fibonacci
-action using `example_interfaces/action/Fibonacci`.
+`server.ts` includes `/add_two_ints`, a 1 Hz `/web_demo_tick` publisher,
+and a cancellable `/fibonacci` server (`example_interfaces/action/Fibonacci`).
 
-> The HTTP transport here serves `call`, `publish`, and SSE actions; `subscribe`
-> uses WebSocket. HTTP `subscribe` over Server-Sent Events is an opt-in
-> (`new HttpTransport({ sse: true })`, or `--http-sse` on the CLI) — see
-> the [JavaScript demo](../javascript/README.md) for a working SSE +
-> `EventSource` example.
+> HTTP serves calls, publishes, and SSE actions; subscriptions use WebSocket.
+> For HTTP topic subscriptions, see the [JavaScript demo](../javascript/README.md).
 
 **Shell 2 — Vite dev server:**
 
@@ -55,15 +50,13 @@ npm run dev
 # ➜  Local:  http://localhost:8080/
 ```
 
-For other ports, set `RUNTIME_PORT` and `HTTP_PORT` on the runtime and
-run `npm run dev -- --port 8081`. Open the page with
-`?wsPort=9010&httpPort=9011` to select matching runtime ports.
+For custom ports, set `RUNTIME_PORT`/`HTTP_PORT`, match the page's
+`?wsPort=9010&httpPort=9011`, and use Vite's `--port` option.
 
 ## Fibonacci actions
 
-The action panel accepts orders from 2 to 12, sends feedback every
-half-second, and displays the final result and terminal status.
-The goal, feedback, and result types are derived from the ROS action name:
+Send orders from 2 to 12 and receive feedback every half-second. The ROS
+action name supplies goal, feedback, and result types:
 
 ```ts
 import type {} from 'rclnodejs';
@@ -83,20 +76,17 @@ try {
 }
 ```
 
-The type-only import loads ROS declarations without adding the native
-addon to browser JavaScript. HTTP actions use a dedicated `{ http }`
-client; the demo's general `{ http, ws }` client still supports topic
-subscriptions on a different port.
+The type-only import supplies ROS declarations without a native browser
+dependency. A dedicated `{ http }` client streams actions; subscriptions
+stay on WebSocket.
 
-- **WebSocket:** **Cancel Goal** requests cancellation and displays the server's partial result and final status.
-- **HTTP:** **Cancel Goal** is disabled. **Stop Streaming** closes the client stream without canceling the ROS goal.
-- Changing transports or leaving the page closes the current action client; stale feedback cannot overwrite later goals.
+- WebSocket: **Cancel Goal** requests cancellation.
+- HTTP/SSE: **Stop Streaming** disconnects without canceling the ROS goal.
+- Switching transports or leaving the page closes the client and ignores late events.
 
-The runtime enables CORS for this local cross-origin demo. Restrict it
-for production. Actions use POST with `fetch()` streaming, not the
-GET-only `EventSource`; the `sse` option only enables HTTP subscriptions.
-Feedback and acceptance can arrive in either order. A resolved result
-can also be canceled or aborted, so inspect `goal.status`.
+Check `goal.status` even when `goal.result` resolves. Wildcard CORS is for
+local testing only. Actions use `fetch()` streaming, not `EventSource`;
+the `sse` option only enables HTTP subscriptions.
 
 ```bash
 curl --fail-with-body -sS -N http://localhost:9001/capability/action/fibonacci \
@@ -118,9 +108,8 @@ ros2 run demo_nodes_cpp add_two_ints_server
 # (and any std_msgs/String publisher on /web_demo_tick)
 ```
 
-The action panel additionally needs a ROS action server at `/fibonacci`
-using `example_interfaces/action/Fibonacci` when the bundled server is
-not used. The CLI does not create the sample ROS nodes.
+For CLI mode, also run a `/fibonacci` server using
+`example_interfaces/action/Fibonacci`.
 
 ## OpenAPI export
 
@@ -130,8 +119,7 @@ With ROS 2 sourced, export the same allow-list, including the action:
 npx rclnodejs-web openapi web.json > openapi.json
 ```
 
-The action response is an SSE stream. Its schemas describe individual
-event payloads, not one JSON response, and API explorers may buffer it.
+SSE schemas describe per-event data; API explorers may buffer the stream.
 
 ## Other npm scripts
 
