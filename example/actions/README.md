@@ -22,7 +22,7 @@ Actions are ideal for:
 
 ### Action Client Examples
 
-The `action_client/` directory contains examples of nodes that send goals to action servers:
+The `action_client/` directory contains native ROS 2 clients and an HTTP client that send goals to action servers:
 
 #### 1. Basic Action Client (`action-client-example.mjs`)
 
@@ -82,6 +82,12 @@ The `action_client/` directory contains examples of nodes that send goals to act
   - **Reusable Validators**: Create validators for repeated goal validation
 - **Run Command**: `node action_client/action-client-validation-example.mjs`
 - **Note**: Standalone example - demonstrates validation errors without requiring a running action server
+
+#### 4. HTTP Action Client (`http-action-client-example.mjs`)
+
+Uses the `rclnodejs/web` SDK to send a Fibonacci goal over HTTP, receive SSE feedback, and print the result and terminal status. The client does not create a ROS node and always closes its HTTP stream. It exits with a nonzero status for request/stream errors or a goal that does not succeed.
+
+See [HTTP Actions over SSE](#http-actions-over-sse) for the server, runtime, and client commands.
 
 ### Action Server Examples
 
@@ -211,6 +217,83 @@ The `action_server/` directory contains examples of nodes that provide action se
 
 - **Deferred Execution**: Use `action-server-defer-example.mjs` to see 3-second execution delay
 - **Single Goal**: Use `action-server-single-goal-example.mjs` to test goal abortion behavior
+
+## HTTP Actions over SSE
+
+Run the following commands from the repository root. Source ROS 2 in the action-server, runtime, and OpenAPI-export terminals, and ensure `test_msgs/action/Fibonacci` is installed. The HTTP client itself does not need a ROS environment.
+
+Start the existing Fibonacci server in one terminal:
+
+```bash
+node example/actions/action_server/action-server-example.mjs
+```
+
+Expose that action through the web runtime in another terminal:
+
+```bash
+node bin/rclnodejs-web.js --host 127.0.0.1 --port 9000 --http-port 9001 \
+  --action /fibonacci=test_msgs/action/Fibonacci
+```
+
+The runtime exposes both transports; the URL supplied to the client selects the action transport. The `--http-sse` flag is not needed for actions: it enables HTTP topic subscriptions only. Exposing an action does not start its ROS server. If a request reports `action_unavailable`, check the server and ROS discovery before submitting another goal.
+
+Run the HTTP-only client in a third terminal:
+
+```bash
+node example/actions/action_client/http-action-client-example.mjs
+```
+
+It sends `{ "order": 5 }`, logs incremental feedback, and finishes with status `succeeded` and result `[0, 1, 1, 2, 3, 5]`. To use a different runtime address:
+
+```bash
+node example/actions/action_client/http-action-client-example.mjs http://127.0.0.1:9101
+```
+
+From an installed package, import the SDK with `import { connect } from 'rclnodejs/web'`; this checkout example imports its source entry point directly.
+
+### Read the raw SSE stream
+
+The same endpoint can be called without the SDK. `-N` disables curl's output buffering; `--fail-with-body` reports HTTP errors while retaining their JSON body.
+
+```bash
+curl --fail-with-body -sS -N http://127.0.0.1:9001/capability/action/fibonacci \
+  -H 'content-type: application/json' \
+  -d '{"order":3}'
+```
+
+The response contains named SSE events with JSON `data:` payloads. A representative response is shown below. ROS delivers feedback and goal replies independently, so `feedback` can arrive before `accepted`; consume events by name rather than requiring this order.
+
+```text
+event: accepted
+data: {"capability":"/fibonacci"}
+
+event: feedback
+data: {"sequence":[0,1,1]}
+
+event: feedback
+data: {"sequence":[0,1,1,2]}
+
+event: result
+data: {"status":"succeeded","payload":{"sequence":[0,1,1,2]}}
+
+```
+
+Before streaming starts, failures use a non-2xx HTTP status and a JSON body with `ok`, `error`, and `code`. After streaming starts, failures use a terminal SSE `error` event and the HTTP status remains `200`; curl's exit status alone does not indicate that the ROS goal succeeded. The SDK rejects `ros.action()` for request failures or `goal.result` for stream errors. A normal result can have status `canceled` or `aborted`, so also inspect `goal.status`.
+
+### Cancellation and browser use
+
+HTTP action handles do not support `cancel()`; it rejects with `unsupported_kind`. Closing the client or interrupting curl closes the stream but does not cancel the ROS goal. Submit the goal over WebSocket when cancellation is required, using a `ws://` URL or an explicit `{ http, ws }` endpoint pair. See the [SDK action examples](../../web/README.md#actions).
+
+Browser HTTP actions use `fetch()` and `ReadableStream`, which the SDK handles. Native `EventSource` cannot submit the required POST. For a page on another origin, configure the runtime's `--http-cors` option for that origin.
+
+### Export the action contract
+
+```bash
+node bin/rclnodejs-web.js openapi --http-port 9001 \
+  --action /fibonacci=test_msgs/action/Fibonacci > openapi.json
+```
+
+This describes the goal, feedback, result/status, and error payloads without running a ROS node. ROS 2 must still be sourced to load interface metadata. OpenAPI describes the individual SSE event data; consumers need SSE-aware parsing, and API explorers may buffer the response until the goal finishes. Use the SDK or curl to observe live feedback.
 
 ## Action Components Explained
 
