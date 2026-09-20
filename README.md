@@ -76,22 +76,32 @@ how much glue you want to write.
 - **[`rclnodejs/web`](./web/README.md)** — a typed layer over your ROS 2 graph:
   you allow-list capabilities in `web.json` or via CLI flags; anything else is
   rejected before it reaches ROS 2. Best for typed web apps and HTTP clients.
-  - **Typed SDK** — `call`, `publish` and `subscribe`, typed end-to-end from
-    your generated message and service types.
+  - **Typed SDK** — `call`, `publish`, `subscribe`, and `action`, typed
+    end-to-end from your generated message, service, and action types.
   - **Two transports** — WebSocket, plus an optional HTTP listener
-    (`--http-port`) so `call` and `publish` work from `curl`, Postman or
-    `fetch()`. `subscribe` needs WebSocket, or `--http-sse` to stream it as
-    Server-Sent Events.
+    (`--http-port`) for `call`, `publish`, and action goals with Server-Sent
+    Events feedback and results. SDK subscriptions use WebSocket;
+    `--http-sse` additionally enables raw HTTP topic subscriptions.
+  - **Action lifecycle** — receive feedback and a terminal result/status.
+    Submit goals over WebSocket when cancellation is needed; closing an
+    HTTP action stream does not cancel the ROS goal.
   - **OpenAPI 3.1** — `rclnodejs-web openapi` emits a machine-readable spec
-    for codegen, API explorers and agent tool-use.
+    for codegen, API explorers and agent tool-use, including action goal,
+    feedback, and result schemas. Live SSE feedback needs an SSE-aware client.
 
   ```ts
+  import type {} from 'rclnodejs';
   import { connect } from 'rclnodejs/web';
   const ros = await connect('ws://host:9000/capability');
   const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
     '/add_two_ints', { a: '2n', b: '40n' }
   ); // reply.sum is typed as `${number}n`
   ```
+
+  The type-only import loads the generated ROS declarations without adding
+  the native addon to browser JavaScript. See the
+  [HTTP/SSE action walkthrough](./example/actions/README.md#http-actions-over-sse)
+  for a runnable client, curl requests, and cancellation guidance.
 
 - **[`rosocket`](./rosocket/README.md)** — thin WebSocket gateway,
   zero browser dependencies (just built-in `WebSocket` + `JSON`).

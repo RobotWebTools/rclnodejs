@@ -41,7 +41,7 @@ function displayHost(host) {
 //   subscribe  /web_demo_chatter   std_msgs/msg/String
 function formatCapabilities(caps) {
   const rows = [];
-  for (const verb of ['call', 'publish', 'subscribe']) {
+  for (const verb of ['call', 'publish', 'subscribe', 'action']) {
     for (const [topic, type] of Object.entries(caps[verb] || {})) {
       rows.push([verb, topic, type]);
     }
@@ -57,6 +57,7 @@ function formatCapabilities(caps) {
 // ---- Layer 1: rclnodejs core ----------------------------------------
 await rclnodejs.init();
 const node = rclnodejs.createNode('rclnodejs_web_demo_node');
+let stopping = false;
 
 // A real ROS 2 service the browser can call.
 node.createService(
@@ -67,6 +68,36 @@ node.createService(
     reply.sum = request.a + request.b;
     response.send(reply);
   }
+);
+
+const Fibonacci = rclnodejs.require('example_interfaces/action/Fibonacci');
+new rclnodejs.ActionServer(
+  node,
+  'example_interfaces/action/Fibonacci',
+  '/fibonacci',
+  async (goalHandle) => {
+    const sequence = [0, 1];
+    for (let index = 1; index < goalHandle.request.order; index++) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (stopping || !goalHandle.isActive) {
+        return new Fibonacci.Result({ sequence });
+      }
+      if (goalHandle.isCancelRequested) {
+        goalHandle.canceled();
+        return new Fibonacci.Result({ sequence });
+      }
+      sequence.push(sequence[index] + sequence[index - 1]);
+      goalHandle.publishFeedback(new Fibonacci.Feedback({ sequence }));
+    }
+    goalHandle.succeed();
+    return new Fibonacci.Result({ sequence });
+  },
+  (goal) =>
+    Number.isInteger(goal.order) && goal.order >= 2 && goal.order <= 12
+      ? rclnodejs.GoalResponse.ACCEPT
+      : rclnodejs.GoalResponse.REJECT,
+  null,
+  () => rclnodejs.CancelResponse.ACCEPT
 );
 
 rclnodejs.spin(node);
@@ -104,6 +135,7 @@ const runtime = createRuntime({
 runtime.expose({
   call: { '/add_two_ints': 'example_interfaces/srv/AddTwoInts' },
   publish: { '/web_demo_chatter': 'std_msgs/msg/String' },
+  action: { '/fibonacci': 'example_interfaces/action/Fibonacci' },
   subscribe: {
     // Shared talker/listener topic: panels 2 (WebSocket), 3 (round-trip),
     // and 6 (SSE) all use it — so a browser publish is visible across
@@ -122,17 +154,18 @@ const caps = runtime.registry.list();
 const total =
   Object.keys(caps.call || {}).length +
   Object.keys(caps.publish || {}).length +
-  Object.keys(caps.subscribe || {}).length;
+  Object.keys(caps.subscribe || {}).length +
+  Object.keys(caps.action || {}).length;
 
 console.log('rclnodejs/web demo running (JavaScript)');
 console.log(
-  `  WebSocket : ws://${displayHost('::')}:${RUNTIME_PORT}/capability`
+  `  WebSocket : ws://${displayHost('::')}:${runtime.transports[0].port}/capability`
 );
 console.log(
-  `  HTTP      : http://${displayHost('::')}:${HTTP_PORT}/capability  (call / publish, curl-able)`
+  `  HTTP      : http://${displayHost('::')}:${runtime.transports[1].port}/capability  (call / publish / action, curl-able)`
 );
 console.log(
-  `  HTTP SSE  : http://${displayHost('::')}:${HTTP_PORT}/capability/subscribe/<name>  (subscribe via text/event-stream)`
+  `  HTTP SSE  : http://${displayHost('::')}:${runtime.transports[1].port}/capability/subscribe/<name>  (subscribe via text/event-stream)`
 );
 console.log();
 console.log(`Exposed capabilities (${total}):`);
@@ -144,6 +177,8 @@ console.log(
 
 // ---- Graceful shutdown ----------------------------------------------
 const stop = async () => {
+  if (stopping) return;
+  stopping = true;
   console.log('\nstopping…');
   await runtime.stop();
   rclnodejs.shutdown();
