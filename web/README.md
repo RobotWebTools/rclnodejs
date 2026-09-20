@@ -71,9 +71,8 @@ import type {} from 'rclnodejs';
 import { connect } from 'rclnodejs/web'; // or via esm.sh in a <script type="module">
 ```
 
-The type-only import loads the generated ROS interface declarations for
-typed calls and is erased from the JavaScript output; it does not load
-the native addon in the browser. Omit it in plain JavaScript.
+The type-only import loads ROS declarations and is erased at runtime.
+Omit it in JavaScript.
 
 `connect()` accepts three URL shapes — the SDK picks transport(s)
 from the scheme:
@@ -89,8 +88,8 @@ A bare `http://` URL auto-derives the WS sibling at the same origin
 (`/capability` path); the `{ http }`-only form disables WS entirely
 and `subscribe()` rejects with `transport_unavailable`.
 
-For actions, both a bare HTTP URL and `{ http }` use SSE. An explicit
-`{ http, ws }` pair uses WebSocket for actions, preserving cancellation.
+Actions use SSE with HTTP-only endpoints and WebSocket with an explicit
+`{ http, ws }` pair.
 
 ```ts
 const ros = await connect({
@@ -128,9 +127,7 @@ await sub.close();
 
 ### Actions
 
-The ROS action server must already be running and the action must be in
-the runtime's allow-list. The [Fibonacci walkthrough](../example/actions/README.md#http-actions-over-sse)
-provides both startup commands and a runnable HTTP client.
+Start and expose the ROS action server before sending a goal.
 
 ```ts
 const httpClient = await connect({ http: 'http://localhost:9001' });
@@ -149,15 +146,12 @@ try {
 }
 ```
 
-HTTP uses a JSON POST followed by SSE `accepted`, `feedback`, and terminal
-`result` or `error` events. Feedback can arrive before the `accepted` event;
-the SDK handles both orderings. `--http-sse` is not required for actions.
-Native `EventSource` is GET-only; the SDK uses `fetch()` streaming instead.
-Errors before streaming reject `action()`; stream errors reject `goal.result`.
-The result promise can resolve for an aborted or canceled goal, so inspect
-`goal.status` rather than treating resolution as success.
+HTTP actions use POST/SSE via `fetch()`; `EventSource` cannot POST goals.
+`--http-sse` is only needed for subscriptions. Feedback may precede `accepted`.
+Request errors reject `action()`; stream errors reject `goal.result`.
+A resolved result may be canceled or aborted, so check `goal.status`.
 
-To request cancellation, start the goal over WebSocket:
+For cancellation, submit the goal over WebSocket:
 
 ```ts
 const wsClient = await connect({
@@ -178,18 +172,15 @@ try {
 }
 ```
 
-Cancellation is a request, not a guarantee; the server may reject it or the
-goal may finish first. HTTP `cancel()` rejects with `unsupported_kind`.
-Closing an HTTP client stops feedback and rejects pending results, but
-does not cancel the ROS goal or transfer it to a WebSocket connection.
+Cancellation depends on server acceptance. HTTP `cancel()` rejects with
+`unsupported_kind`; closing an HTTP stream does not cancel the goal.
 
 ### Lifecycle and cleanup
 
 Each `subscribe()` returns a handle with its own `close()`; the
 top-level `ros.close()` cancels every active subscription and shuts
-down both transports. It also aborts pending HTTP action requests and
-streams, rejecting their results with `connection_lost` without canceling
-the underlying ROS goals.
+down both transports. Pending HTTP actions reject with `connection_lost`;
+the ROS goals are not canceled.
 
 ```ts
 const sub = await ros.subscribe('/chatter', handler);
@@ -260,10 +251,8 @@ the runtime:
 npx -p rclnodejs rclnodejs-web openapi web.json > openapi.json
 ```
 
-The action entries include goal, feedback, result, and rejection schemas.
-SSE event schemas describe individual `data:` payloads, not a single JSON
-response. API explorers may wait for the complete response; use an
-SSE-aware client to consume live feedback.
+SSE response schemas describe per-event payloads. Use an SSE-aware client for
+live feedback; API explorers may buffer responses.
 
 See [`demo/web/javascript/`](../demo/web/javascript/) for a full
 walkthrough, including browsing it in Swagger UI.
