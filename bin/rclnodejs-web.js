@@ -149,8 +149,8 @@ if (SUBCOMMANDS.has(argv[0])) {
         const httpHost = displayHost(cfg.http.host || cfg.host);
         const httpBase = cfg.http.basePath || cfg.path;
         const httpKinds = cfg.http.sse
-          ? 'call/publish + subscribe (SSE)'
-          : 'call/publish only';
+          ? 'call/publish/action + subscribe (SSE)'
+          : 'call/publish/action';
         process.stdout.write(
           `                  also http://${httpHost}:${httpTransport.port}${httpBase} (${httpKinds})\n`
         );
