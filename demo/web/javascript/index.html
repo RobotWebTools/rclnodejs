@@ -555,6 +555,7 @@ try {
       let chatterSub;
       let mode = 'ws';
       let connectionVersion = 0;
+      let pageCleanup = Promise.resolve();
       let activeAction;
       const actionForm = document.getElementById('actionForm');
       const actionOrder = document.getElementById('actionOrder');
@@ -704,6 +705,8 @@ try {
       async function reconnect(nextMode) {
         const version = ++connectionVersion;
         mode = nextMode;
+        await pageCleanup;
+        if (version !== connectionVersion) return;
         await teardown();
         if (version !== connectionVersion) return;
         setEndpoint(mode);
@@ -814,6 +817,7 @@ try {
         const sseCloseBtn = document.getElementById('sseCloseBtn');
         const sseTopic = document.getElementById('sseTopic');
         let es;
+        let resumeEventSource = false;
         const closeEs = () => {
           if (es) {
             es.close();
@@ -823,7 +827,8 @@ try {
           sseCloseBtn.disabled = true;
           sseTopic.disabled = false;
         };
-        sseBtn.onclick = () => {
+        const openEs = () => {
+          resumeEventSource = false;
           closeEs();
           // Accept '/topic' or 'topic'; the URL path carries the bare name.
           const name = (sseTopic.value || '/web_demo_chatter')
@@ -856,14 +861,26 @@ try {
             }
           });
         };
+        sseBtn.onclick = openEs;
         sseCloseBtn.onclick = () => {
+          resumeEventSource = false;
           closeEs();
           log('sseLog', 'closed', 'ok');
         };
-        window.addEventListener('pagehide', () => {
+        window.addEventListener('pagehide', (event) => {
           connectionVersion++;
+          resumeEventSource = event.persisted && !!es;
           closeEs();
-          void teardown();
+          setStatus('disconnected');
+          pageCleanup = Promise.all([pageCleanup, teardown()]).then(() => {});
+        });
+        window.addEventListener('pageshow', async (event) => {
+          if (!event.persisted) return;
+          const version = connectionVersion;
+          await pageCleanup;
+          if (version !== connectionVersion) return;
+          if (resumeEventSource) openEs();
+          await reconnect(mode);
         });
 
         // Native fetch() — call/publish straight to the HTTP transport,

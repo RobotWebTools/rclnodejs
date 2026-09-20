@@ -81,6 +81,7 @@ async function main(): Promise<void> {
   let tickSub: Subscription | undefined;
   let mode: Mode = 'ws';
   let connectionVersion = 0;
+  let pageCleanup: Promise<void> = Promise.resolve();
   let activeAction: ActionRun | undefined;
   const actionForm = $<HTMLFormElement>('actionForm');
   const actionOrder = $<HTMLInputElement>('actionOrder');
@@ -232,6 +233,8 @@ async function main(): Promise<void> {
   async function reconnect(nextMode: Mode): Promise<void> {
     const version = ++connectionVersion;
     mode = nextMode;
+    await pageCleanup;
+    if (version !== connectionVersion) return;
     await teardown();
     if (version !== connectionVersion) return;
     setEndpoint(mode);
@@ -354,7 +357,16 @@ async function main(): Promise<void> {
 
   window.addEventListener('pagehide', () => {
     connectionVersion++;
-    void teardown();
+    setStatus('disconnected');
+    pageCleanup = Promise.all([pageCleanup, teardown()]).then(() => {});
+  });
+
+  window.addEventListener('pageshow', async (event) => {
+    if (!event.persisted) return;
+    const version = connectionVersion;
+    await pageCleanup;
+    if (version !== connectionVersion) return;
+    await reconnect(mode);
   });
 
   await reconnect('ws');
