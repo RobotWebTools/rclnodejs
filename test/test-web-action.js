@@ -825,101 +825,188 @@ describe('Action capability dispatch', function () {
   });
 });
 
-describe('HTTP action heartbeats', function () {
-  let clock;
-  let connection;
-  let response;
+for (const kind of ['action', 'subscription']) {
+  describe(`HTTP ${kind} SSE lifecycle`, function () {
+    const isAction = kind === 'action';
+    let clock;
+    let connection;
+    let response;
 
-  beforeEach(function () {
-    clock = sinon.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
-  });
-
-  afterEach(function () {
-    connection?.close();
-    connection = null;
-    clock.restore();
-  });
-
-  function openAction(options) {
-    const transport = new HttpTransport(options);
-    const request = Object.assign(new EventEmitter(), {
-      method: 'POST',
-      url: '/capability/action/fibonacci',
-      headers: { 'content-type': 'application/json' },
+    beforeEach(function () {
+      clock = sinon.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
     });
-    response = new EventEmitter();
-    response.writeHead = sinon.stub().returns(response);
-    response.flushHeaders = sinon.spy();
-    response.write = sinon.stub().returns(true);
-    response.end = sinon.spy();
-    transport._onConnection = (value) => {
-      connection = value;
-    };
-    transport._route(request, response);
-    request.emit('data', Buffer.from('{"order":5}'));
-    request.emit('end');
-    assert.ok(connection);
-  }
 
-  for (const [label, options, interval] of [
-    ['default', {}, 15000],
-    ['configured', { sseKeepAliveMs: 10 }, 10],
-  ]) {
-    it(`uses the ${label} interval for actions without feedback`, function () {
-      openAction(options);
+    afterEach(function () {
+      connection?.close();
+      connection = null;
+      clock.restore();
+    });
+
+    function openStream(options) {
+      const transport = new HttpTransport({ sse: !isAction, ...options });
+      const request = Object.assign(new EventEmitter(), {
+        method: isAction ? 'POST' : 'GET',
+        url: isAction
+          ? '/capability/action/fibonacci'
+          : '/capability/subscribe/chatter',
+        headers: { 'content-type': 'application/json' },
+      });
+      response = new EventEmitter();
+      response.writeHead = sinon.stub().returns(response);
+      response.flushHeaders = sinon.spy();
+      response.write = sinon.stub().returns(true);
+      response.end = sinon.spy();
+      transport._onConnection = (value) => {
+        connection = value;
+      };
+      transport._route(request, response);
+      if (isAction) {
+        request.emit('data', Buffer.from('{"order":5}'));
+        request.emit('end');
+      }
+      assert.ok(connection);
+      return request;
+    }
+
+    for (const [label, options, interval] of [
+      ['default', {}, 15000],
+      ['configured', { sseKeepAliveMs: 10 }, 10],
+    ]) {
+      it(`uses the ${label} heartbeat interval for idle streams`, function () {
+        openStream(options);
+        assert.strictEqual(clock.countTimers(), 0);
+        assert.ok(response.writeHead.notCalled);
+        connection.send({ ok: true });
+        clock.tick(interval - 1);
+        assert.ok(!response.write.calledWith(': keep-alive\n\n'));
+        clock.tick(1);
+        assert.ok(response.write.calledWith(': keep-alive\n\n'));
+        assert.strictEqual(clock.countTimers(), 1);
+        assert.strictEqual(connection._keepAlive.hasRef(), false);
+      });
+    }
+
+    it('disables heartbeats when sseKeepAliveMs is zero', function () {
+      openStream({ sseKeepAliveMs: 0 });
+      connection.send({ ok: true });
+      clock.tick(30000);
       assert.strictEqual(clock.countTimers(), 0);
-      connection.send({ ok: true });
-      clock.tick(interval - 1);
       assert.ok(!response.write.calledWith(': keep-alive\n\n'));
-      clock.tick(1);
-      assert.ok(response.write.calledWith(': keep-alive\n\n'));
-      assert.strictEqual(clock.countTimers(), 1);
-      assert.strictEqual(connection._keepAlive.hasRef(), false);
     });
-  }
 
-  it('disables heartbeats when sseKeepAliveMs is zero', function () {
-    openAction({ sseKeepAliveMs: 0 });
-    connection.send({ ok: true });
-    clock.tick(30000);
-    assert.strictEqual(clock.countTimers(), 0);
-    assert.ok(!response.write.calledWith(': keep-alive\n\n'));
-  });
-
-  for (const ending of ['result', 'error', 'disconnect', 'write failure']) {
-    it(`clears the timer after ${ending}`, function () {
-      openAction({ sseKeepAliveMs: 10 });
+    it('preserves acknowledgement and data event framing', function () {
+      openStream({ sseKeepAliveMs: 0 });
       connection.send({ ok: true });
-      clock.tick(10);
-      assert.strictEqual(clock.countTimers(), 1);
-      if (ending === 'disconnect') {
-        response.emit('close');
-      } else if (ending === 'write failure') {
-        response.write.throws(new Error('connection lost'));
+      const acknowledgement = isAction
+        ? 'event: accepted\ndata: {"capability":"/fibonacci"}\n\n'
+        : 'event: ready\ndata: {"capability":"/chatter","subId":"sse"}\n\n';
+      assert.ok(response.write.calledWith(acknowledgement));
+      const event = isAction ? 'feedback' : 'message';
+      connection.send({ event, payload: { data: 'sample' } });
+      assert.ok(
+        response.write.calledWith(
+          `event: ${event}\ndata: {"data":"sample"}\n\n`
+        )
+      );
+      assert.ok(response.writeHead.calledOnce);
+      assert.ok(response.flushHeaders.calledOnce);
+      assert.ok(response.end.notCalled);
+    });
+
+    for (const ending of [
+      isAction ? 'result' : 'request close',
+      'error',
+      'disconnect',
+      'response error',
+      'write failure',
+      'explicit close',
+    ]) {
+      it(`clears the timer and closes once after ${ending}`, function () {
+        const request = openStream({ sseKeepAliveMs: 10 });
+        const onClose = sinon.spy();
+        connection.on('close', onClose);
+        connection.send({ ok: true });
         clock.tick(10);
-      } else {
+        assert.strictEqual(clock.countTimers(), 1);
+        if (ending === 'request close') {
+          request.emit('close');
+        } else if (ending === 'disconnect') {
+          response.emit('close');
+        } else if (ending === 'response error') {
+          response.emit('error', new Error('connection lost'));
+        } else if (ending === 'write failure') {
+          response.write.throws(new Error('connection lost'));
+          clock.tick(10);
+        } else if (ending === 'explicit close') {
+          connection.close();
+        } else {
+          connection.send({
+            event: isAction ? 'result' : undefined,
+            ok: ending === 'result',
+            status: 'succeeded',
+            payload: { sequence: [] },
+            code: isAction ? 'action_failed' : 'internal_error',
+            error: 'stream failed',
+          });
+        }
+        assert.strictEqual(clock.countTimers(), 0);
+        assert.strictEqual(connection._keepAlive, null);
+        const writes = response.write.callCount;
+        connection.close();
+        response.emit('close');
+        connection.send({
+          event: isAction ? 'feedback' : 'message',
+          payload: {},
+        });
+        clock.tick(30);
+        assert.strictEqual(response.write.callCount, writes);
+        assert.ok(response.end.calledOnce);
+        assert.ok(onClose.calledOnce);
+      });
+    }
+
+    it('returns a JSON error without starting a stream when rejected', function () {
+      openStream({ sseKeepAliveMs: 10 });
+      const code = isAction ? 'goal_rejected' : 'not_exposed';
+      connection.send({ ok: false, code, error: 'rejected' });
+      clock.tick(30);
+      assert.strictEqual(clock.countTimers(), 0);
+      assert.ok(response.writeHead.calledWith(isAction ? 409 : 404));
+      assert.ok(response.write.notCalled);
+      assert.ok(response.flushHeaders.notCalled);
+      assert.deepStrictEqual(JSON.parse(response.end.firstCall.args[0]), {
+        ok: false,
+        error: 'rejected',
+        code,
+      });
+    });
+
+    if (isAction) {
+      it('keeps streaming after the POST request closes and preserves the result envelope', function () {
+        const request = openStream({ sseKeepAliveMs: 10 });
+        const onClose = sinon.spy();
+        connection.on('close', onClose);
+        request.emit('close');
+        connection.send({ ok: true });
+        request.emit('close');
+        clock.tick(10);
+        assert.ok(response.end.notCalled);
+        assert.ok(onClose.notCalled);
+        assert.ok(response.write.calledWith(': keep-alive\n\n'));
         connection.send({
           event: 'result',
-          ok: ending === 'result',
           status: 'succeeded',
-          payload: { sequence: [] },
-          code: 'action_failed',
-          error: 'action failed',
+          payload: { sequence: [0, 1] },
         });
-      }
-      assert.strictEqual(clock.countTimers(), 0);
-      const writes = response.write.callCount;
-      clock.tick(30);
-      assert.strictEqual(response.write.callCount, writes);
-    });
-  }
-
-  it('does not start a timer for a rejected goal', function () {
-    openAction({ sseKeepAliveMs: 10 });
-    connection.send({ ok: false, code: 'goal_rejected', error: 'rejected' });
-    clock.tick(30);
-    assert.strictEqual(clock.countTimers(), 0);
-    assert.ok(response.writeHead.calledWith(409));
-    assert.ok(response.write.notCalled);
+        assert.ok(
+          response.write.calledWith(
+            'event: result\ndata: {"status":"succeeded","payload":{"sequence":[0,1]}}\n\n'
+          )
+        );
+        assert.ok(response.end.calledOnce);
+        assert.ok(onClose.calledOnce);
+        assert.strictEqual(clock.countTimers(), 0);
+      });
+    }
   });
-});
+}
