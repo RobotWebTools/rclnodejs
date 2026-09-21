@@ -12,10 +12,9 @@
       <span class="badge">TypeScript</span>
     </h1>
     <p>
-      Same five panels as the JavaScript demo, but the browser entry is written
-      in <strong>TypeScript</strong> with Vite — pass one ROS type-name string
-      per call and the SDK derives the request, response, and message shapes
-      from rclnodejs's generated types.
+      The browser entry is written in <strong>TypeScript</strong> with Vite —
+      pass one ROS type-name string per call and the SDK derives request,
+      response, message, and action shapes from rclnodejs's generated types.
     </p>
     <p>
       Endpoint:
@@ -30,7 +29,7 @@
       >
       <label
         ><input type="radio" name="transport" value="http" /> HTTP
-        (call+publish; subscribe falls through to WS)</label
+        (call+publish; actions via SSE; subscribe via WS)</label
       >
       <div style="margin-top: 0.4em; font-size: 0.85em; color: #666">
         Same registry, same allow-list, same typed SDK — only the URL scheme
@@ -161,6 +160,71 @@ curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
 curl -sS -X POST http://localhost:9001/capability/publish/web_demo_chatter \
   -H <span class="str">'content-type: application/json'</span> \
   -d <span class="str">'{"data":"hi from curl"}'</span></pre>
+
+    <h2 id="actionTitle">6. Fibonacci action - <code>/fibonacci</code></h2>
+    <div class="panel" aria-labelledby="actionTitle">
+      <form id="actionForm" class="controls">
+        <div class="row">
+          <label for="actionOrder">Order</label>
+          <input
+            id="actionOrder"
+            type="number"
+            min="2"
+            max="12"
+            step="1"
+            value="8"
+            required
+          />
+          <output id="actionStatus" class="status" aria-live="polite"
+            >Idle</output
+          >
+        </div>
+        <div class="row action-buttons">
+          <button id="actionSendBtn" type="submit" disabled>Send Goal</button>
+          <button
+            id="actionCancelBtn"
+            type="button"
+            disabled
+            title="Request cancellation over WebSocket"
+          >
+            Cancel Goal
+          </button>
+          <button
+            id="actionStopBtn"
+            type="button"
+            disabled
+            title="Disconnect the HTTP stream; the ROS goal continues"
+          >
+            Stop Streaming
+          </button>
+        </div>
+        <label for="actionResult">Result</label>
+        <output id="actionResult" class="action-result">-</output>
+        <div
+          id="actionLog"
+          class="log"
+          role="log"
+          aria-label="Action events"
+        ></div>
+      </form>
+      <pre class="code">
+import type {} from 'rclnodejs';
+import { connect } from 'rclnodejs/web';
+
+const client = await connect({ http: 'http://localhost:9001' });
+try {
+  const goal = await client.action&lt;'example_interfaces/action/Fibonacci'&gt;(
+    '/fibonacci',
+    { order: 8 },
+    { onFeedback: (feedback) =&gt; console.log(feedback.sequence) },
+  );
+  const result = await goal.result;
+  console.log(goal.status, result.sequence);
+} finally {
+  await client.close();
+}</pre
+      >
+    </div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

@@ -16,12 +16,12 @@ cd demo/web/javascript
 source /opt/ros/<distro>/setup.bash
 node runtime.mjs
 # rclnodejs/web : ws://localhost:9000/capability
-#               also http://localhost:9001/capability  (call/publish, curl-able)
+#               also http://localhost:9001/capability  (call/publish/action, curl-able)
 #               also http://localhost:9001/capability/subscribe/<name>  (SSE)
 ```
 
-`runtime.mjs` exposes a tiny `/add_two_ints` service and the shared
-`/web_demo_chatter` talker/listener topic.
+`runtime.mjs` includes `/add_two_ints`, `/web_demo_chatter`, and a cancellable
+`/fibonacci` server (`example_interfaces/action/Fibonacci`).
 
 **Shell 2 — static-file server** (hosts `index.html`, maps `/sdk/*` to
 the in-repo [`web/`](../../../web/) SDK):
@@ -30,6 +30,9 @@ the in-repo [`web/`](../../../web/) SDK):
 node static.mjs
 # Static files : http://localhost:8080/
 ```
+
+For custom ports, set `RUNTIME_PORT`, `HTTP_PORT`, and `STATIC_PORT`;
+match the page URL, e.g. `?wsPort=9010&httpPort=9011`.
 
 ## What the browser code looks like
 
@@ -49,15 +52,43 @@ node static.mjs
 The page also has a **transport toggle** (WebSocket vs. HTTP) so you
 can flip the SDK between the two without restarting.
 
+## Fibonacci actions
+
+Send an order from 2 to 12 (default 8) to see feedback every half-second,
+then the final sequence and status.
+
+- WebSocket: **Cancel Goal** requests cancellation.
+- HTTP/SSE: **Stop Streaming** disconnects without canceling the ROS goal.
+- Switching transports or leaving the page closes the client and ignores late events.
+
+```js
+const client = await connect({ http: 'http://localhost:9001' });
+try {
+  const goal = await client.action('/fibonacci', { order: 5 }, {
+    onFeedback: (feedback) => console.log(feedback.sequence),
+  });
+  console.log(await goal.result, goal.status);
+} finally {
+  await client.close();
+}
+```
+
+The panel's `{ http }` client uses `fetch()` for SSE actions. Topic
+subscriptions remain on WebSocket; `sse: true` is not needed for actions.
+
 ## Same capability, no SDK
 
-Every `call` / `publish` / `subscribe` is also reachable as plain HTTP —
+Every `call` / `publish` / `subscribe` / `action` is also reachable as plain HTTP —
 curl, Postman, or an AI agent, no JavaScript required:
 
 ```bash
 curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
   -H 'content-type: application/json' -d '{"a":"7n","b":"35n"}'
 # => {"sum":"42n"}
+
+curl --fail-with-body -sS -N http://localhost:9001/capability/action/fibonacci \
+  -H 'content-type: application/json' -d '{"order":3}'
+# terminal data: {"status":"succeeded","payload":{"sequence":[0,1,1,2]}}
 
 curl -N http://localhost:9001/capability/subscribe/web_demo_chatter
 # event: message
@@ -102,11 +133,17 @@ ros2 run demo_nodes_cpp add_two_ints_server
 `web.json` already sets `sse`/`cors`, matching what `runtime.mjs` enables
 in code.
 
+For CLI mode, also run a `/fibonacci` server using
+`example_interfaces/action/Fibonacci`. Wildcard CORS is for local testing only.
+
 ## OpenAPI — no server required
 
 The same `web.json` also documents itself as an OpenAPI 3.1 document — a
 one-shot subcommand that prints it and exits, without starting any
 transport or calling `rclnodejs.init()`.
+
+The export includes action schemas. Swagger UI may buffer SSE; use the
+panel or curl for live feedback.
 
 ```bash
 source /opt/ros/<distro>/setup.bash

@@ -52,6 +52,7 @@ Prebuilt binaries ship for Ubuntu 22.04 (Humble), 24.04 (Jazzy, Kilted) and 26.0
 - JavaScript examples: [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
 - TypeScript demos: [demo/typescript/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript)
 - Browser demos: [demo/web/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/web) (typed Web SDK) and [demo/rosocket/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/rosocket) (WebSocket gateway)
+- HTTP/SSE actions: [Fibonacci demo](https://github.com/RobotWebTools/rclnodejs/blob/develop/demo/web/javascript/README.md#fibonacci-actions)
 - Electron demos: [demo/electron/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/electron)
 - Companion CLI: [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/)
 
@@ -86,17 +87,20 @@ Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript e
 `rclnodejs` ships **two** ways to reach ROS 2 from the browser — pick one based on how much glue you want to write.
 
 - **`rclnodejs/web`** — a typed layer over your ROS 2 graph: you allow-list capabilities in `web.json` or via CLI flags; anything else is rejected before it reaches ROS 2. Best for typed web apps and HTTP clients.
-  - **Typed SDK** — `call`, `publish` and `subscribe`, typed end-to-end from your generated message and service types.
-  - **Two transports** — WebSocket, plus an optional HTTP listener (`--http-port`) so `call` and `publish` work from `curl`, Postman or `fetch()`. `subscribe` needs WebSocket, or `--http-sse` to stream it as Server-Sent Events.
-  - **OpenAPI 3.1** — `rclnodejs-web openapi` emits a machine-readable spec for codegen, API explorers and agent tool-use.
+  - **Typed SDK** — `call`, `publish`, `subscribe`, and `action`, typed from generated ROS interfaces.
+  - **Two transports** — WebSocket for all verbs, or HTTP (`--http-port`) for calls, publishes, and SSE actions. Action cancellation requires WebSocket. SDK subscriptions use WebSocket; `--http-sse` enables raw HTTP subscriptions.
+  - **OpenAPI 3.1** — export service, topic, and action schemas with `rclnodejs-web openapi`.
 
   ```ts
+  import type {} from 'rclnodejs';
   import { connect } from 'rclnodejs/web';
   const ros = await connect('ws://host:9000/capability');
   const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
     '/add_two_ints', { a: '2n', b: '40n' }
   ); // reply.sum is typed as `${number}n`
   ```
+
+  See the [Fibonacci action demo](https://github.com/RobotWebTools/rclnodejs/blob/develop/demo/web/javascript/README.md#fibonacci-actions) for a runnable example.
 
   No SDK needed for subscribe — with the HTTP/SSE transport enabled (`--http-sse`, plus `--http-cors` for cross-origin), any browser streams a live ROS 2 topic via built-in `EventSource`:
 

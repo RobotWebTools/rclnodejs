@@ -6,8 +6,8 @@
 `rclnodejs/web` is the browser-side of `rclnodejs`: a compact ESM
 module plus a server runtime that together expose a declarative
 subset of your ROS 2 graph over WebSocket **and** plain HTTP. The
-browser API is three verbs — `call`, `publish`, `subscribe` — typed
-end-to-end from your ROS 2 message and service types. The same
+browser API has four verbs: `call`, `publish`, `subscribe`, and `action`, typed
+end-to-end from your ROS 2 message, service, and action types. The same
 `expose` config also generates an OpenAPI 3.1 document, so
 codegen, API explorers, and AI-agent tool-use all get a standard,
 machine-readable description of your ROS 2 graph for free.
@@ -31,9 +31,10 @@ npx -p rclnodejs rclnodejs-web \
   --port 9000 --http-port 9001 \
   --call /add_two_ints=example_interfaces/srv/AddTwoInts \
   --publish /chatter=std_msgs/msg/String \
-  --subscribe /scan=sensor_msgs/msg/LaserScan
-# rclnodejs/web listening on ws://localhost:9000/capability (3 capabilities)
-#                also http://localhost:9001/capability (call/publish only)
+  --subscribe /scan=sensor_msgs/msg/LaserScan \
+  --action /fibonacci=test_msgs/action/Fibonacci
+# rclnodejs/web listening on ws://localhost:9000/capability (4 capabilities)
+#                also http://localhost:9001/capability (call/publish/action)
 ```
 
 Or feed the same allow-list from `web.json`:
@@ -45,7 +46,8 @@ Or feed the same allow-list from `web.json`:
   "expose": {
     "call": { "/add_two_ints": "example_interfaces/srv/AddTwoInts" },
     "publish": { "/chatter": "std_msgs/msg/String" },
-    "subscribe": { "/scan": "sensor_msgs/msg/LaserScan" }
+    "subscribe": { "/scan": "sensor_msgs/msg/LaserScan" },
+    "action": { "/fibonacci": "test_msgs/action/Fibonacci" }
   }
 }
 ```
@@ -63,11 +65,13 @@ npx -p rclnodejs rclnodejs-web web.json
 ### Connect
 
 ```ts
+import type {} from 'rclnodejs';
 import { connect } from 'rclnodejs/web'; // or via esm.sh in a <script type="module">
 ```
 
-`connect()` accepts three URL shapes — the SDK picks transport(s)
-from the scheme:
+The type-only import supplies ROS declarations; omit it in JavaScript.
+
+Select transports with `connect()`:
 
 | You want…                          | Pass                                                            |
 | ---------------------------------- | --------------------------------------------------------------- |
@@ -79,6 +83,9 @@ from the scheme:
 A bare `http://` URL auto-derives the WS sibling at the same origin
 (`/capability` path); the `{ http }`-only form disables WS entirely
 and `subscribe()` rejects with `transport_unavailable`.
+
+Actions use SSE with HTTP URLs or `{ http }`, and WS with an explicit
+`{ http, ws }` pair.
 
 ```ts
 const ros = await connect({
@@ -114,11 +121,49 @@ const sub = await ros.subscribe<'std_msgs/msg/String'>('/chatter', (msg) =>
 await sub.close();
 ```
 
+### Actions
+
+Start and expose the matching ROS action server first. For a complete app,
+see the [Fibonacci browser demo](../demo/web/javascript/README.md#fibonacci-actions).
+
+```ts
+const httpClient = await connect({ http: 'http://localhost:9001' });
+try {
+  const goal = await httpClient.action<'test_msgs/action/Fibonacci'>(
+    '/fibonacci',
+    { order: 5 },
+    { onFeedback: (feedback) => console.log(feedback.sequence) }
+  );
+  const result = await goal.result;
+  console.log(goal.status, result.sequence);
+} finally {
+  await httpClient.close();
+}
+```
+
+HTTP actions use POST/SSE via `fetch()`, without `--http-sse`.
+`EventSource` cannot POST goals. Feedback may precede `accepted`.
+Request errors reject `action()`; stream errors reject `goal.result`.
+Check `goal.status`: resolved results may be canceled or aborted.
+
+For cancellation, use the `{ http, ws }` connection above:
+
+```ts
+const goal = await ros.action<'test_msgs/action/Fibonacci'>(
+  '/fibonacci',
+  { order: 10 }
+);
+await goal.cancel();
+console.log(await goal.result, goal.status);
+```
+
+The server may reject cancellation. HTTP `cancel()` rejects with `unsupported_kind`.
+
 ### Lifecycle and cleanup
 
-Each `subscribe()` returns a handle with its own `close()`; the
-top-level `ros.close()` cancels every active subscription and shuts
-down both transports.
+`sub.close()` ends one subscription; `ros.close()` closes all subscriptions
+and transports. Pending HTTP actions reject with `connection_lost`, but
+ROS goals are not canceled.
 
 ```ts
 const sub = await ros.subscribe('/chatter', handler);
@@ -132,7 +177,7 @@ window.addEventListener('beforeunload', () => ros.close());
 
 ## 3. curl recipes (no JavaScript at all)
 
-When `--http-port` is on, every `call` / `publish` is reachable from
+When `--http-port` is on, every `call` / `publish` / `action` is reachable from
 any HTTP client — curl, Postman, AI-agent tool-use, no SDK required.
 With `--http-sse` (or `"http": { "sse": true }`), `subscribe` is also
 reachable over HTTP as a Server-Sent Events stream.
@@ -148,6 +193,11 @@ curl -sS -X POST http://localhost:9001/capability/call/add_two_ints \
 curl -sS -X POST http://localhost:9001/capability/publish/chatter \
   -H 'content-type: application/json' \
   -d '{"data":"hi from curl"}'
+
+# Action (feedback and result over SSE)
+curl --fail-with-body -sS -N http://localhost:9001/capability/action/fibonacci \
+  -H 'content-type: application/json' \
+  -d '{"order":3}'
 
 # Subscribe over Server-Sent Events (needs --http-sse). Streams until
 # you disconnect; -N keeps curl from buffering the event stream.
@@ -183,6 +233,8 @@ the runtime:
 ```bash
 npx -p rclnodejs rclnodejs-web openapi web.json > openapi.json
 ```
+
+SSE schemas describe individual event payloads; API explorers may buffer streams.
 
 See [`demo/web/javascript/`](../demo/web/javascript/) for a full
 walkthrough, including browsing it in Swagger UI.
