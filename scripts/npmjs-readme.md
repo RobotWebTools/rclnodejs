@@ -52,7 +52,7 @@ Prebuilt binaries ship for Ubuntu 22.04 (Humble), 24.04 (Jazzy, Kilted) and 26.0
 - JavaScript examples: [example/](https://github.com/RobotWebTools/rclnodejs/tree/develop/example)
 - TypeScript demos: [demo/typescript/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/typescript)
 - Browser demos: [demo/web/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/web) (typed Web SDK) and [demo/rosocket/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/rosocket) (WebSocket gateway)
-- HTTP/SSE actions: [Fibonacci walkthrough](https://github.com/RobotWebTools/rclnodejs/blob/develop/example/actions/README.md#http-actions-over-sse)
+- HTTP/SSE actions: [Fibonacci demo](https://github.com/RobotWebTools/rclnodejs/blob/develop/demo/web/javascript/README.md#fibonacci-actions)
 - Electron demos: [demo/electron/](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/electron)
 - Companion CLI: [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/)
 
@@ -100,7 +100,7 @@ Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript e
   ); // reply.sum is typed as `${number}n`
   ```
 
-  See the [HTTP/SSE action walkthrough](https://github.com/RobotWebTools/rclnodejs/blob/develop/example/actions/README.md#http-actions-over-sse) for runnable examples.
+  See the [Fibonacci action demo](https://github.com/RobotWebTools/rclnodejs/blob/develop/demo/web/javascript/README.md#fibonacci-actions) for a runnable example.
 
   No SDK needed for subscribe — with the HTTP/SSE transport enabled (`--http-sse`, plus `--http-cors` for cross-origin), any browser streams a live ROS 2 topic via built-in `EventSource`:
 
