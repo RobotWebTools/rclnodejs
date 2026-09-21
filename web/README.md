@@ -19,7 +19,7 @@ For runnable code see [`demo/web/`](../demo/web/):
 | [`demo/web/javascript/`](../demo/web/javascript/) | want a single static page — no build tools, no `npm install` for the page   |
 | [`demo/web/typescript/`](../demo/web/typescript/) | already have a Vite / Next / React / Vue / Svelte project, want full typing |
 
-For HTTP/SSE actions, see the runnable [Fibonacci action walkthrough](../example/actions/README.md#http-actions-over-sse).
+For HTTP/SSE actions, see the [Fibonacci browser demo](../demo/web/javascript/README.md#fibonacci-actions).
 
 ## 1. Server side: stand up the runtime
 
