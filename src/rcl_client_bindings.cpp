@@ -41,6 +41,8 @@ Napi::Value CreateClient(const Napi::CallbackInfo& info) {
   if (ts) {
     rcl_client_t* client =
         reinterpret_cast<rcl_client_t*>(malloc(sizeof(rcl_client_t)));
+    THROW_ERROR_IF_EQUAL(client, nullptr,
+                          "Failed to allocate memory for client.");
     *client = rcl_get_zero_initialized_client();
     rcl_client_options_t client_ops = rcl_client_get_default_options();
     auto qos_profile = GetQoSProfile(info[4]);
