@@ -19,8 +19,6 @@ For runnable code see [`demo/web/`](../demo/web/):
 | [`demo/web/javascript/`](../demo/web/javascript/) | want a single static page — no build tools, no `npm install` for the page   |
 | [`demo/web/typescript/`](../demo/web/typescript/) | already have a Vite / Next / React / Vue / Svelte project, want full typing |
 
-For HTTP/SSE actions, see the [Fibonacci browser demo](../demo/web/javascript/README.md#fibonacci-actions).
-
 ## 1. Server side: stand up the runtime
 
 > `-p rclnodejs` tells npx the `rclnodejs-web` binary lives inside the
@@ -71,11 +69,9 @@ import type {} from 'rclnodejs';
 import { connect } from 'rclnodejs/web'; // or via esm.sh in a <script type="module">
 ```
 
-The type-only import loads ROS declarations and is erased at runtime.
-Omit it in JavaScript.
+The type-only import supplies ROS declarations; omit it in JavaScript.
 
-`connect()` accepts three URL shapes — the SDK picks transport(s)
-from the scheme:
+Select transports with `connect()`:
 
 | You want…                          | Pass                                                            |
 | ---------------------------------- | --------------------------------------------------------------- |
@@ -88,7 +84,7 @@ A bare `http://` URL auto-derives the WS sibling at the same origin
 (`/capability` path); the `{ http }`-only form disables WS entirely
 and `subscribe()` rejects with `transport_unavailable`.
 
-Actions use SSE with HTTP-only endpoints and WebSocket with an explicit
+Actions use SSE with HTTP URLs or `{ http }`, and WS with an explicit
 `{ http, ws }` pair.
 
 ```ts
@@ -127,7 +123,8 @@ await sub.close();
 
 ### Actions
 
-Start and expose the ROS action server before sending a goal.
+Start and expose the matching ROS action server first. For a complete app,
+see the [Fibonacci browser demo](../demo/web/javascript/README.md#fibonacci-actions).
 
 ```ts
 const httpClient = await connect({ http: 'http://localhost:9001' });
@@ -139,48 +136,34 @@ try {
   );
   const result = await goal.result;
   console.log(goal.status, result.sequence);
-} catch (error) {
-  console.error(error);
 } finally {
   await httpClient.close();
 }
 ```
 
-HTTP actions use POST/SSE via `fetch()`; `EventSource` cannot POST goals.
-`--http-sse` is only needed for subscriptions. Feedback may precede `accepted`.
+HTTP actions use POST/SSE via `fetch()`, without `--http-sse`.
+`EventSource` cannot POST goals. Feedback may precede `accepted`.
 Request errors reject `action()`; stream errors reject `goal.result`.
-A resolved result may be canceled or aborted, so check `goal.status`.
+Check `goal.status`: resolved results may be canceled or aborted.
 
-For cancellation, submit the goal over WebSocket:
+For cancellation, use the `{ http, ws }` connection above:
 
 ```ts
-const wsClient = await connect({
-  http: 'http://localhost:9001',
-  ws: 'ws://localhost:9000/capability',
-});
-try {
-  const goal = await wsClient.action<'test_msgs/action/Fibonacci'>(
-    '/fibonacci',
-    { order: 10 },
-    { onFeedback: (feedback) => console.log(feedback.sequence) }
-  );
-  await goal.cancel();
-  const result = await goal.result;
-  console.log(goal.status, result.sequence);
-} finally {
-  await wsClient.close();
-}
+const goal = await ros.action<'test_msgs/action/Fibonacci'>(
+  '/fibonacci',
+  { order: 10 }
+);
+await goal.cancel();
+console.log(await goal.result, goal.status);
 ```
 
-Cancellation depends on server acceptance. HTTP `cancel()` rejects with
-`unsupported_kind`; closing an HTTP stream does not cancel the goal.
+The server may reject cancellation. HTTP `cancel()` rejects with `unsupported_kind`.
 
 ### Lifecycle and cleanup
 
-Each `subscribe()` returns a handle with its own `close()`; the
-top-level `ros.close()` cancels every active subscription and shuts
-down both transports. Pending HTTP actions reject with `connection_lost`;
-the ROS goals are not canceled.
+`sub.close()` ends one subscription; `ros.close()` closes all subscriptions
+and transports. Pending HTTP actions reject with `connection_lost`, but
+ROS goals are not canceled.
 
 ```ts
 const sub = await ros.subscribe('/chatter', handler);
@@ -211,7 +194,7 @@ curl -sS -X POST http://localhost:9001/capability/publish/chatter \
   -H 'content-type: application/json' \
   -d '{"data":"hi from curl"}'
 
-# Action (requires the Fibonacci server; streams feedback and a final result)
+# Action (feedback and result over SSE)
 curl --fail-with-body -sS -N http://localhost:9001/capability/action/fibonacci \
   -H 'content-type: application/json' \
   -d '{"order":3}'
@@ -251,8 +234,7 @@ the runtime:
 npx -p rclnodejs rclnodejs-web openapi web.json > openapi.json
 ```
 
-SSE response schemas describe per-event payloads. Use an SSE-aware client for
-live feedback; API explorers may buffer responses.
+SSE schemas describe individual event payloads; API explorers may buffer streams.
 
 See [`demo/web/javascript/`](../demo/web/javascript/) for a full
 walkthrough, including browsing it in Swagger UI.
