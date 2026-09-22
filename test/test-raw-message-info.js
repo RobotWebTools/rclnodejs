@@ -19,6 +19,7 @@ describe('Raw subscription MessageInfo tests', function () {
   this.timeout(60 * 1000);
 
   let node;
+  let timer;
 
   before(function () {
     return rclnodejs.init();
@@ -33,6 +34,8 @@ describe('Raw subscription MessageInfo tests', function () {
   });
 
   afterEach(function () {
+    clearInterval(timer);
+    timer = undefined;
     node.destroy();
   });
 
@@ -132,7 +135,7 @@ describe('Raw subscription MessageInfo tests', function () {
 
     rclnodejs.spin(node);
 
-    const timer = setInterval(() => {
+    timer = setInterval(() => {
       first.publish('from first');
       second.publish('from second');
     }, 100);
