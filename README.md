@@ -80,8 +80,8 @@ how much glue you want to write.
     from generated ROS interfaces.
   - **Two transports** — WebSocket for all verbs, or HTTP (`--http-port`)
     for calls, publishes, and SSE actions. Action cancellation requires
-    WebSocket. SDK subscriptions use WebSocket; `--http-sse` enables raw
-    HTTP subscriptions.
+    WebSocket and server acceptance. SDK subscriptions use WebSocket;
+    `--http-sse` enables raw HTTP subscriptions.
   - **OpenAPI 3.1** — export service, topic, and action schemas with
     `rclnodejs-web openapi`.
 

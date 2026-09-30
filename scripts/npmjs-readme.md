@@ -88,7 +88,7 @@ Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript e
 
 - **`rclnodejs/web`** — a typed layer over your ROS 2 graph: you allow-list capabilities in `web.json` or via CLI flags; anything else is rejected before it reaches ROS 2. Best for typed web apps and HTTP clients.
   - **Typed SDK** — `call`, `publish`, `subscribe`, and `action`, typed from generated ROS interfaces.
-  - **Two transports** — WebSocket for all verbs, or HTTP (`--http-port`) for calls, publishes, and SSE actions. Action cancellation requires WebSocket. SDK subscriptions use WebSocket; `--http-sse` enables raw HTTP subscriptions.
+  - **Two transports** — WebSocket for all verbs, or HTTP (`--http-port`) for calls, publishes, and SSE actions. Action cancellation requires WebSocket and server acceptance. SDK subscriptions use WebSocket; `--http-sse` enables raw HTTP subscriptions.
   - **OpenAPI 3.1** — export service, topic, and action schemas with `rclnodejs-web openapi`.
 
   ```ts

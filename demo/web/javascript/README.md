@@ -6,6 +6,10 @@ A single static HTML page that talks to a real ROS 2 graph — just
 
 ## Run it (two shells)
 
+First, source ROS 2 and run `npm install` at the repository root to prepare
+the runtime dependencies, native addon and generated interfaces. No separate
+installation is needed for the static page.
+
 ```bash
 cd demo/web/javascript
 ```
@@ -64,9 +68,13 @@ then the final sequence and status.
 ```js
 const client = await connect({ http: 'http://localhost:9001' });
 try {
-  const goal = await client.action('/fibonacci', { order: 5 }, {
-    onFeedback: (feedback) => console.log(feedback.sequence),
-  });
+  const goal = await client.action(
+    '/fibonacci',
+    { order: 5 },
+    {
+      onFeedback: (feedback) => console.log(feedback.sequence),
+    }
+  );
   console.log(await goal.result, goal.status);
 } finally {
   await client.close();
@@ -75,6 +83,8 @@ try {
 
 The panel's `{ http }` client uses `fetch()` for SSE actions. Topic
 subscriptions remain on WebSocket; `sse: true` is not needed for actions.
+Check `goal.status` after awaiting `goal.result`: canceled or aborted goals
+can also return results.
 
 ## Same capability, no SDK
 
@@ -94,6 +104,9 @@ curl -N http://localhost:9001/capability/subscribe/web_demo_chatter
 # event: message
 # data: {"data":"hi from curl"}
 ```
+
+The topic stream waits for messages; publish from the page or a ROS node in
+another shell while curl is listening.
 
 The demo enables SSE + CORS (`new HttpTransport({ sse: true, cors: true
 })`), so the same endpoints also work from a plain browser
@@ -140,7 +153,8 @@ For CLI mode, also run a `/fibonacci` server using
 
 The same `web.json` also documents itself as an OpenAPI 3.1 document — a
 one-shot subcommand that prints it and exits, without starting any
-transport or calling `rclnodejs.init()`.
+transport or calling `rclnodejs.init()`. It still requires the sourced ROS
+environment and available interface definitions.
 
 The export includes action schemas. Swagger UI may buffer SSE; use the
 panel or curl for live feedback.

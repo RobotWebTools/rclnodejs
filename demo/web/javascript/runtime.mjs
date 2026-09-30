@@ -21,7 +21,8 @@ import rclnodejs from '../../../index.js';
 //   import { createRuntime, WebSocketTransport, HttpTransport } from
 //     'rclnodejs/web/server';
 // Inside this in-repo demo we use the relative path so the file runs
-// straight out of a fresh git clone, no `npm install` required.
+// from a checkout after the repository dependencies are installed;
+// no separate demo installation or dist build is required.
 import {
   createRuntime,
   WebSocketTransport,
