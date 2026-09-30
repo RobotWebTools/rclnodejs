@@ -1,5 +1,5 @@
 {
-  "$comment": "Sample rclnodejs/web config consumed by `npx rclnodejs-web web.json`. Every key is optional; the defaults shown match the CLI defaults.",
+  "$comment": "Sample rclnodejs/web config consumed by `npx rclnodejs-web web.json`. This local demo enables wildcard CORS explicitly; its settings are not a list of CLI defaults.",
   "port": 9000,
   "path": "/capability",
   "node": "rclnodejs_web_ts_demo",

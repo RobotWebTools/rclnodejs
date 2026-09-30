@@ -5,9 +5,10 @@ SDK so request, reply, message, and action shapes are visible in your IDE.
 
 ```ts
 const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
-  '/add_two_ints', { a: '2n', b: '40n' }
+  '/add_two_ints',
+  { a: '2n', b: '40n' }
 );
-// reply.sum is typed as `${number}n` — no hand-written types, no codegen.
+// reply.sum is typed as `${number}n` — reuses generated ROS declarations.
 ```
 
 ## Run it (two shells)
@@ -76,9 +77,9 @@ try {
 }
 ```
 
-The type-only import supplies ROS declarations without a native browser
-dependency. A dedicated `{ http }` client streams actions; subscriptions
-stay on WebSocket.
+The type-only import supplies generated ROS declarations without loading the
+native addon in the browser or requiring additional frontend codegen.
+A dedicated `{ http }` client streams actions; subscriptions stay on WebSocket.
 
 - WebSocket: **Cancel Goal** requests cancellation.
 - HTTP/SSE: **Stop Streaming** disconnects without canceling the ROS goal.
@@ -105,7 +106,7 @@ npx rclnodejs-web web.json
 
 # plus the nodes the demo expects:
 ros2 run demo_nodes_cpp add_two_ints_server
-# (and any std_msgs/String publisher on /web_demo_tick)
+# (and any std_msgs/msg/String publisher on /web_demo_tick)
 ```
 
 For CLI mode, also run a `/fibonacci` server using
@@ -123,8 +124,8 @@ SSE schemas describe per-event data; API explorers may buffer the stream.
 
 ## Other npm scripts
 
-| Command             | What it does                                         |
-| ------------------- | ---------------------------------------------------- |
-| `npm run typecheck` | `tsc --noEmit` — silent on success                   |
-| `npm run build`     | static bundle in `dist/`                             |
-| `npm run preview`   | serve the built `dist/`                              |
+| Command             | What it does                       |
+| ------------------- | ---------------------------------- |
+| `npm run typecheck` | `tsc --noEmit` — silent on success |
+| `npm run build`     | static bundle in `dist/`           |
+| `npm run preview`   | serve the built `dist/`            |
