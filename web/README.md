@@ -26,8 +26,6 @@ The table maps ROS 2 communication features to the roles a web client can
 perform and the web transport each role supports. The action rows below
 describe the **2.3.0 implementation**; use a checkout or package that includes
 it (see the [TypeScript demo setup](../demo/web/typescript/README.md#run-it-two-shells)).
-This is an implementation matrix, not a claim that every item in the
-[web runtime roadmap](../docs/WEB_RUNTIME_ROADMAP.md) has shipped.
 
 ### ROS 2 roles and transport support
 
