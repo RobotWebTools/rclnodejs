@@ -16,6 +16,7 @@ h2 {
 .endpoint {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.9em;
+  overflow-wrap: anywhere;
 }
 input,
 button {
@@ -25,18 +26,39 @@ button {
 input[type='text'],
 input[type='number'] {
   width: 8em;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .panel {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1em;
   align-items: start;
 }
 .controls {
   padding: 0.25em 0;
+  min-width: 0;
 }
 .controls .row {
   margin-bottom: 0.5em;
+}
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+.action-buttons button {
+  min-height: 44px;
+}
+.action-result {
+  display: block;
+  min-height: 3em;
+  margin: 0.5em 0;
+  font-family: monospace;
+  overflow-wrap: anywhere;
+}
+#actionStatus {
+  min-width: 7em;
 }
 .log {
   background: #1e1e1e;
@@ -48,6 +70,7 @@ input[type='number'] {
   max-height: 12em;
   overflow: auto;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 /* Don't render the dark log box until something is logged. */
 .log:empty {
@@ -126,6 +149,6 @@ pre.code {
 }
 @media (max-width: 720px) {
   .panel {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }

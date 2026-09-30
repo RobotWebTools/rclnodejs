@@ -1,12 +1,13 @@
 <!doctype html>
 <!--
   rclnodejs/web demo. Open via http://localhost:8080/ once both
-  `node runtime.cjs` (rclnodejs/web runtime) and `node static.cjs`
+  `node runtime.mjs` (rclnodejs/web runtime) and `node static.mjs`
   (page server) are running — see README.md.
 -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>rclnodejs/web — zero-build ROS 2 in a single HTML page</title>
     <style>
       :root {
@@ -27,6 +28,7 @@
       .endpoint {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 0.9em;
+        overflow-wrap: anywhere;
       }
       input,
       button {
@@ -36,18 +38,39 @@
       input[type='text'],
       input[type='number'] {
         width: 8em;
+        max-width: 100%;
+        box-sizing: border-box;
       }
       .panel {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 1em;
         align-items: start;
       }
       .controls {
         padding: 0.25em 0;
+        min-width: 0;
       }
       .controls .row {
         margin-bottom: 0.5em;
+      }
+      .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5em;
+      }
+      .action-buttons button {
+        min-height: 44px;
+      }
+      .action-result {
+        display: block;
+        min-height: 3em;
+        margin: 0.5em 0;
+        font-family: monospace;
+        overflow-wrap: anywhere;
+      }
+      #actionStatus {
+        min-width: 7em;
       }
       .log {
         background: #1e1e1e;
@@ -59,6 +82,7 @@
         max-height: 12em;
         overflow: auto;
         white-space: pre-wrap;
+        overflow-wrap: anywhere;
       }
       /* Don't render the dark log box until something is logged. */
       .log:empty {
@@ -134,7 +158,7 @@
       }
       @media (max-width: 720px) {
         .panel {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
         }
       }
     </style>
@@ -147,7 +171,7 @@
     <p>
       A single static HTML page that talks to a real ROS 2 graph — one Node
       process exposes a typed, capability-allow-listed gateway, the browser
-      drives it with three verbs.
+      drives it with four verbs.
     </p>
     <p>
       Endpoint:
@@ -158,11 +182,11 @@
       <strong>Transport:</strong>
       <label
         ><input type="radio" name="transport" value="ws" checked /> WebSocket
-        (call+publish+subscribe)</label
+        (call+publish+subscribe+action)</label
       >
       <label
         ><input type="radio" name="transport" value="http" /> HTTP
-        (call+publish; subscribe falls through to WS sibling)</label
+        (call+publish; actions via SSE; subscribe via WS)</label
       >
       <div style="margin-top: 0.4em; font-size: 0.85em; color: #666">
         Same registry, same allow-list — the SDK picks the transport from the
@@ -277,9 +301,9 @@ console.log(reply.sum); <span class="com">// '42n'</span></pre>
       — curl, Postman, an AI agent… no JavaScript required. With
       <code>sse: true</code> on the runtime (set in this demo's
       <code>runtime.mjs</code>), <code>subscribe</code> is also reachable as a
-      Server-Sent Events stream — handy for clients that can't hold a
-      WebSocket open. Browser apps still prefer the WebSocket transport, which
-      multiplexes many topics on one connection.
+      Server-Sent Events stream — handy for clients that can't hold a WebSocket
+      open. Browser apps still prefer the WebSocket transport, which multiplexes
+      many topics on one connection.
     </p>
     <pre
       class="code"
@@ -317,15 +341,15 @@ curl -sS -X POST http://localhost:9001/capability/call/dangerous \
       The same SSE stream the <code>curl</code> example above reads is a
       first-class browser API: <code>EventSource</code>. No SDK, no WebSocket —
       just a plain HTTP GET the browser keeps open and auto-reconnects. This
-      works cross-origin because the runtime sends CORS headers
-      (<code>new HttpTransport({ sse: true, cors: true })</code>). For
-      multiplexing many topics on one connection, the WebSocket transport in
-      section 2 is still the better fit.
+      works cross-origin because the runtime sends CORS headers (<code
+        >new HttpTransport({ sse: true, cors: true })</code
+      >). For multiplexing many topics on one connection, the WebSocket
+      transport in section 2 is still the better fit.
     </p>
     <p style="font-size: 0.9em; color: #555">
-      The topic box defaults to <code>/web_demo_chatter</code> — the same
-      topic panels 2 and 3 use, so a publish from panel 3 streams in here at
-      the same time it reaches the WebSocket subscriber. Point the box at
+      The topic box defaults to <code>/web_demo_chatter</code> — the same topic
+      panels 2 and 3 use, so a publish from panel 3 streams in here at the same
+      time it reaches the WebSocket subscriber. Point the box at
       <code>/topic</code> instead to subscribe to an external ROS 2 publisher
       (see the README's <em>publisher example</em> pairing).
     </p>
@@ -371,19 +395,21 @@ es.close();</pre>
     <p style="font-size: 0.9em; color: #555">
       The <code>curl</code> commands in section 5 translate one-to-one to the
       browser's <code>fetch()</code> API — same method, URL, headers and JSON
-      body. Because the runtime sends CORS headers
-      (<code>new HttpTransport({ cors: true })</code>), these cross-origin
-      requests succeed straight from the page (served on <code>:8080</code>,
-      runtime on <code>:9001</code>). <code>call</code> returns
-      <code>200</code> + a JSON reply; <code>publish</code> returns
-      <code>204 No Content</code>. The publish lands on the same
-      <code>/web_demo_chatter</code> topic as panels 2 and 3, so it also shows
-      up in their logs.
+      body. Because the runtime sends CORS headers (<code
+        >new HttpTransport({ cors: true })</code
+      >), these cross-origin requests succeed straight from the page (served on
+      <code>:8080</code>, runtime on <code>:9001</code>).
+      <code>call</code> returns <code>200</code> + a JSON reply;
+      <code>publish</code> returns <code>204 No Content</code>. The publish
+      lands on the same <code>/web_demo_chatter</code> topic as panels 2 and 3,
+      so it also shows up in their logs.
     </p>
     <div class="panel">
       <div class="controls">
         <div class="row">
-          <button id="fetchCallBtn">fetch call <code>/add_two_ints</code></button>
+          <button id="fetchCallBtn">
+            fetch call <code>/add_two_ints</code>
+          </button>
           <button id="fetchPubBtn">
             fetch publish <code>/web_demo_chatter</code>
           </button>
@@ -416,6 +442,66 @@ console.log(reply.sum); <span class="com">// '42n'</span>
 );</pre>
     </div>
 
+    <h2 id="actionTitle">8. Fibonacci action - <code>/fibonacci</code></h2>
+    <div class="panel" aria-labelledby="actionTitle">
+      <form id="actionForm" class="controls">
+        <div class="row">
+          <label for="actionOrder">Order</label>
+          <input
+            id="actionOrder"
+            type="number"
+            min="2"
+            max="12"
+            step="1"
+            value="8"
+            required
+          />
+          <output id="actionStatus" class="status" aria-live="polite"
+            >Idle</output
+          >
+        </div>
+        <div class="row action-buttons">
+          <button id="actionSendBtn" type="submit" disabled>Send Goal</button>
+          <button
+            id="actionCancelBtn"
+            type="button"
+            disabled
+            title="Request cancellation over WebSocket"
+          >
+            Cancel Goal
+          </button>
+          <button
+            id="actionStopBtn"
+            type="button"
+            disabled
+            title="Disconnect the HTTP stream; the ROS goal continues"
+          >
+            Stop Streaming
+          </button>
+        </div>
+        <label for="actionResult">Result</label>
+        <output id="actionResult" class="action-result">-</output>
+        <div
+          id="actionLog"
+          class="log"
+          role="log"
+          aria-label="Action events"
+        ></div>
+      </form>
+      <pre class="code">
+const client = await connect({ http: 'http://localhost:9001' });
+try {
+  const goal = await client.action('/fibonacci', { order: 8 }, {
+    onFeedback: (feedback) =&gt; console.log(feedback.sequence),
+  });
+  const result = await goal.result;
+  console.log(goal.status, result.sequence);
+} finally {
+  await client.close();
+}</pre
+      >
+    </div>
+
     <p style="font-size: 0.9em; color: #555">
       Prefer a browsable API reference to reading code panels? The same
       capabilities as an OpenAPI 3.1 document, viewable in
@@ -425,13 +511,14 @@ console.log(reply.sum); <span class="com">// '42n'</span>
     </p>
 
     <script type="module">
-      import { connect } from '/sdk/index.js';
+      import { connect, RosClient } from '/sdk/index.js';
 
       const host = location.hostname || 'localhost';
+      const parameters = new URLSearchParams(location.search);
       const ENDPOINTS = {
-        ws: `ws://${host}:9000/capability`,
+        ws: `ws://${host}:${parameters.get('wsPort') || 9000}/capability`,
         // HTTP base for call/publish.
-        http: `http://${host}:9001`,
+        http: `http://${host}:${parameters.get('httpPort') || 9001}`,
       };
       // Pass Form C ({http, ws}) when the user picks HTTP so subscribe
       // still reaches the WS runtime on :9000. The SDK's auto-derived
@@ -466,32 +553,176 @@ console.log(reply.sum); <span class="com">// '42n'</span>
 
       let ros;
       let chatterSub;
+      let mode = 'ws';
+      let connectionVersion = 0;
+      let pageCleanup = Promise.resolve();
+      let activeAction;
+      const actionForm = document.getElementById('actionForm');
+      const actionOrder = document.getElementById('actionOrder');
+      const actionSendBtn = document.getElementById('actionSendBtn');
+      const actionCancelBtn = document.getElementById('actionCancelBtn');
+      const actionStopBtn = document.getElementById('actionStopBtn');
+      const actionResult = document.getElementById('actionResult');
+
+      function setActionStatus(text, cls = '') {
+        const output = document.getElementById('actionStatus');
+        output.textContent = text;
+        output.className = `status ${cls}`;
+      }
+
+      function updateActionControls() {
+        actionSendBtn.disabled = !ros || !!activeAction;
+        actionOrder.disabled = !!activeAction;
+        actionCancelBtn.disabled =
+          !activeAction?.goal ||
+          activeAction.mode !== 'ws' ||
+          activeAction.cancelPending;
+        actionCancelBtn.title =
+          mode === 'http'
+            ? 'HTTP actions cannot be canceled; use WebSocket'
+            : 'Request cancellation over WebSocket';
+        actionStopBtn.disabled = !activeAction || activeAction.mode !== 'http';
+        actionForm.setAttribute('aria-busy', String(!!activeAction));
+      }
+
+      async function detachAction() {
+        const current = activeAction;
+        if (!current) return;
+        activeAction = undefined;
+        setActionStatus('Detached');
+        log('actionLog', 'Disconnected locally; the ROS goal may continue.');
+        updateActionControls();
+        await current.client.close();
+      }
+
+      actionForm.onsubmit = async (event) => {
+        event.preventDefault();
+        if (!ros || activeAction || !actionForm.reportValidity()) return;
+        const order = actionOrder.valueAsNumber;
+        if (!Number.isInteger(order) || order < 2 || order > 12) return;
+        const client = new RosClient(
+          mode === 'http' ? { http: ENDPOINTS.http } : ENDPOINTS.ws
+        );
+        const current = { client, mode, goal: undefined, cancelPending: false };
+        activeAction = current;
+        document.getElementById('actionLog').textContent = '';
+        actionResult.textContent = '-';
+        setActionStatus('Submitting');
+        updateActionControls();
+        try {
+          await client.connect();
+          if (activeAction !== current) return;
+          const goal = await client.action(
+            '/fibonacci',
+            { order },
+            {
+              onFeedback(feedback) {
+                if (activeAction !== current) return;
+                log(
+                  'actionLog',
+                  `Feedback: ${JSON.stringify(feedback.sequence)}`
+                );
+              },
+            }
+          );
+          if (activeAction !== current) {
+            void goal.result.catch(() => {});
+            return;
+          }
+          current.goal = goal;
+          setActionStatus('Running');
+          updateActionControls();
+          const result = await goal.result;
+          if (activeAction !== current) return;
+          actionResult.textContent = JSON.stringify(result.sequence);
+          setActionStatus(
+            goal.status || 'unknown',
+            goal.status === 'succeeded' ? 'ok' : ''
+          );
+          log(
+            'actionLog',
+            `Result: ${goal.status}`,
+            goal.status === 'succeeded' ? 'ok' : ''
+          );
+        } catch (error) {
+          if (activeAction === current) {
+            setActionStatus('Failed', 'err');
+            log(
+              'actionLog',
+              `${error.code || 'action_failed'}: ${error.message}`,
+              'err'
+            );
+          }
+        } finally {
+          if (activeAction === current) {
+            activeAction = undefined;
+            updateActionControls();
+          }
+          await client.close();
+        }
+      };
+
+      actionCancelBtn.onclick = async () => {
+        const current = activeAction;
+        if (!current?.goal || current.mode !== 'ws' || current.cancelPending)
+          return;
+        current.cancelPending = true;
+        setActionStatus('Canceling');
+        updateActionControls();
+        try {
+          await current.goal.cancel();
+        } catch (error) {
+          if (activeAction !== current) return;
+          current.cancelPending = false;
+          setActionStatus('Running');
+          log('actionLog', `Cancel failed: ${error.message}`, 'err');
+          updateActionControls();
+        }
+      };
+      actionStopBtn.onclick = () => detachAction();
 
       async function teardown() {
-        if (chatterSub) {
+        const previousSub = chatterSub;
+        const previousClient = ros;
+        chatterSub = null;
+        ros = null;
+        updateActionControls();
+        await detachAction();
+        if (previousSub) {
           try {
-            await chatterSub.close();
+            await previousSub.close();
           } catch (_) {}
-          chatterSub = null;
           document.getElementById('subBtn').disabled = false;
           document.getElementById('unsubBtn').disabled = true;
         }
-        if (ros) {
+        if (previousClient) {
           try {
-            await ros.close();
+            await previousClient.close();
           } catch (_) {}
-          ros = null;
         }
       }
 
-      async function reconnect(mode) {
+      async function reconnect(nextMode) {
+        const version = ++connectionVersion;
+        mode = nextMode;
+        await pageCleanup;
+        if (version !== connectionVersion) return;
         await teardown();
+        if (version !== connectionVersion) return;
         setEndpoint(mode);
         setStatus(`connecting (${mode})…`);
+        let connected;
         try {
-          ros = await connect(connectArg(mode));
+          connected = await connect(connectArg(mode));
+          if (version !== connectionVersion) {
+            await connected.close();
+            return;
+          }
+          ros = connected;
           setStatus(`connected (${mode})`, 'ok');
+          updateActionControls();
         } catch (e) {
+          if (version !== connectionVersion) return;
           setStatus(`failed: ${e.message || e}`, 'err');
           return;
         }
@@ -499,10 +730,13 @@ console.log(reply.sum); <span class="com">// '42n'</span>
         // reconnect. Over HTTP the explicit { ws } in connectArg() makes
         // this work — see comment above.
         try {
-          await ros.subscribe('/web_demo_chatter', (msg) =>
-            log('chatLog', `<- ${msg.data}`)
+          await connected.subscribe(
+            '/web_demo_chatter',
+            (msg) =>
+              version === connectionVersion && log('chatLog', `<- ${msg.data}`)
           );
         } catch (e) {
+          if (version !== connectionVersion) return;
           log('chatLog', `subscribe failed: ${e.message} (${e.code})`, 'err');
         }
       }
@@ -583,6 +817,7 @@ console.log(reply.sum); <span class="com">// '42n'</span>
         const sseCloseBtn = document.getElementById('sseCloseBtn');
         const sseTopic = document.getElementById('sseTopic');
         let es;
+        let resumeEventSource = false;
         const closeEs = () => {
           if (es) {
             es.close();
@@ -592,7 +827,8 @@ console.log(reply.sum); <span class="com">// '42n'</span>
           sseCloseBtn.disabled = true;
           sseTopic.disabled = false;
         };
-        sseBtn.onclick = () => {
+        const openEs = () => {
+          resumeEventSource = false;
           closeEs();
           // Accept '/topic' or 'topic'; the URL path carries the bare name.
           const name = (sseTopic.value || '/web_demo_chatter')
@@ -625,10 +861,27 @@ console.log(reply.sum); <span class="com">// '42n'</span>
             }
           });
         };
+        sseBtn.onclick = openEs;
         sseCloseBtn.onclick = () => {
+          resumeEventSource = false;
           closeEs();
           log('sseLog', 'closed', 'ok');
         };
+        window.addEventListener('pagehide', (event) => {
+          connectionVersion++;
+          resumeEventSource = event.persisted && !!es;
+          closeEs();
+          setStatus('disconnected');
+          pageCleanup = Promise.all([pageCleanup, teardown()]).then(() => {});
+        });
+        window.addEventListener('pageshow', async (event) => {
+          if (!event.persisted) return;
+          const version = connectionVersion;
+          await pageCleanup;
+          if (version !== connectionVersion) return;
+          if (resumeEventSource) openEs();
+          await reconnect(mode);
+        });
 
         // Native fetch() — call/publish straight to the HTTP transport,
         // no SDK and no WebSocket. CORS on the runtime lets these

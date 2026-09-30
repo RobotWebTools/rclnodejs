@@ -12,16 +12,31 @@
 // MessagesMap / ServicesMap, looked up by the ROS interface name
 // passed as a single string generic at the call site.
 
-import { connect, type RosClient, type Subscription } from 'rclnodejs/web';
+import type {} from 'rclnodejs';
+import {
+  connect,
+  RosClient,
+  type ActionHandle,
+  type ActionResult,
+  type Subscription,
+} from 'rclnodejs/web';
 import './style.css';
 
 type Mode = 'ws' | 'http';
 
+interface ActionRun {
+  client: RosClient;
+  mode: Mode;
+  goal?: ActionHandle<ActionResult<'example_interfaces/action/Fibonacci'>>;
+  cancelPending: boolean;
+}
+
 const HOST = location.hostname || 'localhost';
+const parameters = new URLSearchParams(location.search);
 const ENDPOINTS: Record<Mode, string> = {
-  ws: `ws://${HOST}:9000/capability`,
+  ws: `ws://${HOST}:${parameters.get('wsPort') || 9000}/capability`,
   // HTTP base for call/publish.
-  http: `http://${HOST}:9001`,
+  http: `http://${HOST}:${parameters.get('httpPort') || 9001}`,
 };
 // Pass Form C ({http, ws}) when the user picks HTTP so subscribe still
 // reaches the WS runtime on :9000. The SDK's auto-derived sibling would
@@ -64,36 +79,178 @@ function log(id: string, text: string, cls: 'ok' | 'err' | '' = ''): void {
 async function main(): Promise<void> {
   let ros: RosClient | undefined;
   let tickSub: Subscription | undefined;
+  let mode: Mode = 'ws';
+  let connectionVersion = 0;
+  let pageCleanup: Promise<void> = Promise.resolve();
+  let activeAction: ActionRun | undefined;
+  const actionForm = $<HTMLFormElement>('actionForm');
+  const actionOrder = $<HTMLInputElement>('actionOrder');
+  const actionSendBtn = $<HTMLButtonElement>('actionSendBtn');
+  const actionCancelBtn = $<HTMLButtonElement>('actionCancelBtn');
+  const actionStopBtn = $<HTMLButtonElement>('actionStopBtn');
+  const actionResult = $('actionResult');
+
+  function setActionStatus(text: string, cls: 'ok' | 'err' | '' = ''): void {
+    const output = $('actionStatus');
+    output.textContent = text;
+    output.className = `status ${cls}`;
+  }
+
+  function updateActionControls(): void {
+    actionSendBtn.disabled = !ros || !!activeAction;
+    actionOrder.disabled = !!activeAction;
+    actionCancelBtn.disabled =
+      !activeAction?.goal ||
+      activeAction.mode !== 'ws' ||
+      activeAction.cancelPending;
+    actionCancelBtn.title =
+      mode === 'http'
+        ? 'HTTP actions cannot be canceled; use WebSocket'
+        : 'Request cancellation over WebSocket';
+    actionStopBtn.disabled = !activeAction || activeAction.mode !== 'http';
+    actionForm.setAttribute('aria-busy', String(!!activeAction));
+  }
+
+  async function detachAction(): Promise<void> {
+    const current = activeAction;
+    if (!current) return;
+    activeAction = undefined;
+    setActionStatus('Detached');
+    log('actionLog', 'Disconnected locally; the ROS goal may continue.');
+    updateActionControls();
+    await current.client.close();
+  }
+
+  actionForm.onsubmit = async (event): Promise<void> => {
+    event.preventDefault();
+    if (!ros || activeAction || !actionForm.reportValidity()) return;
+    const order = actionOrder.valueAsNumber;
+    if (!Number.isInteger(order) || order < 2 || order > 12) return;
+    const client = new RosClient(
+      mode === 'http' ? { http: ENDPOINTS.http } : ENDPOINTS.ws
+    );
+    const current: ActionRun = { client, mode, cancelPending: false };
+    activeAction = current;
+    $('actionLog').textContent = '';
+    actionResult.textContent = '-';
+    setActionStatus('Submitting');
+    updateActionControls();
+    try {
+      await client.connect();
+      if (activeAction !== current) return;
+      const goal = await client.action<'example_interfaces/action/Fibonacci'>(
+        '/fibonacci',
+        { order },
+        {
+          onFeedback(feedback) {
+            if (activeAction !== current) return;
+            log('actionLog', `Feedback: ${JSON.stringify(feedback.sequence)}`);
+          },
+        }
+      );
+      if (activeAction !== current) {
+        void goal.result.catch(() => {});
+        return;
+      }
+      current.goal = goal;
+      setActionStatus('Running');
+      updateActionControls();
+      const result = await goal.result;
+      if (activeAction !== current) return;
+      actionResult.textContent = JSON.stringify(result.sequence);
+      setActionStatus(
+        goal.status || 'unknown',
+        goal.status === 'succeeded' ? 'ok' : ''
+      );
+      log(
+        'actionLog',
+        `Result: ${goal.status}`,
+        goal.status === 'succeeded' ? 'ok' : ''
+      );
+    } catch (error) {
+      if (activeAction === current) {
+        const failure = error as { code?: string; message?: string };
+        setActionStatus('Failed', 'err');
+        log(
+          'actionLog',
+          `${failure.code || 'action_failed'}: ${failure.message}`,
+          'err'
+        );
+      }
+    } finally {
+      if (activeAction === current) {
+        activeAction = undefined;
+        updateActionControls();
+      }
+      await client.close();
+    }
+  };
+
+  actionCancelBtn.onclick = async (): Promise<void> => {
+    const current = activeAction;
+    if (!current?.goal || current.mode !== 'ws' || current.cancelPending)
+      return;
+    current.cancelPending = true;
+    setActionStatus('Canceling');
+    updateActionControls();
+    try {
+      await current.goal.cancel();
+    } catch (error) {
+      if (activeAction !== current) return;
+      current.cancelPending = false;
+      setActionStatus('Running');
+      log('actionLog', `Cancel failed: ${String(error)}`, 'err');
+      updateActionControls();
+    }
+  };
+  actionStopBtn.onclick = () => detachAction();
 
   async function teardown(): Promise<void> {
-    if (tickSub) {
+    const previousSub = tickSub;
+    const previousClient = ros;
+    tickSub = undefined;
+    ros = undefined;
+    updateActionControls();
+    await detachAction();
+    if (previousSub) {
       try {
-        await tickSub.close();
+        await previousSub.close();
       } catch {
         /* noop */
       }
-      tickSub = undefined;
       $<HTMLButtonElement>('subBtn').disabled = false;
       $<HTMLButtonElement>('unsubBtn').disabled = true;
     }
-    if (ros) {
+    if (previousClient) {
       try {
-        await ros.close();
+        await previousClient.close();
       } catch {
         /* noop */
       }
-      ros = undefined;
     }
   }
 
-  async function reconnect(mode: Mode): Promise<void> {
+  async function reconnect(nextMode: Mode): Promise<void> {
+    const version = ++connectionVersion;
+    mode = nextMode;
+    await pageCleanup;
+    if (version !== connectionVersion) return;
     await teardown();
+    if (version !== connectionVersion) return;
     setEndpoint(mode);
     setStatus(`connecting (${mode})…`);
+    let connected: RosClient;
     try {
-      ros = await connect(connectArg(mode));
+      connected = await connect(connectArg(mode));
+      if (version !== connectionVersion) {
+        await connected.close();
+        return;
+      }
+      ros = connected;
       setStatus(`connected (${mode})`, 'ok');
+      updateActionControls();
     } catch (e) {
+      if (version !== connectionVersion) return;
       setStatus(`failed: ${String(e)}`, 'err');
       return;
     }
@@ -101,10 +258,13 @@ async function main(): Promise<void> {
     // Always-on chatter subscription; subscribe always uses WS — the
     // explicit { ws } in connectArg() makes this work in HTTP mode too.
     try {
-      await ros.subscribe<'std_msgs/msg/String'>('/web_demo_chatter', (msg) =>
-        log('chatLog', `<- ${msg.data}`)
+      await connected.subscribe<'std_msgs/msg/String'>(
+        '/web_demo_chatter',
+        (msg) =>
+          version === connectionVersion && log('chatLog', `<- ${msg.data}`)
       );
     } catch (e) {
+      if (version !== connectionVersion) return;
       const err = e as { message?: string; code?: string };
       log('chatLog', `subscribe failed: ${err.message} (${err.code})`, 'err');
     }
@@ -194,6 +354,20 @@ async function main(): Promise<void> {
       reconnect((e.target as HTMLInputElement).value as Mode)
     );
   }
+
+  window.addEventListener('pagehide', () => {
+    connectionVersion++;
+    setStatus('disconnected');
+    pageCleanup = Promise.all([pageCleanup, teardown()]).then(() => {});
+  });
+
+  window.addEventListener('pageshow', async (event) => {
+    if (!event.persisted) return;
+    const version = connectionVersion;
+    await pageCleanup;
+    if (version !== connectionVersion) return;
+    await reconnect(mode);
+  });
 
   await reconnect('ws');
 }
