@@ -14,6 +14,7 @@
 
 import assert from 'assert';
 import rclnodejs from '../index.js';
+import native from '../lib/native_loader.js';
 
 describe('MessageInfo tests', function () {
   this.timeout(60 * 1000);
@@ -34,6 +35,30 @@ describe('MessageInfo tests', function () {
 
   afterEach(function () {
     node.destroy();
+  });
+
+  it('returns undefined from both typed take paths when no message is available', function () {
+    const subscription = node.createSubscription(
+      'std_msgs/msg/String',
+      'empty_mi_test_topic',
+      () => {}
+    );
+    const Message = rclnodejs.require('std_msgs/msg/String');
+    const message = new Message();
+    const buffer = message.toRawROS();
+
+    try {
+      assert.strictEqual(
+        native.rclTake(subscription.handle, buffer),
+        undefined
+      );
+      assert.strictEqual(
+        native.rclTakeWithInfo(subscription.handle, buffer),
+        undefined
+      );
+    } finally {
+      Message.destroyRawROS(message);
+    }
   });
 
   it('should receive MessageInfo when callback has 2 parameters', function (done) {
@@ -88,13 +113,18 @@ describe('MessageInfo tests', function () {
       'mi_test_topic_2'
     );
 
-    node.createSubscription('std_msgs/msg/String', 'mi_test_topic_2', (msg) => {
-      assert.strictEqual(typeof msg, 'object');
-      assert.strictEqual(msg.data, 'Hello no info');
-      // msg should be the message, not MessageInfo
-      assert.ok(!msg.sourceTimestamp, 'should not have sourceTimestamp');
-      done();
-    });
+    node.createSubscription(
+      'std_msgs/msg/String',
+      'mi_test_topic_2',
+      function (msg) {
+        assert.strictEqual(arguments.length, 1);
+        assert.strictEqual(typeof msg, 'object');
+        assert.strictEqual(msg.data, 'Hello no info');
+        // msg should be the message, not MessageInfo
+        assert.ok(!msg.sourceTimestamp, 'should not have sourceTimestamp');
+        done();
+      }
+    );
 
     rclnodejs.spin(node);
 

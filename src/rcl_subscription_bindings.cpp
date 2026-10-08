@@ -59,9 +59,8 @@ Napi::Object MessageInfoToObject(Napi::Env env,
   return js_info;
 }
 
-}  // namespace
-
-Napi::Value RclTake(const Napi::CallbackInfo& info) {
+Napi::Value TakeMessage(const Napi::CallbackInfo& info,
+                        bool wants_message_info) {
   Napi::Env env = info.Env();
 
   RclHandle* subscription_handle =
@@ -69,38 +68,18 @@ Napi::Value RclTake(const Napi::CallbackInfo& info) {
   rcl_subscription_t* subscription =
       reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
   void* msg_taken = info[1].As<Napi::Buffer<char>>().Data();
-  rcl_ret_t ret = rcl_take(subscription, msg_taken, nullptr, nullptr);
-
-  if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
-    std::string error_string = rcl_get_error_string().str;
-    rcl_reset_error();
-    Napi::Error::New(env, error_string).ThrowAsJavaScriptException();
-    return Napi::Boolean::New(env, false);
-  }
-
-  if (ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
-    return Napi::Boolean::New(env, true);
-  }
-
-  return env.Undefined();
-}
-
-Napi::Value RclTakeWithInfo(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-
-  RclHandle* subscription_handle =
-      RclHandle::Unwrap(info[0].As<Napi::Object>());
-  rcl_subscription_t* subscription =
-      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
-  void* msg_taken = info[1].As<Napi::Buffer<char>>().Data();
-
   rmw_message_info_t message_info = rmw_get_zero_initialized_message_info();
-  rcl_ret_t ret = rcl_take(subscription, msg_taken, &message_info, nullptr);
+  rcl_ret_t ret =
+      rcl_take(subscription, msg_taken,
+               wants_message_info ? &message_info : nullptr, nullptr);
 
   if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
     std::string error_string = rcl_get_error_string().str;
     rcl_reset_error();
     Napi::Error::New(env, error_string).ThrowAsJavaScriptException();
+    if (!wants_message_info) {
+      return Napi::Boolean::New(env, false);
+    }
     return env.Undefined();
   }
 
@@ -108,7 +87,73 @@ Napi::Value RclTakeWithInfo(const Napi::CallbackInfo& info) {
     return env.Undefined();
   }
 
-  return MessageInfoToObject(env, message_info);
+  if (wants_message_info) {
+    return MessageInfoToObject(env, message_info);
+  }
+  return Napi::Boolean::New(env, true);
+}
+
+Napi::Value TakeRawMessage(const Napi::CallbackInfo& info,
+                           bool wants_message_info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
+  rcl_serialized_message_t msg = rmw_get_zero_initialized_serialized_message();
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+  rcl_ret_t ret = rmw_serialized_message_init(&msg, 0u, &allocator);
+  if (ret != RCL_RET_OK) {
+    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                             "Failed to deallocate message buffer.");
+    return env.Undefined();
+  }
+
+  rmw_message_info_t message_info = rmw_get_zero_initialized_message_info();
+  ret = rcl_take_serialized_message(
+      subscription, &msg, wants_message_info ? &message_info : nullptr,
+      nullptr);
+  if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    rcl_reset_error();
+    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                             "Failed to deallocate message buffer.");
+    return env.Undefined();
+  }
+
+  if (ret == RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                             "Failed to deallocate message buffer.");
+    return env.Undefined();
+  }
+
+  RCPPUTILS_SCOPE_EXIT({
+    rcl_ret_t fini_ret = rmw_serialized_message_fini(&msg);
+    if (fini_ret != RCL_RET_OK) {
+      rcl_reset_error();
+    }
+  });
+
+  Napi::Buffer<char> buffer = Napi::Buffer<char>::Copy(
+      env, reinterpret_cast<char*>(msg.buffer), msg.buffer_length);
+  if (!wants_message_info) {
+    return buffer;
+  }
+
+  Napi::Object result = Napi::Object::New(env);
+  result.Set("buffer", buffer);
+  result.Set("info", MessageInfoToObject(env, message_info));
+  return result;
+}
+
+}  // namespace
+
+Napi::Value RclTake(const Napi::CallbackInfo& info) {
+  return TakeMessage(info, /*wants_message_info=*/false);
+}
+
+Napi::Value RclTakeWithInfo(const Napi::CallbackInfo& info) {
+  return TakeMessage(info, /*wants_message_info=*/true);
 }
 
 Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
@@ -222,93 +267,11 @@ Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value RclTakeRaw(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-
-  RclHandle* subscription_handle =
-      RclHandle::Unwrap(info[0].As<Napi::Object>());
-  rcl_subscription_t* subscription =
-      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
-
-  rcl_serialized_message_t msg = rmw_get_zero_initialized_serialized_message();
-  rcutils_allocator_t allocator = rcutils_get_default_allocator();
-  rcl_ret_t ret = rmw_serialized_message_init(&msg, 0u, &allocator);
-  if (ret != RCL_RET_OK) {
-    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
-                             "Failed to deallocate message buffer.");
-    return env.Undefined();
-  }
-  ret = rcl_take_serialized_message(subscription, &msg, nullptr, nullptr);
-  if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
-    rcl_reset_error();
-    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
-                             "Failed to deallocate message buffer.");
-    return env.Undefined();
-  }
-
-  if (ret == RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
-    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
-                             "Failed to deallocate message buffer.");
-    return env.Undefined();
-  }
-
-  RCPPUTILS_SCOPE_EXIT({
-    rcl_ret_t fini_ret = rmw_serialized_message_fini(&msg);
-    if (fini_ret != RCL_RET_OK) {
-      rcl_reset_error();
-    }
-  });
-
-  Napi::Buffer<char> buffer = Napi::Buffer<char>::Copy(
-      env, reinterpret_cast<char*>(msg.buffer), msg.buffer_length);
-
-  return buffer;
+  return TakeRawMessage(info, /*wants_message_info=*/false);
 }
 
 Napi::Value RclTakeRawWithInfo(const Napi::CallbackInfo& info) {
-  Napi::Env env = info.Env();
-
-  RclHandle* subscription_handle =
-      RclHandle::Unwrap(info[0].As<Napi::Object>());
-  rcl_subscription_t* subscription =
-      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
-
-  rcl_serialized_message_t msg = rmw_get_zero_initialized_serialized_message();
-  rcutils_allocator_t allocator = rcutils_get_default_allocator();
-  rcl_ret_t ret = rmw_serialized_message_init(&msg, 0u, &allocator);
-  if (ret != RCL_RET_OK) {
-    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
-                             "Failed to deallocate message buffer.");
-    return env.Undefined();
-  }
-
-  rmw_message_info_t message_info = rmw_get_zero_initialized_message_info();
-  ret = rcl_take_serialized_message(subscription, &msg, &message_info, nullptr);
-  if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
-    rcl_reset_error();
-    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
-                             "Failed to deallocate message buffer.");
-    return env.Undefined();
-  }
-
-  if (ret == RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
-    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
-                             "Failed to deallocate message buffer.");
-    return env.Undefined();
-  }
-
-  RCPPUTILS_SCOPE_EXIT({
-    rcl_ret_t fini_ret = rmw_serialized_message_fini(&msg);
-    if (fini_ret != RCL_RET_OK) {
-      rcl_reset_error();
-    }
-  });
-
-  Napi::Object result = Napi::Object::New(env);
-  result.Set("buffer",
-             Napi::Buffer<char>::Copy(env, reinterpret_cast<char*>(msg.buffer),
-                                      msg.buffer_length));
-  result.Set("info", MessageInfoToObject(env, message_info));
-  return result;
+  return TakeRawMessage(info, /*wants_message_info=*/true);
 }
 
 Napi::Value GetSubscriptionTopic(const Napi::CallbackInfo& info) {
