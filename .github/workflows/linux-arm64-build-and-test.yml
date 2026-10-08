@@ -51,6 +51,12 @@ jobs:
             test_suite: idl
 
     steps:
+    # Install runtime libraries before setup-node verifies the Node executable.
+    - name: Install Node.js runtime dependencies
+      run: |
+        apt-get update
+        apt-get install -y --no-install-recommends libatomic1
+
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v7
       with:
