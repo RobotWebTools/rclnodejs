@@ -31,6 +31,36 @@
 
 namespace rclnodejs {
 
+namespace {
+
+// Mirror an rmw_message_info_t into the plain object that MessageInfo
+// (lib/message_info.js) wraps. Shared by the deserialized and raw take paths.
+Napi::Object MessageInfoToObject(Napi::Env env,
+                                 const rmw_message_info_t& message_info) {
+  Napi::Object js_info = Napi::Object::New(env);
+  js_info.Set("source_timestamp",
+              Napi::BigInt::New(env, message_info.source_timestamp));
+  js_info.Set("received_timestamp",
+              Napi::BigInt::New(env, message_info.received_timestamp));
+  js_info.Set(
+      "publication_sequence_number",
+      Napi::BigInt::New(
+          env, static_cast<int64_t>(message_info.publication_sequence_number)));
+  js_info.Set(
+      "reception_sequence_number",
+      Napi::BigInt::New(
+          env, static_cast<int64_t>(message_info.reception_sequence_number)));
+
+  // Publisher GID as Buffer
+  auto gid_buf =
+      Napi::Buffer<uint8_t>::Copy(env, message_info.publisher_gid.data,
+                                  sizeof(message_info.publisher_gid.data));
+  js_info.Set("publisher_gid", gid_buf);
+  return js_info;
+}
+
+}  // namespace
+
 Napi::Value RclTake(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
@@ -78,28 +108,7 @@ Napi::Value RclTakeWithInfo(const Napi::CallbackInfo& info) {
     return env.Undefined();
   }
 
-  // Build JS object with message info fields
-  Napi::Object js_info = Napi::Object::New(env);
-  js_info.Set("source_timestamp",
-              Napi::BigInt::New(env, message_info.source_timestamp));
-  js_info.Set("received_timestamp",
-              Napi::BigInt::New(env, message_info.received_timestamp));
-  js_info.Set(
-      "publication_sequence_number",
-      Napi::BigInt::New(
-          env, static_cast<int64_t>(message_info.publication_sequence_number)));
-  js_info.Set(
-      "reception_sequence_number",
-      Napi::BigInt::New(
-          env, static_cast<int64_t>(message_info.reception_sequence_number)));
-
-  // Publisher GID as Buffer
-  auto gid_buf =
-      Napi::Buffer<uint8_t>::Copy(env, message_info.publisher_gid.data,
-                                  sizeof(message_info.publisher_gid.data));
-  js_info.Set("publisher_gid", gid_buf);
-
-  return js_info;
+  return MessageInfoToObject(env, message_info);
 }
 
 Napi::Value CreateSubscription(const Napi::CallbackInfo& info) {
@@ -253,6 +262,53 @@ Napi::Value RclTakeRaw(const Napi::CallbackInfo& info) {
       env, reinterpret_cast<char*>(msg.buffer), msg.buffer_length);
 
   return buffer;
+}
+
+Napi::Value RclTakeRawWithInfo(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
+
+  RclHandle* subscription_handle =
+      RclHandle::Unwrap(info[0].As<Napi::Object>());
+  rcl_subscription_t* subscription =
+      reinterpret_cast<rcl_subscription_t*>(subscription_handle->ptr());
+
+  rcl_serialized_message_t msg = rmw_get_zero_initialized_serialized_message();
+  rcutils_allocator_t allocator = rcutils_get_default_allocator();
+  rcl_ret_t ret = rmw_serialized_message_init(&msg, 0u, &allocator);
+  if (ret != RCL_RET_OK) {
+    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                             "Failed to deallocate message buffer.");
+    return env.Undefined();
+  }
+
+  rmw_message_info_t message_info = rmw_get_zero_initialized_message_info();
+  ret = rcl_take_serialized_message(subscription, &msg, &message_info, nullptr);
+  if (ret != RCL_RET_OK && ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    rcl_reset_error();
+    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                             "Failed to deallocate message buffer.");
+    return env.Undefined();
+  }
+
+  if (ret == RCL_RET_SUBSCRIPTION_TAKE_FAILED) {
+    THROW_ERROR_IF_NOT_EQUAL(rmw_serialized_message_fini(&msg), RCL_RET_OK,
+                             "Failed to deallocate message buffer.");
+    return env.Undefined();
+  }
+
+  RCPPUTILS_SCOPE_EXIT({
+    rcl_ret_t fini_ret = rmw_serialized_message_fini(&msg);
+    if (fini_ret != RCL_RET_OK) {
+      rcl_reset_error();
+    }
+  });
+
+  Napi::Object result = Napi::Object::New(env);
+  result.Set("buffer",
+             Napi::Buffer<char>::Copy(env, reinterpret_cast<char*>(msg.buffer),
+                                      msg.buffer_length));
+  result.Set("info", MessageInfoToObject(env, message_info));
+  return result;
 }
 
 Napi::Value GetSubscriptionTopic(const Napi::CallbackInfo& info) {
@@ -489,6 +545,8 @@ Napi::Object InitSubscriptionBindings(Napi::Env env, Napi::Object exports) {
   exports.Set("createSubscription",
               Napi::Function::New(env, CreateSubscription));
   exports.Set("rclTakeRaw", Napi::Function::New(env, RclTakeRaw));
+  exports.Set("rclTakeRawWithInfo",
+              Napi::Function::New(env, RclTakeRawWithInfo));
   exports.Set("getSubscriptionTopic",
               Napi::Function::New(env, GetSubscriptionTopic));
 #if ROS_VERSION >= 2605  // ROS2 Lyrical or newer
