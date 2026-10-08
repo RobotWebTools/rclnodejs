@@ -14,6 +14,7 @@
 
 import assert from 'assert';
 import rclnodejs from '../index.js';
+import native from '../lib/native_loader.js';
 
 describe('Raw subscription MessageInfo tests', function () {
   this.timeout(60 * 1000);
@@ -39,6 +40,21 @@ describe('Raw subscription MessageInfo tests', function () {
     node.destroy();
   });
 
+  it('returns undefined from both raw take paths when no message is available', function () {
+    const subscription = node.createSubscription(
+      'std_msgs/msg/String',
+      'empty_raw_mi_test_topic',
+      { isRaw: true },
+      () => {}
+    );
+
+    assert.strictEqual(native.rclTakeRaw(subscription.handle), undefined);
+    assert.strictEqual(
+      native.rclTakeRawWithInfo(subscription.handle),
+      undefined
+    );
+  });
+
   it('should receive MessageInfo with a raw subscription when callback has 2 parameters', function (done) {
     const publisher = node.createPublisher(
       'std_msgs/msg/String',
@@ -52,6 +68,12 @@ describe('Raw subscription MessageInfo tests', function () {
       (buffer, messageInfo) => {
         assert.ok(Buffer.isBuffer(buffer), 'raw message should be a Buffer');
         assert.ok(messageInfo, 'messageInfo should be provided');
+        assert.ok(messageInfo instanceof rclnodejs.MessageInfo);
+        const typeClass = rclnodejs.require('std_msgs/msg/String');
+        assert.strictEqual(
+          rclnodejs.deserializeMessage(buffer, typeClass).data,
+          'Hello raw MessageInfo'
+        );
         assert.ok(
           typeof messageInfo.sourceTimestamp === 'bigint',
           'sourceTimestamp should be a bigint'
@@ -59,6 +81,14 @@ describe('Raw subscription MessageInfo tests', function () {
         assert.ok(
           typeof messageInfo.receivedTimestamp === 'bigint',
           'receivedTimestamp should be a bigint'
+        );
+        assert.strictEqual(
+          typeof messageInfo.publicationSequenceNumber,
+          'bigint'
+        );
+        assert.strictEqual(
+          typeof messageInfo.receptionSequenceNumber,
+          'bigint'
         );
         assert.ok(
           messageInfo.receivedTimestamp >= messageInfo.sourceTimestamp,
@@ -95,6 +125,11 @@ describe('Raw subscription MessageInfo tests', function () {
       { isRaw: true },
       function (buffer) {
         assert.ok(Buffer.isBuffer(buffer), 'raw message should be a Buffer');
+        const typeClass = rclnodejs.require('std_msgs/msg/String');
+        assert.strictEqual(
+          rclnodejs.deserializeMessage(buffer, typeClass).data,
+          'Hello raw no info'
+        );
         assert.strictEqual(
           arguments.length,
           1,
