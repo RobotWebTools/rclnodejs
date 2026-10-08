@@ -70,10 +70,12 @@ describe('Raw subscription MessageInfo tests', function () {
         assert.ok(messageInfo, 'messageInfo should be provided');
         assert.ok(messageInfo instanceof rclnodejs.MessageInfo);
         const typeClass = rclnodejs.require('std_msgs/msg/String');
-        assert.strictEqual(
-          rclnodejs.deserializeMessage(buffer, typeClass).data,
-          'Hello raw MessageInfo'
-        );
+        const message = rclnodejs.deserializeMessage(buffer, typeClass);
+        try {
+          assert.strictEqual(message.data, 'Hello raw MessageInfo');
+        } finally {
+          typeClass.destroyRawROS(message);
+        }
         assert.ok(
           typeof messageInfo.sourceTimestamp === 'bigint',
           'sourceTimestamp should be a bigint'
@@ -126,10 +128,12 @@ describe('Raw subscription MessageInfo tests', function () {
       function (buffer) {
         assert.ok(Buffer.isBuffer(buffer), 'raw message should be a Buffer');
         const typeClass = rclnodejs.require('std_msgs/msg/String');
-        assert.strictEqual(
-          rclnodejs.deserializeMessage(buffer, typeClass).data,
-          'Hello raw no info'
-        );
+        const message = rclnodejs.deserializeMessage(buffer, typeClass);
+        try {
+          assert.strictEqual(message.data, 'Hello raw no info');
+        } finally {
+          typeClass.destroyRawROS(message);
+        }
         assert.strictEqual(
           arguments.length,
           1,

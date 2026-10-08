@@ -47,11 +47,18 @@ describe('MessageInfo tests', function () {
     const message = new Message();
     const buffer = message.toRawROS();
 
-    assert.strictEqual(native.rclTake(subscription.handle, buffer), undefined);
-    assert.strictEqual(
-      native.rclTakeWithInfo(subscription.handle, buffer),
-      undefined
-    );
+    try {
+      assert.strictEqual(
+        native.rclTake(subscription.handle, buffer),
+        undefined
+      );
+      assert.strictEqual(
+        native.rclTakeWithInfo(subscription.handle, buffer),
+        undefined
+      );
+    } finally {
+      Message.destroyRawROS(message);
+    }
   });
 
   it('should receive MessageInfo when callback has 2 parameters', function (done) {
