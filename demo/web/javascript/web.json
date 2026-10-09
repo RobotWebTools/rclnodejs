@@ -1,10 +1,10 @@
 {
-  "$comment": "Sample rclnodejs/web config consumed by `npx rclnodejs-web web.json` from a project that has rclnodejs installed. Inside a checkout of the rclnodejs repo itself, run `node ../../../bin/rclnodejs-web.js web.json` instead — npx resolves `rclnodejs` against the enclosing package.json, which *is* rclnodejs here, so it finds no bin to run. Every key is optional; the defaults shown match the CLI defaults.",
+  "$comment": "Sample rclnodejs/web config consumed by `npx rclnodejs-web web.json` from a project that has rclnodejs installed. From this demo folder in a source checkout, run `node ../../../bin/rclnodejs-web.js web.json`. This local demo enables SSE/CORS explicitly; its settings are not a list of CLI defaults.",
   "port": 9000,
   "path": "/capability",
   "node": "rclnodejs_web_demo",
   "http": {
-    "$comment": "HTTP transport for `call` and `publish` (curl-able, AI-agent friendly). `sse` also exposes `subscribe` over Server-Sent Events; `cors: \"*\"` allows any origin so a cross-origin browser EventSource can connect. `host` binds to loopback only, shown here to document the option (the default without it, `::`, binds all interfaces but displays the same). Matches the bundled runtime.mjs.",
+    "$comment": "HTTP transport for `call`, `publish`, and action goals with SSE feedback/results. `sse` also exposes topic subscriptions; `cors: \"*\"` allows cross-origin browser requests for this local demo. `host` binds to loopback only (the default without it, `::`, binds all interfaces).",
     "port": 9001,
     "host": "localhost",
     "sse": true,
@@ -16,6 +16,9 @@
     },
     "publish": {
       "/web_demo_chatter": "std_msgs/msg/String"
+    },
+    "action": {
+      "/fibonacci": "example_interfaces/action/Fibonacci"
     },
     "subscribe": {
       "/web_demo_chatter": "std_msgs/msg/String",
