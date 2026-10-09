@@ -47,14 +47,16 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Setup Python 3.11
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: '3.11'
 
     - name: Install pixi
-      uses: prefix-dev/setup-pixi@v0.9.4
+      uses: prefix-dev/setup-pixi@v0.11.0
       with:
         run-install: false
+        # Preserve cleanup behavior from setup-pixi before v0.10.
+        post-cleanup: true
 
     - name: Install ROS2 ${{ matrix.ros_distribution }}
       shell: powershell
@@ -81,7 +83,7 @@ jobs:
         Pop-Location
 
     - name: Prebuild - Setup VS Dev Environment
-      uses: seanmiddleditch/gha-setup-vsdevenv@v4
+      uses: seanmiddleditch/gha-setup-vsdevenv@v5
 
     - uses: actions/checkout@v7
 

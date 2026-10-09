@@ -49,14 +49,14 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Download x64 prebuilds
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: prebuilt-linux-x64-*
           path: prebuilds/linux-x64
           merge-multiple: true
 
       - name: Download arm64 prebuilds
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: prebuilt-linux-arm64-*
           path: prebuilds/linux-arm64
