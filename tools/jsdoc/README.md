@@ -54,9 +54,11 @@ for testing:
 
 ### Documentation Source Tags
 
-The workflow's branch selector chooses the deployment tooling, not the source
-for each documentation version. The generator applies this rule independently
-to every version in the manifest:
+For `docs-*` pushes, the workflow checks out `refs/heads/develop` for the
+generator, version manifest and template. Manual dispatch uses the selected
+ref's commit (`github.sha`), so tooling changes can be validated before merging.
+The generator selects documentation sources independently for every version
+in that manifest:
 
 1. Use the exact `docs-<version>` tag if it exists.
 2. Otherwise use the exact `<version>` release tag.
@@ -92,8 +94,9 @@ For a new release such as `1.9.0`:
    - `build/published-docs/docs/1.9.0/`
    - `build/published-docs/docs/index.html`
    - `build/published-docs/.nojekyll`
-7. Publish the contents of `build/published-docs/` to GitHub Pages (the
-   `deploy-docs.yml` workflow does this automatically on a `docs-*` tag).
+7. Merge tooling and manifest updates into `develop` before pushing a `docs-*`
+   tag for automatic deployment. Alternatively, manually dispatch the workflow
+   from the validated tooling branch to publish the site.
 
 ## GitHub Actions Deployment
 
@@ -102,9 +105,16 @@ building and deploying docs to GitHub Pages.
 
 ### Triggers
 
-- **Tag push** matching `docs-*` (e.g. `git tag docs-1.9.0 && git push origin docs-1.9.0`) — builds and deploys automatically.
+- **Tag push** matching `docs-*` (e.g. `git tag docs-1.9.0 && git push origin docs-1.9.0`) — builds and deploys automatically using tooling and the full version manifest from `develop`.
 - **Manual dispatch** from the Actions tab — includes a `dry_run` toggle
-  (defaults to `true`). Set it to `false` to deploy.
+  (defaults to `true`). Uses tooling from the selected commit, not automatically
+  from `develop`. Set `dry_run` to `false` to deploy.
+
+GitHub loads the workflow definition itself from the triggering ref before
+checkout runs. A documentation tag must therefore contain this checkout rule
+for automatic deployments to use it. For historical tags carrying an older
+workflow, manually dispatch from a branch containing the updated workflow
+instead of relying on the historical tag's deployment behavior.
 
 These workflow runs only execute in the upstream `RobotWebTools/rclnodejs`
 repository. If you trigger the workflow from a fork, the build job is skipped,
@@ -112,7 +122,8 @@ so manual dispatches and `docs-*` tag pushes there will not run the docs build.
 
 ### What it does
 
-1. Full checkout with all tags.
+1. Check out deployment tooling from `develop` for tag pushes, or the selected
+   commit for manual dispatch, with full history and all source tags.
 2. Runs `npm run docs:publish` to stage the docs tree. This reads
    `published-versions.json` and rebuilds every listed version from its
    documentation tag or release-tag fallback.
