@@ -132,24 +132,32 @@ function readManifestVersions(manifestPath) {
   return Array.from(new Set(versions)).sort(compareVersionsAsc);
 }
 
-function getTaggedReleaseVersions() {
+function getGitTags() {
   return runCommand('git', ['tag', '--list'])
     .split(/\r?\n/)
     .map((entry) => entry.trim())
-    .filter((entry) => semverDirectoryPattern.test(entry))
-    .sort(compareVersionsAsc);
+    .filter(Boolean);
 }
 
-function assertTagsExist(versions) {
-  const tags = new Set(getTaggedReleaseVersions());
-
-  const missing = versions.filter((version) => !tags.has(version));
+function resolveDocumentationSources(versions, availableTags) {
+  const tags = new Set(availableTags);
+  const missing = [];
+  const sources = versions.map((version) => {
+    const docsTag = `docs-${version}`;
+    const tag = tags.has(docsTag) ? docsTag : version;
+    if (!tags.has(tag)) {
+      missing.push(`${version} (expected ${docsTag} or ${version})`);
+    }
+    return { version, tag };
+  });
 
   if (missing.length) {
     throw new Error(
-      `Missing Git tags for requested versions: ${missing.join(', ')}`
+      `Missing Git tags for requested documentation versions: ${missing.join(', ')}`
     );
   }
+
+  return sources;
 }
 
 function ensureCleanOutput(outputRoot) {
@@ -249,10 +257,18 @@ function writeIndexPackage(packageJsonPath, outputRoot) {
   return destinationPath;
 }
 
-function buildVersionDocs(version, outputDocsRoot, tempRoot) {
-  const worktreePath = addWorktree(version, tempRoot, version);
+function buildVersionDocs(version, sourceTag, outputDocsRoot, tempRoot) {
+  const worktreePath = addWorktree(`refs/tags/${sourceTag}`, tempRoot, version);
 
   try {
+    const packageJsonPath = path.join(worktreePath, 'package.json');
+    const packageInfo = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    if (packageInfo.version !== version) {
+      throw new Error(
+        `Documentation source ${sourceTag} declares package version ${packageInfo.version}; expected ${version}`
+      );
+    }
+
     const inputs = getJsdocInputs(worktreePath);
 
     runCommand(
@@ -260,7 +276,7 @@ function buildVersionDocs(version, outputDocsRoot, tempRoot) {
       [
         'jsdoc',
         '--package',
-        path.join(worktreePath, 'package.json'),
+        packageJsonPath,
         ...inputs,
         '-t',
         __dirname,
@@ -272,7 +288,7 @@ function buildVersionDocs(version, outputDocsRoot, tempRoot) {
 
     return {
       worktreePath,
-      packageJsonPath: path.join(worktreePath, 'package.json'),
+      packageJsonPath,
     };
   } catch (error) {
     removeWorktree(worktreePath);
@@ -362,10 +378,8 @@ function main() {
 
   const latestVersion = versions[versions.length - 1];
 
-  // The staged site is a pure function of the manifest and the Git tags: every
-  // listed version is rebuilt from its release tag, so a fresh build always
-  // reproduces the full site with no branch state to drift.
-  assertTagsExist(versions);
+  // Prefer documentation tags without changing immutable release tags.
+  const sources = resolveDocumentationSources(versions, getGitTags());
   ensureCleanOutput(options.outputRoot);
   fs.writeFileSync(path.join(options.outputRoot, '.nojekyll'), '', 'utf8');
 
@@ -376,10 +390,10 @@ function main() {
   try {
     console.log(`Building ${versions.length} documentation versions.`);
 
-    versions.forEach((version) => {
-      console.log(`- ${version}`);
+    sources.forEach(({ version, tag }) => {
+      console.log(`- ${version} (source: ${tag})`);
 
-      const buildResult = buildVersionDocs(version, docsRoot, tempRoot);
+      const buildResult = buildVersionDocs(version, tag, docsRoot, tempRoot);
 
       if (version === latestVersion) {
         latestPackageJsonPath = writeIndexPackage(
@@ -401,4 +415,8 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { resolveDocumentationSources };

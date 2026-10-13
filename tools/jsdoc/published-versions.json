@@ -1,5 +1,5 @@
 {
-  "$comment": "Curated list of rclnodejs versions whose JSDoc is published to GitHub Pages. This file is the source of truth for the published set: add a version here when cutting its release. Each deploy rebuilds every listed version from its Git tag, plus the current package.json version from the workspace, so the live site is a pure function of this manifest and the tags.",
+  "$comment": "Curated list of rclnodejs versions whose JSDoc is published to GitHub Pages. Add a version here when cutting its release. For each listed version, the generator prefers docs-<version> and otherwise uses the <version> release tag. The selected source must declare that package version. Unlisted workspace versions are not added automatically.",
   "versions": [
     "0.12.0",
     "0.13.0",
