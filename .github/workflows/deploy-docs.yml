@@ -28,6 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          # Tag pushes use maintained tooling; manual runs keep the selected commit.
+          ref: ${{ github.event_name == 'push' && 'refs/heads/develop' || github.sha }}
           fetch-depth: 0
           fetch-tags: true
 
