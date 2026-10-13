@@ -94,6 +94,15 @@ Because the manifest plus the Git tags fully describe the published set, the
 live site is always reconstructed from a fresh build — nothing can silently
 drop off.
 
+### Pull Request and Push Validation
+
+The [Linux x64 build/test workflow](../../.github/workflows/linux-x64-build-and-test.yml)
+runs `npm run docs` in its Lyrical / Node 24 lane for pull requests and pushes.
+The check builds the current checkout's API docs and landing page using the
+publication template; invalid JSDoc annotations or generation errors fail the job.
+It does not rebuild historical tags, upload artifacts or deploy to Pages.
+The full publication dry run remains necessary to verify all tagged versions.
+
 ### Testing
 
 - Run the workflow manually with `dry_run` enabled first to verify the build

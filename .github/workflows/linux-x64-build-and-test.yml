@@ -154,6 +154,10 @@ jobs:
           fi
           npm run clean
 
+    - name: Validate current JSDoc
+      if: ${{ matrix.ros_distribution == 'lyrical' && matrix['node-version'] == '24.X' }}
+      run: npm run docs
+
     - name: Coveralls
       if: ${{ matrix.ros_distribution == 'lyrical' && matrix['node-version'] == '24.X' }}
       uses: coverallsapp/github-action@v2
