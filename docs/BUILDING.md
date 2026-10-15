@@ -99,6 +99,17 @@ that produce distribution bundles need the newer build-time Node version.
 `npm pack` normally builds the distribution through `prepack`. The release
 workflow builds it explicitly before packing with `--ignore-scripts`.
 
+To build a release tarball without publishing, manually run the
+[NPM Publish workflow](../.github/workflows/npm-publish.yml) with `dry_run`
+enabled. Download the `rclnodejs-npm-tarball` artifact from the run's summary
+and extract the `.tgz` file. The workflow uploads the tarball before publishing,
+so it is also available if a subsequent publish attempt fails.
+
+Dry runs build and package only: they do not invoke `npm publish` or validate
+registry version availability, publishing credentials, or provenance. This
+allows testing an already-published version such as `2.3.0`. Tag-triggered runs
+and manual runs with `dry_run` disabled still publish to npm.
+
 With ROS sourced and the native addon built, validate an installed tarball:
 
 ```bash
