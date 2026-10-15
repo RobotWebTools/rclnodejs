@@ -20,6 +20,17 @@ I install Nodejs from either:
 - Node.js official [website](https://nodejs.org/en/)
 - Node Version Manager ([nvm](https://github.com/creationix/nvm))
 
+For source development, use npm **11.19.0**, as pinned in Linux ARM64 and
+Windows CI. npm 10 can fail while resolving tsdown's peer dependencies with
+`Cannot read properties of null (reading 'edgesOut')`.
+
+```bash
+npm install --global npm@11.19.0
+```
+
+This applies to installing the repository's development dependencies, not to
+users installing the published npm package.
+
 ### C++ Toolchain Requirements
 
 The native addon follows the ROS 2 distro toolchain requirement:

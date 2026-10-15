@@ -46,6 +46,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    # npm 10 can crash while resolving tsdown's peer dependencies.
+    - name: Setup npm 11.19.0
+      run: npm install --global npm@11.19.0
+
     - name: Setup Python 3.11
       uses: actions/setup-python@v7
       with:
