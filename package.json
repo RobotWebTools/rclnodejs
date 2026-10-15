@@ -72,7 +72,6 @@
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.h && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,cjs,mjs,md,ts}\" ./*.{js,md,ts}",
     "prepack": "npm run build:dist",
     "prepare": "husky",
-    "coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "prebuild:node": "prebuildify --napi --strip --name node --target 20.20.2",
     "prebuild:electron": "prebuildify --napi --strip --name electron --target electron@34.0.0",
     "prebuild": "npm run prebuild:node && npm run prebuild:electron && node scripts/tag_prebuilds.cjs",
@@ -102,7 +101,6 @@
     "c8": "^12.0.0",
     "clang-format": "^1.8.0",
     "commander": "^15.0.0",
-    "coveralls": "^3.1.1",
     "deep-equal": "^2.2.3",
     "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.0.2",
@@ -118,7 +116,7 @@
     "tree-kill": "^1.2.2",
     "tsd": "^0.33.0",
     "tsdown": "^0.23.1",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@rclnodejs/ref-array-di": "^1.2.2",
