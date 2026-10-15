@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: 'Perform a dry run (skip actual publish)'
+        description: 'Build and upload the npm tarball without publishing'
         required: true
         type: boolean
         default: true
@@ -85,6 +85,13 @@ jobs:
       - name: Pack
         run: ./scripts/npm-pack.sh
 
+      - name: Upload npm tarball
+        uses: actions/upload-artifact@v7
+        with:
+          name: rclnodejs-npm-tarball
+          path: pack/rclnodejs-*.tgz
+          if-no-files-found: error
+
       - name: Determine dist-tag
         id: dist_tag
         run: |
@@ -101,15 +108,11 @@ jobs:
           echo "Resolved dist-tag: $TAG"
 
       - name: Publish
+        if: ${{ inputs.dry_run != true }}
         run: |
           TAG="${{ steps.dist_tag.outputs.tag }}"
           if [[ -z "$TAG" ]]; then
             echo "::error::dist-tag is empty, aborting publish"
             exit 1
           fi
-          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
-            echo "=== DRY RUN ==="
-            npm publish --provenance --access public --tag "$TAG" --dry-run ./pack/rclnodejs-*.tgz
-          else
-            npm publish --provenance --access public --tag "$TAG" ./pack/rclnodejs-*.tgz
-          fi
+          npm publish --provenance --access public --tag "$TAG" ./pack/rclnodejs-*.tgz
