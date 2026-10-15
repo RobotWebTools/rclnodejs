@@ -141,3 +141,17 @@ Lyrical / Node 24 CI lane.
 ```bash
   set PATH=<path\to\python 3.x>;%PATH%
 ```
+
+### Coverage
+
+With ROS sourced, use Node 24 to run the tests and generate local coverage reports:
+
+```bash
+npm run test:coverage
+```
+
+The reports are written to `coverage/lcov.info` and `coverage/lcov-report/index.html`.
+[Linux x64 CI](../.github/workflows/linux-x64-build-and-test.yml) uploads coverage
+from the Lyrical / Node 24 lane using `coverallsapp/github-action@v2`.
+The legacy `npm run coverage` upload command and the unmaintained `coveralls`
+npm package have been removed; local report generation does not upload coverage.
