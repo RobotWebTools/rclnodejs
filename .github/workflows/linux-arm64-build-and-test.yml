@@ -63,6 +63,10 @@ jobs:
         node-version: ${{ matrix.node-version }}
         architecture: ${{ matrix.architecture }}
 
+    # npm 10 can crash while resolving tsdown's peer dependencies.
+    - name: Setup npm 11.19.0
+      run: npm install --global npm@11.19.0
+
     - uses: actions/checkout@v7
 
     - name: Setup ROS2

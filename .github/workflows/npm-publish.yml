@@ -72,7 +72,7 @@ jobs:
       - name: Install dependencies
         # --ignore-scripts skips install/postinstall (native build + message
         # generation need a sourced ROS env, which this job doesn't have) while
-        # still installing devDependencies such as tsup needed for build:dist.
+        # still installing devDependencies such as tsdown needed for build:dist.
         run: npm install --ignore-scripts
 
       - name: Build dist (ESM/CJS bundles)

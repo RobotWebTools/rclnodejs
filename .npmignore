@@ -6,7 +6,7 @@
 .gitignore
 .prettierrc.yml
 eslint.config.mjs
-tsup.config.js
+tsdown.config.js
 CONTRIBUTORS.md
 Dockerfile
 cpplint.py

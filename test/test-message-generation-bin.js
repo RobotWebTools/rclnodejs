@@ -64,7 +64,15 @@ function runCommand(command, args, options) {
   return result;
 }
 
-describe('rclnodejs generate-messages binary-script tests', function () {
+// npm pack invokes tsdown, whose build-time Node range is narrower than ours.
+const [nodeMajor, nodeMinor] = getNodeVersionInfo();
+const supportsTsdown =
+  (nodeMajor === 22 && nodeMinor >= 18) ||
+  (nodeMajor === 24 && nodeMinor >= 11) ||
+  nodeMajor >= 26;
+const suite = supportsTsdown ? describe : describe.skip;
+
+suite('rclnodejs generate-messages binary-script tests', function () {
   let cwd;
   let tmpPkg;
   const args = process.argv.find((arg) => arg === '--idl') ? ['--idl'] : [];
