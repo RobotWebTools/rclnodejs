@@ -119,6 +119,12 @@ The test suite is implemented using the [mocha](https://www.npmjs.com/package/mo
 npm run test
 ```
 
+The three message-generator CLI installation tests invoke `npm pack`, which
+runs tsdown through `prepack`. They run only on the bundler's supported Node
+versions listed above and are skipped on Node 20. Source-level message-generation
+and other runtime tests still run on Node 20. Package validation remains in the
+Lyrical / Node 24 CI lane.
+
 **Windows-specific**: the tests requires in a `Microsoft Visual Studio Native Tools command prompt`, and also make sure Python 3.x interpreter is first searched in your `PATH` before running te test. You can change it temporarily by:
 
 ```bash
