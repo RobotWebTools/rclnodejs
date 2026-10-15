@@ -51,7 +51,7 @@
   "scripts": {
     "build": "node-gyp -j 16 build",
     "build:dev": "node-gyp -j 16 build --debug",
-    "build:dist": "tsup",
+    "build:dist": "tsdown",
     "rebuild": "npm run clean && node-gyp -j 16 rebuild",
     "rebuild:dev": "npm run clean && node-gyp -j 16 rebuild --debug",
     "generate-messages": "node scripts/generate_messages.cjs",
@@ -66,6 +66,7 @@
     "test": "node --expose-gc ./scripts/run_test.cjs && tsd && npm install --no-save electron && node test/electron/run_test.cjs",
     "test:coverage": "c8 node --expose-gc ./scripts/run_test.cjs && tsd && npm install --no-save electron && node test/electron/run_test.cjs",
     "test-idl": "node --expose-gc ./scripts/run_test.cjs --idl",
+    "test:package": "npm run build:dist && mocha --timeout 120000 test/package/test-package.js",
     "lint": "eslint && node ./scripts/cpplint.cjs",
     "test:asan": "bash scripts/run_asan_test.sh",
     "format": "clang-format -i -style=file ./src/*.cpp ./src/*.h && npx --yes prettier --write \"{lib,rosidl_gen,rostsd_gen,rosidl_parser,types,example,test,scripts,benchmark,rostsd_gen}/**/*.{js,cjs,mjs,md,ts}\" ./*.{js,md,ts}",
@@ -116,7 +117,7 @@
     "sinon": "^22.0.0",
     "tree-kill": "^1.2.2",
     "tsd": "^0.33.0",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.23.1",
     "typescript": "^6.0.2"
   },
   "dependencies": {

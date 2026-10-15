@@ -32,7 +32,7 @@ TARFILENAME="$WORKDIR/$FILENAME"
 
 popd > /dev/null
 # Output the packed tarball to ./pack (NOT ./dist): since the ESM/CJS dual build
-# (tsup) now owns ./dist and that directory is published to npm, dropping the
+# (tsdown) owns ./dist and that directory is published to npm, dropping the
 # tarball there would ship pack artifacts inside the package.
 mkdir -p pack
 cp -f $TARFILENAME ./pack/

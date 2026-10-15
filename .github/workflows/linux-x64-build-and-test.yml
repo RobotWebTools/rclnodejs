@@ -148,15 +148,13 @@ jobs:
           # entry fails to load under `require()` on Node 26. Generate coverage
           # only in the Lyrical Node 24.X leg that uploads it below.
           if [ "${{ matrix.ros_distribution }}" = "lyrical" ] && [ "${{ matrix.node-version }}" = "24.X" ]; then
+            npm run test:package
             npm run test:coverage
+            npm run docs
           else
             npm test
           fi
           npm run clean
-
-    - name: Validate current JSDoc
-      if: ${{ matrix.ros_distribution == 'lyrical' && matrix['node-version'] == '24.X' }}
-      run: npm run docs
 
     - name: Coveralls
       if: ${{ matrix.ros_distribution == 'lyrical' && matrix['node-version'] == '24.X' }}
