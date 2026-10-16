@@ -302,8 +302,8 @@ function generateMessage(data) {
 
 ${willUseTypedArray ? "const rclnodejs = require('../../lib/native_loader.js').default;" : ''}
 const ref = require('../../third_party/ref-napi');
-const StructType = require('@rclnodejs/ref-struct-di')(ref);
-const ArrayType = require('@rclnodejs/ref-array-di')(ref);
+const StructType = require('../../third_party/ref-struct-di')(ref);
+const ArrayType = require('../../third_party/ref-array-di')(ref);
 const primitiveTypes = require('../../rosidl_gen/primitive_types.cjs');
 const deallocator = require('../../rosidl_gen/deallocator.cjs');
 const translator = require('../../rosidl_gen/message_translator.cjs');
