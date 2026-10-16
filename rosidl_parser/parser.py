@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import sys
-import json
 
 from rosidl_adapter import parser
+from json_utils import dumps_for_javascript
 
 def get_json_object_from_base_type_object(base_type_obj):
      return {'pkgName': base_type_obj.pkg_name, 'type': base_type_obj.type,
@@ -67,7 +67,7 @@ if __name__ == '__main__':
         else:
             assert False, "unknown method '%s'" % sys.argv[1]
 
-        print(json.dumps(json_obj))
+        print(dumps_for_javascript(json_obj))
         sys.exit(0)
 
     except Exception as e:

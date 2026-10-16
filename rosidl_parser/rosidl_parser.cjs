@@ -14,20 +14,11 @@
 
 'use strict';
 
-const { compareVersions } = require('../lib/utils.js');
 const path = require('path');
 const execFile = require('child_process').execFile;
 
 const pythonExecutable =
   require('./py_utils.cjs').getPythonExecutable('python3');
-
-const contextSupportedVersion = '21.0.0.0';
-const currentVersion = process.version;
-const isContextSupported = compareVersions(
-  currentVersion.substring(1, currentVersion.length),
-  contextSupportedVersion,
-  '>='
-);
 
 const rosidlParser = {
   parseMessageFile(packageName, filePath) {
@@ -62,7 +53,11 @@ const rosidlParser = {
               )
             );
           } else {
-            resolve(this._parseJSONObject(stdout));
+            try {
+              resolve(this._parseJSONObject(stdout));
+            } catch (parseError) {
+              reject(parseError);
+            }
           }
         }
       );
@@ -70,22 +65,8 @@ const rosidlParser = {
   },
 
   _parseJSONObject(str) {
-    // For nodejs >= `contextSupportedVersion`, we leverage context parameter to
-    // convert unsafe integer to string, otherwise, json-bigint is used.
-    // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
-    if (isContextSupported) {
-      return JSON.parse(str, (key, value, context) => {
-        if (
-          Number.isInteger(value) &&
-          !Number.isSafeInteger(Number(context.source))
-        ) {
-          return context.source;
-        }
-        return value;
-      });
-    }
-    const JSONbigString = require('json-bigint')({ storeAsString: true });
-    return JSONbigString.parse(str);
+    // Python encodes unsafe integers as decimal strings before serialization.
+    return JSON.parse(str);
   },
 
   _parseFile(command, packageName, filePath) {
@@ -110,7 +91,11 @@ const rosidlParser = {
               )
             );
           } else {
-            resolve(this._parseJSONObject(stdout));
+            try {
+              resolve(this._parseJSONObject(stdout));
+            } catch (parseError) {
+              reject(parseError);
+            }
           }
         }
       );
