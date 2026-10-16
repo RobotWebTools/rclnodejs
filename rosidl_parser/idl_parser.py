@@ -20,7 +20,8 @@ This eliminates the need for the intermediate .idl -> .msg conversion step.
 """
 
 import sys
-import json
+
+from json_utils import dumps_for_javascript
 
 from rosidl_parser.parser import parse_idl_string
 from rosidl_parser.definition import (
@@ -430,7 +431,7 @@ if __name__ == '__main__':
 
     try:
         result = parse_idl_file(sys.argv[1])
-        print(json.dumps(result))
+        print(dumps_for_javascript(result))
         sys.exit(0)
     except Exception as e:
         print(str(e), file=sys.stderr)
