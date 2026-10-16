@@ -40,6 +40,29 @@ The native addon follows the ROS 2 distro toolchain requirement:
 
 If no prebuilt binary is available for your target, make sure your local compiler matches the required C++ standard before running `npm install`.
 
+### C++ Formatting
+
+For contributors, `npm install` provides the `clang-format` command through
+[`clang-format-node`](https://github.com/lumirlumir/npm-clang-format-node),
+pinned to **4.0.3**, which bundles **LLVM clang-format 23.1.3**. No separate
+LLVM or Python installation is needed for formatting. The bundled formatter
+supports Linux x64/ARM64, macOS x64/ARM64, and Windows x64.
+
+```bash
+# Optional: check the installed formatter version.
+npm exec --no -- clang-format --version
+npm run format
+```
+
+The existing format script and C++ `lint-staged` hook use this project-local
+executable and the [.clang-format](../.clang-format) style. `Standard: c++20`
+sets the formatter's language mode; it does not change the per-distribution
+compiler requirements above.
+The exact package pin keeps formatter updates deliberate; compare output
+before upgrading it rather than silently changing formatting across contributors.
+This replaces the archived `clang-format` npm wrapper and does not add a
+runtime requirement for users installing rclnodejs.
+
 ### Get Code
 
 Open a terminal, and input:

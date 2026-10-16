@@ -1,5 +1,5 @@
 BasedOnStyle: Google
-Standard: c++17
+Standard: c++20
 IncludeBlocks: Regroup
 IncludeCategories:
   - Regex:    '^<ext/.*\.h>'
