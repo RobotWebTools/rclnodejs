@@ -15,7 +15,7 @@
 'use strict';
 
 const ref = require('../third_party/ref-napi');
-const StructType = require('@rclnodejs/ref-struct-di')(ref);
+const StructType = require('../third_party/ref-struct-di')(ref);
 const rclnodejs = require('../lib/native_loader.js').default;
 
 const StringRefStruct = StructType({

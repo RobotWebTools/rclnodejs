@@ -119,8 +119,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@rclnodejs/ref-array-di": "^1.2.2",
-    "@rclnodejs/ref-struct-di": "^1.1.1",
+    "array-index": "^1.0.0",
     "bindings": "^1.5.0",
     "debug": "^4.4.0",
     "node-addon-api": "^8.3.1",

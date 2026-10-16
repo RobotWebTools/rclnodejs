@@ -2,3 +2,7 @@
 # long-URL badge tables.  Exclude root READMEs to keep them minimal.
 README.md
 scripts/npmjs-readme.md
+
+# Keep vendored ref adapters byte-for-byte identical to their source releases.
+third_party/ref-array-di/lib/array.js
+third_party/ref-struct-di/lib/struct.js

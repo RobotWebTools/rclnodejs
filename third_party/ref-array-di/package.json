@@ -1,0 +1,8 @@
+{
+  "name": "@rclnodejs/ref-array-di",
+  "version": "1.2.2",
+  "private": true,
+  "main": "lib/array.js",
+  "type": "commonjs",
+  "license": "MIT"
+}
