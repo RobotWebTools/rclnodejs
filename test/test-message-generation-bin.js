@@ -17,7 +17,6 @@ import childProcess from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import * as rimraf from 'rimraf';
 import rclnodejs from '../index.js';
 
 const GEN_FOLDER = 'generated';
@@ -130,21 +129,13 @@ suite('rclnodejs generate-messages binary-script tests', function () {
 
     let generatedFolderPath = createGeneratedFolderPath(this.tmpPkg);
     if (fs.existsSync(generatedFolderPath)) {
-      if (getNodeVersionInfo()[0] === 10) {
-        rimraf.sync(generatedFolderPath);
-      } else {
-        fs.rmSync(generatedFolderPath, { recursive: true });
-      }
+      fs.rmSync(generatedFolderPath, { recursive: true });
     }
   });
 
   after(function () {
     // recursively remove test package folder
-    if (getNodeVersionInfo()[0] === 10) {
-      rimraf.sync(this.tmpPkg);
-    } else {
-      fs.rmSync(this.tmpPkg, { recursive: true });
-    }
+    fs.rmSync(this.tmpPkg, { recursive: true });
   });
 
   it('test generate-ros-messages script installation', function (done) {

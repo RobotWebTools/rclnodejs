@@ -58,7 +58,7 @@
     "generate-messages-idl": "node scripts/generate_messages.cjs --idl",
     "generate-messages:dev": "node scripts/generate_messages.cjs --debug",
     "generate-tsd-messages": "node scripts/generate_tsd.cjs",
-    "clean": "node-gyp clean && npx rimraf ./generated",
+    "clean": "node-gyp clean && node -e \"require('node:fs').rmSync('./generated', { recursive: true, force: true, maxRetries: 3 })\"",
     "install": "node scripts/install.cjs",
     "postinstall": "npm run generate-messages",
     "docs": "make -C tools/jsdoc",
@@ -111,9 +111,7 @@
     "lint-staged": "^17.0.0",
     "mocha": "^12.0.0",
     "prebuildify": "^6.0.1",
-    "rimraf": "^6.0.1",
     "sinon": "^22.0.0",
-    "tree-kill": "^1.2.2",
     "tsd": "^0.33.0",
     "tsdown": "^0.23.1",
     "typescript": "^6.0.3"
