@@ -316,8 +316,6 @@ describe('Client coverage testing', function () {
   });
 
   it('sendRequestAsync handles manual abort', async function () {
-    if (typeof AbortController === 'undefined') this.skip();
-
     const client = new Client(
       mockHandle,
       mockNodeHandle,
@@ -334,7 +332,6 @@ describe('Client coverage testing', function () {
       await promise;
       assert.fail('Should have aborted');
     } catch (err) {
-      // Name might vary depending on polyfill or native
       assert.ok(err.name === 'AbortError', 'Error name ' + err.name);
     }
   });
