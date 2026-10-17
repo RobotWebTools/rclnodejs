@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "clock_event.hpp"
+#include "clock_event.h"
 
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
