@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_CLOCK_EVENT_HPP_
-#define SRC_CLOCK_EVENT_HPP_
+#ifndef SRC_CLOCK_EVENT_H_
+#define SRC_CLOCK_EVENT_H_
 
 #include <napi.h>
 #include <rcl/time.h>
@@ -59,4 +59,4 @@ void InitClockEventBindings(Napi::Env env, Napi::Object exports);
 
 }  // namespace rclnodejs
 
-#endif  // SRC_CLOCK_EVENT_HPP_
+#endif  // SRC_CLOCK_EVENT_H_

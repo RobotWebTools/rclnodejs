@@ -15,7 +15,7 @@
 #include <node_api.h>
 #include <rcutils/logging.h>
 
-#include "clock_event.hpp"
+#include "clock_event.h"
 #include "macros.h"
 #include "rcl_action_client_bindings.h"
 #include "rcl_action_goal_bindings.h"

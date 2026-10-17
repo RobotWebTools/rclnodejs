@@ -135,7 +135,7 @@
     "*.{js,ts,md}": [
       "prettier --write"
     ],
-    "*.{hpp,cpp}": [
+    "*.{h,cpp}": [
       "clang-format -i -style=file"
     ]
   },
