@@ -11,6 +11,8 @@
 // limitations under the License.
 
 import assert from 'assert';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import rclnodejs from '../index.js';
 
 const DistroUtils = rclnodejs.DistroUtils;
@@ -60,8 +62,78 @@ describe('rclnodejs distro utils', function () {
       assert.equal(id, DistroUtils.getDistroId());
 
       id = DistroUtils.getDistroId(distroName);
-      assert.notEqual(id, DistroUtils.UNKNOWN_ID);
+      assert.notEqual(id, DistroUtils.DistroId.UNKNOWN);
       assert.equal(distroName, DistroUtils.getDistroName(id));
+    });
+
+    describe('ROS distro build script', function () {
+      const script = fileURLToPath(
+        new URL('../scripts/ros_distro.cjs', import.meta.url)
+      );
+
+      function runScript(distroName, args = [script]) {
+        const env = { ...process.env };
+        if (distroName === undefined) {
+          delete env.ROS_DISTRO;
+        } else {
+          env.ROS_DISTRO = distroName;
+        }
+        const result = spawnSync(process.execPath, args, {
+          env,
+          encoding: 'utf8',
+          timeout: 10000,
+        });
+        assert.ifError(result.error);
+        return result;
+      }
+
+      for (const distroName of [undefined, '']) {
+        it(`rejects ${distroName === undefined ? 'unset' : 'empty'} ROS_DISTRO`, function () {
+          const result = runScript(distroName);
+          assert.strictEqual(result.status, 1);
+          assert.strictEqual(result.stdout, '');
+          assert.match(result.stderr, /Unable to detect ROS/);
+        });
+      }
+
+      for (const [distroName, id] of [
+        ['humble', 2205],
+        ['jazzy', 2405],
+        ['kilted', 2505],
+        ['lyrical', 2605],
+        ['rolling', 5000],
+        ['foxy', 2006],
+        ['future_test_distro', 9999],
+      ]) {
+        it(`preserves the existing ID for ${distroName}`, function () {
+          const result = runScript(distroName);
+          assert.strictEqual(result.status, 0, result.stderr);
+          assert.strictEqual(result.stdout.trim(), String(id));
+          assert.strictEqual(result.stderr, '');
+        });
+      }
+
+      it('rejects the UNKNOWN enum value when the distro name is present', function () {
+        const distroModule = fileURLToPath(
+          new URL('../lib/distro.js', import.meta.url)
+        );
+        const result = runScript('humble', [
+          '-e',
+          `
+    const distro = require(process.argv[1]).default;
+    distro.getDistroId = () => distro.DistroId.UNKNOWN;
+    require(process.argv[2]);
+    `,
+          distroModule,
+          script,
+        ]);
+        assert.strictEqual(result.status, 1);
+        assert.strictEqual(result.stdout, '');
+        assert.match(
+          result.stderr,
+          /Unknown or unsupported ROS version "humble"/
+        );
+      });
     });
 
     process.env.ROS_DISTRO = backupEnvar;

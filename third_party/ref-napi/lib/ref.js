@@ -1453,26 +1453,21 @@ Buffer.prototype.reinterpretUntilZeros = function reinterpretUntilZeros(
  * **Before**:
  *
  * ``` js
- * console.log(new Buffer('ref'));
+ * console.log(Buffer.from('ref'));
  * <Buffer 72 65 66>
  * ```
  *
  * **After**:
  *
  * ``` js
- * console.log(new Buffer('ref'));
+ * console.log(Buffer.from('ref'));
  * <Buffer@0x103015490 72 65 66>
  * ```
  */
 
-var inspectSym = inspect.custom || 'inspect';
-/**
- * in node 6.91, inspect.custom does not give a correct value; so in this case, don't torch the whole process.
- * fixed in >6.9.2
- */
-if (Buffer.prototype[inspectSym]) {
-  Buffer.prototype[inspectSym] = overwriteInspect(Buffer.prototype[inspectSym]);
-}
+Buffer.prototype[inspect.custom] = overwriteInspect(
+  Buffer.prototype[inspect.custom]
+);
 
 /**
  * ...

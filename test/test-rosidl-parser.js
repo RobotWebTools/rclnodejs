@@ -135,7 +135,7 @@ ${sections.map((name) => idlMessage(name ? `Precision_${name}` : 'Precision')).j
   });
 
   it('normalizes only unsafe integers recursively without mutating the input', function () {
-    const [executable, args] = pyUtils.getPythonExecutable('python3');
+    const [executable, args] = pyUtils.getPythonExecutable();
     const json = execFileSync(
       executable,
       [

@@ -22,10 +22,6 @@
 #include <string>
 #include <unordered_map>
 
-#if !defined(NAPI_VERSION) || NAPI_VERSION < 6
-#include <get-symbol-from-current-process.h>
-#endif
-
 namespace RefNapi {
 
 class Instance {

@@ -131,7 +131,6 @@ Napi::Value CreateArrayBufferFromAddress(const Napi::CallbackInfo& info) {
   char* addr = reinterpret_cast<char*>(result);
   int32_t length = info[1].As<Napi::Number>().Int32Value();
 
-  static_assert(NODE_MAJOR_VERSION > 12, "nodejs version must > 12");
 #if (NODE_RUNTIME_ELECTRON && NODE_MODULE_VERSION >= 109)
   // Because V8 sandboxed pointers was enabled since Electron 21, we have to
   // make a deep copy for Electron 21 and up.
@@ -140,8 +139,7 @@ Napi::Value CreateArrayBufferFromAddress(const Napi::CallbackInfo& info) {
   memcpy(array_buffer.Data(), addr, length);
   free(addr);
 #else
-  // For nodejs > 12 or electron < 21, we will take over the ownership of
-  // `addr`.
+  // Outside Electron's memory cage, the ArrayBuffer owns `addr`.
   auto array_buffer = Napi::ArrayBuffer::New(
       env, addr, length, [](Napi::Env /*env*/, void* data) { free(data); });
 #endif

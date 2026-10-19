@@ -101,6 +101,12 @@ npm install
 
 **Windows-specific**: make sure a Python 3.x interpreter is available in your `PATH` before running the command, as required by [node-gyp](https://github.com/nodejs/node-gyp#on-windows).
 
+Interface generation uses Python 3: `python3` on Linux/macOS and `py -3` on
+Windows. Python 2 is not supported by the parser helper. Runtime compatibility
+code assumes the Node.js minimum above; Electron's native build still uses its
+own headers and memory-cage handling rather than an exact Node patch-version
+check.
+
 ### Build the JavaScript Distribution
 
 ```bash

@@ -17,8 +17,7 @@
 const path = require('path');
 const execFile = require('child_process').execFile;
 
-const pythonExecutable =
-  require('./py_utils.cjs').getPythonExecutable('python3');
+const pythonExecutable = require('./py_utils.cjs').getPythonExecutable();
 
 const rosidlParser = {
   parseMessageFile(packageName, filePath) {
