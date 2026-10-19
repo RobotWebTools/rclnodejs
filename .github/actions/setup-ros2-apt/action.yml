@@ -28,7 +28,7 @@ runs:
         fi
 
         apt-get update
-        apt-get install -y sudo software-properties-common curl python3
+        apt-get install -y sudo software-properties-common curl
 
         # Enable required repositories. The same setup applies to both the
         # rolling nightly tarball and the lyrical apt-deb install; see the
@@ -36,42 +36,29 @@ runs:
         #   rolling: https://docs.ros.org/en/rolling/Installation/Alternatives/Ubuntu-Install-Binary.html
         #   lyrical: https://docs.ros.org/en/lyrical/Get-Started/Installation/Ubuntu-Install-Debs.html
         add-apt-repository universe
+        # Keep curl's transient-error retries; do not blindly retry HTTP 403/404.
         CURL_OPTIONS=(
-          --show-error --silent --location
-          --retry 3 --retry-all-errors --retry-delay 5 --retry-max-time 180
+          --fail --show-error --silent --location
+          --retry 3 --retry-delay 5 --retry-max-time 180
           --connect-timeout 10 --max-time 60
         )
 
-        RELEASE_METADATA=$(mktemp)
-        trap 'rm -f "$RELEASE_METADATA"' EXIT
+        # Resolve the latest tag through GitHub's release redirect, not its REST API.
+        ROS_RELEASES_URL=https://github.com/ros-infrastructure/ros-apt-source/releases
         echo "Resolving the latest ros-apt-source release"
-        curl --fail-with-body "${CURL_OPTIONS[@]}" \
-          --header "Accept: application/vnd.github+json" \
-          --output "$RELEASE_METADATA" \
-          https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest || {
-            status=$?
-            echo "::error::Unable to fetch the latest ros-apt-source release (curl exit ${status})"
-            if [ -s "$RELEASE_METADATA" ]; then
-              head -c 1024 "$RELEASE_METADATA" >&2
-              printf '\n' >&2
-            fi
-            exit "$status"
-          }
-        ROS_APT_SOURCE_VERSION=$(python3 -c '
-        import json
-        import sys
-        with open(sys.argv[1], encoding="utf-8") as stream:
-            release = json.load(stream)
-        version = release.get("tag_name") if isinstance(release, dict) else None
-        if not isinstance(version, str) or not version.strip():
-            sys.exit("::error::GitHub release response does not contain a valid tag_name")
-        print(version)
-        ' "$RELEASE_METADATA")
+        LATEST_RELEASE_URL=$(curl "${CURL_OPTIONS[@]}" --head \
+          --output /dev/null --write-out '%{url_effective}' \
+          "$ROS_RELEASES_URL/latest")
+        ROS_APT_SOURCE_VERSION="${LATEST_RELEASE_URL#"$ROS_RELEASES_URL/tag/"}"
+        if [[ ! "$ROS_APT_SOURCE_VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+          echo "::error::Unexpected ROS apt source release URL: $LATEST_RELEASE_URL"
+          exit 1
+        fi
 
         echo "Downloading ros2-apt-source ${ROS_APT_SOURCE_VERSION} for Ubuntu ${UBUNTU_RELEASE}"
-        curl --fail "${CURL_OPTIONS[@]}" \
+        curl "${CURL_OPTIONS[@]}" \
           --output /tmp/ros2-apt-source.deb \
-          "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.${UBUNTU_RELEASE}_all.deb"
+          "$ROS_RELEASES_URL/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.${UBUNTU_RELEASE}_all.deb"
         dpkg -i /tmp/ros2-apt-source.deb
         apt-get update
         # Common build deps for both rolling and lyrical. Rolling-only tarball
