@@ -38,6 +38,10 @@ The native addon follows the ROS 2 distro toolchain requirement:
 - Humble, Jazzy, and Kilted build with C++17.
 - Post-Kilted distros, including Lyrical and newer Rolling snapshots, build with C++20.
 
+Native compatibility branches for ROS releases older than Humble have been
+removed. Humble and newer API differences remain handled by the build and
+runtime code; recognizing a historical distro name does not imply build support.
+
 If no prebuilt binary is available for your target, make sure your local compiler matches the required C++ standard before running `npm install`.
 
 ### C++ Formatting

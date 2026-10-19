@@ -13,7 +13,6 @@
 import assert from 'assert';
 
 import rclnodejs from '../index.js';
-import childProcess from 'child_process';
 import * as assertUtils from './utils.js';
 
 const NODE_NAME = 'lifecycle_node';
@@ -315,20 +314,6 @@ describe('LifecycleNode test suite', function () {
   });
 
   it('LifecycleNode disable enableCommunicationsInterface', async function () {
-    // this test is only valid on ROS2 Galactic distro
-    // TODO: refactor the version info to reusable location
-    const GALACTIC_VERSION = 2105;
-    const versionInfo = childProcess
-      .execSync('node scripts/ros_distro.cjs')
-      .toString('utf-8');
-    const version =
-      versionInfo && versionInfo.length > 0
-        ? parseInt(versionInfo)
-        : GALACTIC_VERSION;
-
-    if (version < GALACTIC_VERSION) return;
-
-    let rosDistro = process.env.ROS_DISTRO;
     let testNode = new rclnodejs.lifecycle.LifecycleNode(
       'TEST_NODE',
       undefined,
