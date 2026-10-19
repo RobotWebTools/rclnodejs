@@ -126,11 +126,6 @@
     "walk": "^2.3.15",
     "ws": "^8.18.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
     "*.{js,ts,md}": [
       "prettier --write"
