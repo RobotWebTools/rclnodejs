@@ -25,7 +25,7 @@ if (!distroName) {
   process.exit(1);
 }
 
-if (distroId === DistroUtils.UNKNOWN_ID) {
+if (distroId === DistroUtils.DistroId.UNKNOWN) {
   console.error(`Unknown or unsupported ROS version "${distroName}"`);
   process.exit(1);
 }

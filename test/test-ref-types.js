@@ -7,6 +7,7 @@
 //     http://www.apache.org/licenses/LICENSE-2.0
 
 import assert from 'node:assert/strict';
+import { inspect } from 'node:util';
 import ref from '../third_party/ref-napi/index.js';
 import createArrayType from '../third_party/ref-array-di/lib/array.js';
 import createStructType from '../third_party/ref-struct-di/lib/struct.js';
@@ -15,6 +16,11 @@ const ArrayType = createArrayType(ref);
 const StructType = createStructType(ref);
 
 describe('Vendored ref types', function () {
+  it('preserves custom Buffer inspection with native memory addresses', function () {
+    const buffer = Buffer.from('ref');
+    assert.equal(inspect(buffer), `<Buffer@0x${buffer.hexAddress()} 72 65 66>`);
+  });
+
   it('preserves struct field offsets, alignment and backing-buffer access', function () {
     const Record = StructType({
       tag: ref.types.uint8,
