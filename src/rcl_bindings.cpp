@@ -17,18 +17,13 @@
 #include <node_version.h>
 #include <rcl/arguments.h>
 #include <rcl/rcl.h>
-
-#include <rcpputils/scope_exit.hpp>
-
-#if ROS_VERSION >= 2006
 #include <rosidl_runtime_c/string_functions.h>
-#else
-#include <rosidl_generator_c/string_functions.h>
-#endif
 
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <rcpputils/scope_exit.hpp>
 
 #include "rcl_handle.h"
 #include "rcl_utilities.h"
@@ -90,17 +85,10 @@ Napi::Value InitString(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
 
   void* buffer = info[0].As<Napi::Buffer<char>>().Data();
-#if ROS_VERSION >= 2006
   rosidl_runtime_c__String* ptr =
       reinterpret_cast<rosidl_runtime_c__String*>(buffer);
 
   rosidl_runtime_c__String__init(ptr);
-#else
-  rosidl_generator_c__String* ptr =
-      reinterpret_cast<rosidl_generator_c__String*>(buffer);
-
-  rosidl_generator_c__String__init(ptr);
-#endif
   return env.Undefined();
 }
 

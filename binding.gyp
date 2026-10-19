@@ -49,6 +49,10 @@
         './third_party/ref-napi/src',
         '<(ros_include_root)',
         "<!@(node -p \"require('node-addon-api').include\")",
+        "<!@(node -p \"require('./scripts/config.cjs').getIncludePaths().forEach(p => console.log(JSON.stringify(p)))\")"
+      ],
+      'library_dirs': [
+        '<(ros_lib_dir)',
       ],
       'cflags!': [
         '-fno-exceptions'
@@ -152,27 +156,6 @@
               'MACOS_DEPLOYMENT_TARGET': '10.12',
               'CLANG_CXX_LANGUAGE_STANDARD': 'c++17'
             }
-          }
-        ],
-        [
-          'ros_version <= 1911', {
-            'libraries': [
-              '-lrosidl_generator_c'
-            ],
-            'libraries!': [
-              '-lrosidl_runtime_c'
-            ]
-          }
-        ],
-        [
-          # After Galactic, e.g., Humble, Jazzy, Rolling.
-          'ros_version > 2105', {
-            'include_dirs': [
-              "<!@(node -p \"require('./scripts/config.cjs').getIncludePaths().forEach(p => console.log(JSON.stringify(p)))\")"
-            ],
-            'library_dirs': [
-              '<(ros_lib_dir)',
-            ]
           }
         ],
         [
