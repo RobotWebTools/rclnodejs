@@ -2,8 +2,8 @@ name: 'Setup ROS2 apt repository'
 description: >-
   Enable the official ros-apt-source repository (and common build deps) on
   Ubuntu, and optionally install the Lyrical Luth desktop. Shared by the
-  build-and-test and ASan workflows so the lyrical/rolling apt setup lives in
-  one place.
+  build-and-test, prebuild, and ASan workflows so the lyrical/rolling apt setup
+  lives in one place.
 
 inputs:
   install-desktop:
@@ -20,17 +20,58 @@ runs:
     - name: Enable ROS2 apt repository
       shell: bash
       run: |
+        . /etc/os-release
+        UBUNTU_RELEASE="${UBUNTU_CODENAME:-${VERSION_CODENAME:-}}"
+        if [ -z "$UBUNTU_RELEASE" ]; then
+          echo "::error::Unable to determine the Ubuntu codename from /etc/os-release"
+          exit 1
+        fi
+
         apt-get update
-        apt-get install -y sudo software-properties-common curl
+        apt-get install -y sudo software-properties-common curl python3
 
         # Enable required repositories. The same setup applies to both the
         # rolling nightly tarball and the lyrical apt-deb install; see the
         # per-distro install docs for reference:
         #   rolling: https://docs.ros.org/en/rolling/Installation/Alternatives/Ubuntu-Install-Binary.html
-        #   lyrical: https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
+        #   lyrical: https://docs.ros.org/en/lyrical/Get-Started/Installation/Ubuntu-Install-Debs.html
         add-apt-repository universe
-        ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F'"' '{print $4}')
-        curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
+        CURL_OPTIONS=(
+          --show-error --silent --location
+          --retry 3 --retry-all-errors --retry-delay 5 --retry-max-time 180
+          --connect-timeout 10 --max-time 60
+        )
+
+        RELEASE_METADATA=$(mktemp)
+        trap 'rm -f "$RELEASE_METADATA"' EXIT
+        echo "Resolving the latest ros-apt-source release"
+        curl --fail-with-body "${CURL_OPTIONS[@]}" \
+          --header "Accept: application/vnd.github+json" \
+          --output "$RELEASE_METADATA" \
+          https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest || {
+            status=$?
+            echo "::error::Unable to fetch the latest ros-apt-source release (curl exit ${status})"
+            if [ -s "$RELEASE_METADATA" ]; then
+              head -c 1024 "$RELEASE_METADATA" >&2
+              printf '\n' >&2
+            fi
+            exit "$status"
+          }
+        ROS_APT_SOURCE_VERSION=$(python3 -c '
+        import json
+        import sys
+        with open(sys.argv[1], encoding="utf-8") as stream:
+            release = json.load(stream)
+        version = release.get("tag_name") if isinstance(release, dict) else None
+        if not isinstance(version, str) or not version.strip():
+            sys.exit("::error::GitHub release response does not contain a valid tag_name")
+        print(version)
+        ' "$RELEASE_METADATA")
+
+        echo "Downloading ros2-apt-source ${ROS_APT_SOURCE_VERSION} for Ubuntu ${UBUNTU_RELEASE}"
+        curl --fail "${CURL_OPTIONS[@]}" \
+          --output /tmp/ros2-apt-source.deb \
+          "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.${UBUNTU_RELEASE}_all.deb"
         dpkg -i /tmp/ros2-apt-source.deb
         apt-get update
         # Common build deps for both rolling and lyrical. Rolling-only tarball
@@ -42,5 +83,5 @@ runs:
       if: ${{ inputs.install-desktop == 'true' }}
       shell: bash
       run: |
-        # Per https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
+        # Per https://docs.ros.org/en/lyrical/Get-Started/Installation/Ubuntu-Install-Debs.html
         apt-get install -y ros-lyrical-desktop
