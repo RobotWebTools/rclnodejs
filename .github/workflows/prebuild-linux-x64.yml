@@ -44,31 +44,17 @@ jobs:
         node-version: ${{ matrix.node-version }}
         architecture: ${{ matrix.architecture }}
 
+    - uses: actions/checkout@v7
+
     - name: Setup ROS2
       if: ${{ matrix.ros_distribution != 'lyrical' }}
       uses: ros-tooling/setup-ros@v0.7
       with:
         required-ros-distributions: ${{ matrix.ros_distribution }}
 
-    - name: Enable ROS2 apt repository (lyrical)
+    - name: Setup ROS2 from apt (lyrical)
       if: ${{ matrix.ros_distribution == 'lyrical' }}
-      run: |
-        apt-get update
-        apt-get install -y software-properties-common curl
-        # Per https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debs.html
-        add-apt-repository universe
-        ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F'"' '{print $4}')
-        curl -L -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo ${UBUNTU_CODENAME:-${VERSION_CODENAME}})_all.deb"
-        dpkg -i /tmp/ros2-apt-source.deb
-        apt-get update
-        apt-get install -y build-essential cmake python3
-
-    - name: Install ROS2 from apt (lyrical)
-      if: ${{ matrix.ros_distribution == 'lyrical' }}
-      run: |
-        apt-get install -y ros-lyrical-desktop
-
-    - uses: actions/checkout@v7
+      uses: ./.github/actions/setup-ros2-apt
 
     - name: Install dependencies
       shell: bash

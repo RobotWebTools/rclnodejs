@@ -6,11 +6,9 @@ import { defineConfig } from 'vite';
 // `rclnodejs` npm package (see its package.json `exports` field), so
 // Vite resolves it through `node_modules` with no alias required.
 //
-// The browser SDK uses a top-level `await import('ws')` to optionally
-// pull in a Node WebSocket polyfill (no-op in real browsers). That
-// requires an ES2022 build target both for the production bundle
-// (`build.target`) and for esbuild's dev-mode dependency pre-bundling
-// (`optimizeDeps.esbuildOptions.target`).
+// Keep the ES2022 target consistent across development and production.
+// The SDK loads Node's optional `ws` fallback lazily; browsers use
+// `globalThis.WebSocket` without loading that fallback.
 export default defineConfig({
   server: {
     // 8080 to match the JavaScript demo's static-file server, instead of

@@ -126,11 +126,8 @@ jobs:
         fi
         sudo apt install -y xvfb libgtk-3-0 libnss3 $LIBASOUND_PKG libgbm-dev
 
-    # The mocha suite and the Electron postinstall (extract-zip 2.0.1) are
-    # known to be intermittently flaky on this runner. Wrap the test
-    # invocation in nick-fields/retry@v4 so a single transient failure does
-    # not fail the whole matrix leg. Keep max_attempts conservative so real
-    # regressions still surface quickly.
+    # Retry transient test or download failures once. Keep max_attempts
+    # conservative so persistent regressions still fail the matrix leg.
     - name: Build and test rclnodejs
       uses: nick-fields/retry@v4
       with:
@@ -144,9 +141,8 @@ jobs:
           source /opt/ros/${{ matrix.ros_distribution }}/setup.bash
           npm i
           npm run lint
-          # c8 (coverage) depends on yargs 17, whose extensionless `yargs/yargs`
-          # entry fails to load under `require()` on Node 26. Generate coverage
-          # only in the Lyrical Node 24.X leg that uploads it below.
+          # Run package validation, coverage, and documentation generation in
+          # the Lyrical Node 24.X lane; only this lane uploads coverage below.
           if [ "${{ matrix.ros_distribution }}" = "lyrical" ] && [ "${{ matrix.node-version }}" = "24.X" ]; then
             npm run test:package
             npm run test:coverage

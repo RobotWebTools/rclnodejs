@@ -1,199 +1,99 @@
 # Build rclnodejs
 
-### Get ready for ROS 2
+## Requirements
 
-1. Install ROS 2 from binary package.
-
-   ROS 2 is a cross-platform system, which covers Linux, macOS and Windows, and the `rclnodejs` module is developed against the [`master`](https://github.com/ros2/ros2/blob/master/ros2.repos) branch of ROS 2. You can download the latest binary packages from the [ROS 2 nightly builds](https://github.com/ros2/ros2/releases/tag/release-rolling-nightlies) and follow the instructions of [Linux](https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debians.html)/[Windows](https://docs.ros.org/en/lyrical/Installation/Windows-Install-Binary.html) to setup the environment. Supported ROS 2 distributions: Rolling, Lyrical, Kilted, Jazzy, and Humble.
-
-2. Build ROS 2 from scratch.
-
-   Alternatively, you can build ROS 2 from scratch. Please select the platform you want to work on, then reference the instructions of [Linux](https://docs.ros.org/en/lyrical/Installation/Alternatives/Ubuntu-Development-Setup.html#)/[Windows](https://docs.ros.org/en/lyrical/Installation/Alternatives/Windows-Development-Setup.html) to build ROS 2 (please build with flag `--merge-install`).
-
-### Install `Node.js`
-
-**Notice:**
-`rclnodejs` requires Node.js version >= 20.20.2.
-
-I install Nodejs from either:
-
-- Node.js official [website](https://nodejs.org/en/)
-- Node Version Manager ([nvm](https://github.com/creationix/nvm))
-
-For source development, use npm **11.19.0**, as pinned in Linux ARM64 and
-Windows CI. npm 10 can fail while resolving tsdown's peer dependencies with
-`Cannot read properties of null (reading 'edgesOut')`.
-
-```bash
-npm install --global npm@11.19.0
-```
-
-This applies to installing the repository's development dependencies, not to
-users installing the published npm package.
+- **ROS 2:** Humble, Jazzy, Kilted, Lyrical, or Rolling. Follow the [Linux](https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debians.html) or [Windows](https://docs.ros.org/en/lyrical/Installation/Windows-Install-Binary.html) installation guide for your distro. Use `--merge-install` when building ROS from source.
+- **Node.js:** runtime minimum **20.20.2**. For source development, use **Node 24.11+ in the 24.x line**; the bundler also supports **22.18+ in the 22.x line** and **26+**. Published npm packages already contain the bundles.
+- **npm:** use **11.19.0** for source development to avoid npm 10 dependency-resolution failures. This is not a requirement for installing the published package.
+- **Native build tools:** Python 3 (`python3` on Linux/macOS, `py -3` on Windows) and the [node-gyp prerequisites](https://github.com/nodejs/node-gyp#installation). Python 2 is unsupported. On Windows, use a Visual Studio Native Tools command prompt.
 
 ### C++ Toolchain Requirements
 
-The native addon follows the ROS 2 distro toolchain requirement:
+- **Linux:** C++17 for Humble/Jazzy/Kilted; C++20 for Lyrical/Rolling.
+- **Windows:** MSBuild inherits the Node/Electron headers' compiler settings; the ROS-specific `cflags_cc` entries do not configure MSVC. Node 20 headers select C++17 even for Lyrical/Rolling, so verify the generated flags before using that combination.
 
-- Humble, Jazzy, and Kilted build with C++17.
-- Post-Kilted distros, including Lyrical and newer Rolling snapshots, build with C++20.
+Electron native builds use their own headers and memory-cage handling; the npm runtime's exact Node patch-version minimum is not enforced against those headers.
 
 Native compatibility branches for ROS releases older than Humble have been
 removed. Humble and newer API differences remain handled by the build and
 runtime code; recognizing a historical distro name does not imply build support.
 
-If no prebuilt binary is available for your target, make sure your local compiler matches the required C++ standard before running `npm install`.
-
-### C++ Formatting
-
-For contributors, `npm install` provides the `clang-format` command through
-[`clang-format-node`](https://github.com/lumirlumir/npm-clang-format-node),
-pinned to **4.0.3**, which bundles **LLVM clang-format 23.1.3**. No separate
-LLVM or Python installation is needed for formatting. The bundled formatter
-supports Linux x64/ARM64, macOS x64/ARM64, and Windows x64.
-
-```bash
-# Optional: check the installed formatter version.
-npm exec --no -- clang-format --version
-npm run format
-```
-
-The existing format script and C++ `lint-staged` hook use this project-local
-executable and the [.clang-format](../.clang-format) style. `Standard: c++20`
-sets the formatter's language mode; it does not change the per-distribution
-compiler requirements above.
-The exact package pin keeps formatter updates deliberate; compare output
-before upgrading it rather than silently changing formatting across contributors.
-This replaces the archived `clang-format` npm wrapper and does not add a
-runtime requirement for users installing rclnodejs.
-
-### Get Code
-
-Open a terminal, and input:
+## Build from Source
 
 ```bash
 git clone https://github.com/RobotWebTools/rclnodejs.git
+cd rclnodejs
+npm install --global npm@11.19.0
 ```
 
-### Build Module
-
-Before you build the module, you should make sure the ROS2 environments were loaded. You can check if the `AMENT_PREFIX_PATH` environment variable was set:
-
-- For Windows: `echo %AMENT_PREFIX_PATH%` in the command prompt.
-
-- For Linux and macOS: `echo $AMENT_PREFIX_PATH` in the terminal.
-
-If the `AMENT_PREFIX_PATH` is unset, you should load the ROS2 environments:
-
-- For Windows, open the command prompt and run
+Load your ROS environment in the same terminal. For a Linux binary installation:
 
 ```bash
-  call <path\to\ros2>\install\local_setup.bat
+source /opt/ros/jazzy/setup.bash
 ```
 
-- For Linux and macOS, open the terminal and run:
+Replace `jazzy` with your distro. For a source installation, source `<install-prefix>/local_setup.bash`. On Windows:
+
+```bat
+call C:\path\to\ros2\local_setup.bat
+```
+
+Then install and build:
 
 ```bash
-  source <path/to/ros2>/install/local_setup.bash
-```
-
-This `Node.js` module is built by [node-gyp](https://www.npmjs.com/package/node-gyp), all you have to do is just to run the following command:
-
-```javascript
 npm install
-```
-
-**Windows-specific**: make sure a Python 3.x interpreter is available in your `PATH` before running the command, as required by [node-gyp](https://github.com/nodejs/node-gyp#on-windows).
-
-Interface generation uses Python 3: `python3` on Linux/macOS and `py -3` on
-Windows. Python 2 is not supported by the parser helper. Runtime compatibility
-code assumes the Node.js minimum above; Electron's native build still uses its
-own headers and memory-cage handling rather than an exact Node patch-version
-check.
-
-### Build the JavaScript Distribution
-
-```bash
 npm run build:dist
 ```
 
-This uses tsdown to bundle the ESM source into ESM (`.js`) and CommonJS (`.cjs`)
-entries for `rclnodejs`, `rclnodejs/web`, `rclnodejs/web/server` and
-`rclnodejs/rosocket`. Shared chunks remain directly under `dist/` so native
-addon paths stay valid. Message/type generators remain external, and existing
-public declarations are not regenerated by the bundler.
+`npm install` uses a prebuilt native addon or builds one, then generates ROS interfaces. `build:dist` creates the ESM/CommonJS package entry points in `dist/`. Source examples can run without this bundling step.
 
-The [vendored ref helpers](../third_party/README.md) provide array and struct
-types alongside the local `ref-napi` implementation. Their source and MIT
-licenses are shipped in the npm package; the two scoped npm packages are no
-longer installed as dependencies. `array-index` remains a runtime dependency.
-Normal installations regenerate interfaces through `postinstall`. If you skip
-installation hooks and reuse cached interfaces from before this integration,
-source ROS and run `npm run generate-messages` before loading those interfaces
-to replace the old scoped-package imports.
+To refresh stale interfaces, including caches reused after skipping install hooks, run `npm run generate-messages` with ROS sourced.
 
-Running the bundler requires Node **22.18+ in the 22.x line, 24.11+ in the
-24.x line, or 26+**; Node 24.11+ is recommended for development and packaging.
-The published library's runtime requirement remains **Node >= 20.20.2**.
-Installing the npm package does not require running tsdown; source/Git builds
-that produce distribution bundles need the newer build-time Node version.
+## Build and Run with Docker
 
-`npm pack` normally builds the distribution through `prepack`. The release
-workflow builds it explicitly before packing with `--ignore-scripts`.
-
-To build a release tarball without publishing, manually run the
-[NPM Publish workflow](../.github/workflows/npm-publish.yml) with `dry_run`
-enabled. Download the `rclnodejs-npm-tarball` artifact from the run's summary
-and extract the `.tgz` file. The workflow uploads the tarball before publishing,
-so it is also available if a subsequent publish attempt fails.
-
-Dry runs build and package only: they do not invoke `npm publish` or validate
-registry version availability, publishing credentials, or provenance. This
-allows testing an already-published version such as `2.3.0`. Tag-triggered runs
-and manual runs with `dry_run` disabled still publish to npm.
-
-With ROS sourced and the native addon built, validate an installed tarball:
+The [Dockerfile](../Dockerfile) provides a source-development environment with **Rolling, Node 24 LTS, and npm 11.19.0** by default:
 
 ```bash
-npm run test:package
+docker build -t rclnodejs .
+docker run --rm -it rclnodejs
 ```
 
-The tests install a temporary package without install hooks, provide the locally
-built addon, generate standard/custom interfaces, and exercise typed ESM/CJS
-imports plus HTTP/WS ROS round trips. They check matching prebuild loading and existing-build fallback,
-not cross-platform prebuild production. Linux x64 CI runs them in the
-Lyrical / Node 24 lane.
+Override `ROS_DISTRO`, `NODE_MAJOR_VER`, or `BRANCH` with `--build-arg`. The image clones the selected GitHub branch (default: `develop`), **not the local checkout**, and its entrypoint loads ROS automatically.
 
-## Run Unit Tests
+Source examples run directly; execute `npm run build:dist` inside the container before using bundled package entry points. The image does not include the extra Electron/Xvfb dependencies for the full test suite.
 
-The test suite is implemented using the [mocha](https://www.npmjs.com/package/mocha) JavaScript test framework for node.js. Run the unit tests:
+## Tests
 
-```javascript
-npm run test
-```
+With ROS sourced and the native addon built:
 
-The three message-generator CLI installation tests invoke `npm pack`, which
-runs tsdown through `prepack`. They run only on the bundler's supported Node
-versions listed above and are skipped on Node 20. Source-level message-generation
-and other runtime tests still run on Node 20. Package validation remains in the
-Lyrical / Node 24 CI lane.
+| Command                | Purpose                                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `npm test`             | Mocha, TypeScript, and Electron tests.                                                               |
+| `npm run test:package` | Build bundles and validate an installed tarball using the existing addon; install hooks are skipped. |
+| `npm run lint`         | JavaScript and native-code linting.                                                                  |
 
-**Windows-specific**: the tests requires in a `Microsoft Visual Studio Native Tools command prompt`, and also make sure Python 3.x interpreter is first searched in your `PATH` before running te test. You can change it temporarily by:
-
-```bash
-  set PATH=<path\to\python 3.x>;%PATH%
-```
+On Linux, Electron tests need GUI libraries and, when headless, `xvfb-run`; see the [CI dependency setup](../.github/workflows/linux-x64-build-and-test.yml). Packaging tests require a bundler-supported Node version. The pack-based CLI tests are skipped on Node 20; ordinary runtime tests still run.
 
 ### Coverage
-
-With ROS sourced, use Node 24 to run the tests and generate local coverage reports:
 
 ```bash
 npm run test:coverage
 ```
 
-The reports are written to `coverage/lcov.info` and `coverage/lcov-report/index.html`.
-[Linux x64 CI](../.github/workflows/linux-x64-build-and-test.yml) uploads coverage
-from the Lyrical / Node 24 lane using `coverallsapp/github-action@v2`.
-The legacy `npm run coverage` upload command and the unmaintained `coveralls`
-npm package have been removed; local report generation does not upload coverage.
+Reports: `coverage/lcov.info` and `coverage/lcov-report/index.html`. Local generation does not upload coverage; CI uploads only from the Lyrical/Node 24 lane.
+
+### C++ Formatting
+
+Run `npm run format`. It uses the npm-installed `clang-format-node` (`^4.0.3`; tested: 4.0.3 / LLVM 23.1.3) and [.clang-format](../.clang-format). No separate formatter installation is needed. The C++20 formatting mode does not set the compiler standard.
+
+## Packaging
+
+```bash
+npm pack
+```
+
+The `prepack` hook builds the JavaScript bundles automatically.
+
+For a release tarball with prebuilt addons, run the [NPM Publish workflow](../.github/workflows/npm-publish.yml) with `dry_run: true`, then download the `rclnodejs-npm-tarball` artifact and extract its `.tgz`.
+
+Dry runs build and package only: they neither publish nor validate registry version availability, publishing credentials, or provenance. Tag-triggered runs and manual runs with `dry_run: false` publish to npm.
