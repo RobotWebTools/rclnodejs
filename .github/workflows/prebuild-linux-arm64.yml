@@ -21,19 +21,19 @@ jobs:
           - lyrical
         include:
           # Humble Hawksbill (May 2022 - May 2027)
-          - docker_image: ubuntu:jammy
+          - docker_image: ros:humble-ros-base-jammy
             ros_distribution: humble
             ubuntu_codename: jammy
           # Jazzy Jalisco (May 2024 - May 2029)
-          - docker_image: ubuntu:noble
+          - docker_image: ros:jazzy-ros-base-noble
             ros_distribution: jazzy
             ubuntu_codename: noble
           # Kilted Kaiju (May 2025 - Dec 2026)
-          - docker_image: ubuntu:noble
+          - docker_image: ros:kilted-ros-base-noble
             ros_distribution: kilted
             ubuntu_codename: noble
           # Lyrical Luth (May 2026 - May 2031)
-          - docker_image: ubuntu:26.04
+          - docker_image: ros:lyrical-ros-base-resolute
             ros_distribution: lyrical
             ubuntu_codename: resolute
 
@@ -45,16 +45,6 @@ jobs:
         architecture: ${{ matrix.architecture }}
 
     - uses: actions/checkout@v7
-
-    - name: Setup ROS2
-      if: ${{ matrix.ros_distribution != 'lyrical' }}
-      uses: ros-tooling/setup-ros@v0.7
-      with:
-        required-ros-distributions: ${{ matrix.ros_distribution }}
-
-    - name: Setup ROS2 from apt (lyrical)
-      if: ${{ matrix.ros_distribution == 'lyrical' }}
-      uses: ./.github/actions/setup-ros2-apt
 
     - name: Install dependencies
       shell: bash
