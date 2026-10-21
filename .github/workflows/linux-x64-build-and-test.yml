@@ -44,21 +44,16 @@ jobs:
           # Lyrical Luth (May 2026 - May 2031)
           - docker_image: ros:lyrical-ros-base-resolute
             ros_distribution: lyrical
-          # Use the same Rolling nightly release channel as Windows.
+          # Rolling Ridley (No End-Of-Life) - Ubuntu 26.04 (resolute)
           - node-version: 26.X
             architecture: x64
-            docker_image: ubuntu:resolute
+            docker_image: ros:rolling-ros-base-resolute
             ros_distribution: rolling
-            ros_tar_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-linux-amd64.tar.bz2"
     steps:
-    - name: Install Node.js runtime and lint dependencies
+    - name: Install lint dependencies
       run: |
         apt-get update
         apt-get install -y --no-install-recommends wget
-        # Bare Ubuntu needs libatomic before setup-node starts Node 26.
-        if [ "${{ matrix.ros_distribution }}" = "rolling" ]; then
-          apt-get install -y --no-install-recommends libatomic1
-        fi
 
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v7
@@ -72,7 +67,6 @@ jobs:
       uses: ./.github/actions/setup-ros2-apt
       with:
         ros-distribution: ${{ matrix.ros_distribution }}
-        ros-tar-url: ${{ matrix.ros_tar_url }}
 
     # Retry transient test or download failures once. Keep max_attempts
     # conservative so persistent regressions still fail the matrix leg.

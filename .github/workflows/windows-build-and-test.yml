@@ -20,7 +20,6 @@ jobs:
           - jazzy
           - kilted
           - lyrical
-          - rolling
         include:
           # Humble Hawksbill (May 2022 - May 2027)
           - ros_distribution: humble
@@ -37,9 +36,6 @@ jobs:
           - ros_distribution: lyrical
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-20260807/ros2-lyrical-2026-08-07-windows-AMD64.zip"
             run_tests: true
-          - ros_distribution: rolling
-            ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-windows-amd64.zip"
-            run_tests: false
     steps:
     - name: Setup Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v7

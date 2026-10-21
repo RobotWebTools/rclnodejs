@@ -1,16 +1,12 @@
-name: 'Setup Linux ROS2 test environment'
+name: 'Setup Linux ROS2 test dependencies'
 description: >-
-  Prepare Rolling nightly binaries or stable ROS test interfaces, and optionally
-  install Electron dependencies for the Linux x64 and ARM64 test jobs.
+  Install ROS test interfaces and optional Electron dependencies in the official
+  ROS base images used by Linux x64 and ARM64 test jobs.
 
 inputs:
   ros-distribution:
     description: 'ROS distribution used by the job.'
     required: true
-  ros-tar-url:
-    description: 'Architecture-specific nightly tarball URL; required for Rolling.'
-    required: false
-    default: ''
   install-electron:
     description: 'Install Electron GUI/headless dependencies; disable for IDL-only jobs.'
     required: false
@@ -19,73 +15,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Enable ROS2 apt repository (rolling)
-      if: ${{ inputs.ros-distribution == 'rolling' }}
-      shell: bash
-      run: |
-        . /etc/os-release
-        UBUNTU_RELEASE="${UBUNTU_CODENAME:-${VERSION_CODENAME:-}}"
-        if [ -z "$UBUNTU_RELEASE" ]; then
-          echo "::error::Unable to determine the Ubuntu codename from /etc/os-release"
-          exit 1
-        fi
-
-        apt-get update
-        apt-get install -y software-properties-common curl
-        add-apt-repository universe
-        # Retry transient errors, not persistent HTTP 403/404 responses.
-        CURL_OPTIONS=(
-          --fail --show-error --silent --location
-          --retry 3 --retry-delay 5 --retry-max-time 180
-          --connect-timeout 10 --max-time 60
-        )
-
-        # Resolve the latest tag without the unauthenticated REST API quota.
-        ROS_RELEASES_URL=https://github.com/ros-infrastructure/ros-apt-source/releases
-        echo "Resolving the latest ros-apt-source release"
-        LATEST_RELEASE_URL=$(curl "${CURL_OPTIONS[@]}" --head \
-          --output /dev/null --write-out '%{url_effective}' \
-          "$ROS_RELEASES_URL/latest")
-        ROS_APT_SOURCE_VERSION="${LATEST_RELEASE_URL#"$ROS_RELEASES_URL/tag/"}"
-        if [[ ! "$ROS_APT_SOURCE_VERSION" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
-          echo "::error::Unexpected ROS apt source release URL: $LATEST_RELEASE_URL"
-          exit 1
-        fi
-
-        echo "Downloading ros2-apt-source ${ROS_APT_SOURCE_VERSION} for Ubuntu ${UBUNTU_RELEASE}"
-        curl "${CURL_OPTIONS[@]}" \
-          --output /tmp/ros2-apt-source.deb \
-          "$ROS_RELEASES_URL/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.${UBUNTU_RELEASE}_all.deb"
-        dpkg -i /tmp/ros2-apt-source.deb
-        rm /tmp/ros2-apt-source.deb
-        apt-get update
-        apt-get install -y build-essential cmake python3 python3-colcon-common-extensions
-
-    - name: Install ROS2 from binary tarball (rolling)
-      if: ${{ inputs.ros-distribution == 'rolling' }}
-      shell: bash
-      env:
-        ROS_TAR_URL: ${{ inputs.ros-tar-url }}
-      run: |
-        if [ -z "$ROS_TAR_URL" ]; then
-          echo "::error::ros-tar-url is required for Rolling"
-          exit 1
-        fi
-        apt-get install -y --no-install-recommends tar bzip2 python3-rosdep
-        curl --fail --show-error --silent --location \
-          --retry 3 --retry-delay 5 --connect-timeout 10 --max-time 600 \
-          "$ROS_TAR_URL" -o /tmp/ros2-rolling.tar.bz2
-        sha256sum /tmp/ros2-rolling.tar.bz2
-        mkdir -p /opt/ros/rolling
-        tar xf /tmp/ros2-rolling.tar.bz2 --strip-components=1 -C /opt/ros/rolling
-        rm /tmp/ros2-rolling.tar.bz2
-
-        rosdep init
-        rosdep update --rosdistro rolling
-        rosdep install --rosdistro rolling --from-paths /opt/ros/rolling/share --ignore-src -y --skip-keys "cyclonedds fastcdr fastdds iceoryx_binding_c rmw_connextdds rti-connext-dds-7.3.0 rti-connext-dds-7.7.0 urdfdom_headers python3-pyqt6.qtsvg rosidl_buffer_py pybind11"
-
     - name: Install ROS test interfaces
-      if: ${{ inputs.ros-distribution != 'rolling' }}
       shell: bash
       env:
         ROS_DISTRO: ${{ inputs.ros-distribution }}
