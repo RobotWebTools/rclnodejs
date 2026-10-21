@@ -74,7 +74,7 @@ With ROS sourced and the native addon built:
 
 On Linux, Electron tests need GUI libraries and, when headless, `xvfb-run`; see the [CI dependency setup](../.github/workflows/linux-x64-build-and-test.yml). Packaging tests require a bundler-supported Node version. The pack-based CLI tests are skipped on Node 20; ordinary runtime tests still run.
 
-Linux CI uses official ROS base images for all five supported distros, including Rolling on x64 and ARM64. The images provide ROS, native build tools, Python, CMake, and `libatomic1`; workflows install only additional lint/test dependencies and explicitly source ROS before building.
+Linux CI uses official ROS base images for Humble, Jazzy, Kilted, and Lyrical. Rolling x64/ARM64 use Ubuntu plus the `release-rolling-nightlies` tarballs, matching Windows' nightly release channel. These asset URLs are mutable, so they do not guarantee an identical snapshot if upstream updates during separate jobs. Both Linux build workflows share [ROS/test environment setup](../.github/actions/setup-ros2-apt/action.yml), log nightly tarball SHA-256 values, and explicitly load ROS before building.
 
 ### Coverage
 
