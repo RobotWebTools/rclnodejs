@@ -55,8 +55,8 @@ jobs:
       uses: prefix-dev/setup-pixi@v0.11.0
       with:
         run-install: false
-        # Preserve cleanup behavior from setup-pixi before v0.10.
-        post-cleanup: true
+        # GitHub-hosted VMs are discarded after each job.
+        post-cleanup: false
 
     - name: Install ROS2 ${{ matrix.ros_distribution }}
       shell: powershell
