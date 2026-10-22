@@ -1,4 +1,6 @@
-# Zero-build ROS 2 in a single HTML page
+# API Playground - Vanilla
+
+The zero-build variant of the [web API playground](../../README.md).
 
 A single static HTML page that talks to a real ROS 2 graph — just
 `<script type="module">` and the SDK's ESM file. No bundler, no
@@ -11,7 +13,7 @@ the runtime dependencies, native addon and generated interfaces. No separate
 installation is needed for the static page.
 
 ```bash
-cd demo/web/javascript
+cd demo/web/api-playground/vanilla
 ```
 
 **Shell 1 — runtime + the demo's ROS 2 nodes:**
@@ -28,7 +30,7 @@ node runtime.mjs
 `/fibonacci` server (`example_interfaces/action/Fibonacci`).
 
 **Shell 2 — static-file server** (hosts `index.html`, maps `/sdk/*` to
-the in-repo [`web/`](../../../web/) SDK):
+the in-repo [`web/`](../../../../web/) SDK):
 
 ```bash
 node static.mjs
@@ -124,7 +126,7 @@ node instead of the in-page publisher:
 
 ```bash
 source /opt/ros/<distro>/setup.bash
-node ../../../example/topics/publisher/publisher-example.mjs
+node ../../../../example/topics/publisher/publisher-example.mjs
 
 curl -N http://localhost:9001/capability/subscribe/topic
 ```
@@ -137,7 +139,7 @@ only need the runtime — replace shell 1 with the CLI (shell 2 is
 unchanged):
 
 ```bash
-node ../../../bin/rclnodejs-web.js web.json
+node ../../../../bin/rclnodejs-web.js web.json
 
 # plus the service the demo expects:
 ros2 run demo_nodes_cpp add_two_ints_server
@@ -161,7 +163,7 @@ panel or curl for live feedback.
 
 ```bash
 source /opt/ros/<distro>/setup.bash
-node ../../../bin/rclnodejs-web.js openapi web.json > openapi.json
+node ../../../../bin/rclnodejs-web.js openapi web.json > openapi.json
 
 # Browse it in Swagger UI (loads from a CDN, no install needed):
 node static.mjs

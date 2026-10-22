@@ -15,17 +15,18 @@ schema enforcement.
 
 For runnable code see [`demo/web/`](../demo/web/):
 
-| Demo                                              | Pick this if you…                                                           |
-| ------------------------------------------------- | --------------------------------------------------------------------------- |
-| [`demo/web/javascript/`](../demo/web/javascript/) | want a single static page — no build tools, no `npm install` for the page   |
-| [`demo/web/typescript/`](../demo/web/typescript/) | already have a Vite / Next / React / Vue / Svelte project, want full typing |
+| Demo | Pick this if you… |
+| --- | --- |
+| [API playground — Vanilla](../demo/web/api-playground/vanilla/) | want a single static page — no build tools, no `npm install` for the page |
+| [API playground — Vite + TypeScript](../demo/web/api-playground/vite-typescript/) | want a typed Vite app as a starting point for your web frontend |
+| [Manipulator studio](../demo/web/manipulator/) | want terminal keyboard control with a read-only Three.js browser visualization |
 
 ## Functionality at a glance
 
 The table maps ROS 2 communication features to the roles a web client can
 perform and the web transport each role supports. The action rows below
 describe the **2.3.0 implementation**; use a checkout or package that includes
-it (see the [TypeScript demo setup](../demo/web/typescript/README.md#run-it-two-shells)).
+it (see the [typed playground setup](../demo/web/api-playground/vite-typescript/README.md#run-it-two-shells)).
 
 ### ROS 2 roles and transport support
 
@@ -168,7 +169,7 @@ await sub.close();
 ### Actions
 
 Start and expose the matching ROS action server first. For a complete app,
-see the [Fibonacci browser demo](../demo/web/javascript/README.md#fibonacci-actions).
+see the [Fibonacci browser demo](../demo/web/api-playground/vanilla/README.md#fibonacci-actions).
 
 ```ts
 const httpClient = await connect({ http: 'http://localhost:9001' });
@@ -286,7 +287,7 @@ npx -p rclnodejs rclnodejs-web openapi web.json > openapi.json
 
 SSE schemas describe individual event payloads; API explorers may buffer streams.
 
-See [`demo/web/javascript/`](../demo/web/javascript/) for a full
+See the [Vanilla API playground](../demo/web/api-playground/vanilla/) for a full
 walkthrough, including browsing it in Swagger UI.
 
 ## 4. `rclnodejs/web` vs. `rosbridge` + `roslibjs`

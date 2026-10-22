@@ -1,9 +1,9 @@
 {
-  "name": "rclnodejs-web-ts-demo",
+  "name": "rclnodejs-web-api-playground-vite-typescript",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "TypeScript-first demo of rclnodejs/web with Vite.",
+  "description": "Typed ROS 2 API playground built with rclnodejs/web and Vite.",
   "scripts": {
     "server": "NODE_OPTIONS=--no-deprecation tsx server.ts",
     "rclnodejs-web": "rclnodejs-web web.json",

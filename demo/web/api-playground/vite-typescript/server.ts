@@ -6,11 +6,11 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
-// TypeScript demo server. Run with `npm run server` (which uses tsx) or
-// `npx tsx server.ts`. Behaviour matches demo/web/javascript/runtime.mjs
+// Typed API playground server. Run with `npm run server` (which uses tsx) or
+// `npx tsx server.ts`. Behaviour matches ../vanilla/runtime.mjs
 // — same runtime + same demo nodes — except this side is written in
 // TypeScript so the typed SDK story is visible end to end. The static
-// page server is Vite (`npm run dev`), parallel to the JS demo's
+// page server is Vite (`npm run dev`), parallel to the Vanilla playground's
 // separate `node static.mjs`.
 
 // rclnodejs is a CommonJS module without first-class ESM types; using
@@ -31,7 +31,7 @@ const RUNTIME_PORT = Number(process.env.RUNTIME_PORT || 9000);
 const HTTP_PORT = Number(process.env.HTTP_PORT || 9001);
 
 // Render the registry as a small human-readable table — see the matching
-// helper in demo/web/javascript/runtime.mjs.
+// helper in ../vanilla/runtime.mjs.
 function formatCapabilities(
   caps: Record<
     'call' | 'publish' | 'subscribe' | 'action',
@@ -153,7 +153,7 @@ async function main(): Promise<void> {
     Object.keys(caps.subscribe || {}).length +
     Object.keys(caps.action || {}).length;
 
-  console.log('rclnodejs/web demo running (TypeScript)');
+  console.log('rclnodejs/web API playground running (Vite + TypeScript)');
   console.log(
     `  WebSocket : ws://localhost:${runtime.transports[0].port}/capability`
   );

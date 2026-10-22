@@ -1,4 +1,6 @@
-# End-to-end typed ROS 2 in a TypeScript app
+# API Playground - Vite + TypeScript
+
+The typed-app variant of the [web API playground](../../README.md).
 
 A **TypeScript** browser entry built with **Vite**, driven by the typed
 SDK so request, reply, message, and action shapes are visible in your IDE.
@@ -15,7 +17,7 @@ const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
 
 ```bash
 source /opt/ros/<distro>/setup.bash
-cd demo/web/typescript
+cd demo/web/api-playground/vite-typescript
 npm install
 ```
 
@@ -25,8 +27,8 @@ without changing the dependency or lockfile:
 ```bash
 # From the repository root, with ROS 2 sourced and npm install completed:
 npm run build:dist
-cd demo/web/typescript
-npm install --no-save --package-lock=false --ignore-scripts ../../..
+cd demo/web/api-playground/vite-typescript
+npm install --no-save --package-lock=false --ignore-scripts ../../../..
 ```
 
 **Shell 1 — runtime:**
@@ -42,7 +44,7 @@ npm run server
 and a cancellable `/fibonacci` server (`example_interfaces/action/Fibonacci`).
 
 > HTTP serves calls, publishes, and SSE actions; subscriptions use WebSocket.
-> For HTTP topic subscriptions, see the [JavaScript demo](../javascript/README.md).
+> For HTTP topic subscriptions, see the [Vanilla playground](../vanilla/README.md).
 
 **Shell 2 — Vite dev server:**
 

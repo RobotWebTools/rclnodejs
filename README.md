@@ -94,8 +94,10 @@ how much glue you want to write.
   ); // reply.sum is typed as `${number}n`
   ```
 
-  See the [Fibonacci action demo](./demo/web/javascript/README.md#fibonacci-actions)
-  for a runnable example.
+  See the [Fibonacci action demo](./demo/web/api-playground/vanilla/README.md#fibonacci-actions)
+  for a runnable example, or the [browser manipulator demo](./demo/web/manipulator/)
+  for terminal keyboard control and live Three.js visualization.
+  Browse all [web demos](./demo/web/README.md) by scenario and implementation.
 
 - **[`rosocket`](./rosocket/README.md)** — thin WebSocket gateway,
   zero browser dependencies (just built-in `WebSocket` + `JSON`).

@@ -15,8 +15,8 @@
 // and `import { connect } from 'rclnodejs/web'` instead.
 //
 // Pair with `node runtime.mjs` (the rclnodejs/web runtime + the demo's
-// ROS 2 nodes) in another shell — the same split as the TypeScript
-// demo's `tsx server.ts` + `vite`. Production deployments use nginx,
+// ROS 2 nodes) in another shell — the same split as the Vite + TypeScript
+// playground's `tsx server.ts` + `vite`. Production deployments use nginx,
 // a CDN, or any other static host.
 
 import path from 'node:path';
@@ -29,7 +29,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STATIC_PORT = Number(process.env.STATIC_PORT || 8080);
 
 const demoDir = __dirname;
-const sdkDir = path.resolve(__dirname, '..', '..', '..', 'web');
+const sdkDir = path.resolve(__dirname, '..', '..', '..', '..', 'web');
 
 const server = http.createServer((req, res) => {
   let urlPath = (req.url || '/').split('?')[0];
