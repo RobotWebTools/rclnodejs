@@ -14,7 +14,7 @@
 //   2. From this folder run `node runtime.mjs`
 //   3. In another shell run `node static.mjs` to host
 //      `index.html` on http://localhost:8080/ — same split as the
-//      Vite + TypeScript playground's `tsx server.ts` + `vite`.
+//      TypeScript playground's `tsx server.ts` + `vite`.
 
 import rclnodejs from '../../../../index.js';
 // In a downstream project this is the public, supported import:
@@ -158,7 +158,7 @@ const total =
   Object.keys(caps.subscribe || {}).length +
   Object.keys(caps.action || {}).length;
 
-console.log('rclnodejs/web API playground running (Vanilla)');
+console.log('rclnodejs/web API playground running (JavaScript)');
 console.log(
   `  WebSocket : ws://${displayHost('::')}:${runtime.transports[0].port}/capability`
 );

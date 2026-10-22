@@ -1,4 +1,4 @@
-# API Playground - Vite + TypeScript
+# API Playground - TypeScript
 
 The typed-app variant of the [web API playground](../../README.md).
 
@@ -17,7 +17,7 @@ const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
 
 ```bash
 source /opt/ros/<distro>/setup.bash
-cd demo/web/api-playground/vite-typescript
+cd demo/web/api-playground/typescript
 npm install
 ```
 
@@ -27,7 +27,7 @@ without changing the dependency or lockfile:
 ```bash
 # From the repository root, with ROS 2 sourced and npm install completed:
 npm run build:dist
-cd demo/web/api-playground/vite-typescript
+cd demo/web/api-playground/typescript
 npm install --no-save --package-lock=false --ignore-scripts ../../../..
 ```
 
@@ -44,7 +44,7 @@ npm run server
 and a cancellable `/fibonacci` server (`example_interfaces/action/Fibonacci`).
 
 > HTTP serves calls, publishes, and SSE actions; subscriptions use WebSocket.
-> For HTTP topic subscriptions, see the [Vanilla playground](../vanilla/README.md).
+> For HTTP topic subscriptions, see the [JavaScript playground](../javascript/README.md).
 
 **Shell 2 — Vite dev server:**
 

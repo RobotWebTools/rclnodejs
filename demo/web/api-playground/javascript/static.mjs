@@ -15,7 +15,7 @@
 // and `import { connect } from 'rclnodejs/web'` instead.
 //
 // Pair with `node runtime.mjs` (the rclnodejs/web runtime + the demo's
-// ROS 2 nodes) in another shell — the same split as the Vite + TypeScript
+// ROS 2 nodes) in another shell — the same split as the TypeScript
 // playground's `tsx server.ts` + `vite`. Production deployments use nginx,
 // a CDN, or any other static host.
 

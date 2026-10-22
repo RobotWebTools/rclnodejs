@@ -1,4 +1,4 @@
-# API Playground - Vanilla
+# API Playground - JavaScript
 
 The zero-build variant of the [web API playground](../../README.md).
 
@@ -13,7 +13,7 @@ the runtime dependencies, native addon and generated interfaces. No separate
 installation is needed for the static page.
 
 ```bash
-cd demo/web/api-playground/vanilla
+cd demo/web/api-playground/javascript
 ```
 
 **Shell 1 — runtime + the demo's ROS 2 nodes:**

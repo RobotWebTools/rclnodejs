@@ -11,7 +11,7 @@ import { defineConfig } from 'vite';
 // `globalThis.WebSocket` without loading that fallback.
 export default defineConfig({
   server: {
-    // 8080 to match the Vanilla playground's static-file server, instead of
+    // 8080 to match the JavaScript playground's static-file server, instead of
     // Vite's default 5173 — keeps the two demos' README instructions in sync.
     port: 8080,
   },
