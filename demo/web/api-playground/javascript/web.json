@@ -1,5 +1,5 @@
 {
-  "$comment": "Sample rclnodejs/web config consumed by `npx rclnodejs-web web.json` from a project that has rclnodejs installed. From this demo folder in a source checkout, run `node ../../../bin/rclnodejs-web.js web.json`. This local demo enables SSE/CORS explicitly; its settings are not a list of CLI defaults.",
+  "$comment": "Sample rclnodejs/web config consumed by `npx rclnodejs-web web.json` from a project that has rclnodejs installed. From this demo folder in a source checkout, run `node ../../../../bin/rclnodejs-web.js web.json`. This local demo enables SSE/CORS explicitly; its settings are not a list of CLI defaults.",
   "port": 9000,
   "path": "/capability",
   "node": "rclnodejs_web_demo",

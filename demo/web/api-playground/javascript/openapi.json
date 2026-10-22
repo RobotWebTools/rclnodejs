@@ -1,0 +1,284 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "rclnodejs_web_demo",
+    "version": "0.0.0"
+  },
+  "paths": {
+    "/capability/call/add_two_ints": {
+      "post": {
+        "summary": "Call ROS 2 service /add_two_ints",
+        "operationId": "call_add_two_ints",
+        "x-ros-capability": {
+          "kind": "call",
+          "name": "/add_two_ints",
+          "type": "example_interfaces/srv/AddTwoInts"
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "a": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^-?[0-9]+n$",
+                    "example": "42n",
+                    "description": "ROS 2 int64, transmitted as a BigInt-string (e.g. \"42n\") for precision-safety."
+                  },
+                  "b": {
+                    "type": "string",
+                    "format": "int64",
+                    "pattern": "^-?[0-9]+n$",
+                    "example": "42n",
+                    "description": "ROS 2 int64, transmitted as a BigInt-string (e.g. \"42n\") for precision-safety."
+                  }
+                },
+                "required": [
+                  "a",
+                  "b"
+                ],
+                "x-ros-type": "example_interfaces/srv/AddTwoInts_Request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ROS 2 service response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sum": {
+                      "type": "string",
+                      "format": "int64",
+                      "pattern": "^-?[0-9]+n$",
+                      "example": "42n",
+                      "description": "ROS 2 int64, transmitted as a BigInt-string (e.g. \"42n\") for precision-safety."
+                    }
+                  },
+                  "required": [
+                    "sum"
+                  ],
+                  "x-ros-type": "example_interfaces/srv/AddTwoInts_Response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Capability not exposed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_exposed"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/capability/publish/web_demo_chatter": {
+      "post": {
+        "summary": "Publish to ROS 2 topic /web_demo_chatter",
+        "operationId": "publish_web_demo_chatter",
+        "x-ros-capability": {
+          "kind": "publish",
+          "name": "/web_demo_chatter",
+          "type": "std_msgs/msg/String"
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "data"
+                ],
+                "x-ros-type": "std_msgs/msg/String"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Published, no content"
+          },
+          "404": {
+            "description": "Capability not exposed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "const": "not_exposed"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/capability/subscribe/web_demo_chatter": {
+      "get": {
+        "summary": "Subscribe to ROS 2 topic /web_demo_chatter via Server-Sent Events",
+        "operationId": "subscribe_web_demo_chatter",
+        "x-ros-capability": {
+          "kind": "subscribe",
+          "name": "/web_demo_chatter",
+          "type": "std_msgs/msg/String"
+        },
+        "description": "Requires the HTTP transport to be started with `sse: true` (`--http-sse` on the CLI). Shipped in rclnodejs 2.1.1. **Not testable via \"Try it out\"**: this response is an unbounded stream that never completes, and API explorers (e.g. Swagger UI) wait for the response body to finish before displaying it, so the request will appear to hang forever. Use `curl -N` or a browser `EventSource` instead.",
+        "responses": {
+          "200": {
+            "description": "Server-Sent Events stream of std_msgs/msg/String messages",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "x-ros-type": "std_msgs/msg/String"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Capability not exposed, or subscribe over HTTP is disabled (`sse: false`, the default)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "not_exposed",
+                        "unsupported_kind"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/capability/subscribe/topic": {
+      "get": {
+        "summary": "Subscribe to ROS 2 topic /topic via Server-Sent Events",
+        "operationId": "subscribe_topic",
+        "x-ros-capability": {
+          "kind": "subscribe",
+          "name": "/topic",
+          "type": "std_msgs/msg/String"
+        },
+        "description": "Requires the HTTP transport to be started with `sse: true` (`--http-sse` on the CLI). Shipped in rclnodejs 2.1.1. **Not testable via \"Try it out\"**: this response is an unbounded stream that never completes, and API explorers (e.g. Swagger UI) wait for the response body to finish before displaying it, so the request will appear to hang forever. Use `curl -N` or a browser `EventSource` instead.",
+        "responses": {
+          "200": {
+            "description": "Server-Sent Events stream of std_msgs/msg/String messages",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "x-ros-type": "std_msgs/msg/String"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Capability not exposed, or subscribe over HTTP is disabled (`sse: false`, the default)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "const": false
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "not_exposed",
+                        "unsupported_kind"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {}
+  },
+  "servers": [
+    {
+      "url": "http://localhost:9001",
+      "description": "rclnodejs/web HTTP transport"
+    }
+  ]
+}

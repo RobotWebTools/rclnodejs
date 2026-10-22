@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Manipulator Studio | rclnodejs Web Runtime</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/vendor/three.module.js",
+          "three/addons/controls/OrbitControls.js": "/vendor/OrbitControls.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="https://github.com/RobotWebTools/rclnodejs">
+        <span class="brand-icon" aria-hidden="true">r</span>
+        <span>rclnodejs <span class="muted">/ Web Runtime</span></span>
+      </a>
+      <div class="header-status">
+        <span class="badge">Read-only viewer</span>
+        <span
+          id="connection-status"
+          class="status"
+          data-state="waiting"
+          role="status"
+          >Starting</span
+        >
+      </div>
+    </header>
+    <main>
+      <div class="workspace">
+        <div class="workspace-heading">
+          <div>
+            <p class="eyebrow">RCLNODEJS / MOTION LAB</p>
+            <h1>Manipulator studio</h1>
+            <p class="workspace-summary">
+              Terminal-driven motion. A live window into ROS 2.
+            </p>
+          </div>
+          <span class="session-label"
+            >2 joints <span aria-hidden="true">/</span> 10 Hz publisher</span
+          >
+        </div>
+        <section class="views" aria-label="Interactive manipulator view">
+          <article class="view-card">
+            <div class="view-title">
+              <h2>Robot scene</h2>
+              <span>Interactive third-person view</span>
+            </div>
+            <div class="preview">
+              <div class="preview-label">
+                <span><i class="dot green"></i> Orbit camera</span
+                ><span id="preview-size">&mdash;</span>
+              </div>
+              <div id="viewport" class="viewport"></div>
+              <div class="axis-legend">
+                <span class="axis-x">X</span><span class="axis-y">Y</span
+                ><span class="axis-z">Z</span><span>Y-up viewer</span>
+              </div>
+            </div>
+          </article>
+        </section>
+        <div class="camera-toolbar">
+          <div class="segmented" aria-label="Left mouse button behavior">
+            <button id="orbit-mode" type="button" aria-pressed="true">
+              Orbit
+            </button>
+            <button id="pan-mode" type="button" aria-pressed="false">
+              Pan
+            </button>
+          </div>
+          <label for="camera-distance">Zoom</label>
+          <span class="zoom-caption">Near</span>
+          <input
+            id="camera-distance"
+            type="range"
+            min="4"
+            max="18"
+            step="0.1"
+            value="9.8"
+          />
+          <span class="zoom-caption">Far</span>
+          <button id="reset-camera" type="button">Reset view</button>
+          <span class="camera-hint">Drag to move &middot; Scroll to zoom</span>
+        </div>
+        <section class="diagnostics" aria-labelledby="diagnostics-title">
+          <div class="section-title">
+            <h2 id="diagnostics-title">Live diagnostics</h2>
+            <span class="section-note">Received ROS data</span>
+          </div>
+          <div class="metrics">
+            <div>
+              <span>Message rate</span><strong id="frequency">0.0 Hz</strong>
+            </div>
+            <div>
+              <span>Messages received</span
+              ><strong id="message-count">0</strong>
+            </div>
+            <div>
+              <span>Last valid message</span
+              ><strong id="last-message">No data yet</strong>
+            </div>
+            <div>
+              <span>Render rate</span><strong id="render-rate">&mdash;</strong>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div>
+              <span>Topic</span><code id="topic-name">/joint_states</code>
+            </div>
+            <div>
+              <span>Message type</span><code>sensor_msgs/msg/JointState</code>
+            </div>
+            <div>
+              <span>Tool mount XYZ &middot; viewer units</span
+              ><output id="end-position">&mdash;</output>
+            </div>
+            <div>
+              <span>Rejected states</span><output id="rejected-count">0</output>
+            </div>
+          </div>
+          <div class="history-title">
+            <span>Recent states</span
+            ><span>Last five valid messages &middot; browser receipt time</span>
+          </div>
+          <div class="history-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Received</th>
+                  <th>Base (deg)</th>
+                  <th>Elbow (deg)</th>
+                  <th>Tool X</th>
+                  <th>Tool Y</th>
+                  <th>Tool Z</th>
+                </tr>
+              </thead>
+              <tbody id="recent-states">
+                <tr>
+                  <td colspan="6" class="empty-state">
+                    Waiting for joint states from the terminal...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <footer class="workspace-footer">
+          <span class="dot green"></span> Terminal keyboard &rarr; ROS topic
+          &rarr; rclnodejs/web &rarr; browser
+        </footer>
+      </div>
+      <aside
+        class="sidebar"
+        aria-label="Tool camera, joint states and terminal controls"
+      >
+        <section class="view-card tool-view" aria-labelledby="tool-view-title">
+          <div class="view-title">
+            <h2 id="tool-view-title">Tool camera</h2>
+            <span>Simulated camera</span>
+          </div>
+          <div class="preview">
+            <div class="preview-label">
+              <span><i class="dot green"></i> Following end effector</span>
+            </div>
+            <div id="tool-viewport" class="viewport"></div>
+            <div class="camera-crosshair" aria-hidden="true"></div>
+          </div>
+        </section>
+        <section class="joint-panel">
+          <div class="section-title">
+            <h2>Joint monitor</h2>
+            <span class="read-only">Read-only</span>
+          </div>
+          <div class="map-title">
+            <span>Joint map</span><span>Reference layout</span>
+          </div>
+          <svg
+            class="joint-map"
+            viewBox="0 0 240 180"
+            role="img"
+            aria-label="Two-joint chain: base, elbow, and tool mount"
+          >
+            <path d="M48 151H87L83 137H53Z" fill="#e3eae8" stroke="#6c8580" />
+            <path
+              d="M67 135L124 34L181 72"
+              fill="none"
+              stroke="#a6bab4"
+              stroke-width="13"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M67 135L124 34L181 72"
+              fill="none"
+              stroke="#f1f5f3"
+              stroke-width="8"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M176 68L190 77L190 90M181 81L174 89"
+              fill="none"
+              stroke="#536f68"
+              stroke-width="4"
+              stroke-linecap="round"
+            />
+            <circle
+              cx="67"
+              cy="135"
+              r="12"
+              fill="#cf7664"
+              stroke="white"
+              stroke-width="2"
+            />
+            <text x="67" y="139" text-anchor="middle">1</text>
+            <circle
+              cx="124"
+              cy="34"
+              r="12"
+              fill="#178470"
+              stroke="white"
+              stroke-width="2"
+            />
+            <text x="124" y="38" text-anchor="middle">2</text>
+            <circle cx="181" cy="72" r="4" fill="#536f68" />
+          </svg>
+          <div class="map-legend">
+            <span><i class="dot base"></i> 1 Base / Y</span
+            ><span><i class="dot elbow"></i> 2 Elbow / Z</span>
+          </div>
+          <div class="joint-row">
+            <div class="joint-heading">
+              <strong>J1 <span>Base rotation</span></strong
+              ><output id="joint1-value">&mdash;</output>
+            </div>
+            <div class="position-track">
+              <span id="joint1-bar" class="base-fill"></span><i></i>
+            </div>
+            <div class="joint-scale">
+              <span>&minus;180&deg;</span
+              ><span id="joint1-radians">Waiting for state</span
+              ><span>180&deg;</span>
+            </div>
+          </div>
+          <div class="joint-row">
+            <div class="joint-heading">
+              <strong>J2 <span>Elbow bend</span></strong
+              ><output id="joint2-value">&mdash;</output>
+            </div>
+            <div class="position-track">
+              <span id="joint2-bar" class="elbow-fill"></span><i></i>
+            </div>
+            <div class="joint-scale">
+              <span>&minus;135&deg;</span
+              ><span id="joint2-radians">Waiting for state</span
+              ><span>135&deg;</span>
+            </div>
+          </div>
+        </section>
+        <section class="keyboard">
+          <p class="eyebrow">CONTROL FROM YOUR TERMINAL</p>
+          <h2>Keyboard shortcuts</h2>
+          <dl>
+            <div>
+              <dt><kbd>A</kbd> <kbd>D</kbd></dt>
+              <dd>Rotate base</dd>
+            </div>
+            <div>
+              <dt><kbd>S</kbd> <kbd>W</kbd></dt>
+              <dd>Bend elbow</dd>
+            </div>
+            <div>
+              <dt><kbd>Space</kbd></dt>
+              <dd>Toggle animation</dd>
+            </div>
+            <div>
+              <dt><kbd>R</kbd> / <kbd>Q</kbd></dt>
+              <dd>Reset / quit</dd>
+            </div>
+          </dl>
+          <p class="muted">
+            Arrow keys also work. Each press moves 5 degrees. Keep keyboard
+            focus in the terminal.
+          </p>
+        </section>
+        <section class="connection">
+          <div class="section-title">
+            <h2>Web Runtime</h2>
+            <button id="reconnect" type="button" disabled>Reconnect</button>
+          </div>
+          <code id="endpoint">Waiting for runtime configuration</code>
+          <p class="muted">
+            Local simulation. No robot commands are exposed to the browser.
+          </p>
+          <p id="error" class="error" role="alert" hidden></p>
+        </section>
+      </aside>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "rclnodejs-browser-manipulator-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Terminal-controlled ROS 2 manipulator visualized in a browser with rclnodejs/web and Three.js",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node controller.mjs"
+  },
+  "dependencies": {
+    "three": "0.182.0"
+  },
+  "engines": {
+    "node": ">=20.20.2"
+  }
+}
