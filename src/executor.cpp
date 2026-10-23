@@ -48,7 +48,9 @@ Executor::Executor(Napi::Env env, HandleManager* handle_manager,
       handle_manager_(handle_manager),
       delegate_(delegate),
       context_(nullptr),
+      interrupt_guard_condition_(rcl_get_zero_initialized_guard_condition()),
       env_(env),
+      thread_started_(false),
       work_pending_(false) {
   running_.store(false);
 }
@@ -58,18 +60,53 @@ Executor::~Executor() {
 }
 
 void Executor::Start(rcl_context_t* context, int32_t time_out) {
-  if (!running_.load()) {
-    async_ = new uv_async_t();
+  if (!thread_started_) {
     context_ = context;
     time_out_ = time_out;
 
-    uv_async_init(uv_default_loop(), async_, DoWork);
-    async_->data = this;
+    rcl_ret_t ret =
+        rcl_guard_condition_init(&interrupt_guard_condition_, context_,
+                                 rcl_guard_condition_get_default_options());
+    if (ret != RCL_RET_OK) {
+      std::string error_message =
+          std::string("Failed to initialize executor guard condition: ") +
+          rcl_get_error_string().str;
+      rcl_reset_error();
+      Napi::Error::New(env_, error_message).ThrowAsJavaScriptException();
+      return;
+    }
 
-    // Mark flag before creating thread
-    // Make sure thread can run
-    running_.store(true);
-    uv_thread_create(&background_thread_, Executor::Run, this);
+    async_ = new uv_async_t();
+    int uv_ret = uv_async_init(uv_default_loop(), async_, DoWork);
+    if (uv_ret == 0) {
+      async_->data = this;
+      {
+        std::lock_guard<std::mutex> lock(work_done_mutex_);
+        work_pending_ = false;
+        running_.store(true);
+      }
+      uv_ret = uv_thread_create(&background_thread_, Executor::Run, this);
+      if (uv_ret == 0) {
+        thread_started_ = true;
+        return;
+      }
+      running_.store(false);
+      uv_close(reinterpret_cast<uv_handle_t*>(async_), [](uv_handle_t* async) {
+        delete reinterpret_cast<uv_async_t*>(async);
+      });
+    } else {
+      delete async_;
+    }
+    async_ = nullptr;
+
+    std::string error_message =
+        std::string("Failed to start executor: ") + uv_strerror(uv_ret);
+    if (rcl_guard_condition_fini(&interrupt_guard_condition_) != RCL_RET_OK) {
+      error_message += std::string("; failed to finalize guard condition: ") +
+                       rcl_get_error_string().str;
+      rcl_reset_error();
+    }
+    Napi::Error::New(env_, error_message).ThrowAsJavaScriptException();
   }
 }
 
@@ -102,14 +139,44 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
 }
 
 void Executor::Stop() {
-  if (running_.load()) {
+  if (thread_started_) {
     // Stop thread first, and then uv_close
     // Make sure async_ is not used anymore
-    running_.store(false);
+    {
+      std::lock_guard<std::mutex> lock(work_done_mutex_);
+      running_.store(false);
+    }
     // Wake the background thread in case it is waiting on the condvar.
     work_done_cv_.notify_all();
     handle_manager_->StopWaitingHandles();
-    uv_thread_join(&background_thread_);
+    // The semaphore/condvar cannot wake a thread blocked inside rcl_wait().
+    rcl_ret_t ret = rcl_trigger_guard_condition(&interrupt_guard_condition_);
+    if (ret != RCL_RET_OK) {
+      std::string error_message =
+          std::string("Failed to interrupt executor: ") +
+          rcl_get_error_string().str;
+      rcl_reset_error();
+      Napi::Error::New(env_, error_message).ThrowAsJavaScriptException();
+      return;
+    }
+    int uv_ret = uv_thread_join(&background_thread_);
+    if (uv_ret != 0) {
+      Napi::Error::New(env_, std::string("Failed to join executor thread: ") +
+                                 uv_strerror(uv_ret))
+          .ThrowAsJavaScriptException();
+      return;
+    }
+    thread_started_ = false;
+    handle_manager_->TakeReadyHandles();
+
+    // The wait set must release the guard before it can be finalized.
+    std::string error_message;
+    if (rcl_guard_condition_fini(&interrupt_guard_condition_) != RCL_RET_OK) {
+      error_message =
+          std::string("Failed to finalize executor guard condition: ") +
+          rcl_get_error_string().str;
+      rcl_reset_error();
+    }
 
     if (uv_is_active(reinterpret_cast<uv_handle_t*>(async_))) {
       static bool handle_closed = false;
@@ -125,6 +192,10 @@ void Executor::Stop() {
       while (!handle_closed) uv_run(uv_default_loop(), UV_RUN_ONCE);
 
       RCLNODEJS_DEBUG("Background thread stopped.");
+    }
+    async_ = nullptr;
+    if (!error_message.empty()) {
+      Napi::Error::New(env_, error_message).ThrowAsJavaScriptException();
     }
   }
 }
@@ -159,8 +230,10 @@ void Executor::Run(void* arg) {
   Executor* executor = reinterpret_cast<Executor*>(arg);
   HandleManager* handle_manager = executor->handle_manager_;
 
+  rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
+  bool wait_set_initialized = false;
+  std::string error_message;
   try {
-    rcl_wait_set_t wait_set = rcl_get_zero_initialized_wait_set();
     rcl_ret_t ret =
         rcl_wait_set_init(&wait_set, 0, 2, 0, 0, 0, 0, executor->context_,
                           rcl_get_default_allocator());
@@ -168,12 +241,15 @@ void Executor::Run(void* arg) {
       throw std::runtime_error(std::string("Init waitset failed: ") +
                                rcl_get_error_string().str);
     }
+    wait_set_initialized = true;
 
     while (executor->running_.load()) {
       RclResult wait_result =
           executor->WaitForReadyCallbacks(&wait_set, executor->time_out());
       if (wait_result.ret != RCL_RET_OK)
         throw std::runtime_error(wait_result.error_msg);
+
+      if (!executor->running_.load()) break;
 
       if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(executor->async_)) &&
           handle_manager->ready_handles_count() > 0) {
@@ -196,22 +272,30 @@ void Executor::Run(void* arg) {
         }
       }
     }
-
-    if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
-      throw std::runtime_error(std::string("Failed to destroy guard waitset:") +
-                               rcl_get_error_string().str);
-    }
-  } catch (...) {
-    g_exception_ptr = std::current_exception();
+  } catch (const std::exception& error) {
+    error_message = error.what();
+  }
+  if (wait_set_initialized && rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
+    if (!error_message.empty()) error_message += "; ";
+    error_message += std::string("Failed to destroy executor wait set: ") +
+                     rcl_get_error_string().str;
+  }
+  if (!error_message.empty()) {
+    g_exception_ptr =
+        std::make_exception_ptr(std::runtime_error(error_message));
     uv_async_send(executor->async_);
   }
 }
 
 RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
                                           int32_t time_out) {
-  // Wait the handles on the background thread if there is none.
-  if (handle_manager_->sum() == 0 && !IsMainThread())
+  const bool is_background_thread = !IsMainThread();
+  // Wake tokens can outlive the handles that produced them.
+  while (is_background_thread && running_.load() && handle_manager_->sum() == 0)
     handle_manager_->WaitForHandles();
+
+  if (is_background_thread && !running_.load())
+    return RclResult(RCL_RET_OK, "");
 
   if (handle_manager_->is_synchronizing())
     handle_manager_->WaitForSynchronizing();
@@ -220,8 +304,14 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
     ScopedReadWriteLock read_lock(handle_manager_->handle_rwlock(),
                                   ScopedReadWriteLock::LockType::kRead);
 
+    // The last entity may disappear between the semaphore check and this lock.
+    if (is_background_thread &&
+        (!running_.load() || handle_manager_->sum() == 0)) {
+      return RclResult(RCL_RET_OK, "");
+    }
+
     size_t num_subscriptions = 0u;
-    size_t num_guard_conditions = 0u;
+    size_t num_guard_conditions = is_background_thread ? 1u : 0u;
     size_t num_timers = 0u;
     size_t num_clients = 0u;
     size_t num_services = 0u;
@@ -252,9 +342,19 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
       return RclResult(add_wait_set_ret, error_message);
     }
 
-    time_out = time_out < 0 ? -1 : RCL_MS_TO_NS(time_out);
+    if (is_background_thread) {
+      rcl_ret_t guard_ret = rcl_wait_set_add_guard_condition(
+          wait_set, &interrupt_guard_condition_, nullptr);
+      if (guard_ret != RCL_RET_OK) {
+        return RclResult(
+            guard_ret, std::string("Failed to add executor guard condition: ") +
+                           rcl_get_error_string().str);
+      }
+    }
 
-    rcl_ret_t wait_ret = rcl_wait(wait_set, time_out);
+    const int64_t timeout_ns =
+        time_out < 0 ? -1 : RCL_MS_TO_NS(static_cast<int64_t>(time_out));
+    rcl_ret_t wait_ret = rcl_wait(wait_set, timeout_ns);
 
     if (wait_ret == RCL_RET_WAIT_SET_EMPTY) {
     } else if (wait_ret != RCL_RET_OK && wait_ret != RCL_RET_TIMEOUT) {
