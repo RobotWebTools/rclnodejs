@@ -289,12 +289,13 @@ void Executor::Run(void* arg) {
 
 RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
                                           int32_t time_out) {
-  const bool background = !IsMainThread();
+  const bool is_background_thread = !IsMainThread();
   // Wake tokens can outlive the handles that produced them.
-  while (background && running_.load() && handle_manager_->sum() == 0)
+  while (is_background_thread && running_.load() && handle_manager_->sum() == 0)
     handle_manager_->WaitForHandles();
 
-  if (background && !running_.load()) return RclResult(RCL_RET_OK, "");
+  if (is_background_thread && !running_.load())
+    return RclResult(RCL_RET_OK, "");
 
   if (handle_manager_->is_synchronizing())
     handle_manager_->WaitForSynchronizing();
@@ -304,12 +305,13 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
                                   ScopedReadWriteLock::LockType::kRead);
 
     // The last entity may disappear between the semaphore check and this lock.
-    if (background && (!running_.load() || handle_manager_->sum() == 0)) {
+    if (is_background_thread &&
+        (!running_.load() || handle_manager_->sum() == 0)) {
       return RclResult(RCL_RET_OK, "");
     }
 
     size_t num_subscriptions = 0u;
-    size_t num_guard_conditions = background ? 1u : 0u;
+    size_t num_guard_conditions = is_background_thread ? 1u : 0u;
     size_t num_timers = 0u;
     size_t num_clients = 0u;
     size_t num_services = 0u;
@@ -340,7 +342,7 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
       return RclResult(add_wait_set_ret, error_message);
     }
 
-    if (background) {
+    if (is_background_thread) {
       rcl_ret_t guard_ret = rcl_wait_set_add_guard_condition(
           wait_set, &interrupt_guard_condition_, nullptr);
       if (guard_ret != RCL_RET_OK) {
