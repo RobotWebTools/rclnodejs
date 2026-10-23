@@ -90,4 +90,75 @@ describe('Spin testing', function () {
       rclnodejs.spinOnce(node);
     });
   });
+
+  for (const spinMethod of ['spin', 'spinOnce']) {
+    for (const [scenario, operation, expected] of [
+      [
+        'destroys another ready timer',
+        'node.destroyTimer(second);',
+        ['first', 'third'],
+      ],
+      ['cancels another ready timer', 'second.cancel();', ['first', 'third']],
+      [
+        'destroys itself',
+        'node.destroyTimer(first);',
+        ['first', 'second', 'third'],
+      ],
+      ['destroys the node', 'node.destroy();', ['first']],
+      ['shuts down the context', 'context.shutdown();', ['first']],
+      [
+        'replaces another ready timer',
+        `node.destroyTimer(second);
+         node.createTimer(0n, () => calls.push('replacement'));`,
+        ['first', 'third'],
+      ],
+    ]) {
+      it(`${spinMethod} handles a timer callback that ${scenario}`, function (done) {
+        this.timeout(15000);
+        const moduleUrl = new URL('../index.js', import.meta.url).href;
+        // Keep a native abort in a regression from terminating the test runner.
+        const script = `
+          import assert from 'node:assert/strict';
+          import rclnodejs from ${JSON.stringify(moduleUrl)};
+          await rclnodejs.init();
+          const context = rclnodejs.Context.defaultContext();
+          const node = rclnodejs.createNode('ready_timer_lifetime_regression');
+          const calls = [];
+          let first;
+          let second;
+          const completion = new Promise((resolve) => {
+            first = node.createTimer(0n, () => {
+              calls.push('first');
+              first.cancel();
+              ${operation}
+              resolve();
+            });
+          });
+          second = node.createTimer(0n, () => {
+            calls.push('second');
+            second.cancel();
+          });
+          const third = node.createTimer(0n, () => {
+            calls.push('third');
+            third.cancel();
+          });
+
+          try {
+            assert.ok([first, second, third].every((timer) => timer.isReady()));
+            node.${spinMethod}();
+            await completion;
+            assert.deepEqual(calls, ${JSON.stringify(expected)});
+          } finally {
+            context.shutdown();
+          }
+        `;
+        execFile(
+          process.execPath,
+          ['--input-type=module', '--eval', script],
+          { timeout: 10000, killSignal: 'SIGKILL' },
+          (error) => done(error)
+        );
+      });
+    }
+  }
 });

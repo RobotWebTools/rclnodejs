@@ -592,6 +592,7 @@ declare module 'rclnodejs' {
 
     /**
      * Destroy a Timer.
+     * A destroyed timer is skipped even if it was already ready for dispatch.
      *
      * @param timer - Timer to be destroyed.
      */
