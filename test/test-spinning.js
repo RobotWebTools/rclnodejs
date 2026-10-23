@@ -165,7 +165,7 @@ describe('Spin testing', function () {
   describe('Interruptible spinning', function () {
     this.timeout(15000);
 
-    function runInChild(body, done) {
+    function runInChild(body, done, timeout = 10000) {
       const moduleUrl = new URL('../index.js', import.meta.url).href;
       const script = `
         import assert from 'node:assert/strict';
@@ -187,7 +187,7 @@ describe('Spin testing', function () {
       execFile(
         process.execPath,
         ['--input-type=module', '--eval', script],
-        { timeout: 10000, killSignal: 'SIGKILL' },
+        { timeout, killSignal: 'SIGKILL' },
         (error) => done(error)
       );
     }
@@ -326,6 +326,41 @@ describe('Spin testing', function () {
           );
         });
       }
+    }
+
+    for (const entity of ['timer', 'subscription']) {
+      it(`creates a ${entity} promptly after removing the last entity during spin`, function (done) {
+        this.timeout(25000);
+        runInChild(
+          `
+            const messageType = rclnodejs.require('std_msgs/msg/String');
+            node.spinOnce(0);
+            for (let i = 0; i < 100; i++) {
+              const guard = node.createGuardCondition(() => {});
+              node.spin(100);
+              node.destroyGuardCondition(guard);
+              await delay(1);
+              const start = performance.now();
+              const created = ${JSON.stringify(entity)} === 'timer'
+                ? node.createTimer(1000000n, () => {})
+                : node.createSubscription(messageType, 'empty_transition_topic', () => {});
+              const elapsed = performance.now() - start;
+              node.stop();
+              if (${JSON.stringify(entity)} === 'timer') {
+                node.destroyTimer(created);
+              } else {
+                node.destroySubscription(created);
+              }
+              assert.ok(
+                elapsed < 75,
+                'Entity creation waited for an empty wait set: ' + elapsed + ' ms (iteration ' + i + ')'
+              );
+            }
+          `,
+          done,
+          20000
+        );
+      });
     }
 
     it('shuts down from a timer callback during an infinite spin', function (done) {

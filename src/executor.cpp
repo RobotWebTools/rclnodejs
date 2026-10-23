@@ -303,6 +303,11 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
     ScopedReadWriteLock read_lock(handle_manager_->handle_rwlock(),
                                   ScopedReadWriteLock::LockType::kRead);
 
+    // The last entity may disappear between the semaphore check and this lock.
+    if (background && (!running_.load() || handle_manager_->sum() == 0)) {
+      return RclResult(RCL_RET_OK, "");
+    }
+
     size_t num_subscriptions = 0u;
     size_t num_guard_conditions = background ? 1u : 0u;
     size_t num_timers = 0u;
