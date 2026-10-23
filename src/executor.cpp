@@ -290,8 +290,8 @@ void Executor::Run(void* arg) {
 RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
                                           int32_t time_out) {
   const bool background = !IsMainThread();
-  // Wait the handles on the background thread if there is none.
-  if (handle_manager_->sum() == 0 && background)
+  // Wake tokens can outlive the handles that produced them.
+  while (background && running_.load() && handle_manager_->sum() == 0)
     handle_manager_->WaitForHandles();
 
   if (background && !running_.load()) return RclResult(RCL_RET_OK, "");

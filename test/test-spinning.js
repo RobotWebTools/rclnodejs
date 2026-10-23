@@ -265,6 +265,69 @@ describe('Spin testing', function () {
       );
     });
 
+    for (const [scenario, setup] of [
+      [
+        'creating and destroying the only entity',
+        `node.spinOnce(0);
+         const oldTimer = node.createTimer(0n, () => {});
+         node.destroyTimer(oldTimer);`,
+      ],
+      [
+        'stopping and emptying a nonempty executor',
+        `const oldGuard = node.createGuardCondition(() => {});
+         node.spin(-1);
+         node.stop();
+         node.destroyGuardCondition(oldGuard);`,
+      ],
+    ]) {
+      for (const entity of ['timer', 'subscription']) {
+        it(`creates a ${entity} after a stale handle wake from ${scenario}`, function (done) {
+          runInChild(
+            `
+              ${setup}
+              node.spin(-1);
+              await delay(200);
+              let resolve;
+              const completed = new Promise((done) => { resolve = done; });
+              let callbacks = 0;
+              const callback = () => {
+                callbacks++;
+                node.stop();
+                resolve();
+              };
+              const start = performance.now();
+              if (${JSON.stringify(entity)} === 'timer') {
+                node.createTimer(1000000n, callback);
+              } else {
+                node.createSubscription(
+                  'std_msgs/msg/String', 'stale_wake_topic', callback
+                );
+              }
+              assert.ok(
+                performance.now() - start < 500,
+                'Creating an entity must not block behind an empty wait set'
+              );
+              let publishInterval;
+              try {
+                if (${JSON.stringify(entity)} === 'subscription') {
+                  const publisher = node.createPublisher(
+                    'std_msgs/msg/String', 'stale_wake_topic'
+                  );
+                  publishInterval = setInterval(() => publisher.publish('wake'), 20);
+                }
+                await completed;
+                assert.equal(callbacks, 1);
+                assert.equal(node.spinning, false);
+              } finally {
+                clearInterval(publishInterval);
+              }
+            `,
+            done
+          );
+        });
+      }
+    }
+
     it('shuts down from a timer callback during an infinite spin', function (done) {
       runInChild(
         `
