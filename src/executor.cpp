@@ -252,9 +252,9 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
       return RclResult(add_wait_set_ret, error_message);
     }
 
-    time_out = time_out < 0 ? -1 : RCL_MS_TO_NS(time_out);
-
-    rcl_ret_t wait_ret = rcl_wait(wait_set, time_out);
+    const int64_t timeout_ns =
+        time_out < 0 ? -1 : RCL_MS_TO_NS(static_cast<int64_t>(time_out));
+    rcl_ret_t wait_ret = rcl_wait(wait_set, timeout_ns);
 
     if (wait_ret == RCL_RET_WAIT_SET_EMPTY) {
     } else if (wait_ret != RCL_RET_OK && wait_ret != RCL_RET_TIMEOUT) {
