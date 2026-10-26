@@ -1,0 +1,153 @@
+name: Nightly Compatibility
+
+on:
+  schedule:
+    # 00:00 Asia/Shanghai (UTC+8).
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+    inputs:
+      node-version:
+        description: 'Node version (27-nightly by default; use 26.X for comparison)'
+        required: true
+        default: '27-nightly'
+        type: string
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  compatibility:
+    name: Rolling nightly / Node ${{ inputs.node-version || '27-nightly' }} / Ubuntu x64
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container: ubuntu:26.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      ROS_DISTRO: rolling
+      ROS_AUTOMATIC_DISCOVERY_RANGE: LOCALHOST
+      RMW_IMPLEMENTATION: rmw_fastrtps_cpp
+      ROS_NIGHTLY_URL: https://github.com/ros2/ros2/releases/download/release-rolling-nightlies/ros2-rolling-nightly-linux-amd64.tar.bz2
+    steps:
+      - name: Install bootstrap dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates curl git bzip2 libatomic1
+
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ inputs.node-version || '27-nightly' }}
+          architecture: x64
+          check-latest: true
+          package-manager-cache: false
+
+      - name: Install ROS development tools
+        run: |
+          # Follow the release redirect rather than consuming anonymous API quota.
+          release_url=$(curl --fail --silent --show-error --location --retry 3 \
+            --output /dev/null --write-out '%{url_effective}' \
+            https://github.com/ros-infrastructure/ros-apt-source/releases/latest)
+          version=${release_url##*/}
+          curl --fail --location --retry 3 \
+            "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${version}/ros2-apt-source_${version}.resolute_all.deb" \
+            --output "$RUNNER_TEMP/ros2-apt-source.deb"
+          dpkg -i "$RUNNER_TEMP/ros2-apt-source.deb"
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            build-essential cmake python3-dev ros-dev-tools
+
+      - name: Install ROS Rolling nightly
+        run: |
+          curl --fail --location --retry 3 \
+            --dump-header "$RUNNER_TEMP/ros-nightly.headers" \
+            "$ROS_NIGHTLY_URL" --output "$RUNNER_TEMP/ros-nightly.tar.bz2"
+          {
+            echo '### ROS nightly artifact'
+            echo "$ROS_NIGHTLY_URL"
+            echo '```text'
+            awk 'tolower($0) ~ /^last-modified:/ {print}' "$RUNNER_TEMP/ros-nightly.headers"
+            sha256sum "$RUNNER_TEMP/ros-nightly.tar.bz2"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p /opt/ros-nightly
+          tar --extract --bzip2 --file "$RUNNER_TEMP/ros-nightly.tar.bz2" \
+            --directory /opt/ros-nightly --strip-components=1 --no-same-owner
+          test -f /opt/ros-nightly/local_setup.bash
+          rm "$RUNNER_TEMP/ros-nightly.tar.bz2"
+          rosdep init
+          rosdep update --rosdistro rolling
+          # Use upstream binary-install vendor exclusions, plus unused xacro,
+          # so dependency resolution does not introduce an APT ROS overlay.
+          rosdep install --from-paths /opt/ros-nightly/share --ignore-src -y \
+            --rosdistro rolling \
+            --skip-keys "cyclonedds fastcdr fastdds iceoryx_binding_c rmw_connextdds rti-connext-dds-7.7.0 urdfdom_headers xacro"
+
+      - name: Record environment
+        run: |
+          source /opt/ros-nightly/local_setup.bash
+          {
+            echo '### Compatibility environment'
+            echo '```text'
+            printf '%s\n' "$GITHUB_SHA"
+            cat /opt/ros-nightly/BUILD_URL
+            cat /etc/os-release
+            uname -m
+            node -p 'JSON.stringify({versions: process.versions, release: process.release}, null, 2)'
+            npm --version
+            python3 --version
+            g++ --version
+            cmake --version
+            echo "RMW_IMPLEMENTATION=$RMW_IMPLEMENTATION"
+            ros2 pkg prefix example_interfaces
+            ros2 pkg prefix test_msgs
+            python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          for name in ("rcl", "rmw", "rmw_fastrtps_cpp"):
+              package = ET.parse(f"/opt/ros-nightly/share/{name}/package.xml")
+              print(f"{name}: {package.findtext('version')}")
+          PY
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Install and build from source
+        id: build
+        run: |
+          source /opt/ros-nightly/local_setup.bash
+          npm install
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import path from 'node:path';
+          import './index.js';
+          const libraries = process.report.getReport().sharedObjects;
+          const addons = libraries.filter(file => file.endsWith('/rclnodejs.node'));
+          assert.deepEqual(addons, [path.resolve('build/Release/rclnodejs.node')]);
+          assert.ok(libraries.includes('/opt/ros-nightly/lib/librcl.so'));
+          console.log('Loaded source-built addon:', addons[0]);
+          console.log('Loaded ROS library: /opt/ros-nightly/lib/librcl.so');
+          JS
+
+      - name: Run core ROS tests
+        run: |
+          source /opt/ros-nightly/local_setup.bash
+          node --expose-gc ./scripts/run_test.cjs
+
+      - name: Run TypeScript tests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          source /opt/ros-nightly/local_setup.bash
+          npx --no-install tsd
+
+      - name: Validate npm package
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          source /opt/ros-nightly/local_setup.bash
+          npm run test:package

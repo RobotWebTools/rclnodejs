@@ -78,6 +78,15 @@ Linux CI uses official ROS base images for Humble, Jazzy, Kilted, Lyrical, and R
 
 Windows CI covers Humble, Jazzy, Kilted, and Lyrical, with full tests on Lyrical. Windows Rolling is not covered by CI.
 
+### Nightly compatibility checks
+
+The [Nightly Compatibility workflow](../.github/workflows/nightly-compatibility.yml) builds from source and runs core ROS, TypeScript, and package tests on Ubuntu 26.04 x64 with ROS Rolling nightly, Node 27 nightly, and bundled npm.
+
+- **Scheduled:** daily at 00:00 Asia/Shanghai (16:00 UTC) on the default branch; execution may be delayed.
+- **Manual:** use **Actions > Nightly Compatibility > Run workflow**. The `node-version` input defaults to `27-nightly`; use `26.X` for comparison.
+
+For pre-merge testing, enable Actions in your fork and place the workflow on its default branch.
+
 ### Coverage
 
 ```bash
