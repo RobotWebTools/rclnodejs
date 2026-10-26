@@ -47,11 +47,19 @@ describe('Installed package compatibility', function () {
   before(function () {
     assert.ok(process.env.ROS_DISTRO, 'Source ROS 2 before package tests');
     directory = fs.mkdtempSync(path.join(os.tmpdir(), 'rclnodejs-package-'));
-    const [archive] = JSON.parse(
+    const packResult = JSON.parse(
       runNpm(
         ['pack', '--ignore-scripts', '--json', '--pack-destination', directory],
         root
       )
+    );
+    // npm 12 keys archive metadata by package name instead of returning an array.
+    const archive = Array.isArray(packResult)
+      ? packResult[0]
+      : packResult?.rclnodejs;
+    assert.ok(
+      typeof archive?.filename === 'string' && Array.isArray(archive.files),
+      'npm pack returned invalid archive metadata for rclnodejs'
     );
     packedFiles = new Set(archive.files.map((file) => file.path));
     fs.writeFileSync(
