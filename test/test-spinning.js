@@ -91,6 +91,37 @@ describe('Spin testing', function () {
     });
   });
 
+  it('preserves long spinOnce timeouts without nanosecond overflow', function (done) {
+    this.timeout(15000);
+    const moduleUrl = new URL('../index.js', import.meta.url).href;
+    const script = `
+      import assert from 'node:assert/strict';
+      import { performance } from 'node:perf_hooks';
+      import rclnodejs from ${JSON.stringify(moduleUrl)};
+      await rclnodejs.init();
+      const node = rclnodejs.createNode(
+        'long_spin_once_regression', '', rclnodejs.Context.defaultContext(),
+        new rclnodejs.NodeOptions(false, [], false, false, false)
+      );
+      try {
+        let called = false;
+        node.createTimer(1000000000n, () => { called = true; });
+        const start = performance.now();
+        node.spinOnce(5000);
+        assert.equal(called, true, 'spinOnce returned before the timer was ready');
+        assert.ok(performance.now() - start >= 800);
+      } finally {
+        rclnodejs.shutdown();
+      }
+    `;
+    execFile(
+      process.execPath,
+      ['--input-type=module', '--eval', script],
+      { timeout: 10000, killSignal: 'SIGKILL' },
+      (error) => done(error)
+    );
+  });
+
   for (const spinMethod of ['spin', 'spinOnce']) {
     for (const [scenario, operation, expected] of [
       [
