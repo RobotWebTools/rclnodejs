@@ -342,6 +342,8 @@ declare module 'rclnodejs' {
 
     /**
      * Terminate spinning - no further events will be received.
+     * Interrupts the native background wait, including an infinite spin timeout.
+     * Does not interrupt a JavaScript callback that is already executing.
      */
     stop(): void;
 

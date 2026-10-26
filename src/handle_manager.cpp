@@ -23,7 +23,7 @@
 
 namespace rclnodejs {
 
-HandleManager::HandleManager() {
+HandleManager::HandleManager() : sum_(0) {
   is_synchronizing_.store(false);
   uv_rwlock_init(&sync_handles_rwlock_);
   uv_rwlock_init(&ready_handles_rwlock_);
@@ -50,6 +50,7 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
   Napi::Value events = node.Get("_events");
 
   uint32_t sum = 0;
+  uint32_t sum_was = 0;
   is_synchronizing_.store(true);
   {
     ScopedReadWriteLock scoped_lock(&sync_handles_rwlock_,
@@ -67,6 +68,7 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
     sum += SynchronizeHandlesByType(action_servers.As<Napi::Object>(),
                                     &action_servers_);
     sum += SynchronizeHandlesByType(events.As<Napi::Object>(), &events_);
+    sum_was = sum_.exchange(sum);
   }
   is_synchronizing_.store(false);
 
@@ -75,8 +77,7 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
 
   // Wakeup the backgroud thread if the sum was zero, but now it is greater than
   // zero.
-  uint32_t sum_was = sum_.exchange(sum);
-  if (sum_was == 0 && sum_ > 0) uv_sem_post(&wait_handle_sem_);
+  if (sum_was == 0 && sum > 0) uv_sem_post(&wait_handle_sem_);
 
   RCLNODEJS_DEBUG(
       "Add %lu timers, %lu subscriptions, %lu clients, %lu services, %lu "
