@@ -53,7 +53,9 @@ void ShadowNode::Init(Napi::Env env, Napi::Object exports) {
 
 void ShadowNode::StopRunning() {
   executor_->Stop();
-  handle_manager_->ClearHandles();
+  if (!Env().IsExceptionPending()) {
+    handle_manager_->ClearHandles();
+  }
 }
 
 void ShadowNode::StartRunning(rcl_context_t* context, int32_t timeout) {
