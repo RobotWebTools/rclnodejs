@@ -47,7 +47,7 @@ npm run build:dist
 
 `npm install` uses a prebuilt native addon or builds one, then generates ROS interfaces. `build:dist` creates the ESM/CommonJS package entry points in `dist/`. Source examples can run without this bundling step.
 
-To refresh stale interfaces, including caches reused after skipping install hooks, run `npm run generate-messages` with ROS sourced.
+To refresh stale interfaces, including caches reused after skipping install hooks, run `npm run generate-messages` with ROS sourced. The command prepares the native addon before generating messages and TypeScript declarations.
 
 ## Build and Run with Docker
 
