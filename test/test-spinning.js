@@ -14,6 +14,11 @@ import assert from 'assert';
 import { execFile } from 'node:child_process';
 import sinon from 'sinon';
 import rclnodejs from '../index.js';
+import DistroUtils from '../lib/distro.js';
+import {
+  PublisherEventCallbacks,
+  SubscriptionEventCallbacks,
+} from '../lib/event_handler.js';
 import nativeLoader from '../lib/native_loader.js';
 
 describe('Spin testing', function () {
@@ -192,6 +197,91 @@ describe('Spin testing', function () {
           (error) => done(error)
         );
       });
+    }
+  }
+
+  for (const entityKind of ['publisher', 'subscription']) {
+    for (const origin of ['timer', 'event']) {
+      for (const throws of [false, true]) {
+        it(`skips destroyed ${entityKind} events after ${origin} callbacks${throws ? ' throw' : ''}`, function () {
+          if (DistroUtils.getDistroId() < DistroUtils.getDistroId('jazzy')) {
+            this.skip();
+          }
+          const EventCallbacks =
+            entityKind === 'publisher'
+              ? PublisherEventCallbacks
+              : SubscriptionEventCallbacks;
+          const calls = [];
+          const failure = new Error('event owner destroyed');
+          const createEndpoint = (topic, callback) => {
+            const callbacks = new EventCallbacks();
+            callbacks.deadline = callback;
+            return entityKind === 'publisher'
+              ? node.createPublisher(
+                  'std_msgs/msg/String',
+                  topic,
+                  undefined,
+                  callbacks
+                )
+              : node.createSubscription(
+                  'std_msgs/msg/String',
+                  topic,
+                  undefined,
+                  () => {},
+                  callbacks
+                );
+          };
+          let releasedEndpoint;
+          const destroyEndpoint = () => {
+            calls.push('source');
+            if (entityKind === 'publisher') {
+              node.destroyPublisher(releasedEndpoint);
+            } else {
+              node.destroySubscription(releasedEndpoint);
+            }
+            if (throws) throw failure;
+          };
+          let sourceHandle;
+          if (origin === 'timer') {
+            const timer = node.createTimer(0n, () => {
+              timer.cancel();
+              destroyEndpoint();
+            });
+            sourceHandle = timer.handle;
+          } else {
+            const source = createEndpoint('event_source', destroyEndpoint);
+            sourceHandle = source.events[0].handle;
+          }
+          releasedEndpoint = createEndpoint('event_released', () =>
+            calls.push('released')
+          );
+          const liveEndpoint = createEndpoint('event_live', () =>
+            calls.push('live')
+          );
+          const releasedEvent = releasedEndpoint.events[0];
+          const takeData = sinon.spy(releasedEvent, 'takeData');
+          const handles = [
+            sourceHandle,
+            releasedEvent.handle,
+            liveEndpoint.events[0].handle,
+          ];
+          try {
+            if (throws) {
+              assert.throws(
+                () => node.execute(handles),
+                (error) => error === failure
+              );
+            } else {
+              node.execute(handles);
+            }
+            assert.equal(releasedEvent.isDestroyed(), true);
+            assert.equal(takeData.callCount, 0);
+            assert.deepEqual(calls, ['source', 'live']);
+          } finally {
+            takeData.restore();
+          }
+        });
+      }
     }
   }
 
