@@ -450,5 +450,52 @@ describe('Spin testing', function () {
         done
       );
     });
+
+    it('publishes startup before the worker handles its first event', function (done) {
+      runInChild(
+        `
+          let complete;
+          let callbacks = 0;
+          const guard = node.createGuardCondition(() => {
+            callbacks++;
+            node.stop();
+            complete();
+          });
+          for (let i = 0; i < 50; i++) {
+            const completed = new Promise((resolve) => { complete = resolve; });
+            guard.trigger();
+            node.spin(-1);
+            await completed;
+            assert.equal(callbacks, i + 1);
+            assert.equal(node.spinning, false);
+            await delay(0);
+          }
+        `,
+        done
+      );
+    });
+
+    it('stops and restarts without pumping unrelated JavaScript callbacks', function (done) {
+      runInChild(
+        `
+          let callbacks = 0;
+          const completed = new Promise((resolve) => {
+            setImmediate(() => {
+              callbacks++;
+              resolve();
+            });
+          });
+          for (let i = 0; i < 3; i++) {
+            node.spin(-1);
+            node.stop();
+            assert.equal(node.spinning, false);
+            assert.equal(callbacks, 0, 'stop() must not pump the event loop');
+          }
+          await completed;
+          assert.equal(callbacks, 1);
+        `,
+        done
+      );
+    });
   });
 });

@@ -24,6 +24,7 @@
 #include <condition_variable>
 #include <exception>
 #include <mutex>
+#include <string>
 #include <vector>
 
 #include "rcl_handle.h"
@@ -54,6 +55,19 @@ class Executor {
   static void Run(void* arg);
 
  private:
+  enum class ExecutorState {
+    Stopped,
+    Starting,
+    Running,
+    ThreadJoinPending,
+    ReleasingResources,
+  };
+
+  bool IsRunning() const { return state_.load() == ExecutorState::Running; }
+
+  // Called only when no worker remains to be joined.
+  std::string ReleaseResources();
+
   // Returns RclResult object which indicates the final result.
   RclResult WaitForReadyCallbacks(rcl_wait_set_t* wait_set, int32_t time_out);
 
@@ -75,8 +89,7 @@ class Executor {
   int32_t time_out_;
   Napi::Env env_;
 
-  std::atomic_bool running_;
-  bool thread_started_;
+  std::atomic<ExecutorState> state_;
 
   // Synchronization: the background thread waits after uv_async_send until
   // the main thread finishes ExecuteReadyHandles.  This prevents the
