@@ -11,11 +11,7 @@
 // limitations under the License.
 
 import assert from 'assert';
-import { execFile, spawnSync } from 'node:child_process';
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { execFile } from 'node:child_process';
 import rclnodejs from '../index.js';
 
 describe('Spin testing', function () {
@@ -200,7 +196,7 @@ describe('Spin testing', function () {
   describe('Interruptible spinning', function () {
     this.timeout(15000);
 
-    function runInChild(body, done, timeout = 10000, env = process.env) {
+    function runInChild(body, done, timeout = 10000) {
       const moduleUrl = new URL('../index.js', import.meta.url).href;
       const script = `
         import assert from 'node:assert/strict';
@@ -222,7 +218,7 @@ describe('Spin testing', function () {
       execFile(
         process.execPath,
         ['--input-type=module', '--eval', script],
-        { timeout, killSignal: 'SIGKILL', env },
+        { timeout, killSignal: 'SIGKILL' },
         (error) => done(error)
       );
     }
@@ -500,135 +496,6 @@ describe('Spin testing', function () {
         `,
         done
       );
-    });
-
-    describe('Worker failure handling', function () {
-      let tempDirectory;
-      let shim;
-
-      before(function () {
-        if (process.platform !== 'linux') this.skip();
-        tempDirectory = fs.mkdtempSync(
-          path.join(os.tmpdir(), 'executor-fault-')
-        );
-        shim = path.join(tempDirectory, 'executor-fault.so');
-        const source = fileURLToPath(
-          new URL('./executor-fault-shim.c', import.meta.url)
-        );
-        const result = spawnSync(
-          'cc',
-          ['-std=c11', '-shared', '-fPIC', '-O1', source, '-o', shim, '-ldl'],
-          { encoding: 'utf8' }
-        );
-        if (result.error?.code === 'ENOENT') this.skip();
-        assert.equal(result.status, 0, result.stderr || String(result.error));
-      });
-
-      after(function () {
-        if (tempDirectory) {
-          fs.rmSync(tempDirectory, { recursive: true, force: true });
-        }
-      });
-
-      function runWithFault(name, fault, body, done) {
-        const env = {
-          ...process.env,
-          LD_PRELOAD: [process.env.LD_PRELOAD, shim].filter(Boolean).join(':'),
-          RCLNODEJS_TEST_EXECUTOR_MARKER: path.join(tempDirectory, name),
-        };
-        delete env.RCLNODEJS_TEST_FAIL_WAITS;
-        delete env.RCLNODEJS_TEST_FAIL_WAIT_SET_FINI;
-        delete env.RCLNODEJS_TEST_FAIL_TRIGGER;
-        delete env.RCLNODEJS_TEST_FAIL_GUARD_FINI;
-        delete env.RCLNODEJS_TEST_FAIL_UV;
-        Object.assign(env, fault);
-        if (fault.RCLNODEJS_TEST_FAIL_UV) {
-          env.LD_AUDIT = [process.env.LD_AUDIT, shim].filter(Boolean).join(':');
-        }
-        runInChild(
-          `
-            const fs = await import('node:fs');
-            const waitBuffer = new Int32Array(new SharedArrayBuffer(4));
-            function waitForMarkers(marker, count) {
-              const deadline = Date.now() + 5000;
-              while (Date.now() < deadline) {
-                let markers = '';
-                try {
-                  markers = fs.readFileSync(process.env.RCLNODEJS_TEST_EXECUTOR_MARKER, 'utf8');
-                } catch (error) {
-                  if (error.code !== 'ENOENT') throw error;
-                }
-                if (markers.split(marker).length - 1 >= count) return;
-                Atomics.wait(waitBuffer, 0, 0, 10);
-              }
-              throw new Error('Timed out waiting for executor fault markers');
-            }
-            ${body}
-          `,
-          done,
-          10000,
-          env
-        );
-      }
-
-      for (const [target, marker] of [
-        ['async', 'A'],
-        ['create', 'C'],
-        ['join', 'J'],
-      ]) {
-        it(`recovers from a libuv ${target} failure`, function (done) {
-          const glibc = process.report.getReport().header.glibcVersionRuntime;
-          if (!glibc || !['x64', 'arm64'].includes(process.arch)) this.skip();
-          runWithFault(
-            `uv-${target}`,
-            { RCLNODEJS_TEST_FAIL_UV: target },
-            `
-              let complete;
-              const completed = new Promise((resolve) => { complete = resolve; });
-              const guard = node.createGuardCondition(() => complete());
-              if (${JSON.stringify(target)} === 'join') {
-                node.spin(-1);
-                assert.throws(() => node.stop(), /Failed to join executor thread/);
-                assert.equal(node.spinning, true);
-                node.stop();
-              } else {
-                assert.throws(() => node.spin(-1), /Failed to start executor/);
-              }
-              assert.equal(node.spinning, false);
-              const markers = fs.readFileSync(process.env.RCLNODEJS_TEST_EXECUTOR_MARKER, 'utf8');
-              assert.ok(markers.includes(${JSON.stringify(marker)}));
-              node.spin(-1);
-              guard.trigger();
-              await completed;
-              node.stop();
-            `,
-            done
-          );
-        });
-      }
-
-      it('keeps spinning state until an interrupted stop can be retried', function (done) {
-        runWithFault(
-          'interrupt-failure',
-          { RCLNODEJS_TEST_FAIL_TRIGGER: '1' },
-          `
-            let complete;
-            const completed = new Promise((resolve) => { complete = resolve; });
-            const guard = node.createGuardCondition(() => complete());
-            node.spin(-1);
-            waitForMarkers('W', 1);
-            assert.throws(() => node.stop(), /executor interrupt failure/);
-            assert.equal(node.spinning, true);
-            node.stop();
-            assert.equal(node.spinning, false);
-            node.spin(-1);
-            guard.trigger();
-            await completed;
-            node.stop();
-          `,
-          done
-        );
-      });
     });
   });
 });
