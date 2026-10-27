@@ -475,6 +475,124 @@ describe('Spin testing', function () {
       );
     });
 
+    it('does not acknowledge restarted work from an earlier callback', function (done) {
+      runInChild(
+        `
+          let complete;
+          let callbacks = 0;
+          const completed = new Promise((resolve) => { complete = resolve; });
+          const wait = new Int32Array(new SharedArrayBuffer(4));
+          const guard = node.createGuardCondition(() => {
+            callbacks++;
+            if (callbacks === 1) {
+              node.stop();
+              node.spin(-1);
+              guard.trigger();
+              Atomics.wait(wait, 0, 0, 100);
+              setImmediate(() => Atomics.wait(wait, 0, 0, 100));
+            } else {
+              node.destroyGuardCondition(guard);
+              node.stop();
+              complete();
+            }
+          });
+          node.spin(-1);
+          guard.trigger();
+          await completed;
+          assert.equal(callbacks, 2);
+        `,
+        done
+      );
+    });
+
+    for (const restartFrom of ['callback', 'uncaughtException', 'spinOnce']) {
+      it(`waits for the earlier callback before restarting from ${restartFrom}`, function (done) {
+        runInChild(
+          `
+            let complete;
+            const completed = new Promise((resolve) => { complete = resolve; });
+            const wait = new Int32Array(new SharedArrayBuffer(4));
+            const failure = new Error('restart from error handler');
+            let first;
+            function restartAndReplaceGuard() {
+              node.stop();
+              node.spin(-1);
+              Atomics.wait(wait, 0, 0, 100);
+              node.destroyGuardCondition(first);
+              const second = node.createGuardCondition(() => {
+                node.stop();
+                complete();
+              });
+              second.trigger();
+            }
+            first = node.createGuardCondition(() => {
+              if (${JSON.stringify(restartFrom)} !== 'uncaughtException') {
+                restartAndReplaceGuard();
+              } else {
+                throw failure;
+              }
+            });
+            if (${JSON.stringify(restartFrom)} === 'uncaughtException') {
+              process.once('uncaughtException', (error) => {
+                assert.equal(error, failure);
+                restartAndReplaceGuard();
+              });
+            }
+            if (${JSON.stringify(restartFrom)} === 'spinOnce') {
+              first.trigger();
+              node.spinOnce(0);
+            } else {
+              node.spin(-1);
+              first.trigger();
+            }
+            await completed;
+          `,
+          done,
+          4000
+        );
+      });
+    }
+
+    for (const restartFrom of ['callback', 'uncaughtException', 'spinOnce']) {
+      it(`can stop again while restart waits for ${restartFrom}`, function (done) {
+        runInChild(
+          `
+            let complete;
+            const completed = new Promise((resolve) => { complete = resolve; });
+            const failure = new Error('restart and stop');
+            function restartAndStop() {
+              node.stop();
+              node.spin(-1);
+              node.stop();
+              complete();
+            }
+            const guard = node.createGuardCondition(() => {
+              if (${JSON.stringify(restartFrom)} === 'uncaughtException') {
+                throw failure;
+              }
+              restartAndStop();
+            });
+            if (${JSON.stringify(restartFrom)} === 'uncaughtException') {
+              process.once('uncaughtException', (error) => {
+                assert.equal(error, failure);
+                restartAndStop();
+              });
+            }
+            guard.trigger();
+            if (${JSON.stringify(restartFrom)} === 'spinOnce') {
+              node.spinOnce(0);
+            } else {
+              node.spin(-1);
+            }
+            await completed;
+            assert.equal(node.spinning, false);
+          `,
+          done,
+          4000
+        );
+      });
+    }
+
     it('stops and restarts without pumping unrelated JavaScript callbacks', function (done) {
       runInChild(
         `

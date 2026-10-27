@@ -22,6 +22,7 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <cstddef>
 #include <exception>
 #include <mutex>
 #include <string>
@@ -100,7 +101,8 @@ class Executor {
   // content filter changes).
   std::mutex work_done_mutex_;
   std::condition_variable work_done_cv_;
-  bool work_pending_;  // true while the main thread is processing handles
+  bool work_pending_;
+  std::size_t callbacks_in_flight_;
   std::string worker_error_;
 };
 

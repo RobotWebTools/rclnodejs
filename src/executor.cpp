@@ -67,7 +67,8 @@ Executor::Executor(Napi::Env env, HandleManager* handle_manager,
       interrupt_guard_condition_(rcl_get_zero_initialized_guard_condition()),
       env_(env),
       state_(ExecutorState::Stopped),
-      work_pending_(false) {}
+      work_pending_(false),
+      callbacks_in_flight_(0) {}
 
 Executor::~Executor() {
   // Note: don't free this->async_ in ctor
@@ -138,6 +139,20 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
         .ThrowAsJavaScriptException();
     return;
   }
+  {
+    std::lock_guard<std::mutex> lock(work_done_mutex_);
+    ++callbacks_in_flight_;
+  }
+  struct CallbackGuard {
+    Executor* exec;
+    ~CallbackGuard() {
+      {
+        std::lock_guard<std::mutex> lock(exec->work_done_mutex_);
+        --exec->callbacks_in_flight_;
+      }
+      exec->work_done_cv_.notify_all();
+    }
+  } callback_guard{this};
   struct WaitSetGuard {
     rcl_wait_set_t* wait_set;
     ~WaitSetGuard() {
@@ -259,20 +274,24 @@ bool Executor::IsMainThread() {
 
 void Executor::DoWork(uv_async_t* handle) {
   Executor* executor = reinterpret_cast<Executor*>(handle->data);
+  {
+    std::lock_guard<std::mutex> lock(executor->work_done_mutex_);
+    ++executor->callbacks_in_flight_;
+  }
 
-  // RAII guard: always clear work_pending_ and notify the background thread,
-  // even if ExecuteReadyHandles() throws (e.g. from N-API callbacks).
-  // Without this, the background thread would block forever on work_done_cv_.
+  // Acknowledge this handle's work even if callback execution throws.
   struct WorkDoneGuard {
     Executor* exec;
+    uv_async_t* async_handle;
     ~WorkDoneGuard() {
       {
         std::lock_guard<std::mutex> lock(exec->work_done_mutex_);
-        exec->work_pending_ = false;
+        --exec->callbacks_in_flight_;
+        if (exec->async_ == async_handle) exec->work_pending_ = false;
       }
-      exec->work_done_cv_.notify_one();
+      exec->work_done_cv_.notify_all();
     }
-  } guard{executor};
+  } guard{executor, handle};
 
   try {
     Napi::HandleScope scope(executor->env_);
@@ -296,7 +315,10 @@ void Executor::Run(void* arg) {
   HandleManager* handle_manager = executor->handle_manager_;
 
   {
-    std::lock_guard<std::mutex> lock(executor->work_done_mutex_);
+    std::unique_lock<std::mutex> lock(executor->work_done_mutex_);
+    executor->work_done_cv_.wait(lock, [executor] {
+      return executor->callbacks_in_flight_ == 0 || !executor->IsRunning();
+    });
     if (!executor->IsRunning()) return;
   }
 
