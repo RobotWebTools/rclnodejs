@@ -497,5 +497,64 @@ describe('Spin testing', function () {
         done
       );
     });
+
+    it('reports callback errors through uncaughtException and can restart', function (done) {
+      runInChild(
+        `
+          const failure = new Error('executor callback error');
+          const completed = new Promise((resolve) => {
+            process.once('uncaughtException', (error) => {
+              assert.equal(error, failure);
+              node.stop();
+              resolve();
+            });
+          });
+          const timer = node.createTimer(0n, () => {
+            timer.cancel();
+            throw failure;
+          });
+          node.spin(-1);
+          await completed;
+          assert.equal(node.spinning, false);
+          await delay(0);
+          node.spin(-1);
+          node.stop();
+        `,
+        done
+      );
+    });
+
+    for (const spinMethod of ['spin', 'spinOnce']) {
+      it(`${spinMethod} preserves non-Error thrown values`, function (done) {
+        runInChild(
+          `
+            for (const value of [undefined, null, false, 0, 'failure', Symbol('failure'), {}]) {
+              const guard = node.createGuardCondition(() => { throw value; });
+              guard.trigger();
+              let caught = false;
+              let error;
+              if (${JSON.stringify(spinMethod)} === 'spin') {
+                const reported = new Promise((resolve) => {
+                  process.once('uncaughtException', (thrown) => resolve({ thrown }));
+                });
+                node.spin(-1);
+                error = (await reported).thrown;
+                caught = true;
+                node.stop();
+              } else {
+                try { node.spinOnce(0); } catch (thrown) {
+                  caught = true;
+                  error = thrown;
+                }
+              }
+              assert.equal(caught, true);
+              assert.equal(error, value);
+              node.destroyGuardCondition(guard);
+            }
+          `,
+          done
+        );
+      });
+    }
   });
 });

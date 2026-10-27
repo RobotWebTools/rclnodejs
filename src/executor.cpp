@@ -18,6 +18,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include "handle_manager.h"
 #include "macros.h"
@@ -31,7 +32,22 @@
 
 namespace rclnodejs {
 
-static std::exception_ptr g_exception_ptr = nullptr;
+namespace {
+
+void ReportCallbackError(const Napi::Error& error) noexcept {
+  try {
+    Napi::HandleScope scope(error.Env());
+    if (napi_fatal_exception(error.Env(), error.Value()) != napi_ok) {
+      Napi::Error::Fatal("Executor::DoWork",
+                         "Failed to report an uncaught callback exception");
+    }
+  } catch (...) {
+    Napi::Error::Fatal("Executor::DoWork",
+                       "Failed to report an uncaught callback exception");
+  }
+}
+
+}  // namespace
 
 struct RclResult {
   RclResult(rcl_ret_t rcl_ret, const std::string& msg)
@@ -122,6 +138,14 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
         .ThrowAsJavaScriptException();
     return;
   }
+  struct WaitSetGuard {
+    rcl_wait_set_t* wait_set;
+    ~WaitSetGuard() {
+      if (wait_set && rcl_wait_set_fini(wait_set) != RCL_RET_OK) {
+        rcl_reset_error();
+      }
+    }
+  } guard{&wait_set};
 
   RclResult wait_result = WaitForReadyCallbacks(&wait_set, time_out);
 
@@ -133,7 +157,9 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
 
   if (handle_manager_->ready_handles_count() > 0) ExecuteReadyHandles();
 
-  if (rcl_wait_set_fini(&wait_set) != RCL_RET_OK) {
+  rcl_ret_t fini_ret = rcl_wait_set_fini(&wait_set);
+  guard.wait_set = nullptr;
+  if (fini_ret != RCL_RET_OK) {
     std::string error_message =
         std::string("Failed to destroy guard waitset:") +
         std::string(rcl_get_error_string().str);
@@ -177,10 +203,26 @@ void Executor::Stop() {
     return;
   }
 
-  const std::string error_message = ReleaseResources();
+  std::string error_message = TakeWorkerError();
+  const std::string cleanup_error = ReleaseResources();
+  if (!cleanup_error.empty()) {
+    if (!error_message.empty()) error_message += "; ";
+    error_message += cleanup_error;
+  }
   if (!error_message.empty()) {
     Napi::Error::New(env_, error_message).ThrowAsJavaScriptException();
   }
+}
+
+std::string Executor::TakeWorkerError() {
+  std::lock_guard<std::mutex> lock(work_done_mutex_);
+  std::string error_message;
+  error_message.swap(worker_error_);
+  return error_message;
+}
+
+bool Executor::IsStopped() const {
+  return state_.load() == ExecutorState::Stopped;
 }
 
 std::string Executor::ReleaseResources() {
@@ -232,7 +274,20 @@ void Executor::DoWork(uv_async_t* handle) {
     }
   } guard{executor};
 
-  executor->ExecuteReadyHandles();
+  try {
+    Napi::HandleScope scope(executor->env_);
+    executor->ExecuteReadyHandles();
+    if (executor->env_.IsExceptionPending()) {
+      ReportCallbackError(executor->env_.GetAndClearPendingException());
+    }
+  } catch (const Napi::Error& error) {
+    ReportCallbackError(error);
+  } catch (const std::exception& error) {
+    Napi::Error::Fatal("Executor::DoWork", error.what());
+  } catch (...) {
+    Napi::Error::Fatal("Executor::DoWork",
+                       "Unknown native exception in executor callback");
+  }
 }
 
 void Executor::Run(void* arg) {
@@ -299,9 +354,8 @@ void Executor::Run(void* arg) {
     {
       std::lock_guard<std::mutex> lock(executor->work_done_mutex_);
       executor->state_.store(ExecutorState::ThreadJoinPending);
+      executor->worker_error_ = std::move(error_message);
     }
-    g_exception_ptr =
-        std::make_exception_ptr(std::runtime_error(error_message));
     uv_async_send(executor->async_);
   }
 }
@@ -408,10 +462,10 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
 
 void Executor::ExecuteReadyHandles() {
   if (delegate_) {
-    if (g_exception_ptr) {
-      delegate_->CatchException(g_exception_ptr);
-      rcl_reset_error();
-      g_exception_ptr = nullptr;
+    const std::string error_message = TakeWorkerError();
+    if (!error_message.empty()) {
+      delegate_->CatchException(
+          std::make_exception_ptr(std::runtime_error(error_message)));
       return;
     }
 

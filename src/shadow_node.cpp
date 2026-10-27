@@ -37,14 +37,15 @@ ShadowNode::~ShadowNode() { StopRunning(); }
 void ShadowNode::Init(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);
 
-  Napi::Function func =
-      DefineClass(env, "ShadowNode",
-                  {
-                      InstanceMethod("start", &ShadowNode::Start),
-                      InstanceMethod("stop", &ShadowNode::Stop),
-                      InstanceMethod("syncHandles", &ShadowNode::SyncHandles),
-                      InstanceMethod("spinOnce", &ShadowNode::SpinOnce),
-                  });
+  Napi::Function func = DefineClass(
+      env, "ShadowNode",
+      {
+          InstanceMethod("start", &ShadowNode::Start),
+          InstanceMethod("stop", &ShadowNode::Stop),
+          InstanceMethod("_isExecutorStopped", &ShadowNode::IsExecutorStopped),
+          InstanceMethod("syncHandles", &ShadowNode::SyncHandles),
+          InstanceMethod("spinOnce", &ShadowNode::SpinOnce),
+      });
 
   constructor = Napi::Persistent(func);
   constructor.SuppressDestruct();
@@ -53,7 +54,7 @@ void ShadowNode::Init(Napi::Env env, Napi::Object exports) {
 
 void ShadowNode::StopRunning() {
   executor_->Stop();
-  if (!Env().IsExceptionPending()) {
+  if (executor_->IsStopped()) {
     handle_manager_->ClearHandles();
   }
 }
@@ -82,6 +83,10 @@ Napi::Value ShadowNode::Start(const Napi::CallbackInfo& info) {
 Napi::Value ShadowNode::Stop(const Napi::CallbackInfo& info) {
   StopRunning();
   return info.Env().Undefined();
+}
+
+Napi::Value ShadowNode::IsExecutorStopped(const Napi::CallbackInfo& info) {
+  return Napi::Boolean::New(info.Env(), executor_->IsStopped());
 }
 
 Napi::Value ShadowNode::SpinOnce(const Napi::CallbackInfo& info) {
