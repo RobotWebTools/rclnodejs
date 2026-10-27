@@ -327,7 +327,7 @@ declare module 'rclnodejs' {
      * incoming events.
      * @param node - The node to be spun up.
      * @param - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
-     * @throws Error if the node is already spinning.
+     * @throws Error if the node is already spinning or native executor cleanup is still in progress.
      */
     spin(timeout?: number): void;
 
@@ -336,7 +336,7 @@ declare module 'rclnodejs' {
      * will not received additional events until running additional calls to spin() or spinOnce().
      * @param node - The node to be spun.
      * @param  - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
-     * @throws An error if the node is already spinning.
+     * @throws An error if the node is already spinning or native executor cleanup is still in progress.
      */
     spinOnce(timeout?: number): void;
 
@@ -344,6 +344,8 @@ declare module 'rclnodejs' {
      * Terminate spinning - no further events will be received.
      * Interrupts the native background wait, including an infinite spin timeout.
      * Does not interrupt a JavaScript callback that is already executing.
+     * Reentrant calls during cleanup do not repeat teardown; starting a new spin
+     * must wait until cleanup has finished.
      */
     stop(): void;
 
