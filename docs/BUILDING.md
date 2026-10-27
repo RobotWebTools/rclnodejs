@@ -47,7 +47,7 @@ npm run build:dist
 
 `npm install` uses a prebuilt native addon or builds one, then generates ROS interfaces. `build:dist` creates the ESM/CommonJS package entry points in `dist/`. Source examples can run without this bundling step.
 
-To refresh stale interfaces, including caches reused after skipping install hooks, run `npm run generate-messages` with ROS sourced.
+To refresh stale interfaces, including caches reused after skipping install hooks, run `npm run generate-messages` with ROS sourced. The command prepares the native addon before generating messages and TypeScript declarations.
 
 ## Build and Run with Docker
 
@@ -77,6 +77,15 @@ On Linux, Electron tests need GUI libraries and, when headless, `xvfb-run`; see 
 Linux CI uses official ROS base images for Humble, Jazzy, Kilted, Lyrical, and Rolling on x64 and ARM64. Both Linux build workflows share [test dependency setup](../.github/actions/setup-ros2-apt/action.yml) and explicitly load ROS before building. Rolling keeps Node 26 coverage and the ARM64 IDL suite; its image is not guaranteed to match the latest upstream source.
 
 Windows CI covers Humble, Jazzy, Kilted, and Lyrical, with full tests on Lyrical. Windows Rolling is not covered by CI.
+
+### Nightly compatibility checks
+
+The [Nightly Compatibility workflow](../.github/workflows/nightly-compatibility.yml) builds from source and runs core ROS, TypeScript, and package tests on Ubuntu 26.04 x64 with ROS Rolling nightly, Node 27 nightly, and bundled npm.
+
+- **Scheduled:** daily at 00:00 Asia/Shanghai (16:00 UTC) on the default branch; execution may be delayed.
+- **Manual:** use **Actions > Nightly Compatibility > Run workflow**. The `node-version` input defaults to `27-nightly`; use `26.X` for comparison.
+
+For pre-merge testing, enable Actions in your fork and place the workflow on its default branch.
 
 ### Coverage
 

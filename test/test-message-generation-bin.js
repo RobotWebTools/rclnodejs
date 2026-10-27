@@ -34,6 +34,7 @@ function runCommand(command, args, options) {
   const result = childProcess.spawnSync(command, args, options);
   if (
     result.error ||
+    result.signal ||
     (typeof result.status === 'number' && result.status !== 0)
   ) {
     const parts = [
@@ -51,6 +52,9 @@ function runCommand(command, args, options) {
     }
     if (typeof result.status === 'number' && result.status !== 0) {
       parts.push(`Exit status: ${result.status}`);
+    }
+    if (result.signal) {
+      parts.push(`Signal: ${result.signal}`);
     }
     if (result.stdout) {
       parts.push(`stdout:\n${result.stdout.toString()}`);
@@ -183,6 +187,37 @@ suite('rclnodejs generate-messages binary-script tests', function () {
       'std_msgs folder found'
     );
     done();
+  });
+
+  it('generates messages and declarations when the native addon must be built', function () {
+    const packageRoot = path.join(this.tmpPkg, 'node_modules', 'rclnodejs');
+    for (const folder of ['build', 'prebuilds', GEN_FOLDER]) {
+      fs.rmSync(path.join(packageRoot, folder), {
+        recursive: true,
+        force: true,
+      });
+    }
+    const declarations = path.join(packageRoot, 'types', 'interfaces.d.ts');
+    fs.rmSync(declarations, { force: true });
+
+    runCommand(createScriptFolderPath(this.tmpPkg), args, {
+      shell: true,
+      timeout: 5 * 60 * 1000,
+    });
+
+    assert.ok(
+      fs.existsSync(
+        path.join(packageRoot, 'build', 'Release', 'rclnodejs.node')
+      ),
+      'The CLI must build the missing native addon'
+    );
+    assert.ok(
+      fs.existsSync(
+        path.join(createGeneratedFolderPath(this.tmpPkg), 'std_msgs')
+      ),
+      'Generated messages must survive the native build'
+    );
+    assert.match(fs.readFileSync(declarations, 'utf8'), /namespace std_msgs/);
   });
 });
 

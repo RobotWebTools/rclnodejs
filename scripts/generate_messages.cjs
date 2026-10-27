@@ -30,6 +30,8 @@ async function main() {
   }
 
   try {
+    // A fallback native build clears generated/, so finish it before generation.
+    require('../lib/native_loader.js');
     await generator.generateAll(true);
     await tsdGenerator.generateAll(); // create interfaces.d.ts
     console.log('Generation complete.');
