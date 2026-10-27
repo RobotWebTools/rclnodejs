@@ -346,6 +346,7 @@ declare module 'rclnodejs' {
      * Does not interrupt a JavaScript callback that is already executing.
      * Reentrant calls during cleanup do not repeat teardown; starting a new spin
      * must wait until cleanup has finished.
+     * @throws Error if the worker or native cleanup fails.
      */
     stop(): void;
 

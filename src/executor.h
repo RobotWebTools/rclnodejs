@@ -50,6 +50,7 @@ class Executor {
   void SpinOnce(rcl_context_t* context, int32_t time_out);
   int32_t time_out() { return time_out_; }
   bool IsMainThread();
+  bool IsStopped() const;
 
   static void DoWork(uv_async_t* handle);
   static void Run(void* arg);
@@ -67,6 +68,7 @@ class Executor {
 
   // Called only when no worker remains to be joined.
   std::string ReleaseResources();
+  std::string TakeWorkerError();
 
   // Returns RclResult object which indicates the final result.
   RclResult WaitForReadyCallbacks(rcl_wait_set_t* wait_set, int32_t time_out);
@@ -99,6 +101,7 @@ class Executor {
   std::mutex work_done_mutex_;
   std::condition_variable work_done_cv_;
   bool work_pending_;  // true while the main thread is processing handles
+  std::string worker_error_;
 };
 
 }  // namespace rclnodejs

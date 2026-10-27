@@ -50,6 +50,7 @@ class ShadowNode : public Napi::ObjectWrap<ShadowNode>,
 
   Napi::Value Stop(const Napi::CallbackInfo& info);
   Napi::Value Start(const Napi::CallbackInfo& info);
+  Napi::Value IsExecutorStopped(const Napi::CallbackInfo& info);
   Napi::Value SyncHandles(const Napi::CallbackInfo& info);
   Napi::Value SpinOnce(const Napi::CallbackInfo& info);
   Napi::Value HandleGetter(const Napi::CallbackInfo& info);
