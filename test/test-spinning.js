@@ -12,7 +12,9 @@
 
 import assert from 'assert';
 import { execFile } from 'node:child_process';
+import sinon from 'sinon';
 import rclnodejs from '../index.js';
+import nativeLoader from '../lib/native_loader.js';
 
 describe('Spin testing', function () {
   var node;
@@ -189,6 +191,84 @@ describe('Spin testing', function () {
           { timeout: 10000, killSignal: 'SIGKILL' },
           (error) => done(error)
         );
+      });
+    }
+  }
+
+  it('releases raw messages when callbacks throw', function () {
+    const failure = new Error('message callback failed');
+    let destroyedMessage;
+    class Message {
+      toRawROS() {
+        return {};
+      }
+
+      static destroyRawROS(message) {
+        destroyedMessage = message;
+      }
+    }
+    assert.throws(
+      () =>
+        node._runWithMessageType(Message, () => {
+          throw failure;
+        }),
+      (error) => error === failure
+    );
+    assert.ok(destroyedMessage instanceof Message);
+  });
+
+  for (const actionKind of ['client', 'server']) {
+    for (const destroyOnError of [false, true]) {
+      it(`handles ready action ${actionKind} events after ${destroyOnError ? 'destruction and ' : ''}an error`, function () {
+        const sandbox = sinon.createSandbox();
+        const failure = new Error('action callback failed');
+        const calls = [];
+        const messageKind = actionKind === 'client' ? 'Response' : 'Request';
+        const collection =
+          actionKind === 'client' ? node._actionClients : node._actionServers;
+        let destroyed = false;
+        const action = {
+          handle: {
+            properties: {
+              [`isGoal${messageKind}Ready`]: true,
+              [`isCancel${messageKind}Ready`]: true,
+            },
+          },
+          typeClass: {
+            impl: {
+              SendGoalService: { [messageKind]: Object },
+              CancelGoal: { [messageKind]: Object },
+            },
+          },
+          isDestroyed: () => destroyed,
+          [`processGoal${messageKind}`]: () => {
+            calls.push('goal');
+            destroyed = destroyOnError;
+            throw failure;
+          },
+          [`processCancel${messageKind}`]: () => calls.push('cancel'),
+        };
+        collection.push(action);
+        try {
+          sandbox.stub(nativeLoader, `actionTakeGoal${messageKind}`).returns(1);
+          sandbox
+            .stub(nativeLoader, `actionTakeCancel${messageKind}`)
+            .returns(1);
+          sandbox
+            .stub(node, '_runWithMessageType')
+            .callsFake((type, callback) => callback({}, () => ({})));
+          assert.throws(
+            () => node.execute([action.handle]),
+            (error) => error === failure
+          );
+          assert.deepEqual(
+            calls,
+            destroyOnError ? ['goal'] : ['goal', 'cancel']
+          );
+        } finally {
+          collection.splice(collection.indexOf(action), 1);
+          sandbox.restore();
+        }
       });
     }
   }
@@ -593,6 +673,38 @@ describe('Spin testing', function () {
       });
     }
 
+    it('does not execute an earlier ready batch after an immediate restart', function (done) {
+      runInChild(
+        `
+          const calls = [];
+          let restarted;
+          const afterRestart = new Promise((resolve) => { restarted = resolve; });
+          let complete;
+          const completed = new Promise((resolve) => { complete = resolve; });
+          const first = node.createGuardCondition(() => {
+            calls.push('first');
+            node.stop();
+            node.spin(-1);
+            setImmediate(restarted);
+          });
+          const second = node.createGuardCondition(() => {
+            calls.push('second');
+            complete();
+          });
+          first.trigger();
+          second.trigger();
+          node.spin(-1);
+          await afterRestart;
+          assert.deepEqual(calls, ['first']);
+          second.trigger();
+          await completed;
+          node.stop();
+          assert.deepEqual(calls, ['first', 'second']);
+        `,
+        done
+      );
+    });
+
     it('stops and restarts without pumping unrelated JavaScript callbacks', function (done) {
       runInChild(
         `
@@ -673,6 +785,165 @@ describe('Spin testing', function () {
           done
         );
       });
+
+      for (const multipleErrors of [false, true]) {
+        it(`${spinMethod} preserves ready guards after ${multipleErrors ? 'multiple errors' : 'an error'}`, function (done) {
+          runInChild(
+            `
+              const firstError = new Error('first guard failure');
+              const secondError = new Error('second guard failure');
+              const calls = [];
+              const first = node.createGuardCondition(() => {
+                calls.push('first');
+                throw firstError;
+              });
+              const second = node.createGuardCondition(() => {
+                calls.push('second');
+                if (${multipleErrors}) throw secondError;
+              });
+              const third = node.createGuardCondition(() => calls.push('third'));
+              first.trigger();
+              second.trigger();
+              third.trigger();
+              let error;
+              if (${JSON.stringify(spinMethod)} === 'spin') {
+                const reported = new Promise((resolve) => {
+                  process.once('uncaughtException', resolve);
+                });
+                node.spin(-1);
+                error = await reported;
+                node.stop();
+              } else {
+                try { node.spinOnce(0); } catch (failure) { error = failure; }
+              }
+              assert.deepEqual(calls, ['first', 'second', 'third']);
+              if (${multipleErrors}) {
+                assert.ok(error instanceof AggregateError);
+                assert.deepEqual(error.errors, [firstError, secondError]);
+              } else {
+                assert.equal(error, firstError);
+              }
+            `,
+            done
+          );
+        });
+      }
+
+      it(`${spinMethod} preserves ready guards after a timer error`, function (done) {
+        runInChild(
+          `
+            const failure = new Error('timer failure');
+            const calls = [];
+            const timer = node.createTimer(0n, () => {
+              timer.cancel();
+              calls.push('timer');
+              throw failure;
+            });
+            const guard = node.createGuardCondition(() => calls.push('guard'));
+            guard.trigger();
+            let error;
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              const reported = new Promise((resolve) => {
+                process.once('uncaughtException', resolve);
+              });
+              node.spin(-1);
+              error = await reported;
+              node.stop();
+            } else {
+              try { node.spinOnce(0); } catch (caught) { error = caught; }
+            }
+            assert.equal(error, failure);
+            assert.deepEqual(calls, ['timer', 'guard']);
+          `,
+          done
+        );
+      });
+
+      it(`${spinMethod} discards remaining ready callbacks after stop and an error`, function (done) {
+        runInChild(
+          `
+            const failure = new Error('stopped callback failed');
+            const calls = [];
+            const first = node.createGuardCondition(() => {
+              calls.push('first');
+              node.stop();
+              throw failure;
+            });
+            let complete;
+            const completed = new Promise((resolve) => { complete = resolve; });
+            const second = node.createGuardCondition(() => {
+              calls.push('second');
+              complete();
+            });
+            first.trigger();
+            second.trigger();
+            let error;
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              const reported = new Promise((resolve) => {
+                process.once('uncaughtException', resolve);
+              });
+              node.spin(-1);
+              error = await reported;
+            } else {
+              try { node.spinOnce(0); } catch (caught) { error = caught; }
+            }
+            assert.equal(error, failure);
+            assert.deepEqual(calls, ['first']);
+            second.trigger();
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              node.spin(-1);
+              await completed;
+              node.stop();
+            } else {
+              node.spinOnce(0);
+              await completed;
+            }
+            assert.deepEqual(calls, ['first', 'second']);
+          `,
+          done
+        );
+      });
+
+      for (const operation of ['node.destroy()', 'context.shutdown()']) {
+        for (const throws of [false, true]) {
+          it(`${spinMethod} discards ready guards after ${operation}${throws ? ' and an error' : ''}`, function (done) {
+            runInChild(
+              `
+                const failure = new Error('destroyed callback failed');
+                const calls = [];
+                let complete;
+                const completed = new Promise((resolve) => { complete = resolve; });
+                const timer = node.createTimer(0n, () => {
+                  calls.push('timer');
+                  timer.cancel();
+                  ${operation};
+                  if (${throws}) throw failure;
+                  complete();
+                });
+                const guard = node.createGuardCondition(() => calls.push('guard'));
+                guard.trigger();
+                let error;
+                if (${JSON.stringify(spinMethod)} === 'spin') {
+                  const reported = ${throws} ? new Promise((resolve) => {
+                    process.once('uncaughtException', (caught) => resolve({ caught }));
+                  }) : completed;
+                  node.spin(-1);
+                  const result = await reported;
+                  if (${throws}) error = result.caught;
+                } else {
+                  try { node.spinOnce(0); } catch (caught) { error = caught; }
+                }
+                assert.equal(error, ${throws} ? failure : undefined);
+                assert.deepEqual(calls, ['timer']);
+                assert.equal(node.spinning, false);
+                assert.equal(context.nodes.includes(node), false);
+                assert.equal(context.isShutdown(), ${JSON.stringify(operation)} === 'context.shutdown()');
+              `,
+              done
+            );
+          });
+        }
+      }
     }
   });
 });
