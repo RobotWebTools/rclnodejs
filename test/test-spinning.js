@@ -330,13 +330,15 @@ describe('Spin testing', function () {
   });
 
   for (const actionKind of ['client', 'server']) {
-    for (const [destroyDuringCallback, throws] of [
-      [false, false],
-      [false, true],
-      [true, false],
-      [true, true],
+    for (const [operation, throws] of [
+      ['callback', false],
+      ['callback', true],
+      ['destruction', false],
+      ['destruction', true],
+      ['stop', false],
+      ['stop', true],
     ]) {
-      it(`handles ready action ${actionKind} events after ${destroyDuringCallback ? 'destruction' : 'a callback'}${throws ? ' and an error' : ''}`, function () {
+      it(`handles ready action ${actionKind} events after ${operation === 'callback' ? 'a callback' : operation}${throws ? ' and an error' : ''}`, function () {
         const sandbox = sinon.createSandbox();
         const failure = new Error('action callback failed');
         const calls = [];
@@ -360,7 +362,8 @@ describe('Spin testing', function () {
           isDestroyed: () => destroyed,
           [`processGoal${messageKind}`]: () => {
             calls.push('goal');
-            destroyed = destroyDuringCallback;
+            destroyed = operation === 'destruction';
+            if (operation === 'stop') node.stop();
             if (throws) throw failure;
           },
           [`processCancel${messageKind}`]: () => calls.push('cancel'),
@@ -384,7 +387,7 @@ describe('Spin testing', function () {
           }
           assert.deepEqual(
             calls,
-            destroyDuringCallback || throws ? ['goal'] : ['goal', 'cancel']
+            operation !== 'callback' || throws ? ['goal'] : ['goal', 'cancel']
           );
         } finally {
           collection.splice(collection.indexOf(action), 1);
