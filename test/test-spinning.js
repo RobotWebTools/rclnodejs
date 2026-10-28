@@ -15,6 +15,7 @@ import { execFile } from 'node:child_process';
 import sinon from 'sinon';
 import rclnodejs from '../index.js';
 import DistroUtils from '../lib/distro.js';
+import Entity from '../lib/entity.js';
 import {
   PublisherEventCallbacks,
   SubscriptionEventCallbacks,
@@ -276,7 +277,7 @@ describe('Spin testing', function () {
             }
             assert.equal(releasedEvent.isDestroyed(), true);
             assert.equal(takeData.callCount, 0);
-            assert.deepEqual(calls, ['source', 'live']);
+            assert.deepEqual(calls, throws ? ['source'] : ['source', 'live']);
           } finally {
             takeData.restore();
           }
@@ -284,6 +285,27 @@ describe('Spin testing', function () {
       }
     }
   }
+
+  it('clears destroyed handle references when a callback throws', function () {
+    const failure = new Error('guard callback failed');
+    let released;
+    const first = node.createGuardCondition(() => {
+      node.destroyGuardCondition(released);
+      throw failure;
+    });
+    released = node.createGuardCondition(() => assert.fail('must not run'));
+    const clearHandles = sinon.spy(Entity, '_gcHandles');
+    try {
+      assert.throws(
+        () => node.execute([first.handle, released.handle]),
+        (error) => error === failure
+      );
+      assert.equal(released.isDestroyed(), true);
+      assert.equal(clearHandles.callCount, 1);
+    } finally {
+      clearHandles.restore();
+    }
+  });
 
   it('releases raw messages when callbacks throw', function () {
     const failure = new Error('message callback failed');
@@ -308,8 +330,13 @@ describe('Spin testing', function () {
   });
 
   for (const actionKind of ['client', 'server']) {
-    for (const destroyOnError of [false, true]) {
-      it(`handles ready action ${actionKind} events after ${destroyOnError ? 'destruction and ' : ''}an error`, function () {
+    for (const [destroyDuringCallback, throws] of [
+      [false, false],
+      [false, true],
+      [true, false],
+      [true, true],
+    ]) {
+      it(`handles ready action ${actionKind} events after ${destroyDuringCallback ? 'destruction' : 'a callback'}${throws ? ' and an error' : ''}`, function () {
         const sandbox = sinon.createSandbox();
         const failure = new Error('action callback failed');
         const calls = [];
@@ -333,8 +360,8 @@ describe('Spin testing', function () {
           isDestroyed: () => destroyed,
           [`processGoal${messageKind}`]: () => {
             calls.push('goal');
-            destroyed = destroyOnError;
-            throw failure;
+            destroyed = destroyDuringCallback;
+            if (throws) throw failure;
           },
           [`processCancel${messageKind}`]: () => calls.push('cancel'),
         };
@@ -347,13 +374,17 @@ describe('Spin testing', function () {
           sandbox
             .stub(node, '_runWithMessageType')
             .callsFake((type, callback) => callback({}, () => ({})));
-          assert.throws(
-            () => node.execute([action.handle]),
-            (error) => error === failure
-          );
+          if (throws) {
+            assert.throws(
+              () => node.execute([action.handle]),
+              (error) => error === failure
+            );
+          } else {
+            node.execute([action.handle]);
+          }
           assert.deepEqual(
             calls,
-            destroyOnError ? ['goal'] : ['goal', 'cancel']
+            destroyDuringCallback || throws ? ['goal'] : ['goal', 'cancel']
           );
         } finally {
           collection.splice(collection.indexOf(action), 1);
@@ -844,6 +875,78 @@ describe('Spin testing', function () {
       );
     });
 
+    it('continues spinning on new work after a handled callback error', function (done) {
+      runInChild(
+        `
+          const failure = new Error('handled callback failure');
+          const calls = [];
+          const reported = new Promise((resolve) => {
+            process.once('uncaughtException', resolve);
+          });
+          let complete;
+          const completed = new Promise((resolve) => { complete = resolve; });
+          const first = node.createGuardCondition(() => {
+            calls.push('first');
+            throw failure;
+          });
+          const later = node.createGuardCondition(() => {
+            calls.push('later');
+            node.stop();
+            complete();
+          });
+          first.trigger();
+          node.spin(-1);
+          assert.equal(await reported, failure);
+          assert.equal(node.spinning, true);
+          assert.deepEqual(calls, ['first']);
+          later.trigger();
+          await completed;
+          assert.deepEqual(calls, ['first', 'later']);
+          assert.equal(node.spinning, false);
+        `,
+        done
+      );
+    });
+
+    it('exits on an unhandled callback error without running later callbacks', function (done) {
+      const moduleUrl = new URL('../index.js', import.meta.url).href;
+      const script = `
+        import rclnodejs from ${JSON.stringify(moduleUrl)};
+        await rclnodejs.init();
+        const node = rclnodejs.createNode(
+          'unhandled_callback_error', '', rclnodejs.Context.defaultContext(),
+          new rclnodejs.NodeOptions(false, [], false, false, false)
+        );
+        const first = node.createGuardCondition(() => {
+          throw new Error('unhandled callback error');
+        });
+        const second = node.createGuardCondition(() => {
+          console.log('unexpected second callback');
+        });
+        first.trigger();
+        second.trigger();
+        node.spin(-1);
+      `;
+      execFile(
+        process.execPath,
+        ['--input-type=module', '--eval', script],
+        { timeout: 10000, killSignal: 'SIGKILL' },
+        (error, stdout, stderr) => {
+          try {
+            assert.ok(error);
+            assert.equal(error.code, 1);
+            assert.equal(error.signal, null);
+            assert.match(stderr, /unhandled callback error/);
+            assert.doesNotMatch(stderr, /FATAL ERROR/);
+            assert.doesNotMatch(stdout, /unexpected second callback/);
+            done();
+          } catch (failure) {
+            done(failure);
+          }
+        }
+      );
+    });
+
     for (const spinMethod of ['spin', 'spinOnce']) {
       it(`${spinMethod} preserves non-Error thrown values`, function (done) {
         runInChild(
@@ -876,50 +979,59 @@ describe('Spin testing', function () {
         );
       });
 
-      for (const multipleErrors of [false, true]) {
-        it(`${spinMethod} preserves ready guards after ${multipleErrors ? 'multiple errors' : 'an error'}`, function (done) {
-          runInChild(
-            `
-              const firstError = new Error('first guard failure');
-              const secondError = new Error('second guard failure');
-              const calls = [];
-              const first = node.createGuardCondition(() => {
-                calls.push('first');
-                throw firstError;
+      it(`${spinMethod} stops the ready batch at the first guard error`, function (done) {
+        runInChild(
+          `
+            const firstError = new Error('first guard failure');
+            const calls = [];
+            let complete;
+            const completed = new Promise((resolve) => { complete = resolve; });
+            const first = node.createGuardCondition(() => {
+              calls.push('first');
+              throw firstError;
+            });
+            const second = node.createGuardCondition(() => {
+              calls.push('second');
+              throw new Error('second guard failure');
+            });
+            const third = node.createGuardCondition(() => {
+              calls.push('third');
+              complete();
+            });
+            first.trigger();
+            second.trigger();
+            third.trigger();
+            let error;
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              const reported = new Promise((resolve) => {
+                process.once('uncaughtException', resolve);
               });
-              const second = node.createGuardCondition(() => {
-                calls.push('second');
-                if (${multipleErrors}) throw secondError;
-              });
-              const third = node.createGuardCondition(() => calls.push('third'));
-              first.trigger();
-              second.trigger();
-              third.trigger();
-              let error;
-              if (${JSON.stringify(spinMethod)} === 'spin') {
-                const reported = new Promise((resolve) => {
-                  process.once('uncaughtException', resolve);
-                });
-                node.spin(-1);
-                error = await reported;
-                node.stop();
-              } else {
-                try { node.spinOnce(0); } catch (failure) { error = failure; }
-              }
-              assert.deepEqual(calls, ['first', 'second', 'third']);
-              if (${multipleErrors}) {
-                assert.ok(error instanceof AggregateError);
-                assert.deepEqual(error.errors, [firstError, secondError]);
-              } else {
-                assert.equal(error, firstError);
-              }
-            `,
-            done
-          );
-        });
-      }
+              node.spin(-1);
+              error = await reported;
+              node.stop();
+            } else {
+              try { node.spinOnce(0); } catch (failure) { error = failure; }
+            }
+            assert.equal(error, firstError);
+            assert.deepEqual(calls, ['first']);
+            node.destroyGuardCondition(first);
+            node.destroyGuardCondition(second);
+            third.trigger();
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              node.spin(-1);
+              await completed;
+              node.stop();
+            } else {
+              node.spinOnce(0);
+              await completed;
+            }
+            assert.deepEqual(calls, ['first', 'third']);
+          `,
+          done
+        );
+      });
 
-      it(`${spinMethod} preserves ready guards after a timer error`, function (done) {
+      it(`${spinMethod} stops before ready guards after a timer error`, function (done) {
         runInChild(
           `
             const failure = new Error('timer failure');
@@ -943,7 +1055,7 @@ describe('Spin testing', function () {
               try { node.spinOnce(0); } catch (caught) { error = caught; }
             }
             assert.equal(error, failure);
-            assert.deepEqual(calls, ['timer', 'guard']);
+            assert.deepEqual(calls, ['timer']);
           `,
           done
         );
