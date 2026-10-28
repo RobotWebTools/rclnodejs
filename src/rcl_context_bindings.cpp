@@ -108,8 +108,8 @@ int DestroyContext(Napi::Env env, rcl_context_t* context) {
         Napi::Error::New(env, rcl_get_error_string().str)
             .ThrowAsJavaScriptException();
       }
-      ret = rcl_context_fini(context);
     }
+    ret = rcl_context_fini(context);
   }
   return ret;
 }
