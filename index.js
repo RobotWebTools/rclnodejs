@@ -770,6 +770,7 @@ const _sigHandler = () => {
   rcl.shutdownAll();
 };
 process.on('SIGINT', _sigHandler);
+process.once('exit', () => rcl.shutdownAll());
 
 /** {@link Node} class */
 rcl.Node = Node;

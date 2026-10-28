@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import assert from 'assert';
+import { execFile } from 'node:child_process';
 import rclnodejs from '../index.js';
 
 describe('context test suite', function () {
@@ -91,4 +92,65 @@ describe('context test suite', function () {
     await rclnodejs.init(context);
     assert.strictEqual(typeof context.domainId, 'bigint');
   });
+
+  for (const [termination, operation, expectedCode] of [
+    ['natural exit', 'for (const node of nodes) node.stop();', 0],
+    ['explicit exit', 'process.exit(7);', 7],
+    ['an unhandled callback', 'guard.trigger();', 1],
+  ]) {
+    it(`shuts down all contexts on ${termination}`, function (done) {
+      const moduleUrl = new URL('../index.js', import.meta.url).href;
+      const script = `
+        import assert from 'node:assert/strict';
+        import rclnodejs from ${JSON.stringify(moduleUrl)};
+        const contexts = [
+          rclnodejs.Context.defaultContext(),
+          new rclnodejs.Context(),
+        ];
+        const nodes = [];
+        for (const [index, context] of contexts.entries()) {
+          await rclnodejs.init(context);
+          nodes.push(rclnodejs.createNode(
+            'exit_cleanup_' + index, '', context,
+            new rclnodejs.NodeOptions(false, [], false, false, false)
+          ));
+        }
+        const guard = nodes[0].createGuardCondition(() => {
+          throw new Error('exit cleanup regression');
+        });
+        for (const node of nodes) node.spin(-1);
+        process.once('exit', (code) => {
+          assert.equal(code, ${expectedCode});
+          assert.equal(rclnodejs.Context.instances.length, 0);
+          for (const context of contexts) {
+            assert.equal(context.isShutdown(), true);
+            assert.equal(context.isValid(), false);
+            assert.equal(context.nodes.length, 0);
+          }
+          for (const node of nodes) assert.equal(node.spinning, false);
+          console.log('all contexts finalized');
+        });
+        ${operation}
+      `;
+      execFile(
+        process.execPath,
+        ['--input-type=module', '--eval', script],
+        { timeout: 10000, killSignal: 'SIGKILL' },
+        (error, stdout, stderr) => {
+          try {
+            assert.equal(error?.code ?? 0, expectedCode, stderr);
+            assert.equal(error?.signal ?? null, null, stderr);
+            assert.match(stdout, /all contexts finalized/);
+            assert.doesNotMatch(stderr, /ERROR: (?:Address|Leak)Sanitizer/);
+            if (expectedCode === 1) {
+              assert.match(stderr, /exit cleanup regression/);
+            }
+            done();
+          } catch (failure) {
+            done(failure);
+          }
+        }
+      );
+    });
+  }
 });
