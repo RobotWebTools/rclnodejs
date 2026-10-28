@@ -944,6 +944,26 @@ describe('Spin testing', function () {
             assert.doesNotMatch(stdout, /unexpected second callback/);
             done();
           } catch (failure) {
+            console.error(
+              'Unhandled callback child process diagnostics:',
+              JSON.stringify(
+                {
+                  code: error?.code ?? null,
+                  signal: error?.signal ?? null,
+                  killed: error?.killed ?? false,
+                  node: process.version,
+                  rosDistro: process.env.ROS_DISTRO ?? null,
+                  rmwImplementation: process.env.RMW_IMPLEMENTATION ?? null,
+                  asanOptions: process.env.ASAN_OPTIONS ?? null,
+                  lsanOptions: process.env.LSAN_OPTIONS ?? null,
+                  ldPreload: process.env.LD_PRELOAD ?? null,
+                },
+                null,
+                2
+              )
+            );
+            console.error('Child stdout:\n%s', stdout || '<empty>');
+            console.error('Child stderr:\n%s', stderr || '<empty>');
             done(failure);
           }
         }
