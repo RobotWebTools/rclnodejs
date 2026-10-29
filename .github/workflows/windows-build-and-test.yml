@@ -20,6 +20,9 @@ jobs:
           - jazzy
           - kilted
           - lyrical
+        exclude:
+          - node-version: 22.X
+            ros_distribution: lyrical
         include:
           # Humble Hawksbill (May 2022 - May 2027)
           - ros_distribution: humble
@@ -33,7 +36,8 @@ jobs:
             run_tests: false
           # Lyrical Luth (May 2026 - May 2031)
           # Reference: https://docs.ros.org/en/lyrical/Installation/Windows-Install-Binary.html
-          - ros_distribution: lyrical
+          - node-version: 26.X
+            ros_distribution: lyrical
             ros_zip_url: "https://github.com/ros2/ros2/releases/download/release-lyrical-20260807/ros2-lyrical-2026-08-07-windows-AMD64.zip"
             run_tests: true
     steps:
