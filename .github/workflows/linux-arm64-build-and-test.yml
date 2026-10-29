@@ -34,7 +34,7 @@ jobs:
           # Jazzy Jalisco (May 2024 - May 2029)
           - docker_image: ros:jazzy-ros-base-noble
             ros_distribution: jazzy
-            node-version: 20.X
+            node-version: 24.X
           # Kilted Kaiju (May 2025 - Dec 2026)
           - docker_image: ros:kilted-ros-base-noble
             ros_distribution: kilted
@@ -42,7 +42,7 @@ jobs:
           # Lyrical Luth (May 2026 - May 2031)
           - docker_image: ros:lyrical-ros-base-resolute
             ros_distribution: lyrical
-            node-version: 24.X
+            node-version: 26.X
           # Rolling Ridley (No End-Of-Life) - Ubuntu 26.04 (resolute)
           - node-version: 26.X
             architecture: arm64
@@ -51,6 +51,12 @@ jobs:
             test_suite: idl
 
     steps:
+    - name: Install Node.js runtime dependencies
+      if: ${{ matrix['node-version'] == '26.X' }}
+      run: |
+        apt-get update
+        apt-get install -y --no-install-recommends libatomic1
+
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v7
       with:

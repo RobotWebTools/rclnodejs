@@ -31,6 +31,8 @@ jobs:
         exclude:
           - node-version: 24.X
             ros_distribution: rolling
+          - node-version: 24.X
+            ros_distribution: lyrical
         include:
           # Humble Hawksbill (May 2022 - May 2027)
           - docker_image: ros:humble-ros-base-jammy
@@ -42,7 +44,9 @@ jobs:
           - docker_image: ros:kilted-ros-base-noble
             ros_distribution: kilted
           # Lyrical Luth (May 2026 - May 2031)
-          - docker_image: ros:lyrical-ros-base-resolute
+          - node-version: 26.X
+            architecture: x64
+            docker_image: ros:lyrical-ros-base-resolute
             ros_distribution: lyrical
           # Rolling Ridley (No End-Of-Life) - Ubuntu 26.04 (resolute)
           - node-version: 26.X
@@ -50,10 +54,10 @@ jobs:
             docker_image: ros:rolling-ros-base-resolute
             ros_distribution: rolling
     steps:
-    - name: Install lint dependencies
+    - name: Install bootstrap dependencies
       run: |
         apt-get update
-        apt-get install -y --no-install-recommends wget
+        apt-get install -y --no-install-recommends wget libatomic1
 
     - name: Setup Node.js ${{ matrix.node-version }} on ${{ matrix.architecture }}
       uses: actions/setup-node@v7
@@ -84,8 +88,8 @@ jobs:
           npm i
           npm run lint
           # Run package validation, coverage, and documentation generation in
-          # the Lyrical Node 24.X lane; only this lane uploads coverage below.
-          if [ "${{ matrix.ros_distribution }}" = "lyrical" ] && [ "${{ matrix.node-version }}" = "24.X" ]; then
+          # the Lyrical Node 26.X lane; only this lane uploads coverage below.
+          if [[ "${{ matrix.ros_distribution }}" == "lyrical" && "${{ matrix.node-version }}" == "26.X" ]]; then
             npm run test:package
             npm run test:coverage
             npm run docs
@@ -95,7 +99,7 @@ jobs:
           npm run clean
 
     - name: Coveralls
-      if: ${{ matrix.ros_distribution == 'lyrical' && matrix['node-version'] == '24.X' }}
+      if: ${{ matrix.ros_distribution == 'lyrical' && matrix['node-version'] == '26.X' }}
       uses: coverallsapp/github-action@v2
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
