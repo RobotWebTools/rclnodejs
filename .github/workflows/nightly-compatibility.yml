@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       node-version:
-        description: 'Node version (27-nightly by default; use 26.X for comparison)'
+        description: 'Node version (latest Node 27 alpha by default; use 26.X for comparison)'
         required: true
-        default: '27-nightly'
+        default: '>=27.0.0-alpha.0 <27.0.0-beta'
         type: string
 
 permissions:
@@ -21,7 +21,7 @@ defaults:
 
 jobs:
   compatibility:
-    name: Rolling nightly / Node ${{ inputs.node-version || '27-nightly' }} / Ubuntu x64
+    name: Rolling nightly / Node ${{ inputs.node-version || '>=27.0.0-alpha.0 <27.0.0-beta' }} / Ubuntu x64
     runs-on: ubuntu-latest
     timeout-minutes: 45
     container: ubuntu:26.04
@@ -45,7 +45,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: ${{ inputs.node-version || '27-nightly' }}
+          node-version: ${{ inputs.node-version || '>=27.0.0-alpha.0 <27.0.0-beta' }}
           architecture: x64
           check-latest: true
           package-manager-cache: false

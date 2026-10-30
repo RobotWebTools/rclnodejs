@@ -80,10 +80,10 @@ Windows CI covers Humble, Jazzy, Kilted, and Lyrical, with full tests on Lyrical
 
 ### Nightly compatibility checks
 
-The [Nightly Compatibility workflow](../.github/workflows/nightly-compatibility.yml) builds from source and runs core ROS, TypeScript, and package tests on Ubuntu 26.04 x64 with ROS Rolling nightly, Node 27 nightly, and bundled npm.
+The [Nightly Compatibility workflow](../.github/workflows/nightly-compatibility.yml) builds from source and runs core ROS, TypeScript, and package tests on Ubuntu 26.04 x64 with ROS Rolling nightly, the latest matching Node 27 alpha release, and bundled npm. It primarily tracks ROS nightly compatibility; Node follows published alpha releases rather than daily development builds. Alpha is still a prerelease, not a production-stability guarantee.
 
 - **Scheduled:** daily at 00:00 Asia/Shanghai (16:00 UTC) on the default branch; execution may be delayed.
-- **Manual:** use **Actions > Nightly Compatibility > Run workflow**. The `node-version` input defaults to `27-nightly`; use `26.X` for comparison.
+- **Manual:** use **Actions > Nightly Compatibility > Run workflow**. The `node-version` input defaults to `>=27.0.0-alpha.0 <27.0.0-beta`; use `26.X` for comparison, `27-nightly` to investigate Node development changes, or an exact alpha version to reproduce a result. The default range accepts newer Node 27 alphas but excludes beta, RC, stable, and nightly versions. The resolved runtime version is recorded in the job summary.
 
 For pre-merge testing, enable Actions in your fork and place the workflow on its default branch.
 
