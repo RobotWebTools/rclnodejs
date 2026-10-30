@@ -18,7 +18,6 @@ const debug = require('debug')('rosidl_gen:packages');
 const fs = require('fs');
 const readline = require('readline');
 const path = require('path');
-const walk = require('walk');
 const os = require('os');
 const pkgFilters = require('../rosidl_gen/filter.cjs');
 
@@ -166,8 +165,14 @@ async function generateMsgForSrv(filePath, interfaceInfo, pkgMap) {
   }
 }
 
-async function addInterfaceInfos(filePath, dir, pkgMap, useIDL) {
-  const interfaceInfo = grabInterfaceInfo(filePath, /*amentExecuted=*/ true);
+async function addInterfaceInfos(
+  filePath,
+  dir,
+  pkgMap,
+  useIDL,
+  amentExecuted = true
+) {
+  const interfaceInfo = grabInterfaceInfo(filePath, amentExecuted);
   const ignore = pkgFilters.matchesAny(interfaceInfo);
   if (!ignore) {
     if (useIDL) {
@@ -215,83 +220,69 @@ async function findAmentPackagesInDirectory(dir, useIDL) {
   return pkgMap;
 }
 
+async function* findFilesInDirectory(dir, ancestors = new Set()) {
+  let realPath;
+  let entries;
+  try {
+    realPath = await fsp.realpath(dir);
+    if (ancestors.has(realPath)) return;
+    entries = await fsp.readdir(dir, { withFileTypes: true });
+  } catch (error) {
+    debug(error);
+    return;
+  }
+
+  ancestors.add(realPath);
+  try {
+    for (const entry of entries) {
+      const filePath = path.join(dir, entry.name);
+      let stats = entry;
+      if (entry.isSymbolicLink()) {
+        try {
+          stats = await fsp.stat(filePath);
+        } catch (error) {
+          debug(error);
+          continue;
+        }
+      }
+      if (stats.isDirectory()) {
+        yield* findFilesInDirectory(filePath, ancestors);
+      } else if (stats.isFile()) {
+        yield filePath;
+      }
+    }
+  } finally {
+    ancestors.delete(realPath);
+  }
+}
+
 /**
  * Collects all packages in a directory.
  * @param {string} dir - the directory to search in
  * @return {Promise<Map<string, object>>} A mapping from the package name to some info about it.
  */
 async function findPackagesInDirectory(dir, useIDL) {
-  return new Promise((resolve, reject) => {
-    let amentExecuted = true;
+  // If there is a folder named 'share' under the root path, we consider that
+  // the ament build tool has been executed and |amentExecuted| will be true.
+  const amentExecuted = await fsp.stat(path.join(dir, 'share')).then(
+    () => true,
+    () => false
+  );
+  if (amentExecuted) {
+    return findAmentPackagesInDirectory(dir, useIDL);
+  }
 
-    // If there is a folder named 'share' under the root path, we consider that
-    // the ament build tool has been executed and |amentExecuted| will be true.
-    fs.stat(path.join(dir, 'share'), (err) => {
-      if (err) {
-        amentExecuted = false;
-      }
-
-      if (amentExecuted) {
-        return resolve(findAmentPackagesInDirectory(dir, useIDL));
-      }
-
-      let walker = walk.walk(dir, { followLinks: true });
-      let pkgMap = new Map();
-      walker.on('file', async (root, file, next) => {
-        const interfaceInfo = grabInterfaceInfo(
-          path.join(root, file.name),
-          amentExecuted
-        );
-        const ignore = pkgFilters.matchesAny(interfaceInfo);
-        if (!ignore) {
-          if (useIDL) {
-            if (path.extname(file.name) === '.idl') {
-              addInterfaceInfo(interfaceInfo, 'idls', pkgMap);
-            }
-          } else {
-            if (path.extname(file.name) === '.msg') {
-              // Some .msg files were generated prior to 0.3.2 for .action files,
-              // which has been disabled. So these files should be ignored here.
-              if (path.dirname(root).split(path.sep).pop() !== 'action') {
-                addInterfaceInfo(interfaceInfo, 'messages', pkgMap);
-              }
-            } else if (path.extname(file.name) === '.srv') {
-              const requestMsgName = `${path.parse(interfaceInfo.filePath).name}_Request.msg`;
-              if (
-                !fs.existsSync(
-                  path.join(
-                    path.dirname(interfaceInfo.filePath),
-                    requestMsgName
-                  )
-                )
-              ) {
-                await generateMsgForSrv(
-                  interfaceInfo.filePath,
-                  interfaceInfo,
-                  pkgMap
-                );
-              }
-              addInterfaceInfo(interfaceInfo, 'services', pkgMap);
-            } else if (path.extname(file.name) === '.action') {
-              addInterfaceInfo(interfaceInfo, 'actions', pkgMap);
-            } else {
-              // we ignore all other files
-            }
-          }
-        }
-        next();
-      });
-
-      walker.on('end', () => {
-        resolve(pkgMap);
-      });
-
-      walker.on('errors', (root, stats, next) => {
-        debug(stats);
-        next();
-      });
-    });
-  });
+  const pkgMap = new Map();
+  for await (const filePath of findFilesInDirectory(dir)) {
+    await addInterfaceInfos(
+      filePath,
+      path.dirname(filePath),
+      pkgMap,
+      useIDL,
+      amentExecuted
+    );
+  }
+  return pkgMap;
 }
 
 let packages = {
