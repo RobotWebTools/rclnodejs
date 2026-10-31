@@ -12,7 +12,15 @@
 
 import assert from 'assert';
 import { execFile } from 'node:child_process';
+import sinon from 'sinon';
 import rclnodejs from '../index.js';
+import DistroUtils from '../lib/distro.js';
+import Entity from '../lib/entity.js';
+import {
+  PublisherEventCallbacks,
+  SubscriptionEventCallbacks,
+} from '../lib/event_handler.js';
+import nativeLoader from '../lib/native_loader.js';
 
 describe('Spin testing', function () {
   var node;
@@ -189,6 +197,202 @@ describe('Spin testing', function () {
           { timeout: 10000, killSignal: 'SIGKILL' },
           (error) => done(error)
         );
+      });
+    }
+  }
+
+  for (const entityKind of ['publisher', 'subscription']) {
+    for (const origin of ['timer', 'event']) {
+      for (const throws of [false, true]) {
+        it(`skips destroyed ${entityKind} events after ${origin} callbacks${throws ? ' throw' : ''}`, function () {
+          if (DistroUtils.getDistroId() < DistroUtils.getDistroId('jazzy')) {
+            this.skip();
+          }
+          const EventCallbacks =
+            entityKind === 'publisher'
+              ? PublisherEventCallbacks
+              : SubscriptionEventCallbacks;
+          const calls = [];
+          const failure = new Error('event owner destroyed');
+          const createEndpoint = (topic, callback) => {
+            const callbacks = new EventCallbacks();
+            callbacks.deadline = callback;
+            return entityKind === 'publisher'
+              ? node.createPublisher(
+                  'std_msgs/msg/String',
+                  topic,
+                  undefined,
+                  callbacks
+                )
+              : node.createSubscription(
+                  'std_msgs/msg/String',
+                  topic,
+                  undefined,
+                  () => {},
+                  callbacks
+                );
+          };
+          let releasedEndpoint;
+          const destroyEndpoint = () => {
+            calls.push('source');
+            if (entityKind === 'publisher') {
+              node.destroyPublisher(releasedEndpoint);
+            } else {
+              node.destroySubscription(releasedEndpoint);
+            }
+            if (throws) throw failure;
+          };
+          let sourceHandle;
+          if (origin === 'timer') {
+            const timer = node.createTimer(0n, () => {
+              timer.cancel();
+              destroyEndpoint();
+            });
+            sourceHandle = timer.handle;
+          } else {
+            const source = createEndpoint('event_source', destroyEndpoint);
+            sourceHandle = source.events[0].handle;
+          }
+          releasedEndpoint = createEndpoint('event_released', () =>
+            calls.push('released')
+          );
+          const liveEndpoint = createEndpoint('event_live', () =>
+            calls.push('live')
+          );
+          const releasedEvent = releasedEndpoint.events[0];
+          const takeData = sinon.spy(releasedEvent, 'takeData');
+          const handles = [
+            sourceHandle,
+            releasedEvent.handle,
+            liveEndpoint.events[0].handle,
+          ];
+          try {
+            if (throws) {
+              assert.throws(
+                () => node.execute(handles),
+                (error) => error === failure
+              );
+            } else {
+              node.execute(handles);
+            }
+            assert.equal(releasedEvent.isDestroyed(), true);
+            assert.equal(takeData.callCount, 0);
+            assert.deepEqual(calls, throws ? ['source'] : ['source', 'live']);
+          } finally {
+            takeData.restore();
+          }
+        });
+      }
+    }
+  }
+
+  it('clears destroyed handle references when a callback throws', function () {
+    const failure = new Error('guard callback failed');
+    let released;
+    const first = node.createGuardCondition(() => {
+      node.destroyGuardCondition(released);
+      throw failure;
+    });
+    released = node.createGuardCondition(() => assert.fail('must not run'));
+    const clearHandles = sinon.spy(Entity, '_gcHandles');
+    try {
+      assert.throws(
+        () => node.execute([first.handle, released.handle]),
+        (error) => error === failure
+      );
+      assert.equal(released.isDestroyed(), true);
+      assert.equal(clearHandles.callCount, 1);
+    } finally {
+      clearHandles.restore();
+    }
+  });
+
+  it('releases raw messages when callbacks throw', function () {
+    const failure = new Error('message callback failed');
+    let destroyedMessage;
+    class Message {
+      toRawROS() {
+        return {};
+      }
+
+      static destroyRawROS(message) {
+        destroyedMessage = message;
+      }
+    }
+    assert.throws(
+      () =>
+        node._runWithMessageType(Message, () => {
+          throw failure;
+        }),
+      (error) => error === failure
+    );
+    assert.ok(destroyedMessage instanceof Message);
+  });
+
+  for (const actionKind of ['client', 'server']) {
+    for (const [operation, throws] of [
+      ['callback', false],
+      ['callback', true],
+      ['destruction', false],
+      ['destruction', true],
+      ['stop', false],
+      ['stop', true],
+    ]) {
+      it(`handles ready action ${actionKind} events after ${operation === 'callback' ? 'a callback' : operation}${throws ? ' and an error' : ''}`, function () {
+        const sandbox = sinon.createSandbox();
+        const failure = new Error('action callback failed');
+        const calls = [];
+        const messageKind = actionKind === 'client' ? 'Response' : 'Request';
+        const collection =
+          actionKind === 'client' ? node._actionClients : node._actionServers;
+        let destroyed = false;
+        const action = {
+          handle: {
+            properties: {
+              [`isGoal${messageKind}Ready`]: true,
+              [`isCancel${messageKind}Ready`]: true,
+            },
+          },
+          typeClass: {
+            impl: {
+              SendGoalService: { [messageKind]: Object },
+              CancelGoal: { [messageKind]: Object },
+            },
+          },
+          isDestroyed: () => destroyed,
+          [`processGoal${messageKind}`]: () => {
+            calls.push('goal');
+            destroyed = operation === 'destruction';
+            if (operation === 'stop') node.stop();
+            if (throws) throw failure;
+          },
+          [`processCancel${messageKind}`]: () => calls.push('cancel'),
+        };
+        collection.push(action);
+        try {
+          sandbox.stub(nativeLoader, `actionTakeGoal${messageKind}`).returns(1);
+          sandbox
+            .stub(nativeLoader, `actionTakeCancel${messageKind}`)
+            .returns(1);
+          sandbox
+            .stub(node, '_runWithMessageType')
+            .callsFake((type, callback) => callback({}, () => ({})));
+          if (throws) {
+            assert.throws(
+              () => node.execute([action.handle]),
+              (error) => error === failure
+            );
+          } else {
+            node.execute([action.handle]);
+          }
+          assert.deepEqual(
+            calls,
+            operation !== 'callback' || throws ? ['goal'] : ['goal', 'cancel']
+          );
+        } finally {
+          collection.splice(collection.indexOf(action), 1);
+          sandbox.restore();
+        }
       });
     }
   }
@@ -593,6 +797,38 @@ describe('Spin testing', function () {
       });
     }
 
+    it('does not execute an earlier ready batch after an immediate restart', function (done) {
+      runInChild(
+        `
+          const calls = [];
+          let restarted;
+          const afterRestart = new Promise((resolve) => { restarted = resolve; });
+          let complete;
+          const completed = new Promise((resolve) => { complete = resolve; });
+          const first = node.createGuardCondition(() => {
+            calls.push('first');
+            node.stop();
+            node.spin(-1);
+            setImmediate(restarted);
+          });
+          const second = node.createGuardCondition(() => {
+            calls.push('second');
+            complete();
+          });
+          first.trigger();
+          second.trigger();
+          node.spin(-1);
+          await afterRestart;
+          assert.deepEqual(calls, ['first']);
+          second.trigger();
+          await completed;
+          node.stop();
+          assert.deepEqual(calls, ['first', 'second']);
+        `,
+        done
+      );
+    });
+
     it('stops and restarts without pumping unrelated JavaScript callbacks', function (done) {
       runInChild(
         `
@@ -642,6 +878,98 @@ describe('Spin testing', function () {
       );
     });
 
+    it('continues spinning on new work after a handled callback error', function (done) {
+      runInChild(
+        `
+          const failure = new Error('handled callback failure');
+          const calls = [];
+          const reported = new Promise((resolve) => {
+            process.once('uncaughtException', resolve);
+          });
+          let complete;
+          const completed = new Promise((resolve) => { complete = resolve; });
+          const first = node.createGuardCondition(() => {
+            calls.push('first');
+            throw failure;
+          });
+          const later = node.createGuardCondition(() => {
+            calls.push('later');
+            node.stop();
+            complete();
+          });
+          first.trigger();
+          node.spin(-1);
+          assert.equal(await reported, failure);
+          assert.equal(node.spinning, true);
+          assert.deepEqual(calls, ['first']);
+          later.trigger();
+          await completed;
+          assert.deepEqual(calls, ['first', 'later']);
+          assert.equal(node.spinning, false);
+        `,
+        done
+      );
+    });
+
+    it('exits on an unhandled callback error without running later callbacks', function (done) {
+      const moduleUrl = new URL('../index.js', import.meta.url).href;
+      const script = `
+        import rclnodejs from ${JSON.stringify(moduleUrl)};
+        await rclnodejs.init();
+        const node = rclnodejs.createNode(
+          'unhandled_callback_error', '', rclnodejs.Context.defaultContext(),
+          new rclnodejs.NodeOptions(false, [], false, false, false)
+        );
+        const first = node.createGuardCondition(() => {
+          throw new Error('unhandled callback error');
+        });
+        const second = node.createGuardCondition(() => {
+          console.log('unexpected second callback');
+        });
+        first.trigger();
+        second.trigger();
+        node.spin(-1);
+      `;
+      execFile(
+        process.execPath,
+        ['--input-type=module', '--eval', script],
+        { timeout: 10000, killSignal: 'SIGKILL' },
+        (error, stdout, stderr) => {
+          try {
+            assert.ok(error);
+            assert.equal(error.code, 1);
+            assert.equal(error.signal, null);
+            assert.match(stderr, /unhandled callback error/);
+            assert.doesNotMatch(stderr, /FATAL ERROR/);
+            assert.doesNotMatch(stdout, /unexpected second callback/);
+            done();
+          } catch (failure) {
+            console.error(
+              'Unhandled callback child process diagnostics:',
+              JSON.stringify(
+                {
+                  code: error?.code ?? null,
+                  signal: error?.signal ?? null,
+                  killed: error?.killed ?? false,
+                  node: process.version,
+                  rosDistro: process.env.ROS_DISTRO ?? null,
+                  rmwImplementation: process.env.RMW_IMPLEMENTATION ?? null,
+                  asanOptions: process.env.ASAN_OPTIONS ?? null,
+                  lsanOptions: process.env.LSAN_OPTIONS ?? null,
+                  ldPreload: process.env.LD_PRELOAD ?? null,
+                },
+                null,
+                2
+              )
+            );
+            console.error('Child stdout:\n%s', stdout || '<empty>');
+            console.error('Child stderr:\n%s', stderr || '<empty>');
+            done(failure);
+          }
+        }
+      );
+    });
+
     for (const spinMethod of ['spin', 'spinOnce']) {
       it(`${spinMethod} preserves non-Error thrown values`, function (done) {
         runInChild(
@@ -673,6 +1001,174 @@ describe('Spin testing', function () {
           done
         );
       });
+
+      it(`${spinMethod} stops the ready batch at the first guard error`, function (done) {
+        runInChild(
+          `
+            const firstError = new Error('first guard failure');
+            const calls = [];
+            let complete;
+            const completed = new Promise((resolve) => { complete = resolve; });
+            const first = node.createGuardCondition(() => {
+              calls.push('first');
+              throw firstError;
+            });
+            const second = node.createGuardCondition(() => {
+              calls.push('second');
+              throw new Error('second guard failure');
+            });
+            const third = node.createGuardCondition(() => {
+              calls.push('third');
+              complete();
+            });
+            first.trigger();
+            second.trigger();
+            third.trigger();
+            let error;
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              const reported = new Promise((resolve) => {
+                process.once('uncaughtException', resolve);
+              });
+              node.spin(-1);
+              error = await reported;
+              node.stop();
+            } else {
+              try { node.spinOnce(0); } catch (failure) { error = failure; }
+            }
+            assert.equal(error, firstError);
+            assert.deepEqual(calls, ['first']);
+            node.destroyGuardCondition(first);
+            node.destroyGuardCondition(second);
+            third.trigger();
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              node.spin(-1);
+              await completed;
+              node.stop();
+            } else {
+              node.spinOnce(0);
+              await completed;
+            }
+            assert.deepEqual(calls, ['first', 'third']);
+          `,
+          done
+        );
+      });
+
+      it(`${spinMethod} stops before ready guards after a timer error`, function (done) {
+        runInChild(
+          `
+            const failure = new Error('timer failure');
+            const calls = [];
+            const timer = node.createTimer(0n, () => {
+              timer.cancel();
+              calls.push('timer');
+              throw failure;
+            });
+            const guard = node.createGuardCondition(() => calls.push('guard'));
+            guard.trigger();
+            let error;
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              const reported = new Promise((resolve) => {
+                process.once('uncaughtException', resolve);
+              });
+              node.spin(-1);
+              error = await reported;
+              node.stop();
+            } else {
+              try { node.spinOnce(0); } catch (caught) { error = caught; }
+            }
+            assert.equal(error, failure);
+            assert.deepEqual(calls, ['timer']);
+          `,
+          done
+        );
+      });
+
+      it(`${spinMethod} discards remaining ready callbacks after stop and an error`, function (done) {
+        runInChild(
+          `
+            const failure = new Error('stopped callback failed');
+            const calls = [];
+            const first = node.createGuardCondition(() => {
+              calls.push('first');
+              node.stop();
+              throw failure;
+            });
+            let complete;
+            const completed = new Promise((resolve) => { complete = resolve; });
+            const second = node.createGuardCondition(() => {
+              calls.push('second');
+              complete();
+            });
+            first.trigger();
+            second.trigger();
+            let error;
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              const reported = new Promise((resolve) => {
+                process.once('uncaughtException', resolve);
+              });
+              node.spin(-1);
+              error = await reported;
+            } else {
+              try { node.spinOnce(0); } catch (caught) { error = caught; }
+            }
+            assert.equal(error, failure);
+            assert.deepEqual(calls, ['first']);
+            second.trigger();
+            if (${JSON.stringify(spinMethod)} === 'spin') {
+              node.spin(-1);
+              await completed;
+              node.stop();
+            } else {
+              node.spinOnce(0);
+              await completed;
+            }
+            assert.deepEqual(calls, ['first', 'second']);
+          `,
+          done
+        );
+      });
+
+      for (const operation of ['node.destroy()', 'context.shutdown()']) {
+        for (const throws of [false, true]) {
+          it(`${spinMethod} discards ready guards after ${operation}${throws ? ' and an error' : ''}`, function (done) {
+            runInChild(
+              `
+                const failure = new Error('destroyed callback failed');
+                const calls = [];
+                let complete;
+                const completed = new Promise((resolve) => { complete = resolve; });
+                const timer = node.createTimer(0n, () => {
+                  calls.push('timer');
+                  timer.cancel();
+                  ${operation};
+                  if (${throws}) throw failure;
+                  complete();
+                });
+                const guard = node.createGuardCondition(() => calls.push('guard'));
+                guard.trigger();
+                let error;
+                if (${JSON.stringify(spinMethod)} === 'spin') {
+                  const reported = ${throws} ? new Promise((resolve) => {
+                    process.once('uncaughtException', (caught) => resolve({ caught }));
+                  }) : completed;
+                  node.spin(-1);
+                  const result = await reported;
+                  if (${throws}) error = result.caught;
+                } else {
+                  try { node.spinOnce(0); } catch (caught) { error = caught; }
+                }
+                assert.equal(error, ${throws} ? failure : undefined);
+                assert.deepEqual(calls, ['timer']);
+                assert.equal(node.spinning, false);
+                assert.equal(context.nodes.includes(node), false);
+                assert.equal(context.isShutdown(), ${JSON.stringify(operation)} === 'context.shutdown()');
+              `,
+              done
+            );
+          });
+        }
+      }
     }
   });
 });
