@@ -8,6 +8,7 @@
 
 import assert from 'node:assert/strict';
 import { inspect } from 'node:util';
+import ArrayIndex from '../third_party/array-index/index.js';
 import ref from '../third_party/ref-napi/index.js';
 import createArrayType from '../third_party/ref-array-di/lib/array.js';
 import createStructType from '../third_party/ref-struct-di/lib/struct.js';
@@ -15,7 +16,88 @@ import createStructType from '../third_party/ref-struct-di/lib/struct.js';
 const ArrayType = createArrayType(ref);
 const StructType = createStructType(ref);
 
+function createIndexedType() {
+  return class Indexed extends ArrayIndex {
+    constructor(values) {
+      super(values.length);
+      this.values = values.slice();
+    }
+
+    [ArrayIndex.get](index) {
+      return this.values[index];
+    }
+
+    [ArrayIndex.set](index, value) {
+      this.values[index] = value;
+    }
+  };
+}
+
 describe('Vendored ref types', function () {
+  it('uses native index symbols and preserves length coercion', function () {
+    assert.equal(typeof ArrayIndex.get, 'symbol');
+    assert.equal(typeof ArrayIndex.set, 'symbol');
+    assert.notEqual(ArrayIndex.get, ArrayIndex.set);
+    assert.equal(new ArrayIndex().length, 0);
+    class LengthOnly extends ArrayIndex {}
+    for (const [value, expected] of [
+      [undefined, 0],
+      [null, 0],
+      [3.5, 3],
+      ['4', 4],
+      [-1, -1],
+      [NaN, 0],
+      [2147483648, -2147483648],
+    ]) {
+      assert.equal(new LengthOnly(value).length, expected);
+    }
+  });
+
+  it('preserves indexed access and array conversion methods', function () {
+    const Indexed = createIndexedType();
+    const values = new Indexed([1, 2, 3]);
+    values[1] = 42;
+    assert.deepEqual(values.toArray(), [1, 42, 3]);
+    assert.deepEqual(values.toJSON(), [1, 42, 3]);
+    assert.equal(JSON.stringify(values), '[1,42,3]');
+    assert.equal(values.toString(), '1,42,3');
+    values.label = 'indexed';
+    const inspected = values.inspect();
+    assert.deepEqual(inspected.slice(), [1, 42, 3]);
+    assert.equal(inspected.label, 'indexed');
+    assert.notEqual(values.toArray(), values.values);
+  });
+
+  it('preserves shared index descriptors and independent instance lengths', function () {
+    const Indexed = createIndexedType();
+    const values = new Indexed([1, 2, 3, 4]);
+    const sibling = new Indexed([9]);
+    const length = Object.getOwnPropertyDescriptor(values, 'length');
+    assert.equal(length.enumerable, false);
+    assert.equal(length.configurable, true);
+    const index = Object.getOwnPropertyDescriptor(Indexed.prototype, '2');
+    assert.equal(index.enumerable, true);
+    assert.equal(index.configurable, true);
+    assert.equal(typeof index.get, 'function');
+    assert.equal(typeof index.set, 'function');
+    assert.equal(Object.hasOwn(values, '2'), false);
+    const indexes = [];
+    for (const key in values) {
+      if (/^\d+$/.test(key)) indexes.push(key);
+    }
+    assert.deepEqual(indexes, ['0', '1', '2', '3']);
+    values.length = 1;
+    assert.deepEqual(values.toArray(), [1]);
+    assert.equal(Object.hasOwn(Indexed.prototype, '3'), true);
+    sibling.length = 2;
+    sibling[1] = 8;
+    values.length = 5;
+    values[4] = 5;
+    assert.deepEqual(values.toArray(), [1, 2, 3, 4, 5]);
+    assert.equal(sibling.length, 2);
+    assert.deepEqual(sibling.toArray(), [9, 8]);
+  });
+
   it('preserves custom Buffer inspection with native memory addresses', function () {
     const buffer = Buffer.from('ref');
     assert.equal(inspect(buffer), `<Buffer@0x${buffer.hexAddress()} 72 65 66>`);
@@ -89,6 +171,9 @@ describe('Vendored ref types', function () {
     assert.equal(Ints.size, ref.sizeof.pointer);
     assert.equal(Ints.alignment, ref.alignof.pointer);
     const values = new Ints([1, 2, 3]);
+    assert.ok(values instanceof ArrayIndex);
+    assert.equal(JSON.stringify(values), '[1,2,3]');
+    assert.equal(values.toString(), '1,2,3');
     const slice = values.slice(1);
     slice[0] = 42;
     assert.deepEqual(values.toArray(), [1, 42, 3]);

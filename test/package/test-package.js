@@ -180,6 +180,17 @@ describe('Installed package compatibility', function () {
     for (const file of ['rosidl_gen/index.cjs', 'rostsd_gen/index.cjs']) {
       assert.ok(packedFiles.has(file));
     }
+    for (const file of [
+      'third_party/array-index/index.js',
+      'third_party/array-index/package.json',
+      'third_party/array-index/LICENSE',
+    ]) {
+      assert.ok(packedFiles.has(file), file);
+    }
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8')
+    );
+    assert.equal(Object.hasOwn(manifest.dependencies, 'array-index'), false);
   });
 
   it('preserves typed ESM and CommonJS consumer imports', function () {

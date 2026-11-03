@@ -3,6 +3,6 @@
 README.md
 scripts/npmjs-readme.md
 
-# Keep vendored ref adapters byte-for-byte identical to their source releases.
+# Preserve the source formatting of vendored ref adapters with local imports.
 third_party/ref-array-di/lib/array.js
 third_party/ref-struct-di/lib/struct.js

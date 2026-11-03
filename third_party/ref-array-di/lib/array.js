@@ -5,7 +5,7 @@
 
 var assert = require('assert')
 var debug = require('debug')('ref:array')
-var ArrayIndex = require('array-index')
+var ArrayIndex = require('../../array-index')
 var isArray = Array.isArray
 
 /**
