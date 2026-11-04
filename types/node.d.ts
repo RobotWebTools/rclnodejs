@@ -325,6 +325,8 @@ declare module 'rclnodejs' {
     /**
      * Trigger the event loop to continuously check for and route.
      * incoming events.
+     * A synchronous callback exception stops the current ready batch and is
+     * reported through Node.js uncaught exception handling.
      * @param node - The node to be spun up.
      * @param - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
      * @throws Error if the node is already spinning or native executor cleanup is still in progress.
@@ -334,6 +336,7 @@ declare module 'rclnodejs' {
     /**
      * Spin the node and trigger the event loop to check for one incoming event. Thereafter the node
      * will not received additional events until running additional calls to spin() or spinOnce().
+     * A synchronous callback exception stops the current ready batch and is thrown to the caller.
      * @param node - The node to be spun.
      * @param  - Timeout to wait in milliseconds. Block forever if negative. Don't wait if 0.
      * @throws An error if the node is already spinning or native executor cleanup is still in progress.
