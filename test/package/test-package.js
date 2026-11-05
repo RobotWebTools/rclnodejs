@@ -191,6 +191,7 @@ describe('Installed package compatibility', function () {
       fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8')
     );
     assert.equal(Object.hasOwn(manifest.dependencies, 'array-index'), false);
+    assert.equal(Object.hasOwn(manifest.dependencies, 'bindings'), false);
   });
 
   it('preserves typed ESM and CommonJS consumer imports', function () {

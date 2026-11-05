@@ -49,6 +49,21 @@ npm run build:dist
 
 To refresh stale interfaces, including caches reused after skipping install hooks, run `npm run generate-messages` with ROS sourced. The command prepares the native addon before generating messages and TypeScript declarations.
 
+### Native Addon Lookup
+
+The loader first tries a prebuild in `prebuilds/<platform>-<arch>/` that exactly
+matches the ROS distribution, Ubuntu release and Node/Electron runtime. If none
+loads, it checks node-gyp's `build/Debug/rclnodejs.node`, then
+`build/Release/rclnodejs.node`, relative to the installed package root. Debug
+keeps priority so development and sanitizer builds are not hidden by a Release
+copy. If no local addon loads, the loader attempts a source rebuild.
+
+`RCLNODEJS_FORCE_BUILD=1` bypasses the prebuild and existing-build checks and
+rebuilds first. Legacy `bindings` locations such as `compiled/`, `out/`,
+`addon-build/` and `lib/binding/` are no longer searched;
+`NODE_BINDINGS_COMPILED_DIR` is no longer used. Custom builds must use the
+node-gyp output directories or the existing tagged prebuild layout.
+
 ## Build and Run with Docker
 
 The [Dockerfile](../Dockerfile) provides a source-development environment with **Rolling, Node 24 LTS, and npm 11.19.0** by default:
