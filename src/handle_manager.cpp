@@ -14,9 +14,11 @@
 
 #include "handle_manager.h"
 
+#include <rcl/error_handling.h>
 #include <rcl_action/rcl_action.h>
 
 #include <algorithm>
+#include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -29,18 +31,18 @@ HandleManager::HandleManager() : sum_(0) {
   is_synchronizing_.store(false);
   uv_rwlock_init(&sync_handles_rwlock_);
   uv_rwlock_init(&ready_handles_rwlock_);
-  uv_sem_init(&sync_handle_sem_, 0);
   uv_sem_init(&wait_handle_sem_, 0);
 }
 
 HandleManager::~HandleManager() {
   uv_rwlock_destroy(&sync_handles_rwlock_);
   uv_rwlock_destroy(&ready_handles_rwlock_);
-  uv_sem_destroy(&sync_handle_sem_);
   uv_sem_destroy(&wait_handle_sem_);
 }
 
-void HandleManager::SynchronizeHandles(const Napi::Object& node) {
+void HandleManager::SynchronizeHandles(
+    const Napi::Object& node,
+    rcl_guard_condition_t* interrupt_guard_condition) {
   Napi::HandleScope scope(node.Env());
   Napi::Value timers = node.Get("_timers");
   Napi::Value subscriptions = node.Get("_subscriptions");
@@ -54,6 +56,27 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
   uint32_t sum = 0;
   uint32_t sum_was = 0;
   is_synchronizing_.store(true);
+  struct SynchronizationGuard {
+    HandleManager* manager;
+    ~SynchronizationGuard() {
+      manager->is_synchronizing_.store(false);
+      std::lock_guard<std::mutex> lock(manager->synchronization_mutex_);
+      manager->synchronization_cv_.notify_all();
+    }
+  } synchronization_guard{this};
+
+  if (interrupt_guard_condition) {
+    rcl_ret_t ret = rcl_trigger_guard_condition(interrupt_guard_condition);
+    if (ret != RCL_RET_OK) {
+      std::string error_message =
+          std::string(
+              "Failed to interrupt executor for handle synchronization: ") +
+          rcl_get_error_string().str;
+      rcl_reset_error();
+      throw Napi::Error::New(node.Env(), error_message);
+    }
+  }
+
   {
     ScopedReadWriteLock scoped_lock(&sync_handles_rwlock_,
                                     ScopedReadWriteLock::LockType::kWrite);
@@ -73,10 +96,6 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
     PruneRemovedReadyHandles(sum);
     sum_was = sum_.exchange(sum);
   }
-  is_synchronizing_.store(false);
-
-  // Signals that the synchronization has finished.
-  uv_sem_post(&sync_handle_sem_);
 
   // Wakeup the backgroud thread if the sum was zero, but now it is greater than
   // zero.
@@ -119,7 +138,10 @@ void HandleManager::PruneRemovedReadyHandles(uint32_t active_handle_count) {
   }
 }
 
-void HandleManager::WaitForSynchronizing() { uv_sem_wait(&sync_handle_sem_); }
+void HandleManager::WaitForSynchronizing() {
+  std::unique_lock<std::mutex> lock(synchronization_mutex_);
+  synchronization_cv_.wait(lock, [this] { return !is_synchronizing(); });
+}
 
 void HandleManager::WaitForHandles() { uv_sem_wait(&wait_handle_sem_); }
 

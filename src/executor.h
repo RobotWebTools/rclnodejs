@@ -49,6 +49,7 @@ class Executor {
   void Start(rcl_context_t* context, int32_t time_out);
   void Stop();
   void SpinOnce(rcl_context_t* context, int32_t time_out);
+  void SynchronizeHandles(const Napi::Object& node);
   int32_t time_out() { return time_out_; }
   bool IsMainThread();
   bool IsStopped() const;

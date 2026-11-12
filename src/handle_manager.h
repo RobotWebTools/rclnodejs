@@ -20,6 +20,8 @@
 #include <uv.h>
 
 #include <atomic>
+#include <condition_variable>
+#include <mutex>
 #include <vector>
 
 #include "rcl_handle.h"
@@ -54,7 +56,9 @@ class HandleManager {
   HandleManager();
   ~HandleManager();
 
-  void SynchronizeHandles(const Napi::Object& node);
+  void SynchronizeHandles(
+      const Napi::Object& node,
+      rcl_guard_condition_t* interrupt_guard_condition = nullptr);
   void WaitForSynchronizing();
 
   // Waits the handles to be attached from the background thread.
@@ -126,7 +130,8 @@ class HandleManager {
 
   // Used to wait from the background thread when the handles are being
   // synchronized on the main thread.
-  uv_sem_t sync_handle_sem_;
+  std::mutex synchronization_mutex_;
+  std::condition_variable synchronization_cv_;
 
   // Atomically written from the main thread only, but read from background
   // thread.

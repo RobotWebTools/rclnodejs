@@ -60,12 +60,12 @@ void ShadowNode::StopRunning() {
 }
 
 void ShadowNode::StartRunning(rcl_context_t* context, int32_t timeout) {
-  handle_manager_->SynchronizeHandles(this->Value());
+  executor_->SynchronizeHandles(this->Value());
   executor_->Start(context, timeout);
 }
 
 void ShadowNode::RunOnce(rcl_context_t* context, int32_t timeout) {
-  handle_manager_->SynchronizeHandles(this->Value());
+  executor_->SynchronizeHandles(this->Value());
   executor_->SpinOnce(context, timeout);
 }
 
@@ -101,7 +101,7 @@ Napi::Value ShadowNode::SpinOnce(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value ShadowNode::SyncHandles(const Napi::CallbackInfo& info) {
-  handle_manager()->SynchronizeHandles(this->Value());
+  executor_->SynchronizeHandles(this->Value());
   return info.Env().Undefined();
 }
 
