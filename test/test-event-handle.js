@@ -178,6 +178,75 @@ describe('Event handle test suite', function () {
     assert.strictEqual(node._events.length, expectedEventCount);
   });
 
+  for (const kind of ['publisher', 'subscription']) {
+    it(`synchronizes a ${kind} and its events before releasing them`, function () {
+      const sandbox = sinon.createSandbox();
+      const snapshots = [];
+      const nativeSync = node.syncHandles.bind(node);
+      const syncHandles = sandbox.spy(() => {
+        snapshots.push({
+          entities: [...node._publishers, ...node._subscriptions],
+          events: [...node._events],
+        });
+        nativeSync();
+      });
+      Object.defineProperty(node, 'syncHandles', {
+        configurable: true,
+        value: syncHandles,
+      });
+      try {
+        const callbacks =
+          kind === 'publisher'
+            ? new PublisherEventCallbacks()
+            : new SubscriptionEventCallbacks();
+        callbacks.deadline = () => {};
+        callbacks.liveliness = () => {};
+        const entity =
+          kind === 'publisher'
+            ? node.createPublisher(
+                'std_msgs/msg/String',
+                'registry_events',
+                undefined,
+                callbacks
+              )
+            : node.createSubscription(
+                'std_msgs/msg/String',
+                'registry_events',
+                undefined,
+                () => {},
+                callbacks
+              );
+        const events = [...entity.events];
+        assert.strictEqual(events.length, 2);
+        assert.strictEqual(syncHandles.callCount, 1);
+        assert.ok(snapshots[0].entities.includes(entity));
+        assert.ok(events.every((event) => snapshots[0].events.includes(event)));
+
+        syncHandles.resetHistory();
+        const releases = events.map((event) => sandbox.spy(event, '_destroy'));
+        const releaseEntity = sandbox.spy(entity, '_destroy');
+        if (kind === 'publisher') {
+          node.destroyPublisher(entity);
+        } else {
+          node.destroySubscription(entity);
+        }
+
+        assert.strictEqual(syncHandles.callCount, 1);
+        assert.ok(!snapshots[1].entities.includes(entity));
+        assert.ok(
+          events.every((event) => !snapshots[1].events.includes(event))
+        );
+        sinon.assert.callOrder(syncHandles, ...releases, releaseEntity);
+        assert.ok(entity.isDestroyed());
+        assert.ok(events.every((event) => event.isDestroyed()));
+        assert.deepStrictEqual(entity.events, []);
+      } finally {
+        sandbox.restore();
+        delete node.syncHandles;
+      }
+    });
+  }
+
   it('marks retained entities and QoS events destroyed with the node', function () {
     const publisherCallbacks = new PublisherEventCallbacks();
     publisherCallbacks.deadline = () => {};
