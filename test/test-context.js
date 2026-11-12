@@ -76,8 +76,24 @@ describe('context test suite', function () {
     let node2 = new rclnodejs.Node('n2', undefined, context);
     assert.strictEqual(context.nodes.length, 2);
 
+    const nodes = [
+      node1,
+      node2,
+      new rclnodejs.Node('n3', undefined, context),
+      new rclnodejs.Node('n4', undefined, context),
+    ];
+    const publishers = nodes.map((node) =>
+      node.createPublisher('std_msgs/msg/String', 'context_shutdown')
+    );
+    assert.strictEqual(context.nodes.length, 4);
+
     context.shutdown();
     assert.strictEqual(context.nodes.length, 0);
+    assert.ok(!context.isValid());
+    for (const publisher of publishers) {
+      assert.ok(publisher.isDestroyed());
+    }
+    assert.doesNotThrow(() => context.shutdown());
   });
 
   it('context domain id', async function () {

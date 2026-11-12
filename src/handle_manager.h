@@ -104,6 +104,9 @@ class HandleManager {
       std::vector<rclnodejs::RclHandle*>* ready_handles);
 
  private:
+  // Requires the caller to hold sync_handles_rwlock_ for writing.
+  void PruneRemovedReadyHandles(uint32_t active_handle_count);
+
   std::vector<rclnodejs::RclHandle*> timers_;
   std::vector<rclnodejs::RclHandle*> clients_;
   std::vector<rclnodejs::RclHandle*> services_;

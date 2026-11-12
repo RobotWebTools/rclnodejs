@@ -14,7 +14,9 @@
 
 import assert from 'assert';
 import childProcess from 'child_process';
+import sinon from 'sinon';
 import rclnodejs from '../index.js';
+import Entity from '../lib/entity.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +33,24 @@ describe('Node & Entity destroy testing', function () {
     rclnodejs.shutdown();
   });
 
+  it('reclaims released handles after non-spinning node teardown', async function () {
+    const clearHandles = sinon.spy(Entity, '_gcHandles');
+    try {
+      for (let index = 0; index < 4; index++) {
+        const node = rclnodejs.createNode(`unspun_teardown_${index}`);
+        node.createPublisher('std_msgs/msg/String', 'unspun_teardown');
+        node.destroy();
+      }
+
+      assert.strictEqual(clearHandles.callCount, 0);
+      await new Promise(setImmediate);
+      assert.strictEqual(clearHandles.callCount, 1);
+    } finally {
+      clearHandles.restore();
+      Entity._gcHandles();
+    }
+  });
+
   it('node.destroy()', function () {
     var node = rclnodejs.createNode('my_node1');
     node.destroy();
@@ -44,6 +64,77 @@ describe('Node & Entity destroy testing', function () {
       node.destroy();
     }, Error);
   });
+
+  for (const teardown of ['node', 'context']) {
+    for (const spinning of [false, true]) {
+      it(`${teardown} teardown destroys every action${spinning ? ' while spinning' : ''}`, async function () {
+        const context = new rclnodejs.Context();
+        const clients = [];
+        const servers = [];
+        let node;
+        try {
+          await rclnodejs.init(context);
+          node = rclnodejs.createNode(
+            'bulk_action_teardown',
+            '',
+            context,
+            new rclnodejs.NodeOptions(false, [], false, false, false)
+          );
+          for (let index = 0; index < 2; index++) {
+            clients.push(
+              new rclnodejs.ActionClient(
+                node,
+                'example_interfaces/action/Fibonacci',
+                `bulk_client_${index}`
+              )
+            );
+            servers.push(
+              new rclnodejs.ActionServer(
+                node,
+                'example_interfaces/action/Fibonacci',
+                `bulk_server_${index}`,
+                () => {}
+              )
+            );
+          }
+          assert.strictEqual(node._actionClients.length, 2);
+          assert.strictEqual(node._actionServers.length, 2);
+          assert.ok(
+            [...clients, ...servers].every((action) => !action.isDestroyed())
+          );
+          if (spinning) node.spin(1);
+
+          if (teardown === 'node') {
+            node.destroy();
+          } else {
+            context.shutdown();
+          }
+
+          assert.deepStrictEqual(
+            clients.map((client) => client.isDestroyed()),
+            [true, true]
+          );
+          assert.deepStrictEqual(
+            servers.map((server) => server.isDestroyed()),
+            [true, true]
+          );
+          assert.strictEqual(node._actionClients.length, 0);
+          assert.strictEqual(node._actionServers.length, 0);
+          assert.strictEqual(node.spinning, false);
+          assert.strictEqual(context.nodes.length, 0);
+          assert.strictEqual(context.isValid(), teardown === 'node');
+          assert.doesNotThrow(() => {
+            node.destroy();
+            context.shutdown();
+          });
+        } finally {
+          for (const action of [...clients, ...servers]) action.destroy();
+          if (node) node.destroy();
+          context.tryShutdown();
+        }
+      });
+    }
+  }
 
   it('node handle readonly', function () {
     var node = rclnodejs.createNode('my_node3');
@@ -119,12 +210,29 @@ describe('Node & Entity destroy testing', function () {
     assert.deepStrictEqual(defaultServicesCount, node._services.length);
     service = node.createService(srvInterface, serviceName, () => {});
 
+    const guard = node.createGuardCondition(() => {});
+
     node.destroy();
+    assert.ok(pub2.isDestroyed());
+    assert.ok(sub2.isDestroyed());
+    assert.ok(client.isDestroyed());
+    assert.ok(service.isDestroyed());
+    assert.ok(guard.isDestroyed());
     assert.deepStrictEqual(0, node._timers.length);
     assert.deepStrictEqual(0, node._publishers.length);
     assert.deepStrictEqual(0, node._subscriptions.length);
     assert.deepStrictEqual(0, node._clients.length);
     assert.deepStrictEqual(0, node._services.length);
+    assert.deepStrictEqual(0, node._guards.length);
+    assert.deepStrictEqual(0, node._events.length);
+    assert.doesNotThrow(() => {
+      node.destroyPublisher(pub2);
+      node.destroySubscription(sub2);
+      node.destroyClient(client);
+      node.destroyService(service);
+      node.destroyGuardCondition(guard);
+      node.destroy();
+    });
   });
 
   it('entity redundant destroy()', function (done) {

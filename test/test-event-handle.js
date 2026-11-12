@@ -178,6 +178,37 @@ describe('Event handle test suite', function () {
     assert.strictEqual(node._events.length, expectedEventCount);
   });
 
+  it('marks retained entities and QoS events destroyed with the node', function () {
+    const publisherCallbacks = new PublisherEventCallbacks();
+    publisherCallbacks.deadline = () => {};
+    const subscriptionCallbacks = new SubscriptionEventCallbacks();
+    subscriptionCallbacks.deadline = () => {};
+    const publisher = node.createPublisher(
+      'std_msgs/msg/String',
+      'teardown_topic',
+      undefined,
+      publisherCallbacks
+    );
+    const subscription = node.createSubscription(
+      'std_msgs/msg/String',
+      'teardown_topic',
+      undefined,
+      () => {},
+      subscriptionCallbacks
+    );
+    const events = [...node._events];
+    assert.strictEqual(events.length, 2);
+    assert.ok(events.every((event) => !event.isDestroyed()));
+
+    node.destroy();
+
+    assert.ok(publisher.isDestroyed());
+    assert.ok(subscription.isDestroyed());
+    assert.ok(events.every((event) => event.isDestroyed()));
+    assert.strictEqual(node._events.length, 0);
+    assert.doesNotThrow(() => node.destroy());
+  });
+
   it('Test subscription event apis', async function () {
     const String = 'std_msgs/msg/String';
     let eventCallbacks = new SubscriptionEventCallbacks();

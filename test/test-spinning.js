@@ -26,6 +26,39 @@ describe('Spin testing', function () {
   var node;
   this.timeout(60 * 1000);
 
+  function runScriptInChild(script, callback, timeout = 10000) {
+    const started = Date.now();
+    execFile(
+      process.execPath,
+      ['--input-type=module', '--eval', script],
+      { timeout, killSignal: 'SIGKILL' },
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(
+            'Executor child process diagnostics: %s\nstdout:\n%s\nstderr:\n%s',
+            JSON.stringify({
+              code: error.code ?? null,
+              signal: error.signal ?? null,
+              killed: error.killed ?? false,
+              elapsedMs: Date.now() - started,
+              timeoutMs: timeout,
+              node: process.version,
+              platform: process.platform,
+              arch: process.arch,
+              rosDistro: process.env.ROS_DISTRO ?? null,
+              rmwImplementation: process.env.RMW_IMPLEMENTATION ?? null,
+              addonPath: nativeLoader.path,
+              githubSha: process.env.GITHUB_SHA ?? null,
+            }),
+            stdout || '<empty>',
+            stderr || '<empty>'
+          );
+        }
+        callback(error, stdout, stderr);
+      }
+    );
+  }
+
   before(function () {
     return rclnodejs.init();
   });
@@ -41,6 +74,43 @@ describe('Spin testing', function () {
   afterEach(function () {
     node.destroy();
   });
+
+  for (const exitCode of [0, 7]) {
+    it(`preserves child process output and exit code ${exitCode}`, function (done) {
+      const diagnostics = sinon.stub(console, 'error');
+      runScriptInChild(
+        `process.stdout.write('child stdout'); process.stderr.write('child stderr'); process.exit(${exitCode});`,
+        (error, stdout, stderr) => {
+          let failure;
+          try {
+            assert.strictEqual(error?.code ?? 0, exitCode);
+            assert.match(stdout, /child stdout/);
+            assert.match(stderr, /child stderr/);
+            assert.strictEqual(diagnostics.callCount, exitCode === 0 ? 0 : 1);
+            if (exitCode !== 0) {
+              const output = diagnostics.firstCall.args;
+              const metadata = JSON.parse(output[1]);
+              assert.strictEqual(metadata.code, exitCode);
+              assert.strictEqual(metadata.node, process.version);
+              assert.strictEqual(metadata.addonPath, nativeLoader.path);
+              assert.strictEqual(metadata.timeoutMs, 10000);
+              assert.strictEqual(
+                metadata.githubSha,
+                process.env.GITHUB_SHA ?? null
+              );
+              assert.strictEqual(output[2], stdout);
+              assert.strictEqual(output[3], stderr);
+            }
+          } catch (error) {
+            failure = error;
+          } finally {
+            diagnostics.restore();
+          }
+          done(failure);
+        }
+      );
+    });
+  }
 
   it('rclnodejs.spin()', function () {
     rclnodejs.spin(node);
@@ -122,12 +192,7 @@ describe('Spin testing', function () {
         rclnodejs.shutdown();
       }
     `;
-    execFile(
-      process.execPath,
-      ['--input-type=module', '--eval', script],
-      { timeout: 10000, killSignal: 'SIGKILL' },
-      (error) => done(error)
-    );
+    runScriptInChild(script, done);
   });
 
   for (const spinMethod of ['spin', 'spinOnce']) {
@@ -191,12 +256,7 @@ describe('Spin testing', function () {
             context.shutdown();
           }
         `;
-        execFile(
-          process.execPath,
-          ['--input-type=module', '--eval', script],
-          { timeout: 10000, killSignal: 'SIGKILL' },
-          (error) => done(error)
-        );
+        runScriptInChild(script, done);
       });
     }
   }
@@ -291,6 +351,7 @@ describe('Spin testing', function () {
     let released;
     const first = node.createGuardCondition(() => {
       node.destroyGuardCondition(released);
+      assert.equal(clearHandles.callCount, 0);
       throw failure;
     });
     released = node.createGuardCondition(() => assert.fail('must not run'));
@@ -305,6 +366,77 @@ describe('Spin testing', function () {
     } finally {
       clearHandles.restore();
     }
+  });
+
+  it('excludes removed guards from native ready batches without losing live guards', function (done) {
+    this.timeout(15000);
+    const moduleUrl = new URL('../index.js', import.meta.url).href;
+    const script = `
+      import assert from 'node:assert/strict';
+      import rclnodejs from ${JSON.stringify(moduleUrl)};
+      await rclnodejs.init();
+      const node = rclnodejs.createNode(
+        'ready_queue_removal', '', rclnodejs.Context.defaultContext(),
+        new rclnodejs.NodeOptions(false, [], false, false, false)
+      );
+      const removedHandles = new Set();
+      let completedRounds = 0;
+      let phase = 'starting worker';
+      const execute = node.execute.bind(node);
+      node.execute = (handles) => {
+        for (const handle of handles) {
+          assert.ok(!removedHandles.has(handle), 'Removed handle remained in native ready queue');
+        }
+        execute(handles);
+      };
+      const watchdog = setTimeout(() => {
+        console.error('Surviving ready guard was not dispatched', JSON.stringify({
+          completedRounds,
+          phase,
+        }));
+        process.exit(1);
+      }, 10000);
+      try {
+        node.spin(1);
+        for (let index = 0; index < 64; index++) {
+          phase = 'creating guards';
+          let completeRound;
+          const delivered = new Promise((resolve) => { completeRound = resolve; });
+          const surviving = node.createGuardCondition(() => completeRound());
+          const removed = node.createGuardCondition(() => assert.fail('Destroyed guard ran'));
+          removed.trigger();
+          phase = 'removing ready guard';
+          node.destroyGuardCondition(removed);
+          removedHandles.add(removed.handle);
+          phase = 'waiting for surviving guard';
+          surviving.trigger();
+          await delivered;
+          phase = 'removing surviving guard';
+          node.destroyGuardCondition(surviving);
+          removedHandles.add(surviving.handle);
+          await new Promise(setImmediate);
+          completedRounds++;
+        }
+        console.log('ready queue removal passed');
+      } finally {
+        clearTimeout(watchdog);
+        rclnodejs.shutdown();
+      }
+    `;
+    runScriptInChild(
+      script,
+      (error, stdout, stderr) => {
+        try {
+          assert.ifError(error);
+          assert.match(stdout, /ready queue removal passed/);
+          assert.doesNotMatch(stderr, /ERROR: (?:Address|Leak)Sanitizer/);
+          done();
+        } catch (failure) {
+          done(failure);
+        }
+      },
+      12000
+    );
   });
 
   it('releases raw messages when callbacks throw', function () {
@@ -419,12 +551,7 @@ describe('Spin testing', function () {
           context.shutdown();
         }
       `;
-      execFile(
-        process.execPath,
-        ['--input-type=module', '--eval', script],
-        { timeout, killSignal: 'SIGKILL' },
-        (error) => done(error)
-      );
+      runScriptInChild(script, done, timeout);
     }
 
     for (const timeout of [1500, -1]) {
@@ -564,22 +691,33 @@ describe('Spin testing', function () {
     }
 
     for (const entity of ['timer', 'subscription']) {
-      it(`creates a ${entity} promptly after removing the last entity during spin`, function (done) {
+      it(`synchronizes a new ${entity} promptly after removing the last entity during spin`, function (done) {
         this.timeout(25000);
         runInChild(
           `
             const messageType = rclnodejs.require('std_msgs/msg/String');
+            const syncHandles = node.syncHandles.bind(node);
+            let synchronizationElapsed;
+            Object.defineProperty(node, 'syncHandles', {
+              value: () => {
+                const start = performance.now();
+                syncHandles();
+                synchronizationElapsed = performance.now() - start;
+              },
+            });
             node.spinOnce(0);
             for (let i = 0; i < 100; i++) {
               const guard = node.createGuardCondition(() => {});
               node.spin(100);
               node.destroyGuardCondition(guard);
               await delay(1);
+              synchronizationElapsed = undefined;
               const start = performance.now();
               const created = ${JSON.stringify(entity)} === 'timer'
                 ? node.createTimer(1000000n, () => {})
                 : node.createSubscription(messageType, 'empty_transition_topic', () => {});
-              const elapsed = performance.now() - start;
+              const creationElapsed = performance.now() - start;
+              const elapsed = synchronizationElapsed;
               node.stop();
               if (${JSON.stringify(entity)} === 'timer') {
                 node.destroyTimer(created);
@@ -588,7 +726,7 @@ describe('Spin testing', function () {
               }
               assert.ok(
                 elapsed < 75,
-                'Entity creation waited for an empty wait set: ' + elapsed + ' ms (iteration ' + i + ')'
+                'Handle synchronization waited for an empty wait set: ' + elapsed + ' ms (creation ' + creationElapsed + ' ms, iteration ' + i + ')'
               );
             }
           `,
