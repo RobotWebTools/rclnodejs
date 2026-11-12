@@ -16,6 +16,8 @@
 
 #include <rcl_action/rcl_action.h>
 
+#include <algorithm>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -68,6 +70,7 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
     sum += SynchronizeHandlesByType(action_servers.As<Napi::Object>(),
                                     &action_servers_);
     sum += SynchronizeHandlesByType(events.As<Napi::Object>(), &events_);
+    PruneRemovedReadyHandles(sum);
     sum_was = sum_.exchange(sum);
   }
   is_synchronizing_.store(false);
@@ -84,6 +87,36 @@ void HandleManager::SynchronizeHandles(const Napi::Object& node) {
       "guards.",
       timers_.size(), subscriptions_.size(), clients_.size(), services_.size(),
       guard_conditions_.size());
+}
+
+void HandleManager::PruneRemovedReadyHandles(uint32_t active_handle_count) {
+  ScopedReadWriteLock ready_lock(&ready_handles_rwlock_,
+                                 ScopedReadWriteLock::LockType::kWrite);
+  if (!ready_handles_.empty()) {
+    std::unordered_set<RclHandle*> active_handles;
+    active_handles.reserve(active_handle_count);
+    for (const auto* handles :
+         {&timers_, &subscriptions_, &clients_, &services_, &guard_conditions_,
+          &action_clients_, &action_servers_, &events_}) {
+      active_handles.insert(handles->begin(), handles->end());
+    }
+    // The worker can queue a raw RclHandle* before JS removes its entity.
+    // Removal updates the active lists, but the queued pointer can outlive
+    // the wrapper if deferred JS cleanup allows GC before dispatch. Prune
+    // removed entries now, preserving other entities' ready callbacks.
+    //
+    // Example: the worker collects [removed_guard, live_guard], releases its
+    // handle read lock, then pauses before uv_async_send(). JS removes
+    // removed_guard and calls syncHandles() before releasing its handle.
+    // Prune removed_guard now so deferred cleanup/GC cannot invalidate a
+    // queued pointer; retain live_guard so its ready callback is not lost.
+    ready_handles_.erase(
+        std::remove_if(ready_handles_.begin(), ready_handles_.end(),
+                       [&active_handles](RclHandle* handle) {
+                         return active_handles.count(handle) == 0;
+                       }),
+        ready_handles_.end());
+  }
 }
 
 void HandleManager::WaitForSynchronizing() { uv_sem_wait(&sync_handle_sem_); }
