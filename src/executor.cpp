@@ -240,6 +240,11 @@ bool Executor::IsStopped() const {
   return state_.load() == ExecutorState::Stopped;
 }
 
+void Executor::SynchronizeHandles(const Napi::Object& node) {
+  handle_manager_->SynchronizeHandles(
+      node, IsRunning() ? &interrupt_guard_condition_ : nullptr);
+}
+
 std::string Executor::ReleaseResources() {
   state_.store(ExecutorState::ReleasingResources);
   handle_manager_->TakeReadyHandles();
@@ -399,7 +404,8 @@ RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
                                   ScopedReadWriteLock::LockType::kRead);
 
     // The last entity may disappear between the semaphore check and this lock.
-    if (is_background_thread && (!IsRunning() || handle_manager_->sum() == 0)) {
+    if (is_background_thread && (!IsRunning() || handle_manager_->sum() == 0 ||
+                                 handle_manager_->is_synchronizing())) {
       return RclResult(RCL_RET_OK, "");
     }
 

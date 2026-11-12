@@ -580,6 +580,44 @@ describe('Spin testing', function () {
       }
     }
 
+    it('synchronizes repeated entity changes during an infinite spin', function (done) {
+      runInChild(
+        `
+          const unexpectedCallback = () => assert.fail('Inactive entity ran');
+          for (let index = 0; index < 32; index++) {
+            const guard = node.createGuardCondition(unexpectedCallback);
+            node.destroyGuardCondition(guard);
+          }
+          node.createGuardCondition(unexpectedCallback);
+          node.spin(-1);
+          await delay(200);
+          const operations = [
+            [() => node.createTimer(3600000000000n, unexpectedCallback),
+             (entity) => node.destroyTimer(entity)],
+            [() => node.createSubscription('std_msgs/msg/String', 'sync_subscription', unexpectedCallback),
+             (entity) => node.destroySubscription(entity)],
+            [() => node.createClient('example_interfaces/srv/AddTwoInts', 'sync_client'),
+             (entity) => node.destroyClient(entity)],
+            [() => node.createService('example_interfaces/srv/AddTwoInts', 'sync_service', unexpectedCallback),
+             (entity) => node.destroyService(entity)],
+            [() => node.createGuardCondition(unexpectedCallback),
+             (entity) => node.destroyGuardCondition(entity)],
+          ];
+          for (let iteration = 0; iteration < 8; iteration++) {
+            for (const [create, destroy] of operations) {
+              const entity = create();
+              if (iteration % 2 === 0) await delay(10);
+              destroy(entity);
+              assert.equal(node.spinning, true);
+            }
+          }
+          node.stop();
+          assert.equal(node.spinning, false);
+        `,
+        done
+      );
+    });
+
     it('supports repeated start/stop and still dispatches user guards', function (done) {
       runInChild(
         `
