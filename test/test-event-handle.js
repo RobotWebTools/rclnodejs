@@ -223,8 +223,10 @@ describe('Event handle test suite', function () {
         assert.ok(events.every((event) => snapshots[0].events.includes(event)));
 
         syncHandles.resetHistory();
-        const releases = events.map((event) => sandbox.spy(event, '_destroy'));
-        const releaseEntity = sandbox.spy(entity, '_destroy');
+        const releases = events.map((event) =>
+          sandbox.spy(event, 'releaseResources')
+        );
+        const releaseEntity = sandbox.spy(entity, 'releaseResources');
         if (kind === 'publisher') {
           node.destroyPublisher(entity);
         } else {
