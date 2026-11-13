@@ -51,7 +51,6 @@ class Executor {
   void SpinOnce(rcl_context_t* context, int32_t time_out);
   void SynchronizeHandles(const Napi::Object& node);
   int32_t time_out() { return time_out_; }
-  bool IsMainThread();
   bool IsStopped() const;
 
   static void DoWork(uv_async_t* handle);
@@ -66,6 +65,11 @@ class Executor {
     ReleasingResources,
   };
 
+  enum class WaitMode {
+    Synchronous,
+    Background,
+  };
+
   bool IsRunning() const { return state_.load() == ExecutorState::Running; }
 
   // Called only when no worker remains to be joined.
@@ -73,15 +77,14 @@ class Executor {
   std::string TakeWorkerError();
 
   // Returns RclResult object which indicates the final result.
-  RclResult WaitForReadyCallbacks(rcl_wait_set_t* wait_set, int32_t time_out);
+  RclResult WaitForReadyCallbacks(rcl_wait_set_t* wait_set, int32_t time_out,
+                                  WaitMode mode);
 
   // Calls the callback of the ready handle.
   void ExecuteReadyHandles();
 
+  // Notifies the JS event loop of ready callbacks or worker errors.
   uv_async_t* async_;
-
-  // The v8 main thread.
-  uv_thread_t main_thread_;
 
   // Sub thread used to query the ready handles.
   uv_thread_t background_thread_;
@@ -95,14 +98,13 @@ class Executor {
 
   std::atomic<ExecutorState> state_;
 
-  // Synchronization: the background thread waits after uv_async_send until
-  // the main thread finishes ExecuteReadyHandles.  This prevents the
-  // background thread from re-entering rcl_wait (which holds a reference to
-  // subscriptions) while the main thread modifies subscription state (e.g.
-  // content filter changes).
-  std::mutex work_done_mutex_;
-  std::condition_variable work_done_cv_;
-  bool work_pending_;
+  // The worker waits for JS dispatch completion before re-entering rcl_wait,
+  // and for earlier callbacks to unwind before starting a new spin.
+  // dispatch_mutex_ protects dispatch_pending_, callbacks_in_flight_, and
+  // worker_error_, and coordinates lifecycle changes that wake dispatch_cv_.
+  std::mutex dispatch_mutex_;
+  std::condition_variable dispatch_cv_;
+  bool dispatch_pending_;
   std::size_t callbacks_in_flight_;
   std::string worker_error_;
 };
