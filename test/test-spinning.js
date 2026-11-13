@@ -578,6 +578,57 @@ describe('Spin testing', function () {
           );
         });
       }
+
+      it(`synchronizes publisher events during an idle ${timeout} ms wait`, function (done) {
+        if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+          this.skip();
+        }
+        const eventCallbacksUrl = new URL(
+          '../lib/event_handler.js',
+          import.meta.url
+        ).href;
+        runInChild(
+          `
+            const { PublisherEventCallbacks } = await import(${JSON.stringify(eventCallbacksUrl)});
+            node.createGuardCondition(() => assert.fail('Idle guard ran'));
+            node.spin(${timeout});
+            await delay(200);
+            const synchronize = node.syncHandles.bind(node);
+            let synchronizationElapsed;
+            Object.defineProperty(node, 'syncHandles', {
+              value: () => {
+                const start = performance.now();
+                synchronize();
+                synchronizationElapsed = performance.now() - start;
+              },
+            });
+            const callbacks = new PublisherEventCallbacks();
+            callbacks.deadline = () => assert.fail('Inactive deadline event ran');
+            const publisher = node.createPublisher(
+              'std_msgs/msg/String', 'idle_publisher_events', undefined, callbacks
+            );
+            assert.ok(
+              synchronizationElapsed < 500,
+              'Publisher registration waited for rcl_wait: ' + synchronizationElapsed + ' ms'
+            );
+            assert.equal(node._events.length, 1);
+            assert.equal(node.spinning, true);
+
+            await delay(100);
+            synchronizationElapsed = undefined;
+            node.destroyPublisher(publisher);
+            assert.ok(
+              synchronizationElapsed < 500,
+              'Publisher removal waited for rcl_wait: ' + synchronizationElapsed + ' ms'
+            );
+            assert.equal(node._events.length, 0);
+            assert.equal(publisher.isDestroyed(), true);
+            node.stop();
+          `,
+          done,
+          5000
+        );
+      });
     }
 
     it('synchronizes repeated entity changes during an infinite spin', function (done) {
