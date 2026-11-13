@@ -60,14 +60,13 @@ struct RclResult {
 Executor::Executor(Napi::Env env, HandleManager* handle_manager,
                    Delegate* delegate)
     : async_(nullptr),
-      main_thread_(uv_thread_self()),
       handle_manager_(handle_manager),
       delegate_(delegate),
       context_(nullptr),
       interrupt_guard_condition_(rcl_get_zero_initialized_guard_condition()),
       env_(env),
       state_(ExecutorState::Stopped),
-      work_pending_(false),
+      dispatch_pending_(false),
       callbacks_in_flight_(0) {}
 
 Executor::~Executor() {
@@ -103,8 +102,8 @@ void Executor::Start(rcl_context_t* context, int32_t time_out) {
     async_->data = this;
     {
       // Run() takes this lock before checking the published startup state.
-      std::lock_guard<std::mutex> lock(work_done_mutex_);
-      work_pending_ = false;
+      std::lock_guard<std::mutex> lock(dispatch_mutex_);
+      dispatch_pending_ = false;
       uv_ret = uv_thread_create(&background_thread_, Executor::Run, this);
       if (uv_ret == 0) {
         state_.store(ExecutorState::Running);
@@ -140,17 +139,17 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
     return;
   }
   {
-    std::lock_guard<std::mutex> lock(work_done_mutex_);
+    std::lock_guard<std::mutex> lock(dispatch_mutex_);
     ++callbacks_in_flight_;
   }
   struct CallbackGuard {
     Executor* exec;
     ~CallbackGuard() {
       {
-        std::lock_guard<std::mutex> lock(exec->work_done_mutex_);
+        std::lock_guard<std::mutex> lock(exec->dispatch_mutex_);
         --exec->callbacks_in_flight_;
       }
-      exec->work_done_cv_.notify_all();
+      exec->dispatch_cv_.notify_all();
     }
   } callback_guard{this};
   struct WaitSetGuard {
@@ -162,7 +161,8 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
     }
   } guard{&wait_set};
 
-  RclResult wait_result = WaitForReadyCallbacks(&wait_set, time_out);
+  RclResult wait_result =
+      WaitForReadyCallbacks(&wait_set, time_out, WaitMode::Synchronous);
 
   if (wait_result.ret != RCL_RET_OK) {
     Napi::Error::New(env_, wait_result.error_msg.c_str())
@@ -197,10 +197,10 @@ void Executor::Stop() {
   }
 
   {
-    std::lock_guard<std::mutex> lock(work_done_mutex_);
+    std::lock_guard<std::mutex> lock(dispatch_mutex_);
     state_.store(ExecutorState::ThreadJoinPending);
   }
-  work_done_cv_.notify_all();
+  dispatch_cv_.notify_all();
   handle_manager_->StopWaitingHandles();
   rcl_ret_t ret = rcl_trigger_guard_condition(&interrupt_guard_condition_);
   if (ret != RCL_RET_OK) {
@@ -230,7 +230,7 @@ void Executor::Stop() {
 }
 
 std::string Executor::TakeWorkerError() {
-  std::lock_guard<std::mutex> lock(work_done_mutex_);
+  std::lock_guard<std::mutex> lock(dispatch_mutex_);
   std::string error_message;
   error_message.swap(worker_error_);
   return error_message;
@@ -272,15 +272,10 @@ std::string Executor::ReleaseResources() {
   return error_message;
 }
 
-bool Executor::IsMainThread() {
-  uv_thread_t this_thread = uv_thread_self();
-  return uv_thread_equal(&main_thread_, &this_thread) != 0;
-}
-
 void Executor::DoWork(uv_async_t* handle) {
   Executor* executor = reinterpret_cast<Executor*>(handle->data);
   {
-    std::lock_guard<std::mutex> lock(executor->work_done_mutex_);
+    std::lock_guard<std::mutex> lock(executor->dispatch_mutex_);
     ++executor->callbacks_in_flight_;
   }
 
@@ -290,11 +285,11 @@ void Executor::DoWork(uv_async_t* handle) {
     uv_async_t* async_handle;
     ~WorkDoneGuard() {
       {
-        std::lock_guard<std::mutex> lock(exec->work_done_mutex_);
+        std::lock_guard<std::mutex> lock(exec->dispatch_mutex_);
         --exec->callbacks_in_flight_;
-        if (exec->async_ == async_handle) exec->work_pending_ = false;
+        if (exec->async_ == async_handle) exec->dispatch_pending_ = false;
       }
-      exec->work_done_cv_.notify_all();
+      exec->dispatch_cv_.notify_all();
     }
   } guard{executor, handle};
 
@@ -320,8 +315,8 @@ void Executor::Run(void* arg) {
   HandleManager* handle_manager = executor->handle_manager_;
 
   {
-    std::unique_lock<std::mutex> lock(executor->work_done_mutex_);
-    executor->work_done_cv_.wait(lock, [executor] {
+    std::unique_lock<std::mutex> lock(executor->dispatch_mutex_);
+    executor->dispatch_cv_.wait(lock, [executor] {
       return executor->callbacks_in_flight_ == 0 || !executor->IsRunning();
     });
     if (!executor->IsRunning()) return;
@@ -341,30 +336,29 @@ void Executor::Run(void* arg) {
     wait_set_initialized = true;
 
     while (executor->IsRunning()) {
-      RclResult wait_result =
-          executor->WaitForReadyCallbacks(&wait_set, executor->time_out());
+      RclResult wait_result = executor->WaitForReadyCallbacks(
+          &wait_set, executor->time_out(), WaitMode::Background);
       if (wait_result.ret != RCL_RET_OK)
         throw std::runtime_error(wait_result.error_msg);
 
       if (!executor->IsRunning()) break;
 
-      if (!uv_is_closing(reinterpret_cast<uv_handle_t*>(executor->async_)) &&
-          handle_manager->ready_handles_count() > 0) {
+      if (handle_manager->ready_handles_count() > 0) {
         // Tell the main thread there is work to do, then wait for it to
         // finish before re-entering rcl_wait.  This prevents a data race
         // where the background thread holds subscriptions in the wait set
         // while the main thread modifies their state (e.g. content filter).
         {
-          std::lock_guard<std::mutex> lock(executor->work_done_mutex_);
-          executor->work_pending_ = true;
+          std::lock_guard<std::mutex> lock(executor->dispatch_mutex_);
+          executor->dispatch_pending_ = true;
         }
         uv_async_send(executor->async_);
 
         // Wait until DoWork() signals completion.
         {
-          std::unique_lock<std::mutex> lock(executor->work_done_mutex_);
-          executor->work_done_cv_.wait(lock, [executor] {
-            return !executor->work_pending_ || !executor->IsRunning();
+          std::unique_lock<std::mutex> lock(executor->dispatch_mutex_);
+          executor->dispatch_cv_.wait(lock, [executor] {
+            return !executor->dispatch_pending_ || !executor->IsRunning();
           });
         }
       }
@@ -379,7 +373,7 @@ void Executor::Run(void* arg) {
   }
   if (!error_message.empty()) {
     {
-      std::lock_guard<std::mutex> lock(executor->work_done_mutex_);
+      std::lock_guard<std::mutex> lock(executor->dispatch_mutex_);
       executor->state_.store(ExecutorState::ThreadJoinPending);
       executor->worker_error_ = std::move(error_message);
     }
@@ -388,8 +382,8 @@ void Executor::Run(void* arg) {
 }
 
 RclResult Executor::WaitForReadyCallbacks(rcl_wait_set_t* wait_set,
-                                          int32_t time_out) {
-  const bool is_background_thread = !IsMainThread();
+                                          int32_t time_out, WaitMode mode) {
+  const bool is_background_thread = mode == WaitMode::Background;
   // Wake tokens can outlive the handles that produced them.
   while (is_background_thread && IsRunning() && handle_manager_->sum() == 0)
     handle_manager_->WaitForHandles();
