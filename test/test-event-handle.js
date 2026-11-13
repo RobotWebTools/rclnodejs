@@ -224,9 +224,9 @@ describe('Event handle test suite', function () {
 
         syncHandles.resetHistory();
         const releases = events.map((event) =>
-          sandbox.spy(event, 'releaseResources')
+          sandbox.spy(event, 'finalizeDestruction')
         );
-        const releaseEntity = sandbox.spy(entity, 'releaseResources');
+        const releaseEntity = sandbox.spy(entity, 'finalizeDestruction');
         if (kind === 'publisher') {
           node.destroyPublisher(entity);
         } else {
