@@ -348,19 +348,14 @@ void Executor::Run(void* arg) {
         // finish before re-entering rcl_wait.  This prevents a data race
         // where the background thread holds subscriptions in the wait set
         // while the main thread modifies their state (e.g. content filter).
-        {
-          std::lock_guard<std::mutex> lock(executor->js_dispatch_mutex_);
-          executor->js_dispatch_pending_ = true;
-        }
+        std::unique_lock<std::mutex> lock(executor->js_dispatch_mutex_);
+        executor->js_dispatch_pending_ = true;
         uv_async_send(executor->async_);
 
         // Wait until DoWork() signals completion.
-        {
-          std::unique_lock<std::mutex> lock(executor->js_dispatch_mutex_);
-          executor->js_dispatch_done_cv_.wait(lock, [executor] {
-            return !executor->js_dispatch_pending_ || !executor->IsRunning();
-          });
-        }
+        executor->js_dispatch_done_cv_.wait(lock, [executor] {
+          return !executor->js_dispatch_pending_ || !executor->IsRunning();
+        });
       }
     }
   } catch (const std::exception& error) {
