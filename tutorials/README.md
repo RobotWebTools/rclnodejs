@@ -4,15 +4,15 @@ This directory contains comprehensive tutorials explaining various ROS 2 feature
 
 ## Getting Started
 
-If you're new to ROS 2, start with the **Basic Concepts** tutorial to understand fundamental communication patterns, then explore other tutorials based on your specific needs.
+Start with [Writing Your First rclnodejs Nodes](writing-your-first-rclnodejs-nodes.md), then explore the tutorials below for your application's needs.
 
 ## Available Tutorials
 
 ### 📚 Fundamentals
 
-#### [ROS 2 Basic Concepts](ros2-basic-concepts.md)
+#### [Writing Your First rclnodejs Nodes](writing-your-first-rclnodejs-nodes.md)
 
-Introduction to fundamental ROS 2 communication patterns: **Topics** (publish/subscribe) and **Services** (request/response). Essential for beginners to understand the core building blocks of ROS 2 applications.
+Set up an npm project, run a ROS 2 node, and build publisher/subscriber and service examples. Inspect communication with the ROS 2 CLI.
 
 ### 🔧 Node Management
 
