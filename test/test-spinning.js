@@ -368,7 +368,7 @@ describe('Spin testing', function () {
     }
   });
 
-  it('excludes removed guards from native ready batches without losing live guards', function (done) {
+  it('excludes removed ready handles while preserving live timer callbacks', function (done) {
     this.timeout(15000);
     const moduleUrl = new URL('../index.js', import.meta.url).href;
     const script = `
@@ -379,8 +379,10 @@ describe('Spin testing', function () {
         'ready_queue_removal', '', rclnodejs.Context.defaultContext(),
         new rclnodejs.NodeOptions(false, [], false, false, false)
       );
+      const rmwImplementation = node.getRMWImplementationIdentifier();
       const removedHandles = new Set();
       let completedRounds = 0;
+      let liveCallbacks = 0;
       let phase = 'starting worker';
       const execute = node.execute.bind(node);
       node.execute = (handles) => {
@@ -390,29 +392,35 @@ describe('Spin testing', function () {
         execute(handles);
       };
       const watchdog = setTimeout(() => {
-        console.error('Surviving ready guard was not dispatched', JSON.stringify({
+        console.error('Surviving ready timer was not dispatched', JSON.stringify({
           completedRounds,
           phase,
+          rmwImplementation,
         }));
         process.exit(1);
       }, 10000);
       try {
         node.spin(1);
         for (let index = 0; index < 64; index++) {
-          phase = 'creating guards';
+          phase = 'creating handles';
           let completeRound;
           const delivered = new Promise((resolve) => { completeRound = resolve; });
-          const surviving = node.createGuardCondition(() => completeRound());
+          const surviving = node.createTimer(0n, () => {
+            surviving.cancel();
+            liveCallbacks++;
+            completeRound();
+          }, { autostart: false });
           const removed = node.createGuardCondition(() => assert.fail('Destroyed guard ran'));
           removed.trigger();
           phase = 'removing ready guard';
           node.destroyGuardCondition(removed);
           removedHandles.add(removed.handle);
-          phase = 'waiting for surviving guard';
-          surviving.trigger();
+          phase = 'waiting for surviving timer';
+          surviving.reset();
           await delivered;
-          phase = 'removing surviving guard';
-          node.destroyGuardCondition(surviving);
+          assert.equal(liveCallbacks, index + 1);
+          phase = 'removing surviving timer';
+          node.destroyTimer(surviving);
           removedHandles.add(surviving.handle);
           await new Promise(setImmediate);
           completedRounds++;
@@ -578,6 +586,57 @@ describe('Spin testing', function () {
           );
         });
       }
+
+      it(`synchronizes publisher events during an idle ${timeout} ms wait`, function (done) {
+        if (DistroUtils.getDistroId() <= DistroUtils.getDistroId('humble')) {
+          this.skip();
+        }
+        const eventCallbacksUrl = new URL(
+          '../lib/event_handler.js',
+          import.meta.url
+        ).href;
+        runInChild(
+          `
+            const { PublisherEventCallbacks } = await import(${JSON.stringify(eventCallbacksUrl)});
+            node.createGuardCondition(() => assert.fail('Idle guard ran'));
+            node.spin(${timeout});
+            await delay(200);
+            const synchronize = node.syncHandles.bind(node);
+            let synchronizationElapsed;
+            Object.defineProperty(node, 'syncHandles', {
+              value: () => {
+                const start = performance.now();
+                synchronize();
+                synchronizationElapsed = performance.now() - start;
+              },
+            });
+            const callbacks = new PublisherEventCallbacks();
+            callbacks.deadline = () => assert.fail('Inactive deadline event ran');
+            const publisher = node.createPublisher(
+              'std_msgs/msg/String', 'idle_publisher_events', undefined, callbacks
+            );
+            assert.ok(
+              synchronizationElapsed < 500,
+              'Publisher registration waited for rcl_wait: ' + synchronizationElapsed + ' ms'
+            );
+            assert.equal(node._events.length, 1);
+            assert.equal(node.spinning, true);
+
+            await delay(100);
+            synchronizationElapsed = undefined;
+            node.destroyPublisher(publisher);
+            assert.ok(
+              synchronizationElapsed < 500,
+              'Publisher removal waited for rcl_wait: ' + synchronizationElapsed + ' ms'
+            );
+            assert.equal(node._events.length, 0);
+            assert.equal(publisher.isDestroyed(), true);
+            node.stop();
+          `,
+          done,
+          5000
+        );
+      });
     }
 
     it('synchronizes repeated entity changes during an infinite spin', function (done) {

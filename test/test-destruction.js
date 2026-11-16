@@ -65,6 +65,52 @@ describe('Node & Entity destroy testing', function () {
     }, Error);
   });
 
+  it('keeps registry collection views stable through bulk teardown', function () {
+    const node = rclnodejs.createNode('registry_teardown');
+    const views = Object.entries(node._entityRegistry.collections);
+    try {
+      const publisher = node.createPublisher('std_msgs/msg/String', 'registry');
+      const subscription = node.createSubscription(
+        'std_msgs/msg/String',
+        'registry',
+        () => {}
+      );
+      const client = node.createClient(
+        'example_interfaces/srv/AddTwoInts',
+        'registry_service'
+      );
+      const service = node.createService(
+        'example_interfaces/srv/AddTwoInts',
+        'registry_service',
+        () => {}
+      );
+      node.createTimer(1000000000n, () => {});
+      node.createGuardCondition(() => {});
+      node.spin(1);
+
+      const syncHandles = sinon.spy(node.syncHandles.bind(node));
+      Object.defineProperty(node, 'syncHandles', {
+        configurable: true,
+        value: syncHandles,
+      });
+
+      node.destroy();
+
+      assert.strictEqual(syncHandles.callCount, 0);
+      assert.strictEqual(node.spinning, false);
+      for (const [kind, entities] of views) {
+        assert.strictEqual(node[`_${kind}`], entities);
+        assert.strictEqual(entities.length, 0, kind);
+      }
+      for (const entity of [publisher, subscription, client, service]) {
+        assert.ok(entity.isDestroyed());
+      }
+    } finally {
+      delete node.syncHandles;
+      node.destroy();
+    }
+  });
+
   for (const teardown of ['node', 'context']) {
     for (const spinning of [false, true]) {
       it(`${teardown} teardown destroys every action${spinning ? ' while spinning' : ''}`, async function () {
