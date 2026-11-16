@@ -66,7 +66,7 @@ Executor::Executor(Napi::Env env, HandleManager* handle_manager,
       interrupt_guard_condition_(rcl_get_zero_initialized_guard_condition()),
       env_(env),
       state_(ExecutorState::Stopped),
-      dispatch_pending_(false),
+      js_dispatch_pending_(false),
       callbacks_in_flight_(0) {}
 
 Executor::~Executor() {
@@ -102,8 +102,8 @@ void Executor::Start(rcl_context_t* context, int32_t time_out) {
     async_->data = this;
     {
       // Run() takes this lock before checking the published startup state.
-      std::lock_guard<std::mutex> lock(dispatch_mutex_);
-      dispatch_pending_ = false;
+      std::lock_guard<std::mutex> lock(js_dispatch_mutex_);
+      js_dispatch_pending_ = false;
       uv_ret = uv_thread_create(&background_thread_, Executor::Run, this);
       if (uv_ret == 0) {
         state_.store(ExecutorState::Running);
@@ -139,17 +139,17 @@ void Executor::SpinOnce(rcl_context_t* context, int32_t time_out) {
     return;
   }
   {
-    std::lock_guard<std::mutex> lock(dispatch_mutex_);
+    std::lock_guard<std::mutex> lock(js_dispatch_mutex_);
     ++callbacks_in_flight_;
   }
   struct CallbackGuard {
     Executor* exec;
     ~CallbackGuard() {
       {
-        std::lock_guard<std::mutex> lock(exec->dispatch_mutex_);
+        std::lock_guard<std::mutex> lock(exec->js_dispatch_mutex_);
         --exec->callbacks_in_flight_;
       }
-      exec->dispatch_cv_.notify_all();
+      exec->js_dispatch_done_cv_.notify_all();
     }
   } callback_guard{this};
   struct WaitSetGuard {
@@ -197,10 +197,10 @@ void Executor::Stop() {
   }
 
   {
-    std::lock_guard<std::mutex> lock(dispatch_mutex_);
+    std::lock_guard<std::mutex> lock(js_dispatch_mutex_);
     state_.store(ExecutorState::ThreadJoinPending);
   }
-  dispatch_cv_.notify_all();
+  js_dispatch_done_cv_.notify_all();
   handle_manager_->StopWaitingHandles();
   rcl_ret_t ret = rcl_trigger_guard_condition(&interrupt_guard_condition_);
   if (ret != RCL_RET_OK) {
@@ -230,7 +230,7 @@ void Executor::Stop() {
 }
 
 std::string Executor::TakeWorkerError() {
-  std::lock_guard<std::mutex> lock(dispatch_mutex_);
+  std::lock_guard<std::mutex> lock(js_dispatch_mutex_);
   std::string error_message;
   error_message.swap(worker_error_);
   return error_message;
@@ -275,7 +275,7 @@ std::string Executor::ReleaseResources() {
 void Executor::DoWork(uv_async_t* handle) {
   Executor* executor = reinterpret_cast<Executor*>(handle->data);
   {
-    std::lock_guard<std::mutex> lock(executor->dispatch_mutex_);
+    std::lock_guard<std::mutex> lock(executor->js_dispatch_mutex_);
     ++executor->callbacks_in_flight_;
   }
 
@@ -285,11 +285,11 @@ void Executor::DoWork(uv_async_t* handle) {
     uv_async_t* async_handle;
     ~WorkDoneGuard() {
       {
-        std::lock_guard<std::mutex> lock(exec->dispatch_mutex_);
+        std::lock_guard<std::mutex> lock(exec->js_dispatch_mutex_);
         --exec->callbacks_in_flight_;
-        if (exec->async_ == async_handle) exec->dispatch_pending_ = false;
+        if (exec->async_ == async_handle) exec->js_dispatch_pending_ = false;
       }
-      exec->dispatch_cv_.notify_all();
+      exec->js_dispatch_done_cv_.notify_all();
     }
   } guard{executor, handle};
 
@@ -315,8 +315,8 @@ void Executor::Run(void* arg) {
   HandleManager* handle_manager = executor->handle_manager_;
 
   {
-    std::unique_lock<std::mutex> lock(executor->dispatch_mutex_);
-    executor->dispatch_cv_.wait(lock, [executor] {
+    std::unique_lock<std::mutex> lock(executor->js_dispatch_mutex_);
+    executor->js_dispatch_done_cv_.wait(lock, [executor] {
       return executor->callbacks_in_flight_ == 0 || !executor->IsRunning();
     });
     if (!executor->IsRunning()) return;
@@ -349,16 +349,16 @@ void Executor::Run(void* arg) {
         // where the background thread holds subscriptions in the wait set
         // while the main thread modifies their state (e.g. content filter).
         {
-          std::lock_guard<std::mutex> lock(executor->dispatch_mutex_);
-          executor->dispatch_pending_ = true;
+          std::lock_guard<std::mutex> lock(executor->js_dispatch_mutex_);
+          executor->js_dispatch_pending_ = true;
         }
         uv_async_send(executor->async_);
 
         // Wait until DoWork() signals completion.
         {
-          std::unique_lock<std::mutex> lock(executor->dispatch_mutex_);
-          executor->dispatch_cv_.wait(lock, [executor] {
-            return !executor->dispatch_pending_ || !executor->IsRunning();
+          std::unique_lock<std::mutex> lock(executor->js_dispatch_mutex_);
+          executor->js_dispatch_done_cv_.wait(lock, [executor] {
+            return !executor->js_dispatch_pending_ || !executor->IsRunning();
           });
         }
       }
@@ -373,7 +373,7 @@ void Executor::Run(void* arg) {
   }
   if (!error_message.empty()) {
     {
-      std::lock_guard<std::mutex> lock(executor->dispatch_mutex_);
+      std::lock_guard<std::mutex> lock(executor->js_dispatch_mutex_);
       executor->state_.store(ExecutorState::ThreadJoinPending);
       executor->worker_error_ = std::move(error_message);
     }

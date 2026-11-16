@@ -98,13 +98,14 @@ class Executor {
 
   std::atomic<ExecutorState> state_;
 
-  // The worker waits for JS dispatch completion before re-entering rcl_wait,
-  // and for earlier callbacks to unwind before starting a new spin.
-  // dispatch_mutex_ protects dispatch_pending_, callbacks_in_flight_, and
-  // worker_error_, and coordinates lifecycle changes that wake dispatch_cv_.
-  std::mutex dispatch_mutex_;
-  std::condition_variable dispatch_cv_;
-  bool dispatch_pending_;
+  // Shared state for worker-to-JS-thread dispatch.
+  // The worker waits on js_dispatch_done_cv_ for JS dispatch completion or
+  // stop, and for earlier callbacks to unwind before starting a new spin.
+  // js_dispatch_mutex_ protects js_dispatch_pending_, callbacks_in_flight_,
+  // and worker_error_, and coordinates lifecycle changes that wake the worker.
+  std::mutex js_dispatch_mutex_;
+  std::condition_variable js_dispatch_done_cv_;
+  bool js_dispatch_pending_;
   std::size_t callbacks_in_flight_;
   std::string worker_error_;
 };
