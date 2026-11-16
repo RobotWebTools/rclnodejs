@@ -19,6 +19,8 @@
 
 **Key features:** Topics, Services, Actions, Parameters, Lifecycle Nodes, TypeScript support, RxJS Observables, Electron integration, ROS 2 in the browser (typed Web SDK + thin WebSocket gateway — `rclnodejs/web`, `rosocket`), and prebuilt binaries for Linux x64/arm64.
 
+New to ROS 2 or rclnodejs? Start with [Writing Your First rclnodejs Nodes](./tutorials/writing-your-first-rclnodejs-nodes.md) for project setup, publisher/subscriber examples, and service calls.
+
 ```javascript
 import rclnodejs from 'rclnodejs';
 

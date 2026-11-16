@@ -6,6 +6,8 @@
 
 Supported ROS 2 distributions include Humble, Jazzy, Kilted, Lyrical, and Rolling.
 
+New to ROS 2 or rclnodejs? Start with [Writing Your First rclnodejs Nodes](https://github.com/RobotWebTools/rclnodejs/blob/develop/tutorials/writing-your-first-rclnodejs-nodes.md) for project setup, publisher/subscriber examples, and service calls.
+
 ```javascript
 import rclnodejs from 'rclnodejs';
 
