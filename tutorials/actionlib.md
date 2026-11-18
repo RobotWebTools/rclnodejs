@@ -174,8 +174,3 @@ npx generate-ros-messages
 ```
 
 Use your package's action type in place of `test_msgs/action/Fibonacci` on both ends.
-
-## Further Reading
-
-- [Action examples](../example/actions/) include deferred execution and single-goal servers. Accepting multiple goals lets their asynchronous callbacks interleave; it does not create separate JavaScript threads.
-- [ROS 2 actions](https://docs.ros.org/en/lyrical/ROS-Framework/interfaces/actions/Working-with-actions/Understanding-ROS2-Actions/Understanding-ROS2-Actions.html) explains the underlying topics and services.

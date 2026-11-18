@@ -21,7 +21,5 @@ Start with [Writing Your First rclnodejs Nodes](writing-your-first-rclnodejs-nod
 
 ## Reference
 
-- [rclnodejs API Documentation](https://robotwebtools.github.io/rclnodejs/)
+- [rclnodejs API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html)
 - [ROS 2 Official Documentation](https://docs.ros.org/)
-- [rclnodejs GitHub Repository](https://github.com/RobotWebTools/rclnodejs)
-- [ROS 2 Examples](../example/)
