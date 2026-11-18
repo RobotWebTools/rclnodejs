@@ -66,9 +66,10 @@ The subscriber receives only the readings selected by its filter. Whether this a
 
 ## Change the Filter
 
-The subscription can keep running while you replace its filter:
+Stop spinning before changing the filter so the background executor is not waiting on the subscription during the update. You can keep the same subscription and resume spinning afterward:
 
 ```javascript
+node.stop();
 if (
   !subscription.setContentFilter({
     expression: 'data > %0',
@@ -79,16 +80,19 @@ if (
 }
 
 console.log(subscription.getContentFilter());
+rclnodejs.spin(node);
 ```
 
 Add this code where your application handles a configuration change. Future matching messages use the new expression; a filter update does not retract callbacks already delivered to JavaScript.
 
-To receive all values again:
+Stop spinning before clearing the filter, too:
 
 ```javascript
+node.stop();
 if (!subscription.clearContentFilter()) {
   throw new Error('Could not clear the content filter');
 }
+rclnodejs.spin(node);
 ```
 
 `hasContentFilter()` reports whether a filter is active. On Lyrical and newer, `isContentFilterSupported()` provides a separate subscription capability check. On older distros, do not interpret that newer capability API's `false` result as proof that an active filter is unsupported.
