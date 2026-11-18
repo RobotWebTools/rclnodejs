@@ -17,6 +17,7 @@
 
 #include <napi.h>
 #include <rcl/guard_condition.h>
+#include <rcl/subscription.h>
 #include <rcl/wait.h>
 #include <uv.h>
 
@@ -50,6 +51,9 @@ class Executor {
   void Stop();
   void SpinOnce(rcl_context_t* context, int32_t time_out);
   void SynchronizeHandles(const Napi::Object& node);
+  rcl_ret_t SetSubscriptionContentFilter(
+      const rcl_subscription_t* subscription,
+      const rcl_subscription_content_filter_options_t* options);
   int32_t time_out() { return time_out_; }
   bool IsStopped() const;
 

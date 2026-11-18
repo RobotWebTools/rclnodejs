@@ -40,6 +40,35 @@ HandleManager::~HandleManager() {
   uv_sem_destroy(&wait_handle_sem_);
 }
 
+void HandleManager::RunWithWaitSetWriteLock(
+    Napi::Env env, rcl_guard_condition_t* interrupt_guard_condition,
+    const std::function<void()>& operation) {
+  is_synchronizing_.store(true);
+  struct SynchronizationGuard {
+    HandleManager* manager;
+    ~SynchronizationGuard() {
+      manager->is_synchronizing_.store(false);
+      std::lock_guard<std::mutex> lock(manager->synchronization_mutex_);
+      manager->synchronization_cv_.notify_all();
+    }
+  } synchronization_guard{this};
+
+  if (interrupt_guard_condition) {
+    rcl_ret_t ret = rcl_trigger_guard_condition(interrupt_guard_condition);
+    if (ret != RCL_RET_OK) {
+      std::string error_message =
+          std::string("Failed to interrupt executor for a wait set update: ") +
+          rcl_get_error_string().str;
+      rcl_reset_error();
+      throw Napi::Error::New(env, error_message);
+    }
+  }
+
+  ScopedReadWriteLock scoped_lock(&sync_handles_rwlock_,
+                                  ScopedReadWriteLock::LockType::kWrite);
+  operation();
+}
+
 void HandleManager::SynchronizeHandles(
     const Napi::Object& node,
     rcl_guard_condition_t* interrupt_guard_condition) {
@@ -55,31 +84,7 @@ void HandleManager::SynchronizeHandles(
 
   uint32_t sum = 0;
   uint32_t sum_was = 0;
-  is_synchronizing_.store(true);
-  struct SynchronizationGuard {
-    HandleManager* manager;
-    ~SynchronizationGuard() {
-      manager->is_synchronizing_.store(false);
-      std::lock_guard<std::mutex> lock(manager->synchronization_mutex_);
-      manager->synchronization_cv_.notify_all();
-    }
-  } synchronization_guard{this};
-
-  if (interrupt_guard_condition) {
-    rcl_ret_t ret = rcl_trigger_guard_condition(interrupt_guard_condition);
-    if (ret != RCL_RET_OK) {
-      std::string error_message =
-          std::string(
-              "Failed to interrupt executor for handle synchronization: ") +
-          rcl_get_error_string().str;
-      rcl_reset_error();
-      throw Napi::Error::New(node.Env(), error_message);
-    }
-  }
-
-  {
-    ScopedReadWriteLock scoped_lock(&sync_handles_rwlock_,
-                                    ScopedReadWriteLock::LockType::kWrite);
+  RunWithWaitSetWriteLock(node.Env(), interrupt_guard_condition, [&] {
     ClearHandles();
     sum += SynchronizeHandlesByType(timers.As<Napi::Object>(), &timers_);
     sum += SynchronizeHandlesByType(subscriptions.As<Napi::Object>(),
@@ -95,7 +100,7 @@ void HandleManager::SynchronizeHandles(
     sum += SynchronizeHandlesByType(events.As<Napi::Object>(), &events_);
     PruneRemovedReadyHandles(sum);
     sum_was = sum_.exchange(sum);
-  }
+  });
 
   // Wakeup the backgroud thread if the sum was zero, but now it is greater than
   // zero.

@@ -21,6 +21,7 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <functional>
 #include <mutex>
 #include <vector>
 
@@ -59,6 +60,9 @@ class HandleManager {
   void SynchronizeHandles(
       const Napi::Object& node,
       rcl_guard_condition_t* interrupt_guard_condition = nullptr);
+  void RunWithWaitSetWriteLock(Napi::Env env,
+                               rcl_guard_condition_t* interrupt_guard_condition,
+                               const std::function<void()>& operation);
   void WaitForSynchronizing();
 
   // Waits the handles to be attached from the background thread.

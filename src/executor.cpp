@@ -245,6 +245,17 @@ void Executor::SynchronizeHandles(const Napi::Object& node) {
       node, IsRunning() ? &interrupt_guard_condition_ : nullptr);
 }
 
+rcl_ret_t Executor::SetSubscriptionContentFilter(
+    const rcl_subscription_t* subscription,
+    const rcl_subscription_content_filter_options_t* options) {
+  rcl_ret_t result = RCL_RET_ERROR;
+  handle_manager_->RunWithWaitSetWriteLock(
+      env_, IsRunning() ? &interrupt_guard_condition_ : nullptr, [&] {
+        result = rcl_subscription_set_content_filter(subscription, options);
+      });
+  return result;
+}
+
 std::string Executor::ReleaseResources() {
   state_.store(ExecutorState::ReleasingResources);
   handle_manager_->TakeReadyHandles();
