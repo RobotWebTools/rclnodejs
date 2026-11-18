@@ -138,8 +138,3 @@ Use `METADATA` when payloads are unnecessary. You can call `configureIntrospecti
 If the monitor is quiet, check the endpoint's state, the full service name, and event-topic QoS compatibility. Service-request QoS and event-publisher QoS are separate settings.
 
 Press **Ctrl+C** to stop the server and monitor when finished.
-
-## Further Reading
-
-- [ROS 2 service introspection](https://docs.ros.org/en/lyrical/Developer-Tools/Introspection-and-analysis/Service-Introspection.html) describes the event protocol.
-- [Service-introspection tests](../test/test-service-introspection.js) cover the endpoint states and payloads.

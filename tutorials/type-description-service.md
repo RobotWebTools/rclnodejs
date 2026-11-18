@@ -129,8 +129,3 @@ With this override, the service can still appear in the ROS graph even though th
 If the service is missing, verify the ROS version, node namespace, and startup configuration. A service appearing in the graph does not mean it will answer unless the target node is spinning.
 
 Press **Ctrl+C** to stop the publisher.
-
-## Further Reading
-
-- [ROS 2 interfaces](https://docs.ros.org/en/lyrical/ROS-Framework/interfaces/Working-with-interfaces.html) introduces message and service definitions.
-- [Type-description tests](../test/test-type-description-service.js) cover the request and startup behavior.

@@ -141,8 +141,3 @@ Callbacks must synchronously return `SUCCESS`, `FAILURE`, or `ERROR` from `rclno
 Use `FAILURE` when the requested transition cannot complete, such as an unavailable device during configuration. `ERROR` enters error processing and invokes the registered error callback. Returning `SUCCESS` from that error callback returns the node to unconfigured; cleanup must have left it ready to configure again.
 
 You can also call `node.configure()`, `node.activate()`, and the other transitions locally. They return the resulting state; read `node.currentState` to inspect it. For remote control from another node, use the `lifecycle_msgs/srv/ChangeState` service at `/managed_talker/change_state` with the asynchronous client pattern from the [first-nodes guide](writing-your-first-rclnodejs-nodes.md#write-the-client).
-
-## Further Reading
-
-- [Lifecycle example](../example/lifecycle/) shows a node controlling its own transitions.
-- [Managed-node design](https://design.ros2.org/articles/node_lifecycle.html) describes transition and error behavior.

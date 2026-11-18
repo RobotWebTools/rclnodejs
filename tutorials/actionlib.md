@@ -154,23 +154,3 @@ The client requests cancellation after 750 ms. Accepting that request does not s
 For real work, check for cancellation at points where it is safe to stop. If execution fails instead, call `abort()` and return a result that explains the failure through your action's fields. Call `succeed()` only after the task has completed.
 
 Press **Ctrl+C** to stop the server when finished.
-
-## Define Your Own Action
-
-An `.action` file contains the goal, result, and feedback definitions, separated by `---`. For the example above they are:
-
-```text
-int32 order
----
-int32[] sequence
----
-int32[] sequence
-```
-
-Define custom actions in a ROS interface package, build it, and source its installation before generating the JavaScript interfaces:
-
-```bash
-npx generate-ros-messages
-```
-
-Use your package's action type in place of `test_msgs/action/Fibonacci` on both ends.

@@ -130,9 +130,3 @@ For changes on other nodes, use parameter events or a parameter client rather th
 ```bash
 ros2 topic echo /parameter_events
 ```
-
-## Further Reading
-
-- [Parameter examples](../example/parameter/) cover overrides and additional parameter operations.
-- [Node API declarations](../types/node.d.ts) list the parameter methods and options.
-- [Lifecycle nodes](lifecycle-nodes.md) add explicit configuration and activation states.

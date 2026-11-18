@@ -66,10 +66,9 @@ The subscriber receives only the readings selected by its filter. Whether this a
 
 ## Change the Filter
 
-Stop spinning before changing the filter so the background executor is not waiting on the subscription during the update. You can keep the same subscription and resume spinning afterward:
+Call `setContentFilter()` to replace the filter while the node is spinning:
 
 ```javascript
-node.stop();
 if (
   !subscription.setContentFilter({
     expression: 'data > %0',
@@ -80,20 +79,19 @@ if (
 }
 
 console.log(subscription.getContentFilter());
-rclnodejs.spin(node);
 ```
 
 Add this code where your application handles a configuration change. Future matching messages use the new expression; a filter update does not retract callbacks already delivered to JavaScript.
 
-Stop spinning before clearing the filter, too:
+Call `clearContentFilter()` to receive messages without the filter:
 
 ```javascript
-node.stop();
 if (!subscription.clearContentFilter()) {
   throw new Error('Could not clear the content filter');
 }
-rclnodejs.spin(node);
 ```
+
+On releases without the [executor synchronization fix](https://github.com/RobotWebTools/rclnodejs/pull/1692), call `node.stop()` before setting or clearing the filter, then resume with `rclnodejs.spin(node)`.
 
 `hasContentFilter()` reports whether a filter is active. On Lyrical and newer, `isContentFilterSupported()` provides a separate subscription capability check. On older distros, do not interpret that newer capability API's `false` result as proof that an active filter is unsupported.
 
@@ -106,9 +104,3 @@ Pass parameters as strings. A numeric threshold can be `'25'`; a string literal 
 Filters are subscription preferences, not access control. Another subscriber can request the unfiltered topic.
 
 Press **Ctrl+C** to stop the example. In a longer-running application, release an individual subscription with `node.destroySubscription(subscription)` when it is no longer needed.
-
-## Further Reading
-
-- [Observable subscriptions](observable-subscriptions.md) cover application-level filtering and stream processing.
-- [ROS 2 content-filtering demo](https://docs.ros.org/en/lyrical/ROS-Framework/interfaces/topics/Working-with-topics/Content-Filtering-Subscription.html) describes middleware support.
-- [Content-filtering tests](../test/test-subscription-content-filter.js) exercise creation, updates, and removal.
