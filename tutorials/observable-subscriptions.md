@@ -1,420 +1,125 @@
-# Observable Subscriptions in rclnodejs
+# Observable Subscriptions
 
-rclnodejs provides RxJS Observable support for subscriptions, enabling reactive programming patterns when working with ROS 2 messages.
+An observable subscription exposes ROS messages as an RxJS stream. Use it when operators make the processing clearer than a callback, such as combining topics or grouping messages into batches. A plain `createSubscription()` callback is still a good choice for simple handlers.
 
-## Table of Contents
-
-- [What are Observable Subscriptions?](#what-are-observable-subscriptions)
-- [Basic Usage](#basic-usage)
-- [API Reference](#api-reference)
-- [Examples](#examples)
-- [Cleanup](#cleanup)
-- [Best Practices](#best-practices)
-- [Running the Examples](#running-the-examples)
-- [Comparison with Callback API](#comparison-with-callback-api)
-
-## What are Observable Subscriptions?
-
-**Observable Subscriptions** wrap standard ROS 2 subscriptions and expose messages through RxJS Observables. This allows you to use the full power of reactive programming for:
-
-- 🔄 **Rate limiting**: `throttleTime()`, `debounceTime()`, `auditTime()`
-- 🔧 **Transformation**: `map()`, `scan()`, `buffer()`
-- 🔍 **Filtering**: `filter()`, `distinctUntilChanged()`, `take()`
-- 🔗 **Combining topics**: `combineLatest()`, `merge()`, `zip()`
-- ⚠️ **Error handling**: `catchError()`, `retry()`, `timeout()`
-
-Observable subscriptions are ideal for complex message processing pipelines where you need to combine, filter, or transform data from multiple sources.
-
-> **Note:** RxJS `filter()` operates at the application level after messages are received. For simple content-based filtering that reduces network traffic, consider using [DDS Content Filtering](content-filtering-subscription.md) instead, which filters at the middleware level before messages reach your application. See [Example 6](#example-6-combining-dds-content-filtering-with-rxjs) for combined usage.
-
-## Basic Usage
-
-```javascript
-const rclnodejs = require('rclnodejs');
-const { throttleTime, map, filter } = require('rxjs');
-
-async function main() {
-  await rclnodejs.init();
-  const node = new rclnodejs.Node('observable_example');
-
-  // Create an Observable subscription
-  const obsSub = node.createObservableSubscription(
-    'sensor_msgs/msg/LaserScan',
-    '/scan'
-  );
-
-  // Use RxJS operators to process messages
-  obsSub.observable
-    .pipe(
-      throttleTime(200), // Limit to 5 Hz
-      map((msg) => msg.ranges),
-      filter((ranges) => ranges.length > 0)
-    )
-    .subscribe((ranges) => {
-      console.log('Received ranges:', ranges.length);
-    });
-
-  node.spin();
-}
-
-main();
-```
-
-## API Reference
-
-### `node.createObservableSubscription(typeClass, topic, options?, eventCallbacks?)`
-
-Creates a subscription that returns an `ObservableSubscription`.
-
-**Parameters:**
-
-- `typeClass` - Message type (string, object, or class)
-- `topic` - Topic name
-- `options` - Optional subscription options (same as `createSubscription()`)
-- `eventCallbacks` - Optional event callbacks
-
-**Returns:** `ObservableSubscription`
-
-### `ObservableSubscription`
-
-| Property/Method | Type            | Description                               |
-| --------------- | --------------- | ----------------------------------------- |
-| `observable`    | `Observable<T>` | RxJS Observable that emits messages       |
-| `subscription`  | `Subscription`  | Underlying ROS 2 subscription             |
-| `topic`         | `string`        | Topic name                                |
-| `isDestroyed`   | `boolean`       | Whether the observable has been completed |
-| `complete()`    | `void`          | Complete the observable and stop emitting |
-| `destroy()`     | `void`          | Alias for `complete()`                    |
-
-## Examples
-
-### Example 1: Throttling High-Frequency Sensors
-
-```javascript
-const { throttleTime } = require('rxjs');
-
-// LiDAR publishes at 20Hz, but we only need 5Hz for visualization
-const lidarSub = node.createObservableSubscription(
-  'sensor_msgs/msg/LaserScan',
-  '/scan'
-);
-
-lidarSub.observable
-  .pipe(throttleTime(200)) // 200ms = 5Hz
-  .subscribe((scan) => {
-    visualize(scan);
-  });
-```
-
-### Example 2: Combining Multiple Topics
-
-```javascript
-const { combineLatest, map } = require('rxjs');
-
-const odomSub = node.createObservableSubscription(
-  'nav_msgs/msg/Odometry',
-  '/odom'
-);
-const imuSub = node.createObservableSubscription('sensor_msgs/msg/Imu', '/imu');
-
-combineLatest([odomSub.observable, imuSub.observable])
-  .pipe(
-    map(([odom, imu]) => ({
-      position: odom.pose.pose.position,
-      orientation: imu.orientation,
-    }))
-  )
-  .subscribe((combined) => {
-    console.log('Combined data:', combined);
-  });
-```
-
-### Example 3: Debouncing Burst Events
-
-```javascript
-const { debounceTime } = require('rxjs');
-
-// Joystick commands may come in bursts - only act on the final value
-const joySub = node.createObservableSubscription('sensor_msgs/msg/Joy', '/joy');
-
-joySub.observable
-  .pipe(debounceTime(50)) // Wait 50ms of quiet before processing
-  .subscribe((joy) => {
-    processJoystickCommand(joy);
-  });
-```
-
-### Example 4: Sampling Every Nth Message
-
-```javascript
-const { filter } = require('rxjs');
-
-// IMU at 100Hz - sample every 10th message for logging
-let count = 0;
-const imuSub = node.createObservableSubscription('sensor_msgs/msg/Imu', '/imu');
-
-imuSub.observable.pipe(filter(() => ++count % 10 === 0)).subscribe((imu) => {
-  logToFile(imu);
-});
-```
-
-### Example 5: Buffering Messages
-
-```javascript
-const { bufferTime, filter } = require('rxjs');
-
-const tempSub = node.createObservableSubscription(
-  'sensor_msgs/msg/Temperature',
-  '/temperature'
-);
-
-// Collect messages over 1 second, then process as batch
-tempSub.observable
-  .pipe(
-    bufferTime(1000),
-    filter((batch) => batch.length > 0)
-  )
-  .subscribe((batch) => {
-    const avgTemp =
-      batch.reduce((sum, msg) => sum + msg.temperature, 0) / batch.length;
-    console.log('Average temperature:', avgTemp);
-  });
-```
-
-### Example 6: Combining DDS Content Filtering with RxJS
-
-For optimal performance, use DDS content filtering to reduce network traffic at the middleware level, then apply RxJS operators for additional processing:
-
-```javascript
-const { throttleTime, map } = require('rxjs');
-
-// DDS filters at middleware level - only temperatures > 30°C are delivered
-const tempSub = node.createObservableSubscription(
-  'sensor_msgs/msg/Temperature',
-  '/temperature',
-  {
-    contentFilter: {
-      expression: 'temperature > %0',
-      parameters: ['30.0'],
-    },
-  }
-);
-
-// RxJS processes the pre-filtered stream
-tempSub.observable
-  .pipe(
-    throttleTime(1000), // Rate limit to 1 msg/sec
-    map((msg) => ({
-      celsius: msg.temperature,
-      fahrenheit: msg.temperature * 1.8 + 32,
-    }))
-  )
-  .subscribe((temp) => {
-    console.log(`High temp alert: ${temp.celsius}°C (${temp.fahrenheit}°F)`);
-  });
-```
-
-This approach provides:
-
-- **Network efficiency**: DDS drops messages below 30°C before transmission
-- **CPU efficiency**: RxJS only processes relevant messages
-- **Flexibility**: RxJS handles rate limiting and transformation
-
-> See [Content Filtering Subscription](content-filtering-subscription.md) for more details on DDS content filtering.
-
-## Cleanup
-
-Always clean up subscriptions when done:
-
-```javascript
-// Option 1: Complete the observable
-obsSub.complete();
-
-// Option 2: Destroy via node
-node.destroySubscription(obsSub.subscription);
-
-// Option 3: Destroy the entire node
-node.destroy();
-```
-
-## Best Practices
-
-### 1. Always Unsubscribe
-
-Prevent memory leaks by unsubscribing when done:
-
-```javascript
-const rxjsSubscription = obsSub.observable
-  .pipe(throttleTime(100))
-  .subscribe((msg) => console.log(msg));
-
-// Later, when cleanup is needed:
-rxjsSubscription.unsubscribe();
-obsSub.complete();
-```
-
-### 2. Use `take()` for Finite Streams
-
-```javascript
-const { take } = require('rxjs');
-
-// Only process the first 10 messages
-obsSub.observable.pipe(take(10)).subscribe({
-  next: (msg) => console.log(msg),
-  complete: () => console.log('Received 10 messages'),
-});
-```
-
-### 3. Handle Errors Gracefully
-
-```javascript
-const { catchError } = require('rxjs');
-const { of } = require('rxjs');
-
-obsSub.observable
-  .pipe(
-    map((msg) => processMessage(msg)),
-    catchError((err) => {
-      console.error('Processing error:', err);
-      return of(null); // Continue with null on error
-    }),
-    filter((result) => result !== null)
-  )
-  .subscribe((result) => {
-    console.log('Processed:', result);
-  });
-```
-
-### 4. Combine with Content Filtering
-
-For maximum efficiency, combine RxJS operators with DDS-level content filtering:
-
-```javascript
-const { map } = require('rxjs');
-
-// DDS filters at middleware level (reduces network traffic)
-const obsSub = node.createObservableSubscription(
-  'sensor_msgs/msg/Temperature',
-  '/temperature',
-  {
-    contentFilter: {
-      expression: 'temperature > %0',
-      parameters: [50.0],
-    },
-  }
-);
-
-// RxJS operators for additional processing
-obsSub.observable
-  .pipe(
-    map((msg) => ({ temp: msg.temperature, critical: msg.temperature > 80 }))
-  )
-  .subscribe((data) => {
-    if (data.critical) {
-      console.warn('Critical temperature:', data.temp);
-    }
-  });
-```
-
-## Running the Examples
-
-The rclnodejs repository includes an Observable subscription example in `example/topics/subscriber/`.
-
-### Run the Built-in Example
+Use the project from [Writing Your First rclnodejs Nodes](writing-your-first-rclnodejs-nodes.md), with ROS sourced. Install RxJS as a direct dependency because the examples import it:
 
 ```bash
-# Terminal 1 - Start a publisher
-node example/topics/publisher/publisher-example.js
-
-# Terminal 2 - Run the observable subscription example
-node example/topics/subscriber/subscription-observable-example.js
+npm install rxjs
 ```
 
-### Expected Output
+## Process a Message Stream
 
-```
-Observable subscription created on /topic
-Run: ros2 topic pub /topic std_msgs/msg/String "{data: Hello ROS}" -r 5
-[Throttled] Hello ROS 2 from rclnodejs
-[Filtered] Hello ROS 2 from rclnodejs
-[Throttled] Hello ROS 2 from rclnodejs
-[Filtered] Hello ROS 2 from rclnodejs
-[Batched] 3 messages
-[Filtered] Hello ROS 2 from rclnodejs
-[Throttled] Hello ROS 2 from rclnodejs
-[Filtered] Hello ROS 2 from rclnodejs
-[Batched] 3 messages
-```
-
-- **[Throttled]** — Rate limited to ~2 messages/second via `throttleTime(500)`
-- **[Filtered]** — Only messages containing "ROS" (all pass in this case)
-- **[Batched]** — Emits after every 3 messages via `bufferCount(3)`
-
-### Custom Example
+Create `observable-subscriber.mjs`:
 
 ```javascript
-// observable-example.js
-const rclnodejs = require('rclnodejs');
-const { take, map } = require('rxjs');
+import rclnodejs from 'rclnodejs';
+import { filter, map, take, throttleTime } from 'rxjs';
 
-async function main() {
-  await rclnodejs.init();
-  const node = new rclnodejs.Node('observable_demo');
+await rclnodejs.init();
+const node = rclnodejs.createNode('observable_listener');
+const source = node.createObservableSubscription(
+  'std_msgs/msg/String',
+  'hello'
+);
 
-  const obsSub = node.createObservableSubscription(
-    'std_msgs/msg/String',
-    '/test_topic'
-  );
+source.observable
+  .pipe(
+    filter((message) => message.data.includes('ROS')),
+    throttleTime(500),
+    map((message) => message.data.toUpperCase()),
+    take(5)
+  )
+  .subscribe({
+    next: (text) => console.log(`Received: ${text}`),
+    error: (error) => {
+      console.error(error);
+      source.complete();
+      node.destroySubscription(source.subscription);
+      rclnodejs.shutdown();
+    },
+    complete: () => {
+      console.log('Stream complete');
+      source.complete();
+      node.destroySubscription(source.subscription);
+      rclnodejs.shutdown();
+    },
+  });
 
-  obsSub.observable
-    .pipe(
-      take(5),
-      map((msg) => msg.data.toUpperCase())
-    )
-    .subscribe({
-      next: (data) => console.log('Received:', data),
-      complete: () => {
-        console.log('Done - received 5 messages');
-        node.destroy();
-        rclnodejs.shutdown();
-      },
-    });
+console.log('Listening on /hello');
+rclnodejs.spin(node);
+```
 
-  node.spin();
-}
+Run the publisher from the first-nodes guide in one terminal and this subscriber in another:
 
-main().catch(console.error);
+```bash
+node publisher.mjs
 ```
 
 ```bash
-# Terminal 2 - Run the example
-node observable-example.js
+node observable-subscriber.mjs
 ```
 
-### Expected Output
+The subscriber prints five matching messages in uppercase, then shuts down. For a faster stream, use the CLI instead of the publisher:
 
-```
-Received: HELLO
-Received: HELLO
-Received: HELLO
-Received: HELLO
-Received: HELLO
-Done - received 5 messages
+```bash
+ros2 topic pub /hello std_msgs/msg/String '{data: "Hello ROS"}' --rate 10
 ```
 
-## Comparison with Callback API
+`throttleTime(500)` forwards the first matching message, then drops others during the next 500 ms. It limits the output rate, not the publisher's rate or the number of messages received by ROS. `take(5)` counts messages after the preceding operators and completes that RxJS pipeline.
 
-| Feature          | `createSubscription()` | `createObservableSubscription()` |
-| ---------------- | ---------------------- | -------------------------------- |
-| Style            | Callback-based         | Observable-based                 |
-| Rate limiting    | Manual implementation  | Via RxJS operators               |
-| Combining topics | Manual                 | Built-in with RxJS               |
-| Learning curve   | Lower                  | Requires RxJS knowledge          |
-| Use case         | Simple subscriptions   | Complex reactive pipelines       |
-| Dependencies     | None                   | RxJS (included)                  |
+Stop the publisher with **Ctrl+C** when finished.
 
-Both APIs can coexist in the same application. Use the callback-based API for simple cases and the Observable API when you need advanced reactive patterns.
+## Combine Topics
 
----
+`combineLatest()` waits for one message from each input. After that, a message on either topic emits a new pair, even if its value is unchanged.
 
-_This tutorial is part of the rclnodejs documentation. For more tutorials and examples, visit the [rclnodejs GitHub repository](https://github.com/RobotWebTools/rclnodejs)._
+For example, add this pipeline before `spin()` in a node that receives two numeric topics:
+
+```javascript
+import { combineLatest } from 'rxjs';
+
+const left = node.createObservableSubscription('std_msgs/msg/Float64', 'left');
+const right = node.createObservableSubscription(
+  'std_msgs/msg/Float64',
+  'right'
+);
+
+const combined = combineLatest([left.observable, right.observable]).subscribe(
+  ([leftMessage, rightMessage]) => {
+    console.log(`Total: ${leftMessage.data + rightMessage.data}`);
+  }
+);
+```
+
+This combines the most recent values; it does not synchronize sensor timestamps. If time alignment matters, implement that explicitly rather than assuming two messages arrived together.
+
+## Release the Subscription
+
+There are three separate resources to consider:
+
+- The RxJS subscription returned by `subscribe()`. Calling `unsubscribe()` stops that pipeline.
+- The observable wrapper returned by `createObservableSubscription()`. Calling `complete()` notifies its observers and stops further emissions; `destroy()` is an alias.
+- The underlying ROS subscription, available as `.subscription`. Call `node.destroySubscription()` to unregister and release it.
+
+For the combined pipeline above, cleanup while the node is still alive looks like this:
+
+```javascript
+combined.unsubscribe();
+left.complete();
+right.complete();
+node.destroySubscription(left.subscription);
+node.destroySubscription(right.subscription);
+```
+
+Neither `take()` nor `unsubscribe()` automatically releases the ROS subscription. Completing a wrapper also does not release it. Destroying the node releases its ROS entities, but does not itself call `complete()` on the observable wrapper.
+
+## Operators and Errors
+
+All observers of one wrapper share the same underlying ROS subscription. The stream is live: a new observer does not receive messages that arrived before it subscribed.
+
+`filter()` and other RxJS operators run after ROS has received and converted a message. For middleware-level filtering, see [Content Filtering](content-filtering-subscription.md).
+
+An exception in an operator ends that pipeline unless you handle it. `catchError(() => of(null))` replaces the failed stream with a single value and then completes; it does not resume the original ROS stream. Use an error strategy that matches your application, and remember that retrying an observer cannot repair a destroyed ROS subscription.
+
+See the [observable subscription example](../example/topics/subscriber/subscription-observable-example.mjs) for several pipelines sharing one source, and the [RxJS operator guide](https://rxjs.dev/guide/operators) for operator behavior.
