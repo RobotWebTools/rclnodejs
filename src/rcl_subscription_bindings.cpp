@@ -19,6 +19,7 @@
 #include <rcl/subscription.h>
 #include <rmw/types.h>
 
+#include <cstdio>
 #include <memory>
 #include <string>
 #include <vector>
