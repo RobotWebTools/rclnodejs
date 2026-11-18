@@ -91,8 +91,6 @@ if (!subscription.clearContentFilter()) {
 }
 ```
 
-On releases without the [executor synchronization fix](https://github.com/RobotWebTools/rclnodejs/pull/1692), call `node.stop()` before setting or clearing the filter, then resume with `rclnodejs.spin(node)`.
-
 `hasContentFilter()` reports whether a filter is active. On Lyrical and newer, `isContentFilterSupported()` provides a separate subscription capability check. On older distros, do not interpret that newer capability API's `false` result as proof that an active filter is unsupported.
 
 ## Write Filter Expressions
