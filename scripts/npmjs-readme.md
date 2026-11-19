@@ -1,12 +1,10 @@
 # rclnodejs
 
-`rclnodejs` is a Node.js client library for ROS 2 that provides JavaScript and TypeScript APIs for building ROS 2 applications.
-
-**Key features:** Topics, Services, Actions, Parameters, Lifecycle Nodes, TypeScript support, RxJS Observables, Electron integration, ROS 2 in the browser (typed Web SDK + thin WebSocket gateway — `rclnodejs/web`, `rosocket`), and prebuilt binaries for Linux x64/arm64.
+`rclnodejs` is a Node.js client library for [ROS 2](https://www.ros.org/) with JavaScript and TypeScript APIs. It supports topics, services, actions, parameters, lifecycle nodes, RxJS subscriptions, and Electron and browser apps.
 
 Supported ROS 2 distributions include Humble, Jazzy, Kilted, Lyrical, and Rolling.
 
-New to ROS 2 or rclnodejs? Start with [Writing Your First rclnodejs Nodes](https://github.com/RobotWebTools/rclnodejs/blob/develop/tutorials/writing-your-first-rclnodejs-nodes.md) for project setup, publisher/subscriber examples, and service calls.
+Start with [Writing Your First rclnodejs Nodes](https://github.com/RobotWebTools/rclnodejs/blob/develop/tutorials/writing-your-first-rclnodejs-nodes.md) for setup, topics, and service calls.
 
 ```javascript
 import rclnodejs from 'rclnodejs';
@@ -45,7 +43,9 @@ To install from GitHub instead of npm, run:
 npm install RobotWebTools/rclnodejs#<branch>
 ```
 
-Prebuilt binaries ship for Ubuntu 22.04 (Humble), 24.04 (Jazzy, Kilted) and 26.04 (Lyrical) on x64 and arm64, so most installs skip compilation; anything else builds from source. Set `RCLNODEJS_FORCE_BUILD=1` to always build from source.
+GitHub installs need newer Node.js/npm versions than the runtime minimum above; see the [build guide](https://github.com/RobotWebTools/rclnodejs/blob/develop/docs/BUILDING.md).
+
+Prebuilt binaries cover Ubuntu 22.04 (Humble), 24.04 (Jazzy, Kilted), and 26.04 (Lyrical) on x64 and arm64. Other platforms build from source. Set `RCLNODEJS_FORCE_BUILD=1` to force compilation.
 
 ## Documentation and Examples
 
@@ -60,17 +60,19 @@ Prebuilt binaries ship for Ubuntu 22.04 (Humble), 24.04 (Jazzy, Kilted) and 26.0
 
 ## Message Generation
 
-rclnodejs auto-generates JavaScript message interfaces and TypeScript declarations during `npm install`, so in most projects you do not need to run anything by hand. If you install additional ROS packages **after** rclnodejs was installed, re-run the generator from your project so the new interfaces are picked up:
+rclnodejs generates JavaScript bindings and TypeScript declarations during `npm install` for ROS 2 `.msg`, `.srv`, and `.action` interfaces in your sourced environment.
+
+After adding ROS interface packages, source their workspace and run from your project:
 
 ```bash
 npx generate-ros-messages
 ```
 
-Generated files are written to `<your-project>/node_modules/rclnodejs/generated/`.
+JavaScript bindings are written to `node_modules/rclnodejs/generated/` and TypeScript declarations to `node_modules/rclnodejs/types/interfaces.d.ts`.
 
 ## Using rclnodejs with TypeScript
 
-TypeScript declaration files are included in the package. In most projects, configuring your `tsconfig.json` is sufficient:
+The package includes TypeScript declarations. Use NodeNext module resolution in `tsconfig.json`:
 
 ```jsonc
 {
@@ -82,44 +84,55 @@ TypeScript declaration files are included in the package. In most projects, conf
 }
 ```
 
-Then `import * as rclnodejs from 'rclnodejs'` works the same as the JavaScript example at the top of this README.
+Use `import rclnodejs from 'rclnodejs'` as in the JavaScript example above.
 
-## ROS 2 in the browser
+## Bring ROS 2 to the Web
 
-`rclnodejs` ships **two** ways to reach ROS 2 from the browser — pick one based on how much glue you want to write.
+Build robot dashboards, control panels, and 3D visualizations in JavaScript or TypeScript. Your browser app connects to a Node.js runtime that handles ROS 2 communication.
 
-- **`rclnodejs/web`** — a typed layer over your ROS 2 graph: you allow-list capabilities in `web.json` or via CLI flags; anything else is rejected before it reaches ROS 2. Best for typed web apps and HTTP clients.
-  - **Typed SDK** — `call`, `publish`, `subscribe`, and `action`, typed from generated ROS interfaces.
-  - **Two transports** — WebSocket for all verbs, or HTTP (`--http-port`) for calls, publishes, and SSE actions. Action cancellation requires WebSocket and server acceptance. SDK subscriptions use WebSocket; `--http-sse` enables raw HTTP subscriptions.
-  - **OpenAPI 3.1** — export service, topic, and action schemas with `rclnodejs-web openapi`.
+### Typed Web SDK
 
-  ```ts
-  import type {} from 'rclnodejs';
-  import { connect } from 'rclnodejs/web';
-  const ros = await connect('ws://host:9000/capability');
-  const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
-    '/add_two_ints', { a: '2n', b: '40n' }
-  ); // reply.sum is typed as `${number}n`
-  ```
+[rclnodejs/web](https://github.com/RobotWebTools/rclnodejs/blob/develop/web/README.md) provides `call`, `publish`, `subscribe`, and `action`, with payload types derived from your generated ROS interfaces.
 
-  See the [Fibonacci action demo](https://github.com/RobotWebTools/rclnodejs/blob/develop/demo/web/api-playground/javascript/README.md#fibonacci-actions) for a runnable example.
+- Choose which services, topics, and actions to expose in `web.json` or CLI flags. Unlisted operations are rejected before reaching ROS 2.
+- Use WebSocket for all four operations, or HTTP/SSE for service calls, publishing, and actions. HTTP endpoints also work with `curl` and Postman.
+- Export OpenAPI 3.1 with `rclnodejs-web openapi` for API explorers and client generation.
 
-  No SDK needed for subscribe — with the HTTP/SSE transport enabled (`--http-sse`, plus `--http-cors` for cross-origin), any browser streams a live ROS 2 topic via built-in `EventSource`:
+With the [runtime](https://github.com/RobotWebTools/rclnodejs/blob/develop/web/README.md#server) and a ROS `/add_two_ints` service running:
 
-  ```js
-  const es = new EventSource('http://host:9001/capability/subscribe/chatter');
-  es.onmessage = (e) => console.log(JSON.parse(e.data)); // live ROS 2 messages
-  ```
+```ts
+import type {} from 'rclnodejs';
+import { connect } from 'rclnodejs/web';
 
-  See the [Web SDK guide](https://github.com/RobotWebTools/rclnodejs/tree/develop/web).
+const ros = await connect('ws://localhost:9000/capability');
+const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
+  '/add_two_ints',
+  { a: '2n', b: '40n' }
+);
+console.log(reply.sum);
+await ros.close();
+```
 
-- **`rosocket`** — thin WebSocket gateway, zero browser dependencies (just built-in `WebSocket` + `JSON`). Best for quick prototypes and `roslibjs`-style apps.
+SDK subscriptions and action cancellation use WebSocket; cancellation also requires server acceptance.
 
-  ```bash
-  npx rosocket --port 9000 --topic /chatter:std_msgs/msg/String
-  ```
+For browser subscriptions without an SDK, expose `/chatter` and enable HTTP with `--http-port 9001 --http-sse`. Set `--http-cors` to the frontend origin for cross-origin requests:
 
-  See the [rosocket guide](https://github.com/RobotWebTools/rclnodejs/tree/develop/rosocket).
+```js
+const es = new EventSource(
+  'http://localhost:9001/capability/subscribe/chatter'
+);
+es.onmessage = (event) => console.log(JSON.parse(event.data));
+```
+
+Try [Fibonacci actions in the browser](https://github.com/RobotWebTools/rclnodejs/blob/develop/demo/web/api-playground/javascript/README.md#fibonacci-actions), or watch a [terminal-controlled manipulator in 3D](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/web/manipulator). See all [web demos](https://github.com/RobotWebTools/rclnodejs/tree/develop/demo/web) for setup and runnable code.
+
+### WebSocket URLs Without an SDK
+
+[rosocket](https://github.com/RobotWebTools/rclnodejs/blob/develop/rosocket/README.md) exposes one topic or service per WebSocket connection. Browser clients use only the built-in `WebSocket` and `JSON` APIs.
+
+```bash
+npx rosocket --host 127.0.0.1 --port 9000 --topic /chatter:std_msgs/msg/String
+```
 
 ## License
 

@@ -1,13 +1,21 @@
 # rostsd-gen
 
-A node.js script that creates and updates the TypeScript interfaces.d.ts declaration file with type declarations for the generated interfaces (messages and services).
+Generates `types/interfaces.d.ts` for ROS 2 messages, services, and actions. It runs automatically with `npm install` and `npm run generate-messages`.
 
-Run this script every time new interfaces are generated, see script/generate_messages.cjs
+After adding interfaces, source their workspace and run from the repository root:
 
-# run
-
-You can update the interfaces.d.ts types manually by running the generate_tsd.cjs script.
-
+```bash
+npm run generate-messages
 ```
+
+Regenerate declarations only:
+
+```bash
+npm run generate-tsd-messages
+```
+
+For an installed package, run from your project directory:
+
+```bash
 node node_modules/rclnodejs/scripts/generate_tsd.cjs
 ```
