@@ -1,5 +1,6 @@
 import childProcess from 'child_process';
 import assert from 'assert';
+import { setTimeout as delay } from 'node:timers/promises';
 import rclnodejs from '../index.js';
 const DistroUtils = rclnodejs.DistroUtils;
 
@@ -288,29 +289,14 @@ describe('subscription content-filtering', function () {
 
     this.subscriberNode.spin();
 
-    const p1 = new Promise((resolve) =>
-      setTimeout(() => {
-        let msgCnt = msgCnt0 + msgCnt5;
-        const contentFilter5 = {
-          expression: 'data = 5',
-        };
-        // Stop spinning before changing content filter to avoid race condition
-        this.subscriberNode.stop();
-        subscription.setContentFilter(contentFilter5);
-        this.subscriberNode.spin();
-        resolve(msgCnt);
-      }, SUBSCRIBER_WAIT_TIME)
-    );
-    let result = await p1;
-    assert.strictEqual(result, 0);
+    await delay(SUBSCRIBER_WAIT_TIME);
+    assert.strictEqual(msgCnt0 + msgCnt5, 0);
+    const contentFilter5 = { expression: 'data = 5' };
+    assert.strictEqual(subscription.setContentFilter(contentFilter5), true);
+    assert.strictEqual(this.subscriberNode.spinning, true);
 
-    const p2 = new Promise((resolve) =>
-      setTimeout(() => {
-        resolve(!fail && msgCnt5 && !msgCnt0);
-      }, SUBSCRIBER_WAIT_TIME)
-    );
-    result = await p2;
-    assert.ok(result);
+    await delay(SUBSCRIBER_WAIT_TIME);
+    assert.ok(!fail && msgCnt5 && !msgCnt0);
   });
 
   it('set undefined content filter', async function () {
@@ -363,27 +349,79 @@ describe('subscription content-filtering', function () {
 
     this.subscriberNode.spin();
 
-    const p1 = new Promise((resolve) =>
-      setTimeout(() => {
-        const result = !msgCnt0 && msgCnt5 && !fail;
-        // Stop spinning before changing content filter to avoid race condition
-        this.subscriberNode.stop();
-        subscription.setContentFilter();
-        this.subscriberNode.spin();
-        resolve(result);
-      }, SUBSCRIBER_WAIT_TIME)
-    );
-    let result = await p1;
-    assert.ok(result);
+    await delay(SUBSCRIBER_WAIT_TIME);
+    assert.ok(!msgCnt0 && msgCnt5 && !fail);
+    assert.strictEqual(subscription.setContentFilter(), true);
     assert.ok(!subscription.hasContentFilter());
+    assert.strictEqual(this.subscriberNode.spinning, true);
 
-    const p2 = new Promise((resolve) =>
-      setTimeout(() => {
-        resolve(msgCnt0 && msgCnt5 && !fail);
-      }, SUBSCRIBER_WAIT_TIME)
+    await delay(SUBSCRIBER_WAIT_TIME);
+    assert.ok(msgCnt0 && msgCnt5 && !fail);
+  });
+
+  it('updates and clears a filter during an infinite spin', function (done) {
+    this.timeout(15000);
+    const moduleUrl = new URL('../index.js', import.meta.url).href;
+    const script = `
+      import assert from 'node:assert/strict';
+      import { setTimeout as delay } from 'node:timers/promises';
+      import rclnodejs from ${JSON.stringify(moduleUrl)};
+
+      await rclnodejs.init();
+      try {
+        const receiver = rclnodejs.createNode('filter_update_receiver');
+        const sender = rclnodejs.createNode('filter_update_sender');
+        const type = 'std_msgs/msg/Int32';
+        const topic = 'filter_update_while_spinning';
+        const filter = { expression: 'data = %0', parameters: ['30'] };
+        const publisher = sender.createPublisher(type, topic);
+        let complete;
+        const delivered = new Promise((resolve) => { complete = resolve; });
+        const subscription = receiver.createSubscription(
+          type, topic, { contentFilter: filter }, (message) => {
+            if (message.data === 42) complete();
+          }
+        );
+
+        receiver.spin(-1);
+        await delay(100);
+        assert.equal(subscription.clearContentFilter(), true);
+        assert.equal(subscription.hasContentFilter(), false);
+
+        for (let round = 0; round < 64; round++) {
+          await delay(2);
+          assert.equal(subscription.setContentFilter(filter), true);
+          assert.equal(subscription.hasContentFilter(), true);
+          publisher.publish({ data: 30 });
+          await delay(2);
+          assert.equal(subscription.clearContentFilter(), true);
+          assert.equal(subscription.hasContentFilter(), false);
+          publisher.publish({ data: 5 });
+        }
+
+        assert.equal(receiver.spinning, true);
+        const deadline = Date.now() + 5000;
+        while (
+          (!subscription.publisherCount || !publisher.subscriptionCount) &&
+          Date.now() < deadline
+        ) {
+          await delay(20);
+        }
+        assert.ok(subscription.publisherCount > 0);
+        assert.ok(publisher.subscriptionCount > 0);
+        publisher.publish({ data: 42 });
+        await delivered;
+      } finally {
+        rclnodejs.shutdown();
+      }
+    `;
+
+    childProcess.execFile(
+      process.execPath,
+      ['--input-type=module', '--eval', script],
+      { timeout: 10000, killSignal: 'SIGKILL' },
+      done
     );
-    result = await p2;
-    assert.ok(result);
   });
 
   it('clearContentFilter', function (done) {

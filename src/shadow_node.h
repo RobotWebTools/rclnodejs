@@ -37,6 +37,7 @@ class ShadowNode : public Napi::ObjectWrap<ShadowNode>,
   void RunOnce(rcl_context_t* context, int32_t timeout);
 
   HandleManager* handle_manager() { return handle_manager_.get(); }
+  Executor* executor() { return executor_.get(); }
 
   // Executor::Delegate overrides:
   void Execute(const std::vector<rclnodejs::RclHandle*>& handles) override;
