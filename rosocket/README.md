@@ -1,163 +1,114 @@
-# rosocket — ROS 2 in the browser, no library required
+# rosocket
 
-> A tiny WebSocket gateway to ROS 2 — built into `rclnodejs`.
+rosocket exposes ROS 2 topics and services over WebSocket URLs. It runs in your `rclnodejs` process; browser clients use the built-in `WebSocket` and `JSON` APIs.
 
-> **Availability:** experimental; currently only on the `develop` branch of
-> `rclnodejs` and not yet part of any published release. Install from GitHub
-> to try it (see the project's [Install from GitHub](../README.md#install-from-github) section):
->
-> ```bash
-> npm install RobotWebTools/rclnodejs#develop
-> ```
+Install [rclnodejs](../README.md) with a sourced ROS 2 environment:
 
-**rosocket** is a **lightweight** WebSocket gateway that lets a **plain web
-browser** (or any WebSocket-capable client) talk to ROS 2 through `rclnodejs`,
-with **no extra JavaScript library** required on the client side. Browsers
-only need the built-in `WebSocket` and `JSON` APIs.
+```bash
+npm install rclnodejs
+```
 
-> 💡 **Building a new browser app? Start with [`rclnodejs/web`](../web/README.md).**
-> It's the recommended SDK for ROS 2 in the browser — typed three-verb
-> API (`call` / `publish` / `subscribe`), a reviewable per-app capability
-> allow-list (`web.json`), and a `curl`-able HTTP transport for Postman /
-> AI-agent tool-use. **`rosocket` (this page) is the lighter sibling**:
-> one named topic or service per WebSocket, no SDK, no allow-list. Reach
-> for `rosocket` when you genuinely want exactly that; reach for
-> `rclnodejs/web` when you want a typed SDK, an allow-list, and HTTP
-> fallback. See [`rclnodejs/web` vs. `rosbridge` + `roslibjs`](../web/README.md#4-rclnodejsweb-vs-rosbridge-roslibjs)
-> in the SDK guide for the full picture.
-
-How it compares with the classic
-[rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite) +
-[roslibjs](https://github.com/RobotWebTools/roslibjs) stack:
-
-| | **rosocket (rclnodejs)** | **rosbridge_suite + roslibjs** |
-| --- | --- | --- |
-| Server process | same Node.js process as your `rclnodejs` app | separate Python ROS 2 node |
-| Client-side library | none — built-in `WebSocket` + `JSON` | `roslibjs` (must be bundled/loaded) |
-| Wire protocol | resource-style URLs (`/topic/<name>`, `/service/<name>`); frame = bare ROS message as JSON | custom JSON envelope (`op: "publish" / "subscribe" / "call_service"`, …) |
-| Type discovery | URL `?type=` query, or server-side default map | advertised at runtime via envelope ops |
-| Features | publish / subscribe, service client | pub/sub, services, **actions, tf, parameters, compression, PNG/CBOR, auth, …** |
-| Deployment | one `npm` dep, runs anywhere Node runs | extra ROS package; version must match ROS distro |
+For actions, typed browser clients, or a server-side allow-list, use [rclnodejs/web](../web/README.md).
 
 ## URL scheme
 
-The bridge is **resource-style** — the URL *is* the topic or service name and
-the WebSocket frame *is* the ROS message as JSON.
-
 | URL | Direction | Payload |
 | --- | --- | --- |
-| `ws://host:port/topic/<topic_name>?type=<pkg>/msg/<Type>` | server → client (subscribe) | one frame per received ROS message, JSON-serialized |
-| `ws://host:port/topic/<topic_name>?type=<pkg>/msg/<Type>` | client → server (publish) | one frame per ROS message to publish, JSON-encoded |
-| `ws://host:port/service/<service_name>?type=<pkg>/srv/<Type>` | client → server (request) | one frame per request, JSON-encoded |
-| `ws://host:port/service/<service_name>?type=<pkg>/srv/<Type>` | server → client (response) | one frame per response, JSON-serialized |
+| `ws://host:port/topic/<topic_name>?type=<pkg>/msg/<Type>` | server to client (subscribe) | one frame per received message |
+| `ws://host:port/topic/<topic_name>?type=<pkg>/msg/<Type>` | client to server (publish) | one frame per message to publish |
+| `ws://host:port/service/<service_name>?type=<pkg>/srv/<Type>` | client to server (request) | one frame per request |
+| `ws://host:port/service/<service_name>?type=<pkg>/srv/<Type>` | server to client (response) | one frame per response |
 
-Notes:
-
-- Each connection is dedicated to one topic or service. A single socket is
-  full-duplex, so the same `/topic/<name>` socket can both publish and
-  subscribe at the same time.
-- The `type=` query parameter can be omitted if the server was started with
-  `topicTypes` / `serviceTypes` defaults for that name.
-- Service calls may be sent as a bare request (`{"a":1,"b":2}`) or wrapped
-  with a correlation id (`{"id":"c1","request":{"a":1,"b":2}}`); responses
-  echo the same shape (`{"id":"c1","response":{...}}`).
-- Errors are reported as `{"error":"<message>"}` frames; fatal protocol errors
-  cause the socket to close with a `1008`/`1011` code.
-- 64-bit integer fields may be sent as JSON numbers or BigInt-encoded
-  strings (`"12n"`); responses use the rclnodejs `toJSONSafe` encoding
-  (BigInts become `"<n>n"` strings).
+- Each connection uses one topic or service. A topic socket can both publish and subscribe.
+- Omit `type=` when the server has a `topicTypes` or `serviceTypes` entry for that name.
+- Send service requests directly (`{"a":"1n","b":"2n"}`) or with an ID (`{"id":"c1","request":{"a":"1n","b":"2n"}}`). Wrapped replies use `{"id":"c1","response":{...}}`.
+- Errors arrive as `{"error":"<message>"}` frames. Fatal protocol errors close the socket with code `1008` or `1011`.
+- Encode 64-bit integer fields as strings such as `"12n"`, not JSON numbers. Responses use the same encoding for BigInts.
 
 ## Server side
 
+Save as `server.mjs` and run with `node server.mjs`:
+
 ```js
-const rclnodejs = require('rclnodejs');
-const { startRosocket } = require('rclnodejs/rosocket');
+import rclnodejs from 'rclnodejs';
+import { startRosocket } from 'rclnodejs/rosocket';
 
 await rclnodejs.init();
 const node = new rclnodejs.Node('rosocket_node');
 rclnodejs.spin(node);
 
-await startRosocket({
+const bridge = await startRosocket({
   node,
+  host: '127.0.0.1',
   port: 9000,
-  // optional: pre-declare types so clients can omit ?type=
-  topicTypes:   { '/chatter':       'std_msgs/msg/String' },
-  serviceTypes: { '/add_two_ints':  'example_interfaces/srv/AddTwoInts' },
+  topicTypes: { '/chatter': 'std_msgs/msg/String' },
+  serviceTypes: { '/add_two_ints': 'example_interfaces/srv/AddTwoInts' },
 });
 ```
 
-### Without `topicTypes` / `serviceTypes`
+Stop the gateway with `await bridge.close()`, then call `rclnodejs.shutdown()`.
 
-The `topicTypes` / `serviceTypes` maps are entirely optional. If you omit
-them, the server stays generic and clients must specify the message type
-themselves via the `?type=` query parameter on each connection:
+### Without type maps
+
+Without type maps, clients must include the type in the URL:
 
 ```js
-// server – open to any topic/service the node is allowed to access
-await startRosocket({ node, port: 9000 });
+await startRosocket({ node, host: '127.0.0.1', port: 9000 });
 ```
 
 ```js
-// browser – type comes from the URL
 const sub = new WebSocket(
-  'ws://localhost:9000/topic/chatter?type=std_msgs/msg/String'
+  'ws://127.0.0.1:9000/topic/chatter?type=std_msgs/msg/String'
 );
 const cli = new WebSocket(
-  'ws://localhost:9000/service/add_two_ints?type=example_interfaces/srv/AddTwoInts'
+  'ws://127.0.0.1:9000/service/add_two_ints?type=example_interfaces/srv/AddTwoInts'
 );
 ```
 
-The same applies to the CLI — drop `--topic` / `--service` to run a generic
-gateway: `npx rosocket --port 9000`.
+For the CLI, omit `--topic` and `--service` to require types in client URLs.
 
 ## CLI (`rosocket`)
 
-A ready-to-run command is shipped as a `bin` entry, so users do not need to
-write any server code:
+From the repository root:
 
 ```bash
-# from inside this repo
-npm run rosocket -- --port 9000 \
-  --topic   /chatter:std_msgs/msg/String \
-  --service /add_two_ints:example_interfaces/srv/AddTwoInts
-
-# anywhere after `npm i rclnodejs` (or via npx)
-npx rosocket --port 9000 \
+npm run rosocket -- --host 127.0.0.1 --port 9000 \
   --topic   /chatter:std_msgs/msg/String \
   --service /add_two_ints:example_interfaces/srv/AddTwoInts
 ```
 
-Options: `--port/-p`, `--host/-H`, `--node-name/-n`, repeatable
-`--topic/-t <name>:<type>` and `--service/-s <name>:<type>`, `--help/-h`.
-Pre-declared types let browsers omit the `?type=` query.
+After installing the package:
+
+```bash
+npx rosocket --host 127.0.0.1 --port 9000 \
+  --topic   /chatter:std_msgs/msg/String \
+  --service /add_two_ints:example_interfaces/srv/AddTwoInts
+```
+
+Options: `--port/-p`, `--host/-H`, `--node-name/-n`, repeatable `--topic/-t <name>:<type>` and `--service/-s <name>:<type>`, `--help/-h`.
 
 ## Browser side (no library)
+
+Run the server above and a ROS `/add_two_ints` service of type `example_interfaces/srv/AddTwoInts`.
 
 ```html
 <script type="module">
   // Subscribe
-  const sub = new WebSocket('ws://localhost:9000/topic/chatter');
+  const sub = new WebSocket('ws://127.0.0.1:9000/topic/chatter');
   sub.onmessage = (e) => console.log('chatter:', JSON.parse(e.data).data);
 
   // Publish on the same socket (or a different one)
   sub.onopen = () => sub.send(JSON.stringify({ data: 'hello from browser' }));
 
   // Service call
-  const cli = new WebSocket('ws://localhost:9000/service/add_two_ints');
-  cli.onopen    = () => cli.send(JSON.stringify({ a: 1, b: 2 }));
+  const cli = new WebSocket('ws://127.0.0.1:9000/service/add_two_ints');
+  cli.onopen = () => cli.send(JSON.stringify({ a: '1n', b: '2n' }));
   cli.onmessage = (e) => console.log('sum =', JSON.parse(e.data).sum);
 </script>
 ```
 
-## Why not rosbridge?
+## Access control
 
-Use this bridge when you want:
+The bridge listens on `0.0.0.0` by default; the examples bind to loopback. Type maps supply defaults, not an allow-list: clients can select other resources and types through their URLs. Use the `verifyClient` hook or an authenticated reverse proxy before exposing the gateway to a network.
 
-- **Zero browser dependency** — no JavaScript library to bundle or load.
-- **Zero extra process** — already in the same Node.js where your
-  `rclnodejs` app runs.
-- **Greppable URLs** for reverse-proxy ACLs (`location /topic/...`).
-
-Use a full-featured stack like rosbridge_suite when you need actions, tf,
-parameter helpers, compression, throttling, or compatibility with existing
-ROS web tooling.
+For tf, parameter helpers, compression, or throttling, see [rosbridge_suite](https://github.com/RobotWebTools/rosbridge_suite) and [roslibjs](https://github.com/RobotWebTools/roslibjs).
