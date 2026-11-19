@@ -1,93 +1,36 @@
-# rosocket demo — ROS 2 in the browser
+# Rosocket Demo
 
-A minimal end-to-end example of the
-[`rosocket`](../../rosocket/README.md) WebSocket gateway. The Node
-server runs anywhere ROS 2 is sourced; the HTML page runs in any
-modern browser and talks to it over plain `WebSocket` — no client
-library required.
+The browser uses [Rosocket](../../rosocket/README.md) to send and receive messages on `/chatter` and call `/add_two_ints`. No frontend build is needed.
 
-## What it shows
+## Run
 
-- Subscribe to and publish on `/chatter` (`std_msgs/msg/String`).
-- Call `/add_two_ints` (`example_interfaces/srv/AddTwoInts`) — the
-  service implementation lives in
-  [`example/services/service/service-example.mjs`](../../example/services/service/service-example.mjs)
-  and is launched in a second terminal.
-
-## Layout
-
-- `server.mjs` — `rclnodejs` node + `startRosocket` bridge only.
-- `index.html` — single-file browser client using only built-in
-  `WebSocket` and `JSON`.
-
-## Run the bridge
+Use Node.js 20.20.2 or newer and ROS 2 with `std_msgs` and `example_interfaces` installed. From the repository root, run these commands. Replace `lyrical` with your distro:
 
 ```bash
-# 1. Source your ROS 2 distro (humble / jazzy / kilted / lyrical / rolling)
-source /opt/ros/$ROS_DISTRO/setup.bash
+source /opt/ros/lyrical/setup.bash
+npm install
+HOST=127.0.0.1 node demo/rosocket/server.mjs
+```
 
-# 2. Terminal A — start the WebSocket gateway
-node demo/rosocket/server.mjs
-# [rosocket-demo] listening on ws://localhost:9000 (bind=0.0.0.0)
+In a second terminal at the repository root, source the same distro and start the service:
 
-# 3. Terminal B — start the AddTwoInts service so the browser has
-#    something to call
+```bash
+source /opt/ros/lyrical/setup.bash
 node example/services/service/service-example.mjs
 ```
 
-The server binds to `0.0.0.0:9000` so it is reachable from any host
-that can route to the machine running it.
+Open your local `demo/rosocket/index.html` in a browser. Set the bridge URL to `ws://127.0.0.1:9000`. Click **Subscribe**, then **Publish**. Click **Call** to see a service reply.
 
-## Open the page
+## Check from ROS 2
 
-Open `demo/rosocket/index.html` in any modern browser (double-click,
-or `File > Open`). Leave the bridge field as `ws://localhost:9000`
-when the browser and the bridge run on the same machine, and click
-**Subscribe**, then **Publish**, then **Call**.
-
-If the browser is on a different machine than the bridge (remote ROS
-box, container, VM, WSL → host browser, etc.), change the bridge
-field to point at the bridge host, e.g. `ws://192.0.2.10:9000` or
-`ws://my-ros-host.local:9000`, and reconnect.
-
-> WSL note: WSL2 normally forwards `localhost` to Windows, so
-> `ws://localhost:9000` works as-is. On WSL1 or with custom/mirrored
-> networking, use the WSL IP (`hostname -I | awk '{print $1}'`)
-> instead.
-
-### Verify from the ROS 2 side (optional)
+With the browser subscribed, publish from another ROS-sourced terminal:
 
 ```bash
-# Always works (explicit type), even before any browser tab is connected:
-ros2 topic echo /chatter std_msgs/msg/String
-
-# Auto-discovery form — only works after a browser tab is connected to
-# ws://.../topic/chatter (the bridge creates the subscription on demand)
-# and after a publisher exists on the topic (browser Publish, or the
-# `ros2 topic pub` command below):
-ros2 topic echo /chatter
-
-ros2 topic pub /chatter std_msgs/msg/String "{data: 'hi from ros2'}"
-ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 7, b: 5}"
+ros2 topic pub /chatter std_msgs/msg/String '{data: "hi from ROS 2"}' --once
 ```
 
-> If you see `WARNING: topic [/chatter] does not appear to be published yet
-> / Could not determine the type for the passed topic`, it just means no
-> publisher exists on `/chatter` yet — use the explicit-type form above,
-> or click **Subscribe** + **Publish** in the browser first.
+Look for the message in the browser log. Use `ros2 topic echo /chatter std_msgs/msg/String` to see messages sent from the page. Stop the bridge and service with Ctrl+C.
 
-Anything you publish from the browser shows up in `ros2 topic echo`,
-and any `ros2 topic pub` to `/chatter` shows up in the browser
-subscription log.
+## Connect from Another Machine
 
-## URL scheme reminder
-
-```
-ws://<host>:<port>/topic/<name>?type=<pkg>/msg/<Type>
-ws://<host>:<port>/service/<name>?type=<pkg>/srv/<Type>
-```
-
-This demo pre-declares both types server-side via `topicTypes` /
-`serviceTypes`, so the browser can omit `?type=`. See
-[`rosocket/README.md`](../../rosocket/README.md) for the full
-protocol reference.
+The run command binds to loopback. For a remote browser, set `HOST` to a reachable address on the ROS machine and use that address in the WebSocket URL. Only expose the demo on a trusted network. WSL2 usually forwards the port to Windows, so try the loopback URL first.

@@ -1,70 +1,26 @@
 # Electron Demos
 
-This directory contains interactive Electron applications that demonstrate various rclnodejs features with rich graphical interfaces. Each demo showcases how to integrate ROS2 functionality into desktop applications using web technologies.
+- [Topics](topics/README.md): send and receive ROS 2 messages in a desktop window.
+- [Car](car/README.md): drive a simulated car with buttons or the keyboard.
+- [Manipulator](manipulator/README.md): move two joints and view the arm in Three.js.
+- [Turtle TF2](turtle_tf2/README.md): view coordinate frames and make one turtle follow another.
 
-## 📱 Available Demos
+The Electron main process runs rclnodejs. The window sends commands and receives ROS data over IPC.
 
-### 🔤 Basic Communication
+## Setup
 
-- **[topics/](./topics/)** - Minimal publisher/subscriber demo
-  - Basic ROS2 topic communication with simple UI
-  - Publishes and subscribes to string messages
-  - Ideal starting point for learning rclnodejs with Electron
+Use Linux with a desktop session, Node.js 20.20.2 or newer, and ROS 2. Source ROS before installing or starting a demo. Replace `lyrical` with your distro:
 
-### 🚗 Robot Control & Visualization
+```bash
+source /opt/ros/lyrical/setup.bash
+```
 
-- **[car/](./car/)** - Interactive car control with joystick
+At launch, rclnodejs uses a prebuilt Electron binary if one matches your ROS distro, Ubuntu version, and architecture. Forge skips rebuilding rclnodejs. If you need to compile it, see the [native build requirements](../../docs/BUILDING.md#requirements).
 
-  - Virtual joystick for velocity command publishing
-  - Real-time car visualization responding to commands
-  - Emergency stop functionality and directional controls
+## Package a Demo
 
-- **[manipulator/](./manipulator/)** - Two-joint robotic arm simulation
-  - 3D robotic arm visualization using Three.js
-  - Interactive joint controls with sliders
-  - Automatic animation patterns and live feedback
-  - ROS2 integration via `sensor_msgs/msg/JointState`
+In the demo directory, `npm run package` puts the app in `out/`. `npm run make` builds the distributables. For Car, Topics, and Turtle TF2, install `dpkg` and `fakeroot` for `.deb` packages and `rpm` or `rpm-build` for `.rpm` packages.
 
-### 🌍 Advanced Robotics Applications
+Install and source ROS 2 on the target machine before starting the packaged app.
 
-- **[turtle_tf2/](./turtle_tf2/)** - TF2 transforms and turtle simulation
-  - Complete TF2 coordinate frame system implementation
-  - Integration with turtlesim for turtle tracking
-  - 3D WebGL visualization of coordinate transformations
-  - Intelligent turtle following behavior
-
-## Complexity Levels
-
-| Demo            | Complexity        | Features                   | Best For              |
-| --------------- | ----------------- | -------------------------- | --------------------- |
-| **topics**      | ⭐ Beginner       | Basic pub/sub              | Learning fundamentals |
-| **car**         | ⭐⭐ Intermediate | Control UI, visualization  | Interactive control   |
-| **manipulator** | ⭐⭐⭐ Advanced   | 3D graphics, joint control | Robotics simulation   |
-| **turtle_tf2**  | ⭐⭐⭐⭐ Expert   | TF2 system, complex logic  | Transform management  |
-
-## 🛠️ Development Tips
-
-### ROS2 Integration
-
-- All demos use rclnodejs in the renderer process
-- Node lifecycle management follows Electron best practices
-- Proper cleanup on application exit
-
-### UI Technologies
-
-- **Electron**: Desktop application framework
-- **Three.js**: 3D graphics and visualization
-- **Modern CSS**: Responsive and accessible interfaces
-- **Web APIs**: Canvas, WebGL, and DOM manipulation
-
-### Performance Considerations
-
-- Efficient ROS2 message handling
-- Optimized rendering loops
-- Memory management for long-running applications
-
-## 📚 Related Resources
-
-- [rclnodejs Tutorials](../tutorials/) - Core concepts and API usage
-- [ROS2 Documentation](https://docs.ros.org/) - Official ROS2 reference
-- [Electron Documentation](https://www.electronjs.org/docs) - Electron framework guide
+For ROS 2 basics, see [Writing Your First rclnodejs Nodes](../../tutorials/writing-your-first-rclnodejs-nodes.md).

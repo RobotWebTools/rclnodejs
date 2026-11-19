@@ -1,69 +1,23 @@
 # TypeScript Demos
 
-This directory contains TypeScript demonstrations showcasing rclnodejs functionality with full type safety and modern development practices. Each demo illustrates core ROS2 communication patterns using TypeScript interfaces and best practices.
+Start with [topics](topics/README.md), then try [services](services/README.md) or [actions](actions/README.md).
 
-## 📂 Available Demos
+## Setup
 
-### 📨 **[topics/](./topics/)** - Publisher/Subscriber Pattern
+Use Node.js 24.11 or later in the 24.x line, npm 11.19.0, and a supported ROS 2 release. These demos build from the checkout and need the [source-development requirements](../../docs/BUILDING.md#requirements), not just the published package's Node.js 20.20.2 runtime minimum.
 
-Basic ROS2 topic communication with TypeScript type safety
+Install the interface package for your demo first: `std_msgs` for topics, `example_interfaces` for services, or `test_msgs` for actions.
 
-- **Publisher**: Sends timestamped string messages at regular intervals
-- **Subscriber**: Receives and displays messages with colorful console output
-- **Features**: Message counting, error handling, graceful shutdown
+From the repository root, run these commands. Replace `lyrical` with your distro:
 
-### 🔧 **[services/](./services/)** - Request/Response Pattern
+```bash
+source /opt/ros/lyrical/setup.bash
+npm install
+npm run build:dist
+```
 
-Synchronous service calls for immediate responses
+`npm install` prepares the native addon and generates ROS interfaces and TypeScript declarations. `npm run build:dist` bundles the JavaScript the demos import.
 
-- **Service Server**: Provides AddTwoInts service for integer addition
-- **Service Client**: Makes requests with random numbers at intervals
-- **Features**: Service discovery, request counting, comprehensive error handling
+The demos link to this checkout (`file:../../..`). Follow your demo's run steps and source ROS in each terminal you use.
 
-### ⚡ **[actions/](./actions/)** - Long-Running Task Pattern
-
-Asynchronous actions with progress feedback and cancellation
-
-- **Action Server**: Calculates Fibonacci sequences with progress updates
-- **Action Client**: Sends goals, monitors progress, handles results
-- **Features**: Goal cancellation, feedback processing, result handling
-
-## 🛠️ TypeScript Features
-
-### Type Safety
-
-- **Full typing** for all ROS2 messages, services, and actions
-- **Compile-time validation** of message structures
-- **IntelliSense support** in VS Code and other TypeScript editors
-- **Two equivalent forms**: identify a type by its **string name**
-  (e.g. `'std_msgs/msg/String'`) or by its **class/constructor** obtained from
-  `rclnodejs.require(...)`. With the class form, TypeScript infers the concrete
-  message/service/action types automatically\u2014no explicit annotations needed.
-
-### Modern Development
-
-- **ES2022+ syntax** with async/await patterns
-- **Modular architecture** with clean separation of concerns
-- **Error boundaries** with comprehensive exception handling
-- **Graceful shutdown** handling for SIGINT/SIGTERM
-
-### Code Quality
-
-- **Consistent formatting** with prettier/eslint configurations
-- **Build validation** with TypeScript strict mode
-- **Runtime safety** with proper error handling patterns
-
-## 📊 Complexity Progression
-
-| Demo         | Complexity        | Communication | Best For               |
-| ------------ | ----------------- | ------------- | ---------------------- |
-| **topics**   | ⭐ Basic          | Pub/Sub       | Learning fundamentals  |
-| **services** | ⭐⭐ Intermediate | Req/Response  | Synchronous operations |
-| **actions**  | ⭐⭐⭐ Advanced   | Goal-oriented | Long-running tasks     |
-
-## 🔗 Related Resources
-
-- [rclnodejs Tutorials](../../tutorials/) - Comprehensive API documentation
-- [Electron Demos](../electron/) - GUI applications with rclnodejs
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/) - Language reference
-- [ROS2 Documentation](https://docs.ros.org/) - Official ROS2 concepts
+For the ROS 2 basics, see [Writing Your First rclnodejs Nodes](../../tutorials/writing-your-first-rclnodejs-nodes.md).
