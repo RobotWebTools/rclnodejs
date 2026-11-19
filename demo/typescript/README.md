@@ -4,7 +4,9 @@ Start with [topics](topics/README.md), then try [services](services/README.md) o
 
 ## Setup
 
-Use Node.js 20.20.2 or newer and a supported ROS 2 release. Install the interface package for your demo first: `std_msgs` for topics, `example_interfaces` for services, or `test_msgs` for actions. For source builds, see the [build requirements](../../docs/BUILDING.md#requirements).
+Use Node.js 24.11 or later in the 24.x line, npm 11.19.0, and a supported ROS 2 release. These demos build from the checkout and need the [source-development requirements](../../docs/BUILDING.md#requirements), not just the published package's Node.js 20.20.2 runtime minimum.
+
+Install the interface package for your demo first: `std_msgs` for topics, `example_interfaces` for services, or `test_msgs` for actions.
 
 From the repository root, run these commands. Replace `lyrical` with your distro:
 
