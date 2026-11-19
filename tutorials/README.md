@@ -1,64 +1,25 @@
 # rclnodejs Tutorials
 
-This directory contains comprehensive tutorials explaining various ROS 2 features and concepts using rclnodejs. Each tutorial provides practical examples and best practices for building robust ROS 2 applications in JavaScript/Node.js.
+Start with [Writing Your First rclnodejs Nodes](writing-your-first-rclnodejs-nodes.md). It covers project setup, topics, services, and the ROS 2 CLI.
 
-## Getting Started
+## Node Configuration
 
-Start with [Writing Your First rclnodejs Nodes](writing-your-first-rclnodejs-nodes.md), then explore the tutorials below for your application's needs.
+- [Parameter Service](parameter-service.md): declare settings, validate changes, and update a running node.
+- [Lifecycle Nodes](lifecycle-nodes.md): control when a node configures, activates, and shuts down.
 
-## Available Tutorials
+## Communication
 
-### 📚 Fundamentals
+- [Actions](actionlib.md): run longer tasks with feedback and cancellation.
+- [Observable Subscriptions](observable-subscriptions.md): process ROS message streams with RxJS.
+- [Content Filtering](content-filtering-subscription.md): filter subscription messages with DDS expressions where supported.
+- [Browser SDK](../web/README.md): connect a web app to ROS 2 over WebSocket or HTTP.
 
-#### [Writing Your First rclnodejs Nodes](writing-your-first-rclnodejs-nodes.md)
+## Inspection
 
-Set up an npm project, run a ROS 2 node, and build publisher/subscriber and service examples. Inspect communication with the ROS 2 CLI.
+- [Service Introspection](service-introspection.md): inspect service requests and responses.
+- [Type Description Service](type-description-service.md): query type definitions from a running node.
 
-### 🔧 Node Management
+## Reference
 
-#### [Lifecycle Nodes](lifecycle-nodes.md)
-
-Learn about managed nodes with state machines for controlled startup, shutdown, and error handling. Covers lifecycle states, transitions, and implementing robust, production-ready nodes.
-
-#### [Parameter Service](parameter-service.md)
-
-Dynamic configuration management using ROS 2 parameters. Covers parameter declaration, validation, runtime updates, and callbacks for building configurable applications.
-
-### 🚀 Advanced Communication
-
-#### [ROS 2 Actions](actionlib.md)
-
-Implement long-running, cancellable tasks with progress feedback using the ROS 2 action system. Learn to create action servers and clients for complex robot behaviors.
-
-#### [Service Introspection](service-introspection.md)
-
-Debug and monitor service interactions in real-time. Learn to observe service calls, responses, and performance metrics for troubleshooting distributed systems.
-
-#### [Content Filtering Subscription](content-filtering-subscription.md)
-
-Reduce network traffic and improve performance by filtering messages at the DDS middleware level using SQL-like expressions. Essential for high-frequency data streams.
-
-#### [Observable Subscriptions with RxJS](observable-subscriptions.md)
-
-Use RxJS Observables for reactive programming with ROS 2 subscriptions. Apply operators like `throttleTime()`, `combineLatest()`, and `filter()` to process message streams declaratively.
-
-#### [rclnodejs/web — Browser SDK guide](../web/README.md)
-
-Front-end developer guide to talking to ROS 2 from a web app using `rclnodejs/web` and the bundled `rclnodejs-web` CLI. Covers the `connect()` URL forms (WebSocket vs. HTTP vs. split endpoints), the typed verb API (`call` / `publish` / `subscribe`) — one ROS 2 type name gives you a fully typed request, response, or message — the `"42n"` BigInt convention for 64-bit integers, structured error codes, and curl recipes.
-
-### 🔍 Introspection & Debugging
-
-#### [Type Description Service](type-description-service.md)
-
-Introspect message and service types used by nodes at runtime. Learn to query type definitions, field descriptions, and dependencies for better system understanding.
-
-## Additional Resources
-
-- [rclnodejs API Documentation](https://robotwebtools.github.io/rclnodejs/)
+- [rclnodejs API Documentation](https://robotwebtools.github.io/rclnodejs/docs/index.html)
 - [ROS 2 Official Documentation](https://docs.ros.org/)
-- [rclnodejs GitHub Repository](https://github.com/RobotWebTools/rclnodejs)
-- [ROS 2 Examples](../example/)
-
----
-
-_These tutorials are part of the rclnodejs project. For the latest updates and more examples, visit the [GitHub repository](https://github.com/RobotWebTools/rclnodejs)._
