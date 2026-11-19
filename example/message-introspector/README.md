@@ -1,47 +1,29 @@
-# ROS 2 MessageIntrospector Example
+# Message Introspection
 
-This directory contains an example demonstrating the `MessageIntrospector` class for inspecting ROS 2 message structure.
+`MessageIntrospector` reads generated message definitions. The [example](message-introspector-example.mjs) prints fields and defaults for `Twist`, `String`, and `JointState`.
 
-## Overview
+## Run
 
-The `MessageIntrospector` class provides a simple way to understand the structure of ROS 2 messages without directly using `loader.loadInterface`. It's useful for debugging, generating documentation, and building dynamic UIs based on message structure.
-
-## MessageIntrospector Example (`message-introspector-example.mjs`)
-
-**Purpose**: Demonstrates how to inspect message structure, fields, and default values.
-
-### Run Command
+Install `geometry_msgs`, `std_msgs`, and `sensor_msgs`, source ROS, and run `npm install` at the repository root. Then run:
 
 ```bash
-node message-introspector-example.mjs
+node example/message-introspector/message-introspector-example.mjs
 ```
 
-### Expected Output
+The output includes `Twist fields: [ 'linear', 'angular' ]` and the default vectors. The program exits after printing the definitions; it does not need a publisher.
 
-```
-Twist fields: [ 'linear', 'angular' ]
-Twist defaults: { linear: { x: 0, y: 0, z: 0 }, angular: { x: 0, y: 0, z: 0 } }
-String fields: [ 'data' ]
-String defaults: { data: '' }
-JointState fields: [ 'header', 'name', 'position', 'velocity', 'effort' ]
-Twist schema msgName: Twist
-```
+## Available Properties
 
-## API
+Create an instance with `new rclnodejs.MessageIntrospector('geometry_msgs/msg/Twist')` in an application that imports rclnodejs.
 
-```javascript
-const Twist = new rclnodejs.MessageIntrospector('geometry_msgs/msg/Twist');
+| Property | Value |
+| --- | --- |
+| `typeName` | The supplied type name. |
+| `fields` | The field names. |
+| `defaults` | A deep copy of the message's default values. |
+| `schema` | The generated `ROSMessageDef` metadata. |
+| `typeClass` | The generated message constructor. |
 
-Twist.typeName; // 'geometry_msgs/msg/Twist'
-Twist.fields; // ['linear', 'angular']
-Twist.defaults; // { linear: { x: 0, y: 0, z: 0 }, angular: { x: 0, y: 0, z: 0 } }
-Twist.schema; // ROSMessageDef object
-Twist.typeClass; // The underlying constructor
-```
+The defaults are cached internally, but each access returns a fresh copy. Custom interfaces must be installed and generated before they can be loaded.
 
-## Notes
-
-- Works with any message type including custom packages
-- Default values are cached for performance after the first access
-- The `defaults` getter returns a new deep copy each time to prevent mutation
-- Service request/response types can also be inspected (e.g., `'my_pkg/srv/MyService_Request'`)
+To ask another running node about its advertised interface instead, see the [type description service](../../tutorials/type-description-service.md).
