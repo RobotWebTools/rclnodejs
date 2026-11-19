@@ -1,510 +1,55 @@
-# ROS 2 Parameters Examples
+# Parameter Examples
 
-This directory contains examples demonstrating ROS 2 parameter handling using rclnodejs. Parameters provide a way to configure node behavior at runtime and can be modified dynamically during execution.
+Run these commands from the repository root with ROS sourced and `npm install` completed. See the [build requirements](../../docs/BUILDING.md#requirements) for checkout setup.
 
-## Overview
-
-ROS 2 parameters are configuration values that can be set on nodes to modify their behavior. Parameters are:
-
-- **Typed**: Each parameter has a specific type (string, int, double, bool, etc.)
-- **Declarable**: Must be declared before use with optional descriptors
-- **Dynamic**: Can be changed at runtime through services or command line
-- **Discoverable**: Can be listed and inspected by other nodes and tools
-
-Parameters are ideal for:
-
-- Configuration settings (rates, thresholds, file paths)
-- Behavior modification without code changes
-- Runtime tuning and debugging
-- Node customization for different environments
-
-## Parameter Examples
-
-### Local Parameters (On Current Node)
-
-#### 1. Parameter Declaration (`parameter-declaration-example.mjs`)
-
-**Purpose**: Demonstrates how to declare and use parameters in a ROS 2 node.
-
-- **Functionality**:
-  - Creates a node named `my_node`
-  - Declares a string parameter `param1` with default value "hello world"
-  - Uses `ParameterDescriptor` to define parameter metadata
-  - Checks parameter existence and retrieves its value
-  - Displays parameter details and descriptor information
-- **Features**:
-  - Parameter declaration with `declareParameter()`
-  - Parameter existence checking with `hasParameter()`
-  - Parameter value retrieval with `getParameter()`
-  - Parameter descriptor access with `getParameterDescriptor()`
-- **Parameter Details**:
-  - **Name**: `param1`
-  - **Type**: `PARAMETER_STRING`
-  - **Default Value**: `"hello world"`
-- **Run Command**: `node parameter-declaration-example.mjs`
-
-#### 2. Parameter Override (`parameter-override-example.mjs`)
-
-**Purpose**: Shows how to override parameter values using command-line arguments.
-
-- **Functionality**:
-  - Creates a node named `my_node`
-  - Declares a string parameter `param1` with default value "hello world"
-  - Demonstrates command-line parameter override using ROS args
-  - Shows how the parameter value is changed from default to override value
-  - Displays the overridden parameter value and descriptor
-- **Features**:
-  - Command-line parameter override with `--ros-args -p`
-  - ROS argument parsing integration
-  - Parameter initialization with custom argv
-  - Comparison between default and overridden values
-- **Parameter Details**:
-  - **Name**: `param1`
-  - **Type**: `PARAMETER_STRING`
-  - **Default Value**: `"hello world"`
-  - **Override Value**: `"hello ros2"` (via command line)
-- **Run Command**: `node parameter-override-example.mjs`
-
-### Remote Parameter Access (On Other Nodes)
-
-#### 3. ParameterClient Basic (`parameter-client-basic-example.mjs`)
-
-**Purpose**: Demonstrates accessing and modifying parameters on a remote node using `ParameterClient`.
-
-- **Functionality**:
-  - Creates a client node and ParameterClient
-  - Connects to turtlesim node's parameters
-  - Lists all available parameters
-  - Gets and sets individual parameters
-  - Retrieves multiple parameters at once
-- **Features**:
-  - Service availability checking with `waitForService()`
-  - Parameter listing with `listParameters()`
-  - Single parameter get/set operations
-  - Batch parameter retrieval
-  - Automatic type inference for parameter values
-- **Target Node**: `turtlesim` (run: `ros2 run turtlesim turtlesim_node`)
-- **Run Command**: `node parameter-client-basic-example.mjs`
-
-#### 4. ParameterClient Advanced (`parameter-client-advanced-example.mjs`)
-
-**Purpose**: Comprehensive example showing all ParameterClient features and capabilities.
-
-- **Functionality**:
-  - Creates target and client nodes
-  - Declares parameters on target node
-  - Demonstrates all ParameterClient operations:
-    - List parameters
-    - Get single/multiple parameters
-    - Set single/multiple parameters
-    - Describe parameters (get metadata)
-    - Get parameter types
-    - Timeout handling
-    - Request cancellation with AbortController
-- **Features**:
-  - Complete API coverage
-  - Error handling examples
-  - Timeout and cancellation patterns
-  - Automatic BigInt conversion for integers
-  - Type inference demonstrations
-  - Lifecycle management
-- **Run Command**: `node parameter-client-advanced-example.mjs`
-
-#### 5. ParameterWatcher (`parameter-watcher-example.mjs`)
-
-**Purpose**: Demonstrates watching parameter changes on a remote node in real-time.
-
-- **Functionality**:
-  - Creates a watcher for turtlesim's background color parameters
-  - Listens for parameter change events
-  - Displays current parameter values
-  - Shows real-time updates when parameters change
-- **Features**:
-  - Event-driven parameter monitoring
-  - Automatic filtering by node and parameter names
-  - Real-time change notifications
-  - Built on top of ParameterClient
-  - Simple EventEmitter API
-- **Target Node**: `turtlesim` (run: `ros2 run turtlesim turtlesim_node`)
-- **Run Command**: `node parameter-watcher-example.mjs`
-- **Test Changes**: In another terminal, run `ros2 param set /turtlesim background_r 200`
-
-**ParameterClient Key Features**:
-
-- **Remote Access**: Query/modify parameters on any node
-- **Async/Await API**: Modern promise-based interface
-- **Type-Safe**: Automatic type inference and BigInt conversion
-- **Timeout Support**: Per-request or default timeout settings
-- **Cancellation**: AbortController integration for request cancellation
-- **Lifecycle Management**: Automatic cleanup when parent node is destroyed
-
-**ParameterClient Public API**:
-
-- `remoteNodeName` (getter) - Get the target node name
-- `waitForService(timeout?)` - Wait for remote services to be available
-- `getParameter(name, options?)` - Get a single parameter
-- `getParameters(names, options?)` - Get multiple parameters
-- `setParameter(name, value, options?)` - Set a single parameter
-- `setParameters(parameters, options?)` - Set multiple parameters
-- `listParameters(options?)` - List all parameters with optional filtering
-- `describeParameters(names, options?)` - Get parameter descriptors
-- `getParameterTypes(names, options?)` - Get parameter types
-- `isDestroyed()` - Check if client has been destroyed
-- `destroy()` - Clean up and destroy the client
-
-**ParameterWatcher Key Features**:
-
-- **Real-Time Monitoring**: Automatically notified when watched parameters change
-- **Event-Driven**: Uses EventEmitter pattern for clean async code
-- **Filtered**: Only notifies about relevant parameter changes
-- **Flexible**: Add/remove parameters from watch list dynamically
-- **Built on ParameterClient**: Can query current values at any time
-- **Lifecycle Management**: Automatic cleanup when parent node is destroyed
-
-**ParameterWatcher Public API**:
-
-- `remoteNodeName` (getter) - Get the target node name
-- `watchedParameters` (getter) - Get list of watched parameter names
-- `start(timeout?)` - Start watching for parameter changes
-- `getCurrentValues(options?)` - Get current values of all watched parameters
-- `addParameter(name)` - Add a parameter to the watch list
-- `removeParameter(name)` - Remove a parameter from the watch list
-- `on('change', callback)` - Listen for parameter change events
-- `isDestroyed()` - Check if watcher has been destroyed
-- `destroy()` - Clean up and destroy the watcher
-
-## How to Run the Examples
-
-### Prerequisites
-
-1. Ensure ROS 2 is installed and sourced
-2. Navigate to the `example/parameter` directory
-
-### Running Parameter Declaration Example
+## Declare and Override Values
 
 ```bash
-cd example/parameter
-node parameter-declaration-example.mjs
+node example/parameter/parameter-declaration-example.mjs
+node example/parameter/parameter-override-example.mjs
 ```
 
-**Expected Output**:
+The first program declares `param1` as `hello world`. The second supplies its own ROS argument list and reads back `hello ros2`. Change the `argv` array in that file to try a different override.
 
-```
-Declared parameter: param1
-Parameter details:  Parameter {
-  name: 'param1',
-  type: 4,
-  value: 'hello world'
-}
-ParameterDescriptor {
-  name: 'param1',
-  type: 4,
-  description: '',
-  additional_constraints: '',
-  read_only: false,
-  dynamic_typing: false,
-  floating_point_range: [],
-  integer_range: []
-}
-```
+Both programs print their results and exit; they do not spin a parameter service for the CLI to call. For a node you can configure with `ros2 param`, use the [parameter tutorial](../../tutorials/parameter-service.md).
 
-### Running Parameter Override Example
+## Try a Parameter Client
+
+This example creates its own target node and client, reads and updates several parameters, and exits:
 
 ```bash
-cd example/parameter
-node parameter-override-example.mjs
+node example/parameter/parameter-client-advanced-example.mjs
 ```
 
-**Expected Output**:
+It also reads a descriptor and makes a call with a short timeout. A short timeout may or may not expire, depending on how quickly the service responds.
 
-```
-Declared parameter: param1
-Parameter overridden:  Parameter {
-  name: 'param1',
-  type: 4,
-  value: 'hello ros2'
-}
-ParameterDescriptor {
-  name: 'param1',
-  type: 4,
-  description: '',
-  additional_constraints: '',
-  read_only: false,
-  dynamic_typing: false,
-  floating_point_range: [],
-  integer_range: []
-}
-```
+## Read and Watch TurtleSim Parameters
 
-Notice how the value changed from "hello world" to "hello ros2" due to the command-line override.
-
-### Running ParameterClient Basic Example
-
-First, in one terminal, run turtlesim:
+Install the ROS `turtlesim` package. In a ROS-sourced terminal with a graphical session, start it:
 
 ```bash
 ros2 run turtlesim turtlesim_node
 ```
 
-Then in another terminal:
+Before running the [basic client](parameter-client-basic-example.mjs), add `rclnodejs.spin(node)` after its `createNode()` call so it can process replies. Then run it from another ROS-sourced terminal at the repository root to read and change the blue background value:
 
 ```bash
-cd example/parameter
-node parameter-client-basic-example.mjs
+node example/parameter/parameter-client-basic-example.mjs
 ```
 
-**Expected Output**:
-
-```
-Current background_b: 255n
-Updated background_b: 200n
-```
-
-### Running ParameterClient Advanced Example
+To watch changes instead:
 
 ```bash
-cd example/parameter
-node parameter-client-advanced-example.mjs
+node example/parameter/parameter-watcher-example.mjs
 ```
 
-**Expected Output**:
-
-```
-Available parameters: [ 'use_sim_time', 'max_speed', 'debug_mode', 'retry_count' ]
-max_speed = 10.5
-Retrieved parameters: [ 'max_speed', 'debug_mode', 'retry_count' ]
-max_speed descriptor: {
-  name: 'max_speed',
-  type: 3,
-  description: 'Maximum speed in m/s',
-  additional_constraints: '',
-  read_only: false,
-  dynamic_typing: false,
-  floating_point_range: [],
-  integer_range: []
-}
-```
-
-### Running ParameterWatcher Example
-
-First, in one terminal, run turtlesim:
-
-```bash
-ros2 run turtlesim turtlesim_node
-```
-
-Then in another terminal:
-
-```bash
-cd example/parameter
-node parameter-watcher-example.mjs
-```
-
-**Expected Output**:
-
-```
-Watching: [ 'background_r', 'background_g' ]
-Added background_b. Now watching: [ 'background_r', 'background_g', 'background_b' ]
-Removed background_g. Now watching: [ 'background_r', 'background_b' ]
-```
-
-Now in a third terminal, change a parameter to see real-time updates:
+The watcher starts with `background_r` and `background_g`, adds `background_b`, then removes `background_g`. Change the remaining watched values from another terminal:
 
 ```bash
 ros2 param set /turtlesim background_r 200
 ros2 param set /turtlesim background_b 100
-ros2 param set /turtlesim background_g 50  # This won't trigger (removed from watch list)
 ```
 
-You'll see output like:
+The watcher prints the updates. Stop it and TurtleSim with Ctrl+C.
 
-```
-background_r changed to 200
-background_b changed to 100
-```
-
-Note: `background_g` changes won't be displayed since it was removed from the watch list.
-
-## Using ROS 2 Parameter Tools
-
-You can interact with these examples using standard ROS 2 parameter tools:
-
-### Listing Parameters
-
-While either example is running, you can list parameters:
-
-```bash
-ros2 param list
-```
-
-Expected output:
-
-```
-/my_node:
-  param1
-  use_sim_time
-```
-
-### Getting Parameter Values
-
-```bash
-ros2 param get /my_node param1
-```
-
-Expected output:
-
-```
-String value is: hello world
-```
-
-(or "hello ros2" for the override example)
-
-### Setting Parameter Values
-
-```bash
-ros2 param set /my_node param1 "new value"
-```
-
-### Describing Parameters
-
-```bash
-ros2 param describe /my_node param1
-```
-
-## Key Concepts Demonstrated
-
-### Parameter Declaration
-
-- **Parameter Objects**: Creating `Parameter` instances with name, type, and value
-- **Parameter Descriptors**: Using `ParameterDescriptor` for metadata
-- **Declaration Process**: Registering parameters with the node using `declareParameter()`
-- **Type Safety**: Ensuring parameter types match expected values
-
-### Parameter Types
-
-The examples demonstrate `PARAMETER_STRING`, but ROS 2 supports various types:
-
-- `PARAMETER_BOOL`: Boolean values
-- `PARAMETER_INTEGER`: 64-bit signed integers
-- `PARAMETER_DOUBLE`: Double-precision floating point
-- `PARAMETER_STRING`: UTF-8 encoded strings
-- `PARAMETER_BYTE_ARRAY`: Raw byte arrays
-- `PARAMETER_BOOL_ARRAY`: Arrays of booleans
-- `PARAMETER_INTEGER_ARRAY`: Arrays of integers
-- `PARAMETER_DOUBLE_ARRAY`: Arrays of doubles
-- `PARAMETER_STRING_ARRAY`: Arrays of strings
-
-### Parameter Management
-
-- **Existence Checking**: Using `hasParameter()` to verify parameter presence
-- **Value Retrieval**: Getting current parameter values with `getParameter()`
-- **Descriptor Access**: Retrieving parameter metadata with `getParameterDescriptor()`
-- **Runtime Override**: Modifying parameters via command line or services
-
-### Command-Line Integration
-
-- **ROS Args**: Using `--ros-args -p` syntax for parameter overrides
-- **Node-Specific Parameters**: Targeting specific nodes with `node_name:param_name:=value`
-- **Initialization Integration**: Passing argv to `rclnodejs.init()` for parameter processing
-
-## Advanced Parameter Usage
-
-### Parameter Constraints
-
-ParameterDescriptor can include constraints:
-
-```javascript
-const descriptor = new ParameterDescriptor(
-  'my_param',
-  ParameterType.PARAMETER_INTEGER
-);
-descriptor.description = 'A sample integer parameter';
-descriptor.additional_constraints = 'Must be positive';
-descriptor.read_only = false;
-descriptor.integer_range = [{ from_value: 0, to_value: 100, step: 1 }];
-```
-
-### Parameter Callbacks
-
-You can set up callbacks to respond to parameter changes:
-
-```javascript
-node.setParameterCallback((parameters) => {
-  for (const param of parameters) {
-    console.log(`Parameter ${param.name} changed to ${param.value}`);
-  }
-});
-```
-
-### Multiple Parameter Types
-
-```javascript
-// String parameter
-const stringParam = new Parameter(
-  'config_file',
-  ParameterType.PARAMETER_STRING,
-  '/path/to/config'
-);
-
-// Integer parameter
-const intParam = new Parameter(
-  'max_items',
-  ParameterType.PARAMETER_INTEGER,
-  100
-);
-
-// Boolean parameter
-const boolParam = new Parameter(
-  'debug_mode',
-  ParameterType.PARAMETER_BOOL,
-  false
-);
-
-// Double parameter
-const doubleParam = new Parameter(
-  'update_rate',
-  ParameterType.PARAMETER_DOUBLE,
-  10.0
-);
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Parameter Not Found**:
-   - Ensure parameter is declared before accessing
-   - Check parameter name spelling
-   - Verify node has been properly initialized
-
-2. **Type Mismatch**:
-   - Ensure parameter type matches declaration
-   - Check ParameterType constants are correct
-   - Verify value type matches parameter type
-
-3. **Override Not Working**:
-   - Check command-line syntax: `--ros-args -p node_name:param_name:=value`
-   - Ensure node name matches exactly
-   - Verify rclnodejs.init() is called with argv
-
-4. **Permission Issues**:
-   - Check if parameter is marked as read_only
-   - Verify parameter constraints are satisfied
-
-### Debugging Tips
-
-- Use `ros2 param list` to see all available parameters
-- Use `ros2 param describe <node_name> <param_name>` to check parameter details
-- Use `ros2 param get <node_name> <param_name>` to verify current values
-- Check console output for parameter declaration confirmations
-- Verify node names match between declaration and command-line usage
-
-## Notes
-
-- Parameters must be declared before they can be used or accessed
-- Parameter types are enforced and cannot be changed after declaration
-- Command-line overrides are processed during `rclnodejs.init()`
-- Parameter descriptors provide metadata but are optional
-- The `use_sim_time` parameter is automatically added to all nodes
-- Parameter names are case-sensitive and must be valid ROS names
-- Parameters are node-specific and accessed using the full node path
+See the [parameter tutorial](../../tutorials/parameter-service.md#choose-a-callback) for local validation callbacks and accepted-change notifications. A remote watcher and a local on-set callback serve different purposes.
