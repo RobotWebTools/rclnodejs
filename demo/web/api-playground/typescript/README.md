@@ -1,65 +1,51 @@
 # API Playground - TypeScript
 
-The typed-app variant of the [web API playground](../../README.md).
-
-A **TypeScript** browser entry built with **Vite**, driven by the typed
-SDK so request, reply, message, and action shapes are visible in your IDE.
+This Vite app uses the [`rclnodejs/web` SDK](../../../../web/README.md) to work with ROS 2 topics, services, and actions in TypeScript.
 
 ```ts
 const reply = await ros.call<'example_interfaces/srv/AddTwoInts'>(
   '/add_two_ints',
   { a: '2n', b: '40n' }
 );
-// reply.sum is typed as `${number}n` — reuses generated ROS declarations.
+// The SDK types reply.sum as `${number}n` using the generated declarations.
 ```
 
 ## Run it (two shells)
 
+Use a supported version of Node.js and ROS 2 with `example_interfaces` and `std_msgs` installed. From the repository root, run these commands. Replace `lyrical` with your distro:
+
 ```bash
-source /opt/ros/<distro>/setup.bash
+source /opt/ros/lyrical/setup.bash
 cd demo/web/api-playground/typescript
 npm install
 ```
 
-Until a released package includes the action SDK, use the checkout instead
-without changing the dependency or lockfile:
+The published rclnodejs v2.3.1 package includes the action SDK. If you have an older install, run `npm update rclnodejs` in the demo directory.
+
+Start the runtime from this directory with ROS sourced:
 
 ```bash
-# From the repository root, with ROS 2 sourced and npm install completed:
-npm run build:dist
-cd demo/web/api-playground/typescript
-npm install --no-save --package-lock=false --ignore-scripts ../../../..
-```
-
-**Shell 1 — runtime:**
-
-```bash
-source /opt/ros/<distro>/setup.bash
 npm run server
 # rclnodejs/web : ws://localhost:9000/capability
 #               also http://localhost:9001/capability
 ```
 
-`server.ts` includes `/add_two_ints`, a 1 Hz `/web_demo_tick` publisher,
-and a cancellable `/fibonacci` server (`example_interfaces/action/Fibonacci`).
+The runtime starts `/add_two_ints`, publishes `/web_demo_tick` at 1 Hz, and runs a cancellable `/fibonacci` action (`example_interfaces/action/Fibonacci`).
 
-> HTTP serves calls, publishes, and SSE actions; subscriptions use WebSocket.
-> For HTTP topic subscriptions, see the [JavaScript playground](../javascript/README.md).
+This demo subscribes over WebSocket. See the [JavaScript playground](../javascript/README.md) for HTTP subscriptions.
 
-**Shell 2 — Vite dev server:**
+In a second terminal in the demo directory, start Vite:
 
 ```bash
 npm run dev
 # ➜  Local:  http://localhost:8080/
 ```
 
-For custom ports, set `RUNTIME_PORT`/`HTTP_PORT`, match the page's
-`?wsPort=9010&httpPort=9011`, and use Vite's `--port` option.
+Open http://localhost:8080/. To change the runtime ports, set `RUNTIME_PORT` and `HTTP_PORT`, then match them in the page URL, for example `?wsPort=9010&httpPort=9011`. Use Vite's `--port` option to change the page port.
 
 ## Fibonacci actions
 
-Send orders from 2 to 12 and receive feedback every half-second. The ROS
-action name supplies goal, feedback, and result types:
+Send an order from 2 to 12. The server sends feedback every half-second. Pass the ROS action type to type the goal, feedback, and result:
 
 ```ts
 import type {} from 'rclnodejs';
@@ -79,17 +65,14 @@ try {
 }
 ```
 
-The type-only import supplies generated ROS declarations without loading the
-native addon in the browser or requiring additional frontend codegen.
-A dedicated `{ http }` client streams actions; subscriptions stay on WebSocket.
+`import type` makes the generated declarations available without loading the native addon in the browser. The `{ http }` client streams action results.
 
-- WebSocket: **Cancel Goal** requests cancellation.
-- HTTP/SSE: **Stop Streaming** disconnects without canceling the ROS goal.
-- Switching transports or leaving the page closes the client and ignores late events.
+- Over WebSocket, **Cancel Goal** requests cancellation.
+- Over HTTP/SSE, **Stop Streaming** disconnects without canceling the goal.
 
-Check `goal.status` even when `goal.result` resolves. Wildcard CORS is for
-local testing only. Actions use `fetch()` streaming, not `EventSource`;
-the `sse` option only enables HTTP subscriptions.
+The page closes the client and ignores late events when you switch transports or leave. Check `goal.status` even when `goal.result` resolves.
+
+HTTP actions stream with `fetch()`, not `EventSource`. The `sse` option enables HTTP topic subscriptions. Use wildcard CORS only for local testing.
 
 ```bash
 curl --fail-with-body -sS -N http://localhost:9001/capability/action/fibonacci \
@@ -98,10 +81,7 @@ curl --fail-with-body -sS -N http://localhost:9001/capability/action/fibonacci \
 
 ## Without the bundled `server.ts`
 
-`npm run server` bundles the runtime and the demo's sample nodes into one
-process so it runs out of the box. In a real project those nodes already
-run elsewhere, so you only need the runtime — replace shell 1 with the
-CLI (shell 2 and `src/main.ts` are unchanged):
+To use your own ROS nodes, run the CLI instead of `npm run server`. Keep Vite running. Start the CLI and the ROS service in separate ROS-sourced terminals:
 
 ```bash
 npx rclnodejs-web web.json
@@ -111,23 +91,18 @@ ros2 run demo_nodes_cpp add_two_ints_server
 # (and any std_msgs/msg/String publisher on /web_demo_tick)
 ```
 
-For CLI mode, also run a `/fibonacci` server using
-`example_interfaces/action/Fibonacci`.
+Also run `/fibonacci` with the `example_interfaces/action/Fibonacci` type.
 
 ## OpenAPI export
 
-With ROS 2 sourced, export the same allow-list, including the action:
+With ROS sourced, export the config, including the action:
 
 ```bash
 npx rclnodejs-web openapi web.json > openapi.json
 ```
 
-SSE schemas describe per-event data; API explorers may buffer the stream.
+SSE schemas describe one event at a time. Some API explorers buffer the stream.
 
 ## Other npm scripts
 
-| Command             | What it does                       |
-| ------------------- | ---------------------------------- |
-| `npm run typecheck` | `tsc --noEmit` — silent on success |
-| `npm run build`     | static bundle in `dist/`           |
-| `npm run preview`   | serve the built `dist/`            |
+`npm run typecheck` checks the types without building. `npm run build` writes the app to `dist/`, and `npm run preview` serves that build.
