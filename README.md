@@ -13,7 +13,7 @@
 
 [![Nightly Compatibility](https://github.com/RobotWebTools/rclnodejs/actions/workflows/nightly-compatibility.yml/badge.svg?branch=develop&event=schedule)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/nightly-compatibility.yml?query=branch%3Adevelop+event%3Aschedule)
 
-*Early-warning checks for ROS Rolling nightlies using Node.js 27 alpha. See the [build documentation](./docs/BUILDING.md#nightly-compatibility-checks).*
+*Early-warning checks for ROS Rolling [nightlies](https://github.com/ros2/ros2/releases/tag/release-rolling-nightlies) using Node.js 27 [alpha](https://nodejs.org/en/about/previous-releases). See the [build documentation](./docs/BUILDING.md#nightly-compatibility-checks).*
 
 **rclnodejs** is a Node.js client library for [ROS 2](https://www.ros.org/) that provides comprehensive JavaScript and TypeScript APIs for developing ROS 2 solutions.
 
