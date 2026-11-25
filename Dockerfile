@@ -1,6 +1,6 @@
 # Create a source-development image with ROS 2, colcon, Node.js and rclnodejs.
 # Supported ARGS:
-#   ROS_DISTRO = [humble, jazzy, kilted, lyrical, rolling], default=rolling
+#   ROS_DISTRO = [humble, jazzy, lyrical, rolling], default=rolling
 #   NODE_MAJOR_VER = [20, 22, 24], default=24
 #   BRANCH = rclnodejs git branch, default=develop
 #
@@ -17,7 +17,7 @@
 #
 # Build an image for a specific branch of rclnodejs, version of ROS2 and Nodejs use:
 #
-#     docker build -t <image_name> --build-arg ROS_DISTRO=kilted .
+#     docker build -t <image_name> --build-arg ROS_DISTRO=lyrical .
 #     docker build -t <image_name>  \
 #        --build-arg ROS_DISTRO=jazzy \
 #        --build-arg BRANCH=develop \

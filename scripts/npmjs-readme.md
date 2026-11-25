@@ -2,7 +2,7 @@
 
 `rclnodejs` is a Node.js client library for [ROS 2](https://www.ros.org/) with JavaScript and TypeScript APIs. It supports topics, services, actions, parameters, lifecycle nodes, RxJS subscriptions, and Electron and browser apps.
 
-Supported ROS 2 distributions include Humble, Jazzy, Kilted, Lyrical, and Rolling.
+Supported ROS 2 distributions include Humble, Jazzy, Lyrical, and Rolling.
 
 Start with [Writing Your First rclnodejs Nodes](https://github.com/RobotWebTools/rclnodejs/blob/develop/tutorials/writing-your-first-rclnodejs-nodes.md) for setup, topics, and service calls.
 
@@ -45,7 +45,7 @@ npm install RobotWebTools/rclnodejs#<branch>
 
 GitHub installs need newer Node.js/npm versions than the runtime minimum above; see the [build guide](https://github.com/RobotWebTools/rclnodejs/blob/develop/docs/BUILDING.md).
 
-Prebuilt binaries cover Ubuntu 22.04 (Humble), 24.04 (Jazzy, Kilted), and 26.04 (Lyrical) on x64 and arm64. Other platforms build from source. Set `RCLNODEJS_FORCE_BUILD=1` to force compilation.
+Prebuilt binaries cover Ubuntu 22.04 (Humble), 24.04 (Jazzy), and 26.04 (Lyrical) on x64 and arm64. Other platforms build from source. Set `RCLNODEJS_FORCE_BUILD=1` to force compilation.
 
 ## Documentation and Examples
 
