@@ -17,7 +17,6 @@ jobs:
         ros_distribution:
           - humble
           - jazzy
-          - kilted
           - lyrical
         include:
           # Humble Hawksbill (May 2022 - May 2027)
@@ -27,10 +26,6 @@ jobs:
           # Jazzy Jalisco (May 2024 - May 2029)
           - docker_image: ros:jazzy-ros-base-noble
             ros_distribution: jazzy
-            ubuntu_codename: noble
-          # Kilted Kaiju (May 2025 - Dec 2026)
-          - docker_image: ros:kilted-ros-base-noble
-            ros_distribution: kilted
             ubuntu_codename: noble
           # Lyrical Luth (May 2026 - May 2031)
           - docker_image: ros:lyrical-ros-base-resolute

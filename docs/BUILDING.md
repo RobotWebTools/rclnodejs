@@ -2,14 +2,14 @@
 
 ## Requirements
 
-- **ROS 2:** Humble, Jazzy, Kilted, Lyrical, or Rolling. Follow the [Linux](https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debians.html) or [Windows](https://docs.ros.org/en/lyrical/Installation/Windows-Install-Binary.html) installation guide for your distro. Use `--merge-install` when building ROS from source.
+- **ROS 2:** Humble, Jazzy, Lyrical, or Rolling. Follow the [Linux](https://docs.ros.org/en/lyrical/Installation/Ubuntu-Install-Debians.html) or [Windows](https://docs.ros.org/en/lyrical/Installation/Windows-Install-Binary.html) installation guide for your distro. Use `--merge-install` when building ROS from source.
 - **Node.js:** runtime minimum **20.20.2**. For source development, use **Node 24.11+ in the 24.x line**; the bundler also supports **22.18+ in the 22.x line** and **26+**. Published npm packages already contain the bundles.
 - **npm:** use **11.19.0** for source development to avoid npm 10 dependency-resolution failures. This is not a requirement for installing the published package.
 - **Native build tools:** Python 3 (`python3` on Linux/macOS, `py -3` on Windows) and the [node-gyp prerequisites](https://github.com/nodejs/node-gyp#installation). Python 2 is unsupported. On Windows, use a Visual Studio Native Tools command prompt.
 
 ### C++ Toolchain Requirements
 
-- **Linux:** C++17 for Humble/Jazzy/Kilted; C++20 for Lyrical/Rolling.
+- **Linux:** C++17 for Humble/Jazzy; C++20 for Lyrical/Rolling.
 - **Windows:** MSBuild inherits the Node/Electron headers' compiler settings; the ROS-specific `cflags_cc` entries do not configure MSVC. Node 20 headers select C++17 even for Lyrical/Rolling, so verify the generated flags before using that combination.
 
 Electron native builds use their own headers and memory-cage handling; the npm runtime's exact Node patch-version minimum is not enforced against those headers.
@@ -89,9 +89,9 @@ With ROS sourced and the native addon built:
 
 On Linux, Electron tests need GUI libraries and, when headless, `xvfb-run`; see the [CI dependency setup](../.github/workflows/linux-x64-build-and-test.yml). Packaging tests require a bundler-supported Node version. The pack-based CLI tests are skipped on Node 20; ordinary runtime tests still run.
 
-Linux CI uses official ROS base images for Humble, Jazzy, Kilted, Lyrical, and Rolling on x64 and ARM64. Both Linux build workflows share [test dependency setup](../.github/actions/setup-ros2-apt/action.yml) and explicitly load ROS before building. Rolling keeps Node 26 coverage and the ARM64 IDL suite; its image is not guaranteed to match the latest upstream source.
+Linux CI uses official ROS base images for Humble, Jazzy, Lyrical, and Rolling on x64 and ARM64. Both Linux build workflows share [test dependency setup](../.github/actions/setup-ros2-apt/action.yml) and explicitly load ROS before building. Rolling keeps Node 26 coverage and the ARM64 IDL suite; its image is not guaranteed to match the latest upstream source.
 
-Windows CI covers Humble, Jazzy, Kilted, and Lyrical, with full tests on Lyrical. Windows Rolling is not covered by CI.
+Windows CI covers Humble, Jazzy, and Lyrical, with full tests on Lyrical. Windows Rolling is not covered by CI.
 
 ### Nightly compatibility checks
 

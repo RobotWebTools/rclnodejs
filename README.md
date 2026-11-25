@@ -9,7 +9,7 @@
 
 | **ROS 2 Distro** | **CI Status** |
 | :---: | :---: |
-| [![ROS 2](https://img.shields.io/badge/ROS%202-Humble%20%7C%20Jazzy%20%7C%20Kilted%20%7C%20Lyrical%20%7C%20Rolling-blue?logo=ros)](https://www.ros.org/) | [![Linux x64](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml?query=branch%3Adevelop)<br>[![Linux arm64](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml?query=branch%3Adevelop)<br>[![Windows](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml?query=branch%3Adevelop)<br>[![ASan](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml?query=branch%3Adevelop) |
+| [![ROS 2](https://img.shields.io/badge/ROS%202-Humble%20%7C%20Jazzy%20%7C%20Lyrical%20%7C%20Rolling-blue?logo=ros)](https://www.ros.org/) | [![Linux x64](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-push-test.yml?query=branch%3Adevelop)<br>[![Linux arm64](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-arm64-push-test.yml?query=branch%3Adevelop)<br>[![Windows](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/windows-push-test.yml?query=branch%3Adevelop)<br>[![ASan](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml/badge.svg?branch=develop)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/linux-x64-asan-test.yml?query=branch%3Adevelop) |
 
 [![Nightly Compatibility](https://github.com/RobotWebTools/rclnodejs/actions/workflows/nightly-compatibility.yml/badge.svg?branch=develop&event=schedule)](https://github.com/RobotWebTools/rclnodejs/actions/workflows/nightly-compatibility.yml?query=branch%3Adevelop+event%3Aschedule)
 
@@ -55,7 +55,7 @@ npm i rclnodejs
 
 Install an unpublished branch or commit with `npm install RobotWebTools/rclnodejs#<branch>`. GitHub installs and source checkouts need newer Node.js/npm versions than the runtime minimum; see the [build guide](./docs/BUILDING.md).
 
-Prebuilt binaries cover Ubuntu 22.04 (Humble), 24.04 (Jazzy, Kilted), and 26.04 (Lyrical) on x64 and arm64. Other platforms build from source. Set `RCLNODEJS_FORCE_BUILD=1` to force compilation, or use the [Dockerfile](./Dockerfile) for container development.
+Prebuilt binaries cover Ubuntu 22.04 (Humble), 24.04 (Jazzy), and 26.04 (Lyrical) on x64 and arm64. Other platforms build from source. Set `RCLNODEJS_FORCE_BUILD=1` to force compilation, or use the [Dockerfile](./Dockerfile) for container development.
 
 ### Run the examples from a clone
 
