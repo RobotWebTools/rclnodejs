@@ -99,6 +99,5 @@
     <text class="subtitle" x="855" y="508" text-anchor="middle">Total time (ms)</text>
   </g>
 
-  <text class="note" x="550" y="552">2025: recorded totals. 2026: median of five calibration runs. Same linear scale in both panels.</text>
-  <text class="note" x="550" y="580">Different hardware, software, and timing scopes: not a controlled release comparison.</text>
+  <text class="note" x="550" y="565">Hardware and software differ between years, including ROS 2 releases and runtime versions.</text>
 </svg>
