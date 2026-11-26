@@ -27,7 +27,6 @@ async function main() {
   try {
     await rclnodejs.init();
 
-    const startTime = process.hrtime.bigint();
     const node = rclnodejs.createNode('stress_client_rclnodejs');
     const client = node.createClient('nav_msgs/srv/GetMap', 'get_map', {
       enableTypedArray: true,
@@ -59,6 +58,7 @@ async function main() {
     // Send requests sequentially using callback pattern
     let requestPromiseResolve, requestPromiseReject;
     let currentRequestPromise = null;
+    const request = {};
 
     const sendRequests = () => {
       return new Promise((resolve, reject) => {
@@ -71,25 +71,21 @@ async function main() {
           }
 
           requestCount++;
-          client.sendRequest({}, (response) => {
-            if (response) {
-              receivedTimes++;
-              // Show progress every 100 requests or for small test runs
-              if (receivedTimes % 100 === 0 || totalTimes <= 10) {
-                node
-                  .getLogger()
-                  .info(
-                    `Progress: ${receivedTimes}/${totalTimes} requests completed`
-                  );
-              }
-            } else {
-              node
-                .getLogger()
-                .error(`Request ${requestCount} failed: No response received`);
+          client.sendRequest(request, (response) => {
+            if (!response) {
+              reject(
+                new Error(
+                  `Request ${requestCount} failed: No response received`
+                )
+              );
+              return;
             }
-
-            // Send next request
-            setImmediate(sendNextRequest);
+            receivedTimes++;
+            if (receivedTimes >= totalTimes) {
+              resolve();
+            } else {
+              setImmediate(sendNextRequest);
+            }
           });
         };
 
@@ -98,8 +94,8 @@ async function main() {
       });
     };
 
+    const startTime = process.hrtime.bigint();
     await sendRequests();
-
     const endTime = process.hrtime.bigint();
     const diffNanos = endTime - startTime;
     const diffMillis = Number(diffNanos) / 1000000;

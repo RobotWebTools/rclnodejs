@@ -143,7 +143,7 @@ See the [TypeScript demos](./demo/typescript/).
 
 ## More
 
-- [Benchmarks](./benchmark/README.md) record topic publishing and service request-response measurements for rclnodejs v1.5.0, rclcpp, and rclpy.
+- [Benchmarks](./benchmark/README.md) record topic publishing and service request-response measurements for published rclnodejs v2.3.2, rclcpp, and rclpy on ROS 2 Lyrical.
 - [rclnodejs-cli](https://github.com/RobotWebTools/rclnodejs-cli/) creates application skeletons and launch files for multi-node setups.
 
 ## Contributing

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 /* eslint-disable camelcase */
+import { setTimeout as delay } from 'node:timers/promises';
 import { program } from 'commander';
 import rclnodejs from '../../../index.js';
 
@@ -29,7 +30,6 @@ async function main() {
   try {
     await rclnodejs.init();
 
-    const startTime = process.hrtime.bigint();
     const node = rclnodejs.createNode('stress_publisher_rclnodejs');
     const publisher = node.createPublisher(
       'std_msgs/msg/UInt8MultiArray',
@@ -72,8 +72,16 @@ async function main() {
       });
     };
 
-    await publishMessages();
+    const discoveryDeadline = process.hrtime.bigint() + 5_000_000_000n;
+    while (publisher.subscriptionCount === 0) {
+      if (process.hrtime.bigint() >= discoveryDeadline) {
+        throw new Error('No matched subscriber available after 5 seconds.');
+      }
+      await delay(10);
+    }
 
+    const startTime = process.hrtime.bigint();
+    await publishMessages();
     const endTime = process.hrtime.bigint();
     const diffNanos = endTime - startTime;
     const diffMillis = Number(diffNanos) / 1000000;
@@ -85,6 +93,9 @@ async function main() {
       .info(
         `Benchmark took ${seconds} seconds and ${milliseconds} milliseconds.`
       );
+    node
+      .getLogger()
+      .info(`Successfully published ${sentTimes}/${totalTimes} messages`);
 
     await rclnodejs.shutdown();
   } catch (error) {

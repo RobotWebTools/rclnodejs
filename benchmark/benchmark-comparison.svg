@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="610" viewBox="0 0 1100 610" role="img" aria-labelledby="title description">
+  <title id="title">ROS 2 client benchmarks: 2025 vs 2026</title>
+  <desc id="description">Two panels grouped by year, with topic and service total runtimes for each client. Each run uses 1000 iterations with 1 MiB data arrays. In 2025, topic and service times in milliseconds were: rclcpp 168 and 627; rclpy 1618 and 15380; rclnodejs 744 and 927. In 2026: rclcpp 428 and 6123; rclpy 1620 and 8870; rclnodejs 1090 and 7848. Both panels use the same linear scale. The 2026 values are medians of five calibration runs. Hardware, software, and timing scopes differ between years.</desc>
+  <style>
+    text { font-family: Arial, Helvetica, sans-serif; fill: #0f172a; }
+    .heading { font-size: 26px; font-weight: 700; }
+    .subtitle { font-size: 15px; fill: #475569; }
+    .panel-title { font-size: 20px; font-weight: 700; }
+    .client { font-size: 16px; font-weight: 600; }
+    .value { font-size: 14px; font-weight: 600; }
+    .tick { font-size: 13px; fill: #64748b; text-anchor: middle; }
+    .note { font-size: 14px; fill: #475569; text-anchor: middle; }
+    .grid { stroke: #e2e8f0; stroke-width: 1; }
+    .axis { stroke: #94a3b8; stroke-width: 1; }
+    .topic { fill: #2563eb; }
+    .service { fill: #ea580c; }
+  </style>
+  <rect width="1100" height="610" fill="#ffffff"/>
+  <text class="heading" x="550" y="40" text-anchor="middle">ROS 2 client benchmarks: 2025 vs 2026</text>
+  <text class="subtitle" x="550" y="68" text-anchor="middle">1,000 iterations | 1 MiB data arrays | Lower total time is better</text>
+  <rect class="topic" x="300" y="92" width="16" height="16" rx="2"/>
+  <text class="subtitle" x="325" y="105">Topic publishing</text>
+  <rect class="service" x="580" y="92" width="16" height="16" rx="2"/>
+  <text class="subtitle" x="605" y="105">Service request-response</text>
+
+  <rect x="35" y="130" width="500" height="390" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+  <g id="year-2025-chart" data-year="2025" data-axis-max="16000" data-axis-width="300">
+    <text class="panel-title" x="285" y="160" text-anchor="middle">2025 - Jazzy</text>
+    <text class="subtitle" x="285" y="184" text-anchor="middle">August 30 | rclnodejs v1.5.0</text>
+    <g class="grid">
+      <line x1="170" y1="202" x2="170" y2="464"/>
+      <line x1="245" y1="202" x2="245" y2="464"/>
+      <line x1="320" y1="202" x2="320" y2="464"/>
+      <line x1="395" y1="202" x2="395" y2="464"/>
+      <line x1="470" y1="202" x2="470" y2="464"/>
+    </g>
+    <text class="client" x="65" y="242">rclcpp</text>
+    <rect class="topic" x="170" y="214" width="3.15" height="20" rx="2" data-metric="topic" data-client="rclcpp" data-value="168"/>
+    <text class="value" x="181.15" y="229">168</text>
+    <rect class="service" x="170" y="240" width="11.75625" height="20" rx="2" data-metric="service" data-client="rclcpp" data-value="627"/>
+    <text class="value" x="189.75625" y="255">627</text>
+
+    <text class="client" x="65" y="334">rclpy</text>
+    <rect class="topic" x="170" y="306" width="30.3375" height="20" rx="2" data-metric="topic" data-client="rclpy" data-value="1618"/>
+    <text class="value" x="208.3375" y="321">1,618</text>
+    <rect class="service" x="170" y="332" width="288.375" height="20" rx="2" data-metric="service" data-client="rclpy" data-value="15380"/>
+    <text class="value" x="466.375" y="347">15,380</text>
+
+    <text class="client" x="65" y="426">rclnodejs</text>
+    <rect class="topic" x="170" y="398" width="13.95" height="20" rx="2" data-metric="topic" data-client="rclnodejs" data-value="744"/>
+    <text class="value" x="191.95" y="413">744</text>
+    <rect class="service" x="170" y="424" width="17.38125" height="20" rx="2" data-metric="service" data-client="rclnodejs" data-value="927"/>
+    <text class="value" x="195.38125" y="439">927</text>
+
+    <line class="axis" x1="170" y1="464" x2="470" y2="464"/>
+    <text class="tick" x="170" y="484">0</text>
+    <text class="tick" x="245" y="484">4,000</text>
+    <text class="tick" x="320" y="484">8,000</text>
+    <text class="tick" x="395" y="484">12,000</text>
+    <text class="tick" x="470" y="484">16,000</text>
+    <text class="subtitle" x="320" y="508" text-anchor="middle">Total time (ms)</text>
+  </g>
+
+  <rect x="565" y="130" width="500" height="390" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+  <g id="year-2026-chart" data-year="2026" data-axis-max="16000" data-axis-width="300">
+    <text class="panel-title" x="815" y="160" text-anchor="middle">2026 - Lyrical</text>
+    <text class="subtitle" x="815" y="184" text-anchor="middle">November 26 | rclnodejs v2.3.2</text>
+    <g class="grid">
+      <line x1="705" y1="202" x2="705" y2="464"/>
+      <line x1="780" y1="202" x2="780" y2="464"/>
+      <line x1="855" y1="202" x2="855" y2="464"/>
+      <line x1="930" y1="202" x2="930" y2="464"/>
+      <line x1="1005" y1="202" x2="1005" y2="464"/>
+    </g>
+    <text class="client" x="595" y="242">rclcpp</text>
+    <rect class="topic" x="705" y="214" width="8.025" height="20" rx="2" data-metric="topic" data-client="rclcpp" data-value="428"/>
+    <text class="value" x="721.025" y="229">428</text>
+    <rect class="service" x="705" y="240" width="114.80625" height="20" rx="2" data-metric="service" data-client="rclcpp" data-value="6123"/>
+    <text class="value" x="827.80625" y="255">6,123</text>
+
+    <text class="client" x="595" y="334">rclpy</text>
+    <rect class="topic" x="705" y="306" width="30.375" height="20" rx="2" data-metric="topic" data-client="rclpy" data-value="1620"/>
+    <text class="value" x="743.375" y="321">1,620</text>
+    <rect class="service" x="705" y="332" width="166.3125" height="20" rx="2" data-metric="service" data-client="rclpy" data-value="8870"/>
+    <text class="value" x="879.3125" y="347">8,870</text>
+
+    <text class="client" x="595" y="426">rclnodejs</text>
+    <rect class="topic" x="705" y="398" width="20.4375" height="20" rx="2" data-metric="topic" data-client="rclnodejs" data-value="1090"/>
+    <text class="value" x="733.4375" y="413">1,090</text>
+    <rect class="service" x="705" y="424" width="147.15" height="20" rx="2" data-metric="service" data-client="rclnodejs" data-value="7848"/>
+    <text class="value" x="860.15" y="439">7,848</text>
+
+    <line class="axis" x1="705" y1="464" x2="1005" y2="464"/>
+    <text class="tick" x="705" y="484">0</text>
+    <text class="tick" x="780" y="484">4,000</text>
+    <text class="tick" x="855" y="484">8,000</text>
+    <text class="tick" x="930" y="484">12,000</text>
+    <text class="tick" x="1005" y="484">16,000</text>
+    <text class="subtitle" x="855" y="508" text-anchor="middle">Total time (ms)</text>
+  </g>
+
+  <text class="note" x="550" y="565">Hardware and software differ between years, including ROS 2 releases and runtime versions.</text>
+</svg>

@@ -62,18 +62,30 @@ def main():
         node.get_logger().info(f'The publisher will publish a UInt8MultiArray topic '
                               f'(contains a size of {args.size}KB array) {args.run} times.')
         
-        start_time = time.time()
+        discovery_deadline = time.perf_counter() + 5.0
+        while publisher.get_subscription_count() == 0:
+            if time.perf_counter() >= discovery_deadline:
+                node.get_logger().error('No matched subscriber available after 5 seconds.')
+                raise RuntimeError('No matched subscriber available')
+            rclpy.spin_once(node, timeout_sec=0.01)
+
+        sent_times = 0
+        start_time = time.perf_counter()
         
         # Publish messages
         for i in range(args.run):
             publisher.publish(msg)
+            sent_times += 1
             rclpy.spin_once(node, timeout_sec=0.001)
-        
+
+        end_time = time.perf_counter()
+
         # Log completion
-        diff = time.time() - start_time
+        diff = end_time - start_time
         milliseconds, seconds = math.modf(diff)
         node.get_logger().info(f'Benchmark took {int(seconds)} seconds and '
                               f'{round(milliseconds * 1000)} milliseconds.')
+        node.get_logger().info(f'Successfully published {sent_times}/{args.run} messages')
         
         node.destroy_node()
     except KeyboardInterrupt:

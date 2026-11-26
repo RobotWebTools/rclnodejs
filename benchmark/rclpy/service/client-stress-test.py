@@ -38,30 +38,31 @@ def main():
         node.get_logger().info('Waiting for service to be available...')
         if not client.wait_for_service(timeout_sec=5.0):
             node.get_logger().error('Service not available after waiting')
-            return
+            raise RuntimeError('GetMap service not available after 5 seconds')
         
         node.get_logger().info(f'The client will send a GetMap request continuously '
                               f'until receiving {args.run} response times.')
         
-        start_time = time.time()
+        request = GetMap.Request()
         received_times = 0
+        start_time = time.perf_counter()
         
         # Send requests synchronously
         for i in range(args.run):
-            request = GetMap.Request()
-            try:
-                future = client.call_async(request)
-                rclpy.spin_until_future_complete(node, future, timeout_sec=5.0)
-                
-                if future.result() is not None:
-                    received_times += 1
-                else:
-                    node.get_logger().error(f'Request {i+1} failed')
-            except Exception as e:
-                node.get_logger().error(f'Service call {i+1} failed: {e}')
-        
+            future = client.call_async(request)
+            rclpy.spin_until_future_complete(node, future, timeout_sec=5.0)
+            if not future.done():
+                node.get_logger().error(f'Request {i+1} timed out')
+                raise RuntimeError(f'Request {i+1} timed out')
+            if future.result() is None:
+                node.get_logger().error(f'Request {i+1} failed')
+                raise RuntimeError(f'Request {i+1} returned no response')
+            received_times += 1
+
+        end_time = time.perf_counter()
+
         # Log completion
-        diff = time.time() - start_time
+        diff = end_time - start_time
         milliseconds, seconds = math.modf(diff)
         node.get_logger().info(f'Benchmark took {int(seconds)} seconds and '
                               f'{round(milliseconds * 1000)} milliseconds.')

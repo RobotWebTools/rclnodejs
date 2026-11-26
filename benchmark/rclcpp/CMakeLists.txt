@@ -29,14 +29,10 @@ function(custom_executable target source)
   add_executable(${target} ${source})
   install(TARGETS ${target}
     DESTINATION lib/${PROJECT_NAME})
-  ament_target_dependencies(${target}
-    "example_interfaces"
-    "nav_msgs"
-    "rclcpp"
-    "rcutils"
-    "sensor_msgs"
-    "std_msgs"
-    "std_srvs")
+  target_link_libraries(${target} PRIVATE
+    rclcpp::rclcpp
+    ${nav_msgs_TARGETS}
+    ${std_msgs_TARGETS})
 endfunction()
 
 custom_executable(publisher-stress-test topic/publisher-stress-test.cpp)

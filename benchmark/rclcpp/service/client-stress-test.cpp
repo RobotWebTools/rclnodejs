@@ -48,44 +48,50 @@ int main(int argc, char* argv[]) {
       "response %d times.\n",
       total_times);
 
-  auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("stress_client_rclcpp");
   auto client = node->create_client<nav_msgs::srv::GetMap>("get_map");
   auto request = std::make_shared<nav_msgs::srv::GetMap::Request>();
   auto received_times = 0;
 
-  // Wait for service to be available
-  while (!client->wait_for_service(std::chrono::seconds(1))) {
-    if (!rclcpp::ok()) {
-      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"),
-                   "Interrupted while waiting for the service. Exiting.");
-      return 0;
-    }
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"),
-                "Service not available, waiting again...");
+  if (!client->wait_for_service(std::chrono::seconds(5))) {
+    RCLCPP_ERROR(node->get_logger(),
+                 "GetMap service not available after 5 seconds.");
+    rclcpp::shutdown();
+    return 1;
   }
 
-  while (rclcpp::ok()) {
-    if (received_times >= total_times) {
+  const auto start = std::chrono::steady_clock::now();
+  while (rclcpp::ok() && received_times < total_times) {
+    auto result_future = client->async_send_request(request);
+
+    // Spin until future is ready using the node directly
+    auto future_status = rclcpp::spin_until_future_complete(
+        node, result_future, std::chrono::seconds(10));
+
+    if (future_status != rclcpp::FutureReturnCode::SUCCESS) {
+      RCLCPP_ERROR(node->get_logger(), "Service call failed or timed out.");
       rclcpp::shutdown();
-      auto end = std::chrono::high_resolution_clock::now();
-      LogTimeConsumption(start, end);
-      break;
-    } else {
-      auto result_future = client->async_send_request(request);
-
-      // Spin until future is ready using the node directly
-      auto future_status = rclcpp::spin_until_future_complete(
-          node, result_future, std::chrono::seconds(10));
-
-      if (future_status != rclcpp::FutureReturnCode::SUCCESS) {
-        RCLCPP_ERROR(node->get_logger(), "Service call failed or timed out.");
-        return 1;
-      }
-
-      auto result = result_future.get();
-      received_times++;
+      return 1;
     }
+    auto result = result_future.get();
+    if (!result) {
+      RCLCPP_ERROR(node->get_logger(), "Service call returned no response.");
+      rclcpp::shutdown();
+      return 1;
+    }
+    received_times++;
   }
+  const auto end = std::chrono::steady_clock::now();
+
+  if (received_times != total_times) {
+    RCLCPP_ERROR(node->get_logger(),
+                 "Service calls interrupted before completion.");
+    rclcpp::shutdown();
+    return 1;
+  }
+  LogTimeConsumption(start, end);
+  printf("Successfully received %d/%d responses\n", received_times,
+         total_times);
+  rclcpp::shutdown();
   return 0;
 }
