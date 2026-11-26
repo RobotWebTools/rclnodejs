@@ -2,64 +2,85 @@
 
 Topic and service benchmarks for rclcpp (C++), rclpy (Python), and rclnodejs (JavaScript).
 
-## Prerequisites
+## Results
 
-- Install ROS 2 with rclcpp, rclpy, `std_msgs`, and `nav_msgs`.
-- For JavaScript, prepare the checkout using the [build guide](../docs/BUILDING.md).
-- For C++, install `cmake`, `build-essential`, and `libssl-dev`.
+Each run uses 1000 publishes or service responses with 1024 KiB (1 MiB) data arrays. Times are total milliseconds, not per-message latencies. Ratios use each table's C++ baseline.
 
-Run from the repository root. Source ROS 2 in each terminal:
+![Benchmark results grouped by year: 2025 and 2026](./benchmark-comparison.svg)
 
-```bash
-source /opt/ros/<distro>/setup.bash
-```
+### November 26, 2026 (Lyrical)
 
-Build the C++ benchmarks:
+- Host: Ubuntu 26.04.1 LTS (WSL2), x86_64; AMD EPYC 7763, 16 logical CPUs, 31.3 GiB VM RAM
+- ROS 2 Lyrical: rclcpp 32.0.3, rclpy 10.0.11
+- Middleware: `rmw_fastrtps_cpp` 9.4.10 (Fast DDS)
+- Runtimes: GCC 15.2.0, Python 3.14.4, Node.js v26.13.1; published [rclnodejs v2.3.2](https://www.npmjs.com/package/rclnodejs/v/2.3.2) with its Lyrical prebuilt addon
+- C++ runners: C++20, default build type (no optimization flags)
 
-```bash
-cmake -S benchmark/rclcpp -B benchmark/rclcpp/build
-cmake --build benchmark/rclcpp/build
-```
+Values are median (min-max) from the final five-run calibration batch.
 
-## Recorded Results
+| Client Library | Topic (ms) | Service (ms) | Time / C++ (topic / service) |
+| --- | --- | --- | --- |
+| rclcpp (C++) | 428 (400-452) | 6,123 (3,096-6,202) | Baseline |
+| rclpy (Python) | 1,620 (1,609-1,641) | 8,870 (8,821-9,348) | 3.8x / 1.4x |
+| rclnodejs (Node.js) | 1,090 (1,017-1,203) | 7,848 (7,128-8,377) | 2.5x / 1.3x |
 
-Recorded on August 30, 2025, using rclnodejs v1.5.0. These are historical results, not measurements of the current release.
+### August 30, 2025 (Jazzy)
 
-### Test Environment
+Original recorded totals, retained for trend tracking:
 
-Hardware:
-
-- CPU: 11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz (4 cores, 8 threads)
-- Memory: 8GB RAM
-- Architecture: x86_64
-
-Software:
-
-- OS: Ubuntu 24.04.3 LTS (WSL2)
-- Kernel: 6.6.87.2-microsoft-standard-WSL2
+- Host: Ubuntu 24.04.3 LTS (WSL2), x86_64; Intel Core i7-1185G7 (4 cores, 8 threads), 8GB RAM
 - ROS 2: [Jazzy Patch Release 6](https://github.com/ros2/ros2/releases/tag/release-jazzy-20250820)
-- C++ compiler: GCC 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04)
-- Python: 3.12.3
-- Node.js: v22.18.0
-- rclnodejs: [v1.5.0](https://www.npmjs.com/package/rclnodejs/v/1.5.0)
+- Runtimes: GCC 13.3.0, Python 3.12.3, Node.js v22.18.0; [rclnodejs v1.5.0](https://www.npmjs.com/package/rclnodejs/v/1.5.0)
 
-### Benchmark Results
-
-1000 iterations with 1024KB topic payloads and service responses. Ratios are relative to the C++ result.
-
-| Client Library          | Topic (ms) | Service (ms) | Performance Ratio   |
-| ----------------------- | ---------- | ------------ | ------------------- |
-| rclcpp (C++)           | 168        | 627          | Baseline           |
-| rclpy (Python)         | 1,618      | 15,380       | 9.6x / 24.5x slower |
-| rclnodejs (Node.js)     | 744        | 927          | 4.4x / 1.5x slower  |
+| Client Library | Topic (ms) | Service (ms) | Time / C++ (topic / service) |
+| --- | --- | --- | --- |
+| rclcpp (C++) | 168 | 627 | Baseline |
+| rclpy (Python) | 1,618 | 15,380 | 9.6x / 24.5x |
+| rclnodejs (Node.js) | 744 | 927 | 4.4x / 1.5x |
 
 ## Running Benchmarks
 
-Choose one implementation at a time. Start its subscriber or service in terminal 1, then run its publisher or client in terminal 2.
+### Environment and C++ Build
+
+Run from the repository root with ROS 2 Lyrical, the [C++ build dependencies](./rclcpp/CMakeLists.txt), `cmake`, and `build-essential`.
+
+Use these settings in both terminals, choosing the same unused domain ID:
+
+```bash
+source /opt/ros/lyrical/setup.bash
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+export ROS_DOMAIN_ID=91
+```
+
+Build the recorded C++ configuration:
+
+```bash
+cmake -S benchmark/rclcpp -B benchmark/rclcpp/build -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=
+cmake --build benchmark/rclcpp/build
+```
+
+Run one pair at a time: start terminal 1 first, then terminal 2. `-s` sets data size in KiB; `-r` sets iterations.
+
+### Using the Published rclnodejs Package
+
+Install v2.3.2 in a temporary directory, keeping the checkout unchanged:
+
+```bash
+BENCHMARK_DIR=$(mktemp -d)
+npm install --prefix "$BENCHMARK_DIR" rclnodejs@2.3.2 commander@15.0.0
+npm pkg set --prefix "$BENCHMARK_DIR" type=module
+mkdir -p "$BENCHMARK_DIR/benchmark"
+cp -R benchmark/rclnodejs "$BENCHMARK_DIR/benchmark/"
+printf "export { default } from 'rclnodejs';\n" > "$BENCHMARK_DIR/index.js"
+printf '%s\n' "$BENCHMARK_DIR"
+```
+
+In both terminals, `cd` to the printed directory, then run the JavaScript commands below. Keep using the repository root for C++ and Python.
 
 ### Topics
 
-Publishes `std_msgs/msg/UInt8MultiArray`; `-s` sets the array size in KB.
+Message type: `std_msgs/msg/UInt8MultiArray`.
 
 | Library | Terminal 1: subscriber | Terminal 2: publisher |
 | --- | --- | --- |
@@ -69,16 +90,10 @@ Publishes `std_msgs/msg/UInt8MultiArray`; `-s` sets the array size in KB.
 
 ### Services
 
-Calls `nav_msgs/srv/GetMap`; `-s` sets the service's map data size in KB.
+Service type: `nav_msgs/srv/GetMap`.
 
 | Library | Terminal 1: service | Terminal 2: client |
 | --- | --- | --- |
 | rclcpp | `benchmark/rclcpp/build/service-stress-test -s 1024` | `benchmark/rclcpp/build/client-stress-test -r 1000` |
 | rclpy | `python3 benchmark/rclpy/service/service-stress-test.py -s 1024` | `python3 benchmark/rclpy/service/client-stress-test.py -r 1000` |
 | rclnodejs | `node benchmark/rclnodejs/service/service-stress-test.js -s 1024` | `node benchmark/rclnodejs/service/client-stress-test.js -r 1000` |
-
-### What the Timers Measure
-
-Timing differs between runners. The JavaScript topic timer covers node, publisher, and message setup, then publishing, not subscriber delivery or round-trip latency. The service timer also includes node/client setup and service discovery.
-
-These are total run times, not per-message latencies. Middleware, payload size, and hardware affect the results.

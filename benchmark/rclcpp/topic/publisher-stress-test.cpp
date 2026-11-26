@@ -16,6 +16,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "rclcpp/rclcpp.hpp"
@@ -81,7 +82,6 @@ int main(int argc, char* argv[]) {
       "%dKB array) %d times.\n",
       amount, total_times);
 
-  auto start = std::chrono::high_resolution_clock::now();
   auto node = rclcpp::Node::make_shared("stress_publisher_rclcpp");
   auto publisher = node->create_publisher<std_msgs::msg::UInt8MultiArray>(
       "stress_topic", 10);
@@ -91,18 +91,36 @@ int main(int argc, char* argv[]) {
   auto executor = rclcpp::executors::SingleThreadedExecutor::make_shared();
   executor->add_node(node);
 
-  while (rclcpp::ok()) {
-    if (sent_times >= total_times) {
-      rclcpp::shutdown();
-      auto end = std::chrono::high_resolution_clock::now();
-      LogTimeConsumption(start, end);
-      break;
-    } else {
-      publisher->publish(msg);
-      sent_times++;
-      executor->spin_some();
-    }
+  const auto discovery_deadline =
+      std::chrono::steady_clock::now() + std::chrono::seconds(5);
+  while (rclcpp::ok() && publisher->get_subscription_count() == 0 &&
+         std::chrono::steady_clock::now() < discovery_deadline) {
+    executor->spin_some();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+  if (!rclcpp::ok() || publisher->get_subscription_count() == 0) {
+    RCLCPP_ERROR(node->get_logger(),
+                 "No matched subscriber available after 5 seconds.");
+    rclcpp::shutdown();
+    return 1;
   }
 
+  const auto start = std::chrono::steady_clock::now();
+  while (rclcpp::ok() && sent_times < total_times) {
+    publisher->publish(msg);
+    sent_times++;
+    executor->spin_some();
+  }
+  const auto end = std::chrono::steady_clock::now();
+
+  if (sent_times != total_times) {
+    RCLCPP_ERROR(node->get_logger(),
+                 "Publishing interrupted before completion.");
+    rclcpp::shutdown();
+    return 1;
+  }
+  LogTimeConsumption(start, end);
+  printf("Successfully published %d/%d messages\n", sent_times, total_times);
+  rclcpp::shutdown();
   return 0;
 }
