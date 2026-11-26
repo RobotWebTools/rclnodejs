@@ -221,11 +221,15 @@ describe('rclnodejs observable subscription test suite', function () {
     node.destroy();
   });
 
-  // Regression test: destroy()/complete() used to only complete the RxJS Subject, leaving the
-  // native ROS subscription alive. Repeated subscribe/destroy cycles (e.g. an
-  // rxjs `timeout()` + `repeat()` pattern reconnecting after a publisher gap)
-  // would pile up zombie native subscriptions still receiving and
-  // deserializing every message, growing CPU usage over time.
+  // Regression test: destroy()/complete() used to only complete the RxJS
+  // Subject, leaving the native ROS subscription alive. Plain RxJS
+  // unsubscription (e.g. a `repeat()` resubscribing to the same wrapper's
+  // `.observable`) never calls destroy() either, so it never hit this bug on
+  // its own; the leak happens one level up, in app code that creates a new
+  // ObservableSubscription per reconnect (e.g. via a `switchMap` + `share` +
+  // `finalize(() => obsSub.destroy())` wrapper reacting to a `timeout()` +
+  // `repeat()` gap-detection pattern) and relies on destroy() to actually
+  // free the previous native subscription before creating the next one.
   it('destroy() also destroys the underlying native ROS subscription', function () {
     const node = new rclnodejs.Node('test_node');
     const String = 'std_msgs/msg/String';
