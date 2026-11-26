@@ -220,4 +220,57 @@ describe('rclnodejs observable subscription test suite', function () {
 
     node.destroy();
   });
+
+  // Regression test: destroy()/complete() used to only complete the RxJS Subject, leaving the
+  // native ROS subscription alive. Repeated subscribe/destroy cycles (e.g. an
+  // rxjs `timeout()` + `repeat()` pattern reconnecting after a publisher gap)
+  // would pile up zombie native subscriptions still receiving and
+  // deserializing every message, growing CPU usage over time.
+  it('destroy() also destroys the underlying native ROS subscription', function () {
+    const node = new rclnodejs.Node('test_node');
+    const String = 'std_msgs/msg/String';
+
+    const obsSub = node.createObservableSubscription(
+      String,
+      'destroy_native_test_topic'
+    );
+    const nativeSubscription = obsSub.subscription;
+
+    assert.strictEqual(nativeSubscription.isDestroyed(), false);
+
+    obsSub.destroy();
+
+    assert.strictEqual(
+      nativeSubscription.isDestroyed(),
+      true,
+      'native subscription should be destroyed, not just the RxJS wrapper'
+    );
+
+    node.destroy();
+  });
+
+  it('repeated subscribe/destroy cycles on the same topic do not leak native subscriptions', function () {
+    const node = new rclnodejs.Node('test_node');
+    const String = 'std_msgs/msg/String';
+
+    const subscriptions = [];
+    for (let i = 0; i < 5; i++) {
+      const obsSub = node.createObservableSubscription(
+        String,
+        'leak_test_topic'
+      );
+      subscriptions.push(obsSub.subscription);
+      obsSub.destroy();
+    }
+
+    subscriptions.forEach((sub, i) => {
+      assert.strictEqual(
+        sub.isDestroyed(),
+        true,
+        `subscription #${i} should have been destroyed`
+      );
+    });
+
+    node.destroy();
+  });
 });
