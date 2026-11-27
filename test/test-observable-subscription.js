@@ -220,4 +220,61 @@ describe('rclnodejs observable subscription test suite', function () {
 
     node.destroy();
   });
+
+  // Regression test: destroy()/complete() used to only complete the RxJS
+  // Subject, leaving the native ROS subscription alive. Plain RxJS
+  // unsubscription (e.g. a `repeat()` resubscribing to the same wrapper's
+  // `.observable`) never calls destroy() either, so it never hit this bug on
+  // its own; the leak happens one level up, in app code that creates a new
+  // ObservableSubscription per reconnect (e.g. via a `switchMap` + `share` +
+  // `finalize(() => obsSub.destroy())` wrapper reacting to a `timeout()` +
+  // `repeat()` gap-detection pattern) and relies on destroy() to actually
+  // free the previous native subscription before creating the next one.
+  it('destroy() also destroys the underlying native ROS subscription', function () {
+    const node = new rclnodejs.Node('test_node');
+    const String = 'std_msgs/msg/String';
+
+    const obsSub = node.createObservableSubscription(
+      String,
+      'destroy_native_test_topic'
+    );
+    const nativeSubscription = obsSub.subscription;
+
+    assert.strictEqual(nativeSubscription.isDestroyed(), false);
+
+    obsSub.destroy();
+
+    assert.strictEqual(
+      nativeSubscription.isDestroyed(),
+      true,
+      'native subscription should be destroyed, not just the RxJS wrapper'
+    );
+
+    node.destroy();
+  });
+
+  it('repeated subscribe/destroy cycles on the same topic do not leak native subscriptions', function () {
+    const node = new rclnodejs.Node('test_node');
+    const String = 'std_msgs/msg/String';
+
+    const subscriptions = [];
+    for (let i = 0; i < 5; i++) {
+      const obsSub = node.createObservableSubscription(
+        String,
+        'leak_test_topic'
+      );
+      subscriptions.push(obsSub.subscription);
+      obsSub.destroy();
+    }
+
+    subscriptions.forEach((sub, i) => {
+      assert.strictEqual(
+        sub.isDestroyed(),
+        true,
+        `subscription #${i} should have been destroyed`
+      );
+    });
+
+    node.destroy();
+  });
 });
